@@ -89,6 +89,64 @@ function fakeRuntime(){
   assert.equal(rt.enemyList.length,0,'defeated tactical enemies can be removed on commit');
 }
 
+// Real Dungeon → Tactical transition must keep the live room coordinates and monster art.
+{
+  const size=6,cells=Array(size*size).fill('floor');cells[8]='wall';cells[9]='void';
+  const scene={room:2,index:0,branch:null,participants:['dungeon_aldren','dungeon_lyra'],
+    heroRooms:{dungeon_aldren:2,dungeon_lyra:2},positions:{dungeon_aldren:20,dungeon_lyra:21},
+    enemyCells:{ambush_1:22},
+    last:{kind:'enemy',map:{size,cells,environment:'ice'}}};
+  const stateBefore=JSON.stringify(scene);
+  const enemyList=[{id:'ambush_1',enemyId:'dng_skeleton',hp:10,maxHp:10,dungeonRoom:2,dungeonCell200:22}];
+  let resolverCalls=0;
+  const rt={
+    GensRpgTacticalCombatV2:E,
+    localStorage:{getItem:key=>key==='gensrpg_dungeon_runtime_v2'?JSON.stringify(scene):null},
+    loadDungeonState:()=>scene,dungeonParticipants:()=>scene.participants,
+    loadState:()=>({wounds:0,inventory:[],rightHand:null,leftHand:null}),
+    CHARS:{dungeon_aldren:{name:'Aldren',image:'aldren.png'},dungeon_lyra:{name:'Lyra',image:'lyra.png'}},
+    dungeonCombatHeroSnapshot:()=>({hp:12,maxHp:12,initiative:12,movement:3,defense:0,armor:0,dodge:0}),
+    loadActiveEnemies:()=>enemyList,
+    activeEnemyDefinition:()=>({id:'dng_skeleton',name:'Squelette',image:'old.png',rule:{hp:10,damage:2,range:1}}),
+    gensDungeonCreatureArt165:()=>{resolverCalls++;return 'assets/dungeon/creatures/existing-skeleton-sprite.png'},
+    dungeonEnemyAttackSkills:()=>[null],dungeonEnemyAttackProfile:()=>({mode:'melee',range:1,chance:75,power:2})
+  };
+  const battle=A.createBattle(rt,{enemyIds:['ambush_1']});
+  assert.deepEqual([battle.grid.width,battle.grid.height],[6,6]);
+  assert.equal(battle.grid.sourceMap.environment,'ice','Tactical reads existing room environment');
+  const coords=id=>{const actor=E.actorById(battle,id);return [actor.x,actor.y]};
+  assert.deepEqual(coords('dungeon_aldren'),[2,3],'Aldren must retain Dungeon cell 20');
+  assert.deepEqual(coords('dungeon_lyra'),[3,3],'Lyra must retain Dungeon cell 21');
+  assert.deepEqual(coords('enemy:ambush_1'),[4,3],'enemy instance must retain Dungeon cell 22');
+  const enemy=E.actorById(battle,'enemy:ambush_1');
+  assert.equal(enemy.meta.instanceId,'ambush_1','same monster identity');
+  assert.equal(enemy.meta.art,'assets/dungeon/creatures/existing-skeleton-sprite.png','use same existing creature-art resolver as Dungeon');
+  assert.equal(resolverCalls,1,'only canonical art resolver is called');
+  assert.equal(JSON.stringify(scene),stateBefore,'entering combat must not rewrite Dungeon map/positions');
+  const initialHero=[...coords('dungeon_aldren')];
+  enemy.hp=2;
+  // Battle resolves independently: scene still owns its coordinates and wall data.
+  assert.deepEqual(coords('dungeon_aldren'),initialHero);
+  assert.equal(JSON.stringify(scene),stateBefore,'Tactical battle must not change live Dungeon room');
+}
+// Invalid or colliding coordinates must fall back to unique, traversable cells, never overwrite the live scene.
+{
+  const size=5,cells=Array(25).fill('floor');cells[0]='wall';
+  const scene={room:1,index:0,participants:['dungeon_aldren'],heroRooms:{dungeon_aldren:1},
+    positions:{dungeon_aldren:0},enemyCells:{same:0},last:{map:{size,cells}}};
+  const rt={
+    GensRpgTacticalCombatV2:E,localStorage:{getItem:()=>JSON.stringify(scene)},loadDungeonState:()=>scene,
+    dungeonParticipants:()=>scene.participants,loadState:()=>({wounds:0,inventory:[]}),CHARS:{dungeon_aldren:{name:'Aldren'}},
+    dungeonCombatHeroSnapshot:()=>({hp:10,maxHp:10,movement:3}),loadActiveEnemies:()=>[{id:'same',enemyId:'skeleton',hp:5,maxHp:5}],
+    activeEnemyDefinition:()=>({name:'Squelette',rule:{hp:5}}),dungeonEnemyAttackSkills:()=>[null]
+  };
+  const input=A.buildInput(rt,{enemyIds:['same']});
+  assert.equal(input.actors.length,2);
+  assert.equal(new Set(input.actors.map(a=>a.x+','+a.y)).size,2,'fallback remains collision-free');
+  assert.ok(input.actors.every(a=>!(a.x===0&&a.y===0)),'wall is impassable');
+  assert.equal(scene.positions.dungeon_aldren,0,'fallback never rewrites canonical Dungeon positions');
+}
+
 // Real Dungeon boundary: legacy 5+ is never treated as 5%, RPG scaling owns D100,
  // and a selected hero still outside room 0 cannot enter the tactical snapshot.
  {

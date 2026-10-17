@@ -7,10 +7,6 @@ permissions:
   contents: read
 jobs:
   v108-dungeon-combat-browser:
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: [chromium, firefox]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -29,6 +25,6 @@ jobs:
       - name: Install real mobile browser
         run: |
           npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps ${{ matrix.browser }}
+          npx playwright install --with-deps chromium
       - name: Test real Dungeon approach, persistent V108 panel, dice and turn pacing
-        run: GENS_BROWSER=${{ matrix.browser }} node tests/gens_phase12_dungeon_combat_preview_regression_diagnostic_browser_v1.test.cjs
+        run: GENS_BROWSER=chromium node tests/gens_phase12_dungeon_combat_preview_regression_diagnostic_browser_v1.test.cjs

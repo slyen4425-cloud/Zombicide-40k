@@ -53,8 +53,8 @@ jobs:
             tests/gens_phase2_inline_global_last_owner_v11411.test.cjs \
             tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs \
             tests/helpers/gens_phase12_generated_wall_material_source_view_v1.cjs \
-            .github/workflows/gensrpg-phase12-r06-source-intake.yml
-          git rm .github/workflows/gensrpg-phase12-r06-capture-extract-once.yml
+
+
           git diff --cached --check
           git diff --cached --stat
           git commit -m "refactor(phase12): extract 18 byte-identical Capture patches, preserving classic load order"

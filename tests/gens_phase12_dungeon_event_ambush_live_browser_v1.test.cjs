@@ -95,6 +95,28 @@ async function scenario(browser,port,kind){
     assert.equal(result.distance,1,'spawned ambush enemy MUST be adjacent to hero on traversable dungeon grid');
     assert.equal(result.stored,result.enemyCell,'position must persist on real enemy state');
     assert.notEqual(result.mapKind,'exit','ambush must never spawn on the exit');
+    // The existing V113 owner must detect this REAL adjacent spawn and pass
+    // through the public Dungeon->Tactical combat entry (no test scan call).
+    const vision=await page.evaluate(()=>{
+      const owner=window.GensRpgTacticalRuntimeAuthority1678113;
+      return {owner:!!owner,installed:owner?.status?.(),
+        pairs:owner?.detectionPairs?.(window)?.map(x=>({enemyId:x.enemyId,heroId:x.heroId,distance:x.distance,vision:x.vision}))||[]};
+    });
+    console.log('[dungeon-real-ambush-detection] '+JSON.stringify({kind,vision}));
+    assert.ok(vision.owner,'V113 remains the sole runtime enemy detection owner');
+    assert.ok(vision.pairs.some(x=>x.enemyId===result.enemyId&&x.heroId===result.hero),
+      'adjacent, unobstructed real ambush must be visible to the active hero');
+    await page.waitForFunction(()=>!!window.GensRpgTacticalCombatV2Ui?.getBattle?.()&&
+      !!document.querySelector('.gtv2Overlay[data-gens-tactical-v2="1"]'),null,{timeout:15000});
+    const engaged=await page.evaluate(()=>{
+      const battle=window.GensRpgTacticalCombatV2Ui.getBattle();
+      return {participants:battle.actors.map(a=>({id:a.id,instanceId:a.meta?.instanceId||'',side:a.side,x:a.x,y:a.y})),
+        overlays:document.querySelectorAll('.gtv2Overlay[data-gens-tactical-v2="1"]').length};
+    });
+    assert.equal(engaged.overlays,1,'one and only one Tactical combat UI');
+    assert.ok(engaged.participants.some(a=>a.instanceId===result.enemyId),
+      'detected adjacent ambush must enter Tactical with original enemy identity');
+    console.log('[dungeon-real-ambush-tactical-entry] '+JSON.stringify({kind,engaged}));
     console.log('[dungeon-real-ambush] '+JSON.stringify({kind,...result}));
     return result;
   }finally{await context.close()}

@@ -70,7 +70,16 @@ assert.equal(core200.length,55842,'D4 legacy Core200 physical owner size locked'
 assert.equal(core200Blob,'5649ae0af69064dde72e6ea28b8dbefd105cb527','D4 legacy Core200 must remain byte-identical');
 assert.equal((core200.toString().match(/\.stopImmediatePropagation\s*\(/g)||[]).length,1,'D4 owner had exactly one historical hard-stop');
 assert.equal((core200.toString().match(/(?:window|R)\.(?:dc200StartCombat|openDungeonCombatSetup|launchCombat200|startCombat)\s*=/g)||[]).length,1,'D4 owner had exactly one historical combat public assignment');
+// R05 physically moves an existing local-backup import/reload effect without modifying it.
+// This is an exact historical exception, NOT permission for future Core modules to reload pages.
+const CLOUD_SYNC_R05='assets/gensrpg/core/legacy-cloud-sync-backup-v1.js';
+const cloudSyncR05=fs.readFileSync(path.join(__dirname,'..',CLOUD_SYNC_R05));
+const cloudSyncR05Blob=crypto.createHash('sha1').update(Buffer.from('blob '+cloudSyncR05.length+'\0')).update(cloudSyncR05).digest('hex');
+assert.equal(cloudSyncR05.length,53746,'R05 original online sync and local-backup JS size');
+assert.equal(cloudSyncR05Blob,'8d7f8179676b096a53816cd1ca2530c120e3cf18','R05 must preserve original inline JS byte-identically');
+assert.equal((cloudSyncR05.toString().match(/(?:window\\.|R\\.)?location\\.reload\\s*\\(/g)||[]).length,1,'one historical local-backup import reload');
 const explicitRuleExceptions=new Map([
+  [CLOUD_SYNC_R05,new Set(['direct page reload'])],
   [RUNTIME_BOOTSTRAP,new Set(['hidden script injection'])],
   [TACTICAL_ENTRY,new Set(['hidden script injection'])],
   [DUNGEON_CORE200,new Set(['event propagation hard-stop','protected Dungeon combat global replacement'])],
@@ -127,6 +136,6 @@ for(const file of allFiles.filter(f=>targetPrefixes.some(p=>f.startsWith(p)))){
   }
 }
 
-assert.deepEqual([...explicitRuleExceptions.keys()],[RUNTIME_BOOTSTRAP,TACTICAL_ENTRY,DUNGEON_CORE200,DUNGEON_CORE213],
+assert.deepEqual([...explicitRuleExceptions.keys()],[CLOUD_SYNC_R05,RUNTIME_BOOTSTRAP,TACTICAL_ENTRY,DUNGEON_CORE200,DUNGEON_CORE213],
   'only the two composition entrypoints and the exact byte-verified D4 legacy owner may claim named exceptions');
 console.log(`GenSrpG global side-effect guard OK (${allFiles.length} modules; Core loads public entry, Tactical entry owns private composition)`);

@@ -379,6 +379,15 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - **Checkpoint final §25 GREEN technique** : `checkpoint/gensrpg-phase12-r03-shell-hub-family-ui-extraction-green-2026-10-16` exactement sur ce SHA. Sans fusion sur `main`, sans test Android manuel revendiqué. Ce lot valide la partie Shell Hub traitée, **pas la séparation complète du monolithe**. Prochaine responsabilité R03–R07 à délimiter avant code ; pas de nouveau D10 mécanique.
 - **Source pour futur §26** : [index R03 au SHA code GREEN](https://github.com/slyen4425-cloud/Zombicide-40k/blob/afab707dad385450fdf296f7b2b6b41da376929b/index.html) ; `c6.zip` reste la source R02. Rapport : `docs/GENSRPG_PHASE12_R03_SHELL_HUB_FAMILY_UI_2026-10-16.md`.
 
+### R05 Core cloud sync & backup — GREEN technique/CI (17 octobre 2026)
+
+- **Source §26** : `c7 (1).zip` / `index.html(17).txt` = R04 (2 835 125 octets ; blob `554bf6100aeb0f40bfc098dc90863af7d2d5e439`). Checkpoint START `checkpoint/gensrpg-start-phase12-r05-core-cloud-sync-backup-2026-10-17` à `f01e0b65c67fcc4e14dbd64b8fec17625c1b5753`.
+- Un bloc autonome Core de synchronisation cloud, récupération et compactage des sauvegardes a été déplacé **byte-identique**, **53 746 octets**, dans `assets/gensrpg/core/legacy-cloud-sync-backup-v1.js`. Nouveau `index.html` : **2 781 436 octets** / blob `485de2e6a08ffd89e4f1fb9410e40c938774d62f`, gain 53 689 octets. Script synchrone au même point de chargement, aucun changement de règles.
+- Rollback historique exact R05→R04→R03→R02→R01. Pré-cache PWA et propriétaires mis à jour ; aucun changement sur les laboratoires, les 32 images Survie, ou `main`.
+- **Triple CI sur le SHA `a832da1cbbad39c446f46f1035dbb819aa60ec20`** : [Architecture/Chromium 38994986867](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38994986867), [Firefox 38994986930](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38994986930), [Tactical 38994986871](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38994986871) toutes SUCCESS. [Shell/Survie 38994986857](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38994986857) SUCCESS. **Sept checks SUCCESS** au même SHA.
+- Checkpoint GREEN `checkpoint/gensrpg-phase12-r05-core-cloud-sync-backup-green-2026-10-17` sur le SHA code CI exact. GREEN technique/CI sans essai Android/Supabase réel revendiqué. Phase 12 OUVERTE, R06 non ouvert.
+- Rapport : `docs/GENSRPG_PHASE12_R05_CORE_CLOUD_SYNC_BACKUP_2026-10-17.md`. Pour R06, source exacte [nouvel index R05](https://github.com/slyen4425-cloud/Zombicide-40k/blob/a832da1cbbad39c446f46f1035dbb819aa60ec20/index.html), non le ZIP R04.
+
 ### R04 Builders / bibliothèque et éditeur d'équipements — GREEN technique (17 octobre 2026)
 
 - Source §26 : `c7.zip` (`index.html(16).txt`), 2 862 906 octets, blob `8faf7af7fced0a1e0724985e85718a0e4a9e673b`, identique au R03 GREEN.

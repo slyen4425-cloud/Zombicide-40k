@@ -133,10 +133,65 @@ async function scenario(browser,port,kind){
     return result;
   }finally{await context.close()}
 }
+
+async function realMovementDetection(browser,port){
+ const ctx=await browser.newContext({viewport:{width:412,height:915},isMobile:true,hasTouch:true,locale:'fr-FR',serviceWorkers:'block'});
+ const page=await ctx.newPage();page.setDefaultTimeout(25000);
+ page.on('dialog',d=>d.accept().catch(()=>{}));
+ await page.route('https://cdn.jsdelivr.net/**',r=>r.abort());
+ try{
+  await page.goto('http://127.0.0.1:'+port+'/preview.html',{waitUntil:'domcontentloaded'});await ready(page);await openDungeonHome(page);
+  await page.locator('#gensGameHome button[onclick="backToGensFamily()"]').click();
+  await page.locator('#gensFamilyGames [data-rpg-profile="game_profile_dungeon_demo"] .gensUniverseCardActions button').first().click();
+  const editor=page.locator('#rpgUniverseEditorModal');await editor.waitFor({state:'visible'});
+  await editor.locator('button[onclick="showRpgUniverseTab(\'style\')"]').click();
+  await editor.locator('[data-gmodule="movement"]').check();
+  await editor.locator('button[onclick="saveRpgGameplayModules()"]').click();
+  await editor.locator('[data-rpgtab-btn="movement"]').click();
+  await editor.locator('#rpgMovementMode').selectOption('tactical');
+  await editor.locator('#rpgMovementRefreshMode').selectOption('turn');
+  await editor.locator('button[onclick="saveRpgMovementSettings()"]').click();
+  await editor.locator('button[onclick="closeRpgUniverseEditor()"]').click();
+  await start(page);
+  const initial=await page.evaluate(()=>{
+   const K='gensrpg_dungeon_runtime_v2',x=JSON.parse(localStorage.getItem(K)||'null');
+   if(!x?.participants?.length)throw Error('Dungeon runtime missing');
+   const hero=String(x.participants[0]);
+   x.index=0;x.room=1;x.branch=null;x.last={kind:'enemy',room:1,title:'Mouvement réel V113',map:{size:5,cells:Array(25).fill('floor')}};
+   x.last.map.cells[24]='exit';x.positions={...x.positions,[hero]:6};x.heroRooms={...x.heroRooms,[hero]:1};
+   x.remaining={...x.remaining,[hero]:4};x.enemyCells={v113_movement_enemy:13};
+   localStorage.setItem(K,JSON.stringify(x));
+   const d=activeEnemyDefinition('dng_skeleton')||activeEnemyDefinition('dng_ghoul');
+   const hp=Math.max(1,Number(d?.hp||d?.maxHp)||6);
+   saveActiveEnemies([{id:'v113_movement_enemy',enemyId:d?.id||'dng_skeleton',hp,maxHp:hp,vision:1,dungeonRoom:1,dungeonCell200:13,defeated:false}]);
+   DungeonCore01.render();
+   return {hero,enabled:!!window.dc305PositionalGameplay?.(),before:window.GensRpgTacticalRuntimeAuthority1678113?.detectionPairs?.(window)?.length,
+     battle:!!window.GensRpgTacticalCombatV2Ui?.getBattle?.(),remaining:x.remaining[hero]};
+  });
+  console.log('[dungeon-real-movement-before] '+JSON.stringify(initial));
+  assert.equal(initial.enabled,true,'creator configured real positional movement');
+  assert.equal(initial.before,0,'enemy with vision 1 is not visible at distance 3');
+  assert.equal(initial.battle,false,'no premature Tactical battle');
+  const target=page.locator('#dc047RoomBoard .dc047Cell.dc200Reach[data-dc-map-index="12"]');
+  await target.waitFor({state:'visible',timeout:15000});
+  await target.tap(); // Actual user gesture and Dungeon movement owner.
+  await page.waitForFunction(()=>{const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');return x.positions?.[x.participants?.[0]]===12},{},{timeout:12000});
+  await page.waitForFunction(()=>{const b=window.GensRpgTacticalCombatV2Ui?.getBattle?.();return !!document.querySelector('.gtv2Overlay[data-gens-tactical-v2="1"]')&&b?.actors?.some(a=>a.meta?.instanceId==='v113_movement_enemy')},null,{timeout:15000});
+  const after=await page.evaluate(()=>{const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')),b=window.GensRpgTacticalCombatV2Ui.getBattle();
+   return {cell:x.positions[x.participants[0]],remaining:x.remaining[x.participants[0]],enemies:b.actors.filter(a=>a.meta?.instanceId==='v113_movement_enemy').length,
+    overlays:document.querySelectorAll('.gtv2Overlay[data-gens-tactical-v2="1"]').length};
+  });
+  console.log('[dungeon-real-movement-after] '+JSON.stringify(after));
+  assert.equal(after.enemies,1,'one real enemy instance');assert.equal(after.overlays,1,'one Tactical overlay');
+  assert.ok(after.remaining<initial.remaining,'movement cost must be consumed');
+ }finally{await ctx.close()}
+}
+
 (async()=>{
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  const b=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
  try{
+   await realMovementDetection(b,server.address().port);
    const local=await scenario(b,server.address().port,'local'),external=await scenario(b,server.address().port,'external-emulated');
    assert.equal(local.distance,external.distance,'both loading orders preserve same close-spawn contract');
  }finally{await b.close();await new Promise(resolve=>server.close(resolve))}

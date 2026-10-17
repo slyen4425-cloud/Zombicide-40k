@@ -140,11 +140,12 @@ async function startDungeon(page){
       x.last={kind:'enemy',room:1,at:Date.now(),title:'Salle test combat Phase 5',
         map:{size:5,cells:Array(25).fill('floor')},narrative:'',exitLocked:false,keyEnemyId:''};
       x.last.map.cells[24]='exit';
+      x.last.map.cells[5]='wall';
       x.positions=x.positions&&typeof x.positions==='object'?x.positions:{};
       x.heroRooms=x.heroRooms&&typeof x.heroRooms==='object'?x.heroRooms:{};
       x.remaining=x.remaining&&typeof x.remaining==='object'?x.remaining:{};
       x.enemyCells={phase5_e2e_enemy:12};
-      x.positions[hero]=12;
+      x.positions[hero]=11;
       x.heroRooms[hero]=1;
       x.remaining[hero]=3;
       localStorage.setItem(RT,JSON.stringify(x));
@@ -197,15 +198,44 @@ async function startDungeon(page){
         };
       })(),
       activeProfile:typeof activeGameProfileId==='function'?activeGameProfileId():'',
-      dungeonCore:getComputedStyle(document.getElementById('gensDungeonCore01')).display
+      dungeonCore:getComputedStyle(document.getElementById('gensDungeonCore01')).display,
+      sceneSnapshot:(()=>{const source=[...document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell')],arena=[...document.querySelectorAll('.gtv2Overlay .gtv2Cell')];return {native:source.map(el=>getComputedStyle(el).backgroundImage),tactical:arena.map(el=>getComputedStyle(el).backgroundImage),room:JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'{}').room,wallTiles:source[5]?.querySelectorAll(':scope > .gtv2WallTile').length||0,wall5:source[5]?.className||''}})()
     }));
 
     assert.equal(opened.overlayVisible,true,'real Dungeon map action must open the visible Tactical V2 overlay');
     assert.ok(opened.cells>0,'Tactical V2 must render battlefield cells');
     assert.ok(opened.battle.actors.some(a=>a.side==='hero'),'Tactical battle must contain a real hero participant');
     assert.ok(opened.battle.actors.some(a=>a.side==='enemy'&&a.instanceId==='phase5_e2e_enemy'),'Tactical battle must contain the selected map enemy');
+    const hero=opened.battle.actors.find(a=>a.side==='hero');
+    const monster=opened.battle.actors.find(a=>a.instanceId==='phase5_e2e_enemy');
+    assert.equal(opened.battle.width,5,'same Dungeon room width');
+    assert.equal(opened.battle.height,5,'same Dungeon room height');
+    assert.ok(hero&&monster,'actors must preserve the original Dungeon identities');
+    assert.equal(opened.sceneSnapshot.room,1,'original Dungeon room identity');
+    assert.equal(opened.sceneSnapshot.native.length,25,'real Dungeon source cells exist');
+    assert.equal(opened.sceneSnapshot.tactical.length,25,'same tactical grid');
+    assert.match(opened.sceneSnapshot.native[5],/dng_floor_.*\.png/,'native wall cover keeps existing 0.79 theme, not old wall PNG');
+    assert.equal(opened.sceneSnapshot.wallTiles,0,'Tactical must not inject a competing wall overlay into Dungeon');
+    assert.deepEqual(opened.sceneSnapshot.tactical,opened.sceneSnapshot.native,'Tactical must borrow the exact visible background art of every original Dungeon cell');
+    const coord=await page.evaluate(()=>{const b=window.GensRpgTacticalCombatV2Ui.getBattle();return b.actors.map(a=>({id:a.id,side:a.side,x:a.x,y:a.y,art:a.meta?.art||'',instanceId:a.meta?.instanceId||''}))});
+    assert.deepEqual(coord.find(a=>a.side==='hero')&&[coord.find(a=>a.side==='hero').x,coord.find(a=>a.side==='hero').y],[1,2],'hero retains actual Dungeon cell 11');
+    assert.deepEqual(coord.find(a=>a.side==='enemy')&&[coord.find(a=>a.side==='enemy').x,coord.find(a=>a.side==='enemy').y],[2,2],'monster retains actual Dungeon cell 12');
+    assert.ok(coord.find(a=>a.side==='enemy').art,'monster must borrow its existing Dungeon sprite');
     assert.equal(opened.activeProfile,DUNGEON_ID,'combat launch must keep Dungeon profile authority');
     assert.notEqual(opened.dungeonCore,'none','Dungeon world remains the owning background while Tactical is active');
+    // Return through the real UI owner, rebuild the Dungeon board, and
+    // assert that the existing terrain owner restores exactly the same art.
+    await page.evaluate(()=>{window.GensRpgTacticalCombatV2Ui.close(false);DungeonCore01.render()});
+    const returned=await page.evaluate(()=>({
+      room:JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'{}').room,
+      backgrounds:[...document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell')].map(el=>getComputedStyle(el).backgroundImage),
+      wallTiles:document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell > .gtv2WallTile').length,
+      overlay:document.querySelectorAll('.gtv2Overlay').length
+    }));
+    assert.equal(returned.room,opened.sceneSnapshot.room,'combat exit must preserve current room');
+    assert.deepEqual(returned.backgrounds,opened.sceneSnapshot.native,'re-render after combat must preserve every Dungeon tile');
+    assert.equal(returned.wallTiles,0,'no competing Tactical wall overlay may remain after combat');
+    assert.equal(returned.overlay,0,'Tactical modal closed without leaving overlay');
     assert.deepEqual(errors,[],'Dungeon map -> Tactical path must not raise browser/runtime errors');
 
     console.log(JSON.stringify({

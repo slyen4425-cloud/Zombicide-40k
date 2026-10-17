@@ -101,16 +101,108 @@ async function scenario(browser,port,kind){
   await page.waitForFunction(()=>/ATTAQUER|ENGAGER LE COMBAT/i.test(document.getElementById('dc01Explore')?.textContent||''),null,{timeout:15000});
   await page.locator('#dc01Explore').click();
   await page.waitForFunction(()=>!!document.querySelector('.gtv2Overlay[data-gens-tactical-v2="1"]')&&!!window.GensRpgTacticalCombatV2Ui?.getBattle(),null,{timeout:20000});result.steps.push('tactical-overlay');
-  result.combat=await page.evaluate(()=>{const b=window.GensRpgTacticalCombatV2Ui.getBattle();return {actors:b?.actors?.map(x=>({side:x.side,id:x.id})),diceBackdrops:document.querySelectorAll('.gtv2DiceBackdrop').length,attackButtons:document.querySelectorAll('.gtv2Actions button[data-attack]').length,targets:document.querySelectorAll('[data-target^="enemy:"]').length,actionText:document.querySelector('.gtv2Actions')?.textContent?.slice(0,280),turn:window.GensRpgTacticalCombatV2?.currentActor?.(b)?.side}});
-  const targetBtn=page.locator('[data-target^="enemy:"]').first();
-  if(await targetBtn.count()){await targetBtn.click();result.steps.push('select-enemy')}
-  const attack=page.locator('.gtv2Actions button[data-attack]:not([disabled])').first();
-  if(await attack.count()){
-    result.steps.push('click-attack');
-    await attack.click();
-    try{await page.waitForSelector('.gtv2DiceBackdrop',{state:'visible',timeout:9000});result.steps.push('animated-dice-visible')}catch(e){result.steps.push('DICE-MISSING')}
-  }else result.steps.push('NO-ENABLED-ATTACK');
-  result.after=await page.evaluate(()=>({dice:document.querySelectorAll('.gtv2DiceBackdrop').length,turn:window.GensRpgTacticalCombatV2?.currentActor?.(window.GensRpgTacticalCombatV2Ui?.getBattle())?.side,actions:document.querySelector('.gtv2Actions')?.innerText?.slice(0,200),overlay:!!document.querySelector('.gtv2Overlay')}));
+  function combatSnapshot(){
+    return page.evaluate(()=>{
+      const battle=window.GensRpgTacticalCombatV2Ui?.getBattle(),E=window.GensRpgTacticalCombatV2,cur=E?.currentActor?.(battle)||null,
+        enemy=battle?.actors?.find(a=>a.side==='enemy'&&a.alive)||null,
+        attack=cur?.attacks?.[0]||null,p=cur&&enemy&&attack?E.attackPreview(battle,cur.id,enemy.id,attack.id):null,
+        panel=document.querySelector('.gtv2Overlay [data-v108-panel]'),
+        legacy=document.querySelector('.gtv2Overlay .gtv2Actions button[data-attack]'),
+        el=panel?.querySelector('[data-v108-attack-go]'),
+        css=x=>{if(!x)return null;const s=getComputedStyle(x),r=x.getBoundingClientRect();return {display:s.display,visibility:s.visibility,opacity:s.opacity,rect:{width:r.width,height:r.height},disabled:x.disabled}},
+        log=(battle?.log||[]).filter(x=>x.type==='attack');
+      return {
+        overlay:!!document.querySelector('.gtv2Overlay[data-gens-tactical-v2="1"]'),
+        active:cur?{id:cur.id,side:cur.side,x:cur.x,y:cur.y,movementLeft:cur.movementLeft,actionsLeft:cur.actionsLeft}:null,
+        target:enemy?{id:enemy.id,x:enemy.x,y:enemy.y,hp:enemy.hp}:null,
+        selectedAttack:attack?.id||null,preview:p?{ok:p.ok,reason:p.reason||'',distance:p.distance,minRange:p.minRange,maxRange:p.maxRange}:null,
+        tactical:!!window.GensRpgTacticalPolish1678108,
+        panel:css(panel),visibleAttack:css(el),legacyAttack:css(legacy),
+        approaches:document.querySelectorAll('.gtv2Overlay .gtv2Actions [data-approach]').length,
+        dice:document.querySelectorAll('.gtv2DiceBackdrop').length,
+        attackEvents:log.length,turn:battle?.round,phase:battle?.status,
+        actions:document.querySelector('.gtv2Overlay .gtv2Actions')?.textContent?.trim().slice(0,240)
+      };
+    });
+  }
+  result.combat=await combatSnapshot();
+  assert.equal(result.combat.active?.side,'hero','the actual Dungeon encounter must enter a hero turn');
+  assert.ok(result.combat.target,'a live enemy must be present');
+  const targetBtn=page.locator('.gtv2Overlay [data-target^="enemy:"]').first();
+  await targetBtn.waitFor({state:'visible'});
+  await targetBtn.click();
+  result.steps.push('select-enemy');
+  result.afterTarget=await combatSnapshot();
+
+  // Rapprochement est une mécanique VOULUE. Tester l'attaque uniquement APRES
+  // une distance valide, au lieu d'interpréter un "Hors de portée" comme un bug.
+  if(!result.afterTarget.preview?.ok){
+    assert.equal(result.afterTarget.preview?.reason,'out-of-range','unexpected non-range reason on first combat action');
+    const approach=page.locator('.gtv2Overlay .gtv2Actions button[data-approach]');
+    await approach.waitFor({state:'visible',timeout:8000});
+    await approach.click();
+    result.steps.push('legitimate-approach');
+    result.afterApproach=await combatSnapshot();
+    assert.ok(result.afterApproach.preview?.distance<result.afterTarget.preview.distance,
+      'approach must genuinely reduce engine distance');
+  }
+  result.inRange=await combatSnapshot();
+  if(!result.inRange.preview?.ok)throw new Error('Approach did not reach actual attack range: '+JSON.stringify(result.inRange));
+
+  // L'ancienne attaque est volontairement CACHEE. La vraie UI du joueur est
+  // [data-v108-attack-go] (menu attaque/arme/objet), qui lui délègue.
+  const selected=page.locator('.gtv2Overlay [data-v108-panel] [data-v108-attack]');
+  const go=page.locator('.gtv2Overlay [data-v108-panel] [data-v108-attack-go]');
+  assert.equal(await selected.count(),1,'the real attack choice must exist');
+  assert.equal(await go.count(),1,'the real visible player command must exist');
+  await go.waitFor({state:'visible',timeout:8000});
+  await selected.selectOption(result.inRange.selectedAttack);
+  result.steps.push('visible-player-action-available');
+  await go.click();
+  result.steps.push('click-real-visible-attack');
+
+  const dice=page.locator('.gtv2DiceBackdrop');
+  await dice.waitFor({state:'visible',timeout:7000});
+  result.steps.push('hero-animated-dice-visible');
+  result.heroDice=await page.evaluate(()=>({
+    dice:document.querySelectorAll('.gtv2DiceBackdrop').length,
+    diceRow:document.querySelectorAll('.gtv2DiceBackdrop [data-v1149-die]').length,
+    continueButton:!!document.querySelector('.gtv2DiceBackdrop [data-dice-continue]'),
+    attackCount:window.GensRpgTacticalCombatV2Ui?.getBattle()?.log?.filter(x=>x.type==='attack')?.length||0,
+    text:document.querySelector('.gtv2DiceBackdrop')?.innerText?.slice(0,450)
+  }));
+  assert.equal(result.heroDice.dice,1,'one and only one attack dice overlay');
+  assert.ok(result.heroDice.diceRow>=1,'actual dice must be visible');
+  assert.equal(result.heroDice.continueButton,true,'dice result must wait for explicit player confirmation');
+  const countBefore=await page.evaluate(()=>window.GensRpgTacticalCombatV2Ui?.getBattle()?.log?.filter(x=>x.type==='attack')?.length||0);
+  await page.waitForTimeout(1100);
+  const countAfter=await page.evaluate(()=>window.GensRpgTacticalCombatV2Ui?.getBattle()?.log?.filter(x=>x.type==='attack')?.length||0);
+  assert.equal(countAfter,countBefore,'automatic attack chains must not occur while Continue is waiting');
+  await dice.locator('[data-dice-continue]').waitFor({state:'visible'});
+  await page.waitForFunction(()=>!document.querySelector('.gtv2DiceBackdrop [data-dice-continue]')?.disabled,null,{timeout:8000});
+  await dice.locator('[data-dice-continue]').click();
+  result.steps.push('hero-dice-confirmed');
+
+  // Un tour ennemi peut suivre : ses propres dés doivent rester bloquants
+  // jusqu'à "Continuer". Ne jamais inventer une riposte immédiate.
+  try{
+    await page.waitForFunction(()=>document.querySelector('.gtv2DiceBackdrop')||
+      window.GensRpgTacticalCombatV2Ui?.getBattle()?.status==='ended'||
+      window.GensRpgTacticalCombatV2?.currentActor?.(window.GensRpgTacticalCombatV2Ui?.getBattle())?.side==='hero',
+      null,{timeout:10000});
+  }catch(e){result.steps.push('enemy-turn-timeout')}
+  result.after=await combatSnapshot();
+  if(result.after.dice>0){
+    result.steps.push('enemy-dice-visible');
+    const frozen=result.after.attackEvents;
+    await page.waitForTimeout(1050);
+    const noChain=await combatSnapshot();
+    assert.equal(noChain.attackEvents,frozen,'enemy attack must wait for Continue rather than chain hits');
+    await page.waitForFunction(()=>!document.querySelector('.gtv2DiceBackdrop [data-dice-continue]')?.disabled,null,{timeout:8000});
+    await page.locator('.gtv2DiceBackdrop [data-dice-continue]').click();
+    result.steps.push('enemy-dice-confirmed');
+  }
+
  }catch(e){result.exception=String(e).slice(0,700);result.html=await page.evaluate(()=>document.body?.innerText?.slice(0,250)).catch(()=>null)}
  finally{await context.close()}
  console.log('[dungeon-combat-preview-diagnostic] '+JSON.stringify(result));
@@ -120,8 +212,10 @@ async function scenario(browser,port,kind){
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  const b=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
  try{const local=await scenario(b,server.address().port,'local');const external=await scenario(b,server.address().port,'external-emulated');
-   assert.ok(local.steps.includes('boot'),'local baseline must boot');
-   assert.ok(external.steps.includes('boot'),'external preview must boot');
+   assert.ok(local.steps.includes('hero-animated-dice-visible'),'LOCAL preview must show dice for a VALID attack');
+   assert.ok(external.steps.includes('hero-animated-dice-visible'),'EXTERNAL preview must show dice for a VALID attack');
+   assert.ok(local.steps.includes('visible-player-action-available'),'LOCAL must provide real attack/weapon/item panel');
+   assert.ok(external.steps.includes('visible-player-action-available'),'EXTERNAL must provide real attack/weapon/item panel');
    assert.ok(external.boot?.aux>=20,'external diagnostic must observe late auxiliary module loading');
    console.log('[dungeon-combat-preview-comparison] '+JSON.stringify({localSteps:local.steps,externalSteps:external.steps,localErrors:local.errors,externalErrors:external.errors,externalTiming:external.boot?.auxStates?.slice(0,5)}));
  }finally{await b.close();await new Promise(resolve=>server.close(resolve))}

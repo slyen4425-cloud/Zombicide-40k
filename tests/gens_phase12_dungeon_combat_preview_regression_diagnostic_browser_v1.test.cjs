@@ -10,16 +10,50 @@ async function ready(page){
   await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:110000});
   await page.waitForFunction(()=>typeof window.startConfiguredGame==='function',null,{timeout:12000});
 }
+async function openDungeonHome(page){
+  const cardSelector='#gensFamilyGames [data-rpg-profile="game_profile_dungeon_demo"] .gensUniverseMainBtn';
+  const dungeonId='game_profile_dungeon_demo';
+  const adventure=page.locator('button.gensRootModeCard.adventure');
+  await adventure.waitFor({state:'visible'});
+  await adventure.click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
+  let card=page.locator(cardSelector);
+  await card.waitFor({state:'visible'});
+  const switchInfo=await page.evaluate(id=>({
+    active:typeof activeGameProfileId==='function'?activeGameProfileId():'',
+    from:typeof gensProfileContentFamily155==='function'?gensProfileContentFamily155(activeGameProfileId()):'',
+    to:typeof gensProfileContentFamily155==='function'?gensProfileContentFamily155(id):''
+  }),dungeonId);
+  if(switchInfo.active&&switchInfo.active!==dungeonId&&switchInfo.from!==switchInfo.to){
+    await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded',timeout:45000}),card.click()]);
+    await ready(page);
+    await page.locator('button.gensRootModeCard.adventure').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
+    card=page.locator(cardSelector);
+    await card.waitFor({state:'visible'});
+  }
+  await card.click();
+  await page.waitForFunction(id=>typeof activeGameProfileId==='function'&&activeGameProfileId()===id&&getComputedStyle(document.getElementById('gensGameHome')).display!=='none',dungeonId,{timeout:30000});
+}
 async function start(page){
-  await page.locator('button.gensRootModeCard.adventure').click();
-  await page.locator('#gensFamilyGames [data-rpg-profile="game_profile_dungeon_demo"] .gensUniverseMainBtn').click();
-  await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensGameHome')).display!=='none');
+  await openDungeonHome(page);
   await page.locator('#gensGameHomeActions .newGameBtn').click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
   await page.locator('#pregameSetup .sessionSetupBtn[onclick="openSessionHeroSetup()"]').click();
-  const first=page.locator('#participantList input[type="checkbox"]').first();await first.waitFor({state:'visible'});if(!(await first.isChecked()))await first.check();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('sessionHeroSetup')).display!=='none');
+  const first=page.locator('#participantList input[type="checkbox"]').first();
+  await first.waitFor({state:'visible'});
+  if(!(await first.isChecked()))await first.check();
   await page.locator('#sessionHeroSetup .startGameBtn[onclick="closeSessionHeroSetup()"]').click();
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
   await page.locator('#pregameSetup button.startGameBtn[onclick="startConfiguredGame()"]').click();
-  await page.waitForFunction(()=>{try{return Array.isArray(JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'{}').participants)&&getComputedStyle(document.getElementById('gensDungeonCore01')).display!=='none'}catch(e){return false}},{timeout:20000});
+  await page.waitForFunction(()=>{
+    try{
+      const rt=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'null');
+      const core=document.getElementById('gensDungeonCore01');
+      return localStorage.getItem('z40k_session_active_v1')==='1'&&Array.isArray(rt?.participants)&&rt.participants.length>0&&!!core&&getComputedStyle(core).display!=='none';
+    }catch(e){return false}
+  },null,{timeout:30000});
 }
 async function scenario(browser,port,kind){
  const context=await browser.newContext({viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,locale:'fr-FR',serviceWorkers:'block'});

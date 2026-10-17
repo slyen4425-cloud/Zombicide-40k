@@ -227,6 +227,18 @@ async function scenario(browser,port,kind){
     await page.waitForFunction(()=>!document.querySelector('.gtv2DiceBackdrop [data-dice-continue]')?.disabled,null,{timeout:8000});
     await page.locator('.gtv2DiceBackdrop [data-dice-continue]').click();
     result.steps.push('enemy-dice-confirmed');
+    await page.waitForFunction(()=>{
+      const b=window.GensRpgTacticalCombatV2Ui?.getBattle(),E=window.GensRpgTacticalCombatV2;
+      return !document.querySelector('.gtv2DiceBackdrop')&&
+        (b?.status==='ended'||E?.currentActor?.(b)?.side==='hero');
+    },null,{timeout:10000});
+    result.afterEnemy=await combatSnapshot();
+    if(result.afterEnemy.phase==='active'){
+      assert.equal(result.afterEnemy.active?.side,'hero','the enemy turn must return to player control');
+      assert.ok(result.afterEnemy.panel&&result.afterEnemy.visibleAttack,
+        'V108 action/weapon/item panel must return automatically after enemy turn');
+      result.steps.push('hero-control-returned-with-items');
+    }
   }
 
  }catch(e){result.exception=String(e).slice(0,700);result.html=await page.evaluate(()=>document.body?.innerText?.slice(0,250)).catch(()=>null)}
@@ -244,6 +256,9 @@ async function scenario(browser,port,kind){
    assert.ok(local.steps.includes('visible-player-action-available'),'LOCAL must provide real attack/weapon/item panel');
    assert.ok(external.steps.includes('visible-player-action-available'),'EXTERNAL must provide real attack/weapon/item panel');
    assert.ok(external.boot?.aux>=20,'external diagnostic must observe late auxiliary module loading');
+   for(const c of [local,external])if(c.afterEnemy?.phase==='active'){
+     assert.ok(c.steps.includes('hero-control-returned-with-items'),'combat must not auto-chain without returning control');
+   }
    for(const c of [local,external]){
      assert.ok(!c.steps.includes('test-only-late-polish-install'),'no manual V108 installation allowed');
      assert.ok(c.steps.includes('automatic-v108-panel-persistent'),'render hook must keep actions visible through movement');

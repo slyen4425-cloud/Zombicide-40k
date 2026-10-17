@@ -67,7 +67,8 @@ const injected=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
 const previewInjected=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
   .map(m=>stripQuery(m[1]));
 
-assert.equal(injected.length,31,'GitHub Pages must inject the current 31-module production list');
+assert.equal(injected.length,32,'GitHub Pages must inject the current 32-module production list, including Dungeon real-event placement');
+assert.equal(injected.filter(x=>x==='assets/dungeon/dungeon-event-runtime-fix-167878.js').length,1,'Dungeon event spawn placement must have exactly one production script load');
 assert.deepEqual(previewInjected,injected.filter(x=>x!=='assets/gensrpg/core/storage-v1.js'),'preview must reproduce Pages additions while inheriting Core storage from source index');
 assert.equal(injected.at(-2),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap entry must stay immediately before final Shell authority');
 assert.equal(injected.at(-1),'assets/gensrpg/shell/module-launch-final-authority-v1.js','final Shell authority must stay final');
@@ -79,7 +80,7 @@ const productionDirect=[
   ].includes(x)),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,63,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
+assert.equal(new Set(productionDirect).size,64,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,129,'Phase 2 cartography expects the current 129 identified inline script blocks');

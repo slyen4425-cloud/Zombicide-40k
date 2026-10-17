@@ -65,7 +65,7 @@ for file,pat in [
 anchor="  'assets/gensrpg/shell/legacy-hub-family-ui-v1.js',"
 insert=anchor+"\n  '"+OWNER+"',"
 change("tests/gens_phase2_runtime_load_graph_v11411.test.cjs",
- (anchor,insert),
+ (anchor+"\n  'assets/gensrpg/dungeon/mj72-scene-v1.js',",insert+"\n  'assets/gensrpg/dungeon/mj72-scene-v1.js',"),
  ("assert.equal(new Set(productionDirect).size,61","assert.equal(new Set(productionDirect).size,62"),
  ("assert.equal(allJs.length,119","assert.equal(allJs.length,120"),
  ("const phase5Set=new Set(phase5ConnectedServices);",

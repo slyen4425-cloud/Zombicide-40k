@@ -13,6 +13,12 @@ const contract=JSON.parse(read('assets/gensrpg/capture/module-contract-v1.json')
 const shellFinal=read('assets/gensrpg/shell/module-launch-final-authority-v1.js');
 
 function block(id){
+  if(id==='captureFix139'){
+    const rel='assets/gensrpg/capture/legacy-patches/capture-fix139-v1.js';
+    assert.equal(index.split('<script id="'+id+'" src="'+rel+'"></script>').length-1,1,
+      'R06 Capture139 must load once at original parser position');
+    return read(rel);
+  }
   const marker='<script id="'+id+'">';
   const start=index.indexOf(marker);
   assert.ok(start>=0,'missing '+id);

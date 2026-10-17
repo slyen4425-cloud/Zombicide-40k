@@ -42,6 +42,15 @@ STYLE='''.dc047Cell.dc079WallBlock{
 }
 '''.encode("utf8")
 def historical_r05_view(data):
+    # History-only inverse of R06 first: the active page remains external.
+    # No archived byte signature or original module body is changed.
+    if blob(data)=="12fc91df4ee4c7989a172baa96f9790da6dc57f7":
+        from gensrpg_phase12_r06_capture_inline_extract_apply import (
+            ROOT, NAMES, location, restore, SOURCE_BLOB,
+        )
+        bodies={location(n):(ROOT/location(n)).read_bytes() for n in NAMES}
+        data=restore(data,bodies)
+        assert blob(data)==SOURCE_BLOB and len(data)==2782155, "exact R06 -> approved Dungeon checkpoint"
     if blob(data)!=NEW_BLOB:
         return data
     assert data.count(NEW)==1 and data.count(STYLE)==1,"Core079 wall delta must be exact"

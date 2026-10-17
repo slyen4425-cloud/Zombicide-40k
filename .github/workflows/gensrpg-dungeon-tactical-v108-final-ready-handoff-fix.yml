@@ -1,0 +1,27 @@
+name: GenSrpG Dungeon Tactical V108 final-ready handoff
+on:
+  push:
+    branches:
+      - 'work/gensrpg-dungeon-tactical-v108-final-ready-handoff-fix-2026-10-17'
+permissions:
+  contents: read
+jobs:
+  dungeon-tactical-v108-mobile-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify R05 immutable index and single R05 runtime base
+        run: |
+          test "$(git hash-object index.html)" = '485de2e6a08ffd89e4f1fb9410e40c938774d62f'
+          test "$(git hash-object assets/gensrpg/core/legacy-cloud-sync-backup-v1.js)" = '8d7f8179676b096a53816cd1ca2530c120e3cf18'
+          node tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs
+      - name: Install real Chromium mobile
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: End-to-end Dungeon approach, full weapon/item panel, hero/enemy dice, explicit confirmation without test repair
+        run: node tests/gens_phase12_dungeon_combat_preview_regression_diagnostic_browser_v1.test.cjs

@@ -51,6 +51,9 @@ jobs:
           node tests/gens_phase12_dungeon_core214_extraction_v1.test.cjs
           node tests/gens_phase12_dungeon_core201_d8_extraction_v1.test.cjs
 
+      - name: Vérifier le propriétaire Core R05, la synchronisation et le rollback R05 vers R04
+        run: node tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs
+
       - name: Vérifier la frontière R04 Builders équipement et restauration R03
         run: node tests/gens_phase12_r04_builders_equipment_extraction_v1.test.cjs
 

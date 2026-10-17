@@ -8,7 +8,15 @@ const root=path.join(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
 
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
-  .map(m=>({id:m[1],body:m[2]}));
+  .map(m=>{
+    if(m[1]==='captureFix139'){
+      const rel='assets/gensrpg/capture/legacy-patches/capture-fix139-v1.js';
+      assert.equal(m[0],'<script id="captureFix139" src="'+rel+'"></script>',
+        'R06 Capture139 source must remain unique and parser-ordered');
+      return {id:m[1],body:fs.readFileSync(path.join(root,rel),'utf8')};
+    }
+    return {id:m[1],body:m[2]};
+  });
 
 assert.equal(blocks.some(b=>b.id==='dungeonCore028HeroExploreGuard'),false,
   'Dungeon Core 0.28 compatibility block must be retired');

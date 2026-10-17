@@ -24,3 +24,5 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Verify real Survival launch and protected Core sync owner through browser
         run: node tests/gens_survival_shell_launch_browser_v11411.test.cjs
+      - name: Verify real Survival S2 provider launch using the external Core sync owner
+        run: node tests/gens_phase5_module_launch_s2_survival_provider_browser_v1.test.cjs

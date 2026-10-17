@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs'), http=require('node:http'), path=require('node:path');
 const {chromium}=require('playwright');
-const root=path.resolve(__dirname,'..'),SHA='a832da1cbbad39c446f46f1035dbb819aa60ec20';
+const root=path.resolve(__dirname,'..'),SHA=process.env.GITHUB_SHA||'a832da1cbbad39c446f46f1035dbb819aa60ec20';
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json','.css':'text/css; charset=utf-8','.png':'image/png','.webp':'image/webp','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webmanifest':'application/manifest+json','.mp3':'audio/mpeg','.wav':'audio/wav','.ogg':'audio/ogg'};
 function fixture(file){const target=path.resolve(root,'.'+file);if(!target.startsWith(root+path.sep))return null;try{return {data:fs.readFileSync(target),type:mime[path.extname(target).toLowerCase()]||'application/octet-stream'}}catch(_){return null}}
 const server=http.createServer((req,res)=>{const f=fixture(decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname));res.writeHead(f?200:404,{'content-type':f?.type||'text/plain','cache-control':'no-store','access-control-allow-origin':'*'});res.end(f?.data||'Not Found')});
@@ -156,6 +156,15 @@ async function scenario(browser,port,kind){
   assert.equal(await selected.count(),1,'the real attack choice must exist');
   assert.equal(await go.count(),1,'the real visible player command must exist');
   await go.waitFor({state:'visible',timeout:8000});
+  const panel=page.locator('.gtv2Overlay [data-v108-panel]');
+  assert.equal(await panel.locator('[data-v108-weapon]').count(),1,'equipment choice must exist');
+  assert.equal(await panel.locator('[data-v108-equip]').count(),1,'equip button must exist');
+  assert.equal(await panel.locator('[data-v108-reload]').count(),1,'reload button must exist');
+  assert.equal(await panel.locator('[data-v108-item]').count(),1,'consumable selection must exist even when inventory empty');
+  assert.equal(await panel.locator('[data-v108-qty]').count(),1,'quantity selection must exist');
+  assert.equal(await panel.locator('[data-v108-use]').count(),1,'item use control must exist');
+  assert.equal(await panel.locator('[data-v108-weapon]').isVisible(),true,'equipment choice must be visible');
+  assert.equal(await panel.locator('[data-v108-item]').isVisible(),true,'consumable selection must be visible');
   await selected.selectOption(result.inRange.selectedAttack);
   result.steps.push('visible-player-action-available');
   await go.click();

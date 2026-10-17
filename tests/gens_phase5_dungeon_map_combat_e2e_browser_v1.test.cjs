@@ -290,6 +290,13 @@ async function startDungeon(page){
       overlay:document.querySelectorAll('.gtv2Overlay').length
     }));
     assert.equal(returned.room,opened.sceneSnapshot.room,'combat exit must preserve current room');
+    if(JSON.stringify(returned.backgrounds)!==JSON.stringify(opened.sceneSnapshot.native)){
+      const mismatches=await page.evaluate(expected=>[...document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell')]
+        .map((el,i)=>({index:i,before:expected[i],after:getComputedStyle(el).backgroundImage,cls:el.className,
+          inline:el.style.backgroundImage,coverTheme:el.dataset.coverTheme,terrain:el.dataset.terrain||''}))
+        .filter(x=>x.before!==x.after),opened.sceneSnapshot.native);
+      console.log('[dungeon-return-terrain-mismatch] '+JSON.stringify({mismatches,sourceBefore:opened.sceneSnapshot.native,sourceAfter:returned.backgrounds}));
+    }
     assert.deepEqual(returned.backgrounds,opened.sceneSnapshot.native,'re-render after combat must preserve every Dungeon tile');
     assert.equal(returned.wallTiles,0,'no competing Tactical wall overlay may remain after combat');
     assert.equal(returned.overlay,0,'Tactical modal closed without leaving overlay');

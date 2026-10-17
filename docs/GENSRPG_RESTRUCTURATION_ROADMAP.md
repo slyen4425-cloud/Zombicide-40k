@@ -379,6 +379,18 @@ Critère de sortie : un asset Dungeon ne peut plus apparaître en Survie par col
 - **Checkpoint final §25 GREEN technique** : `checkpoint/gensrpg-phase12-r03-shell-hub-family-ui-extraction-green-2026-10-16` exactement sur ce SHA. Sans fusion sur `main`, sans test Android manuel revendiqué. Ce lot valide la partie Shell Hub traitée, **pas la séparation complète du monolithe**. Prochaine responsabilité R03–R07 à délimiter avant code ; pas de nouveau D10 mécanique.
 - **Source pour futur §26** : [index R03 au SHA code GREEN](https://github.com/slyen4425-cloud/Zombicide-40k/blob/afab707dad385450fdf296f7b2b6b41da376929b/index.html) ; `c6.zip` reste la source R02. Rapport : `docs/GENSRPG_PHASE12_R03_SHELL_HUB_FAMILY_UI_2026-10-16.md`.
 
+### R04 Builders / bibliothèque et éditeur d'équipements — GREEN technique (17 octobre 2026)
+
+- Source §26 : `c7.zip` (`index.html(16).txt`), 2 862 906 octets, blob `8faf7af7fced0a1e0724985e85718a0e4a9e673b`, identique au R03 GREEN.
+- Checkpoint de départ §25 : `checkpoint/gensrpg-start-phase12-r04-builders-equipment-library-2026-10-17` sur `c311e8b721fcb789c89f2d1035a60f7e3ca3eec2` ; branche dédiée `work/gensrpg-phase12-r04-builders-equipment-library-2026-10-17`.
+- **26 fonctions Builders équipement** déplacées sans réécriture vers `assets/gensrpg/builders/equipment-library-editor-v1.js` (**27 860 octets**, blob `27cadba87c766b5293ac3a7fe3ddffb8510adc40`). Le démarrage `refreshCustomEquipmentIntoItems();` demeure dans le gros script au même ordre historique ; pas de transfert de responsabilité gameplay.
+- Index R04 **2 835 125 octets**, blob `554bf6100aeb0f40bfc098dc90863af7d2d5e439`, soit 27 781 octets de moins. Cache PWA versionné et asset pré-caché ; owner `builders` explicitement inscrit, aucune modification du `main` ni des labos.
+- R04→R03→R02→R01 : restauration exacte via les helpers de test et contrôles historiques. Application [38988466500](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38988466500) SUCCESS ; adaptation des tests [38988745257](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38988745257) SUCCESS.
+- **Triple CI finale sur le même SHA `645f5fa9b849c1732e2c11f625548665067294ec`** : [Architecture + Chromium 38989338985](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38989338985), [Firefox 38989339009](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38989339009), [Tactical 38989338929](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38989338929) toutes SUCCESS, six checks au SHA SUCCESS.
+- **Checkpoint final GREEN** : `checkpoint/gensrpg-phase12-r04-builders-equipment-library-green-2026-10-17` sur le SHA certifié. Aucun test manuel Android/PWA installée hors ligne revendiqué et aucune publication de `main`. Phase 12 non achevée.
+- Prochain chantier **non ouvert** : rebornage par propriétaire du monolithe restant. Source §26 future [nouvel index R04](https://github.com/slyen4425-cloud/Zombicide-40k/blob/645f5fa9b849c1732e2c11f625548665067294ec/index.html), pas `c7.zip`.
+- Rapport : `docs/GENSRPG_PHASE12_R04_BUILDERS_EQUIPMENT_LIBRARY_2026-10-17.md`.
+
 ### REMAINING INLINE / EXIT BOUNDARY AUDIT — après D9 GREEN (16 octobre 2026)
 
 - **Changement explicite de plan :** ne pas ouvrir D10 sur le prochain Core Dungeon par inertie. D9 est réellement GREEN au SHA `83d6683896cdb58a63f98cf2fc3e360c23423f76` ; checkpoint final `checkpoint/gensrpg-phase12-dungeon-core202-d9-green-2026-10-16`. Audit documentaire isolé sur `work/gensrpg-phase12-remaining-inline-exit-boundary-audit-2026-10-16` et checkpoint de départ `checkpoint/gensrpg-start-phase12-remaining-inline-exit-boundary-audit-2026-10-16`.

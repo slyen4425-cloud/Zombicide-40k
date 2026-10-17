@@ -67,3 +67,13 @@ Les checkpoints verts intermédiaires permettent de revenir séparément après 
 La sentinelle Chromium `gens_tactical_wall_browser_v11411.test.cjs` vérifie le vrai asset, son décodage, l'unicité des tuiles et le patch Dungeon après chaque retrait.
 
 Aucun changement de texture, taille, collision ou gameplay n'a été mélangé à cette consolidation.
+
+## Mise au point de propriétaire après premier test utilisateur (17 octobre 2026)
+
+La règle d'unicité ci-dessus était trop large en confondant les **murs de l'arène Tactical** et les **terrains de la salle Dungeon**. Ce sont deux vues distinctes d'une même scène, pas deux écrivains autorisés sur les mêmes cases.
+
+- **Dungeon généré** : `applyDungeonMapPolish079()` est la seule fonction qui choisit la texture de la salle selon biome, salle et case. `DungeonSourceRenderStability167877` l'invoque après chaque `DungeonCore01.render/show` sans écrire une texture concurrente, uniquement dans les pièces non-authored.
+- **Dungeon authored** : `DungeonSourceRenderStability167877` conserve le rendu exact depuis le World Builder, sans réécriture par Tactical.
+- **Tactical** : `GensRpgTacticalCombatV2Ui` reste propriétaire de ses cases et de son fallback mur JPEG / zoom Firefox, mais **ne patche plus `dungeonMapHtml` ni les murs `#dc047RoomBoard` à l'installation**. Quand la salle existe déjà, l'adaptateur y lit une seule fois les fonds affichés pour les présenter dans Tactical ; il ne change pas la salle ni la collision.
+- **V108/V109/V111/V112/V113** : propriétaires historiques des autres contrôles, aucun nouveau peintre de mur natif.
+- Les anciens points historiques ci-dessus décrivent le checkpoint du 15 septembre, non le propriétaire effectif depuis cette correction. Tests de séparation : `gens_tactical_visual_authority_characterization_v11411.test.cjs`, `gens_tactical_wall_zoom_firefox_v11411.test.cjs`, `gens_phase5_dungeon_map_combat_e2e_browser_v1.test.cjs`.

@@ -17,7 +17,7 @@ const server=http.createServer((req,res)=>{const pathname=decodeURIComponent(new
       const api=window.GensRpgTacticalCombatV2Ui;if(!api)throw new Error('Tactical UI missing');
       if(api.WALL_ASSET!=='assets/dungeon/creatures/dng_wall_block.jpg')throw new Error(`Unexpected canonical wall asset: ${api.WALL_ASSET}`);
       window.__runtime.room=1;window.__runtime.heroRooms.dungeon_aldren=1;window.__runtime.positions.dungeon_aldren=1;window.__runtime.last.map={width:2,height:1,cells:['wall','floor']};
-      const board=document.getElementById('dc047RoomBoard');board.innerHTML='<div id="zoomGrid" class="dc047Grid" style="width:240px;grid-template-columns:repeat(2,1fr);transform-origin:0 0"><div id="zoomWall" class="dc047Cell"></div><div class="dc047Cell"></div></div>';
+      const board=document.getElementById('dc047RoomBoard');board.innerHTML='<div id="zoomGrid" class="gtv2Grid" style="width:240px;grid-template-columns:repeat(2,1fr);transform-origin:0 0"><div id="zoomWall" class="gtv2Cell blocked"></div><div class="gtv2Cell"></div></div>';
       api.paintLiveWalls();
       const grid=document.getElementById('zoomGrid'),wall=document.getElementById('zoomWall'),img=wall.querySelector(':scope > .gtv2WallTile');
       if(!img)throw new Error('Canonical wall tile missing');

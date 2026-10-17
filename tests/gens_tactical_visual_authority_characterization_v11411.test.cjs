@@ -21,12 +21,16 @@ assert.match(ui,/const WALL_ASSET="assets\/dungeon\/creatures\/dng_wall_block\.j
 assert.match(ui,/function wallTileHtml\(\).*gtv2WallTile/,'base Tactical UI must emit a real wall image tile');
 assert.match(ui,/function ensureWallTile\(el\)/,'base Tactical UI must own idempotent wall tile attachment');
 const renderGrid=block(ui,'function renderGrid(){','function renderRosterGroup','base Tactical UI renderGrid');
-assert.match(renderGrid,/blocked\.has\(k\)\?wallTileHtml\(\)/,'blocked Tactical cells must render their wall tile directly');
+assert.match(renderGrid,/blocked\.has\(k\)\?\(borrowed\?"":wallTileHtml\(\)\)/,'Tactical fallback keeps its wall image, while real Dungeon cells borrow existing visual art');
 assert.match(ui,/function patchDungeonMapHtml\(\)/,'base Tactical UI must own Dungeon wall HTML patching');
 assert.match(ui,/function paintLiveWalls\(\)/,'base Tactical UI must own live wall repair');
 assert.match(ui,/function hookDungeonRender\(\)/,'base Tactical UI must own Dungeon render hookup');
 const globalPolish=block(ui,'function installGlobalPolish(){','const api=','base Tactical UI installGlobalPolish');
-for(const required of ['preloadWall()','patchDungeonMapHtml()','hookDungeonRender()','paintLiveWalls()'])assert.ok(globalPolish.includes(required),`base Tactical UI canonical wall pipeline missing ${required}`);
+for(const required of ['preloadWall()','paintLiveWalls()'])assert.ok(globalPolish.includes(required),`Tactical wall pipeline missing ${required}`);
+assert.doesNotMatch(globalPolish,/patchDungeonMapHtml\(\);hookDungeonRender\(\)/,'Tactical must never install map repaints over Dungeon');
+const painter=block(ui,'function paintLiveWalls(){','function hookDungeonRender','Tactical active wall painter');
+assert.doesNotMatch(painter,/querySelectorAll.*dc047RoomBoard/,'Tactical must not paint native Dungeon cells');
+assert.doesNotMatch(ui,/\.dc047Cell\.dav167870WallCell/,'Tactical CSS must not repaint Dungeon authored walls');
 
 for(const sig of ['function paintWalls(rt=R)','function patchDungeonMapHtml(rt=R)','function hookDungeonRender(rt=R)'])assert.ok(v108.includes(sig),`V108 historical wall seam missing: ${sig}`);
 const i108=block(v108,'function install(rt=R){','function installWithRetries','V108 install');
@@ -74,4 +78,4 @@ for(const name of ['V108','V109','V111','V112','V113']){
 assert.match(doc,/Retrait CSS — terminé/,'inventory must record completed historical wall CSS retirement');
 assert.match(doc,/aucune couche V108\/V109\/V111\/V112\/V113 ne peut reprendre de règle CSS murale/,'inventory must record the final CSS authority lock');
 assert.match(doc,/GensRpgTacticalCombatV2Ui/,'visual authority inventory must name base Tactical UI as target authority');
-console.log('GenSrpG V114.11 visual authority consolidated: Tactical UI owns JS+CSS wall pipeline; V108/V109/V111/V112/V113 historical wall authority retired');
+console.log('GenSrpG wall authority separated: Dungeon 0.79/167877 retains native room visual source; Tactical UI owns Tactical wall fallback; V108-113 retired');

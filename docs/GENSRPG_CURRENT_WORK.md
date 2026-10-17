@@ -1,5 +1,13 @@
 # GenSrpG — CURRENT_WORK officiel (17 octobre 2026)
 
+## Checkpoint GREEN technique — murs des donjons générés (17/10/2026)
+
+- **Checkpoint figé** : `checkpoint/gensrpg-dungeon-generated-wall-texture-green-2026-10-17` au SHA exact `4dd865a45634b7367ce66a526feae58b923edef9`. Base START inchangée `checkpoint/gensrpg-start-dungeon-generated-wall-texture-2026-10-17` au SHA `83d379501e8fe2863471fbe0f10cdfb4f295576c`.
+- **Quatre workflows verts sur le MÊME SHA** : [texture murs générés + vrai Dungeon/Combat/embuscade 39072738371](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39072738371), [Firefox 39072738376](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39072738376), [Tactical dock 39072738379](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39072738379), [Architecture et Chromium navigateur intégral 39072738381](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39072738381).
+- **Lien pour validation manuelle de l'utilisateur** : https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/4dd865a45634b7367ce66a526feae58b923edef9/preview.html — ce lien cible le commit IMMUTABLE contrôlé, **pas `main`** ni le dernier HEAD documentaire.
+- **Changement de gameplay zéro** : peintre unique Core 0.79 distingue désormais mur (matériau Builder canonique `dng_wall_block.jpg`) et couvert (ancien rendu thématique). Builder authored, cartes, Tactical, stats et dés inchangés. Le fichier `index.html` a été modifié chirurgicalement après vérification du blob historique §26 ; nouveau blob `b33542b033c5afa8a1643d99c56c21dbd4be266c`. Les helpers de tests ne modifient que les comparaisons des anciens historiques figés.
+- **Reste OUVERT** : retour visuel et fonctionnel de l'utilisateur sur la nouvelle preview, spécifiquement murs générés face aux murs Builder ; absence de fusion `main` et maintien de R06 en pause jusqu'à son accord. Un GREEN CI technique n'est pas une homologation manuelle.
+
 ## Chantier actif — murs des donjons générés (retour manuel validant les combats)
 
 - **Retour utilisateur** : combats et embuscades semblent corrigés dans la preview du commit `83d379501e8fe2863471fbe0f10cdfb4f295576c`. **Défaut restant** : texture des murs en donjon **généré** ; texture des murs Builder, y compris en jeu, correcte et **à préserver**.

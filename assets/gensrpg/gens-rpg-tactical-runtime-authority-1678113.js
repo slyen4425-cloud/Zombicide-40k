@@ -139,18 +139,32 @@
   function isDetectionReason(reason){return /detect|vision|rep[eé]rage|ambush|embuscade/i.test(str(reason))}
   function unwrap112Start(fn){return fn?.__gensRpg112Start&&typeof fn.__original==="function"?fn.__original:fn}
   function hookStart(rt=R){
-    const cur=rt?.dc200StartCombat;if(typeof cur!=="function")return false;if(cur.__gensRpg113Start){startHooked=true;return true}const base=unwrap112Start(cur);if(typeof base!=="function")return false;
-    const wrapped=function(ids=[],reason="manual"){
-      const state=runtimeState(rt);if(!state)return base.apply(this,arguments);let requested=arr(ids).map(str).filter(Boolean);
-      if(isDetectionReason(reason)){const pairs=detectionPairs(rt,state),visible=new Set(pairs.map(p=>p.enemyId));requested=(requested.length?requested:[...visible]).filter(id=>visible.has(id));if(!requested.length)return {ok:false,reason:"not-detected-v113"};const source=[...new Set(pairs.filter(p=>requested.includes(p.enemyId)).map(p=>p.heroId))];setContext(rt,{scope:activeScope(state,rt),sourceHeroIds:source,enemyIds:requested,reason})}
-      const sel=selectCombatants(rt,{enemyIds:requested});if(!sel.heroIds.length||!sel.enemyIds.length)return {ok:false,reason:"no-scoped-combatants-v113"};setContext(rt,{scope:sel.scope,sourceHeroIds:sel.sourceHeroIds,enemyIds:sel.enemyIds,reason});return base.call(this,sel.enemyIds,reason);
-    };
-    wrapped.__gensRpg113Start=true;wrapped.__gensRpg112Start=true;wrapped.__original=base;rt.dc200StartCombat=wrapped;startWrapped=wrapped;startHooked=true;return true;
+    const cur=rt?.dc200StartCombat;
+    if(typeof cur!=="function")return false;
+    // V113 owns detection and combatant scope, not the global combat-start
+    // function. Before Tactical activation the old global is LEGACY: do not
+    // wrap it and accidentally reawaken the retired combat timeline.
+    if(cur.__gensRpg113Start){startHooked=true;return true}
+    startHooked=false;return false;
   }
 
   function detectionSignature(rt,state){const scope=activeScope(state,rt),h=heroesInScope(state,scope,rt).map(id=>`${id}@${heroCell(state,id)}`).sort().join(","),e=enemiesInScope(rt,state,scope).map(x=>`${str(x.id)}@${enemyCell(state,x)}#${num(x.hp,0)}`).sort().join(",");return `${scopeKey(scope)}|${h}|${e}`}
   function scanDetection(rt=R,reason="vision-v113",force=false){
-    hookStart(rt);hookAdapter(rt);if(currentBattle(rt))return [];const state=runtimeState(rt);if(!state?.last?.map)return [];const sig=detectionSignature(rt,state);if(!force&&sig===lastDetectionSignature)return [];lastDetectionSignature=sig;const pairs=detectionPairs(rt,state);if(!pairs.length)return [];const ids=[...new Set(pairs.map(p=>p.enemyId))],source=[...new Set(pairs.map(p=>p.heroId))];setContext(rt,{scope:activeScope(state,rt),sourceHeroIds:source,enemyIds:ids,reason});try{rt?.dc200StartCombat?.(ids,reason)}catch(e){try{rt?.console?.warn?.("V16.78.113 detection",e)}catch(_){}}return ids;
+    hookStart(rt);hookAdapter(rt);if(currentBattle(rt))return [];
+    const bridge=rt?.GensRpgTacticalCombatV2Bridge;
+    // Only the public Bridge may activate lazy Tactical. Do not call the
+    // legacy global dc200StartCombat before Bridge owns it.
+    if(typeof bridge?.requestCombat!=="function")return [];
+    const state=runtimeState(rt);if(!state?.last?.map)return [];
+    const sig=detectionSignature(rt,state);if(!force&&sig===lastDetectionSignature)return [];
+    const pairs=detectionPairs(rt,state);if(!pairs.length){lastDetectionSignature=sig;return []}
+    const ids=[...new Set(pairs.map(p=>p.enemyId))],source=[...new Set(pairs.map(p=>p.heroId))];
+    setContext(rt,{scope:activeScope(state,rt),sourceHeroIds:source,enemyIds:ids,reason});
+    try{
+      const result=bridge.requestCombat(rt,{enemyIds:ids,reason,entry:"dungeon-detection-v113"});
+      if(result?.ok===true){lastDetectionSignature=sig;return ids}
+    }catch(e){try{rt?.console?.warn?.("V16.78.113 detection",e)}catch(_){}}
+    return [];
   }
   function scheduleDetection(rt=R,reason="vision-v113",force=false,delay=0){const run=()=>scanDetection(rt,reason,force);if(typeof setTimeout==="function"){const id=setTimeout(()=>{detectionTimers.delete(id);run()},Math.max(0,delay));detectionTimers.add(id)}else run()}
   function hookMovement(rt=R){

@@ -1,7 +1,18 @@
 # GenSrpG — CURRENT_WORK officiel (17 octobre 2026)
 
-**PHASE 12 EN PAUSE / TEST UTILISATEUR BLOQUANT : Dungeon combat non validé sur prévisualisation externe.** D1–D9/R01–R05 restent GREEN **technique CI**, mais leur validation manuelle est insuffisante ; pas de R06 ni de publication sur `main`.
+**Phase 12 toujours SUSPENDUE avant R06 et production : diagnostic Dungeon manuel non résolu.** Correctif borné indépendant du lot Tactical V108/V2 : raccord d'un module préexistant de placement d'embuscades/renforts.
 
+## Chantier actif — Dungeon ambush event runtime wiring (NON GREEN)
+
+- **Checkpoint de départ §25** : `checkpoint/gensrpg-start-dungeon-ambush-event-runtime-wiring-2026-10-17` sur `0a80add1e6f71ec6ed465c2e00d6b7ea72b2a79f` ; branche unique `work/gensrpg-dungeon-ambush-event-runtime-wiring-2026-10-17`. Base documentaire antérieure : travail d'audit Dungeon/Tactical, non production.
+- **Source §26** : `c8.zip` / `index.html(18).txt` = 2 781 436 octets / blob `485de2e6a08ffd89e4f1fb9410e40c938774d62f` ; **index du runtime inchangé** prévu pour ce chantier.
+- **Propriétaire** : Dungeon événements/surgissements/renforts. Module existant : `assets/dungeon/dungeon-event-runtime-fix-167878.js`. Il est pré-caché mais pas exécuté par les chemins HTML/Pages/preview ; branche de déploiement `main` inchangée.
+- **Modification admise** : raccorder une seule fois l'asset existant à l'injection GitHub Pages `.github/workflows/main.yml` et au tableau `preview.html` dans un ordre correspondant ; garder V113 propriétaire de la détection et du scope, éviter double wrapper de `applyDungeonTurnEvent`. Ne pas changer la formule de portée, les attaques, la statistique de dégâts, les dés, la récupération de sauvegardes, le code monolithique ni les laboratoires.
+- **Tests requis** : contrat preview/Pages, vrai chargement du module dans le navigateur et **vrai événement `applyDungeonTurnEvent`** avec apparition, distance par la carte traversable et position persistée, comportement renfort et protection anti-doublon, plus CI Architecture/Chromium, Firefox et Tactical au même SHA.
+- **Risques** : wrapper V113 déjà actif, appels d'événements via la fonction globale, ordres de chargement et disponibilité du stock des monstres en jeu ; le test mock historique de positionnement est insuffisant seul.
+- **Règle de sortie** : pas de nouveau lien « prêt », pas de R06 ni publication `main` tant que les rencontres, le combat multi-manches et les embuscades ne sont pas couverts et validés. Tests Android manuels non attestés.
+
+## Contexte précédent — diagnostic Dungeon/Tactical
 ## Retour terrain aggravé / anti-faux-GREEN
 
 - **Utilisateur** : le combat démarre normalement puis se dérègle après ~3 tours ; embuscade avec monstre éloigné, détection incohérente. **BLOCAGE MANUEL OUVERT** : ni nouveau lien de preview dite prête ni R06 ni merge `main`.

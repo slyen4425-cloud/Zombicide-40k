@@ -134,7 +134,10 @@
   function targetActor(){return E()?.actorById?.(battle,selectedTarget)||null}
   function selectedAttackActor(){const cur=current();return cur?.attacks?.find(a=>a.id===selectedAttack)||cur?.attacks?.[0]||null}
   function canTarget(cur,a){if(!cur||!a||!a.alive||cur.side===a.side)return false;return arr(cur.attacks).some(x=>E().attackPreview(battle,cur.id,a.id,x.id).ok)}
-  function refreshSelection(){const cur=current();if(!cur){selectedTarget="";selectedAttack="";return}if(!arr(cur.attacks).some(x=>x.id===selectedAttack))selectedAttack=cur.attacks?.[0]?.id||"";const t=targetActor();if(!t||!t.alive||t.side===cur.side)selectedTarget=""}
+  function refreshSelection(){const cur=current();if(!cur){selectedTarget="";selectedAttack="";return}if(!arr(cur.attacks).some(x=>x.id===selectedAttack))selectedAttack=cur.attacks?.[0]?.id||"";const t=targetActor();
+    // The enemy turn is an automatic phase; it must not erase the target the
+    // player explicitly selected for the next hero turn. No auto-attack is added.
+    if(!t||!t.alive||(cur.side==="hero"&&t.side===cur.side))selectedTarget=""}
   function wallTileHtml(){return `<img class="gtv2WallTile" src="${WALL_ASSET}" alt="" aria-hidden="true" draggable="false" decoding="sync" fetchpriority="high">`}
   function ensureWallTile(el){
     if(!el||!el.classList)return false;el.classList.add("gtv2WallOwner");let img=el.querySelector?.(":scope > .gtv2WallTile");if(img)return true;

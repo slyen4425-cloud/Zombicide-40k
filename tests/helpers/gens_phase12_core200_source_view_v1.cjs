@@ -9,7 +9,7 @@ const crypto=require("node:crypto");
 const assert=require("node:assert/strict");
 const sha=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
 function restore(root){
-  let actual=fs.readFileSync(path.join(root,"index.html"));
+  let actual=require("./gens_phase12_generated_wall_material_source_view_v1.cjs")(fs.readFileSync(path.join(root,"index.html")));
   if(["caf31c121d926b7b76b9bb05688fab8f2839814e","062c4cd37634f504cc75ce3329d6e69e19b5f547","8faf7af7fced0a1e0724985e85718a0e4a9e673b","554bf6100aeb0f40bfc098dc90863af7d2d5e439","485de2e6a08ffd89e4f1fb9410e40c938774d62f"].includes(sha(actual)))actual=require("./gens_phase12_r01_d9_source_view_v1.cjs")(actual,root);
   // D9: restore only the proven byte-identical Core202 source before the
   // existing D8->D4 historical combat inventory; do not relax any fingerprint.

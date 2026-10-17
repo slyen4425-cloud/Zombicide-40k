@@ -227,13 +227,13 @@ async function scenario(browser,port,kind){
 
   // Multiround sentinel: four REAL hero actions, enemy confirmations and round
   // progression. Never click hidden legacy buttons or bypass attack/AI handlers.
-  result.longCombat=[];
+  result.longCombat=[];result.longCombatTrace=[];
   for(let cycle=2;cycle<=4;cycle++){
     await page.waitForFunction(()=>{
       const b=window.GensRpgTacticalCombatV2Ui?.getBattle();
       return b?.status==='active'&&window.GensRpgTacticalCombatV2?.currentActor?.(b)?.side==='hero'&&!document.querySelector('.gtv2DiceBackdrop');
     },null,{timeout:16000});
-    const turnStart=await combatSnapshot();
+    const turnStart=await combatSnapshot();result.longCombatTrace.push({cycle,phase:'turn-start',data:turnStart});
     assert.ok(turnStart.visibleAttack?.display==='block','cycle '+cycle+': visible V108 attack UI missing');
     assert.equal(turnStart.panel?.display,'grid','cycle '+cycle+': equipment/item panel missing');
     if(!turnStart.preview?.ok){
@@ -244,12 +244,21 @@ async function scenario(browser,port,kind){
         return !!(c&&t&&e.attackPreview(b,c.id,t.id,c.attacks[0].id).ok);
       },null,{timeout:7000});
     }
-    const prior=await combatSnapshot();
+    const prior=await combatSnapshot();result.longCombatTrace.push({cycle,phase:'before-attack',data:prior});
     assert.ok(prior.preview?.ok,'cycle '+cycle+': attack must be in range');
     const panel=page.locator('.gtv2Overlay [data-v108-panel]');
     await panel.locator('[data-v108-attack]').selectOption(prior.selectedAttack);
+    await page.waitForFunction(()=>{
+      const b=window.GensRpgTacticalCombatV2Ui?.getBattle();
+      return window.GensRpgTacticalCombatV2?.currentActor?.(b)?.side==='hero' &&
+        !document.querySelector('.gtv2DiceBackdrop') &&
+        !!document.querySelector('.gtv2Overlay .gtv2Actions button[data-attack]:not([disabled])');
+    },null,{timeout:8000});
+    result.longCombatTrace.push({cycle,phase:'real-control-ready',data:await combatSnapshot()});
     await panel.locator('[data-v108-attack-go]').click();
-    await page.locator('.gtv2DiceBackdrop').waitFor({state:'visible',timeout:7500});
+    try{await page.locator('.gtv2DiceBackdrop').waitFor({state:'visible',timeout:7500})}
+    catch(e){result.longCombatTrace.push({cycle,phase:'no-dice-after-click',data:await combatSnapshot(),
+      hint:await page.locator('.gtv2Overlay .gtv2Hint').allInnerTexts().catch(()=>[]) });throw e}
     const inDice=await combatSnapshot();
     assert.equal(inDice.dice,1,'cycle '+cycle+': exactly one hero dice modal');
     await page.waitForTimeout(1200);

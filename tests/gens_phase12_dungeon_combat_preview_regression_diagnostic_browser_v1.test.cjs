@@ -159,7 +159,10 @@ async function scenario(browser,port,kind){
   }));
   assert.equal(result.binding.uiRenderExists,true,'lazy Tactical UI must exist');
   assert.equal(result.binding.polishAvailable,true,'V108 owner must exist');
-  assert.equal(result.binding.uiRenderWrapped,true,'V108 must be bound BEFORE any manual intervention');
+  // Les appels render() PRIVÉS passent par onAfterRender(); la présence
+  // du vrai panneau vaut preuve, pas un marqueur sur l'API render() externe.
+  assert.ok(result.combat.panel&&result.afterTarget.panel&&result.afterApproach?.panel,
+    'V108 must survive initial render, target selection and legit movement without reinstall');
   assert.ok(result.inRange.panel&&result.inRange.visibleAttack?.rect?.width>0,
     'the live player attack/weapon/item panel must already be visible after approach');
   assert.equal(result.inRange.legacyAttack?.display,'none',
@@ -172,6 +175,10 @@ async function scenario(browser,port,kind){
   const go=page.locator('.gtv2Overlay [data-v108-panel] [data-v108-attack-go]');
   assert.equal(await selected.count(),1,'the real attack choice must exist');
   assert.equal(await go.count(),1,'the real visible player command must exist');
+  assert.equal(await page.locator('.gtv2Overlay [data-v108-panel] [data-v108-weapon]').count(),1,
+    'weapon selector must be visible');
+  assert.equal(await page.locator('.gtv2Overlay [data-v108-panel] [data-v108-item]').count(),1,
+    'item selector must be present even when no consumable is available');
   await go.waitFor({state:'visible',timeout:8000});
   await selected.selectOption(result.inRange.selectedAttack);
   result.steps.push('visible-player-action-available');
@@ -218,6 +225,17 @@ async function scenario(browser,port,kind){
     await page.waitForFunction(()=>!document.querySelector('.gtv2DiceBackdrop [data-dice-continue]')?.disabled,null,{timeout:8000});
     await page.locator('.gtv2DiceBackdrop [data-dice-continue]').click();
     result.steps.push('enemy-dice-confirmed');
+  }
+  await page.waitForFunction(()=>{
+    const b=window.GensRpgTacticalCombatV2Ui?.getBattle();
+    return b?.status==='ended'||window.GensRpgTacticalCombatV2?.currentActor?.(b)?.side==='hero';
+  },null,{timeout:12000});
+  result.nextTurn=await combatSnapshot();
+  if(result.nextTurn.phase==='active'){
+    assert.equal(result.nextTurn.active?.side,'hero','enemy flow must return control to hero');
+    assert.ok(result.nextTurn.panel&&result.nextTurn.visibleAttack?.rect?.width>0,
+      'V108 panel must survive the complete hero/enemy/hero render cycle');
+    result.steps.push('hero-next-turn-panel-restored');
   }
 
  }catch(e){result.exception=String(e).slice(0,700);result.html=await page.evaluate(()=>document.body?.innerText?.slice(0,250)).catch(()=>null)}

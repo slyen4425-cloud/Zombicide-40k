@@ -2,6 +2,8 @@
 
 **Phase 12 en PAUSE, régression manuelle Dungeon en diagnostic.**
 
+**Preuve intermédiaire au run 39016208157** : le panneau V108 revient automatiquement après ouverture, changement de cible et rapprochement dans les deux compositions ; le test échouait uniquement sur un marqueur interne `Ui.render.__gensRpg108Polish` devenu non pertinent grâce au hook `onAfterRender`. La sentinelle vérifie maintenant le panneau réel et un tour complet sans installation test-only. Version du cache PWA incrémentée sans changement des assets de gameplay.
+
 **Correctif en validation :** le premier essai sur `tactical/entry-v1.js` a échoué au run [39015979879](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39015979879) : V108 absent après chaque `render()` privé. Le propriétaire V108 utilise désormais le callback existant `GensRpgTacticalCombatV2Ui.onAfterRender()` ; le routeur Tactical l'installe avant `openCurrentEncounter()`. L'essai initial de l'Entry a été retiré. Pas de nouvel observateur ou timer, ni changement des règles. GREEN conditionnel aux tests stricts.
  D1–D9/R01–R05 GREEN technique CI, mais le combat utilisateur n'est pas encore revalidé. R06 non ouvert, `main` inchangé.
 

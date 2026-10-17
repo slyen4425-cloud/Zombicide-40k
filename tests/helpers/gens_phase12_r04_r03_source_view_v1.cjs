@@ -7,6 +7,7 @@ const JS="27cadba87c766b5293ac3a7fe3ddffb8510adc40",REL="assets/gensrpg/builders
 const TAG='<script src="'+REL+'"></script>\n',LAST='const GENS_GAME_CONFIG_KEY="gensrpg_game_config_v1";';
 const CALL='refreshCustomEquipmentIntoItems();\n',FROM='\n\nfunction showEquipmentLibrary',TO='\n'+CALL+'\nfunction showEquipmentLibrary';
 module.exports=function r03SourceView(index,root=path.resolve(__dirname,"../..")){
+ index=require('./gens_phase12_generated_wall_material_source_view_v1.cjs')(index);
  if(gitblob(index)===R03){assert.equal(index.length,2862906);return index;}
  if(gitblob(index)==="485de2e6a08ffd89e4f1fb9410e40c938774d62f")index=require("./gens_phase12_r05_r04_source_view_v1.cjs")(index,root);
  assert.equal(index.length,2835125);assert.equal(gitblob(index),R04,"R04 pinned physical source");

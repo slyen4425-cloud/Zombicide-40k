@@ -175,6 +175,8 @@ async function startDungeon(page){
     assert.equal(before.battle,null,'Tactical battle must not exist before the real Dungeon action');
     assert.equal(before.overlay,false,'Tactical overlay must not exist before combat');
 
+    const nativeAtEngagement=await page.evaluate(()=>[...document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell')].map(el=>getComputedStyle(el).backgroundImage));
+
     await action.click();
 
     await page.waitForFunction(()=>{
@@ -229,6 +231,18 @@ async function startDungeon(page){
     }
     assert.match(opened.sceneSnapshot.native[5],/dng_floor_.*\.png/,'native wall cover keeps existing 0.79 theme, not old wall PNG');
     assert.equal(opened.sceneSnapshot.wallTiles,0,'Tactical must not inject a competing wall overlay into Dungeon');
+    if(JSON.stringify(opened.sceneSnapshot.tactical)!==JSON.stringify(opened.sceneSnapshot.native)){
+      const debugScene=await page.evaluate(()=>{
+        const scene=[...document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell')],arena=[...document.querySelectorAll('.gtv2Overlay .gtv2Cell')],battle=window.GensRpgTacticalCombatV2Ui.getBattle();
+        return {room:JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'{}').room,
+          metadata:battle.grid.sourceMap?.tileBackgrounds||[],cells:scene.map((el,i)=>({
+            index:i,className:el.className,inline:el.style.backgroundImage,inlinePriority:el.style.getPropertyPriority('background-image'),
+            computed:getComputedStyle(el).backgroundImage,tacticalComputed:getComputedStyle(arena[i]).backgroundImage,
+            tacticalInline:arena[i]?.getAttribute('style')||'',sourceMeta:battle.grid.sourceMap?.tileBackgrounds?.[i]||''
+          })).filter(x=>x.computed!==x.tacticalComputed)};
+      });
+      console.log('[dungeon-scene-art-diff] '+JSON.stringify({nativeAtEngagement,debugScene}));
+    }
     assert.deepEqual(opened.sceneSnapshot.tactical,opened.sceneSnapshot.native,'Tactical must borrow the exact visible background art of every original Dungeon cell');
     const coord=await page.evaluate(()=>{const b=window.GensRpgTacticalCombatV2Ui.getBattle();return b.actors.map(a=>({id:a.id,side:a.side,x:a.x,y:a.y,art:a.meta?.art||'',instanceId:a.meta?.instanceId||''}))});
     assert.deepEqual(coord.find(a=>a.side==='hero')&&[coord.find(a=>a.side==='hero').x,coord.find(a=>a.side==='hero').y],[1,2],'hero retains actual Dungeon cell 11');

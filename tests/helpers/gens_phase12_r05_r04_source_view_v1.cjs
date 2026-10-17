@@ -5,6 +5,7 @@ const hash=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0"
 const R05="485de2e6a08ffd89e4f1fb9410e40c938774d62f",R04="554bf6100aeb0f40bfc098dc90863af7d2d5e439";
 const REL="assets/gensrpg/core/legacy-cloud-sync-backup-v1.js",TAG='<script src="'+REL+'"></script>';
 module.exports=function r04SourceView(index,root=path.resolve(__dirname,"../..")){
+ index=require('./gens_phase12_generated_wall_material_source_view_v1.cjs')(index);
  if(hash(index)===R04){assert.equal(index.length,2835125);return index;}
  assert.equal(index.length,2781436);assert.equal(hash(index),R05,"R05 pinned active source");
  const js=fs.readFileSync(path.join(root,REL));

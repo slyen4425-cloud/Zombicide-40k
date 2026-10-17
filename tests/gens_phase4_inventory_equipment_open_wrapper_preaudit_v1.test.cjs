@@ -23,6 +23,8 @@ const reachableHits=Object.keys(owners)
   .sort();
 
 const expected=[
+  // R04 physical canonical base editor, not an additional late wrapper.
+  'assets/gensrpg/builders/equipment-library-editor-v1.js',
   'assets/dungeon/dungeon-equipment-hotfix-167817.js',
   'assets/dungeon/dungeon-set-editor-167818.js',
   'assets/gensrpg/gens-equipment-stat-cleanup-1678102.js',

@@ -36,7 +36,8 @@ assert.doesNotMatch(bootstrap,/gens-rpg-tactical-combat-v2-(?:bridge|adapter|rul
 
 const entry=read('assets/gensrpg/tactical/entry-v1.js');
 const entryApi=block(entry,'R.GensTacticalV1=Object.freeze({','});\ninstall();','entry API');
-assert.match(entry,/function install\(\)[\s\S]*loadFacade\(\)/,'bootstrap install must remain facade-only');
+assert.match(entry,/function install\(\)[\s\S]*ensureDetection\(\)/,'V113 detection must be available before private Tactical');
+assert.match(entry,/function ensureDetection\(\)[\s\S]*loadFacade\(\)/,'Bridge facade must follow the existing detector');
 assert.match(entryApi,/\bactivate\b/);
 assert.match(entryApi,/\bdeactivate\b/);
 assert.match(entryApi,/dispose:deactivate/);
@@ -57,6 +58,7 @@ sandbox.GensRpgTacticalCombatV2Ui={
   installGlobalPolish(){counts.uiInstall++;return true},
   dispose(){counts.uiDispose++;return true}
 };
+sandbox.GensRpgTacticalRuntimeAuthority1678113={install(){return true}};
 sandbox.GensRpgTacticalCombatV2Bridge={
   install(){counts.bridgeInstall++;return true},
   dispose(){counts.bridgeDispose++;return true}

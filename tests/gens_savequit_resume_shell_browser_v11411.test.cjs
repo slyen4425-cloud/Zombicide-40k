@@ -6,6 +6,9 @@ const {chromium}=require('playwright');
 
 const root=path.join(__dirname,'..');
 const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const onlineCoreSource=fs.readFileSync(path.join(root,'assets/gensrpg/core/legacy-cloud-sync-backup-v1.js'),'utf8');
+const onlineCoreTag='<script src="assets/gensrpg/core/legacy-cloud-sync-backup-v1.js"></script>';
+assert.equal(indexSource.split(onlineCoreTag).length-1,1,'original external Core online support must load once');
 const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
 const mobilePerformance=fs.readFileSync(path.join(root,'assets','gensrpg','gens-mobile-combat-performance-16781022.js'),'utf8');
 const finalShellAuthority=fs.readFileSync(path.join(root,'assets','gensrpg','shell','module-launch-final-authority-v1.js'),'utf8');
@@ -17,9 +20,9 @@ assert.doesNotMatch(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,
 assert.match(mobilePerformance,/runtime-bootstrap-v1\.js/,'production mobile bootstrap must still load RuntimeBootstrap');
 assert.match(finalShellAuthority,/window\.startConfiguredGame\s*=\s*async\s+function/,'final Shell authority must own the visible launch global');
 assert.match(finalShellAuthority,/launchService\.startModuleSession\(moduleId\)/,'final Shell authority must delegate to the public module-launch registry');
-assert.match(indexSource,/let z40kRoomId = localStorage\.getItem\('z40k_online_room_id'\) \|\| null;/,'production online block must define optional room id from localStorage');
-assert.match(indexSource,/let z40kRoomCode = localStorage\.getItem\('z40k_online_room_code'\) \|\| '';/,'production online block must define optional room code from localStorage');
-assert.match(indexSource,/let z40kApplyingRemote = false;/,'production online block must default remote-application guard to false');
+assert.match(onlineCoreSource,/let z40kRoomId = localStorage\.getItem\('z40k_online_room_id'\) \|\| null;/,'production online block must define optional room id from localStorage');
+assert.match(onlineCoreSource,/let z40kRoomCode = localStorage\.getItem\('z40k_online_room_code'\) \|\| '';/,'production online block must define optional room code from localStorage');
+assert.match(onlineCoreSource,/let z40kApplyingRemote = false;/,'production online block must default remote-application guard to false');
 
 const core310Pos=indexSource.indexOf('id="dungeonCore310PersistenceAndTokens"');
 const core310End=indexSource.indexOf('</script>',core310Pos);
@@ -37,10 +40,10 @@ const shellOwner=indexSource.indexOf(shellOwnerMarker);
 const shellScriptEnd=indexSource.indexOf('</script>',shellOwner);
 assert.ok(shellOwner>0&&shellScriptEnd>shellOwner,'real Shell owning script must have an exact boundary');
 
-const onlineRoomMarker="let z40kRoomId = localStorage.getItem('z40k_online_room_id') || null;";
-const onlineRoomOwner=indexSource.indexOf(onlineRoomMarker);
-const onlineScriptStart=indexSource.lastIndexOf('<script',onlineRoomOwner);
-const onlineScriptEnd=indexSource.indexOf('</script>',onlineRoomOwner);
+const onlineRoomMarker=onlineCoreTag;
+const onlineRoomOwner=indexSource.indexOf(onlineRoomMarker,shellScriptEnd);
+const onlineScriptStart=onlineRoomOwner;
+const onlineScriptEnd=onlineRoomOwner+onlineRoomMarker.indexOf('</script>');
 assert.ok(onlineRoomOwner>shellScriptEnd&&onlineScriptStart>shellScriptEnd&&onlineScriptEnd>onlineRoomOwner,'exact optional online/session support block must exist');
 
 const customHeroesMarker='function loadCustomHeroesMulti(){';

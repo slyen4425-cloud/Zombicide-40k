@@ -29,11 +29,12 @@ const shellOwner=indexSource.indexOf('async function startConfiguredGame(){');
 const shellScriptEnd=indexSource.indexOf('</script>',shellOwner);
 assert.ok(shellOwner>0&&shellScriptEnd>shellOwner,'real Shell owner block must have an exact boundary');
 
-const onlineMarker="let z40kRoomId = localStorage.getItem('z40k_online_room_id') || null;";
+const onlineMarker='<script src="assets/gensrpg/core/legacy-cloud-sync-backup-v1.js"></script>';
 const onlineOwner=indexSource.indexOf(onlineMarker,shellScriptEnd);
-const onlineScriptStart=indexSource.lastIndexOf('<script',onlineOwner);
-const onlineScriptEnd=indexSource.indexOf('</script>',onlineOwner);
-assert.ok(onlineOwner>shellScriptEnd&&onlineScriptStart>shellScriptEnd&&onlineScriptEnd>onlineOwner,'real online Shell support block must exist');
+const onlineScriptStart=onlineOwner;
+const onlineScriptEnd=onlineOwner+onlineMarker.indexOf('</script>');
+assert.ok(onlineOwner>shellScriptEnd&&onlineScriptStart>shellScriptEnd&&onlineScriptEnd>onlineOwner,'real external Core online support must preserve Shell parser order');
+assert.equal(indexSource.split(onlineMarker).length-1,1,'online Core owner must load once');
 
 const customMarker='function loadCustomHeroesMulti(){';
 const customOwner=indexSource.indexOf(customMarker,onlineScriptEnd);

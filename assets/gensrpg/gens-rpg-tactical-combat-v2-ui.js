@@ -145,6 +145,23 @@
   }
   function pawnHtml(a){const hp=Math.max(0,Math.min(100,(a.hp/a.maxHp)*100)),art=actorArt(a),hasStatus=statusRows(a).length>0;return `<span class="gtv2Pawn ${a.side}">${art?`<img src="${esc(art)}" alt="" onerror="this.style.display='none'">`:'<span class="gtv271Silhouette">◆</span>'}${hasStatus?'<i class="gtv271EffectDot"></i>':''}<span class="gtv2Hp"><i style="width:${hp}%"></i></span></span>`}
   function reachableSet(){const cur=current();if(!cur||cur.side!=="hero"||busy)return new Map();return new Map(E().reachableCells(battle,cur.id).map(c=>[key(c.x,c.y),c]))}
+  // Tactical may read a transient Dungeon tile style while entering combat.
+  // Mirror the *existing* Dungeon terrain owner once the native board settles:
+  // no map repaint, no new gameplay owner, and no persistent watcher.
+  function syncTerrainFromDungeon(){
+    if(!battle?.grid?.sourceMap?.tileBackgrounds||!rootEl)return false;
+    const doc=D(),grid=battle.grid,source=[...(doc?.querySelectorAll?.("#dc047RoomBoard .dc047Grid > .dc047Cell")||[])];
+    if(source.length!==grid.width*grid.height)return false;
+    const current=grid.sourceMap.tileBackgrounds;
+    const live=source.map(el=>String(R.getComputedStyle?.(el)?.backgroundImage||""));
+    const valid=bg=>/^url\(/.test(bg)&&!/^url\(["']?data:/i.test(bg);
+    if(!live.some(valid))return false;
+    const updated=live.map((bg,i)=>valid(bg)?bg:current[i]||"");
+    if(updated.every((bg,i)=>bg===current[i]))return false;
+    grid.sourceMap.tileBackgrounds=updated;
+    return true;
+  }
+
   function renderGrid(){
     const grid=battle.grid,reach=reachableSet(),blocked=new Set(arr(grid.blocked).map(p=>key(p.x,p.y))),cover=new Set(arr(grid.cover).map(p=>key(p.x,p.y))),cur=current();let h=`<div class="gtv2Grid" style="grid-template-columns:repeat(${grid.width},52px)" data-grid>`;
     for(let y=0;y<grid.height;y++)for(let x=0;x<grid.width;x++){
@@ -209,7 +226,15 @@
   function close(apply=false){const b=battle;let summary=null;if(apply&&b)try{summary=A()?.commitBattle?.(R,b,{removeDefeatedEnemies:true})||null}catch(e){console.error("tactical commit",e)}rootEl?.remove?.();rootEl=null;battle=null;selectedTarget="";selectedAttack="";detailActorId="";busy=false;const cb=options?.onFinish,cancel=options?.onCancel,oldOptions=options;options={};try{if(apply&&typeof cb==="function")cb({battle:b,summary,options:oldOptions});else if(!apply&&typeof cancel==="function")cancel({battle:b,options:oldOptions})}catch(e){console.error("tactical finish callback",e)}try{R.GensTacticalV1?.deactivate?.()}catch(e){console.error("tactical teardown",e)}return b}
   function onClick(ev){const btn=ev.target.closest?.("button");if(!btn)return;if(btn.hasAttribute("data-close")){close(false);return}if(btn.hasAttribute("data-commit")){close(true);return}if(btn.hasAttribute("data-detail-close")){detailActorId="";render();return}if(btn.dataset.detail){detailActorId=btn.dataset.detail;render();return}if(btn.hasAttribute("data-roll-rule")){const v=setRollHighToHit(!battle.config.rollHighToHit);battle.config.rollHighToHit=v;notice=`Règle D100 : ${v?"jet haut":"jet bas"}.`;render();return}if(btn.hasAttribute("data-end")){void endHeroTurn();return}if(btn.hasAttribute("data-approach")){approachTarget();return}if(btn.dataset.target){selectedTarget=btn.dataset.target;notice="";render();return}if(btn.dataset.attack){void doAttack(btn.dataset.attack);return}if(btn.dataset.x!==undefined&&btn.dataset.y!==undefined)clickCell(Number(btn.dataset.x),Number(btn.dataset.y))}
 
-  function open(input,opts={}){const doc=D();if(!doc)throw new Error("Tactical UI requires a document");if(!E())throw new Error("Tactical engine unavailable");preloadWall();ensureStyle();hookEditor();options=opts||{};battle=input?.actors?E().createBattle(input):A()?.createBattle?.(R,input||{});if(!battle)throw new Error("Cannot create tactical battle");battle.config=battle.config||{};battle.config.rollHighToHit=getRollHighToHit();rootEl=doc.createElement("div");rootEl.className="gtv2Overlay";rootEl.setAttribute("data-gens-tactical-v2","1");rootEl.addEventListener("click",onClick);doc.body.appendChild(rootEl);render();if(current()?.side==="enemy")void runAiUntilHero();return battle}
+  function open(input,opts={}){const doc=D();if(!doc)throw new Error("Tactical UI requires a document");if(!E())throw new Error("Tactical engine unavailable");preloadWall();ensureStyle();hookEditor();options=opts||{};battle=input?.actors?E().createBattle(input):A()?.createBattle?.(R,input||{});if(!battle)throw new Error("Cannot create tactical battle");battle.config=battle.config||{};battle.config.rollHighToHit=getRollHighToHit();rootEl=doc.createElement("div");rootEl.className="gtv2Overlay";rootEl.setAttribute("data-gens-tactical-v2","1");rootEl.addEventListener("click",onClick);doc.body.appendChild(rootEl);render();
+    if(syncTerrainFromDungeon())render();
+    // A single frame later, respect the existing Dungeon terrain painter.
+    // This repairs a transient entrance-time style without a second observer.
+    const openedRoot=rootEl,openedBattle=battle;
+    if(typeof R.requestAnimationFrame==="function")R.requestAnimationFrame(()=>{
+      if(rootEl===openedRoot&&battle===openedBattle&&syncTerrainFromDungeon())render();
+    });
+    if(current()?.side==="enemy")void runAiUntilHero();return battle}
   function openCurrentEncounter(opts={}){return open(opts,opts)}
   function getBattle(){return battle}
 

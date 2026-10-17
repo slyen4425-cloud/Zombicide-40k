@@ -16,6 +16,7 @@
   const DETECTION_RADIUS=1;
   const STYLE_ID="gensRpgTacticalPolish1678108Style";
   let installed=false,lastDetectionStamp="",lastDetectionAt=0,changeHandler=null,clickHandler=null;
+  let tacticalReadyListener=null,afterRenderUi=null,afterRenderCallback=null,unsubscribeAfterRender=null;
   const retryTimers=new Set();
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
@@ -241,17 +242,40 @@
     D.addEventListener?.("change",changeHandler);D.addEventListener?.("click",clickHandler,true);return true;
   }
   function hookUiRender(rt=R){
-    const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg108Polish)return true;
+    const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;
+    // Use the Tactical-owned render hook: its UI is loaded lazily on first combat.
+    // Re-registering the SAME callback is idempotent (Set), and repairs the hook
+    // when Tactical.dispose() cleared its callbacks between encounters.
+    if(typeof U.onAfterRender==="function"){
+      if(afterRenderUi!==U){
+        try{unsubscribeAfterRender?.()}catch(e){}
+        afterRenderUi=U;
+        afterRenderCallback=()=>{try{enhanceActions(rt)}catch(e){}};
+      }
+      unsubscribeAfterRender=U.onAfterRender(afterRenderCallback);
+      return true;
+    }
+    // Legacy UI compatibility only when the owner's public hook is unavailable.
+    if(old.__gensRpg108Polish)return true;
     const wrapped=function(){const out=old.apply(this,arguments);try{enhanceActions(rt)}catch(e){}return out};wrapped.__gensRpg108Polish=true;wrapped.__original=old;U.render=wrapped;return true;
   }
+  function bindTacticalReady(rt=R){
+    if(tacticalReadyListener||typeof rt?.addEventListener!=="function")return;
+    tacticalReadyListener=()=>{hookUiRender(rt);enhanceActions(rt)};
+    rt.addEventListener("gensrpg:tactical-combat-ready",tacticalReadyListener);
+  }
   function install(rt=R){
-    ensureStyle(rt);bindControls(rt);hookUiRender(rt);enhanceActions(rt);
+    ensureStyle(rt);bindControls(rt);bindTacticalReady(rt);hookUiRender(rt);enhanceActions(rt);
     try{rt.GENS_RPG_TACTICAL_POLISH_VERSION=APP_VERSION}catch(e){}
     installed=true;return true;
   }
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function"){for(const ms of [80,220,600,1200,2500]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}}return true}
   function dispose(rt=R){
     for(const id of retryTimers)try{clearTimeout(id)}catch(e){}retryTimers.clear();
+    if(tacticalReadyListener)rt?.removeEventListener?.("gensrpg:tactical-combat-ready",tacticalReadyListener);
+    tacticalReadyListener=null;
+    try{unsubscribeAfterRender?.()}catch(e){}
+    unsubscribeAfterRender=null;afterRenderUi=null;afterRenderCallback=null;
     const D=doc(rt),U=ui(rt);if(D){if(changeHandler)D.removeEventListener?.("change",changeHandler);if(clickHandler)D.removeEventListener?.("click",clickHandler,true);try{delete D.__gensRpg108Controls}catch(e){D.__gensRpg108Controls=false}}
     const cur=U?.render;if(cur?.__gensRpg108Polish&&typeof cur.__original==="function")U.render=cur.__original;
     D?.getElementById?.(STYLE_ID)?.remove?.();changeHandler=null;clickHandler=null;installed=false;return true;

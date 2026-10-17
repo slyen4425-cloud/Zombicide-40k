@@ -134,10 +134,6 @@
     try{
       const merged={...options,heroIds:e.heroIds,enemyIds:e.enemyIds,onFinish:({battle,summary}={})=>finishExploration(rt,battle,summary,options.reason)};
       const battle=rt.GensRpgTacticalCombatV2Ui.openCurrentEncounter(merged);
-      /* Tactical's private UI is now mounted. Rebind the existing V108
-         attack/weapon/item owner at this deterministic lifecycle seam.
-         Idempotent; no new observer, retry, timer or gameplay authority. */
-      try{rt.GensRpgTacticalPolish1678108?.install?.(rt)}catch(error){try{rt.console?.error?.("Tactical V108 action panel handoff",error)}catch(_){}}
       retireLegacyCombatLayer(rt,options);
       try{rt.document?.body?.style&&(rt.document.body.style.overflow="hidden")}catch(_){ }
       rt.__gensTacticalV2LastRoute={entry:options.entry||"openCurrent",reason:options.reason||"",at:Date.now(),enemyIds:e.enemyIds,heroIds:e.heroIds};

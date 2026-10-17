@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'work/gensrpg-phase12-dungeon-combat-preview-regression-diagnostic-2026-10-17'
+      - 'work/gensrpg-phase12-dungeon-tactical-v108-panel-rebind-fix-2026-10-17'
 permissions:
   contents: read
 jobs:

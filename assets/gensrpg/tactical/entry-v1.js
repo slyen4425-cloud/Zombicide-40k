@@ -28,14 +28,6 @@ function finishIfReady(){
 }
 function compatibilityReady(ok=true){
   compatibilityDone=true;compatibilityOk=ok!==false;
-  // V108 peut avoir installé son listener avant le chargement privé, différé,
-  // de l'UI Tactical. Raccorder le même propriétaire au rendu effectif avant
-  // de libérer le lancement : aucune deuxième autorité ni nouveau timer.
-  if(compatibilityOk&&typeof R.GensRpgTacticalCombatV2Ui?.render==="function"&&
-     typeof R.GensRpgTacticalPolish1678108?.install==="function"){
-    try{R.GensRpgTacticalPolish1678108.install(R)}
-    catch(e){console.error("GenSrpG Tactical V108 late UI install",e);compatibilityOk=false}
-  }
   return finishIfReady();
 }
 function startCompatibility(){

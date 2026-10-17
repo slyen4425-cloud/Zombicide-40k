@@ -133,6 +133,10 @@
     opening=true;
     try{
       const merged={...options,heroIds:e.heroIds,enemyIds:e.enemyIds,onFinish:({battle,summary}={})=>finishExploration(rt,battle,summary,options.reason)};
+      // Le moteur/UI sont chargés à la demande. V108 doit enregistrer son
+      // onAfterRender AVANT le premier render privé de l'overlay Tactical.
+      try{rt.GensRpgTacticalPolish1678108?.install?.(rt)}
+      catch(err){try{rt.console?.error?.("Tactical V108 render owner install",err)}catch(e){}}
       const battle=rt.GensRpgTacticalCombatV2Ui.openCurrentEncounter(merged);
       retireLegacyCombatLayer(rt,options);
       try{rt.document?.body?.style&&(rt.document.body.style.overflow="hidden")}catch(_){ }

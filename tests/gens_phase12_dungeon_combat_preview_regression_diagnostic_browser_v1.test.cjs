@@ -149,26 +149,20 @@ async function scenario(browser,port,kind){
   result.inRange=await combatSnapshot();
   if(!result.inRange.preview?.ok)throw new Error('Approach did not reach actual attack range: '+JSON.stringify(result.inRange));
 
-  // Characterization only: do not change runtime code. The V108 panel may
-  // have missed lazy Tactical UI load. Record its initial state before a
-  // deliberate one-time explicit install to prove or reject the hypothesis.
-  result.beforeManualInstall=await page.evaluate(()=>({
+  // Régression utilisateur : le propriétaire V108 doit posséder le rendu
+  // APRES chargement lazy de toute la chaîne Tactical, SANS intervention test.
+  result.nativeHandoff=await page.evaluate(()=>({
     uiRenderExists:typeof window.GensRpgTacticalCombatV2Ui?.render==='function',
     uiRenderWrapped:!!window.GensRpgTacticalCombatV2Ui?.render?.__gensRpg108Polish,
     polishAvailable:typeof window.GensRpgTacticalPolish1678108?.install==='function',
-    polishStatus:window.GensRpgTacticalPolish1678108?.status?.()||null
+    panelCount:document.querySelectorAll('.gtv2Overlay [data-v108-panel]').length
   }));
-  if(!result.inRange.panel){
-    result.diagnosticManualInstall=await page.evaluate(()=>window.GensRpgTacticalPolish1678108?.install?.());
-    result.afterManualInstall=await combatSnapshot();
-    result.afterManualInstallStatus=await page.evaluate(()=>({
-      uiRenderWrapped:!!window.GensRpgTacticalCombatV2Ui?.render?.__gensRpg108Polish,
-      polishStatus:window.GensRpgTacticalPolish1678108?.status?.()||null
-    }));
-    result.steps.push('test-only-late-polish-install');
-  }
-
-
+  assert.equal(result.nativeHandoff.uiRenderWrapped,true,
+    'V108 must be bound to final Tactical UI render without test-only reinstall');
+  assert.equal(result.nativeHandoff.panelCount,1,
+    'Attack/weapon/item owner must render automatically after lazy activation');
+  result.steps.push('native-final-ready-handoff');
+  
   // L'ancienne attaque est volontairement CACHEE. La vraie UI du joueur est
   // [data-v108-attack-go] (menu attaque/arme/objet), qui lui délègue.
   const selected=page.locator('.gtv2Overlay [data-v108-panel] [data-v108-attack]');
@@ -232,10 +226,17 @@ async function scenario(browser,port,kind){
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  const b=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
  try{const local=await scenario(b,server.address().port,'local');const external=await scenario(b,server.address().port,'external-emulated');
-   assert.ok(local.steps.includes('hero-animated-dice-visible'),'LOCAL preview must show dice for a VALID attack');
-   assert.ok(external.steps.includes('hero-animated-dice-visible'),'EXTERNAL preview must show dice for a VALID attack');
-   assert.ok(local.steps.includes('visible-player-action-available'),'LOCAL must provide real attack/weapon/item panel');
-   assert.ok(external.steps.includes('visible-player-action-available'),'EXTERNAL must provide real attack/weapon/item panel');
+   for(const result of [local,external]){
+     assert.equal(result.exception,undefined,result.kind+' must complete without exception');
+     assert.ok(result.steps.includes('native-final-ready-handoff'),result.kind+' must bind V108 without manual work');
+     assert.ok(result.steps.includes('visible-player-action-available'),result.kind+' must expose the real attack/weapon/item panel');
+     assert.ok(result.steps.includes('legitimate-approach'),result.kind+' must retain the intended approach rule');
+     assert.ok(result.steps.includes('hero-animated-dice-visible'),result.kind+' hero dice must visibly animate');
+     assert.ok(result.steps.includes('hero-dice-confirmed'),result.kind+' player must explicitly continue after hero dice');
+     assert.ok(result.steps.includes('enemy-dice-visible'),result.kind+' enemy dice must visibly animate');
+     assert.ok(result.steps.includes('enemy-dice-confirmed'),result.kind+' player must explicitly continue after enemy dice');
+     assert.ok(!result.steps.includes('test-only-late-polish-install'),'test-only manual repair must not exist');
+   }
    assert.ok(external.boot?.aux>=20,'external diagnostic must observe late auxiliary module loading');
    console.log('[dungeon-combat-preview-comparison] '+JSON.stringify({localSteps:local.steps,externalSteps:external.steps,localErrors:local.errors,externalErrors:external.errors,externalTiming:external.boot?.auxStates?.slice(0,5)}));
  }finally{await b.close();await new Promise(resolve=>server.close(resolve))}

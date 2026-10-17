@@ -252,7 +252,11 @@
     if(core){restoreOwned(core,"show","__gtv271WallRender");restoreOwned(core,"render","__gtv271WallRender")}
     for(const name of ["saveRpgUniverseStats","openRpgUniverseEditor","renderRpgUniverseEditor"])restoreOwned(R,name,"__gtv271RuleHook");
     afterRenderHooks.clear();
-    doc?.getElementById?.(STYLE_ID)?.remove?.();doc?.getElementById?.("gtv271GeneralCombatRule")?.remove?.();
+    // Release only styles owned by this UI. STYLE_ID is not defined here;
+    // referencing it used to abort the real Tactical close/dispose path.
+    doc?.getElementById?.("gensTacticalV2Style")?.remove?.();
+    doc?.getElementById?.("gtv21147DiceStyle")?.remove?.();
+    doc?.getElementById?.("gtv271GeneralCombatRule")?.remove?.();
     mapPatched=false;editorHooked=false;
     return true;
   }

@@ -51,7 +51,7 @@ function install(){
   if(typeof old!=="function"){if(retries++<40&&typeof setTimeout==="function")setTimeout(install,100);return false}
   if(old.__der167879)return true;
   const wrapped=function(evt){const close=isCloseSpawnEvent(evt),before=close?enemyIds():null;const out=old.apply(this,arguments);if(close)try{placeNewEventEnemies(before)}catch(e){console.warn("Dungeon event proximity placement",e)}return out};
-  wrapped.__der167879=true;wrapped.__original=old;R.applyDungeonTurnEvent=wrapped;try{R.GENSRPG_VERSION=APP_VERSION}catch(e){}return true;
+  wrapped.__der167879=true;wrapped.__original=old;R.applyDungeonTurnEvent=wrapped;return true;
 }
 R.DungeonEventRuntimeFix167878={VERSION,APP_VERSION,isAmbush,isReinforcement,isCloseSpawnEvent,mapSize,neighbours,heroCells,candidateCells,placeNewEventEnemies,placeNewAmbushEnemies,install};
 install();if(typeof setTimeout==="function")for(const ms of [50,250,1000])setTimeout(install,ms);

@@ -181,13 +181,12 @@ async function startDungeon(page){
     await page.waitForFunction(()=>{
       const cells=document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell');
       const wall=cells[5],theme=String(document.querySelector('#dc047RoomBoard .dc047Grid')?.dataset.floorTheme||'stone');
-      // The native 0.80 renderer initially paints the base floor (stone).
-      // For a stone wall the 0.79 cover owner must finish with cave/water,
-      // not merely set a class while a stale stone image is still visible.
-      const permitted={stone:['cave','water'],cave:['cave','water'],forest:['forest','water'],water:['cave','water'],ice:['ice','water'],lava:['cave','lava']};
+      // Core 0.79 must now distinguish an actual generated wall from a
+      // cover. The wall matches the Builder's canonical JPEG; other cells
+      // still use their original environment-specific floor/cover assets.
       const visual=String(wall?getComputedStyle(wall).backgroundImage:'');
-      return cells.length===25&&wall?.classList.contains('dc079TerrainCover')&&
-        wall?.dataset.coverTheme===theme&&(permitted[theme]||permitted.stone).some(t=>visual.includes('/dng_floor_'+t+'_'));
+      return cells.length===25&&wall?.classList.contains('dc079WallBlock')&&
+        !wall?.classList.contains('dc079TerrainCover')&&visual.includes('/dng_wall_block.jpg');
     },null,{timeout:10000});
 
     const nativeAtEngagement=await page.evaluate(()=>[...document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell')].map(el=>getComputedStyle(el).backgroundImage));
@@ -231,7 +230,7 @@ async function startDungeon(page){
     assert.equal(opened.sceneSnapshot.room,1,'original Dungeon room identity');
     assert.equal(opened.sceneSnapshot.native.length,25,'real Dungeon source cells exist');
     assert.equal(opened.sceneSnapshot.tactical.length,25,'same tactical grid');
-    if(!/dng_floor_.*\.png/.test(opened.sceneSnapshot.native[5])){
+    if(!/dng_wall_block\.jpg/.test(opened.sceneSnapshot.native[5])){
       const sourceTrace=await page.evaluate(()=>{
         const cell=document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell')[5],
           rules=[],match=(r)=>{try{return cell.matches(r.selectorText)}catch(e){return false}};
@@ -244,7 +243,7 @@ async function startDungeon(page){
       });
       console.log('[Dungeon-native-wall-trace] '+JSON.stringify(sourceTrace));
     }
-    assert.match(opened.sceneSnapshot.native[5],/dng_floor_.*\.png/,'native wall cover keeps existing 0.79 theme, not old wall PNG');
+    assert.match(opened.sceneSnapshot.native[5],/dng_wall_block\.jpg/,'generated Dungeon wall must use the same validated JPEG as authored Builder');
     assert.equal(opened.sceneSnapshot.wallTiles,0,'Tactical must not inject a competing wall overlay into Dungeon');
     if(JSON.stringify(opened.sceneSnapshot.tactical)!==JSON.stringify(opened.sceneSnapshot.native)){
       const debugScene=await page.evaluate(()=>{
@@ -326,13 +325,12 @@ async function startDungeon(page){
     await page.waitForFunction(()=>{
       const cells=document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell');
       const wall=cells[5],theme=String(document.querySelector('#dc047RoomBoard .dc047Grid')?.dataset.floorTheme||'stone');
-      // The native 0.80 renderer initially paints the base floor (stone).
-      // For a stone wall the 0.79 cover owner must finish with cave/water,
-      // not merely set a class while a stale stone image is still visible.
-      const permitted={stone:['cave','water'],cave:['cave','water'],forest:['forest','water'],water:['cave','water'],ice:['ice','water'],lava:['cave','lava']};
+      // Core 0.79 must now distinguish an actual generated wall from a
+      // cover. The wall matches the Builder's canonical JPEG; other cells
+      // still use their original environment-specific floor/cover assets.
       const visual=String(wall?getComputedStyle(wall).backgroundImage:'');
-      return cells.length===25&&wall?.classList.contains('dc079TerrainCover')&&
-        wall?.dataset.coverTheme===theme&&(permitted[theme]||permitted.stone).some(t=>visual.includes('/dng_floor_'+t+'_'));
+      return cells.length===25&&wall?.classList.contains('dc079WallBlock')&&
+        !wall?.classList.contains('dc079TerrainCover')&&visual.includes('/dng_wall_block.jpg');
     },null,{timeout:10000});
 
     const returned=await page.evaluate(()=>({

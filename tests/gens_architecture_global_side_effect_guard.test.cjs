@@ -77,7 +77,7 @@ const cloudSyncR05=fs.readFileSync(path.join(__dirname,'..',CLOUD_SYNC_R05));
 const cloudSyncR05Blob=crypto.createHash('sha1').update(Buffer.from('blob '+cloudSyncR05.length+'\0')).update(cloudSyncR05).digest('hex');
 assert.equal(cloudSyncR05.length,53746,'R05 original online sync and local-backup JS size');
 assert.equal(cloudSyncR05Blob,'8d7f8179676b096a53816cd1ca2530c120e3cf18','R05 must preserve original inline JS byte-identically');
-assert.equal((cloudSyncR05.toString().match(/(?:window\\.|R\\.)?location\\.reload\\s*\\(/g)||[]).length,1,'one historical local-backup import reload');
+assert.equal((cloudSyncR05.toString().match(/(?:window\.|R\.)?location\.reload\s*\(/g)||[]).length,1,'one historical local-backup import reload');
 const explicitRuleExceptions=new Map([
   [CLOUD_SYNC_R05,new Set(['direct page reload'])],
   [RUNTIME_BOOTSTRAP,new Set(['hidden script injection'])],

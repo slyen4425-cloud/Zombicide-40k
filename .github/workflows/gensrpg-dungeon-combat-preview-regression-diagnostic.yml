@@ -17,7 +17,7 @@ jobs:
       - name: Guard exact R05 runtime
         run: |
           test "$(git hash-object index.html)" = '485de2e6a08ffd89e4f1fb9410e40c938774d62f'
-          test "$(git hash-object preview.html)" = 'b01cd01fcd76908fe8d97189b40b8215ad721faf'
+          test "$(git hash-object preview.html)" = '120ed05a3d9f5ae5e111626d825fcd3b6b37c924'
       - name: Install mobile Chromium browser
         run: |
           npm install --no-save playwright@1.55.0

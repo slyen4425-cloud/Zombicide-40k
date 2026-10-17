@@ -39,7 +39,8 @@ def reverse(index,js):
  pin(recovered,R04_LEN,R04_SHA)
  return recovered
 def verify():
- index=INDEX.read_bytes();js=ASSET.read_bytes()
+ from gensrpg_phase12_generated_wall_history import historical_r05_view
+ index=historical_r05_view(INDEX.read_bytes());js=ASSET.read_bytes()
  before=reverse(index,js)
  assert transform(before)==(index,js)
  assert index.index(b"const Z40K_GENERIC_SHEET_BG")<index.index(TAG)<index.index(b'const Z40K_APP_VERSION')

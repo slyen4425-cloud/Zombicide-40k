@@ -149,25 +149,19 @@ async function scenario(browser,port,kind){
   result.inRange=await combatSnapshot();
   if(!result.inRange.preview?.ok)throw new Error('Approach did not reach actual attack range: '+JSON.stringify(result.inRange));
 
-  // Characterization only: do not change runtime code. The V108 panel may
-  // have missed lazy Tactical UI load. Record its initial state before a
-  // deliberate one-time explicit install to prove or reject the hypothesis.
-  result.beforeManualInstall=await page.evaluate(()=>({
+  // STRICT regression: no test-only repair and no manual V108 install permitted.
+  // The Tactical lifecycle must hand off the real render owner during activation.
+  result.activation=await page.evaluate(()=>({
     uiRenderExists:typeof window.GensRpgTacticalCombatV2Ui?.render==='function',
     uiRenderWrapped:!!window.GensRpgTacticalCombatV2Ui?.render?.__gensRpg108Polish,
-    polishAvailable:typeof window.GensRpgTacticalPolish1678108?.install==='function',
-    polishStatus:window.GensRpgTacticalPolish1678108?.status?.()||null
+    polishAvailable:typeof window.GensRpgTacticalPolish1678108?.install==='function'
   }));
-  if(!result.inRange.panel){
-    result.diagnosticManualInstall=await page.evaluate(()=>window.GensRpgTacticalPolish1678108?.install?.());
-    result.afterManualInstall=await combatSnapshot();
-    result.afterManualInstallStatus=await page.evaluate(()=>({
-      uiRenderWrapped:!!window.GensRpgTacticalCombatV2Ui?.render?.__gensRpg108Polish,
-      polishStatus:window.GensRpgTacticalPolish1678108?.status?.()||null
-    }));
-    result.steps.push('test-only-late-polish-install');
-  }
-
+  assert.equal(result.activation.uiRenderExists,true,'Tactical UI must load');
+  assert.equal(result.activation.uiRenderWrapped,true,'V108 owner must be reattached BEFORE the first action');
+  assert.equal(result.inRange.panel?.display,'grid','the real attack/weapon/item panel must persist after approach');
+  assert.equal(result.inRange.visibleAttack?.display,'block','the real attack command must be visible');
+  assert.equal(result.inRange.legacyAttack?.display,'none','the hidden legacy button is not a user control');
+  result.steps.push('lifecycle-owner-attached-without-manual-install');
 
   // L'ancienne attaque est volontairement CACHEE. La vraie UI du joueur est
   // [data-v108-attack-go] (menu attaque/arme/objet), qui lui délègue.

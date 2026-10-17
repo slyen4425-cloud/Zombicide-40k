@@ -1,3 +1,21 @@
+# GenSrpG — CURRENT_WORK (17 octobre 2026)
+
+**Phase 12 EN PAUSE : correction ciblée Dungeon Tactical V108 EN COURS / NON GREEN.** R06 interdit jusqu'au test utilisateur. Production `main` intacte.
+
+## Chantier actif : V108 action panel — raccord au chargement tardif Tactical
+
+- **Base §25** : `7ac97a36df9f31f2cc3f7640e857ffc59963574c` (branche du diagnostic Dungeon, seuls tests/docs, runtime R05 intact).
+- **Checkpoint START §25** : `checkpoint/gensrpg-start-phase12-dungeon-tactical-v108-activation-lifecycle-fix-2026-10-17` sur exactement `7ac97a36df9f31f2cc3f7640e857ffc59963574c`.
+- **Branche unique corrective** : `work/gensrpg-phase12-dungeon-tactical-v108-activation-lifecycle-fix-2026-10-17`. Diagnostic parent à ne plus modifier ; R05 checkpoint GREEN inchangé.
+- **Source §26** : `c8.zip` = `index.html` R05, **2 781 436 octets**, blob `485de2e6a08ffd89e4f1fb9410e40c938774d62f`. **Aucun changement du gros HTML**.
+- **Preuve** : [diagnostic navigateur 39014482141](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39014482141) : sur un vrai trajet Dungeon, le moteur dispose d'une UI Tactical V2 et le module V108 signale installed mais `UI.render.__gensRpg108Polish` est absent ; un `polish.install()` manuel uniquement dans le test restaure menus Attaque/Arme/Objet et animations de dés, avec une pause `Continuer` héros/ennemi.
+- **Cause ciblée** : V108 initialise avant que l'UI Tactical lazy-load existe, et ses retries finissent trop tôt. La prévisualisation externe accentue les différences de timing mais le bug de raccord se produit aussi en local.
+- **Changement limité** : après disponibilité de toutes les couches dans `assets/gensrpg/tactical/entry-v1.js`, avant de rappeler la demande de combat, réutiliser l'API existante `GensRpgTacticalPolish1678108.install()` uniquement si `UI.render` n'est pas déjà wrappé. Aucune nouvelle autorité, aucun observer, timer ou modification des dés/mouvements/combat.
+- **Tests stricts** : vrai scénario mobile local et preview externe, approche normale, UI V108 sans installation test-only, attaque à portée, jets bloquants, tours ennemis sans chaîne, triple CI Architecture+Chromium, Firefox, Tactical, même SHA, puis checkpoint GREEN ; pas de test Android revendiqué.
+- **Limites** : détection des monstres reste un problème séparé, comme les éventuelles frappes en chaîne du retour utilisateur si elles persistent après le raccord. Les 32 assets Survie, les laboratoires et `main` sont protégés.
+
+## Historique R05 et diagnostic initial
+
 # GenSrpG — CURRENT_WORK officiel (17 octobre 2026)
 
 **PHASE 12 EN PAUSE / TEST UTILISATEUR BLOQUANT : Dungeon combat non validé sur prévisualisation externe.** D1–D9/R01–R05 restent GREEN **technique CI**, mais leur validation manuelle est insuffisante ; pas de R06 ni de publication sur `main`.

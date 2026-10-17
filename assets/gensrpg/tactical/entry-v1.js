@@ -22,6 +22,17 @@ function flushReady(ok){
 function finishIfReady(){
   if(!activating||!baseReady||!bridgeInstalled||!compatibilityDone)return false;
   const ok=compatibilityOk!==false;
+  // Tactical UI is lazy-loaded. V108 can install while the UI is still absent,
+  // so its initial timed retries may run out before the first Dungeon encounter.
+  // Reconnect the EXISTING V108 UI owner once, after all compatibility layers
+  // and BEFORE notifying the waiting combat-launch callback. No new listener,
+  // timer, UI owner or combat rule is introduced here.
+  if(ok){
+    try{
+      const U=R.GensRpgTacticalCombatV2Ui,polish=R.GensRpgTacticalPolish1678108;
+      if(typeof U?.render==="function"&&!U.render.__gensRpg108Polish&&typeof polish?.install==="function")polish.install(R);
+    }catch(e){console.error("GenSrpG Tactical V1 V108 action owner handoff",e)}
+  }
   active=ok;activating=false;
   flushReady(ok);
   return ok;

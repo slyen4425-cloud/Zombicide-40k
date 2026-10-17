@@ -102,8 +102,12 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,105,
-  'R03 must add exactly one production Shell Hub owner, leaving Phase 3 entries inert');
+assert.equal(Object.keys(ownerManifest.files||{}).length,106,
+  'R04 adds one reachable Builders equipment owner; planned Phase 3 entry contracts remain inert');
+assert.equal(ownerManifest.files?.['assets/gensrpg/builders/equipment-library-editor-v1.js']?.domain,'builders',
+  'R04 multi-mode equipment library/editor must belong to Builders');
+assert.equal(composition.index.split('assets/gensrpg/builders/equipment-library-editor-v1.js').length-1,1,
+  'R04 Builder equipment owner must load once from index, not its inert Phase 3 entry');
 assert.equal(ownerManifest.files?.['assets/gensrpg/shell/legacy-hub-family-ui-v1.js']?.domain,'shell',
   'R03 family cards must belong only to Shell');
 assert.equal(composition.index.split('assets/gensrpg/shell/legacy-hub-family-ui-v1.js').length-1,1,

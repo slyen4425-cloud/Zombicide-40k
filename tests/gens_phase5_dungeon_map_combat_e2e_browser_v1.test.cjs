@@ -214,6 +214,19 @@ async function startDungeon(page){
     assert.equal(opened.sceneSnapshot.room,1,'original Dungeon room identity');
     assert.equal(opened.sceneSnapshot.native.length,25,'real Dungeon source cells exist');
     assert.equal(opened.sceneSnapshot.tactical.length,25,'same tactical grid');
+    if(!/dng_floor_.*\.png/.test(opened.sceneSnapshot.native[5])){
+      const sourceTrace=await page.evaluate(()=>{
+        const cell=document.querySelectorAll('#dc047RoomBoard .dc047Grid > .dc047Cell')[5],
+          rules=[],match=(r)=>{try{return cell.matches(r.selectorText)}catch(e){return false}};
+        for(const sheet of [...document.styleSheets]){let rows=[];try{rows=[...sheet.cssRules]}catch(e){continue}
+          for(const r of rows)if(r.selectorText&&match(r)&&(r.style?.backgroundImage||r.style?.background||r.style?.getPropertyValue?.('background-image'))){
+            rules.push({selector:r.selectorText,background:r.style.backgroundImage||r.style.background,important:r.style.getPropertyPriority('background-image'),href:sheet.href||'',owner:sheet.ownerNode?.id||''});
+          }
+        }
+        return {class:cell.className,inline:cell.getAttribute('style'),computed:getComputedStyle(cell).backgroundImage,body:document.body?.className||'',has079:typeof window.applyDungeonMapPolish079,has877:typeof window.DungeonSourceRenderStability167877?.install,renderers:[window.DungeonCore01?.render?.__dsr167877,window.DungeonCore01?.render?.__gtv271WallRender],rules:rules.slice(-18)};
+      });
+      console.log('[Dungeon-native-wall-trace] '+JSON.stringify(sourceTrace));
+    }
     assert.match(opened.sceneSnapshot.native[5],/dng_floor_.*\.png/,'native wall cover keeps existing 0.79 theme, not old wall PNG');
     assert.equal(opened.sceneSnapshot.wallTiles,0,'Tactical must not inject a competing wall overlay into Dungeon');
     assert.deepEqual(opened.sceneSnapshot.tactical,opened.sceneSnapshot.native,'Tactical must borrow the exact visible background art of every original Dungeon cell');

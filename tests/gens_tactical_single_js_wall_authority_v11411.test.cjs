@@ -19,7 +19,10 @@ const historical=[
 ];
 
 const canonical=block(ui,'function installGlobalPolish(){','const api=','canonical Tactical UI installGlobalPolish');
-for(const required of ['preloadWall()','patchDungeonMapHtml()','hookDungeonRender()','paintLiveWalls()'])assert.ok(canonical.includes(required),`canonical wall pipeline missing ${required}`);
+for(const required of ['preloadWall()','paintLiveWalls()'])assert.ok(canonical.includes(required),`canonical Tactical wall fallback missing ${required}`);
+assert.doesNotMatch(canonical,/patchDungeonMapHtml\(\);hookDungeonRender\(\)/,'Tactical must not install its own Dungeon map painter');
+const live=block(ui,'function paintLiveWalls(){','function hookDungeonRender','Tactical wall-only painter');
+assert.doesNotMatch(live,/querySelectorAll.*dc047RoomBoard/,'Tactical must not repaint Dungeon native walls');
 
 const activeBlocks=[];
 activeBlocks.push(['V108 install',block(historical[0][1],'function install(rt=R){','function installWithRetries','V108 install')]);
@@ -36,4 +39,4 @@ for(const [label,src] of activeBlocks){
 }
 
 for(const [name,src] of historical)assert.match(src,/dng_wall_block\.jpg/,`${name} historical source should remain traceable during CSS cleanup`);
-console.log('GenSrpG V114.11: Tactical UI is the only active JavaScript wall-rendering authority; historical CSS debt tracked separately');
+console.log('GenSrpG V114.11: Tactical UI owns Tactical fallback; Dungeon 0.79/167877 owns native room; historical CSS debt tracked separately');

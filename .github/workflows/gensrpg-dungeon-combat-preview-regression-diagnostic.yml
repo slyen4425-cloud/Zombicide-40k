@@ -26,3 +26,5 @@ jobs:
         run: node tests/gens_phase12_dungeon_combat_preview_regression_diagnostic_browser_v1.test.cjs
       - name: Exercise real Dungeon ambush event from the running game (local and external preview)
         run: node tests/gens_phase12_dungeon_event_ambush_live_browser_v1.test.cjs
+      - name: Assert real Dungeon scene continuity before during and after Tactical combat
+        run: node tests/gens_phase5_dungeon_map_combat_e2e_browser_v1.test.cjs

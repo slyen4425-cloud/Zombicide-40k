@@ -1,0 +1,37 @@
+name: GenSrpG generated Dungeon wall material regression
+on:
+  push:
+    branches:
+      - 'work/gensrpg-dungeon-generated-wall-texture-2026-10-17'
+permissions:
+  contents: read
+jobs:
+  generated-wall-canonical-material:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify exact scoped index edit
+        run: |
+          test "$(git hash-object index.html)" = 'b33542b033c5afa8a1643d99c56c21dbd4be266c'
+          test "$(git hash-object preview.html)" = '120ed05a3d9f5ae5e111626d825fcd3b6b37c924'
+      - name: Lock generated wall canonical owner and authored Builder invariants
+        run: |
+          node tests/gens_generated_dungeon_wall_core079_owner_v1.test.cjs
+          node tests/dungeon_wall_visual_v167866.test.cjs
+          node tests/dungeon_authored_cache_visual_source_owner_v167877.test.cjs
+          node tests/dungeon_source_render_stability_v167877.test.cjs
+          node tests/gens_tactical_single_detection_authority_v11411.test.cjs
+      - name: Install mobile Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Verify real generated Dungeon material through Tactical and back
+        run: node tests/gens_phase5_dungeon_map_combat_e2e_browser_v1.test.cjs
+      - name: Verify real Dungeon multiround combat unchanged
+        run: node tests/gens_phase12_dungeon_combat_preview_regression_diagnostic_browser_v1.test.cjs
+      - name: Verify real ambush and V113 remains functional
+        run: node tests/gens_phase12_dungeon_event_ambush_live_browser_v1.test.cjs

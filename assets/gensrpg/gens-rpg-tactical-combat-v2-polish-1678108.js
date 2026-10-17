@@ -17,6 +17,7 @@
   const STYLE_ID="gensRpgTacticalPolish1678108Style";
   let installed=false,lastDetectionStamp="",lastDetectionAt=0,changeHandler=null,clickHandler=null;
   const retryTimers=new Set();
+  let afterRenderDetach=null,afterRenderOwner=null;
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
@@ -241,7 +242,16 @@
     D.addEventListener?.("change",changeHandler);D.addEventListener?.("click",clickHandler,true);return true;
   }
   function hookUiRender(rt=R){
-    const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg108Polish)return true;
+    const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;
+    /* The private Tactical UI calls its lexical render() for targets/movement/turns.
+       Wrapping its public U.render alone cannot decorate these internal rerenders.
+       Subscribe once to the UI's existing native afterRender lifecycle hook. */
+    if(typeof U.onAfterRender==="function"&&afterRenderOwner!==U){
+      try{afterRenderDetach?.()}catch(e){}
+      afterRenderOwner=U;
+      afterRenderDetach=U.onAfterRender(()=>enhanceActions(rt));
+    }
+    if(old.__gensRpg108Polish)return true;
     const wrapped=function(){const out=old.apply(this,arguments);try{enhanceActions(rt)}catch(e){}return out};wrapped.__gensRpg108Polish=true;wrapped.__original=old;U.render=wrapped;return true;
   }
   function install(rt=R){
@@ -252,6 +262,8 @@
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function"){for(const ms of [80,220,600,1200,2500]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}}return true}
   function dispose(rt=R){
     for(const id of retryTimers)try{clearTimeout(id)}catch(e){}retryTimers.clear();
+    try{afterRenderDetach?.()}catch(e){}
+    afterRenderDetach=null;afterRenderOwner=null;
     const D=doc(rt),U=ui(rt);if(D){if(changeHandler)D.removeEventListener?.("change",changeHandler);if(clickHandler)D.removeEventListener?.("click",clickHandler,true);try{delete D.__gensRpg108Controls}catch(e){D.__gensRpg108Controls=false}}
     const cur=U?.render;if(cur?.__gensRpg108Polish&&typeof cur.__original==="function")U.render=cur.__original;
     D?.getElementById?.(STYLE_ID)?.remove?.();changeHandler=null;clickHandler=null;installed=false;return true;

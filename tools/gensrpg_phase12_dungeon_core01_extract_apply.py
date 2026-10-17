@@ -308,8 +308,17 @@ def verify():
                         expected_after=expected_after.replace(former,current)
             # Production owner manifests legitimately pin the CURRENT index
             # blob. Only historical reconstruction uses old R05 bytes.
-            if path in (PATH_OWNERS,PATH_GLOBALS) and blob(INDEX.read_bytes())=="b33542b033c5afa8a1643d99c56c21dbd4be266c":
-                expected_after="b33542b033c5afa8a1643d99c56c21dbd4be266c"
+            current_blob=blob(INDEX.read_bytes())
+            if path in (PATH_OWNERS,PATH_GLOBALS) and current_blob in (
+                "b33542b033c5afa8a1643d99c56c21dbd4be266c",
+                "12fc91df4ee4c7989a172baa96f9790da6dc57f7",
+            ):
+                expected_after=current_blob
+            if path==PATH_GRAPH and current_blob=="12fc91df4ee4c7989a172baa96f9790da6dc57f7":
+                # R06 adds 18 real Capture source files to the production
+                # graph. These current assertions are NOT historical hashes;
+                # the D1–R05 rollback calculation above remains unchanged.
+                expected_after=expected_after.replace("reachable.size,107,", "reachable.size,125,")
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

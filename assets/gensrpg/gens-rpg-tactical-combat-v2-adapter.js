@@ -245,7 +245,7 @@
       const cells=[...rt.document.querySelectorAll("#dc047RoomBoard .dc047Grid > .dc047Cell")];
       if(cells.length===grid.width*grid.height){
         const tileBackgrounds=cells.map(el=>{
-          const bg=String(el.style?.backgroundImage||rt.getComputedStyle?.(el)?.backgroundImage||"");
+          const bg=String(rt.getComputedStyle?.(el)?.backgroundImage||el.style?.backgroundImage||"");
           return /^url\(/.test(bg)&&!/^url\(["']?data:/i.test(bg)?bg:"";
         });
         if(tileBackgrounds.some(Boolean))grid.sourceMap={...(grid.sourceMap||{}),tileBackgrounds};

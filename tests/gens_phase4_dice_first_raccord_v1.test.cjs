@@ -43,8 +43,18 @@ assert.equal((serviceWorker.match(/\.\/assets\/gensrpg\/core\/dice-v1\.js/g)||[]
 
 assert.equal(gitBlobSha(coreSrc),'1813b6edb1ac69317d158e8cac6eb5c8ac353855',
   'pure Core Dice implementation must remain byte-for-byte unchanged in this raccord');
-assert.equal(gitBlobSha(tactical),'4f05007de537793fed07739ca718f5131faef9eb',
-  'Tactical V114.11 dice/gameplay authority plus session-teardown lifecycle baseline must remain byte-for-byte unchanged');
+// Keep the original byte-exact Dice V114.11 safeguard. Only two known
+// historic DOM wall seams have been retired; reverse them, then compare
+// against the original Git blob. Any other Dice/gameplay drift still fails.
+const currentWallTargets='function wallTargets(rt=R){const D=doc(rt);if(!D)return [];return [...(D.querySelectorAll?.(".gtv2Cell.blocked,#drc100Grid .drc100Cell.wall")||[])]}';
+const legacyWallTargets='function wallTargets(rt=R){const D=doc(rt);if(!D)return [];return [...(D.querySelectorAll?.(".gtv2Cell.blocked,#drc100Grid .drc100Cell.wall,#dc047RoomBoard .dav167870WallCell")||[])]}';
+const currentInstaller='ensureStyle(rt);preloadWallBitmap(rt);patchHitResolver(rt);patchUiOpen(rt);bindMenu(rt);guardCombatStart(rt);decorateCombatUi(rt);';
+const legacyInstaller='ensureStyle(rt);preloadWallBitmap(rt);patchDungeonMapHtml(rt);patchHitResolver(rt);patchUiOpen(rt);bindMenu(rt);guardCombatStart(rt);decorateCombatUi(rt);';
+assert.equal(tactical.split(currentWallTargets).length-1,1,'retired visual wall target must be uniquely identifiable');
+assert.equal(tactical.split(currentInstaller).length-1,1,'retired map painter in Dice installer must be uniquely identifiable');
+assert.equal(gitBlobSha(tactical.replace(currentWallTargets,legacyWallTargets).replace(currentInstaller,legacyInstaller)),
+  '4f05007de537793fed07739ca718f5131faef9eb',
+  'original Tactical Dice/gameplay and teardown code must be identical except the two retired wall seams');
 assert.equal(gitBlobSha(performance),'e8fd9f1049a6597118eb026976bca7548f11b284',
   'mobile dice animation/performance layer must remain byte-for-byte unchanged');
 

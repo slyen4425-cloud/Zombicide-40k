@@ -15,7 +15,7 @@
   const RUNTIME_KEY="gensrpg_dungeon_runtime_v2";
   const DETECTION_RADIUS=1;
   const STYLE_ID="gensRpgTacticalPolish1678108Style";
-  let installed=false,lastDetectionStamp="",lastDetectionAt=0,changeHandler=null,clickHandler=null;
+  let installed=false,lastDetectionStamp="",lastDetectionAt=0,changeHandler=null,clickHandler=null,afterRenderUnsubscribe=null;
   const retryTimers=new Set();
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
@@ -241,7 +241,17 @@
     D.addEventListener?.("change",changeHandler);D.addEventListener?.("click",clickHandler,true);return true;
   }
   function hookUiRender(rt=R){
-    const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg108Polish)return true;
+    const U=ui(rt);
+    // Tactical V2 calls its internal render() directly after movement/target changes.
+    // The existing onAfterRender contract is the sole reliable point after EACH repaint.
+    // Re-register on every Tactical activation because UI.dispose clears its hook Set.
+    if(typeof U?.onAfterRender==="function"){
+      if(afterRenderUnsubscribe){try{afterRenderUnsubscribe()}catch(e){}afterRenderUnsubscribe=null}
+      afterRenderUnsubscribe=U.onAfterRender(()=>enhanceActions(rt));
+      return true;
+    }
+    // Fallback only for older UIs lacking the canonical after-render contract.
+    const old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg108Polish)return true;
     const wrapped=function(){const out=old.apply(this,arguments);try{enhanceActions(rt)}catch(e){}return out};wrapped.__gensRpg108Polish=true;wrapped.__original=old;U.render=wrapped;return true;
   }
   function install(rt=R){
@@ -252,6 +262,7 @@
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function"){for(const ms of [80,220,600,1200,2500]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}}return true}
   function dispose(rt=R){
     for(const id of retryTimers)try{clearTimeout(id)}catch(e){}retryTimers.clear();
+    if(afterRenderUnsubscribe){try{afterRenderUnsubscribe()}catch(e){}afterRenderUnsubscribe=null}
     const D=doc(rt),U=ui(rt);if(D){if(changeHandler)D.removeEventListener?.("change",changeHandler);if(clickHandler)D.removeEventListener?.("click",clickHandler,true);try{delete D.__gensRpg108Controls}catch(e){D.__gensRpg108Controls=false}}
     const cur=U?.render;if(cur?.__gensRpg108Polish&&typeof cur.__original==="function")U.render=cur.__original;
     D?.getElementById?.(STYLE_ID)?.remove?.();changeHandler=null;clickHandler=null;installed=false;return true;

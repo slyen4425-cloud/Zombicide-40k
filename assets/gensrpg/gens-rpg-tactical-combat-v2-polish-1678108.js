@@ -15,7 +15,7 @@
   const RUNTIME_KEY="gensrpg_dungeon_runtime_v2";
   const DETECTION_RADIUS=1;
   const STYLE_ID="gensRpgTacticalPolish1678108Style";
-  let installed=false,lastDetectionStamp="",lastDetectionAt=0,changeHandler=null,clickHandler=null;
+  let installed=false,lastDetectionStamp="",lastDetectionAt=0,changeHandler=null,clickHandler=null,removeAfterRenderHook=null;
   const retryTimers=new Set();
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
@@ -241,7 +241,16 @@
     D.addEventListener?.("change",changeHandler);D.addEventListener?.("click",clickHandler,true);return true;
   }
   function hookUiRender(rt=R){
-    const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg108Polish)return true;
+    const U=ui(rt);
+    // Les rendus internes de Tactical V2 utilisent leur fonction lexicale
+    // render() : envelopper uniquement U.render ne reçoit PAS ces notifications.
+    // Réutiliser le contrat natif (un seul propriétaire, pas d'observer global).
+    if(typeof U?.onAfterRender==="function"){
+      if(removeAfterRenderHook)return true;
+      removeAfterRenderHook=U.onAfterRender(()=>{try{enhanceActions(rt)}catch(e){}});
+      return true;
+    }
+    const old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg108Polish)return true;
     const wrapped=function(){const out=old.apply(this,arguments);try{enhanceActions(rt)}catch(e){}return out};wrapped.__gensRpg108Polish=true;wrapped.__original=old;U.render=wrapped;return true;
   }
   function install(rt=R){
@@ -251,6 +260,7 @@
   }
   function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function"){for(const ms of [80,220,600,1200,2500]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}}return true}
   function dispose(rt=R){
+    if(removeAfterRenderHook)try{removeAfterRenderHook()}catch(e){}removeAfterRenderHook=null;
     for(const id of retryTimers)try{clearTimeout(id)}catch(e){}retryTimers.clear();
     const D=doc(rt),U=ui(rt);if(D){if(changeHandler)D.removeEventListener?.("change",changeHandler);if(clickHandler)D.removeEventListener?.("click",clickHandler,true);try{delete D.__gensRpg108Controls}catch(e){D.__gensRpg108Controls=false}}
     const cur=U?.render;if(cur?.__gensRpg108Polish&&typeof cur.__original==="function")U.render=cur.__original;

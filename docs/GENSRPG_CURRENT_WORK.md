@@ -1,34 +1,18 @@
-# GenSrpG — CURRENT_WORK officiel (16 octobre 2026)
+# GenSrpG — CURRENT_WORK officiel (17 octobre 2026)
 
-**Phase12 : D1–D9 GREEN, R01 GREEN, R02 GREEN, R03 Shell Hub Family UI GREEN (technique/CI). Phase12 globale toujours OUVERTE.** Aucun chantier suivant ouvert. Ne pas reprendre D10/Core203 mécaniquement.
+**Phase 12 : D1–D9, R01, R02, R03 GREEN technique/CI. R04 Builders équipement EN COURS — NON GREEN.** Ne pas fusionner sur `main`.
 
-## Dernier checkpoint GREEN du code
+## R04 : bibliothèque et éditeur d'équipements multi-modes
 
-- **Checkpoint R03 §25** : `checkpoint/gensrpg-phase12-r03-shell-hub-family-ui-extraction-green-2026-10-16`, commit exact `afab707dad385450fdf296f7b2b6b41da376929b` ([source du checkpoint](https://github.com/slyen4425-cloud/Zombicide-40k/blob/afab707dad385450fdf296f7b2b6b41da376929b/index.html)).
-- **Branche R03 retenue** : `work/gensrpg-phase12-r03-shell-hub-family-ui-extraction-2026-10-16` ; un commit documentaire de clôture peut être au-dessus du code GREEN, sans changer les blobs du runtime.
-- **Base du chantier** : `e8700f10aca7d4f3b9c85aa3cd4dc11aae6530ab` ; checkpoint de départ `checkpoint/gensrpg-start-phase12-r03-shell-hub-family-ui-extraction-2026-10-16` sur ce SHA, après R02 code GREEN `b5f923fa0426467827c12696ad9a4a02f24e3b6f`.
-- **Source exacte §26 R03** : ZIP utilisateur `c6.zip` / `index.html(15).txt`, 2 869 485 octets, Git blob `062c4cd37634f504cc75ce3329d6e69e19b5f547`. C'est **R02** ; ne pas réutiliser pour modifier le futur index après R03.
+- **Point de départ §25** : SHA `c311e8b721fcb789c89f2d1035a60f7e3ca3eec2` (dernier commit documentaire R03, blobs runtime identiques au checkpoint code GREEN `afab707dad385450fdf296f7b2b6b41da376929b`). Checkpoint `checkpoint/gensrpg-start-phase12-r04-builders-equipment-library-2026-10-17` créé sur le vrai départ.
+- **Branche de travail unique** : `work/gensrpg-phase12-r04-builders-equipment-library-2026-10-17`.
+- **Source §26 CERTIFIÉE** : `c7.zip` / `index.html(16).txt`, **2 862 906 octets**, blob Git `8faf7af7fced0a1e0724985e85718a0e4a9e673b`, correspond au code R03 GREEN.
+- **Périmètre propriétaire Builders** : bloc contigu `CUSTOM_EQUIPMENT_KEY` → avant `GENS_GAME_CONFIG_KEY` : bibliothèque et éditeur d'équipements pour les différents modes, 26 déclarations de fonctions, chargement/sauvegarde de la bibliothèque et contrôles UI ; équipement Capture traité dans le même éditeur générique. **Hors périmètre** : moteur de capture/combat, sauvegardes cloud et IndexedDB, Core Stats, Dungeon, Survie et PvP.
+- **Contrat de comportement essentiel** : laisser l'appel initial `refreshCustomEquipmentIntoItems();` **à son emplacement original dans le grand script**, après l'initialisation de `ITEMS` et des autres dépendances. Le module externe, à charge synchrone sans `async/defer/module`, ne doit déclarer que fonctions et variables de l'éditeur, sans déplacer l'effet de bord de démarrage.
+- **Transformation testée localement, pas encore GREEN** : 27 860 octets de module prévus pour `assets/gensrpg/builders/equipment-library-editor-v1.js` (blob `27cadba87c766b5293ac3a7fe3ddffb8510adc40`), nouvel index de **2 835 125 octets** (blob `554bf6100aeb0f40bfc098dc90863af7d2d5e439`), gain de 27 781 octets sur index. Rollback vers R03 exact vérifié localement. Aucun gameplay remanié.
+- **Gates** : application GitHub sous SHA+blob §26 verrouillés, parse Node/VM et ordre parser, aucune duplication des 26 fonctions ni suppression de l'appel initial, actualiser pré-cache PWA/manifeste de propriétaires, historique R04→R03→R02→R01, tests de la bibliothèque/éditeur multi-mode et des quatre modes, CI Architecture + Firefox + Tactical SUCCESS **sur le même commit**, checkpoint final seulement après preuves.
+- **Restrictions** : pas de publication `main` (gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`), pas de modification des laboratoires combat/exploration, pas de suppression des 32 visuels Survie.
+- **Référence pour reprise** : dernier checkpoint GREEN R03 `checkpoint/gensrpg-phase12-r03-shell-hub-family-ui-extraction-green-2026-10-16`, et `docs/GENSRPG_PHASE12_R03_SHELL_HUB_FAMILY_UI_2026-10-16.md`. Phase 12 globale reste ouverte.
 
-## R03 : fonctions Shell Hub déplacées — aucune refonte métier
-
-- Propriétaire : Shell / présentation Hub. Six fonctions transférées sans réécriture : `renderGensRpgUniverseCards`, `renderGensSurvivalUniverseCards`, `renderGensFamilyGamesIfVisible`, `openGensFamily`, `gensFamilyForProfileId`, `renderGensGameHomeLight`.
-- Destination : `assets/gensrpg/shell/legacy-hub-family-ui-v1.js`, **6 651 octets**, Git blob `e45f3b4e419a10b030c47bc921bded1ec0dc723b` ; script classique synchrone au même endroit parser, sans propriétaire global supplémentaire.
-- **Nouvel index physique** : **2 862 906 octets**, Git blob `8faf7af7fced0a1e0724985e85718a0e4a9e673b` ; gain net **6 579 octets HTML** par rapport à R02. Corps du monolithe réduit d'environ 6,65 Ko mais contient encore plusieurs domaines.
-- Rollback déterministe **R03→R02→R01** et tests des vues historiques : vérifiés, sans modifier les moteurs ou la logique métier. Pré-cache du nouveau module dans `service-worker.js`, version de cache actualisée, manifeste propriétaire actualisé.
-- Fonctions et états **hors périmètre** : `newGame`, `resumeGame`, `startConfiguredGame`, `openGensBuiltInGame`, sauvegardes, IndexedDB, moteurs des quatre modes, scripts Tactical. 32 visuels Survie historiques inchangés.
-
-## Tests et CI confirmés au SHA unique R03
-
-- **Application contrôlée** : [run 38942880813](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38942880813) SUCCESS (transfert, JS syntaxique, valeurs byte-exactes, rollback).
-- **CI Architecture/Chromium et navigateurs** : [38946742376](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38946742376) SUCCESS (inclut test de la frontière Shell R03, restauration et sentinelles navigateur).
-- **Firefox** : [38946742392](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38946742392) SUCCESS.
-- **Tactical Chromium/Firefox** : [38946742410](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/38946742410) SUCCESS.
-- Toutes ces CI finales portent le **même commit `afab707dad385450fdf296f7b2b6b41da376929b`** ; les six checks GitHub de ce SHA sont SUCCESS.
-- **Limite explicite** : tests Chromium/Firefox automatisés, mais **aucune installation Android manuelle, aucun essai sur appareil réel hors ligne et aucune validation utilisateur ciblée R03 attestés**. GREEN ici = jalon de code/CI, pas publication `main` ni promesse de parité Android observée.
-
-## Reprise suivante et garde-fous
-
-- Bornage R03–R07 restant : séparer code Shell, Survie, Dungeon, Capture, stockage/éditeurs **par propriétaires prouvés** dans le monolithe historique (environ 1,26 Mo avant R03), pas en externalisant tout en un moteur fictif ni en reprenant les 80 petits Core Dungeon.
-- Pour la prochaine modification de `index.html`, appliquer §26 sur le **nouveau SHA R03 GREEN** : [index exact](https://github.com/slyen4425-cloud/Zombicide-40k/blob/afab707dad385450fdf296f7b2b6b41da376929b/index.html) ; demander le ZIP du nouvel index seulement si l'accès à son contenu exact est indispensable.
-- Préserver `main` gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`, les laboratoires combat/exploration, les quatre modules et les sauvegardes. Branches R02 concurrentes archivées dans leur historique sans fusion.
-- Détails : `docs/GENSRPG_PHASE12_R03_SHELL_HUB_FAMILY_UI_2026-10-16.md`, `docs/GENSRPG_PHASE12_REMAINING_INLINE_EXIT_BOUNDARY_AUDIT_2026-10-16.md`.
+## Suite
+Un lot cohérent = un propriétaire, une branche, un checkpoint de départ, un rollback, trois CI. Après R04 GREEN, rebornage du reste du monolithe ; ne pas créer R05 avant.

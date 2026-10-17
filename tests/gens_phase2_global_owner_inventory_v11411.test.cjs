@@ -6,6 +6,8 @@ const root=path.join(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
 
 const dungeonCore01Path='assets/gensrpg/dungeon/core01-session-ui-v1.js';
+const captureR06Names=new Set(['captureGameplayModalMount','capturePlaytestFix128',...Array.from({length:12},(_,i)=>'captureFix'+(129+i)),'captureItems141','captureBuffs142','captureBuffFx143','captureAbilityTruth144']);
+const captureR06Rel=id=>'assets/gensrpg/capture/legacy-patches/'+id.replace(/([A-Z])/g,'-$1').toLowerCase().replace(/^-/,'')+'-v1.js';
 const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>{
     if(m[1]==='dungeonCore200Rebuild'){
@@ -45,6 +47,12 @@ const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\
       assert.equal(bytes.length,15795,'D7 Core214 historical byte length');
       assert.equal(hash,'72481ac3ee62bc67f6c0646eb724baf4a87a2f88','D7 Core214 byte-identical owner');
       return {id:m[1],body:bytes.toString('utf8'),offset:m.index};
+    }
+    if(captureR06Names.has(m[1])){
+      const rel=captureR06Rel(m[1]);
+      assert.equal(m[0],'<script id="'+m[1]+'" src="'+rel+'"></script>',
+        'R06 Capture must retain one synchronous owner and original parser position for '+m[1]);
+      return {id:m[1],body:fs.readFileSync(path.join(root,rel),'utf8'),offset:m.index};
     }
     if(m[1]!=='gensDungeonCore01Js')return {id:m[1],body:m[2],offset:m.index};
     assert.match(m[0],/src="assets\/gensrpg\/dungeon\/core01-session-ui-v1\.js"/,

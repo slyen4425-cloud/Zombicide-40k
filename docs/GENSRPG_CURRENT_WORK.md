@@ -1,5 +1,19 @@
 # GenSrpG — CURRENT_WORK officiel (17 octobre 2026)
 
+## Reprise vérifiée — correctifs ciblés du 17 octobre (état le plus récent)
+
+**Ne pas lancer R06, ne pas fusionner `main`, ne pas déclarer le donjon GREEN.** Les sections ci-dessous conservent les observations historiques ; le présent bloc supersède leurs hypothèses désormais vérifiées.
+
+- Base §26 recontrôlée : `c8.zip/index.html(18).txt`, 2 781 436 octets, blob `485de2e6a08ffd89e4f1fb9410e40c938774d62f`. `index.html` reste inchangé.
+- Le vrai scénario Chromium local + preview externe termine **quatre cycles** avec action visible, approche légitime, cible conservée et animation D100 interrompue par confirmation ; aucune autorité de dés supplémentaire.
+- L'événement réel d'embuscade utilise à présent `dungeon-event-runtime-fix-167878.js` ; adversaire adjacent au héros (**distance 1**) dans les deux compositions.
+- Diagnostic bloquant ajouté sur la carte native : au retour de Tactical, **case 5** `stone_01` (renderer Dungeon 0.80) au lieu du couvert `cave_01` (propriétaire 0.79). Trace [run 39061788861](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39061788861). Correctif dans `assets/dungeon/dungeon-source-render-stability-167877.js` : microtâche bornée déclenchée par le seam **déjà propriétaire** `dungeonMapHtml`, réappliquant le peintre 0.79 existant après le vrai rebuild 0.80, sans observer ni nouvel algorithme. Run [39062138586](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39062138586) : la parité des 25 cellules passe désormais.
+- Une erreur additionnelle du vrai `dispose()` Tactical a alors été mise au jour : `STYLE_ID` non déclaré. Corrigée dans `assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js` en nettoyant uniquement `gensTacticalV2Style`, `gtv21147DiceStyle` et `gtv271GeneralCombatRule`. Commit `3039e2870c797ec1bc3b23d097f522a3ab99e85b`, sentinelles de ce SHA en cours.
+- Le workflow de diagnostic lance le **test de continuité de carte en premier**, puis le parcours long et l'embuscade, pour ne plus masquer l'échec derrière plusieurs minutes d'autres tests.
+- Détection V113 : propriété unique conservée ; ni nouveau scan concurrent ni correction arbitraire de la vision. Reste à valider la détection après vrai mouvement, ainsi que les commandes d'inventaire/objet avec session non artificielle.
+- Le checkpoint final §25 dépend des sentinelles Architecture + Chromium, Tactical dock, Firefox walls et diagnostic sur **un même SHA** ; revue utilisateur nécessaire avant preview déclarée prête.
+
+
 **PHASE 12 EN PAUSE / TEST UTILISATEUR BLOQUANT : Dungeon combat non validé sur prévisualisation externe.** D1–D9/R01–R05 restent GREEN **technique CI**, mais leur validation manuelle est insuffisante ; pas de R06 ni de publication sur `main`.
 
 ## Retour terrain aggravé / anti-faux-GREEN

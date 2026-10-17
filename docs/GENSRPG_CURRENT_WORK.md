@@ -1,5 +1,14 @@
 # GenSrpG — CURRENT_WORK officiel (17 octobre 2026)
 
+## Reprise ciblée — état de validation le 17 octobre 2026 (supersède l'historique ci-dessous)
+
+- **Source de référence CI validée :** commit `83d379501e8fe2863471fbe0f10cdfb4f295576c`. Les **quatre** suites ont réussi à ce SHA exact : [Firefox 39068342095](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39068342095), [Tactical dock 39068342094](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39068342094), [diagnostic Dungeon 39068342088](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39068342088) et [Architecture/Chromium 39068342098](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39068342098).
+- **Checkpoint de référence CI (non homologation utilisateur) :** `checkpoint/gensrpg-phase12-dungeon-combat-ci-2026-10-17`, pointant exactement sur `83d379501e8fe2863471fbe0f10cdfb4f295576c`.
+- Correctifs démontrés par clics dans le vrai jeu : inventaire Tactical V108 utilise le stockage Core pour sauvegarder le changement d'arme, et transmet les **trois paramètres** du contrat consommable 0.61 à travers le wrapper de tour. Le test reproduit équipement de l'arc, soin des blessures **4→1**, quantité de potion **2→1**, sans déclencher d'attaque automatique.
+- La détection conserve **V113 comme unique propriétaire** et passe désormais uniquement par le Bridge public de combat différé, sans réactiver l'ancienne timeline ni empiler les wrappers d'événements. Le vrai scénario embuscade déclenche un combat avec l'instance du monstre à distance 1, sans overlay ni placement dupliqué.
+- **Contrôle additionnel mouvement réel** introduit sur le HEAD de test `4368c221916fd2a1d39169231a3bb266a492ddc1` : activation du mouvement tactique dans le véritable éditeur, monstre à vision 1 initialement hors portée, tap sur une case atteignable, consommation du mouvement et ouverture d'un seul combat. Le bloc navigateur « embuscade et détection » de [39069360259](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39069360259) a franchi cette étape ; autres vérifications du même HEAD encore en cours lors de cette note.
+- **Garde opérationnelle :** `main` et `index.html` non modifiés ; R06 toujours suspendu ; la validation technique CI ne clôt **pas** la revue manuelle utilisateur. Fournir uniquement un lien de preview **isolée** pointant vers le SHA testé, puis attendre le retour sur une partie normale avant tout GREEN métier ou fusion.
+
 ## Reprise vérifiée — correctifs ciblés du 17 octobre (état le plus récent)
 
 **Ne pas lancer R06, ne pas fusionner `main`, ne pas déclarer le donjon GREEN.** Les sections ci-dessous conservent les observations historiques ; le présent bloc supersède leurs hypothèses désormais vérifiées.

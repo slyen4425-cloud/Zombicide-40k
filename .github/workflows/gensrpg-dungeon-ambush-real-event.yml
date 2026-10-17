@@ -1,0 +1,28 @@
+name: GenSrpG Dungeon ambush real event load sentinel
+on:
+  push:
+    branches:
+      - 'work/gensrpg-dungeon-ambush-event-runtime-wiring-2026-10-17'
+permissions:
+  contents: read
+jobs:
+  dungeon-ambush-real-event:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check R05 HTML unchanged and apply existing unit contract
+        run: |
+          test "$(git hash-object index.html)" = '485de2e6a08ffd89e4f1fb9410e40c938774d62f'
+          node tests/dungeon_event_ambush_position_v167878.test.cjs
+          node tests/gens_preview_composition_v11411.test.cjs
+          node tests/gens_tactical_single_detection_authority_v11411.test.cjs
+      - name: Install mobile Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Verify actual Dungeon event spawn and adjacent positions in both preview modes
+        run: node tests/gens_phase12_dungeon_ambush_event_wiring_browser_v1.test.cjs

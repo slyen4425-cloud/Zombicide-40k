@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Refuse runtime edits during R06 source preaudit
         run: |
-          test "$(git hash-object index.html)" = 'b33542b033c5afa8a1643d99c56c21dbd4be266c'
+          test "$(git hash-object index.html)" = '12fc91df4ee4c7989a172baa96f9790da6dc57f7'
           test "$(git hash-object assets/gensrpg/core/legacy-cloud-sync-backup-v1.js)" = '8d7f8179676b096a53816cd1ca2530c120e3cf18'
           test "$(git hash-object assets/gensrpg/core/legacy-visual-data-v1.js)" = 'f7adfca9b04b23c489aae71ae9284c9b849f1d0b'
           test "$(git hash-object assets/gensrpg/shell/legacy-hub-family-ui-v1.js)" = 'e45f3b4e419a10b030c47bc921bded1ec0dc723b'
@@ -22,5 +22,7 @@ jobs:
           test "$(git hash-object assets/dungeon/creatures/dng_wall_block.jpg)" = 'd21b657a8ffd84deab55633e2663a0a81ab9a6f2'
       - name: Prove the local source/ZIP verifier fails closed
         run: python3 tests/gens_phase12_r06_source_inventory_v1.test.py
+      - name: Verify byte-exact R06 Capture rollback
+        run: python3 tools/gensrpg_phase12_r06_capture_inline_extract_apply.py --verify
       - name: Recheck validated generated-wall owner
         run: node tests/gens_generated_dungeon_wall_core079_owner_v1.test.cjs

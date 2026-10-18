@@ -7,6 +7,11 @@ const blob=b=>crypto.createHash('sha1').update('blob '+b.length+'\0').update(b).
 const R09='4dbe3314d5048f2def404ed674498c0670c04fc1';
 const R08='6eeed45a0a12085c1b107ee6c24b49040277ca54';
 module.exports=function r08View(index,root=path.resolve(__dirname,'../..')){
+  if(blob(index)==='b8ef8dcb497cad94c91094ed008136a5d9800155'){
+    assert.equal(index.length,2031649);
+    index=cp.execFileSync('node',[path.join(root,'tools/gensrpg_phase12_r10_capture_extract_apply.cjs'),'--restore-r09'],{cwd:root,maxBuffer:4*1024*1024});
+    assert.equal(blob(index),R09,'R10 must reconstruct exact R09 for historical sentinels');
+  }
   if(blob(index)!==R09)return index;
   assert.equal(index.length,2093066);
   const restored=cp.execFileSync('node',[path.join(root,'tools/gensrpg_phase12_r09_wave_extract_apply.cjs'),'--restore-r08'],{cwd:root,maxBuffer:4*1024*1024});

@@ -1,0 +1,22 @@
+name: GenSrpG Phase12 R07 exact sound data source preflight
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r07-magic-audio-data-2026-10-18'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-r07:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check R07 physical owner, byte-exact R06 restoration and three audio URLs
+        run: |
+          test "$(git hash-object index.html)" = 'aca31c540d61c81e1504d3b915b034b372103b5b'
+          test "$(git hash-object assets/gensrpg/core/legacy-magic-sounds-v1.js)" = 'a09e21c0da7439ccda5a6aaa246096950e1b261b'
+          python3 tools/gensrpg_phase12_r07_magic_audio_extract_apply.py --verify
+          python3 tests/gens_phase12_exit_inventory_v1.test.py
+          node --check assets/gensrpg/core/legacy-magic-sounds-v1.js
+          node tests/gens_phase12_r07_magic_sound_extraction_v1.test.cjs

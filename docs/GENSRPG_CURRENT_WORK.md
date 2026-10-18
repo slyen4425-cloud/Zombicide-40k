@@ -1,5 +1,19 @@
 # GenSrpG — CURRENT_WORK officiel (18 octobre 2026)
 
+## Chantier actif : Phase 12 / R07 — données audio magiques isolées, CI finale en attente
+
+- **Source §26 vérifiée** : archive utilisateur `d3.zip/index.html(3).txt` de **2 643 155 octets**, blob Git `12fc91df4ee4c7989a172baa96f9790da6dc57f7`, strictement le R06 GREEN certifié et accepté manuellement.
+- **START §25** : `checkpoint/gensrpg-start-phase12-r07-magic-audio-data-2026-10-18` sur `77a70778e0a82a9ca94c8b62d60865a4ed8b5f14` (audit de sortie avec 3 CI SUCCESS) ; branche `work/gensrpg-phase12-r07-magic-audio-data-2026-10-18`. Le checkpoint R06 GREEN d'origine est `41a709f3478ded45b12b770435a96ad3f344faf3`.
+- **Transformation physique appliquée** par [workflow contrôlé 39113331438](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39113331438), au commit runtime `65747672eeb240eca9118b8c67cfe3291e3fcc16`. Une unique déclaration de données contenant **trois URL MP3**, soit **425 476 octets** d'origine, externalisée sans changer aucun octet de son, aucune fonction ni gameplay ; `assets/gensrpg/core/legacy-magic-sounds-v1.js` **425 484 octets**, blob `a09e21c0da7439ccda5a6aaa246096950e1b261b`. Nouvelle constante originale : `const GENSRPG_MAGIC_SOUNDS = GensRpgLegacyMagicSoundsR07;`.
+- **Index actuel projeté et publié** : **2 217 805 octets**, blob `aca31c540d61c81e1504d3b915b034b372103b5b`, soit **–425 350 octets** en une extraction cohérente. Chargement classique synchrone avant le script historique ; cache PWA versionné, owner-map porté de 125 à 126 ; rollback R07→R06 **byte-exact** certifié par l'outil, anciennes sentinelles restaurées en mémoire.
+- **Gates avant GREEN** : CI Architecture statique + navigateur Chromium, Firefox, Tactical et source R07 **sur le même SHA** post-validation ; vérifier la bibliothèque sonore et demander un test manuel si un changement auditif perceptible est signalé. Ne pas confondre workflow d'application (SUCCESS) avec les CI complètes. Aucun merge `main`.
+- **Suite** : aucun R08 ou D10 ouvert, ne pas multiplier les micro-lots. Après R07 GREEN, requalifier les blocs multi-domaines restants, avec une priorité aux morceaux substantiels mono-propriétaire et à un EXIT honnête Phase 12. Les modes, sauvegardes, PvP non jouable, laboratoires et 32 images historiques Survie restent intacts.
+- **Rapport** : `docs/GENSRPG_PHASE12_R07_MAGIC_AUDIO_DATA_2026-10-18.md`. `main` gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+Historique de l'audit de sortie et R06 conservé ci-dessous.
+
+---
+
 ## CHANTIER ACTIF : Phase 12 — audit de sortie / priorités (aucune extraction)
 
 - **Base validée** : R06 GREEN technique + retour manuel utilisateur « Yes c est ok 👍 », checkpoint `checkpoint/gensrpg-phase12-r06-capture-legacy-patches-green-2026-10-18`, SHA **41a709f3478ded45b12b770435a96ad3f344faf3**. Quatre CI vertes : [source](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851988), [Firefox](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851959), [Tactical](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851951), [Architecture+Chromium](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851970).

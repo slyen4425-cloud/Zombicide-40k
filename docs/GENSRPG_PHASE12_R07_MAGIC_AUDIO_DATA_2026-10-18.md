@@ -1,6 +1,6 @@
 # GenSrpG — Phase 12 / R07 — trois sons magiques : données seulement
 
-Date : 18 octobre 2026. **Branche de travail R07** ; extraction contrôlée, aucun gameplay ni nouvelle autorité de son.
+Date : 18 octobre 2026. **Application physique R07 publiée sur branche de travail par CI contrôlée 39113331438, sans modification de gameplay ; CI finale de non-régression en attente et aucun GREEN déclaré à ce stade.**
 
 - Base exacte : audit de sortie GREEN \`77a70778e0a82a9ca94c8b62d60865a4ed8b5f14\`, checkpoint \`checkpoint/gensrpg-start-phase12-r07-magic-audio-data-2026-10-18\` ; branche \`work/gensrpg-phase12-r07-magic-audio-data-2026-10-18\`. La base reprend le R06 GREEN accepté par l'utilisateur.
 - Source utilisateur §26 : \`d3.zip/index.html(3).txt\`, **2 643 155 octets**, blob \`12fc91df4ee4c7989a172baa96f9790da6dc57f7\`. Correspond au checkpoint R06. Contrôle local strict avant projection.
@@ -9,3 +9,8 @@ Date : 18 octobre 2026. **Branche de travail R07** ; extraction contrôlée, auc
 - L'application, garde-fous d'ancres uniques, PWA et registre des propriétaires sont centralisés dans \`tools/gensrpg_phase12_r07_magic_audio_extract_apply.py\` ; activation uniquement par CI contrôlée de la branche R07. Les sentinelles historiques reconstruisent R07→R06→R05 en mémoire uniquement et gardent leurs empreintes originales.
 - **Ne pas déclarer GREEN** avant réussite des CI Architecture statique + Chromium, Firefox et Tactical **au même SHA de runtime**, certificat GREEN + revue utilisateur si le rendu sonore doit être vérifié. Aucune fusion \`main\`; les deux laboratoires et les 32 images Survie historiques ne changent pas.
 - Cet ensemble de 425 Ko est une **extraction substantielle**, à faible risque, mais ne constitue pas la clôture Phase 12 ; le mélange métier résiduel doit rester borné sans nouvel propriétaire fictif.
+
+## État GitHub après application
+
+- Source runtime réellement publiée sur `65747672eeb240eca9118b8c67cfe3291e3fcc16` ; index `aca31c540d61c81e1504d3b915b034b372103b5b` et audio `a09e21c0da7439ccda5a6aaa246096950e1b261b` confirmés dans l'arbre Git.
+- Le workflow d'application a réussi mais ne vaut pas validation finale ; des CI complètes doivent être certifiées sur un **même HEAD postérieur**, incluant le raccord des sentinelles R07. Ne pas créer de checkpoint GREEN ni de preview déclarée prête sans succès.

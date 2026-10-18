@@ -1,0 +1,44 @@
+name: GenSrpG Phase12 R10 guarded Capture functions extraction
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r10-capture-legacy-functions-2026-10-18'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r10-capture-controlled-apply.yml'
+      - 'tools/gensrpg_phase12_r10_capture_extract_apply.cjs'
+permissions:
+  contents: write
+jobs:
+  guarded-apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Confirm exact R09 source and unmodified Capture owner
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r10-capture-legacy-functions-2026-10-18'
+          test "$(git hash-object index.html)" = '4dbe3314d5048f2def404ed674498c0670c04fc1'
+          test ! -e assets/gensrpg/capture/legacy-monolith-functions-v1.js
+          node tools/gensrpg_phase12_r10_capture_extract_apply.cjs --check-source
+      - name: Apply and test only Capture original declarations
+        run: |
+          set -euo pipefail
+          node tools/gensrpg_phase12_r10_capture_extract_apply.cjs --apply
+          node tools/gensrpg_phase12_r10_capture_extract_apply.cjs --verify
+          node --check assets/gensrpg/capture/legacy-monolith-functions-v1.js
+          node tests/gensrpg_phase12_r10_capture_sentinel.test.cjs
+          node tests/gensrpg_phase12_r09_wave_sentinel.test.cjs
+          git -c core.whitespace=-blank-at-eof diff --check
+      - name: Commit exclusively on R10 branch
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/capture/legacy-monolith-functions-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          git -c core.whitespace=-blank-at-eof diff --cached --check
+          git commit -m 'refactor(phase12 R10): extract 90 original Capture functions with byte-exact rollback'
+          git push origin "HEAD:$GITHUB_REF_NAME"

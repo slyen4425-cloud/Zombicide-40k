@@ -1,6 +1,6 @@
 # GenSrpG — Phase 12 R09 : extraction Survie, configuration vagues et apparitions
 
-**18 octobre 2026 — checkpoint technique GREEN sur `8580587f2aab5bc3918950bc152b4a56e4d79a8d` ; contrôle manuel utilisateur encore requis.** Phase 12 reste ouverte.
+**18 octobre 2026 — checkpoint technique GREEN sur `8580587f2aab5bc3918950bc152b4a56e4d79a8d` et retour manuel Survie positif de l'utilisateur.** Phase 12 reste ouverte.
 
 ## Source et checkpoint (§§25–26)
 
@@ -44,8 +44,10 @@ Quatre suites CI **SUCCESS**, toutes sur le commit de code/test `8580587f2aab5bc
 L'ancienne sentinelle de déplacements Dungeon PC/mobile était instable à cause d'une **embuscade aléatoire** lors du scénario « déplacement désactivé ». Sur la passe échouée, le vrai combat Tactical masquait la case du plateau en mobile ; la capture/action GitHub `39148724875` montre le combat, et les traces indiquent « ÉVÉNEMENT — Embuscade ». La correction limitée au **test** ouvre l'éditeur de profil, coupe les événements de round, sélectionne le déclenchement manuel et une chance de 0, sauvegarde ces réglages via les contrôles réels, puis confirme que le module de déplacement demeure désactivé avant de tester les clics/touches. Aucun code de jeu, aucune règle de combat, aucun faux événement injecté ; les parcours PC et mobile ainsi que tout Chromium ont ensuite réussi.
 
 Checkpoint final §25 créé **uniquement après les quatre succès** :
-`checkpoint/gensrpg-phase12-r09-survival-wave-spawn-green-2026-10-18` → `8580587f2aab5bc3918950bc152b4a56e4d79a8d`. Dernier jalon manuellement approuvé : R08 GREEN `f458f0dce79a6bf0034c69bca36313f671d51fc4`. `main` demeure gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+`checkpoint/gensrpg-phase12-r09-survival-wave-spawn-green-2026-10-18` → `8580587f2aab5bc3918950bc152b4a56e4d79a8d`. R09 testé sur Survie avec retour utilisateur positif le 18 octobre 2026 ; checkpoint précédent R08 GREEN `f458f0dce79a6bf0034c69bca36313f671d51fc4`. `main` demeure gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 
-## Prochaine décision
+## Validation utilisateur R09 et prochaine décision
 
-Faire **valider manuellement** la réserve de zombies, le paramétrage de vagues, le tirage et la présentation des apparitions, puis le retour aux modes sur la [preview immuable R09](https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/8580587f2aab5bc3918950bc152b4a56e4d79a8d/preview.html). Ne pas ouvrir R10 automatiquement ni déclarer la Phase 12 terminée : auditer d'abord les frontières et définir le vrai critère de sortie.
+Le 18 octobre 2026, après avoir testé Survie, l'utilisateur indique : « Ok, j'ai testé survie, tout semble très bien fonctionné ». Ce retour manuel est **positif** et ne signale aucun défaut sur le parcours testé. Il vaut acceptation manuelle de ce jalon Survie, mais **pas** validation exhaustive de tous les modes ni clôture de la Phase 12. Référence testée : [preview immuable R09](https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/8580587f2aab5bc3918950bc152b4a56e4d79a8d/preview.html).
+
+**Suite :** auditer les frontières qui restent dans le grand HTML et définir un critère de sortie mesurable avant de cadrer un prochain lot ; ne pas ouvrir automatiquement R10, ne pas toucher aux laboratoires, aux 32 images historiques ni à `main`.

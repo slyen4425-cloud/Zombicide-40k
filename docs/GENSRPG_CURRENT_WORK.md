@@ -1,5 +1,16 @@
 # GenSrpG — CURRENT_WORK officiel (18 octobre 2026)
 
+## R09 — EN COURS : isolation du gestionnaire de vagues / apparitions Survie
+
+- Base technique exacte : checkpoint GREEN R08 `f458f0dce79a6bf0034c69bca36313f671d51fc4`, `index.html` **2 131 805 octets**, blob `6eeed45a0a12085c1b107ee6c24b49040277ca54`, confirmé sur l'archive utilisateur `d7.zip` conformément au §26.
+- START §25 : `checkpoint/gensrpg-start-phase12-r09-survival-wave-spawn-2026-10-18` créé **avant toute modification** depuis le SHA R08 GREEN ; branche dédiée `work/gensrpg-phase12-r09-survival-wave-spawn-2026-10-18` issue du même SHA.
+- Module / propriétaire : **Survie**. Périmètre prévu : extraire en script classique synchrone les déclarations des fonctions de configuration de réserve, profils et sets de vagues, pioche d'apparition et présentation de l'apparition depuis le grand script historique mixte ; préserver les constantes partagées en place, l'ordre des initialisations, les fonctions et règles identiques, le retour arrière octet-exact.
+- Protégés : Dungeon (mouvement/combat Tactical et récompenses), Capture, PvP non jouable, Shell, Core storage, sauvegardes, PWA, laboratoires, assets et 32 images Survie historiques ; `main` gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- Tests obligatoires : préflight source+rollback SHA et syntaxe JS, ordonnancement de scripts, fixtures d'éditeur de vagues / réserve / apparition en vrai navigateur, sentinelles transversales Architecture+Chromium, Firefox, Tactical et source/rollback **SUCCESS sur le même SHA**. Pas de checkpoint GREEN ni de preview de validation sans preuves. Si risque transverse détecté, corriger soustractivement ou revenir à R08.
+- Statut : branche préparée, cible R09 identifiée ; aucune modification runtime certifiée à ce stade.
+
+# GenSrpG — CURRENT_WORK officiel (18 octobre 2026)
+
 ## R08 — ACTIVE / NON GREEN — bibliothèque capacités et compétences
 
 Dernier checkpoint GREEN et manuellement accepté : checkpoint/gensrpg-phase12-r07-magic-audio-data-green-2026-10-18, SHA 17a1def7a514478fec08025f354a4a1b17aa14f5 (R07 validé par l'utilisateur le 18/10/2026).

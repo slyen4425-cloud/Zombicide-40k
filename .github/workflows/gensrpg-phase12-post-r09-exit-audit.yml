@@ -1,0 +1,30 @@
+name: GenSrpG Phase12 post-R09 EXIT metadata audit guards
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-post-r09-exit-audit-2026-10-18'
+permissions:
+  contents: read
+jobs:
+  exit-metadata-guards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout full certified history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Guarantee runtime still equals user-accepted R09
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = '4dbe3314d5048f2def404ed674498c0670c04fc1'
+          test "$(wc -c < index.html | tr -d ' ')" = '2093066'
+          test "$(git hash-object assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js)" = '515642eda275802c50af867d5712517d47020414'
+          git diff --name-only '8580587f2aab5bc3918950bc152b4a56e4d79a8d' HEAD > /tmp/gens-audit-changes.txt
+          if grep -Ev '^(docs/|tools/gensrpg_phase12_post_r09_exit_census\.py$|tests/gens_phase12_post_r09_exit_census\.test\.py$|\.github/workflows/gensrpg-phase12-post-r09-exit-audit\.yml$)' /tmp/gens-audit-changes.txt; then
+            echo 'AUDIT ONLY: forbidden production-file change' >&2
+            exit 1
+          fi
+      - name: Reject stale sources and prevent source-body leaks
+        run: python3 tests/gens_phase12_post_r09_exit_census.test.py

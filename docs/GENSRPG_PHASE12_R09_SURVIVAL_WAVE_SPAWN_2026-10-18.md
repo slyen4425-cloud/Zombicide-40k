@@ -1,6 +1,6 @@
 # GenSrpG — Phase 12 R09 : extraction Survie, configuration vagues et apparitions
 
-**18 octobre 2026 — validation technique en cours, NON GREEN tant que les quatre CI ne passent pas sur le même SHA.** Phase 12 reste ouverte.
+**18 octobre 2026 — checkpoint technique GREEN sur `8580587f2aab5bc3918950bc152b4a56e4d79a8d` ; contrôle manuel utilisateur encore requis.** Phase 12 reste ouverte.
 
 ## Source et checkpoint (§§25–26)
 
@@ -28,10 +28,24 @@ Réduction physique du HTML **38 739 octets** ; toutes les déclarations sont co
 - L'extraction a été produite par `tools/gensrpg_phase12_r09_wave_extract_apply.cjs`, avec **vérification stricte de l'empreinte R08 à l'entrée, de chaque fonction extraite, des octets finaux, des positions et du rollback exact R09 → R08**. Son premier garde a échoué avant tout changement à cause d'une confusion de longueur UTF-16 ; le garde a été rectifié, sans affaiblir les SHA, puis l'[application contrôlée a réussi](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39134393939).
 - Le moteur vérifie `--verify` par comparaison avec le commit R08 et l'empreinte des fichiers R09. `--restore-r08` reconstruit les octets exacts du fichier validé R08 pour les tests anciens (sans lire un gros HTML via GitHub). La chaîne de retour `R09 → R08 → R07 → R06` permet de **préserver** les sentinelles historiques existantes sans modifier leurs attentes.
 - `tests/gensrpg_phase12_r09_wave_sentinel.test.cjs` protège les 72 déclarations globales, réserve et limites, sauvegarde de profil, pioche de cartes, ordre du chargement, SHA et compilation. CI dédiée `.github/workflows/gensrpg-phase12-r09-wave-sentinels.yml`.
-- **Tests requis avant GREEN :** R09 source/rollback, Firefox, Tactical, Architecture + Chromium, tous SUCCESS sur **un même SHA**. Survie navigation/bibliothèque/profils, Dungeon/combat/dés/sauvegarde, Capture et PvP non jouable restent protégés. Aucun checkpoint GREEN, merge ou déclaration de test utilisateur avant ces preuves.
+- **Tests requis exécutés :** R09 source/rollback, Firefox, Tactical, Architecture statique + navigateur Chromium, tous **SUCCESS sur le même SHA `8580587f2aab5bc3918950bc152b4a56e4d79a8d`**. Navigation Survie, Dungeon, Capture, Shell, PWA, PvP placeholder, sauvegardes et non-interférence couverts par les sentinelles. Aucun merge de `main`.
 
 Le nouveau code fonctionnel a été publié sur la branche R09 au commit `40e192a4b39e2e8fed17818cd69707ec297603cc`; les commits suivants ne modifient que la documentation, les contrôles et les fixtures de reconstruction pour la CI.
 
+## Preuves de certification et incident navigateur
+
+Quatre suites CI **SUCCESS**, toutes sur le commit de code/test `8580587f2aab5bc3918950bc152b4a56e4d79a8d` :
+
+- [Source R09, garde SHA et rollback R08](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39149826953)
+- [Firefox UI](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39149826901)
+- [Tactical Firefox et Chromium](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39149826949)
+- [Architecture statique (359 étapes) et navigateur Chromium PC/mobile](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39149826926)
+
+L'ancienne sentinelle de déplacements Dungeon PC/mobile était instable à cause d'une **embuscade aléatoire** lors du scénario « déplacement désactivé ». Sur la passe échouée, le vrai combat Tactical masquait la case du plateau en mobile ; la capture/action GitHub `39148724875` montre le combat, et les traces indiquent « ÉVÉNEMENT — Embuscade ». La correction limitée au **test** ouvre l'éditeur de profil, coupe les événements de round, sélectionne le déclenchement manuel et une chance de 0, sauvegarde ces réglages via les contrôles réels, puis confirme que le module de déplacement demeure désactivé avant de tester les clics/touches. Aucun code de jeu, aucune règle de combat, aucun faux événement injecté ; les parcours PC et mobile ainsi que tout Chromium ont ensuite réussi.
+
+Checkpoint final §25 créé **uniquement après les quatre succès** :
+`checkpoint/gensrpg-phase12-r09-survival-wave-spawn-green-2026-10-18` → `8580587f2aab5bc3918950bc152b4a56e4d79a8d`. Dernier jalon manuellement approuvé : R08 GREEN `f458f0dce79a6bf0034c69bca36313f671d51fc4`. `main` demeure gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
 ## Prochaine décision
 
-Finaliser la CI sur le dernier SHA, créer ensuite seulement le checkpoint technique GREEN, fournir un lien preview immuable et demander les retours manuels ciblés (réserve, vagues, apparition, retour aux modes). Ne pas ouvrir un R10 automatique ni déménager le monolithe sous une fausse autorité ; vérifier les dernières frontières à fort effet et l'objectif de sortie réel de Phase 12.
+Faire **valider manuellement** la réserve de zombies, le paramétrage de vagues, le tirage et la présentation des apparitions, puis le retour aux modes sur la [preview immuable R09](https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/8580587f2aab5bc3918950bc152b4a56e4d79a8d/preview.html). Ne pas ouvrir R10 automatiquement ni déclarer la Phase 12 terminée : auditer d'abord les frontières et définir le vrai critère de sortie.

@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-18",
+  "milestone": "Phase12 post-R07 owner boundaries",
+  "status": "preaudit-only",
+  "source": {
+    "green_commit": "17a1def7a514478fec08025f354a4a1b17aa14f5",
+    "checkpoint": "checkpoint/gensrpg-phase12-r07-magic-audio-data-green-2026-10-18",
+    "index_size_bytes": 2217805,
+    "index_blob": "aca31c540d61c81e1504d3b915b034b372103b5b",
+    "provenance": "read-only exact R07 projection from user d3.zip R06 certified source; not an uploaded R07 ZIP",
+    "next_zip_required": true
+  },
+  "script_counts": {
+    "all": 162,
+    "external": 56,
+    "inline_active": 89,
+    "inline_disabled": 17,
+    "inline_active_body_bytes": 1326879,
+    "inline_disabled_body_bytes": 95878
+  },
+  "inline_heaviest": [
+    {
+      "order": 20,
+      "bytes": 804335,
+      "classification": "multi-domain unverified"
+    },
+    {
+      "order": 22,
+      "bytes": 180964,
+      "classification": "version-shell-builders-capture multi-domain unverified"
+    }
+  ],
+  "other_groups": {
+    "named_dungeon": {
+      "count": 80,
+      "bytes": 306771
+    },
+    "named_other": {
+      "count": 4,
+      "bytes": 28009
+    }
+  },
+  "protected": [
+    "main frozen",
+    "PvP no gameplay",
+    "Survie 32 historical images",
+    "Dungeon generated/authored",
+    "Tactical",
+    "Capture",
+    "PWA cache",
+    "save/import/export",
+    "combat lab",
+    "dynamic exploration lab"
+  ],
+  "next_action": "No R08 until source-current ZIP and domain contracts prove a substantive byte-exact extraction"
+}

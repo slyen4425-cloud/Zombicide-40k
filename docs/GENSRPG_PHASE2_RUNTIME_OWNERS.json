@@ -648,6 +648,11 @@
       "owner": "GenSrpG Builders / Shared Ability and Skill Catalog R08",
       "domain": "builders",
       "role": "57 original library/editor functions moved bit-identical, Escape listener unchanged at original parser position, no combat engine duplicated"
+    },
+    "assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js": {
+      "owner": "GenSrpG Survie / vague, réserve et apparition R09",
+      "domain": "survival",
+      "role": "72 fonctions originales de l'éditeur de vagues, pioche d'apparition et affichage spawn; aucun moteur de combat dupliqué; script classique synchrone"
     }
   }
 }

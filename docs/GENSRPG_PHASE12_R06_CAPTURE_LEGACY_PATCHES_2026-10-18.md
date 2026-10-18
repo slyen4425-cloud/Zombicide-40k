@@ -1,6 +1,6 @@
 # GenSrpG — Phase 12 / R06 — 18 scripts Capture historiques, extraction physique
 
-Date : 18 octobre 2026. **Extraction publiée sur la branche de travail, sans toucher à `main`. Jalon R06 en validation CI, pas encore GREEN à la rédaction de cette note.**
+Date : 18 octobre 2026. **GREEN technique certifié au SHA `41a709f3478ded45b12b770435a96ad3f344faf3` sur `checkpoint/gensrpg-phase12-r06-capture-legacy-patches-green-2026-10-18`. `main` et laboratoires intacts. Revue manuelle Monster Capture encore à confirmer.**
 
 ## Source et protocole §§25–26
 
@@ -23,8 +23,8 @@ Date : 18 octobre 2026. **Extraction publiée sur la branche de travail, sans to
 - La table Phase 2 historique des affectations globales (428 noms, 739 affectations, 114 multi-propriétaires) reste figée. Les sentinelles lisent le contenu externe des 18 scripts pour vérifier **les mêmes chaînes d'autorité effectives**, notamment les anciens `captureFix138`, `captureFix139` et `captureRenderBattleLive`.
 - Les sentinelles Phase 5/9/Architecture ont été adaptées pour contrôler la nouvelle composition ordonnée et la présence stricte des 18 fichiers, sans contourner les frontières de lancement Capture, de `goMenu`, `startConfiguredGame` et `openChar`.
 - La sentinelle rapide `GenSrpG Phase12 R06 source intake preflight` vérifie le blob courant, la restauration exacte, les corrections murales, et les invariants de démarrage/retour de Capture et Phase 9. [Run 39078270215](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39078270215) : **SUCCESS** sur l'état qui précède cette documentation.
-- **Gates finaux encore nécessaires** : Architecture statique + navigateur Chromium, Tactical dock, Firefox et préflight source **au même SHA incluant la documentation** ; revue des éventuels défauts observés, checkpoint GREEN R06 seulement après tous les SUCCESS. Test manuel Capture recommandé via un lien immutable si un jalon prévisualisable est émis.
+- **CI finale vérifiée au SHA exact `41a709f3478ded45b12b770435a96ad3f344faf3`** : [Architecture/Chromium 39105851970](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851970), [Firefox 39105851959](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851959), [Tactical 39105851951](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851951), [source R06 39105851988](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851988) — **4 SUCCESS sur un seul SHA**, 359 étapes statiques et 64 étapes du job Chromium. Checkpoint GREEN créé sur ce SHA. [Preview immuable pour test manuel Capture](https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/41a709f3478ded45b12b770435a96ad3f344faf3/preview.html). La présente mise à jour documentaire est postérieure au checkpoint GREEN.
 
 ## Invariants et suite
 
-Aucun gameplay Capture, Dungeon, Survie ni PvP n'a été réécrit ; aucune donnée de profil ou sauvegarde n'a changé de format ; aucune deuxième autorité d'inventaire, de rendu, de combat ou de détection. R07 et D10 **non commencés**. `main` et les dépôts des laboratoires inchangés.
+Aucun gameplay Capture, Dungeon, Survie ni PvP n'a été réécrit ; aucune donnée de profil ou sauvegarde n'a changé de format ; aucune deuxième autorité d'inventaire, de rendu, de combat ou de détection. R07 et D10 **non commencés**. `main` et les dépôts des laboratoires inchangés. Proscrire les micro-lots : ne reprendre après validation manuelle que des groupes homogènes de portée réelle.

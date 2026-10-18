@@ -115,8 +115,14 @@ assert.equal(ownerManifest.files?.[r09WaveOwner]?.domain,'survival',
   'R09 wave/spawn editor declarations must be exclusively Survival-owned');
 assert.equal(composition.index.split(r09WaveOwner).length-1,1,
   'R09 Survival wave/spawn runtime owner must load exactly once');
-assert.equal(Object.keys(ownerManifest.files||{}).length,110+captureR06OwnerPaths.length,
-  'R09 adds one physical Survival owner to the 109 R08 owners and 18 R06 Capture owners; Phase 3 entry contracts remain inert');
+const r10CaptureOwner='assets/gensrpg/capture/legacy-monolith-functions-v1.js';
+assert.equal(ownerManifest.files?.[r10CaptureOwner]?.domain,'capture',
+  'R10 capture declarations must have exactly one documented Capture owner');
+assert.equal(exists(r10CaptureOwner),true,'R10 physical Capture owner must exist');
+assert.equal(composition.index.split(r10CaptureOwner).length-1,1,
+  'R10 Capture declarations must be loaded exactly once from index');
+assert.equal(Object.keys(ownerManifest.files||{}).length,111+captureR06OwnerPaths.length,
+  'R10 adds one Capture owner after R09, preserving all 18 R06 Capture patch owners and all Phase 3 entry contracts');
 assert.equal(ownerManifest.files?.['assets/gensrpg/core/legacy-cloud-sync-backup-v1.js']?.domain,'core',
   'R05 cloud-sync/local-backup must have a sole Core owner');
 assert.equal(composition.index.split('assets/gensrpg/core/legacy-cloud-sync-backup-v1.js').length-1,1,

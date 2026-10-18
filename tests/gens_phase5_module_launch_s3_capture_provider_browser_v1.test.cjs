@@ -36,11 +36,18 @@ const onlineScriptEnd=onlineOwner+onlineMarker.indexOf('</script>');
 assert.ok(onlineOwner>shellScriptEnd&&onlineScriptStart>shellScriptEnd&&onlineScriptEnd>onlineOwner,'real external Core online support must preserve Shell parser order');
 assert.equal(indexSource.split(onlineMarker).length-1,1,'online Core owner must load once');
 
+const catalogTag='<script src="assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js"></script>';
+const catalogOwner=indexSource.indexOf(catalogTag,onlineScriptEnd);
+assert.ok(catalogOwner>onlineScriptEnd,'R08 catalog must load in the real production order after Core online support');
+assert.equal(indexSource.split(catalogTag).length-1,1,'R08 catalog must have exactly one real parser slot');
+assert.ok(fs.existsSync(path.join(root,'assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js')),
+  'R08 catalog module must physically exist');
+
 const customMarker='function loadCustomHeroesMulti(){';
 const customOwner=indexSource.indexOf(customMarker,onlineScriptEnd);
 const customScriptStart=indexSource.lastIndexOf('<script',customOwner);
 const customScriptEnd=indexSource.indexOf('</script>',customOwner);
-assert.ok(customOwner>onlineScriptEnd&&customScriptStart>onlineScriptEnd&&customScriptEnd>customOwner,'real custom-content block must exist');
+assert.ok(customOwner>catalogOwner&&customScriptStart>catalogOwner&&customScriptEnd>customOwner,'real custom-content block must follow the R08 catalog parser slot');
 
 function exactScript(id){
   const marker='<script id="'+id+'"';
@@ -90,6 +97,7 @@ for(let i=1;i<captureOwnerScripts.length;i++){
 const realCaptureHtml=
   indexSource.slice(0,shellScriptEnd+'</script>'.length)+
   '\n'+indexSource.slice(onlineScriptStart,onlineScriptEnd+'</script>'.length)+
+  '\n'+indexSource.slice(catalogOwner,catalogOwner+catalogTag.length)+
   '\n'+indexSource.slice(customScriptStart,customScriptEnd+'</script>'.length)+
   '\n</body></html>';
 

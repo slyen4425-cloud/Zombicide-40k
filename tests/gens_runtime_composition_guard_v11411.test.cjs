@@ -44,6 +44,7 @@ assert.deepEqual(directSrcs,[
   'assets/gensrpg/core/legacy-visual-data-v1.js',
   'assets/gensrpg/shell/legacy-hub-family-ui-v1.js',
   'assets/gensrpg/builders/equipment-library-editor-v1.js',
+  'assets/gensrpg/core/legacy-magic-sounds-v1.js',
   'assets/gensrpg/core/legacy-cloud-sync-backup-v1.js',
   'assets/gensrpg/dungeon/mj72-scene-v1.js',
   'assets/gensrpg/capture/legacy-patches/capture-gameplay-modal-mount-v1.js',

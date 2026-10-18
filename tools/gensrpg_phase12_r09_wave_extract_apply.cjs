@@ -46,7 +46,12 @@ function extract(source) {
 }
 
 function reconstructR08FromFiles() {
-  const current=fs.readFileSync("index.html","utf8");
+  // Historical R09 -> R08 is still required by R06/R07/R08 sentinels.
+  // After R10, first undo R10 with its strict byte-exact SHA guards.
+  const r10Module="assets/gensrpg/capture/legacy-monolith-functions-v1.js";
+  const current=fs.existsSync(r10Module)
+    ? cp.execFileSync(process.execPath,["tools/gensrpg_phase12_r10_capture_extract_apply.cjs","--restore-r09"],{maxBuffer:10*1024*1024}).toString("utf8")
+    : fs.readFileSync("index.html","utf8");
   const mod=fs.readFileSync(MODULE,"utf8");
   invariant(blob(current)===NEW_INDEX && blob(mod)===NEW_MODULE, "R09: noncanonical R09 files");
   invariant(current.includes(HOOK), "R09: loader missing");

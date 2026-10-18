@@ -1,10 +1,11 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
+const originalR06View=require('./helpers/gens_phase12_r06_capture_source_view_v1.cjs');
 const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
-const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const index=originalR06View(fs.readFileSync(path.join(root,'index.html'))).toString('utf8');
 const storageSrc=fs.readFileSync(path.join(root,'assets/gensrpg/core/storage-v1.js'),'utf8');
 const ctx={};vm.createContext(ctx);vm.runInContext(storageSrc,ctx);
 const api=ctx.GensStorageV1;

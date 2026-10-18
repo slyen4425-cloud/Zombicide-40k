@@ -22,6 +22,12 @@ const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\
           'Core200 must retain its original parser location');
           assert.equal(m[2],'','Core200 must not have a duplicate inline owner');
           return read('assets/gensrpg/dungeon/core200-rebuild-v1.js')})()
+      : m[1]==='captureFix139'
+      ? (()=>{assert.equal(m[0],
+          '<script id="captureFix139" src="assets/gensrpg/capture/legacy-patches/capture-fix139-v1.js"></script>',
+          'R06 Capture139 must retain one synchronous load at its original parser position');
+          assert.equal(m[2],'','R06 Capture139 must not retain a second inline body');
+          return read('assets/gensrpg/capture/legacy-patches/capture-fix139-v1.js')})()
       : m[2]
   }));
 

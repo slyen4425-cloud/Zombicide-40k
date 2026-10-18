@@ -638,6 +638,11 @@
       "owner": "Monster Capture / historical captureAbilityTruth144",
       "domain": "capture",
       "role": "Existing single Capture captureAbilityTruth144 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/core/legacy-magic-sounds-v1.js": {
+      "owner": "GenSrpG Core / shared immutable magic audio library R07",
+      "domain": "core",
+      "role": "single byte-exact set of three embedded MP3 data URLs; synchronous pure data owner, no gameplay logic or new sound engine"
     }
   }
 }

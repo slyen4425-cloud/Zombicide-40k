@@ -23,7 +23,8 @@ class ExitInventoryTests(unittest.TestCase):
 
     def test_current_repo_index_matches_user_d2_zip_census(self):
         source = Path(__file__).resolve().parents[1] / "index.html"
-        report = summarize(source.read_bytes())
+        from gensrpg_phase12_r07_magic_audio_extract_apply import reverse, ROOT, REL
+        report = summarize(reverse(source.read_bytes(), (ROOT / REL).read_bytes()))
         counts = report["counts"]
         self.assertEqual(counts["script_tags"], 161)
         self.assertEqual(counts["external"], 55)

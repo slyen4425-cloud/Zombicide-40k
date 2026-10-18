@@ -110,7 +110,7 @@ for(const rel of captureR06OwnerPaths){
   assert.equal(exists(rel),true,'R06 legacy physical owner must exist: '+rel);
   assert.equal(composition.index.split(rel).length-1,1,'R06 legacy owner must load once from source index: '+rel);
 }
-assert.equal(Object.keys(ownerManifest.files||{}).length,107+captureR06OwnerPaths.length,
+assert.equal(Object.keys(ownerManifest.files||{}).length,108+captureR06OwnerPaths.length,
   'R06 adds 18 Capture physical owners to the previously certified graph; Phase 3 entry contracts remain inert');
 assert.equal(ownerManifest.files?.['assets/gensrpg/core/legacy-cloud-sync-backup-v1.js']?.domain,'core',
   'R05 cloud-sync/local-backup must have a sole Core owner');

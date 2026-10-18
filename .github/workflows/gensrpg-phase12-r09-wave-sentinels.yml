@@ -3,10 +3,6 @@ on:
   push:
     branches:
       - 'work/gensrpg-phase12-r09-survival-wave-spawn-2026-10-18'
-    paths:
-      - 'tests/gensrpg_phase12_r09_wave_sentinel.test.cjs'
-      - 'docs/GENSRPG_PHASE12_R09_SURVIVAL_WAVE_SPAWN_2026-10-18.md'
-      - 'docs/GENSRPG_CURRENT_WORK.md'
 permissions:
   contents: read
 jobs:

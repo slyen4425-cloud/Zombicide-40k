@@ -112,13 +112,22 @@ assert.ok(fs.existsSync(path.join(root,'tests/gens_phase5_startconfiguredgame_ca
 const blocks=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({
     id:m[1],
-    body:m[1]==='gensDungeonCore01Js'
-      ? (()=>{const external='assets/gensrpg/dungeon/core01-session-ui-v1.js';
-          assert.ok(m[0].includes('src="'+external+'"'),'Dungeon Core01 must remain parser-loaded');
-          assert.equal(m[2],'','no duplicate Dungeon wrapper inline');
-          return read(external)})()
-      : m[2]
+    body: (() => {
+      let external;
+      if(m[1]==='gensDungeonCore01Js'){
+        external='assets/gensrpg/dungeon/core01-session-ui-v1.js';
+      }else if(m[1]==='captureFix138'){
+        external='assets/gensrpg/capture/legacy-patches/capture-fix138-v1.js';
+      }
+      if(!external)return m[2];
+      assert.equal(m[0],'<script id="'+m[1]+'" src="'+external+'"></script>',
+        'historical owner keeps one synchronous parser-position script '+m[1]);
+      assert.equal(m[2],'','no duplicate inline body for '+m[1]);
+      return read(external);
+    })()
   }));
+assert.equal((index.match(/<script id="captureFix138" src="assets\/gensrpg\/capture\/legacy-patches\/capture-fix138-v1\.js"><\/script>/g)||[]).length,1,
+  'Capture138 must remain exactly once in parser order ahead of Dungeon Core01');
 const chain=[];
 for(const block of blocks){
   const count=[...block.body.matchAll(/window\.startConfiguredGame\s*=(?!=)/g)].length;

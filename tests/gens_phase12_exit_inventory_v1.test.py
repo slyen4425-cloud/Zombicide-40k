@@ -25,7 +25,15 @@ class ExitInventoryTests(unittest.TestCase):
         source = Path(__file__).resolve().parents[1] / "index.html"
         from gensrpg_phase12_r07_magic_audio_extract_apply import reverse, ROOT, REL
         from gensrpg_phase12_r08_shared_catalog_extract_apply import restore as r08_restore, ROOT as R08_ROOT, REL as R08_REL
-        report = summarize(reverse(r08_restore(source.read_bytes(), (R08_ROOT / R08_REL).read_bytes()), (ROOT / REL).read_bytes()))
+        # R09 est une extraction physique. Reconstruire R08 octet-exact avant
+        # la chaîne historique R08 -> R07 -> R06 : aucune sentinelle retirée.
+        import subprocess
+        root = Path(__file__).resolve().parents[1]
+        r08_index = subprocess.check_output(
+            ["node", str(root / "tools/gensrpg_phase12_r09_wave_extract_apply.cjs"), "--restore-r08"],
+            cwd=root,
+        )
+        report = summarize(reverse(r08_restore(r08_index, (R08_ROOT / R08_REL).read_bytes()), (ROOT / REL).read_bytes()))
         counts = report["counts"]
         self.assertEqual(counts["script_tags"], 161)
         self.assertEqual(counts["external"], 55)

@@ -9,7 +9,12 @@ const contract=JSON.parse(fs.readFileSync(path.join(survivalDir,'module-contract
 const tsv=fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv'),'utf8');
 
 const jsFiles=fs.readdirSync(survivalDir).filter(name=>name.endsWith('.js')).sort();
-assert.deepEqual(jsFiles,['entry-v1.js'],'Phase 6 exit audit must track the current Survival JS entry set');
+assert.deepEqual(jsFiles,['entry-v1.js','legacy-wave-presets-spawn-v1.js'],'Phase 6 exit audit must track the current Survival JS entry set');
+const extracted=fs.readFileSync(path.join(survivalDir,'legacy-wave-presets-spawn-v1.js'),'utf8');
+assert.match(extracted,/function defaultZombieConfig\\(/,'Survival historical wave reserve must be owned by the extracted script');
+assert.match(extracted,/function showSpawnResolution\\(/,'Survival historical spawn rendering must be owned by the extracted script');
+assert.equal((extracted.match(/^function\\s+[\\w$]+\\s*\\(/gm)||[]).length,72,'Survival R09 preserves exactly 72 historical functions');
+assert.doesNotMatch(extracted,/assets\\/gensrpg\\/(?:dungeon|tactical|capture|pvp)\\//,'Survival extraction cannot import a foreign private module');
 
 assert.doesNotMatch(entry,/\bDungeon\w*\b|\bdungeon\w*\b/,'Survival entry must not consume private Dungeon runtime');
 assert.doesNotMatch(entry,/\bTactical\w*\b|\btactical\w*\b/,'Survival entry must not consume private Tactical runtime');

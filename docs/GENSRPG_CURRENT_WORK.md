@@ -1,15 +1,15 @@
 # GenSrpG — CURRENT_WORK officiel (18 octobre 2026)
 
-## R06 — GREEN CI certifié ; validation utilisateur Capture à effectuer
+## R06 — TERMINÉ : GREEN technique et validation utilisateur Capture
 
 - **Checkpoint final immutable** : `checkpoint/gensrpg-phase12-r06-capture-legacy-patches-green-2026-10-18` au SHA exact `41a709f3478ded45b12b770435a96ad3f344faf3`. Branche chantier `work/gensrpg-phase12-r06-inline-owner-scope-2026-10-18`, départ `checkpoint/gensrpg-start-phase12-r06-inline-owner-scope-2026-10-18` sur `4dd865a45634b7367ce66a526feae58b923edef9`.
 - **Quatre CI SUCCESS sur ce même SHA** : [source 39105851988](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851988), [Firefox 39105851959](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851959), [Tactical 39105851951](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851951), [Architecture + Chromium 39105851970](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851970) : 359 étapes statiques et 64 étapes du job Chromium réussies.
 - **Périmètre** : 18 scripts historiques contigus Monster Capture, 140 211 octets, relogés byte-exact dans `assets/gensrpg/capture/legacy-patches/`, `index.html` réduit de 139 000 octets à 2 643 155 octets ; ordre parser, chargements synchrones, propriétaire Capture unique, PWA et rollback vérifiés. Aucun changement moteur ni donnée de sauvegarde.
-- **Test manuel utile** : [preview immuable R06](https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/41a709f3478ded45b12b770435a96ad3f344faf3/preview.html), surtout lancement Capture, retour Shell, jour suivant, reprise sauvegardée. GREEN technique ne signifie pas encore acceptation manuelle.
-- **Prochaine décision** : ne pas ouvrir R07/D10 sans retour Capture et nouveau START §25. Ensuite audit du code inline résiduel pour quelques groupes homogènes de vraie portée ou clôture si gains marginaux ; pas de micro-lots par inertie. Pour toute nouvelle extraction `index.html`, ZIP utilisateur exact du SHA requis §26.
+- **Validation manuelle utilisateur : ACCORD EXPLICITE le 18 octobre 2026 (« Yes c est ok 👍 »)** sur [preview immuable R06](https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/41a709f3478ded45b12b770435a96ad3f344faf3/preview.html), surtout lancement Capture, retour Shell, jour suivant, reprise sauvegardée. GREEN technique + accord manuel utilisateur sont acquis ; ne pas présumer des tests non explicitement détaillés par l'utilisateur.
+- **Prochaine décision** : retour Capture obtenu et R06 clos. Avant R07/D10, nouveau START §25 obligatoire. Ensuite audit du code inline résiduel pour quelques groupes homogènes de vraie portée ou clôture si gains marginaux ; pas de micro-lots par inertie. Pour toute nouvelle extraction `index.html`, ZIP utilisateur exact du SHA requis §26.
 - **Intouchables** : `main` (`e8681f9823573ced8aec59c8ddc47a72b02bc663`), les 4 modes, laboratoires, 32 images Survie historiques, PWA, sauvegardes, Dungeon V113/Tactical et murs générés restent protégés. Le commit documentaire postérieur au GREEN n'est pas un nouveau SHA de certification.
 
-Toutes les anciennes mentions « R06 non GREEN » ci-dessous sont conservées comme historique et remplacées par ce statut actuel.
+Toutes les anciennes mentions « R06 non GREEN » ou « validation manuelle en attente » ci-dessous sont conservées comme historique et remplacées par le statut final validé.
 
 ---
 

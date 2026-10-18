@@ -1,6 +1,6 @@
 # GenSrpG — Phase 12 / R06 — 18 scripts Capture historiques, extraction physique
 
-Date : 18 octobre 2026. **GREEN technique certifié au SHA `41a709f3478ded45b12b770435a96ad3f344faf3` sur `checkpoint/gensrpg-phase12-r06-capture-legacy-patches-green-2026-10-18`. `main` et laboratoires intacts. Revue manuelle Monster Capture encore à confirmer.**
+Date : 18 octobre 2026. **GREEN technique certifié au SHA `41a709f3478ded45b12b770435a96ad3f344faf3` sur `checkpoint/gensrpg-phase12-r06-capture-legacy-patches-green-2026-10-18`. `main` et laboratoires intacts. Revue manuelle Monster Capture **VALIDÉE par l'utilisateur le 18 octobre 2026 (« Yes c est ok 👍 »)** ; R06 clos.**
 
 ## Source et protocole §§25–26
 
@@ -27,4 +27,4 @@ Date : 18 octobre 2026. **GREEN technique certifié au SHA `41a709f3478ded45b12b
 
 ## Invariants et suite
 
-Aucun gameplay Capture, Dungeon, Survie ni PvP n'a été réécrit ; aucune donnée de profil ou sauvegarde n'a changé de format ; aucune deuxième autorité d'inventaire, de rendu, de combat ou de détection. R07 et D10 **non commencés**. `main` et les dépôts des laboratoires inchangés. Proscrire les micro-lots : ne reprendre après validation manuelle que des groupes homogènes de portée réelle.
+Aucun gameplay Capture, Dungeon, Survie ni PvP n'a été réécrit ; aucune donnée de profil ou sauvegarde n'a changé de format ; aucune deuxième autorité d'inventaire, de rendu, de combat ou de détection. R07 et D10 **non commencés**. `main` et les dépôts des laboratoires inchangés. Validation manuelle utilisateur acquise le 18 octobre 2026. Proscrire les micro-lots : ne reprendre que des groupes homogènes de portée réelle, avec un nouveau checkpoint START §25 et un ZIP source exact §26 avant toute nouvelle extraction.

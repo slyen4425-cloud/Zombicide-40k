@@ -653,6 +653,11 @@
       "owner": "GenSrpG Survie / vague, réserve et apparition R09",
       "domain": "survival",
       "role": "72 fonctions originales de l'éditeur de vagues, pioche d'apparition et affichage spawn; aucun moteur de combat dupliqué; script classique synchrone"
+    },
+    "assets/gensrpg/capture/legacy-monolith-functions-v1.js": {
+      "owner": "GenSrpG Capture / 90 legacy declarations R10",
+      "domain": "capture",
+      "role": "90 fonctions historiques Capture originales (combat classique, creat/XP, inventaire, boutiques, soin, regles de mode). Aucun nouveau moteur. Chargement classique synchrone"
     }
   }
 }

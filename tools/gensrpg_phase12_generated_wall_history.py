@@ -52,7 +52,18 @@ def _exact_r09_to_r08():
     assert blob(data)=="6eeed45a0a12085c1b107ee6c24b49040277ca54", "R09 -> R08 exact rollback required"
     return data
 
+@lru_cache(maxsize=1)
+def _exact_r10_to_r09():
+    from pathlib import Path
+    import subprocess
+    root=Path(__file__).resolve().parents[1]
+    data=subprocess.check_output(["node",str(root/"tools/gensrpg_phase12_r10_capture_extract_apply.cjs"),"--restore-r09"],cwd=root)
+    assert len(data)==2093066 and blob(data)=="4dbe3314d5048f2def404ed674498c0670c04fc1", "R10 -> R09 exact rollback required"
+    return data
+
 def historical_r05_view(data):
+    if blob(data)=="b8ef8dcb497cad94c91094ed008136a5d9800155":
+        data=_exact_r10_to_r09()
     if blob(data)=="4dbe3314d5048f2def404ed674498c0670c04fc1":
         data=_exact_r09_to_r08()
     if blob(data)=="6eeed45a0a12085c1b107ee6c24b49040277ca54":

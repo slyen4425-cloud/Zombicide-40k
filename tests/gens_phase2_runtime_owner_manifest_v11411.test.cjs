@@ -51,8 +51,8 @@ while(queue.length){
 }
 
 const mapped=new Set(Object.keys(manifest.files||{}));
-assert.equal(reachable.size,127,'production graph includes the three explicitly composed PvP services alongside Capture owners');
-assert.equal(mapped.size,127,'owner manifest must classify every production-reachable file including PvP S2 and Capture owners');
+assert.equal(reachable.size,128,'production graph includes the three explicitly composed PvP services alongside Capture owners');
+assert.equal(mapped.size,128,'owner manifest must classify every production-reachable file including PvP S2 and Capture owners');
 
 const missing=[...reachable].filter(rel=>!mapped.has(rel)).sort();
 const stale=[...mapped].filter(rel=>!reachable.has(rel)).sort();

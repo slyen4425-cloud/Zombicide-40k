@@ -3,7 +3,7 @@
 The historical Escape keydown handler remains in-place, never relocated.
 Only exact d6.zip (R07 GREEN) input and projected output are accepted.
 """
-import argparse, hashlib, json, re
+import argparse, hashlib, json, re, subprocess
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -92,6 +92,8 @@ def apply():
 
 def verify():
     out=(ROOT/"index.html").read_bytes()
+    if len(out)==2093066 and gitblob(out)=="4dbe3314d5048f2def404ed674498c0670c04fc1":
+        out=subprocess.check_output(["node",str(ROOT/"tools/gensrpg_phase12_r09_wave_extract_apply.cjs"),"--restore-r08"],cwd=ROOT)
     asset=(ROOT/REL).read_bytes()
     old=restore(out,asset)
     if extract(old)!=(out,asset):raise ValueError("R08 forward-backward drift")

@@ -4,7 +4,13 @@ const fs=require('node:fs');
 const crypto=require('node:crypto');
 const vm=require('node:vm');
 function blob(str){const buf=Buffer.from(str);return crypto.createHash('sha1').update('blob '+buf.length+'\0').update(buf).digest('hex')}
-const idx=fs.readFileSync('index.html','utf8');
+const cp=require('node:child_process');
+const active=fs.readFileSync('index.html','utf8');
+// Keep R09 source/behaviour assertions intact after R10: reconstruct the
+// exact R09 byte stream through the certified inverse (no relaxed SHA checks).
+const idx=active.includes('assets/gensrpg/capture/legacy-monolith-functions-v1.js')
+ ? cp.execFileSync('node',['tools/gensrpg_phase12_r10_capture_extract_apply.cjs','--restore-r09'],{maxBuffer:10*1024*1024}).toString('utf8')
+ : active;
 const code=fs.readFileSync('assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js','utf8');
 assert.equal(blob(idx),'4dbe3314d5048f2def404ed674498c0670c04fc1');
 assert.equal(blob(code),'515642eda275802c50af867d5712517d47020414');

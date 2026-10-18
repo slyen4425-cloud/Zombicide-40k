@@ -7,6 +7,7 @@ const tag='<script src="assets/gensrpg/core/legacy-magic-sounds-v1.js"></script>
 const ali='const GENSRPG_MAGIC_SOUNDS = GensRpgLegacyMagicSoundsR07;';
 const prefix='const GensRpgLegacyMagicSoundsR07 = ';
 module.exports=function originalR07View(index,root=path.resolve(__dirname,'../..')){
+ index=require('./gens_phase12_r08_shared_ability_source_view_v1.cjs')(index,root);
  if(hash(index)!==CURRENT)return index;
  assert.equal(index.length,2217805,'only R07 current HTML is reversible');
  const asset=fs.readFileSync(path.join(root,'assets/gensrpg/core/legacy-magic-sounds-v1.js'));

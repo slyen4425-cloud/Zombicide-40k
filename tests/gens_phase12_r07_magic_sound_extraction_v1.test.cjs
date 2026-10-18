@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),vm=require('node:vm');
 const root=path.join(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p));
 const sha=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0')).update(b).digest('hex');
-const rel='assets/gensrpg/core/legacy-magic-sounds-v1.js',data=read(rel),html=read('index.html');
+const rel='assets/gensrpg/core/legacy-magic-sounds-v1.js',data=read(rel),html=require('./helpers/gens_phase12_r08_shared_ability_source_view_v1.cjs')(read('index.html'),root);
 const reverse=require('./helpers/gens_phase12_r07_magic_audio_source_view_v1.cjs');
 assert.equal(html.length,2217805);assert.equal(sha(html),'aca31c540d61c81e1504d3b915b034b372103b5b');
 assert.equal(data.length,425484);assert.equal(sha(data),'a09e21c0da7439ccda5a6aaa246096950e1b261b');

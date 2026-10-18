@@ -42,6 +42,9 @@ STYLE='''.dc047Cell.dc079WallBlock{
 }
 '''.encode("utf8")
 def historical_r05_view(data):
+    if blob(data)=="6eeed45a0a12085c1b107ee6c24b49040277ca54":
+        from gensrpg_phase12_r08_shared_catalog_extract_apply import ROOT as R08_ROOT, REL as R08_REL, restore as r08_restore
+        data=r08_restore(data,(R08_ROOT/R08_REL).read_bytes())
     # Exact R07 -> R06 is test-only, before legacy R06/R05/D9 restorations.
     # The active runtime page and published sound asset are never rewritten.
     if blob(data)=="aca31c540d61c81e1504d3b915b034b372103b5b":

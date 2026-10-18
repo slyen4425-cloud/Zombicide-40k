@@ -312,18 +312,30 @@ def verify():
             if path in (PATH_OWNERS,PATH_GLOBALS) and current_blob in (
                 "b33542b033c5afa8a1643d99c56c21dbd4be266c",
                 "12fc91df4ee4c7989a172baa96f9790da6dc57f7",
+                "aca31c540d61c81e1504d3b915b034b372103b5b",
             ):
                 expected_after=current_blob
-            if path==PATH_GRAPH and current_blob=="12fc91df4ee4c7989a172baa96f9790da6dc57f7":
+            if path==PATH_GRAPH and current_blob in (
+                "12fc91df4ee4c7989a172baa96f9790da6dc57f7",
+                "aca31c540d61c81e1504d3b915b034b372103b5b",
+            ):
                 # R06 introduces 18 Capture-owner files without changing the
-                # historical D1-R05 rollback. Phase 2 JS baseline remains 82,
-                # since all new files belong to the known Capture domain.
+                # historical D1-R05 rollback. Phase 2 JS baseline remains 82.
                 for former,current in (
                     ("size,64,", "size,82,"),
                     ("allJs.length,121,", "allJs.length,139,"),
                     ("reachable.size,107,", "reachable.size,125,"),
                 ):
                     expected_after=expected_after.replace(former,current)
+                if current_blob=="aca31c540d61c81e1504d3b915b034b372103b5b":
+                    # R07 data-only MP3 owner adds one reachable, explicit
+                    # module without changing the historical Phase 2 baseline.
+                    for former,current in (
+                        ("size,82,", "size,83,"),
+                        ("allJs.length,139,", "allJs.length,140,"),
+                        ("reachable.size,125,", "reachable.size,126,"),
+                    ):
+                        expected_after=expected_after.replace(former,current)
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

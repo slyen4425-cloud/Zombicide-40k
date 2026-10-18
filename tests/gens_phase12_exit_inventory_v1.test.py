@@ -21,6 +21,23 @@ class ExitInventoryTests(unittest.TestCase):
         self.assertEqual(EXPECTED_SIZE, 2643155)
         self.assertEqual(EXPECTED_BLOB, "12fc91df4ee4c7989a172baa96f9790da6dc57f7")
 
+    def test_current_repo_index_matches_user_d2_zip_census(self):
+        source = Path(__file__).resolve().parents[1] / "index.html"
+        report = summarize(source.read_bytes())
+        counts = report["counts"]
+        self.assertEqual(counts["script_tags"], 161)
+        self.assertEqual(counts["external"], 55)
+        self.assertEqual(counts["inline_active"], 89)
+        self.assertEqual(counts["inline_disabled"], 17)
+        self.assertEqual(counts["inline_active_bytes"], 1752298)
+        self.assertEqual(report["anonymous_inline_active"], {"count": 5, "body_bytes": 1417518})
+        largest = report["largest_active_inline"]
+        self.assertEqual([(x["order"], x["id"], x["body_bytes"]) for x in largest[:2]],
+                         [(19, None, 1229754), (21, None, 180964)])
+        self.assertEqual(largest[0]["body_blob"], "a277677ff96eb8bb62dcffcbe84e74f5d255b73a")
+        self.assertEqual(largest[1]["body_blob"], "3667baf92d27696569286870403c96d6e5428779")
+        self.assertEqual(sum(x["body_bytes"] for x in report["disabled_metadata"]), 95878)
+
     def test_synthetic_metadata_never_leaks_bodies(self):
         record = summarize(SAMPLE, len(SAMPLE), git_blob(SAMPLE))
         self.assertEqual(record["counts"]["script_tags"], 4)

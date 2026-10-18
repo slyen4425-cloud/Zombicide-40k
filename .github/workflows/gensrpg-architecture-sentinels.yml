@@ -19,6 +19,9 @@ jobs:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
 
+      - name: Recenser sans transfert les scripts actifs du HTML exact R06 GREEN (§26)
+        run: python3 tests/gens_phase12_exit_inventory_v1.test.py
+
       - name: Verrouiller le transfert propriétaire de la transition Hub Capture Phase 9
         run: |
           node tests/gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs

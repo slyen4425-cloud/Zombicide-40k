@@ -22,6 +22,7 @@ jobs:
           test "$(git hash-object index.html)" = '4dbe3314d5048f2def404ed674498c0670c04fc1'
           test "$(git hash-object assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js)" = '515642eda275802c50af867d5712517d47020414'
           node tools/gensrpg_phase12_r09_wave_extract_apply.cjs --verify
+          test "$(node tools/gensrpg_phase12_r09_wave_extract_apply.cjs --restore-r08 | git hash-object --stdin)" = "6eeed45a0a12085c1b107ee6c24b49040277ca54"
       - name: Exercise true classic-script global composition and Survival reserve/waves
         run: |
           node --check assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js

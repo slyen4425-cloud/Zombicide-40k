@@ -44,8 +44,41 @@ function extract(source) {
   invariant(Buffer.byteLength(module) === 39292 && blob(module) === NEW_MODULE, "R09: module mismatch");
   return {html,module};
 }
+
+function reconstructR08FromFiles() {
+  const current=fs.readFileSync("index.html","utf8");
+  const mod=fs.readFileSync(MODULE,"utf8");
+  invariant(blob(current)===NEW_INDEX && blob(mod)===NEW_MODULE, "R09: noncanonical R09 files");
+  invariant(current.includes(HOOK), "R09: loader missing");
+  let html=current.replace(HOOK,"");
+  const scripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)];
+  invariant(scripts.length===163, "R09: script count mismatch on rollback");
+  const m=scripts[19],body=m[2];
+  let cursor=header.length,parts=[];
+  for(let i=0;i<spans.length;i++){
+    const [a,b]=spans[i];
+    parts.push(mod.slice(cursor,cursor+b-a));cursor+=b-a;
+    const separator=i===spans.length-1?"\n":"\n\n";
+    invariant(mod.slice(cursor,cursor+separator.length)===separator, "R09: module separation mismatch at "+i);
+    cursor+=separator.length;
+  }
+  invariant(cursor===mod.length, "R09: trailing module content");
+  let restored=body;
+  for(let i=0;i<spans.length;i++){
+    const [a,b]=spans[i];
+    restored=restored.slice(0,a)+parts[i]+restored.slice(a);
+  }
+  const p=html.indexOf(body,m.index);
+  invariant(p>=0,"R09: remaining script not found");
+  html=html.slice(0,p)+restored+html.slice(p+body.length);
+  invariant(blob(html)===ORIGINAL, "R09: reversed index differs from exact R08");
+  return html;
+}
+
 const mode=process.argv[2]||"--check-source";
-if (mode==="--check-source") {
+if (mode==="--restore-r08") {
+  process.stdout.write(reconstructR08FromFiles());
+} else if (mode==="--check-source") {
   extract(fs.readFileSync("index.html","utf8"));
   invariant(!fs.existsSync(MODULE), "R09: module already exists");
   process.stdout.write("R09 source GREEN: 72 functions / d7 exact\n");

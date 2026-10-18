@@ -6,6 +6,7 @@ const rel='assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js',tag='<scr
 const listener='document.addEventListener("keydown",e=>{\n  if(e.key==="Escape"){\n    const p=document.getElementById("skillEditorPanel");\n    if(p && p.style.display==="block")closeSkillEditor();\n  }\n});\n\n';
 const anchor='function renderSkillEditorType(){';
 module.exports=function R07View(index,root=path.resolve(__dirname,'../..')){
+ index=require('./gens_phase12_r09_wave_source_view_v1.cjs')(index,root);
  if(sha(index)!==from)return index;
  assert.equal(index.length,2131805);
  const js=fs.readFileSync(path.join(root,rel));

@@ -102,8 +102,16 @@ for(const domain of domains){
 }
 
 const ownerManifest=JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'));
-assert.equal(Object.keys(ownerManifest.files||{}).length,107,
-  'R04 adds one reachable Builders equipment owner; planned Phase 3 entry contracts remain inert');
+const captureR06OwnerPaths=Object.keys(ownerManifest.files||{})
+  .filter(rel=>rel.startsWith('assets/gensrpg/capture/legacy-patches/')&&rel.endsWith('-v1.js'));
+assert.equal(captureR06OwnerPaths.length,18,'R06 must preserve exactly eighteen Capture legacy owners');
+for(const rel of captureR06OwnerPaths){
+  assert.equal(ownerManifest.files[rel].domain,'capture','R06 legacy owner must remain in Capture domain: '+rel);
+  assert.equal(exists(rel),true,'R06 legacy physical owner must exist: '+rel);
+  assert.equal(composition.index.split(rel).length-1,1,'R06 legacy owner must load once from source index: '+rel);
+}
+assert.equal(Object.keys(ownerManifest.files||{}).length,107+captureR06OwnerPaths.length,
+  'R06 adds 18 Capture physical owners to the previously certified graph; Phase 3 entry contracts remain inert');
 assert.equal(ownerManifest.files?.['assets/gensrpg/core/legacy-cloud-sync-backup-v1.js']?.domain,'core',
   'R05 cloud-sync/local-backup must have a sole Core owner');
 assert.equal(composition.index.split('assets/gensrpg/core/legacy-cloud-sync-backup-v1.js').length-1,1,
@@ -175,7 +183,7 @@ console.log(JSON.stringify({
   domains:domains.length,
   entrypoints:domains.length,
   contracts:domains.length,
-  productionOwnerGraph:104,
+  productionOwnerGraph:Object.keys(ownerManifest.files||{}).length,
   loadedEntrySlices:4,
   captureAuxiliaryRuntimeOwners:6
 },null,2));

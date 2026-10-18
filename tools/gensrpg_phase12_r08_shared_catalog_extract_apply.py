@@ -92,7 +92,9 @@ def apply():
 
 def verify():
     out=(ROOT/"index.html").read_bytes()
-    if len(out)==2093066 and gitblob(out)=="4dbe3314d5048f2def404ed674498c0670c04fc1":
+    # R10 first restores exact R09, then R09 restores exact R08.
+    # Strictly whitelist both known Git blobs; never loosen the source gate.
+    if (len(out)==2093066 and gitblob(out)=="4dbe3314d5048f2def404ed674498c0670c04fc1") or (len(out)==2031649 and gitblob(out)=="b8ef8dcb497cad94c91094ed008136a5d9800155"):
         out=subprocess.check_output(["node",str(ROOT/"tools/gensrpg_phase12_r09_wave_extract_apply.cjs"),"--restore-r08"],cwd=ROOT)
     asset=(ROOT/REL).read_bytes()
     old=restore(out,asset)

@@ -1,0 +1,20 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+const sha=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0')).update(b).digest('hex');
+const from='6eeed45a0a12085c1b107ee6c24b49040277ca54',to='aca31c540d61c81e1504d3b915b034b372103b5b';
+const rel='assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js',tag='<script src="'+rel+'"></script>';
+const listener='document.addEventListener("keydown",e=>{\n  if(e.key==="Escape"){\n    const p=document.getElementById("skillEditorPanel");\n    if(p && p.style.display==="block")closeSkillEditor();\n  }\n});\n\n';
+const anchor='function renderSkillEditorType(){';
+module.exports=function R07View(index,root=path.resolve(__dirname,'../..')){
+ if(sha(index)!==from)return index;
+ assert.equal(index.length,2131805);
+ const js=fs.readFileSync(path.join(root,rel));
+ assert.equal(js.length,86082);
+ assert.equal(sha(js),'f3f650679799d1e6c8e6b6bcd76a6a0963a02f66');
+ const html=index.toString('utf8'),source=js.toString('utf8');
+ assert.equal(html.split(tag).length-1,1);assert.equal(html.split(listener).length-1,1);
+ assert.equal(source.split(anchor).length-1,1);assert.ok(!source.includes(listener));
+ const old=Buffer.from(html.replace(tag,'').replace(listener,source.replace(anchor,listener+anchor)),'utf8');
+ assert.equal(old.length,2217805);assert.equal(sha(old),to);
+ return old;
+};

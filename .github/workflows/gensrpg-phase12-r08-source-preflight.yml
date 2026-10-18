@@ -1,0 +1,23 @@
+name: GenSrpG Phase12 R08 exact source and rollback
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r08-shared-ability-skill-catalog-2026-10-18'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify R08 exact source, unchanged listener and restore R07
+        run: |
+          test "$(git hash-object index.html)" = '6eeed45a0a12085c1b107ee6c24b49040277ca54'
+          test "$(git hash-object assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js)" = 'f3f650679799d1e6c8e6b6bcd76a6a0963a02f66'
+          python3 tools/gensrpg_phase12_r08_shared_catalog_extract_apply.py --verify
+          node --check assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js
+          node tests/gens_phase12_r08_shared_catalog_extraction_v1.test.cjs
+          node tests/gens_phase12_r07_magic_sound_extraction_v1.test.cjs
+          python3 tests/gens_phase12_exit_inventory_v1.test.py

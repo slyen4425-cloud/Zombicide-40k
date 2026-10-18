@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 import sys
 import zipfile
@@ -22,6 +23,8 @@ CERTIFIED_COMMIT = "8580587f2aab5bc3918950bc152b4a56e4d79a8d"
 def summarize(data: bytes, *, expected_size: int = EXPECTED_SIZE,
               expected_blob: str = EXPECTED_BLOB) -> dict:
     """Count real script tags without emitting their bodies; fail closed by default."""
+    if len(data) != expected_size or git_blob(data) != expected_blob:
+        raise ValueError("Source hors checkpoint R09 : taille ou blob Git incorrect")
     report = inventory(data, expected_size, expected_blob)
     scripts = report["scripts"]
     active = [s for s in scripts if s["status"] == "active" and not s["src"]]
@@ -88,9 +91,9 @@ def main() -> int:
                 candidates = [
                     info for info in archive.infolist()
                     if not info.is_dir() and
-                    __import__("re").fullmatch(
+                    re.fullmatch(
                         r"index\.html(?:\(\d+\))?(?:\.txt)?",
-                        Path(info.filename).name, flags=__import__("re").I
+                        Path(info.filename).name, flags=re.I
                     )
                 ]
                 if len(candidates) != 1 or candidates[0].file_size != EXPECTED_SIZE:

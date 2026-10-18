@@ -59,8 +59,13 @@ const captureR06Files=fs.readdirSync(path.join(root,'assets/gensrpg/capture/lega
 assert.equal(captureR06Files.length,18,'R06 must expose exactly eighteen physical legacy Capture scripts');
 for(const rel of captureR06Files)
   assert.equal(reachable.has(rel),true,'R06 Capture owner must be production-reachable: '+rel);
-assert.equal(reachable.size,109+captureR06Files.length,
-  'production graph must preserve 107 prior owners plus the 18 R06 Capture owners');
+const R09_SURVIVAL_WAVE='assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js';
+assert.equal(rawDirect.filter(x=>x===R09_SURVIVAL_WAVE).length,1,
+  'R09 Survival wave owner must be loaded exactly once from index.html');
+assert.equal(reachable.has(R09_SURVIVAL_WAVE),true,
+  'R09 Survival wave owner must remain reachable in the real production graph');
+assert.equal(reachable.size,110+captureR06Files.length,
+  'production graph must preserve 109 R08 owners, add exactly one R09 Survival owner, and keep all 18 R06 Capture owners');
 assert.equal(reachable.has('assets/gensrpg/dungeon/core01-session-ui-v1.js'),true,
   'Phase 12 extracted Dungeon Core01 must remain physically reachable exactly once');
 assert.equal(reachable.has('assets/gensrpg/capture/combat-core-v1.js'),true,

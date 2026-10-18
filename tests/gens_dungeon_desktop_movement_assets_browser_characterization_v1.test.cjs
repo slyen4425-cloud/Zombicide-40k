@@ -72,6 +72,32 @@ async function configureMovement(page,isolateRoundEvents=false){
   assert.deepEqual(stored,{module:true,mode:'tactical',enabled:true});
   return stored;
 }
+async function isolateDefaultRoundEvents(page){
+  // The default movement-off scenario must not randomly start Tactical combat.
+  // Configure the real creator UI; do not inject or stub the live event runtime.
+  await page.locator('#gensGameHome button[onclick="backToGensFamily()"]').click();
+  await page.locator('#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseCardActions button').first().click();
+  const modal=page.locator('#rpgUniverseEditorModal');
+  await modal.waitFor({state:'visible'});
+  await modal.locator('button[onclick="showRpgUniverseTab(\\'exploration\\')"]').click();
+  await modal.locator('#rpgRoundEvents').selectOption('false');
+  await modal.locator('#rpgEventTrigger').selectOption('manual');
+  await modal.locator('#rpgEventChance').fill('0');
+  await modal.locator('button[onclick="saveRpgUniverseExploration()"]').click();
+  await page.waitForFunction(()=>getActiveGameProfile()?.rpgUniverse?.exploration?.roundEvents===false);
+  const settings=await page.evaluate(()=>({
+    movement:getActiveGameProfile()?.rpgUniverse?.gameplay?.modules?.movement,
+    roundEvents:currentRpgEventSettings().roundEvents,
+    eventTrigger:currentRpgEventSettings().eventTrigger,
+    eventChance:currentRpgEventSettings().eventChance
+  }));
+  assert.notEqual(settings.movement,true,'default test setup must not enable the movement module');
+  assert.deepEqual({roundEvents:settings.roundEvents,eventTrigger:settings.eventTrigger,eventChance:settings.eventChance},
+    {roundEvents:false,eventTrigger:'manual',eventChance:0},'random Dungeon events must be disabled through the real creator before testing movement-off');
+  await modal.locator('button[onclick="closeRpgUniverseEditor()"]').click();
+  await page.locator('#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseMainBtn').click();
+  return settings;
+}
 async function dismissNotices(page){
   const closed=[];
   for(let i=0;i<8;i++){
@@ -233,6 +259,7 @@ async function generatedFixture(page){
           await ready(page);await home(page);
           if(kind==='generated'){
             row.fixture=await generatedFixture(page);
+            row.defaultEventIsolation=await isolateDefaultRoundEvents(page);
             assert.equal(row.fixture.applied,true);
             assert.equal(row.fixture.selected,true);
             assert.equal(row.fixture.activeAdventureId,row.fixture.adventureId);

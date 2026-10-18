@@ -42,6 +42,11 @@ STYLE='''.dc047Cell.dc079WallBlock{
 }
 '''.encode("utf8")
 def historical_r05_view(data):
+    # Exact R07 -> R06 is test-only, before legacy R06/R05/D9 restorations.
+    # The active runtime page and published sound asset are never rewritten.
+    if blob(data)=="aca31c540d61c81e1504d3b915b034b372103b5b":
+        from gensrpg_phase12_r07_magic_audio_extract_apply import ROOT as R07_ROOT, REL, reverse as r07_reverse
+        data=r07_reverse(data,(R07_ROOT/REL).read_bytes())
     # History-only inverse of R06 first: the active page remains external.
     # No archived byte signature or original module body is changed.
     if blob(data)=="12fc91df4ee4c7989a172baa96f9790da6dc57f7":

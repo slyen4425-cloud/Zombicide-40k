@@ -32,6 +32,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
-          git diff --cached --check
+          # Preserve original trailing newlines byte-exact; still reject all other whitespace errors.
+          git -c core.whitespace=-blank-at-eof diff --cached --check
           git commit -m "refactor(phase12): extract shared ability skill catalog without moving keydown listener"
           git push origin "HEAD:$GITHUB_REF_NAME"

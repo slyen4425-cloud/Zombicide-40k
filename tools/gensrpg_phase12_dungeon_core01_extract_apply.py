@@ -333,7 +333,7 @@ def verify():
                     ("reachable.size,107,", "reachable.size,125,"),
                 ):
                     expected_after=expected_after.replace(former,current)
-                if current_blob in ("aca31c540d61c81e1504d3b915b034b372103b5b","6eeed45a0a12085c1b107ee6c24b49040277ca54","4dbe3314d5048f2def404ed674498c0670c04fc1"):
+                if current_blob in ("aca31c540d61c81e1504d3b915b034b372103b5b","6eeed45a0a12085c1b107ee6c24b49040277ca54","4dbe3314d5048f2def404ed674498c0670c04fc1","b8ef8dcb497cad94c91094ed008136a5d9800155"):
                     # R07 data-only MP3 owner adds one reachable, explicit
                     # module without changing the historical Phase 2 baseline.
                     for former,current in (
@@ -342,7 +342,7 @@ def verify():
                         ("reachable.size,125,", "reachable.size,126,"),
                     ):
                         expected_after=expected_after.replace(former,current)
-                if current_blob in ("6eeed45a0a12085c1b107ee6c24b49040277ca54","4dbe3314d5048f2def404ed674498c0670c04fc1"):
+                if current_blob in ("6eeed45a0a12085c1b107ee6c24b49040277ca54","4dbe3314d5048f2def404ed674498c0670c04fc1","b8ef8dcb497cad94c91094ed008136a5d9800155"):
                     for former,current in (
                         ("size,83,", "size,84,"),
                         ("allJs.length,140,", "allJs.length,141,"),

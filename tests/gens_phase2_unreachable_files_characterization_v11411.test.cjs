@@ -53,8 +53,14 @@ while(queue.length){
 const CAPTURE_SESSION_START='assets/gensrpg/capture/session-start-v1.js';
 const CAPTURE_SCREEN_RETURN='assets/gensrpg/capture/screen-return-v1.js';
 const CAPTURE_HUB='assets/gensrpg/capture/hub-entry-v1.js';
-assert.equal(reachable.size,107,
-  'production graph must include the extracted Dungeon Core01 owner and physical Capture world/team/combat/session owners');
+const captureR06Files=fs.readdirSync(path.join(root,'assets/gensrpg/capture/legacy-patches'))
+  .filter(name=>name.endsWith('-v1.js'))
+  .map(name=>'assets/gensrpg/capture/legacy-patches/'+name);
+assert.equal(captureR06Files.length,18,'R06 must expose exactly eighteen physical legacy Capture scripts');
+for(const rel of captureR06Files)
+  assert.equal(reachable.has(rel),true,'R06 Capture owner must be production-reachable: '+rel);
+assert.equal(reachable.size,107+captureR06Files.length,
+  'production graph must preserve 107 prior owners plus the 18 R06 Capture owners');
 assert.equal(reachable.has('assets/gensrpg/dungeon/core01-session-ui-v1.js'),true,
   'Phase 12 extracted Dungeon Core01 must remain physically reachable exactly once');
 assert.equal(reachable.has('assets/gensrpg/capture/combat-core-v1.js'),true,

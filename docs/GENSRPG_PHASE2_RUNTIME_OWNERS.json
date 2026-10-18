@@ -643,6 +643,11 @@
       "owner": "GenSrpG Core / shared immutable magic audio library R07",
       "domain": "core",
       "role": "single byte-exact set of three embedded MP3 data URLs; synchronous pure data owner, no gameplay logic or new sound engine"
+    },
+    "assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js": {
+      "owner": "GenSrpG Builders / Shared Ability and Skill Catalog R08",
+      "domain": "builders",
+      "role": "57 original library/editor functions moved bit-identical, Escape listener unchanged at original parser position, no combat engine duplicated"
     }
   }
 }

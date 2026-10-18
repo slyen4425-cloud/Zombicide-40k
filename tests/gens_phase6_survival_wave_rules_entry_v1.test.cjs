@@ -5,6 +5,7 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 
 const index=fs.readFileSync('index.html','utf8');
+const waveOwner=fs.readFileSync('assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js','utf8');
 const entryPath='assets/gensrpg/survival/entry-v1.js';
 const contractPath='assets/gensrpg/survival/module-contract-v1.json';
 const entry=fs.readFileSync(entryPath,'utf8');
@@ -83,12 +84,16 @@ assert.ok(index.indexOf(tag)<index.indexOf('const Z40K_GENERIC_SHEET_BG'),
 
 assert.doesNotMatch(index,/function\s+defaultWaveProfile\s*\(/,'legacy defaultWaveProfile owner must be retired');
 assert.doesNotMatch(index,/function\s+collectEnemyIdsFromProfile\s*\(/,'legacy enemy-id collector owner must be retired');
-assert.equal((index.match(/GensSurvivalV1\.waveRules\.defaultProfile\(\)/g)||[]).length,5,
-  'five legacy index consumers must still use Survival API directly after Zombicide base conversion moves into the module');
+assert.equal((index.match(/GensSurvivalV1\.waveRules\.defaultProfile\(\)/g)||[]).length,0,
+  'R09 removes the five legacy default-profile consumers from the inline index');
+assert.equal((waveOwner.match(/GensSurvivalV1\.waveRules\.defaultProfile\(\)/g)||[]).length,5,
+  'R09 keeps all five original default-profile consumers in the single Survie owner');
 assert.match(entry,/function\s+zombicideBaseProfile\s*\([^)]*\)\s*\{[\s\S]*?const\s+base=defaultProfile\(\)/,
   'the sixth default-profile consumption now belongs inside the Survival Zombicide base converter');
-assert.equal((index.match(/GensSurvivalV1\.waveRules\.collectEnemyIds\(/g)||[]).length,1,
-  'one legacy index consumer must still use Survival API directly after auto-reserve ownership moves into the module');
+assert.equal((index.match(/GensSurvivalV1\.waveRules\.collectEnemyIds\(/g)||[]).length,0,
+  'R09 removes the one legacy enemy-id consumer from the inline index');
+assert.equal((waveOwner.match(/GensSurvivalV1\.waveRules\.collectEnemyIds\(/g)||[]).length,1,
+  'R09 retains exactly one external enemy-id consumer without rule changes');
 assert.match(entry,/function\s+autoReserve\s*\([^)]*\)\s*\{[\s\S]*?collectEnemyIds\(profile\)/,
   'automatic reserve derivation must reuse the module-owned enemy-id collector');
 

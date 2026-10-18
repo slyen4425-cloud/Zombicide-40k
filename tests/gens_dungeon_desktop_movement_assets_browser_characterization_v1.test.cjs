@@ -79,7 +79,7 @@ async function isolateDefaultRoundEvents(page){
   await page.locator('#gensFamilyGames [data-rpg-profile="'+DUNGEON_ID+'"] .gensUniverseCardActions button').first().click();
   const modal=page.locator('#rpgUniverseEditorModal');
   await modal.waitFor({state:'visible'});
-  await modal.locator('button[onclick="showRpgUniverseTab(\\'exploration\\')"]').click();
+  await modal.locator('button[onclick="showRpgUniverseTab(\'exploration\')"]').click();
   await modal.locator('#rpgRoundEvents').selectOption('false');
   await modal.locator('#rpgEventTrigger').selectOption('manual');
   await modal.locator('#rpgEventChance').fill('0');

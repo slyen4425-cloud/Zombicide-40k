@@ -110,8 +110,13 @@ for(const rel of captureR06OwnerPaths){
   assert.equal(exists(rel),true,'R06 legacy physical owner must exist: '+rel);
   assert.equal(composition.index.split(rel).length-1,1,'R06 legacy owner must load once from source index: '+rel);
 }
-assert.equal(Object.keys(ownerManifest.files||{}).length,109+captureR06OwnerPaths.length,
-  'R06 adds 18 Capture physical owners to the previously certified graph; Phase 3 entry contracts remain inert');
+const r09WaveOwner='assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js';
+assert.equal(ownerManifest.files?.[r09WaveOwner]?.domain,'survival',
+  'R09 wave/spawn editor declarations must be exclusively Survival-owned');
+assert.equal(composition.index.split(r09WaveOwner).length-1,1,
+  'R09 Survival wave/spawn runtime owner must load exactly once');
+assert.equal(Object.keys(ownerManifest.files||{}).length,110+captureR06OwnerPaths.length,
+  'R09 adds one physical Survival owner to the 109 R08 owners and 18 R06 Capture owners; Phase 3 entry contracts remain inert');
 assert.equal(ownerManifest.files?.['assets/gensrpg/core/legacy-cloud-sync-backup-v1.js']?.domain,'core',
   'R05 cloud-sync/local-backup must have a sole Core owner');
 assert.equal(composition.index.split('assets/gensrpg/core/legacy-cloud-sync-backup-v1.js').length-1,1,

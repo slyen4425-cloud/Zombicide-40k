@@ -22,7 +22,7 @@ function extract(source) {
   const scripts = [...source.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)];
   invariant(scripts.length === 163, "R09: unexpected script count " + scripts.length);
   const m = scripts[19], body = m[2];
-  invariant(body.length === 798592, "R09: source JS span changed");
+  invariant(body.length === 799001, "R09: source JS span changed");
   const names = ["defaultZombieConfig", "loadZombieConfig", "showSpawnResolution"];
   const selected = spans.map(([a,b]) => body.slice(a,b));
   invariant(spans.length === 72, "R09: selected function count");

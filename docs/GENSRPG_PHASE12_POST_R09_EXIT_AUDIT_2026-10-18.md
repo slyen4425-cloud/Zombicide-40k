@@ -69,6 +69,17 @@ Le rapport machine ne contient **ni corps de scripts, ni images, ni secrets** : 
 
 **État à la date du présent document : inventaire quantitatif R09 certifié ; audit de dépendances et de propriété fonctionnelle restant à approfondir avant un déplacement.** La Phase 12 n'est pas déclarée terminée.
 
+## 4 bis. Certification du chantier d'audit
+
+Le **checkpoint audit §25** `checkpoint/gensrpg-phase12-post-r09-exit-audit-green-2026-10-18` pointe sur le commit **`62a77e8e2b7fd9a4452cfb23c970957f2f8a37f4`**, uniquement **après** confirmation de ces quatre suites SUCCESS sur ce même SHA :
+
+- [Source R09 exacte, inventaire d8 et verrouillage metadata](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39157964316)
+- [Firefox](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39157964202)
+- [Tactical Firefox + Chromium](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39157964195)
+- [Architecture statique + navigateur Chromium](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39157964222)
+
+**Portée de ce GREEN** : instrument, rapport et inventaire quantitatif certifiés, non-interférence des fichiers runtime. **Ce n'est pas la clôture de la Phase 12.** Les travaux suivants nécessitent un nouveau chantier code, un START propre et un bornage par propriétaire.
+
 ## 5. Point de reprise
 
 `docs/GENSRPG_CHARTE.md` → `docs/GENSRPG_CURRENT_WORK.md` → START ci-dessus → ce rapport. Inventaire exact obtenu de l'archive utilisateur `d8.zip`, octets et blob vérifiés. Source de référence immuable : [index R09](https://github.com/slyen4425-cloud/Zombicide-40k/blob/8580587f2aab5bc3918950bc152b4a56e4d79a8d/index.html) ; manifeste sans corps de code : `docs/GENSRPG_PHASE12_POST_R09_D8_VERIFIED_CENSUS_2026-10-18.json`.

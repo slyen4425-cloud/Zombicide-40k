@@ -1,0 +1,38 @@
+name: GenSrpG Phase12 R07 guarded magic audio extraction
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r07-magic-audio-data-2026-10-18'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r07-magic-audio-controlled-apply.yml'
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify the exact d3.zip-backed R06 source and deterministic rollback
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r07-magic-audio-data-2026-10-18'
+          test "$(git hash-object index.html)" = '12fc91df4ee4c7989a172baa96f9790da6dc57f7'
+          test ! -e assets/gensrpg/core/legacy-magic-sounds-v1.js
+          python3 tools/gensrpg_phase12_r07_magic_audio_extract_apply.py --check-source
+      - name: Extract only pure MP3 data, then prove R07-to-R06 byte-exact reconstruction
+        run: |
+          python3 tools/gensrpg_phase12_r07_magic_audio_extract_apply.py --apply
+          python3 tools/gensrpg_phase12_r07_magic_audio_extract_apply.py --verify
+          node --check assets/gensrpg/core/legacy-magic-sounds-v1.js
+          python3 tests/gens_phase12_exit_inventory_v1.test.py
+          git diff --check
+      - name: Publish on R07 branch only (never on main)
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/core/legacy-magic-sounds-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json tests/
+          git diff --cached --check
+          git commit -m 'refactor(phase12): move 425KB immutable magic audio data without changing game functions'
+          git push origin "HEAD:$GITHUB_REF_NAME"

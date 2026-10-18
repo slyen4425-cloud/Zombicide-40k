@@ -41,7 +41,7 @@ while(queue.length){
   reachable.add(rel);
   for(const dep of assetRefs(read(rel)))if(!reachable.has(dep))queue.push(dep);
 }
-assert.equal(reachable.size,126,'R07 preserves 125 R06 production owners and adds exactly one pure magic-audio data owner');
+assert.equal(reachable.size,127,'R08 preserves R07 owners and adds one shared Builders catalog');
 assert.equal(reachable.has('assets/gensrpg/core/legacy-magic-sounds-v1.js'),true,'R07 audio data must be genuinely production-reachable');
 for(const rel of reachable)assert.ok(manifest.files?.[rel],rel+' must be owned before side-effect inventory');
 

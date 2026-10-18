@@ -1,6 +1,6 @@
 # GenSrpG — Phase 12 R08 : extraction de la bibliothèque partagée capacités / compétences
 
-**Date : 18 octobre 2026. GREEN technique sur le SHA `f458f0dce79a6bf0034c69bca36313f671d51fc4` ; validation manuelle encore requise.**
+**Date : 18 octobre 2026. GREEN technique sur le SHA `f458f0dce79a6bf0034c69bca36313f671d51fc4` ; retour utilisateur favorable reçu (« Pour moi ça a l'air ok »).**
 
 ## §25 / §26 : base, source, périmètre
 
@@ -22,10 +22,14 @@ Checkpoint **`checkpoint/gensrpg-phase12-r08-shared-ability-skill-catalog-green-
 
 Les échecs précédents de Chromium provenaient de constructions de pages partielles dans les **fixtures de test** Capture, auxquelles manquait l'import synchrone de la bibliothèque R08. Les derniers correctifs n'ont changé que ces tests (notamment la composition du provider module-launch S3), sans changement de logique de jeu. Le SHA ci-dessus a passé les suites complètes.
 
-## Gate manuel et suite
+## Retour manuel utilisateur et suite
 
 - [Preview R08 immuable](https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/f458f0dce79a6bf0034c69bca36313f671d51fc4/preview.html). Tester affichage/édition des capacités et compétences, bibliothèques Survie/RPG/Créature/Dresseur/Compagnon, sauvegarde, touche Escape, pré-game Capture et passage entre modes.
-- **Aucun « testé par l'utilisateur » tant que ce retour n'est pas donné.** Phase 12 reste ouverte.
+- **Retour reçu le 18 octobre 2026 : « Pour moi ça a l'air ok ».** Il s'agit d'un retour de validation favorable sans anomalie signalée ; nous ne prétendons pas que chaque scénario de la liste a été personnellement vérifié. **R08 est clos ; Phase 12 reste ouverte.**
 - Pour toute future intervention sur le HTML, respecter §26 : [fichier exact R08 GREEN](https://github.com/slyen4425-cloud/Zombicide-40k/blob/f458f0dce79a6bf0034c69bca36313f671d51fc4/index.html) en ZIP utilisateur, attendu 2 131 805 octets et blob `6eeed45a0a12085c1b107ee6c24b49040277ca54`. Nouveau START §25 obligatoire pour tout R09. `main` reste gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 
 Ce document est un commit de suivi **postérieur** au checkpoint exact. Le checkpoint n'a pas été déplacé.
+
+## Contrôle complémentaire sur le HEAD documentaire
+
+Sur le SHA `88534c2fdc6cc6fd3b5273a27f6b46e66e252bb5` : préflight R08 [39127401450](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39127401450), Firefox [39127401417](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39127401417), Tactical [39127401468](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39127401468), Architecture/Chromium [39127401414](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39127401414) : **tous SUCCESS**, 361 contrôles statiques et 64 étapes navigateur. Comparaison de `f458f0dc` à `88534c2f` : exclusivement les deux documents de suivi, **aucun changement de code de production**. Le checkpoint immuable continue de pointer sur le SHA initialement certifié `f458f0dce79a6bf0034c69bca36313f671d51fc4`.

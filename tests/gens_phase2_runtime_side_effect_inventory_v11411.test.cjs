@@ -41,7 +41,8 @@ while(queue.length){
   reachable.add(rel);
   for(const dep of assetRefs(read(rel)))if(!reachable.has(dep))queue.push(dep);
 }
-assert.equal(reachable.size,128,'R09 preserves R08 owners and adds exactly one synchronous Survie wave owner');
+assert.equal(reachable.size,129,'R10 adds exactly one Capture legacy module to R09 reachable owners');
+assert.equal(reachable.has('assets/gensrpg/capture/legacy-monolith-functions-v1.js'),true,'R10 Capture owner must be genuinely reachable in the production graph');
 assert.equal(reachable.has('assets/gensrpg/core/legacy-magic-sounds-v1.js'),true,'R07 audio data must be genuinely production-reachable');
 for(const rel of reachable)assert.ok(manifest.files?.[rel],rel+' must be owned before side-effect inventory');
 

@@ -60,6 +60,47 @@ class CensusTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Source hors checkpoint R09"):
             summarize(wrong_source)
 
+    def test_exact_certified_r09_runtime_matches_user_d8_census_manifest(self):
+        """Metadata guard against drift; the source was independently certified from d8.zip."""
+        meta = json.loads(
+            (ROOT / "docs/GENSRPG_PHASE12_POST_R09_D8_VERIFIED_CENSUS_2026-10-18.json").read_text()
+        )
+        source = (ROOT / "index.html").read_bytes()
+        self.assertEqual(len(source), EXPECTED_SIZE)
+        self.assertEqual(git_blob(source), EXPECTED_BLOB)
+        current = summarize(source)
+        self.assertEqual(current["source"]["checkpoint_commit"], CERTIFIED_COMMIT)
+        self.assertEqual(current["counts"]["script_tags"], meta["counts"]["scriptTags"])
+        for source_key, manifest_key in [
+            ("external", "externalScripts"),
+            ("inline_active", "activeInlineScripts"),
+            ("inline_active_bytes", "activeInlineBytes"),
+            ("inline_disabled", "disabledInlineScripts"),
+            ("disabled_body_bytes", "disabledInlineBytes"),
+            ("inline_non_js", "nonJsInline"),
+            ("anonymous_inline_active", "anonymousActive"),
+            ("anonymous_active_bytes", "anonymousActiveBytes"),
+            ("named_inline_active", "namedActive"),
+            ("named_active_bytes", "namedActiveBytes"),
+        ]:
+            self.assertEqual(current["counts"][source_key], meta["counts"][manifest_key])
+        by_order = {row["order"]: row for row in current["all_scripts_metadata_only"]}
+        for item in meta["anonymousActive"]:
+            row = by_order[item["ordinal"]]
+            self.assertIsNone(row["id"])
+            self.assertEqual(row["body_bytes"], item["bytes"])
+            self.assertEqual(row["body_blob"], item["blob"])
+        self.assertEqual(
+            [(row["order"],row["id"],row["body_bytes"])
+             for row in current["disabled_inline"]],
+            [(row["ordinal"],row["id"],row["bytes"])
+             for row in meta["disabledScripts"]],
+        )
+        self.assertNotIn("function defaultZombieConfig(", json.dumps(current))
+        self.assertEqual(
+            sum(row["body_bytes"] for row in current["disabled_inline"]), 95878
+        )
+
     def test_zip_is_only_a_transport_not_a_source_override(self):
         with tempfile.TemporaryDirectory() as directory:
             import subprocess

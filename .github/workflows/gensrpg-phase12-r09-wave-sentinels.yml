@@ -1,0 +1,28 @@
+name: GenSrpG Phase12 R09 source rollback and Survival wave smoke
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r09-survival-wave-spawn-2026-10-18'
+    paths:
+      - 'tests/gensrpg_phase12_r09_wave_sentinel.test.cjs'
+      - 'docs/GENSRPG_PHASE12_R09_SURVIVAL_WAVE_SPAWN_2026-10-18.md'
+      - 'docs/GENSRPG_CURRENT_WORK.md'
+permissions:
+  contents: read
+jobs:
+  r09-source-rollback-survival:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Certify original d7 source and output blobs
+        run: |
+          test "$(git hash-object index.html)" = '4dbe3314d5048f2def404ed674498c0670c04fc1'
+          test "$(git hash-object assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js)" = '515642eda275802c50af867d5712517d47020414'
+          node tools/gensrpg_phase12_r09_wave_extract_apply.cjs --verify
+      - name: Exercise true classic-script global composition and Survival reserve/waves
+        run: |
+          node --check assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js
+          node tests/gensrpg_phase12_r09_wave_sentinel.test.cjs

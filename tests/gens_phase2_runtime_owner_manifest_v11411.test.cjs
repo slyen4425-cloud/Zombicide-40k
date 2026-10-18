@@ -51,8 +51,9 @@ while(queue.length){
 }
 
 const mapped=new Set(Object.keys(manifest.files||{}));
-assert.equal(reachable.size,128,'production graph includes the three explicitly composed PvP services alongside Capture owners');
-assert.equal(mapped.size,128,'owner manifest must classify every production-reachable file including PvP S2 and Capture owners');
+assert.equal(reachable.size,129,'production graph includes one new R10 Capture owner alongside PvP services');
+assert.equal(mapped.size,129,'owner manifest classifies the added Capture file and all other production-reachable files');
+assert.equal(manifest.files['assets/gensrpg/capture/legacy-monolith-functions-v1.js']?.domain,'capture','R10 must be owned exclusively by Capture');
 
 const missing=[...reachable].filter(rel=>!mapped.has(rel)).sort();
 const stale=[...mapped].filter(rel=>!reachable.has(rel)).sort();

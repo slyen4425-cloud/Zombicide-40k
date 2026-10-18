@@ -314,12 +314,14 @@ def verify():
                 "12fc91df4ee4c7989a172baa96f9790da6dc57f7",
                 "aca31c540d61c81e1504d3b915b034b372103b5b",
                 "6eeed45a0a12085c1b107ee6c24b49040277ca54",
+                "4dbe3314d5048f2def404ed674498c0670c04fc1",
             ):
                 expected_after=current_blob
             if path==PATH_GRAPH and current_blob in (
                 "12fc91df4ee4c7989a172baa96f9790da6dc57f7",
                 "aca31c540d61c81e1504d3b915b034b372103b5b",
                 "6eeed45a0a12085c1b107ee6c24b49040277ca54",
+                "4dbe3314d5048f2def404ed674498c0670c04fc1",
             ):
                 # R06 introduces 18 Capture-owner files without changing the
                 # historical D1-R05 rollback. Phase 2 JS baseline remains 82.
@@ -329,7 +331,7 @@ def verify():
                     ("reachable.size,107,", "reachable.size,125,"),
                 ):
                     expected_after=expected_after.replace(former,current)
-                if current_blob in ("aca31c540d61c81e1504d3b915b034b372103b5b","6eeed45a0a12085c1b107ee6c24b49040277ca54"):
+                if current_blob in ("aca31c540d61c81e1504d3b915b034b372103b5b","6eeed45a0a12085c1b107ee6c24b49040277ca54","4dbe3314d5048f2def404ed674498c0670c04fc1"):
                     # R07 data-only MP3 owner adds one reachable, explicit
                     # module without changing the historical Phase 2 baseline.
                     for former,current in (
@@ -338,13 +340,20 @@ def verify():
                         ("reachable.size,125,", "reachable.size,126,"),
                     ):
                         expected_after=expected_after.replace(former,current)
-                if current_blob=="6eeed45a0a12085c1b107ee6c24b49040277ca54":
+                if current_blob in ("6eeed45a0a12085c1b107ee6c24b49040277ca54","4dbe3314d5048f2def404ed674498c0670c04fc1"):
                     for former,current in (
                         ("size,83,", "size,84,"),
                         ("allJs.length,140,", "allJs.length,141,"),
                         ("reachable.size,126,", "reachable.size,127,"),
                     ):
                         expected_after=expected_after.replace(former,current)
+            if path==PATH_GRAPH and current_blob=="4dbe3314d5048f2def404ed674498c0670c04fc1":
+                for former,current in (
+                    ("size,84,","size,85,"),
+                    ("allJs.length,141,","allJs.length,142,"),
+                    ("reachable.size,127,","reachable.size,128,"),
+                ):
+                    expected_after=expected_after.replace(former,current)
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

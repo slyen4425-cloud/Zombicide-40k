@@ -1,0 +1,165 @@
+{
+  "schema": "gensrpg.phase12.post-r09.exact-inline-census.v1",
+  "auditDate": "2026-10-18",
+  "source": {
+    "userArchive": "d8.zip",
+    "member": "index.html(6).txt",
+    "checkpoint": "8580587f2aab5bc3918950bc152b4a56e4d79a8d",
+    "bytes": 2093066,
+    "gitBlob": "4dbe3314d5048f2def404ed674498c0670c04fc1",
+    "verification": "exact bytes and Git blob validated against R09 GREEN"
+  },
+  "counts": {
+    "scriptTags": 164,
+    "externalScripts": 58,
+    "activeInlineScripts": 89,
+    "activeInlineBytes": 1201978,
+    "disabledInlineScripts": 17,
+    "disabledInlineBytes": 95878,
+    "nonJsInline": 0,
+    "anonymousActive": 5,
+    "anonymousActiveBytes": 867198,
+    "namedActive": 84,
+    "namedActiveBytes": 334780
+  },
+  "anonymousActive": [
+    {
+      "ordinal": 21,
+      "bytes": 765516,
+      "blob": "db8e91c0e1d9fea04f4c19ad6e84d69ea7259509",
+      "topLevelFunctions": 976,
+      "topLevelStatements": 1120,
+      "classification": "A: multi-domain, NOT single owner"
+    },
+    {
+      "ordinal": 24,
+      "bytes": 94882,
+      "blob": "50e5b25ce6d3d9bf41c6e684f5548cc5842be935",
+      "topLevelFunctions": 115,
+      "topLevelStatements": 133,
+      "classification": "A: versions, shared editors, heroes and Capture; multiple owners"
+    },
+    {
+      "ordinal": 26,
+      "bytes": 219,
+      "blob": "cdf33d5bbe5ba17c36d100b2e348c82e67818160",
+      "classification": "B-candidate only; IndexedDB bootstrap unproven"
+    },
+    {
+      "ordinal": 63,
+      "bytes": 6337,
+      "blob": "ff958f9e2965130ed9c4da1ba8df721b47332d10",
+      "classification": "A: Dungeon Core 0.24 visual feedback IIFE; no relocation authorized"
+    },
+    {
+      "ordinal": 163,
+      "bytes": 244,
+      "blob": "c43d47df21d662a46ae54c0770106d3694acf235",
+      "classification": "B-candidate only; Shell/PvP bootstrap unproven"
+    }
+  ],
+  "namedHintsNotOwnerProof": {
+    "dungeonLikeIds": {
+      "count": 78,
+      "bytes": 295787
+    },
+    "otherIds": {
+      "count": 6,
+      "bytes": 38993
+    }
+  },
+  "disabledScripts": [
+    {
+      "ordinal": 48,
+      "id": "rpgTurnTargetFlow157",
+      "bytes": 8134
+    },
+    {
+      "ordinal": 49,
+      "id": "rpgPlayerTargeting158",
+      "bytes": 4569
+    },
+    {
+      "ordinal": 50,
+      "id": "rpgHeroTargeting159",
+      "bytes": 5630
+    },
+    {
+      "ordinal": 117,
+      "id": "dungeonCore091PostCombatUnlock",
+      "bytes": 4925
+    },
+    {
+      "ordinal": 118,
+      "id": "dungeonCore093StabilityDiagnostic",
+      "bytes": 610
+    },
+    {
+      "ordinal": 119,
+      "id": "dungeonCore093StateGuard",
+      "bytes": 769
+    },
+    {
+      "ordinal": 120,
+      "id": "dungeonCore094EndTurnFinalDisabled",
+      "bytes": 29
+    },
+    {
+      "ordinal": 121,
+      "id": "dungeonCore095SoloTurnFinalDisabled",
+      "bytes": 65
+    },
+    {
+      "ordinal": 122,
+      "id": "dungeonCore096SoloPartyGuard",
+      "bytes": 896
+    },
+    {
+      "ordinal": 123,
+      "id": "dungeonCore097StabilityRollbackDisabled",
+      "bytes": 53
+    },
+    {
+      "ordinal": 124,
+      "id": "dungeonCore098IsolatedMovement",
+      "bytes": 11969
+    },
+    {
+      "ordinal": 125,
+      "id": "dungeonCore100ResumeAndInteractionFix",
+      "bytes": 8182
+    },
+    {
+      "ordinal": 126,
+      "id": "dungeonCore101CacheGuard",
+      "bytes": 3411
+    },
+    {
+      "ordinal": 127,
+      "id": "dungeonCore102RoomCycleFix",
+      "bytes": 7502
+    },
+    {
+      "ordinal": 128,
+      "id": "dungeonCore103StabilityPass",
+      "bytes": 10798
+    },
+    {
+      "ordinal": 129,
+      "id": "dungeonCore104Coherence",
+      "bytes": 21408
+    },
+    {
+      "ordinal": 130,
+      "id": "dungeonCore105MovementRenderFix",
+      "bytes": 6928
+    }
+  ],
+  "notes": [
+    "Body source and embedded data are intentionally excluded from this report.",
+    "AST summary from the two largest anonymous scripts uses TypeScript syntax parser; no parse diagnostics.",
+    "Disabled script IDs may share prefixes with active CSS style IDs: never remove CSS by ID prefix.",
+    "Owner grouping based on legacy names is a hint, not authority proof.",
+    "No production code was changed and no Phase12 EXIT certified."
+  ]
+}

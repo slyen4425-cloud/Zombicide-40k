@@ -1,16 +1,16 @@
 # GenSrpG — CURRENT_WORK officiel (18 octobre 2026)
 
-## R07 — GREEN technique certifié, revue manuelle des sons à confirmer
+## R07 — TERMINÉ : GREEN technique + validation manuelle utilisateur
 
 - **Checkpoint GREEN immuable §25 :** `checkpoint/gensrpg-phase12-r07-magic-audio-data-green-2026-10-18`, SHA exact **`17a1def7a514478fec08025f354a4a1b17aa14f5`**. Départ `checkpoint/gensrpg-start-phase12-r07-magic-audio-data-2026-10-18` au `77a70778e0a82a9ca94c8b62d60865a4ed8b5f14`, branche `work/gensrpg-phase12-r07-magic-audio-data-2026-10-18`.
 - **Quatre CI SUCCESS au même SHA** : [source et rollback 39114167621](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39114167621), [Firefox 39114167552](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39114167552), [Tactical 39114167595](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39114167595), [Architecture/Chromium 39114167672](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39114167672) — **361 contrôles statiques + 64 étapes du job Chromium PASS**, aucun échec. Aucun autre SHA déclaré GREEN.
 - **Source §26** : `d3.zip/index.html(3).txt` certifiée à **2 643 155 octets / Git blob `12fc91df4ee4c7989a172baa96f9790da6dc57f7`**.
 - **R07 appliqué sans réécriture fonctionnelle** : un seul ensemble de trois URL MP3 (électricité, impact/crunch, vent) conservées byte-exact ; `assets/gensrpg/core/legacy-magic-sounds-v1.js` **425 484 octets**, blob `a09e21c0da7439ccda5a6aaa246096950e1b261b` ; `index.html` maintenant **2 217 805 octets**, blob `aca31c540d61c81e1504d3b915b034b372103b5b`, soit **–425 350 octets**. Script synchrone au point parser d'origine, PWA/owner-map (126 fichiers) vérifiés, rollback R07→R06 et anciens historiques octet-exact.
-- **Preview de test manuel :** [R07 sur SHA GREEN](https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/17a1def7a514478fec08025f354a4a1b17aa14f5/preview.html) — vérifier les trois sons de magie et les actions qui les déclenchent, notamment électricité/impact/vent. La CI est GREEN technique ; **acceptation utilisateur des sons non encore déclarée**.
+- **Preview testée et validée manuellement :** [R07 sur SHA GREEN](https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/17a1def7a514478fec08025f354a4a1b17aa14f5/preview.html) — vérifier les trois sons de magie et les actions qui les déclenchent, notamment électricité/impact/vent. La CI est GREEN technique ; **validation manuelle utilisateur confirmée le 18 octobre 2026 (« Parfait test validé »)**.
 - **Suite retenue :** ne pas lancer R08 / D10 par inertie. Le prochain chantier à fort effet sera borné sur la **source exacte du nouveau SHA** (avant nouvelle modification de `index.html`, demander le ZIP du [fichier R07 GREEN](https://github.com/slyen4425-cloud/Zombicide-40k/blob/17a1def7a514478fec08025f354a4a1b17aa14f5/index.html), **2 217 805 octets**, blob `aca31c540d61c81e1504d3b915b034b372103b5b`). Aucun monolithe multi-domaines déplacé sous une fausse autorité. Nouveau START dédié §25 obligatoire. `main`, les 4 modes, le PvP non jouable, PWA, sauvegardes, laboratoires et 32 visuels historiques Survie restent intacts.
 - **Rapport final :** `docs/GENSRPG_PHASE12_R07_MAGIC_AUDIO_DATA_2026-10-18.md`. Le présent commit documentaire postérieur au checkpoint GREEN n'est pas un nouveau SHA runtime certifié.
 
-Ancien suivi R07 en cours, audit et R06 conservés comme historique ci-dessous.
+Les anciennes mentions « CI en attente » et « R07 actif » ci-dessous sont de l'historique ; la clôture R07 confirmée ci-dessus prévaut.
 
 ---
 

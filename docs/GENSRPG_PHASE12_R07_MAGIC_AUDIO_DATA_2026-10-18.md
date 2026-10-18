@@ -1,6 +1,6 @@
 # GenSrpG — Phase 12 / R07 — trois sons magiques (données uniquement)
 
-**Date : 18 octobre 2026. R07 GREEN technique certifié sur `17a1def7a514478fec08025f354a4a1b17aa14f5`, checkpoint immuable `checkpoint/gensrpg-phase12-r07-magic-audio-data-green-2026-10-18`.** Acceptation utilisateur des sons en attente.
+**Date : 18 octobre 2026. R07 GREEN technique et VALIDATION UTILISATEUR acquis sur `17a1def7a514478fec08025f354a4a1b17aa14f5`, checkpoint immuable `checkpoint/gensrpg-phase12-r07-magic-audio-data-green-2026-10-18`.** Test utilisateur confirmé le 18 octobre 2026 (« Parfait test validé »).
 
 ## Source et périmètre exacts (§§25–26)
 
@@ -24,7 +24,7 @@ Le checkpoint `checkpoint/gensrpg-phase12-r07-magic-audio-data-green-2026-10-18`
 ## Gate utilisateur et suite bornée
 
 - **Preview immuable :** [ouvrir R07](https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/17a1def7a514478fec08025f354a4a1b17aa14f5/preview.html). Contrôle manuel recommandé : sons électriques, impact/crunch, vent et fonctions de jeu qui les déclenchent.
-- La CI garantit les assertions automatiques et le vrai navigateur, pas l'écoute manuelle du résultat sonore. **Ne pas inscrire de validation utilisateur avant son retour.**
+- Les quatre CI et le contrôle manuel sont désormais acquis. **Validation manuelle utilisateur le 18 octobre 2026 : « Parfait test validé ».** La clôture ne doit pas être confondue avec la fin de Phase 12.
 - Avant d'inspecter/modifier à nouveau le grand `index.html`, obtenir via §26 le ZIP exact de [l'index R07 GREEN](https://github.com/slyen4425-cloud/Zombicide-40k/blob/17a1def7a514478fec08025f354a4a1b17aa14f5/index.html), **2 217 805 octets / blob `aca31c540d61c81e1504d3b915b034b372103b5b`**. Nouveau START §25 et borne de propriétaire avant un éventuel R08. Ne pas multiplier les micro-lots ni extraire le grand monolithe inter-domaines comme un faux module unique. **Phase 12 n'est pas déclarée terminée.**
 - `main` gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`. Les quatre modes, sauvegardes, PWA, PvP non jouable, deux laboratoires et 32 images Survie historiques restent intacts.
 

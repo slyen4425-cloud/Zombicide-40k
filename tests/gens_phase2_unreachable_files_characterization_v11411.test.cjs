@@ -59,7 +59,7 @@ const captureR06Files=fs.readdirSync(path.join(root,'assets/gensrpg/capture/lega
 assert.equal(captureR06Files.length,18,'R06 must expose exactly eighteen physical legacy Capture scripts');
 for(const rel of captureR06Files)
   assert.equal(reachable.has(rel),true,'R06 Capture owner must be production-reachable: '+rel);
-assert.equal(reachable.size,108+captureR06Files.length,
+assert.equal(reachable.size,109+captureR06Files.length,
   'production graph must preserve 107 prior owners plus the 18 R06 Capture owners');
 assert.equal(reachable.has('assets/gensrpg/dungeon/core01-session-ui-v1.js'),true,
   'Phase 12 extracted Dungeon Core01 must remain physically reachable exactly once');

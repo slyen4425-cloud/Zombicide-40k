@@ -1,5 +1,17 @@
 # GenSrpG — CURRENT_WORK officiel (18 octobre 2026)
 
+## Phase 12 R10 — Extraction ciblée Capture (CHANTIER OUVERT, NON VALIDÉ)
+
+- **START §25 AVANT toute modification** : `checkpoint/gensrpg-start-phase12-r10-capture-legacy-functions-2026-10-18` → `f2d5f954fc8e678bbf6819d2358964f47c61783f` ; branche `work/gensrpg-phase12-r10-capture-legacy-functions-2026-10-18`. Base audit GREEN : `62a77e8e2b7fd9a4452cfb23c970957f2f8a37f4`, seuls deux docs différents depuis ce GREEN. Code R09 GREEN `8580587f2aab5bc3918950bc152b4a56e4d79a8d`.
+- **Source §26** : `d8.zip`, `index.html(6).txt` certifié **2 093 066 octets**, blob Git `4dbe3314d5048f2def404ed674498c0670c04fc1`.
+- **Périmètre** : 90 déclarations `function capture*` au premier niveau du grand script n°21, ~61 603 octets, vers un nouveau propriétaire **Capture du dépôt principal** ; pas les laboratoires. Fonctions inchangées ; initialisations communes, constantes et autres modes restent où ils sont. Aucune autorité dupliquée.
+- **Protégés** : `main` `e8681f9823573ced8aec59c8ddc47a72b02bc663` gelée, laboratoires, les 32 visuels Survie historiques, sauvegardes, Shell, Core, Dungeon generated/authored, Tactical, PvP placeholder, PWA.
+- **Risques** : dépendances et lexique global, ordre synchrone des scripts, fonctions Capture déjà externes, chargement/retour réel. STOP si frontière non prouvée.
+- **Gates** : source/owner/index blob stricts, 90 déclarations exactes, rollback byte-exact R10→R09, compilation, PWA/manifest, anciennes sentinelles restaurées, Firefox, Tactical et Architecture+Chromium sur même SHA. Checkpoint final seulement après CI GREEN ; validation manuelle séparée.
+- **Action** : affiner le bornage et appliquer uniquement si tous les garde-fous sont positifs. Phase 12 OUVERTE.
+
+---
+
 ## Phase 12 — AUDIT post-R09 : inventaire exact d8.zip certifié, extraction non ouverte
 
 - **Jalon audit GREEN §25** : `checkpoint/gensrpg-phase12-post-r09-exit-audit-green-2026-10-18` sur le commit immuable **`62a77e8e2b7fd9a4452cfb23c970957f2f8a37f4`**. Quatre pipelines SUCCESS **sur ce même SHA** : [source/census](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39157964316), [Firefox](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39157964202), [Tactical Firefox+Chromium](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39157964195), [Architecture+Chromium](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39157964222). **GREEN de l'audit documentaire et des tests, PAS EXIT de la Phase 12.**

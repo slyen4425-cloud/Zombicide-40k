@@ -41,13 +41,20 @@ STYLE='''.dc047Cell.dc079WallBlock{
   outline-offset:-2px!important;
 }
 '''.encode("utf8")
+from functools import lru_cache
+
+@lru_cache(maxsize=1)
+def _exact_r09_to_r08():
+    from pathlib import Path
+    import subprocess
+    root=Path(__file__).resolve().parents[1]
+    data=subprocess.check_output(["node",str(root/"tools/gensrpg_phase12_r09_wave_extract_apply.cjs"),"--restore-r08"],cwd=root)
+    assert blob(data)=="6eeed45a0a12085c1b107ee6c24b49040277ca54", "R09 -> R08 exact rollback required"
+    return data
+
 def historical_r05_view(data):
     if blob(data)=="4dbe3314d5048f2def404ed674498c0670c04fc1":
-        from pathlib import Path
-        import subprocess
-        root=Path(__file__).resolve().parents[1]
-        data=subprocess.check_output(["node",str(root/"tools/gensrpg_phase12_r09_wave_extract_apply.cjs"),"--restore-r08"],cwd=root)
-        assert blob(data)=="6eeed45a0a12085c1b107ee6c24b49040277ca54", "R09 -> R08 exact rollback required"
+        data=_exact_r09_to_r08()
     if blob(data)=="6eeed45a0a12085c1b107ee6c24b49040277ca54":
         from gensrpg_phase12_r08_shared_catalog_extract_apply import ROOT as R08_ROOT, REL as R08_REL, restore as r08_restore
         data=r08_restore(data,(R08_ROOT/R08_REL).read_bytes())

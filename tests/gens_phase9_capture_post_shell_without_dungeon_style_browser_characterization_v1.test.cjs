@@ -49,16 +49,25 @@ function exactScript(id){
   assert.ok(start>customScriptEnd,'production script '+id+' must exist after custom-content support');
   const openEnd=indexSource.indexOf('>',start);
   const end=indexSource.indexOf('</script>',openEnd);
-  if(id==='builtinMonsterCapture162'){
-    assert.match(indexSource.slice(start,openEnd+1),/src="assets\/gensrpg\/capture\/builtin-seed-v1\.js\?v=1"/,'production Capture seed URL must remain canonical');
-    assert.equal(indexSource.slice(openEnd+1,end),'','old inline Capture seed must remain retired');
-  }
   assert.ok(openEnd>start&&end>openEnd,'production script '+id+' must have an exact boundary');
-  return {
-    id,
-    start,
-    source:id==='builtinMonsterCapture162'?null:indexSource.slice(openEnd+1,end),url:id==='builtinMonsterCapture162'?captureSeedUrl:null
+  const externalUrls={
+    captureFix137:'assets/gensrpg/capture/legacy-patches/capture-fix137-v1.js',
+    captureFix138:'assets/gensrpg/capture/legacy-patches/capture-fix138-v1.js',
+    captureFix139:'assets/gensrpg/capture/legacy-patches/capture-fix139-v1.js',
+    builtinMonsterCapture162:captureSeedUrl
   };
+  const externalUrl=externalUrls[id]||null;
+  if(externalUrl){
+    assert.ok(indexSource.slice(start,openEnd+1).includes('src="'+externalUrl+'"'),
+      'Capture script must keep its exact external production URL: '+id);
+    assert.equal(indexSource.slice(openEnd+1,end),'',
+      'Capture script must not duplicate its physical owner inline: '+id);
+    assert.equal(indexSource.split('id="'+id+'"').length-1,1,
+      'Capture script must keep exactly one parser slot: '+id);
+    assert.ok(fs.existsSync(path.join(root,externalUrl.split('?')[0])),
+      'external Capture script must physically exist: '+id);
+  }
+  return {id,start,source:externalUrl?null:indexSource.slice(openEnd+1,end),url:externalUrl};
 }
 
 const captureScriptIds=[

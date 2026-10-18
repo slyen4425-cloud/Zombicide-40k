@@ -1,5 +1,30 @@
 # GenSrpG — CURRENT_WORK officiel (18 octobre 2026)
 
+## CHANTIER ACTIF : Phase 12 — audit de sortie / priorités (aucune extraction)
+
+- **Base validée** : R06 GREEN technique + retour manuel utilisateur « Yes c est ok 👍 », checkpoint `checkpoint/gensrpg-phase12-r06-capture-legacy-patches-green-2026-10-18`, SHA **41a709f3478ded45b12b770435a96ad3f344faf3**. Quatre CI vertes : [source](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851988), [Firefox](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851959), [Tactical](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851951), [Architecture+Chromium](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851970).
+- **Checkpoint START §25** : `checkpoint/gensrpg-start-phase12-exit-priorities-2026-10-18` créé sur le SHA GREEN ci-dessus. **Branche** : `work/gensrpg-phase12-exit-priorities-2026-10-18`, issue exactement de ce checkpoint. Le précédent commit documentaire R06 `0cb41f0` n'est pas un nouveau code GREEN.
+- **Périmètre** : inventaire et décision de clôture uniquement, pas de R07, D10, extraction ou refonte. D9 → R06 : `index.html` passe de 7 703 979 à 2 643 155 octets (–5 060 824 ; –65,7 %). Le grand script multi-domaines résiduel reste la priorité d'audit ; aucun propriétaire de ce grand bloc n'est supposé unique. Ne pas multiplier les micro-lots.
+- **État / prochain verrou §26** : pour compter/classer le code **actuel** restant, obtenir du joueur le [index exact du SHA GREEN R06](https://github.com/slyen4425-cloud/Zombicide-40k/blob/41a709f3478ded45b12b770435a96ad3f344faf3/index.html) en ZIP ; attendu **2 643 155 octets**, blob **12fc91df4ee4c7989a172baa96f9790da6dc57f7**. L'outil `tools/gensrpg_phase12_exit_inventory.py` refusera toute autre version. L'ancien comptage D9 ne vaut pas résultat courant.
+- **Rapport** : `docs/GENSRPG_PHASE12_EXIT_PRIORITIES_2026-10-18.md`. Examiner d'abord les grandes responsabilités réellement extractibles, puis un lot substantiel si justifié, avec **nouveau** START/branche et 4 CI + rollback + revue manuelle le cas échéant. Si sortie non justifiable, documenter et ne pas annoncer EXIT. `main`, PWA, sauvegardes, les 4 modes, les laboratoires et 32 visuels Survie historiques intouchables.
+
+Ancien suivi R06 conservé comme historique ci-dessous.
+
+---
+
+## R06 — TERMINÉ : GREEN technique et validation utilisateur Capture
+
+- **Checkpoint final immutable** : `checkpoint/gensrpg-phase12-r06-capture-legacy-patches-green-2026-10-18` au SHA exact `41a709f3478ded45b12b770435a96ad3f344faf3`. Branche chantier `work/gensrpg-phase12-r06-inline-owner-scope-2026-10-18`, départ `checkpoint/gensrpg-start-phase12-r06-inline-owner-scope-2026-10-18` sur `4dd865a45634b7367ce66a526feae58b923edef9`.
+- **Quatre CI SUCCESS sur ce même SHA** : [source 39105851988](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851988), [Firefox 39105851959](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851959), [Tactical 39105851951](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851951), [Architecture + Chromium 39105851970](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39105851970) : 359 étapes statiques et 64 étapes du job Chromium réussies.
+- **Périmètre** : 18 scripts historiques contigus Monster Capture, 140 211 octets, relogés byte-exact dans `assets/gensrpg/capture/legacy-patches/`, `index.html` réduit de 139 000 octets à 2 643 155 octets ; ordre parser, chargements synchrones, propriétaire Capture unique, PWA et rollback vérifiés. Aucun changement moteur ni donnée de sauvegarde.
+- **Validation manuelle utilisateur : ACCORD EXPLICITE le 18 octobre 2026 (« Yes c est ok 👍 »)** sur [preview immuable R06](https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/41a709f3478ded45b12b770435a96ad3f344faf3/preview.html), surtout lancement Capture, retour Shell, jour suivant, reprise sauvegardée. GREEN technique + accord manuel utilisateur sont acquis ; ne pas présumer des tests non explicitement détaillés par l'utilisateur.
+- **Prochaine décision** : retour Capture obtenu et R06 clos. Avant R07/D10, nouveau START §25 obligatoire. Ensuite audit du code inline résiduel pour quelques groupes homogènes de vraie portée ou clôture si gains marginaux ; pas de micro-lots par inertie. Pour toute nouvelle extraction `index.html`, ZIP utilisateur exact du SHA requis §26.
+- **Intouchables** : `main` (`e8681f9823573ced8aec59c8ddc47a72b02bc663`), les 4 modes, laboratoires, 32 images Survie historiques, PWA, sauvegardes, Dungeon V113/Tactical et murs générés restent protégés. Le commit documentaire postérieur au GREEN n'est pas un nouveau SHA de certification.
+
+Toutes les anciennes mentions « R06 non GREEN » ou « validation manuelle en attente » ci-dessous sont conservées comme historique et remplacées par le statut final validé.
+
+---
+
 ## REPRISE EN COURS — Phase 12 / R06 Capture — extraction physique publiée, CI finale obligatoire
 
 - **Source utilisateur §26 reçue et vérifiée** : `d1.zip`/`index.html(1).txt`, 2 782 155 octets, blob Git `b33542b033c5afa8a1643d99c56c21dbd4be266c` identique au checkpoint START `4dd865a45634b7367ce66a526feae58b923edef9`. Les mentions « source attendue » dans le pré-audit historique ci-dessous sont closes.

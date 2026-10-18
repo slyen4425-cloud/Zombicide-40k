@@ -64,8 +64,10 @@ assert.equal(rawDirect.filter(x=>x===R09_SURVIVAL_WAVE).length,1,
   'R09 Survival wave owner must be loaded exactly once from index.html');
 assert.equal(reachable.has(R09_SURVIVAL_WAVE),true,
   'R09 Survival wave owner must remain reachable in the real production graph');
-assert.equal(reachable.size,110+captureR06Files.length,
-  'production graph must preserve 109 R08 owners, add exactly one R09 Survival owner, and keep all 18 R06 Capture owners');
+assert.equal(reachable.size,111+captureR06Files.length,
+  'production graph must preserve R08 owners, R09 Survie, 18 R06 Capture owners and one R10 Capture module');
+assert.equal(reachable.has('assets/gensrpg/capture/legacy-monolith-functions-v1.js'),true,
+  'R10 Capture legacy owner must be active and classified rather than an unreachable artifact');
 assert.equal(reachable.has('assets/gensrpg/dungeon/core01-session-ui-v1.js'),true,
   'Phase 12 extracted Dungeon Core01 must remain physically reachable exactly once');
 assert.equal(reachable.has('assets/gensrpg/capture/combat-core-v1.js'),true,

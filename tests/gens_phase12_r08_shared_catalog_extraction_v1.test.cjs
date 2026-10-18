@@ -2,7 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto'),vm=require('node:vm');
 const root=path.join(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p));
 const sha=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0')).update(b).digest('hex');
-const rel='assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js',asset=read(rel),index=read('index.html'),html=index.toString('utf8');
+const rel='assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js',asset=read(rel),index=require('./helpers/gens_phase12_r09_wave_source_view_v1.cjs')(read('index.html'),root),html=index.toString('utf8');
 assert.equal(index.length,2131805);assert.equal(sha(index),'6eeed45a0a12085c1b107ee6c24b49040277ca54');
 assert.equal(asset.length,86082);assert.equal(sha(asset),'f3f650679799d1e6c8e6b6bcd76a6a0963a02f66');
 assert.equal((asset.toString('utf8').match(/^function\s+[\w$]+\s*\(/gm)||[]).length,57);

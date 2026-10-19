@@ -94,7 +94,7 @@ def verify():
     out=(ROOT/"index.html").read_bytes()
     # R11 -> R10 -> R09 -> R08 : chaque étape est reconstruite et vérifiée par son garde d'empreinte.
     # Strictly whitelist both known Git blobs; never loosen the source gate.
-    if (len(out)==2093066 and gitblob(out)=="4dbe3314d5048f2def404ed674498c0670c04fc1") or (len(out)==2031649 and gitblob(out)=="b8ef8dcb497cad94c91094ed008136a5d9800155") or (len(out)==1934253 and gitblob(out)=="f257bd9e193648dc62cd8a40d510831debfe045a"):
+    if (len(out)==2093066 and gitblob(out)=="4dbe3314d5048f2def404ed674498c0670c04fc1") or (len(out)==2031649 and gitblob(out)=="b8ef8dcb497cad94c91094ed008136a5d9800155") or (len(out)==1934253 and gitblob(out)=="f257bd9e193648dc62cd8a40d510831debfe045a") or (len(out)==1863745 and gitblob(out)=="b0d0c73292e4374fc4f23e86edffad5c1b39a7b6"):
         out=subprocess.check_output(["node",str(ROOT/"tools/gensrpg_phase12_r09_wave_extract_apply.cjs"),"--restore-r08"],cwd=ROOT)
     asset=(ROOT/REL).read_bytes()
     old=restore(out,asset)

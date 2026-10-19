@@ -4,6 +4,9 @@ const path=require("node:path");
 
 const root=path.resolve(__dirname,"..");
 const index=fs.readFileSync(path.join(root,"index.html"),"utf8");
+const dungeonR12=fs.readFileSync(path.join(root,"assets","gensrpg","dungeon","legacy-rpg-rules-talents-v1.js"),"utf8");
+assert.match(index,/<script src="assets\/gensrpg\/dungeon\/legacy-rpg-rules-talents-v1\.js"><\/script>/,
+  "R12 Dungeon dice functions must load synchronously from their sole owner");
 const core051=fs.readFileSync(path.join(root,"assets","gensrpg","dungeon","core051-exploration-polish-v1.js"),"utf8");
 const core211Bytes=fs.readFileSync(path.join(root,"assets","gensrpg","dungeon","core211-consolidation-v1.js"));
 const crypto=require("node:crypto");
@@ -33,10 +36,10 @@ assert.equal(index.includes("assets/gensrpg/core/dice-v1.js"),true,
 
 assert.match(index,/function d100ThresholdFromChance\(chance\)\{[\s\S]*?Number\(chance\)\|\|1[\s\S]*?GensDiceV1\.thresholdFromChance\(c\)/,
   "index must keep the shared D100 boundary while delegating the threshold formula to Core Dice");
-assert.match(index,/function dungeonUniversalTest\(statValue,opt=\{\}\)\{[\s\S]*?Math\.random\(\)\*sides[\s\S]*?success:total>=difficulty/,
+assert.match(dungeonR12,/function dungeonUniversalTest\(statValue,opt=\{\}\)\{[\s\S]*?Math\.random\(\)\*sides[\s\S]*?success:total>=difficulty/,
   "RPG universal test must remain a configurable-sided roll + stat/modifier vs difficulty");
-assert.match(index,/function dungeonInitiativeScore\(statValue\)[\s\S]*?Math\.random\(\)\*d/,
-  "RPG initiative die path must remain inline during pre-audit");
+assert.match(dungeonR12,/function dungeonInitiativeScore\(statValue\)[\s\S]*?Math\.random\(\)\*d/,
+  "RPG initiative die path must remain in its certified Dungeon owner");
 assert.match(index,/function showSpecialD6Roll\([\s\S]*?Math\.random\(\)\*6[\s\S]*?success=roll>=threshold/,
   "Survival/special D6 rule must remain success-on-threshold-or-higher");
 assert.match(index,/window\.rollDungeonRpDice073=function\(\)[\s\S]*?d100ThresholdFromChance\(chance\)[\s\S]*?Math\.random\(\)\*100/,
@@ -98,7 +101,7 @@ console.log(JSON.stringify({
   gameplayRandoms,
   owners:{
     sharedThreshold:"index:d100ThresholdFromChance",
-    universalTest:"index:dungeonUniversalTest",
+    universalTest:"dungeon/legacy-rpg-rules-talents-v1.js:dungeonUniversalTest",
     specialD6:"index:showSpecialD6Roll",
     freeRpgDice:"index:rollDungeonRpDice073",
     legacyDungeonD100:"index:d10048/dc051RollStatChallenge",
@@ -107,5 +110,5 @@ console.log(JSON.stringify({
     tacticalRuleOwner:"gens-rpg-tactical-visual-dice-16781142.js",
     tacticalAnimationDecorator:"gens-rpg-tactical-wall-dice-stats-16781145.js"
   },
-  finding:"dice rules are fragmented across inline gameplay and Tactical; animation decorators are separate; generic RNG must remain out of scope"
+  finding:"dice rules remain split between the moved Dungeon RPG owner, other inline gameplay and Tactical; generic RNG remains out of scope"
 },null,2));

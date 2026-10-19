@@ -7,7 +7,7 @@ const BASE='b1797246c76543447cbbd11248bd59b5c3d7ad6b';
 const R12='b0d0c73292e4374fc4f23e86edffad5c1b39a7b6';
 function installedR11(){
  const current=fs.readFileSync('index.html','utf8');
- return blob(current)===R12?cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r12_dungeon_rpg_rules_talents.cjs','--restore-r11'],{maxBuffer:10*1024*1024}).toString('utf8'):current;
+ return [R12,'b5a39705baf83e9782695c14bede8b9dde6ddf52'].includes(blob(current))?cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r12_dungeon_rpg_rules_talents.cjs','--restore-r11'],{maxBuffer:10*1024*1024}).toString('utf8'):current;
 }
 const SCRIPT=/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi;
 const DISABLED=/\btype\s*=\s*(["'])application\/x-gensrpg-disabled\1/i;

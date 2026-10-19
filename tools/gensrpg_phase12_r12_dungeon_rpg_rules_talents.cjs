@@ -3,7 +3,7 @@
  * R11 checkpoint source authenticated from E1.zip + exact inert-script retirement.
  * No generic Builders ability library function, Core engine or init statement moved.
  */
-const fs=require('node:fs'),crypto=require('node:crypto'),vm=require('node:vm'),path=require('node:path');
+const fs=require('node:fs'),crypto=require('node:crypto'),vm=require('node:vm'),path=require('node:path'),cp=require('node:child_process');
 const ORIGINAL='f257bd9e193648dc62cd8a40d510831debfe045a',ORIGINAL_SIZE=1934253;
 const TARGET='b0d0c73292e4374fc4f23e86edffad5c1b39a7b6',TARGET_SIZE=1863745;
 const OWNER_BLOB='82c847234e75adbfe33ef70ca8f58fa1ebdc381d',OWNER_SIZE=71155;
@@ -14,6 +14,11 @@ const HEADER='/* GenSrpG — Phase12 R12 : fonctions Dungeon RPG règles, progre
 const assert=(ok,msg)=>{if(!ok)throw Error('R12 guard: '+msg)};
 const blob=s=>{const b=Buffer.from(s,'utf8');return crypto.createHash('sha1').update('blob '+b.length+'\0').update(b).digest('hex')};
 const scripts=s=>[...s.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)];
+const installedR12=()=>{
+ const current=fs.readFileSync('index.html','utf8');
+ return blob(current)==='b5a39705baf83e9782695c14bede8b9dde6ddf52'?cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r13_builders_enemy_editor.cjs','--restore-r12'],{maxBuffer:10*1024*1024}).toString('utf8'):current;
+};
+
 function select(body){
  assert(RANGES.length===96,'96 AST ranges required');
  const chunks=RANGES.map(([a,b],i)=>{
@@ -55,7 +60,7 @@ function forward(source){
  return {html,extracted,names,original:source};
 }
 function restoreR11(){
- const current=fs.readFileSync('index.html','utf8'),hash=blob(current);
+ const current=installedR12(),hash=blob(current);
  if(hash===ORIGINAL)return current;
  assert(hash===TARGET,'not an authorized R12 runtime');
  const owner=fs.readFileSync(MODULE,'utf8');
@@ -82,12 +87,12 @@ function restoreR11(){
 function verify(){
  const original=restoreR11();
  const expected=forward(original);
- assert(fs.readFileSync('index.html','utf8')===expected.html,'runtime differs from expected R12');
+ assert(installedR12()===expected.html,'byte-exact historical R12 view differs from expected R12');
  assert(fs.readFileSync(MODULE,'utf8')===expected.extracted,'module differs from expected R12');
  const owners=JSON.parse(fs.readFileSync('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json','utf8'));
  assert(owners.files?.[MODULE]?.domain==='dungeon','runtime Dungeon owner missing');
  const sw=fs.readFileSync('service-worker.js','utf8');
- assert(sw.includes('./'+MODULE+'"')&&sw.includes('-r12-dungeon-rpg-rules-talents"'),'PWA cache/asset missing');
+ assert(sw.includes('./'+MODULE+'"')&&sw.includes('-r12-dungeon-rpg-rules-talents'),'PWA cache/asset missing');
  const ctx={console};vm.createContext(ctx);new vm.Script(expected.extracted).runInContext(ctx);
  assert(typeof ctx.defaultDungeonRpgRules==='function'&&typeof ctx.dungeonCombatUseActiveTalent==='function','global function boundaries absent');
  assert(expected.names.every(name=>typeof ctx[name]==='function'),'some of the 96 declarations not callable');

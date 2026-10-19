@@ -5,11 +5,13 @@ const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const r13Builders=fs.readFileSync(path.join(root,'assets/gensrpg/builders/legacy-enemy-editor-v1.js'),'utf8');
+assert.ok(index.includes('<script src="assets/gensrpg/builders/legacy-enemy-editor-v1.js"></script>'),'R13 sole owner loaded at parser position');
 const r12Dungeon=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js'),'utf8');
 assert.ok(index.includes('<script src="assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js"></script>'),'R12 Dungeon owner must load via the real index');
 const coreSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','dice-v1.js'),'utf8');
 
-const thresholdOccurrences=(index.match(/\bd100ThresholdFromChance\s*\(/g)||[]).length;
+const thresholdOccurrences=((index+'\n'+r13Builders).match(/\bd100ThresholdFromChance\s*\(/g)||[]).length;
 const universalOccurrences=((index+'\n'+r12Dungeon).match(/\bdungeonUniversalTest\s*\(/g)||[]).length;
 assert.equal(thresholdOccurrences,16,'D100 threshold seam must remain one definition + fifteen callsites');
 assert.equal(universalOccurrences,2,'universal test must remain one definition + one callsite');

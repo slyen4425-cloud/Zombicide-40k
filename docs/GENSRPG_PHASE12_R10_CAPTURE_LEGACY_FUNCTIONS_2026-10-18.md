@@ -1,6 +1,6 @@
 # GenSrpG — Phase 12 R10 / 90 fonctions historiques Capture
 
-**18 octobre 2026 — code appliqué sur la branche R10 ; CI complète et validation manuelle encore en attente.** Ne pas annoncer GREEN ou EXIT par anticipation.
+**18 octobre 2026 — code et quatre suites CI GREEN sur le même SHA `b1797246c76543447cbbd11248bd59b5c3d7ad6b`, checkpoint technique créé. Validation manuelle Capture encore en attente.** Ne pas annoncer EXIT de la Phase 12.
 
 ## Protocole et source §§25–26
 
@@ -29,11 +29,28 @@ L'outil `tools/gensrpg_phase12_r10_capture_extract_apply.cjs` intègre **les 90 
 
 Application GitHub Actions sur branche R10 (tests de source, application, restauration, sentinelle R10 et sentinelle R09) : [R10 guarded Capture apply](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39161452910) **SUCCESS**. Commit runtime produit : `148844a8ccc524a06a08ac8f6a8039b8f8e0c6c1`. Fichiers runtime réellement modifiés : uniquement `index.html`, nouveau JS Capture, `service-worker.js` et manifeste d'owners. Les deux laboratoires n'ont subi aucune modification.
 
-## Gates avant GREEN final
+## Certification technique GREEN §25 — preuve des quatre suites sur un même SHA
 
-- Exécuter les sentinelles R10 et le rollback source R09 byte-exact.
-- Conserver les anciens tests Survie, Dungeon, Capture, Shell, sauvegardes et PWA **sans effacer de couverture** ; adapter leurs fixtures si elles requièrent l'index historique à un instant R09, en utilisant **`--restore-r09`**, sans changer les règles de gameplay.
-- Obtenir **SUCCESS sur un seul et même SHA** pour source/rollback, Firefox, Tactical Firefox+Chromium et Architecture statique+Chromium navigateur réel. Aucune tolérance à une CI rouge.
-- Créer seulement alors `checkpoint/gensrpg-phase12-r10-capture-legacy-functions-green-2026-10-18`, demander une validation manuelle ciblée Capture et conserver Phase 12 ouverte.
+Le commit **`b1797246c76543447cbbd11248bd59b5c3d7ad6b`** a passé toutes les suites obligatoires :
 
-**Statut initial : CODE APPLIQUÉ, PAS ENCORE GREEN.**
+- [Sentinelle R10 Capture, compilation, source, fichiers, PWA et rollback R10→R09 exact](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39165974364) — **SUCCESS**.
+- [Firefox](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39165974390) — **SUCCESS**.
+- [Tactical Firefox et Chromium](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39165974365) — **SUCCESS**.
+- [Architecture statique (**361 étapes**) et vrai Chromium](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39165974429) — **SUCCESS**. Parcours notamment Survie, Dungeon PC/mobile, Capture isolé, sauvegardes et retours, PWA/preview et non-interférence.
+
+**Incident résolu sans modifier le runtime :** un ancien contrat de tests Phase 3 attendait encore 128 propriétaires physiques après R09 ; R10 crée légitimement un propriétaire Capture supplémentaire. La vérification a été adaptée à **129**, avec contrôle explicite du domaine `capture`, de l'existence du module, de son chargement **une seule fois**, et maintien des **18** propriétaires correctifs R06. Aucun test neutralisé. Première passe CI rouge non comptée comme succès ; seule la passe ci-dessus certifie le SHA.
+
+Checkpoint créé **après** les quatre SUCCESS :
+`checkpoint/gensrpg-phase12-r10-capture-legacy-functions-green-2026-10-18` → **`b1797246c76543447cbbd11248bd59b5c3d7ad6b`**.
+
+Les éventuels commits de documentation ultérieurs n'altèrent pas ce checkpoint immuable. `main` demeure gelée ; les deux laboratoires restent inchangés.
+
+## Retour de test utilisateur : favorable mais non exhaustif
+
+Preview immuable du checkpoint R10 : [tester Monster Capture](https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/b1797246c76543447cbbd11248bd59b5c3d7ad6b/preview.html).
+
+Le **19 octobre 2026**, l'utilisateur rapporte : « Ça a l'air pas mal », en précisant qu'il ne s'est **pas attardé sur les combats**, dont les systèmes seront retravaillés en profondeur avec les laboratoires Exploration et Combat. Il s'agit d'un **retour de prise en main favorable et limité**, pas d'une validation exhaustive des scénarios Capture, de l'équilibrage, des interactions combat, des sauvegardes ou de l'ensemble du contenu. Les quatre CI certifient la non-régression technique du déplacement, pas la qualité définitive du gameplay.
+
+**Arbitrage** : ne pas intégrer au chantier de restructuration une refonte anticipée des mécaniques des laboratoires. Les modules historiques conservent leurs contrats actuels, les deux dépôts de laboratoires restent distincts. Un éventuel échec concret de chargement, de navigation, de sauvegarde ou de compatibilité doit néanmoins être corrigé au titre de la non-régression R10. Les scénarios non vérifiés manuellement restent non revendiqués.
+
+**Statut : R10 TECHNIQUEMENT GREEN ; retour humain favorable mais partiel, combats non validés en profondeur ; Phase 12 toujours ouverte.**

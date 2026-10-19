@@ -62,11 +62,21 @@ const disabled=new Set([
 const inline=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({id:m[1],source:m[2]}));
 const activeInline=inline.filter(x=>!disabled.has(x.id));
-// R11 physically removes 17 inert script tags: 129 -> 112 named blocks.
-// Never silently exclude an active owner from the side-effect inventory.
+// R11 removes 17 type-disabled tags: 129 -> 112 named blocks.
+// Of the 10 historically excluded IDs in this Phase 2 census, exactly three
+// (Core094/Core095/Core097) belonged to R11 and disappeared. Keep the other
+// seven historical exclusions and their classification unchanged.
 assert.equal(inline.length,112,'R11 must retain exactly 112 named script tags');
-assert.equal(inline.filter(x=>disabled.has(x.id)).length,0,'R11 retired script owners must remain absent');
-assert.equal(activeInline.length,112,'R11 inventory must cover every remaining named block');
+assert.deepEqual(inline.filter(x=>disabled.has(x.id)).map(x=>x.id),[
+  'dungeonCore081TacticalMovementDisabled',
+  'dungeonCore084MovementRuntimeFixDisabled',
+  'dungeonCore086MovementStabilityDisabled',
+  'dungeonCore087InteractionRulesDisabled',
+  'dungeonCore087ChestGuardDisabled',
+  'dungeonCore089TacticalInteractionsDisabled',
+  'dungeonCore090MovementV2Disabled'
+],'Only the seven historic Phase 2 exclusions outside R11 may remain');
+assert.equal(activeInline.length,105,'R11 must preserve the Phase 2 inventory of 105 non-excluded named blocks');
 
 function count(source,re){return (source.match(re)||[]).length}
 function metrics(source){

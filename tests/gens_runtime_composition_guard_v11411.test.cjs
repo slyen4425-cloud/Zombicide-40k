@@ -47,6 +47,7 @@ assert.deepEqual(directSrcs,[
   'assets/gensrpg/core/legacy-magic-sounds-v1.js',
   'assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js',
   'assets/gensrpg/capture/legacy-monolith-functions-v1.js',
+  'assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js',
   'assets/gensrpg/core/legacy-cloud-sync-backup-v1.js',
   'assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js',
   'assets/gensrpg/dungeon/mj72-scene-v1.js',

@@ -1,16 +1,24 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
+const cp=require('node:child_process');
 
 const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+// R11 removed Core 1.00's already inert tag. Restore R10 byte-exact for
+// historical absence-of-authority assertions; check current DOM separately.
+const historicalR10=cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{
+  cwd:path.join(__dirname,'..'),maxBuffer:10*1024*1024
+}).toString('utf8');
 
-function block(id){
-  const m=html.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
+function block(id,source=html){
+  const m=source.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
   assert.ok(m,'missing inline block '+id);
   return m[1];
 }
 
-const core100=block('dungeonCore100ResumeAndInteractionFix');
+assert.doesNotMatch(html,/<script\b[^>]*\bid=["']dungeonCore100ResumeAndInteractionFix["']/i,
+  'R11 must physically retire the non-executing Core 1.00 tag');
+const core100=block('dungeonCore100ResumeAndInteractionFix',historicalR10);
 const core307=block('dungeonCore307CriticalResumeFix');
 const core310=block('dungeonCore310PersistenceAndTokens');
 

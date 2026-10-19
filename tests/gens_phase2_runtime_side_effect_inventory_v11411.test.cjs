@@ -41,7 +41,7 @@ while(queue.length){
   reachable.add(rel);
   for(const dep of assetRefs(read(rel)))if(!reachable.has(dep))queue.push(dep);
 }
-assert.equal(reachable.size,130,'R12 adds exactly one Dungeon RPG owner to the R11 reachable graph');
+assert.equal(reachable.size,131,'R13 adds exactly one Builders owner to the R12 reachable graph');
 assert.equal(reachable.has('assets/gensrpg/capture/legacy-monolith-functions-v1.js'),true,'R10 Capture owner must be genuinely reachable in the production graph');
 assert.equal(reachable.has('assets/gensrpg/core/legacy-magic-sounds-v1.js'),true,'R07 audio data must be genuinely production-reachable');
 for(const rel of reachable)assert.ok(manifest.files?.[rel],rel+' must be owned before side-effect inventory');

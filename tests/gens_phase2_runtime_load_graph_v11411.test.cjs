@@ -37,6 +37,7 @@ assert.deepEqual(rawDirect,[
   'assets/gensrpg/core/legacy-magic-sounds-v1.js',
   'assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js',
   'assets/gensrpg/capture/legacy-monolith-functions-v1.js',
+  'assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js',
   'assets/gensrpg/core/legacy-cloud-sync-backup-v1.js',
   'assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js',
   'assets/gensrpg/dungeon/mj72-scene-v1.js',
@@ -102,12 +103,12 @@ const productionDirect=[
   ].includes(x)),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,86,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
+assert.equal(new Set(productionDirect).size,87,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,112,'R11 must retire exactly 17 previously disabled named script tags from 129');
 assert.equal((index.match(/<script\b[^>]*type=["']application\/x-gensrpg-disabled["']/gi)||[]).length,0,'R11 must leave no legacy disabled script tags');
-assert.equal([...index.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)].length,148,'R11 must retain exactly 148 active/external script tags');
+assert.equal([...index.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)].length,149,'R12 must retain 148 R11 scripts plus the new Dungeon owner');
 
 const assetRefs=source=>[...source.matchAll(/assets\/(?:gensrpg|dungeon)\/[^"'\x60\s)]+\.js(?:\?[^"'\x60\s)]*)?/g)]
   .map(m=>stripQuery(m[0]))
@@ -174,7 +175,7 @@ const phase5ConnectedServices=[
   'assets/gensrpg/shell/module-launch-final-authority-v1.js'
 ];
 const phase5Set=new Set(phase5ConnectedServices);
-const phase12ConnectedServices=["assets/gensrpg/builders/equipment-library-editor-v1.js","assets/gensrpg/core/legacy-cloud-sync-backup-v1.js","assets/gensrpg/core/legacy-magic-sounds-v1.js","assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js","assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js","assets/gensrpg/capture/legacy-monolith-functions-v1.js"];
+const phase12ConnectedServices=["assets/gensrpg/builders/equipment-library-editor-v1.js","assets/gensrpg/core/legacy-cloud-sync-backup-v1.js","assets/gensrpg/core/legacy-magic-sounds-v1.js","assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js","assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js","assets/gensrpg/capture/legacy-monolith-functions-v1.js","assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js"];
 const phase12Set=new Set(phase12ConnectedServices);
 const phase9ConnectedServices=[
   'assets/gensrpg/capture/session-start-v1.js',
@@ -214,9 +215,9 @@ const phase10Set=new Set([...phase10ConnectedServices,...phase10InertServices]);
 const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel)&&!phase10Set.has(rel)&&!phase12Set.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,143,'physical JS inventory includes S3 inert PvP setup UI in addition to S2 services');
+assert.equal(allJs.length,144,'physical JS inventory includes S3 inert PvP setup UI in addition to S2 services');
 assert.equal(phase2Js.length,82,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
-assert.equal(reachable.size,129,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
+assert.equal(reachable.size,130,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
 const connectedPhaseEntrypoints=new Set([
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',

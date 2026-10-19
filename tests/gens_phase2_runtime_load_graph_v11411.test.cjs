@@ -106,8 +106,8 @@ assert.equal(new Set(productionDirect).size,86,'production composition includes 
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,112,'R11 must retire exactly 17 previously disabled named script tags from 129');
-assert.equal((index.match(/<script\\b[^>]*type=["']application\\/x-gensrpg-disabled["']/gi)||[]).length,0,'R11 must leave no legacy disabled script tags');
-assert.equal([...index.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script\\s*>/gi)].length,148,'R11 must retain exactly 148 active/external script tags');
+assert.equal((index.match(/<script\b[^>]*type=["']application\/x-gensrpg-disabled["']/gi)||[]).length,0,'R11 must leave no legacy disabled script tags');
+assert.equal([...index.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)].length,148,'R11 must retain exactly 148 active/external script tags');
 
 const assetRefs=source=>[...source.matchAll(/assets\/(?:gensrpg|dungeon)\/[^"'\x60\s)]+\.js(?:\?[^"'\x60\s)]*)?/g)]
   .map(m=>stripQuery(m[0]))

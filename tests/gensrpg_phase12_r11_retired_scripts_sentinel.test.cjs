@@ -2,7 +2,7 @@
 const fs=require('node:fs'),assert=require('node:assert/strict'),crypto=require('node:crypto'),cp=require('node:child_process');
 const blob=x=>{const b=Buffer.from(x);return crypto.createHash('sha1').update('blob '+b.length+'\0').update(b).digest('hex')};
 const installed=fs.readFileSync('index.html','utf8');
-const html=blob(installed)==='b0d0c73292e4374fc4f23e86edffad5c1b39a7b6'
+const html=['b0d0c73292e4374fc4f23e86edffad5c1b39a7b6','b5a39705baf83e9782695c14bede8b9dde6ddf52'].includes(blob(installed))
   ?cp.execFileSync('node',['tools/gensrpg_phase12_r12_dungeon_rpg_rules_talents.cjs','--restore-r11'],{maxBuffer:10*1024*1024}).toString():installed;
 const original=cp.execFileSync('node',['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{maxBuffer:10*1024*1024}).toString();
 assert.equal(blob(original),'b8ef8dcb497cad94c91094ed008136a5d9800155');

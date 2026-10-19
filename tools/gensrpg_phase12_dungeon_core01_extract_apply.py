@@ -367,7 +367,7 @@ def verify():
                 ):
                     expected_after=expected_after.replace(former,current)
             # R12 adds precisely one Dungeon-only classic owner; R11 behaviour remains identical.
-            if path==PATH_GRAPH and current_blob=="b0d0c73292e4374fc4f23e86edffad5c1b39a7b6","b5a39705baf83e9782695c14bede8b9dde6ddf52":
+            if path==PATH_GRAPH and current_blob in ("b0d0c73292e4374fc4f23e86edffad5c1b39a7b6","b5a39705baf83e9782695c14bede8b9dde6ddf52"):
                 for former,current in (
                     ("size,86,","size,87,"),
                     ("allJs.length,143,","allJs.length,144,"),

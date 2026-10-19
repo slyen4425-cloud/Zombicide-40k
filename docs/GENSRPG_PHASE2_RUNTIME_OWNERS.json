@@ -658,6 +658,11 @@
       "owner": "GenSrpG Capture / 90 legacy declarations R10",
       "domain": "capture",
       "role": "90 fonctions historiques Capture originales (combat classique, creat/XP, inventaire, boutiques, soin, regles de mode). Aucun nouveau moteur. Chargement classique synchrone"
+    },
+    "assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js": {
+      "owner": "GenSrpG Dungeon / 96 RPG rules, progression and talents historical declarations R12",
+      "domain": "dungeon",
+      "role": "96 original top-level Dungeon RPG rule, character progression and talent declarations, byte-identical. No generic Builders ability library or shared Core rules. Classic synchronous before remaining monolith."
     }
   }
 }

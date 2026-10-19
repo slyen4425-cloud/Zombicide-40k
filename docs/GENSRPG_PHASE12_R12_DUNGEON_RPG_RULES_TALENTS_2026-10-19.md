@@ -1,6 +1,6 @@
 # GenSrpG Phase 12 — R12 : extraction contrôlée Dungeon RPG règles + progression + talents
 
-Date 19 octobre 2026. **Statut initial : candidat prouvé par AST, procédure d'application sous gardes ; ne pas annoncer GREEN avant quatre familles CI sur un SHA unique.**
+Date 19 octobre 2026. **R12 GREEN certifié** sur le commit `0426ebe0ed619851c3c8ca9ed60afc33e39807ae` : 7/7 CI succès, checkpoint final créé. Phase 12 globale encore ouverte.
 
 ## START et source
 
@@ -27,3 +27,13 @@ Date 19 octobre 2026. **Statut initial : candidat prouvé par AST, procédure d'
 - Après application, mettre à jour les sentinelles de composition uniquement selon les changements démontrés, puis Architecture+Chromium, Firefox, Tactical et rollback. Pas de checkpoint final si CI rouge.
 
 Phase 12 EXIT reste ouverte après R12 : le code inline restant conserve des responsabilités multi-domaines.
+
+## Résultat définitif — certification GREEN (19 octobre 2026)
+
+- **SHA de code, source et tests certifiés** : [`0426ebe0ed619851c3c8ca9ed60afc33e39807ae`](https://github.com/slyen4425-cloud/Zombicide-40k/commit/0426ebe0ed619851c3c8ca9ed60afc33e39807ae).
+- **7/7 checks SUCCESS sur ce même SHA** : `architecture-sentinels`, `browser-sentinel`, `dock-firefox`, `dock-chromium`, `dock-contract`, `firefox-wall-zoom`, `dungeon-rpg-rollback`. Quatre familles CI couvertes : Architecture+Chromium, Firefox, Tactical et rollback R12→R09.
+- **Checkpoint final GREEN** : [`checkpoint/gensrpg-phase12-r12-dungeon-rpg-rules-talents-green-2026-10-19`](https://github.com/slyen4425-cloud/Zombicide-40k/tree/checkpoint/gensrpg-phase12-r12-dungeon-rpg-rules-talents-green-2026-10-19), pointant exactement vers `0426ebe0ed619851c3c8ca9ed60afc33e39807ae`, créé seulement après tous les succès.
+- **Sorties runtime vérifiées** : `index.html` 1 863 745 octets / Git blob `b0d0c73292e4374fc4f23e86edffad5c1b39a7b6`; `assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js` 71 155 octets / Git blob `82c847234e75adbfe33ef70ca8f58fa1ebdc381d`. Gain HTML –70 508 octets ; 96 déclarations Dungeon originales à l'octet.
+- **Adaptation des sentinelles, sans changer les règles** : restauration de la chaîne R12→R11→R10→R09, comptage du nouvel owner dans les manifestes et sentinelles Core Stats S6/S10/S11, Dice et composition ; les fonctions sont lues depuis leur fichier réel et les tests de résultats restent obligatoires. Le succès `browser-sentinel` a été observé sur le SHA exact.
+- **Contrôle de périmètre** : aucun changement dans `main` (SHA `e8681f9823573ced8aec59c8ddc47a72b02bc663`), Capture/Survie/PvP/Combat Tactical restent exclus du lot, pas de fusion et aucun des laboratoires externes modifié. Aucun test manuel de gameplay non réalisé n'est revendiqué.
+- **Reprise** : checkpoint R12 GREEN ci-dessus. Aucun nouveau lot sans checkpoint START §25 sur son vrai SHA de base, puis nouvelle vérification source §26. **Phase 12 EXIT non encore certifiée**.

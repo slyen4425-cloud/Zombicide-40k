@@ -45,10 +45,12 @@ Checkpoint créé **après** les quatre SUCCESS :
 
 Les éventuels commits de documentation ultérieurs n'altèrent pas ce checkpoint immuable. `main` demeure gelée ; les deux laboratoires restent inchangés.
 
-## Validation manuelle à obtenir
+## Retour de test utilisateur : favorable mais non exhaustif
 
 Preview immuable du checkpoint R10 : [tester Monster Capture](https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/b1797246c76543447cbbd11248bd59b5c3d7ad6b/preview.html).
 
-Tester depuis le Shell : entrée du mode Capture et création/sélection d'un profil, équipe/rencontre, combat classique et victoire, cohérence de l'XP et des PV, accès aux objets et aux soins selon le profil, sauvegarde puis reprise, et retour au hub/autres modes. Signaler tout chargement bloqué, fonction absente ou écran vide. **Aucune approbation manuelle n'est présumée.**
+Le **19 octobre 2026**, l'utilisateur rapporte : « Ça a l'air pas mal », en précisant qu'il ne s'est **pas attardé sur les combats**, dont les systèmes seront retravaillés en profondeur avec les laboratoires Exploration et Combat. Il s'agit d'un **retour de prise en main favorable et limité**, pas d'une validation exhaustive des scénarios Capture, de l'équilibrage, des interactions combat, des sauvegardes ou de l'ensemble du contenu. Les quatre CI certifient la non-régression technique du déplacement, pas la qualité définitive du gameplay.
 
-**Statut final de ce rapport : R10 TECHNIQUEMENT GREEN ; validation humaine Capture en attente ; Phase 12 toujours ouverte.**
+**Arbitrage** : ne pas intégrer au chantier de restructuration une refonte anticipée des mécaniques des laboratoires. Les modules historiques conservent leurs contrats actuels, les deux dépôts de laboratoires restent distincts. Un éventuel échec concret de chargement, de navigation, de sauvegarde ou de compatibilité doit néanmoins être corrigé au titre de la non-régression R10. Les scénarios non vérifiés manuellement restent non revendiqués.
+
+**Statut : R10 TECHNIQUEMENT GREEN ; retour humain favorable mais partiel, combats non validés en profondeur ; Phase 12 toujours ouverte.**

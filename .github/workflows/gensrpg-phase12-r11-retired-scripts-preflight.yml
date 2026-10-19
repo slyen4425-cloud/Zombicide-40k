@@ -1,0 +1,30 @@
+name: GenSrpG Phase12 R11 retired scripts preflight
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r11-disabled-script-retirement-2026-10-19'
+    paths:
+      - 'tools/gensrpg_phase12_r11_retired_scripts.cjs'
+      - '.github/workflows/gensrpg-phase12-r11-retired-scripts-preflight.yml'
+      - 'docs/GENSRPG_CURRENT_WORK.md'
+permissions:
+  contents: read
+jobs:
+  verify-retired-script-refs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify exact R10 index, reference scans and rollback (read-only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = 'b8ef8dcb497cad94c91094ed008136a5d9800155'
+          test "$(wc -c < index.html | tr -d ' ')" = '2031649'
+          node --check tools/gensrpg_phase12_r11_retired_scripts.cjs
+          node tools/gensrpg_phase12_r11_retired_scripts.cjs --audit
+          test "$(node tools/gensrpg_phase12_r11_retired_scripts.cjs --restore-r10 | git hash-object --stdin)" = 'b8ef8dcb497cad94c91094ed008136a5d9800155'
+      - name: Assert non-mutating source audit
+        run: test -z "$(git status --porcelain)"

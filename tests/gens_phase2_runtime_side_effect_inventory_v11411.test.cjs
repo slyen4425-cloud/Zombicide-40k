@@ -62,8 +62,11 @@ const disabled=new Set([
 const inline=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m=>({id:m[1],source:m[2]}));
 const activeInline=inline.filter(x=>!disabled.has(x.id));
-assert.equal(inline.length,129);
-assert.equal(activeInline.length,119);
+// R11 physically removes 17 inert script tags: 129 -> 112 named blocks.
+// Never silently exclude an active owner from the side-effect inventory.
+assert.equal(inline.length,112,'R11 must retain exactly 112 named script tags');
+assert.equal(inline.filter(x=>disabled.has(x.id)).length,0,'R11 retired script owners must remain absent');
+assert.equal(activeInline.length,112,'R11 inventory must cover every remaining named block');
 
 function count(source,re){return (source.match(re)||[]).length}
 function metrics(source){

@@ -1,0 +1,52 @@
+name: GenSrpG Phase12 R11 guard and archive retired script tags once
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r11-disabled-script-retirement-2026-10-19'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r11-retired-archive-apply.yml'
+permissions:
+  contents: write
+jobs:
+  archive-retired:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Produce independently reconstructible original tags from certified R10 history
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r11-disabled-script-retirement-2026-10-19'
+          test "$(git hash-object index.html)" = 'f257bd9e193648dc62cd8a40d510831debfe045a'
+          test ! -e docs/phase12/r11-retired-script-tags.json
+          git show b1797246c76543447cbbd11248bd59b5c3d7ad6b:index.html > /tmp/gens-r10.html
+          test "$(git hash-object /tmp/gens-r10.html)" = 'b8ef8dcb497cad94c91094ed008136a5d9800155'
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');
+          const src=fs.readFileSync('/tmp/gens-r10.html','utf8'),now=fs.readFileSync('index.html','utf8');
+          const re=/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi;
+          const tagged=[...src.matchAll(re)].filter(x=>/\btype\s*=\s*(["'])application\/x-gensrpg-disabled\1/i.test(x[1]));
+          if(tagged.length!==17)throw Error('not 17 disabled');
+          const restore={format:'gensrpg.phase12.r11.retired-tags.v1',source_git_blob:'b8ef8dcb497cad94c91094ed008136a5d9800155',target_git_blob:'f257bd9e193648dc62cd8a40d510831debfe045a',segments:tagged.map(x=>({at:x.index,text:x[0]}))};
+          const output=src.replace(re,(all,attr)=>/\btype\s*=\s*(["'])application\/x-gensrpg-disabled\1/i.test(attr)?'':all);
+          if(output!==now)throw Error('target not exactly source minus tags');
+          let rev=now;
+          for(const x of restore.segments)rev=rev.slice(0,x.at)+x.text+rev.slice(x.at);
+          if(rev!==src)throw Error('archived offsets do not restore certified R10');
+          fs.mkdirSync('docs/phase12',{recursive:true});
+          fs.writeFileSync('docs/phase12/r11-retired-script-tags.json',JSON.stringify(restore)+'\n');
+          console.log('Archived exactly 17 retired tags: independent reverse reconstruction succeeds');
+          NODE
+      - name: Commit only non-runtime rollback evidence on R11 branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/phase12/r11-retired-script-tags.json
+          test "$(git diff --cached --name-only)" = 'docs/phase12/r11-retired-script-tags.json'
+          git commit -m 'test(phase12 R11): archive 17 retired tag spans for shallow-checkout rollback'
+          git push origin "HEAD:$GITHUB_REF_NAME"

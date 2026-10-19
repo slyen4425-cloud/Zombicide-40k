@@ -4,6 +4,11 @@ const fs=require('node:fs'),crypto=require('node:crypto'),cp=require('node:child
 const SOURCE='b8ef8dcb497cad94c91094ed008136a5d9800155',SIZE=2031649;
 const TARGET='f257bd9e193648dc62cd8a40d510831debfe045a',TARGET_SIZE=1934253;
 const BASE='b1797246c76543447cbbd11248bd59b5c3d7ad6b';
+const R12='b0d0c73292e4374fc4f23e86edffad5c1b39a7b6';
+function installedR11(){
+ const current=fs.readFileSync('index.html','utf8');
+ return blob(current)===R12?cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r12_dungeon_rpg_rules_talents.cjs','--restore-r11'],{maxBuffer:10*1024*1024}).toString('utf8'):current;
+}
 const SCRIPT=/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi;
 const DISABLED=/\btype\s*=\s*(["'])application\/x-gensrpg-disabled\1/i;
 const STYLES=['rpgTurnTargetFlow157Css','rpgPlayerTargeting158Css','rpgHeroTargeting159Css','dungeonCore091PostCombatUnlockCss','dungeonCore104CoherenceCss'];
@@ -35,7 +40,7 @@ function scan(s){
  return {...result,count,bytes};
 }
 function r10(){
- const current=fs.readFileSync('index.html','utf8'),hash=blob(current);
+ const current=installedR11(),hash=blob(current);
  if(hash===SOURCE)return Buffer.from(current,'utf8');
  assert(hash===TARGET,'neither R10 nor R11 installed');
  const archive=JSON.parse(fs.readFileSync('docs/phase12/r11-retired-script-tags.json','utf8'));
@@ -54,13 +59,13 @@ function r10(){
 }
 const mode=process.argv[2]||'--audit',file=process.argv[3]||'index.html';
 if(mode==='--restore-r10'){
- const source=r10(),current=fs.readFileSync('index.html','utf8');
+ const source=r10(),current=installedR11();
  if(blob(current)===TARGET)assert(current===analyze(source.toString('utf8')).output,'current R11 cannot reverse to R10');
  else assert(blob(current)===SOURCE,'neither R10 nor R11 active');
  process.stdout.write(source);
 }
 else if(mode==='--verify'){
- const actual=fs.readFileSync('index.html','utf8');
+ const actual=installedR11();
  assert(Buffer.byteLength(actual)===TARGET_SIZE&&blob(actual)===TARGET,'R11 target index mismatch');
  assert(actual===analyze(r10().toString('utf8')).output,'R11 forward reconstruction mismatch');
  const sw=fs.readFileSync('service-worker.js','utf8');

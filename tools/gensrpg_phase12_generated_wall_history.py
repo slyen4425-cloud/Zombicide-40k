@@ -63,7 +63,7 @@ def _exact_r10_to_r09():
 
 def historical_r05_view(data):
     # New R11 source is strictly reconstructed via R11→R10→R09 before old snapshot checks.
-    if blob(data) in ("b8ef8dcb497cad94c91094ed008136a5d9800155","f257bd9e193648dc62cd8a40d510831debfe045a"):
+    if blob(data) in ("b8ef8dcb497cad94c91094ed008136a5d9800155","f257bd9e193648dc62cd8a40d510831debfe045a","b0d0c73292e4374fc4f23e86edffad5c1b39a7b6"):
         data=_exact_r10_to_r09()
     if blob(data)=="4dbe3314d5048f2def404ed674498c0670c04fc1":
         data=_exact_r09_to_r08()

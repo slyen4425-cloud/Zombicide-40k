@@ -44,6 +44,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
           test "$(git diff --cached --name-only | wc -l | tr -d ' ')" = '4'
-          git -c core.whitespace=-blank-at-eof diff --cached --check
+          # Preserve byte-exact legacy function whitespace; continue to check other patch errors.
+          git -c core.whitespace=-blank-at-eol,-blank-at-eof diff --cached --check
           git commit -m 'refactor(phase12 R12): move 96 byte-identical Dungeon RPG rules and talent functions'
           git push origin "HEAD:$GITHUB_REF_NAME"

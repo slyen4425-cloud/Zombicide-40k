@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs'),crypto=require('node:crypto'),vm=require('node:vm'),cp=require('node:child_process');
 const blob=x=>{const b=Buffer.from(x);return crypto.createHash('sha1').update('blob '+b.length+'\0').update(b).digest('hex')};
 const installed=fs.readFileSync('index.html','utf8');
-const html=blob(installed)==='f257bd9e193648dc62cd8a40d510831debfe045a'
+const html=['f257bd9e193648dc62cd8a40d510831debfe045a','b0d0c73292e4374fc4f23e86edffad5c1b39a7b6'].includes(blob(installed))
   ?cp.execFileSync('node',['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{maxBuffer:10*1024*1024}).toString():installed;
 const path='assets/gensrpg/capture/legacy-monolith-functions-v1.js';
 const ext=fs.readFileSync(path,'utf8');

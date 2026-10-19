@@ -6,6 +6,8 @@ const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const r13Builders=fs.readFileSync(path.join(root,'assets/gensrpg/builders/legacy-enemy-editor-v1.js'),'utf8');
+assert.ok(index.includes('<script src="assets/gensrpg/builders/legacy-enemy-editor-v1.js"></script>'),'R13 sole owner loaded at parser position');
 const r12Dungeon=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js'),'utf8');
 assert.ok(index.includes('<script src="assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js"></script>'),'Dungeon R12 owner must load once via the original parser sequence');
 const core051=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core051-exploration-polish-v1.js'),'utf8');
@@ -78,7 +80,7 @@ assert.equal(gitBlob(perfPath),'e8fd9f1049a6597118eb026976bca7548f11b284','mobil
 
 assert.match(index,/function d100ThresholdFromChance\(chance\)\{\s*const c=Math\.max\(1,Math\.min\(100,Number\(chance\)\|\|1\)\);\s*return GensDiceV1\.thresholdFromChance\(c\);\s*\}/,
   'first GREEN Core Dice raccord must remain unchanged');
-assert.equal((index.match(/\bd100ThresholdFromChance\s*\(/g)||[]).length,16,
+assert.equal(((index+'\n'+r13Builders).match(/\bd100ThresholdFromChance\s*\(/g)||[]).length,16,
   'first GREEN seam must remain one definition + fifteen callsites');
 
 assert.equal((index.match(/\bd10048\s*\(/g)||[]).length,5,

@@ -121,8 +121,13 @@ assert.equal(ownerManifest.files?.[r10CaptureOwner]?.domain,'capture',
 assert.equal(exists(r10CaptureOwner),true,'R10 physical Capture owner must exist');
 assert.equal(composition.index.split(r10CaptureOwner).length-1,1,
   'R10 Capture declarations must be loaded exactly once from index');
-assert.equal(Object.keys(ownerManifest.files||{}).length,111+captureR06OwnerPaths.length,
-  'R10 adds one Capture owner after R09, preserving all 18 R06 Capture patch owners and all Phase 3 entry contracts');
+const r12DungeonOwner='assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js';
+assert.equal(ownerManifest.files?.[r12DungeonOwner]?.domain,'dungeon',
+  'R12 rules and talents must remain solely Dungeon-owned');
+assert.equal(composition.index.split(r12DungeonOwner).length-1,1,
+  'R12 classic Dungeon owner must be loaded exactly once');
+assert.equal(Object.keys(ownerManifest.files||{}).length,112+captureR06OwnerPaths.length,
+  'R12 adds one Dungeon owner, preserving the 18 R06 Capture patch owners and all prior Phase 3 entries');
 assert.equal(ownerManifest.files?.['assets/gensrpg/core/legacy-cloud-sync-backup-v1.js']?.domain,'core',
   'R05 cloud-sync/local-backup must have a sole Core owner');
 assert.equal(composition.index.split('assets/gensrpg/core/legacy-cloud-sync-backup-v1.js').length-1,1,

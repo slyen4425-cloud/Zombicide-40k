@@ -1,0 +1,99 @@
+{
+  "schema": "gensrpg.phase12.r10.verified_census.v1",
+  "certified_at": "2026-10-19",
+  "source": {
+    "archive": "E1.zip",
+    "zip_octets": 676688,
+    "member": "index.html(7).txt",
+    "octets": 2031649,
+    "git_blob": "b8ef8dcb497cad94c91094ed008136a5d9800155",
+    "sha256": "affeace70bd5fbb82b0663eac474a39abb02e01a2a5ad53a6d04326672b4eaf5",
+    "checkpoint_sha": "b1797246c76543447cbbd11248bd59b5c3d7ad6b"
+  },
+  "method": "Exact byte count for <script> body and attributes in the verified supplied HTML; TypeScript ScriptKind.JS AST for all five active anonymous script bodies; external literal reference check excludes one empty-content connector result and two CDN scripts.",
+  "totals": {
+    "script_tags": 165,
+    "external": 59,
+    "local_external": 57,
+    "remote_external": 2,
+    "local_external_readable_screened": 56,
+    "inline_active": 89,
+    "inline_active_bytes": 1140482,
+    "inline_active_anonymous": 5,
+    "anonymous_bytes": 805702,
+    "inline_active_named": 84,
+    "named_bytes": 334780,
+    "inline_disabled": 17,
+    "disabled_bytes": 95878
+  },
+  "compared_r09": {
+    "script_tags": 164,
+    "external": 58,
+    "inline_active": 89,
+    "inline_active_bytes": 1201978,
+    "anonymous_bytes": 867198,
+    "named_bytes": 334780,
+    "inline_disabled": 17,
+    "disabled_bytes": 95878
+  },
+  "anonymous": [
+    {
+      "index": 22,
+      "bytes": 704020,
+      "git_blob": "42217af77c73fdc10427c1ac9bf3ecd64a724341",
+      "functions": 886,
+      "variable_statements": 131,
+      "expression_statements": 12,
+      "other_statements": 1,
+      "parse_errors": 0,
+      "role": "multi-domain; not one Core authority"
+    },
+    {
+      "index": 25,
+      "bytes": 94882,
+      "git_blob": "50e5b25ce6d3d9bf41c6e684f5548cc5842be935",
+      "functions": 115,
+      "variable_statements": 13,
+      "expression_statements": 4,
+      "if_statements": 1,
+      "parse_errors": 0,
+      "role": "mixed update/shared editor & content"
+    },
+    {
+      "index": 27,
+      "bytes": 219,
+      "git_blob": "",
+      "parse_errors": 0,
+      "role": "candidate IndexedDB bootstrap, not yet cleared"
+    },
+    {
+      "index": 64,
+      "bytes": 6337,
+      "git_blob": "",
+      "parse_errors": 0,
+      "role": "Dungeon AI visual feedback IIFE"
+    },
+    {
+      "index": 164,
+      "bytes": 244,
+      "git_blob": "",
+      "parse_errors": 0,
+      "role": "Shell/PvP candidate bootstrap, not yet cleared"
+    }
+  ],
+  "disabled_css_id_refs": [
+    "rpgTurnTargetFlow157",
+    "rpgPlayerTargeting158",
+    "rpgHeroTargeting159",
+    "dungeonCore091PostCombatUnlock",
+    "dungeonCore104Coherence"
+  ],
+  "external_unreadable": [
+    "assets/gensrpg/core/legacy-visual-data-v1.js"
+  ],
+  "caveats": [
+    "Literal reference screening is not exhaustive runtime reference proof",
+    "Two CDN scripts not inspected",
+    "No runtime changes or disabled script deletion authorized by this census"
+  ]
+}

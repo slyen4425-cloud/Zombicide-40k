@@ -5,7 +5,14 @@ const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 
 function scripts(){
   const out=[];const re=/<script\b([^>]*)>([\s\S]*?)<\/script>/gi;let m,n=0;
-  while((m=re.exec(html))){const id=(m[1]||'').match(/\bid=["']([^"']+)["']/i)?.[1]||`inline-${++n}`;out.push({id,body:m[2]||''});}
+  while((m=re.exec(html))){
+    const attrs=m[1]||'';
+    const ext='assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js';
+    const id=attrs.match(/\bid=["']([^"']+)["']/i)?.[1]||`inline-${++n}`;
+    // R12: the original top-level progression function lives in a synchronous Dungeon owner.
+    const body=attrs.includes('src="'+ext+'"')?fs.readFileSync(path.join(__dirname,'..',ext),'utf8'):(m[2]||'');
+    out.push({id:body===m[2]?id:'R12 Dungeon rules+talents',body});
+  }
   return out;
 }
 function bodyOfFunction(src,name){

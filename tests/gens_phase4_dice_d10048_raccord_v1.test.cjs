@@ -6,6 +6,8 @@ const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const r12Dungeon=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js'),'utf8');
+assert.ok(index.includes('<script src="assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js"></script>'),'Dungeon R12 owner must load once via the original parser sequence');
 const core051=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core051-exploration-polish-v1.js'),'utf8');
 const core211Path=path.join(root,'assets/gensrpg/dungeon/core211-consolidation-v1.js');
 const core211Bytes=fs.readFileSync(core211Path);
@@ -104,8 +106,8 @@ for(const [name,expected] of Object.entries(consumerHashes)){
   assert.equal(sha256(extractFunctionSource(index,name)),expected,name+' consumer must remain byte-identical');
 }
 
-assert.match(index,/function dungeonUniversalTest\(statValue,opt=\{\}\)\{[\s\S]*?Math\.random\(\)\*sides/,
-  'dungeonUniversalTest must remain deferred');
+assert.match(r12Dungeon,/function dungeonUniversalTest\(statValue,opt=\{\}\)\{[\s\S]*?Math\.random\(\)\*sides/,
+  'dungeonUniversalTest remains outside Core Dice and under the sole Dungeon owner');
 assert.match(index,/function showSpecialD6Roll\([\s\S]*?Math\.random\(\)\*6/,
   'showSpecialD6Roll must remain deferred');
 assert.match(index,/<script id="dungeonCore051ExplorationPolish" src="assets\/gensrpg\/dungeon\/core051-exploration-polish-v1\.js"><\/script>/,

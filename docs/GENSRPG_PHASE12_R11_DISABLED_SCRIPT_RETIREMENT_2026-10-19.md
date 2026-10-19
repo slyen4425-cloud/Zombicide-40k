@@ -1,6 +1,6 @@
 # GenSrpG — Phase 12 / R11 : retrait collectif des scripts déjà désactivés
 
-Date : 19 octobre 2026. **Code R11 physiquement appliqué sur la branche R11 ; certification CI en cours, pas de checkpoint final avant quatre suites vertes.**
+Date : 19 octobre 2026. **Lot R11 appliqué, source, rollback, Architecture, navigateur Chromium et Firefox certifiés GREEN sur un seul SHA. La Phase 12 générale reste ouverte.**
 
 ## 1. Conformité aux §§25–26
 
@@ -40,3 +40,13 @@ Date : 19 octobre 2026. **Code R11 physiquement appliqué sur la branche R11 ; c
 - Garder les tests des modes Survie, Dungeon, Monster Capture, PvP placeholder et la PWA. **Aucun résultat de test manuel non effectué ne doit être inventé.**
 - Si quatre suites vertes : créer `checkpoint/gensrpg-phase12-r11-disabled-script-retirement-green-2026-10-19` sur le SHA certifié, actualiser `GENSRPG_CURRENT_WORK.md` et fournir une preview immuable.
 - **Phase 12 restera ouverte** après R11 : les scripts inline actifs représentent encore des responsabilités multi-domaines. La fin de Phase 12 ne doit pas être annoncée artificiellement.
+
+## 6. Résultat final CI et checkpoint (19 octobre 2026)
+
+- **Commit certifié** : [`9f56f7c7f4576179663f816949159097e981329d`](https://github.com/slyen4425-cloud/Zombicide-40k/commit/9f56f7c7f4576179663f816949159097e981329d).
+- **Sept checks SUCCESS sur le SHA exact** : `architecture-sentinels`, `browser-sentinel`, `retired-script-rollback`, `dock-contract`, `dock-chromium`, `dock-firefox`, `firefox-wall-zoom`. Les suites recouvrent les quatre familles CI exigées (source/rollback, Architecture + navigateur, Firefox, Tactical).
+- **Checkpoint GREEN créé** : [`checkpoint/gensrpg-phase12-r11-disabled-script-retirement-green-2026-10-19`](https://github.com/slyen4425-cloud/Zombicide-40k/tree/checkpoint/gensrpg-phase12-r11-disabled-script-retirement-green-2026-10-19) pointe sur le commit certifié ci-dessus, et non sur un résultat partiel.
+- Deux erreurs de sentinelles historiques ont été traitées **sans modification de code** : expression régulière mal échappée des balises, puis deux inventaires qui comptaient d'anciennes déclarations inertes ou les 17 tags désormais retirés. La chaîne d'affectations des fonctions actives et la conservation des protections ont été maintenues.
+- **Runtime stable R11** : `index.html` 1 934 253 octets, Git blob `f257bd9e193648dc62cd8a40d510831debfe045a`, scripts actifs/externe inchangés. Aucune validation manuelle de combat Capture non effectuée n'est revendiquée.
+- **La Phase 12 reste OUVERTE** : grand code inline actif restant 1 140 482 octets. Prochaine sélection fondée sur responsabilités et dépendances, pas sur le nombre de lots. Pour toute extraction future, nouveau START §25, source exacte §26, tests de rollback et quatre suites CI.
+- Cette mise à jour documentaire **postérieure au checkpoint** est sans modification de fichiers runtime ; le checkpoint immuable demeure le point de reprise GREEN certifié.

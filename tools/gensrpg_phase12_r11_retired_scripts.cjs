@@ -34,7 +34,24 @@ function scan(s){
  visit('assets');
  return {...result,count,bytes};
 }
-function r10(){const b=cp.execFileSync('git',['show',BASE+':index.html'],{maxBuffer:10*1024*1024});assert(b.length===SIZE&&blob(b)===SOURCE,'R10 rollback source unavailable');return b}
+function r10(){
+ const current=fs.readFileSync('index.html','utf8'),hash=blob(current);
+ if(hash===SOURCE)return Buffer.from(current,'utf8');
+ assert(hash===TARGET,'neither R10 nor R11 installed');
+ const archive=JSON.parse(fs.readFileSync('docs/phase12/r11-retired-script-tags.json','utf8'));
+ assert(archive.format==='gensrpg.phase12.r11.retired-tags.v1'&&archive.source_git_blob===SOURCE&&archive.target_git_blob===TARGET,'wrong R11 archival source');
+ assert(Array.isArray(archive.segments)&&archive.segments.length===17,'retired scripts archival count');
+ let reconstructed=current,last=-1;
+ for(const segment of archive.segments){
+   assert(Number.isInteger(segment.at)&&segment.at>last&&typeof segment.text==='string'&&segment.text.startsWith('<script'),'archive interval invalid');
+   assert(DISABLED.test(segment.text.split('>')[0]),'archive contains active script');
+   reconstructed=reconstructed.slice(0,segment.at)+segment.text+reconstructed.slice(segment.at);
+   last=segment.at;
+ }
+ assert(Buffer.byteLength(reconstructed,'utf8')===SIZE&&blob(reconstructed)===SOURCE,'R11 → R10 not byte exact');
+ assert(analyze(reconstructed).output===current,'archival forward re-extraction differs from R11');
+ return Buffer.from(reconstructed,'utf8');
+}
 const mode=process.argv[2]||'--audit',file=process.argv[3]||'index.html';
 if(mode==='--restore-r10'){
  const source=r10(),current=fs.readFileSync('index.html','utf8');

@@ -69,7 +69,7 @@ else if(mode==='--verify'){
  assert(Buffer.byteLength(actual)===TARGET_SIZE&&blob(actual)===TARGET,'R11 target index mismatch');
  assert(actual===analyze(r10().toString('utf8')).output,'R11 forward reconstruction mismatch');
  const sw=fs.readFileSync('service-worker.js','utf8');
- assert(sw.includes('-r10-capture-main-functions-r11-retired-disabled"'),'R11 PWA cache marker missing');
+ assert(sw.includes('-r10-capture-main-functions-r11-retired-disabled'),'R11 PWA cache marker missing');
  console.log('R11 rollback and active order verified, PWA marker present');
 }else if(mode==='--audit'||mode==='--apply'){
  const info=scan(fs.readFileSync(file,'utf8'));

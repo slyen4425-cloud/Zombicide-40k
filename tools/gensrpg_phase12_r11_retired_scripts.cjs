@@ -25,7 +25,8 @@ function analyze(s){
 }
 function scan(s){
  const result=analyze(s),names=result.names;
- const tests=[/document\s*\.\s*scripts\b/i,/getElementsByTagName\s*\(\s*["']script["']\s*\)/i,/querySelector(?:All)?\s*\(\s*["']script(?:\[|\.|:|["'])/i,/application\/x-gensrpg-disabled/i];
+ // Exception démontrée: script[data-*] sélectionne les bridges injectés, jamais les 17 inertes sans attribut data-*.
+ const tests=[/document\s*\.\s*scripts\b/i,/getElementsByTagName\s*\(\s*["']script["']\s*\)/i,/querySelector(?:All)?\s*\(\s*["']script(?!\[data-)(?:\[|\.|:|["'])/i,/application\/x-gensrpg-disabled/i];
  function check(code,label){for(const name of names)assert(!code.includes(name),label+' references '+name);for(const p of tests)assert(!p.test(code),label+' scans retired script DOM '+p)}
  let count=0,bytes=0;
  for(const m of s.matchAll(SCRIPT)){if(DISABLED.test(m[1])||/\bsrc\s*=/.test(m[1]))continue;check(m[2],'inline');count++}

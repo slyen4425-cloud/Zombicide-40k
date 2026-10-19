@@ -12,13 +12,16 @@ const derivedSrc=fs.readFileSync(derivedPath,'utf8');
 
 function extractFunction(name){
   const token='function '+name+'(';
-  const start=index.indexOf(token);
-  assert.ok(start>=0,'missing inline owner '+name);
-  const brace=index.indexOf('{',start);
+  const r12=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js'),'utf8');
+  // R12 retains byte-identical Dungeon formulas in a synchronous Dungeon owner.
+  const source=index.includes(token)?index:r12;
+  const start=source.indexOf(token);
+  assert.ok(start>=0,'missing certified Dungeon owner '+name);
+  const brace=source.indexOf('{',start);
   assert.ok(brace>start,'missing body for '+name);
   let depth=0,quote=null,escaped=false,lineComment=false,blockComment=false;
-  for(let i=brace;i<index.length;i++){
-    const c=index[i],next=index[i+1]||'';
+  for(let i=brace;i<source.length;i++){
+    const c=source[i],next=source[i+1]||'';
     if(lineComment){
       if(c==='\n')lineComment=false;
       continue;
@@ -39,7 +42,7 @@ function extractFunction(name){
     if(c==='{')depth++;
     if(c==='}'){
       depth--;
-      if(depth===0)return index.slice(start,i+1);
+      if(depth===0)return source.slice(start,i+1);
     }
   }
   throw new Error('unterminated inline owner '+name);

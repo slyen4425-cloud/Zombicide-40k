@@ -18,12 +18,15 @@ const V110=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v
 
 function extractFunction(name){
   const token='function '+name+'(';
-  const start=index.indexOf(token);
-  assert.ok(start>=0,'missing inline owner '+name);
-  const brace=index.indexOf('{',start);
+  // Preserve the historical S11 parity test after byte-identical R12 extraction.
+  const dungeonOwner=fs.readFileSync(path.join(root,'assets','gensrpg','dungeon','legacy-rpg-rules-talents-v1.js'),'utf8');
+  const source=index.includes(token)?index:dungeonOwner;
+  const start=source.indexOf(token);
+  assert.ok(start>=0,'missing original Dungeon function '+name);
+  const brace=source.indexOf('{',start);
   let depth=0,quote=null,escaped=false,line=false,block=false;
-  for(let i=brace;i<index.length;i++){
-    const c=index[i],n=index[i+1]||'';
+  for(let i=brace;i<source.length;i++){
+    const c=source[i],n=source[i+1]||'';
     if(line){if(c==='\n')line=false;continue}
     if(block){if(c==='*'&&n==='/'){block=false;i++}continue}
     if(quote){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c===quote)quote=null;continue}
@@ -31,7 +34,7 @@ function extractFunction(name){
     if(c==='/'&&n==='*'){block=true;i++;continue}
     if(c==='"'||c==="'"||c==='\x60'){quote=c;continue}
     if(c==='{')depth++;
-    if(c==='}'&&--depth===0)return index.slice(start,i+1);
+    if(c==='}'&&--depth===0)return source.slice(start,i+1);
   }
   throw new Error('unterminated '+name);
 }

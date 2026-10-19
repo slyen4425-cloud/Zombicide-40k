@@ -315,7 +315,7 @@ def verify():
                 "aca31c540d61c81e1504d3b915b034b372103b5b",
                 "6eeed45a0a12085c1b107ee6c24b49040277ca54",
                 "4dbe3314d5048f2def404ed674498c0670c04fc1",
-                "b8ef8dcb497cad94c91094ed008136a5d9800155",
+                "b8ef8dcb497cad94c91094ed008136a5d9800155","f257bd9e193648dc62cd8a40d510831debfe045a",
             ):
                 expected_after=current_blob
             if path==PATH_GRAPH and current_blob in (
@@ -323,7 +323,7 @@ def verify():
                 "aca31c540d61c81e1504d3b915b034b372103b5b",
                 "6eeed45a0a12085c1b107ee6c24b49040277ca54",
                 "4dbe3314d5048f2def404ed674498c0670c04fc1",
-                "b8ef8dcb497cad94c91094ed008136a5d9800155",
+                "b8ef8dcb497cad94c91094ed008136a5d9800155","f257bd9e193648dc62cd8a40d510831debfe045a",
             ):
                 # R06 introduces 18 Capture-owner files without changing the
                 # historical D1-R05 rollback. Phase 2 JS baseline remains 82.
@@ -333,7 +333,7 @@ def verify():
                     ("reachable.size,107,", "reachable.size,125,"),
                 ):
                     expected_after=expected_after.replace(former,current)
-                if current_blob in ("aca31c540d61c81e1504d3b915b034b372103b5b","6eeed45a0a12085c1b107ee6c24b49040277ca54","4dbe3314d5048f2def404ed674498c0670c04fc1","b8ef8dcb497cad94c91094ed008136a5d9800155"):
+                if current_blob in ("aca31c540d61c81e1504d3b915b034b372103b5b","6eeed45a0a12085c1b107ee6c24b49040277ca54","4dbe3314d5048f2def404ed674498c0670c04fc1","b8ef8dcb497cad94c91094ed008136a5d9800155","f257bd9e193648dc62cd8a40d510831debfe045a"):
                     # R07 data-only MP3 owner adds one reachable, explicit
                     # module without changing the historical Phase 2 baseline.
                     for former,current in (
@@ -342,14 +342,14 @@ def verify():
                         ("reachable.size,125,", "reachable.size,126,"),
                     ):
                         expected_after=expected_after.replace(former,current)
-                if current_blob in ("6eeed45a0a12085c1b107ee6c24b49040277ca54","4dbe3314d5048f2def404ed674498c0670c04fc1","b8ef8dcb497cad94c91094ed008136a5d9800155"):
+                if current_blob in ("6eeed45a0a12085c1b107ee6c24b49040277ca54","4dbe3314d5048f2def404ed674498c0670c04fc1","b8ef8dcb497cad94c91094ed008136a5d9800155","f257bd9e193648dc62cd8a40d510831debfe045a"):
                     for former,current in (
                         ("size,83,", "size,84,"),
                         ("allJs.length,140,", "allJs.length,141,"),
                         ("reachable.size,126,", "reachable.size,127,"),
                     ):
                         expected_after=expected_after.replace(former,current)
-            if path==PATH_GRAPH and current_blob in ("4dbe3314d5048f2def404ed674498c0670c04fc1","b8ef8dcb497cad94c91094ed008136a5d9800155"):
+            if path==PATH_GRAPH and current_blob in ("4dbe3314d5048f2def404ed674498c0670c04fc1","b8ef8dcb497cad94c91094ed008136a5d9800155","f257bd9e193648dc62cd8a40d510831debfe045a"):
                 for former,current in (
                     ("size,84,","size,85,"),
                     ("allJs.length,141,","allJs.length,142,"),
@@ -359,7 +359,7 @@ def verify():
             # R10 adds precisely one new classic Capture owner before the old
             # monolith (no extra Phase 2 baseline authority). Existing R09 graph
             # counts and its strict index/hash guard remain accounted for.
-            if path==PATH_GRAPH and current_blob=="b8ef8dcb497cad94c91094ed008136a5d9800155":
+            if path==PATH_GRAPH and current_blob in ("b8ef8dcb497cad94c91094ed008136a5d9800155","f257bd9e193648dc62cd8a40d510831debfe045a","f257bd9e193648dc62cd8a40d510831debfe045a"):
                 for former,current in (
                     ("size,85,","size,86,"),
                     ("allJs.length,142,","allJs.length,143,"),

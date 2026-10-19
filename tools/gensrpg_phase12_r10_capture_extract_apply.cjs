@@ -49,7 +49,11 @@ function forward(source){
   return {html,extracted};
 }
 function restoreR09(){
-  const html=fs.readFileSync('index.html','utf8'),extracted=fs.readFileSync(MODULE,'utf8');
+  const current=fs.readFileSync('index.html','utf8');
+  const html=blob(current)==='f257bd9e193648dc62cd8a40d510831debfe045a'
+    ? cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{maxBuffer:10*1024*1024}).toString('utf8')
+    : current;
+  const extracted=fs.readFileSync(MODULE,'utf8');
   assert(blob(html)===NEW_INDEX&&blob(extracted)===NEW_MODULE,'not the R10 certified files');
   assert(html.includes(HOOK),'Capture loader missing');
   const sans=html.replace(HOOK,'');
@@ -101,7 +105,11 @@ else if(mode==='--apply'){
 else if(mode==='--verify'){
   const source=cp.execFileSync('git',['show',ORIGINAL_SHA+':index.html'],{maxBuffer:10*1024*1024}).toString('utf8');
   const expected=forward(source);
-  assert(fs.readFileSync('index.html','utf8')===expected.html,'index differs from exactly expected source');
+  const current=fs.readFileSync('index.html','utf8');
+  const currentR10=blob(current)==='f257bd9e193648dc62cd8a40d510831debfe045a'
+    ? cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{maxBuffer:10*1024*1024}).toString('utf8')
+    : current;
+  assert(currentR10===expected.html,'index differs from exactly expected R10 source');
   assert(fs.readFileSync(MODULE,'utf8')===expected.extracted,'Capture module differs');
   assert(restoreR09()===source,'byte exact R09 rollback');
   const sw=fs.readFileSync('service-worker.js','utf8');

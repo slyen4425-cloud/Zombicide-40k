@@ -36,14 +36,26 @@ function scan(s){
 }
 function r10(){const b=cp.execFileSync('git',['show',BASE+':index.html'],{maxBuffer:10*1024*1024});assert(b.length===SIZE&&blob(b)===SOURCE,'R10 rollback source unavailable');return b}
 const mode=process.argv[2]||'--audit',file=process.argv[3]||'index.html';
-if(mode==='--restore-r10')process.stdout.write(r10());
+if(mode==='--restore-r10'){
+ const source=r10(),current=fs.readFileSync('index.html','utf8');
+ if(blob(current)===TARGET)assert(current===analyze(source.toString('utf8')).output,'current R11 cannot reverse to R10');
+ else assert(blob(current)===SOURCE,'neither R10 nor R11 active');
+ process.stdout.write(source);
+}
 else if(mode==='--verify'){
  const actual=fs.readFileSync('index.html','utf8');
  assert(Buffer.byteLength(actual)===TARGET_SIZE&&blob(actual)===TARGET,'R11 target index mismatch');
  assert(actual===analyze(r10().toString('utf8')).output,'R11 forward reconstruction mismatch');
- console.log('R11 rollback and active order verified');
+ const sw=fs.readFileSync('service-worker.js','utf8');
+ assert(sw.includes('-r10-capture-main-functions-r11-retired-disabled"'),'R11 PWA cache marker missing');
+ console.log('R11 rollback and active order verified, PWA marker present');
 }else if(mode==='--audit'||mode==='--apply'){
  const info=scan(fs.readFileSync(file,'utf8'));
  if(mode==='--audit')console.log('R11 preflight: '+info.count+' active and external JS blocks, '+info.bytes+' asset JS bytes screened; CSS + all active scripts preserved');
- else{assert(file==='index.html','apply checkout only');fs.writeFileSync('index.html',info.output,'utf8');console.log('R11 17 inerts retired, 97396 HTML bytes removed')}
+ else{assert(file==='index.html','apply checkout only');const swPath='service-worker.js',sw=fs.readFileSync(swPath,'utf8');
+ const old='-r10-capture-main-functions"',next='-r10-capture-main-functions-r11-retired-disabled"';
+ assert(sw.includes(old)&&!sw.includes(next),'PWA cache marker mismatch');
+ fs.writeFileSync('index.html',info.output,'utf8');
+ fs.writeFileSync(swPath,sw.replace(old,next),'utf8');
+ console.log('R11 17 inerts retired, 97396 HTML bytes removed and PWA cache changed')}
 }else throw Error('Unknown mode '+mode);

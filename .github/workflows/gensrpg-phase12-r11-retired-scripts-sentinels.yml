@@ -1,0 +1,26 @@
+name: GenSrpG Phase12 R11 retired scripts / backward compatibility
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r11-disabled-script-retirement-2026-10-19'
+permissions:
+  contents: read
+jobs:
+  retired-script-rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require R11 exact output, no active script changes and full rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(git hash-object index.html)" = 'b8ef8dcb497cad94c91094ed008136a5d9800155' ]; then
+            node tools/gensrpg_phase12_r11_retired_scripts.cjs --audit
+          else
+            node tests/gensrpg_phase12_r11_retired_scripts_sentinel.test.cjs
+            node tests/gensrpg_phase12_r10_capture_sentinel.test.cjs
+            node tests/gensrpg_phase12_r09_wave_sentinel.test.cjs
+          fi

@@ -21,10 +21,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object index.html)" = 'b8ef8dcb497cad94c91094ed008136a5d9800155'
-          test "$(wc -c < index.html | tr -d ' ')" = '2031649'
+          test "$(git hash-object index.html)" = 'b8ef8dcb497cad94c91094ed008136a5d9800155' -o "$(git hash-object index.html)" = 'f257bd9e193648dc62cd8a40d510831debfe045a'
+          test "$(wc -c < index.html | tr -d ' ')" = '2031649' -o "$(wc -c < index.html | tr -d ' ')" = '1934253'
           node --check tools/gensrpg_phase12_r11_retired_scripts.cjs
-          node tools/gensrpg_phase12_r11_retired_scripts.cjs --audit
+          if [ "$(git hash-object index.html)" = 'b8ef8dcb497cad94c91094ed008136a5d9800155' ]; then
+            node tools/gensrpg_phase12_r11_retired_scripts.cjs --audit
+          else
+            node tools/gensrpg_phase12_r11_retired_scripts.cjs --verify
+          fi
           test "$(node tools/gensrpg_phase12_r11_retired_scripts.cjs --restore-r10 | git hash-object --stdin)" = 'b8ef8dcb497cad94c91094ed008136a5d9800155'
       - name: Assert non-mutating source audit
         run: test -z "$(git status --porcelain)"

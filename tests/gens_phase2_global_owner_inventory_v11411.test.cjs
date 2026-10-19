@@ -71,8 +71,12 @@ function assignmentChain(name){
 }
 
 const expected={
+  // R11 removed five non-executing assignments in 17 retired script bodies:
+  // rpgTurnTargetFlow157 (1), rpgPlayerTargeting158 (1),
+  // rpgHeroTargeting159 (1), dungeonCore102RoomCycleFix (2).
+  // All 25 remaining executable assignments and final owner are still asserted.
   renderDungeonCombatRound:{
-    assignments:30,
+    assignments:25,
     last:'dungeonCore303TimelineRootFix',
     mustInclude:['dungeonCore214SingleAuthority','dungeonCore303TimelineRootFix']
   },

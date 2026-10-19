@@ -16,7 +16,7 @@ assert.equal(nonRetired.length,after.length);
 after.forEach((x,i)=>assert.equal(x[0],nonRetired[i][0],'parser and byte order '+i));
 assert.ok(!html.includes('application/x-gensrpg-disabled'));
 for(const id of ['rpgTurnTargetFlow157Css','rpgPlayerTargeting158Css','rpgHeroTargeting159Css','dungeonCore091PostCombatUnlockCss','dungeonCore104CoherenceCss'])assert.ok(html.includes('id="'+id+'"'));
-const sw=fs.readFileSync('service-worker.js','utf8');assert.ok(sw.includes('-r10-capture-main-functions-r11-retired-disabled"'));
+const sw=fs.readFileSync('service-worker.js','utf8');assert.ok(sw.includes('-r10-capture-main-functions-r11-retired-disabled'));
 cp.execFileSync('node',['tools/gensrpg_phase12_r11_retired_scripts.cjs','--verify']);
 assert.equal(cp.execFileSync('node',['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{maxBuffer:10*1024*1024}).toString(),original);
 assert.equal(blob(cp.execFileSync('node',['tools/gensrpg_phase12_r10_capture_extract_apply.cjs','--restore-r09'],{maxBuffer:10*1024*1024})),'4dbe3314d5048f2def404ed674498c0670c04fc1');

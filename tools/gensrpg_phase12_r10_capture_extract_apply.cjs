@@ -50,7 +50,7 @@ function forward(source){
 }
 function restoreR09(){
   const current=fs.readFileSync('index.html','utf8');
-  const html=blob(current)==='f257bd9e193648dc62cd8a40d510831debfe045a'
+  const html=['f257bd9e193648dc62cd8a40d510831debfe045a','b0d0c73292e4374fc4f23e86edffad5c1b39a7b6'].includes(blob(current))
     ? cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{maxBuffer:10*1024*1024}).toString('utf8')
     : current;
   const extracted=fs.readFileSync(MODULE,'utf8');
@@ -106,7 +106,7 @@ else if(mode==='--verify'){
   const source=cp.execFileSync('git',['show',ORIGINAL_SHA+':index.html'],{maxBuffer:10*1024*1024}).toString('utf8');
   const expected=forward(source);
   const current=fs.readFileSync('index.html','utf8');
-  const currentR10=blob(current)==='f257bd9e193648dc62cd8a40d510831debfe045a'
+  const currentR10=['f257bd9e193648dc62cd8a40d510831debfe045a','b0d0c73292e4374fc4f23e86edffad5c1b39a7b6'].includes(blob(current))
     ? cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{maxBuffer:10*1024*1024}).toString('utf8')
     : current;
   assert(currentR10===expected.html,'index differs from exactly expected R10 source');

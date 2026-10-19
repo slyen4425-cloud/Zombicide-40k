@@ -62,21 +62,21 @@
     {
       "index": 27,
       "bytes": 219,
-      "git_blob": "",
+      "git_blob": "cdf33d5bbe5ba17c36d100b2e348c82e67818160",
       "parse_errors": 0,
       "role": "candidate IndexedDB bootstrap, not yet cleared"
     },
     {
       "index": 64,
       "bytes": 6337,
-      "git_blob": "",
+      "git_blob": "ff958f9e2965130ed9c4da1ba8df721b47332d10",
       "parse_errors": 0,
       "role": "Dungeon AI visual feedback IIFE"
     },
     {
       "index": 164,
       "bytes": 244,
-      "git_blob": "",
+      "git_blob": "c43d47df21d662a46ae54c0770106d3694acf235",
       "parse_errors": 0,
       "role": "Shell/PvP candidate bootstrap, not yet cleared"
     }

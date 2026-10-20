@@ -52,8 +52,17 @@ async function exercise(browser,label){
   const dungeonGame=games.filter({hasText:/dungeon/i}).first();
   assert.ok(await dungeonGame.count(),label+' built-in Dungeon available in adventure family');
   console.log('DUNGEON_REAL_CARD_HTML '+label+' '+(await dungeonGame.evaluate(n=>n.outerHTML)).slice(0,5500));
+  await page.evaluate(()=>{
+    const names=['gensRootHome','gensFamilyHome','gensGameHome'];
+    window.__gensNavMoves=[];
+    const capture=(reason)=>window.__gensNavMoves.push({reason,ms:Math.round(performance.now()),state:names.map(id=>({id,display:document.getElementById(id)?.style.display}))});
+    capture('before-click');
+    for(const id of names){new MutationObserver(()=>capture('mutation:'+id)).observe(document.getElementById(id),{attributes:true,attributeFilter:['style']})}
+  });
   await dungeonGame.locator('button.gensUniverseMainBtn').click({timeout:15000});
+  console.log('DUNGEON_REAL_IMMEDIATE '+label+' '+JSON.stringify(await page.evaluate(()=>window.__gensNavMoves)));
   await page.waitForTimeout(250);
+  console.log('DUNGEON_REAL_NAV_MOVES '+label+' '+JSON.stringify(await page.evaluate(()=>window.__gensNavMoves)));
   console.log('DUNGEON_REAL_AFTER_CARD_ERRORS '+label+' '+JSON.stringify(errs));
   console.log('DUNGEON_REAL_AFTER_CARD '+label+' '+JSON.stringify(await page.evaluate(()=>({family:document.getElementById('gensFamilyHome')?.style.display,game:document.getElementById('gensGameHome')?.style.display,root:document.getElementById('gensRootHome')?.style.display,active:getActiveGameProfile?.()?.id,visiblePanels:[...document.querySelectorAll('#gensFamilyGames button')].filter(n=>n.getClientRects().length>0).map(n=>({text:n.textContent.trim().slice(0,90),onclick:n.getAttribute('onclick')})).slice(0,12)}))));
   await page.locator('#gensGameHome').waitFor({state:'visible',timeout:5000});

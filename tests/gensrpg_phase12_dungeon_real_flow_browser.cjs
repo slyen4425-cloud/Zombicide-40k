@@ -51,21 +51,21 @@ async function exercise(browser,label){
   console.log('DUNGEON_REAL_PROFILE_OPTIONS '+label+' '+JSON.stringify(await games.allTextContents()));
   const dungeonGame=games.filter({hasText:/dungeon/i}).first();
   assert.ok(await dungeonGame.count(),label+' built-in Dungeon available in adventure family');
-  console.log('DUNGEON_REAL_CARD_HTML '+label+' '+(await dungeonGame.evaluate(n=>n.outerHTML)).slice(0,5500));
-  await page.evaluate(()=>{
-    const names=['gensRootHome','gensFamilyHome','gensGameHome'];
-    window.__gensNavMoves=[];
-    const capture=(reason)=>window.__gensNavMoves.push({reason,ms:Math.round(performance.now()),state:names.map(id=>({id,display:document.getElementById(id)?.style.display}))});
-    capture('before-click');
-    for(const id of names){new MutationObserver(()=>capture('mutation:'+id)).observe(document.getElementById(id),{attributes:true,attributeFilter:['style']})}
-  });
-  await dungeonGame.locator('button.gensUniverseMainBtn').click({timeout:15000});
-  console.log('DUNGEON_REAL_IMMEDIATE '+label+' '+JSON.stringify(await page.evaluate(()=>window.__gensNavMoves)));
-  await page.waitForTimeout(250);
-  console.log('DUNGEON_REAL_NAV_MOVES '+label+' '+JSON.stringify(await page.evaluate(()=>window.__gensNavMoves)));
-  console.log('DUNGEON_REAL_AFTER_CARD_ERRORS '+label+' '+JSON.stringify(errs));
-  console.log('DUNGEON_REAL_AFTER_CARD '+label+' '+JSON.stringify(await page.evaluate(()=>({family:document.getElementById('gensFamilyHome')?.style.display,game:document.getElementById('gensGameHome')?.style.display,root:document.getElementById('gensRootHome')?.style.display,active:getActiveGameProfile?.()?.id,visiblePanels:[...document.querySelectorAll('#gensFamilyGames button')].filter(n=>n.getClientRects().length>0).map(n=>({text:n.textContent.trim().slice(0,90),onclick:n.getAttribute('onclick')})).slice(0,12)}))));
-  await page.locator('#gensGameHome').waitFor({state:'visible',timeout:5000});
+  // V16.155 intentionally forces a full reload on Zombicide -> Dungeon family switch.
+  // This is *part of the real UX*, not a blank-screen bug or mock.
+  await Promise.all([
+    page.waitForEvent('framenavigated',{timeout:18000}),
+    dungeonGame.locator('button.gensUniverseMainBtn').click({timeout:15000})
+  ]);
+  await page.waitForLoadState('domcontentloaded',{timeout:30000});
+  await page.waitForFunction(()=>typeof window.openGensBuiltInGame==='function'&&getActiveGameProfile?.()?.id==='game_profile_dungeon_demo',{timeout:15000});
+  let afterReload=await step(page,label+'/family-switch-reloaded');
+  assert.equal(afterReload.profile,'game_profile_dungeon_demo',label+' family switch persists actual Dungeon profile across full reload');
+  await page.waitForTimeout(800);
+  await page.locator('#gensRootHome .gensRootModeCard.adventure').click({timeout:15000});
+  await page.locator('#gensFamilyHome').waitFor({state:'visible',timeout:15000});
+  await page.locator('#gensFamilyGames .gensUniverseCard[data-rpg-profile="game_profile_dungeon_demo"] button.gensUniverseMainBtn').click({timeout:15000});
+  await page.locator('#gensGameHome').waitFor({state:'visible',timeout:15000});
   const selected=await step(page,label+'/profile-selected');
   assert.equal(selected.gameStyle,'dungeon',label+' player-selected profile is Dungeon');
   await page.locator('#gensGameHomeActions button.newGameBtn').click({timeout:15000});

@@ -22,3 +22,11 @@
 - Aucune modification autorisée de `main` gelé `e8681f9823573ced8aec59c8ddc47a72b02bc663`, ni laboratoires Combat/Exploration. Validation manuelle future de la bibliothèque ennemis recommandée.
 
 **Phase 12 EXIT encore ouverte** ; ne pas fractionner ce périmètre en micro-lots ni préjuger de R14.
+
+## Certification finale — 20 octobre 2026
+
+- **Résultat** : R13 **GREEN**, 7/7 checks GitHub Actions SUCCESS sur le **même SHA de code** `e22de3ae8d0d4f07ef7972c80f838dbf96d9e9ec`. Les sept jobs sont `architecture-sentinels`, `browser-sentinel`, `dock-chromium`, `dock-firefox`, `dock-contract`, `firefox-wall-zoom`, `builders-rollback`.
+- **Checkpoint immutable** : [`checkpoint/gensrpg-phase12-r13-builders-enemy-editor-green-2026-10-20`](https://github.com/slyen4425-cloud/Zombicide-40k/tree/checkpoint/gensrpg-phase12-r13-builders-enemy-editor-green-2026-10-20), créé **après** les sept succès, sur `e22de3ae8d0d4f07ef7972c80f838dbf96d9e9ec`.
+- **Changement de code** : 31 déclarations propriétaires Builders déplacées sans modifier leurs corps ; les seules adaptations ultérieures concernent les sentinelles de source, d'ordre de chargement, d'inventaire des 131 propriétaires et la réversibilité. Aucun changement de gameplay autoritaire revendiqué.
+- **Preuves** : `index.html` 1 820 094 octets, Git blob `b5a39705baf83e9782695c14bede8b9dde6ddf52` ; module Builders 44 044 octets, Git blob `47b8d0e2b65bfffca4128d29c345b7e82af2a5fe`. Rollback R13→R12 byte-identique et chaîne historique protégée ; navigateur Architecture SUCCESS.
+- **Hors périmètre** : pas de test manuel déclaré, pas de fusion vers `main`, pas de changement des laboratoires. La **Phase 12 globale reste ouverte** ; choisir seulement un prochain lot réellement justifié, avec START §25 et source §26 exacts.

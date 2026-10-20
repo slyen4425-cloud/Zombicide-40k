@@ -42,6 +42,10 @@ jobs:
           NODE_PATH: /tmp/gensrpg-r14-playwright/node_modules
         run: |
           set -euo pipefail
+          legacy_pkg="$(node -p 'require.resolve("playwright/package.json",{paths:[process.cwd()+"/tests"]})')"
+          legacy_cli="$(dirname "$legacy_pkg")/cli.js"
+          echo "Archived Survival browser test uses Playwright $(node -p 'require("playwright/package.json").version')"
+          node "$legacy_cli" install chromium
           node tests/gens_phase6_survival_builtin_boundary_browser_characterization_v1.test.cjs
       - name: Expose browser parity SHA result
         if: always()

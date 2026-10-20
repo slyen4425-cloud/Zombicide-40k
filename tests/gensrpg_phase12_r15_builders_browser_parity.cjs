@@ -9,7 +9,8 @@ const LABEL='R15 Browser Character and Creature parity';
 async function exercise(browser,version){
  const ctx=await browser.newContext({viewport:{width:1280,height:780},locale:'fr-FR'});
  const page=await ctx.newPage();
- const messages=[],errors=[];
+ const messages=[],errors=[],consoleErrors=[];
+ page.on('console',m=>{if(m.type()==='error'||m.type()==='warning')consoleErrors.push(m.text().slice(0,280))});
  page.on('dialog',async d=>{messages.push(d.message().slice(0,140));await d.accept()});
  page.on('pageerror',e=>errors.push(e.message.slice(0,240)));
  if(version==='R14')await page.route('**/index.html',route=>route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:R14}));
@@ -48,6 +49,10 @@ async function exercise(browser,version){
     const record=window.loadCustomHeroesMulti().find(x=>x.name===name);
     return record&&{name:record.name,hp:record.hp,contentFamily:record.contentFamily};
   },LABEL);
+  if(data.hero?.hp!==7){
+    const diagnostics=await page.evaluate(()=>({raw:localStorage.getItem('z40k_custom_heroes_multi_v1')?.slice(0,550)||null,family:window.gensCurrentContentFamily(),profile:window.getActiveGameProfile()?.id,heroCount:window.loadCustomHeroesMulti().length}));
+    console.error('R15 HERO EDITOR DIAG '+JSON.stringify({version,diagnostics,messages,errors,consoleErrors}).slice(0,2300));
+  }
   assert.equal(data.hero?.hp,7,'saved hero health');
   await page.reload({waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForFunction(()=>typeof window.loadSharedEntities==='function'&&typeof window.loadCustomHeroesMulti==='function',{timeout:40000});

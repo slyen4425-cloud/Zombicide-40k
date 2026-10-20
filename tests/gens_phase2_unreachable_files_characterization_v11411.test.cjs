@@ -64,8 +64,13 @@ assert.equal(rawDirect.filter(x=>x===R09_SURVIVAL_WAVE).length,1,
   'R09 Survival wave owner must be loaded exactly once from index.html');
 assert.equal(reachable.has(R09_SURVIVAL_WAVE),true,
   'R09 Survival wave owner must remain reachable in the real production graph');
-assert.equal(reachable.size,112+captureR06Files.length,
-  'production graph must preserve earlier owners plus one R12 Dungeon RPG module');
+const R13_BUILDERS_ENEMY='assets/gensrpg/builders/legacy-enemy-editor-v1.js';
+assert.equal(reachable.size,113+captureR06Files.length,
+  'production graph must preserve earlier owners plus one R13 Builders enemy editor module');
+assert.equal(rawDirect.filter(x=>x===R13_BUILDERS_ENEMY).length,1,
+  'R13 Builders enemy editor must be loaded once in the real production index');
+assert.equal(reachable.has(R13_BUILDERS_ENEMY),true,
+  'R13 Builders enemy editor must enter the production graph exactly once');
 assert.equal(reachable.has('assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js'),true,
   'R12 Dungeon RPG owner must be genuinely reachable in the production graph');
 assert.equal(reachable.has('assets/gensrpg/capture/legacy-monolith-functions-v1.js'),true,

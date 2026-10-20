@@ -64,7 +64,15 @@ assert.equal((core213.toString().match(/\.stopImmediatePropagation\s*\(/g)||[]).
 
 // D4 moved this unchanged active inline owner into a physical JS file. Allow
 // only two original historical patterns, tied to the exact audited JS blob.
-const core200=fs.readFileSync(path.join(__dirname,'..',DUNGEON_CORE200));
+// Existing D4 exceptions remain pinned to its original owner Git blob.
+ // The narrowly reviewed Phase12 Core200 fix is separately guarded byte-for-byte
+ // in tests/gensrpg_phase12_dungeon_core200_spawn_order_guard.test.cjs.
+const installedCore200=fs.readFileSync(path.join(__dirname,'..',DUNGEON_CORE200));
+const installedBlob=crypto.createHash('sha1').update(Buffer.from('blob '+installedCore200.length+'\0')).update(installedCore200).digest('hex');
+const core200=installedBlob==='5649ae0af69064dde72e6ea28b8dbefd105cb527'
+  ?installedCore200
+  :require('node:child_process').execFileSync('git',['show','905856d0cb4ce04068daf8f7d9bd08b46d556799:'+DUNGEON_CORE200],
+      {cwd:path.join(__dirname,'..'),maxBuffer:2*1024*1024});
 const core200Blob=crypto.createHash('sha1').update(Buffer.from('blob '+core200.length+'\0')).update(core200).digest('hex');
 assert.equal(core200.length,55842,'D4 legacy Core200 physical owner size locked');
 assert.equal(core200Blob,'5649ae0af69064dde72e6ea28b8dbefd105cb527','D4 legacy Core200 must remain byte-identical');

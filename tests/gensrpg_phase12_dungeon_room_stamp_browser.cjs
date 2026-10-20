@@ -128,6 +128,11 @@ async function exercise(browser,label){
   await page.locator('#dc200ModalOk').click({timeout:12000});
   await page.locator('#dc01Explore').waitFor({state:'visible',timeout:12000});
   assert.match(await page.locator('#dc01Explore').textContent(),/ENGAGER LE COMBAT/,label+' real manual combat entry is visible');
+  // Real gameplay shows a result/info overlay; a player dismisses it via OK.
+  if(await page.locator('#effectModal').evaluate(el=>el.classList.contains('open'))){
+    await page.locator('#effectModal button.effectClose').click({timeout:10000});
+    await page.locator('#effectModal').evaluate(el=>{if(el.classList.contains('open'))throw Error('effect overlay failed to close through UI')});
+  }
   await page.locator('#dc01Explore').click({timeout:12000});
   await page.waitForTimeout(1200);
   const combat=await page.evaluate(()=>{

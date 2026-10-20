@@ -50,7 +50,8 @@ async function exercise(browser,label){
   await page.locator('#gensGameHomeActions button.newGameBtn').click({timeout:15000});
   let s=await step(page,label+'/newgame');
   assert.equal(s.pregameVisible,true,label+' pregame wizard really shown');
-  await page.locator('#pregameProfileStep button.pregameContinue').click({timeout:15000});
+  if(await page.locator('#pregameProfileStep').isVisible()) await page.locator('#pregameProfileStep button.pregameContinue').click({timeout:15000});
+  assert.equal(await page.locator('#pregameHeroStep').isVisible(),true,label+' hero-configuration step shown by newGame');
   await step(page,label+'/pregame-heroes');
   const launch=page.locator('button.startGameBtn[onclick="startConfiguredGame()"]');
   await launch.waitFor({state:'visible',timeout:15000});

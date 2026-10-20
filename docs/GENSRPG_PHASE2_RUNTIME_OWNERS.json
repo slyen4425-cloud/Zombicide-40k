@@ -673,6 +673,11 @@
       "owner": "GenSrpG Builders RPG universe editor R14",
       "domain": "builders",
       "role": "41 byte-exact RPG universe UI/form/save functions, historical Core/profile/runtime calls unchanged; no initializer moved."
+    },
+    "assets/gensrpg/builders/legacy-character-entity-editors-v1.js": {
+      "owner": "GenSrpG Builders R15 — hero/controllable-creature/companion editors",
+      "domain": "builders",
+      "role": "54 original byte-identical UI/authoring declarations, no Core entity storage or Capture runtime, synchronous at original parser seam"
     }
   }
 }

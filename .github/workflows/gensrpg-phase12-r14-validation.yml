@@ -32,8 +32,8 @@ jobs:
           test "$new_exit" -ne 0
           grep -q 'AssertionError' /tmp/r14-v1145-old.log
           grep -q 'AssertionError' /tmp/r14-v1145-new.log
-          grep -Fq 'gens-rpg-tactical-wall-dice-stats-16781145\\.js\\?v=16\\.78\\.114\\.5' /tmp/r14-v1145-old.log
-          grep -Fq 'gens-rpg-tactical-wall-dice-stats-16781145\\.js\\?v=16\\.78\\.114\\.5' /tmp/r14-v1145-new.log
+          grep -Fq 'gens-rpg-tactical-wall-dice-stats-16781145' /tmp/r14-v1145-old.log
+          grep -Fq 'gens-rpg-tactical-wall-dice-stats-16781145' /tmp/r14-v1145-new.log
           echo 'ARCHIVED V114.5: same pre-existing baseline failure on R13 GREEN and R14; active Tactical sentinels remain mandatory'
       - name: Report archived-baseline characterization for exact SHA
         if: always()

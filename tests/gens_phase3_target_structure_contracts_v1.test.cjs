@@ -126,8 +126,15 @@ assert.equal(ownerManifest.files?.[r12DungeonOwner]?.domain,'dungeon',
   'R12 rules and talents must remain solely Dungeon-owned');
 assert.equal(composition.index.split(r12DungeonOwner).length-1,1,
   'R12 classic Dungeon owner must be loaded exactly once');
-assert.equal(Object.keys(ownerManifest.files||{}).length,112+captureR06OwnerPaths.length,
-  'R12 adds one Dungeon owner, preserving the 18 R06 Capture patch owners and all prior Phase 3 entries');
+const r13BuildersEnemyOwner='assets/gensrpg/builders/legacy-enemy-editor-v1.js';
+assert.equal(ownerManifest.files?.[r13BuildersEnemyOwner]?.domain,'builders',
+  'R13 enemy editor declarations must retain sole ownership in Builders');
+assert.equal(exists(r13BuildersEnemyOwner),true,
+  'R13 physical Builders enemy editor module must exist');
+assert.equal(composition.index.split(r13BuildersEnemyOwner).length-1,1,
+  'R13 Builders enemy editor must load exactly once in the source index');
+assert.equal(Object.keys(ownerManifest.files||{}).length,113+captureR06OwnerPaths.length,
+  'R13 adds one Builders enemy editor owner, preserving the 18 R06 Capture patch owners and all prior Phase 3 entries');
 assert.equal(ownerManifest.files?.['assets/gensrpg/core/legacy-cloud-sync-backup-v1.js']?.domain,'core',
   'R05 cloud-sync/local-backup must have a sole Core owner');
 assert.equal(composition.index.split('assets/gensrpg/core/legacy-cloud-sync-backup-v1.js').length-1,1,

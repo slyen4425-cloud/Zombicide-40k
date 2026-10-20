@@ -16,7 +16,7 @@ const blob=s=>{const b=Buffer.from(s,'utf8');return crypto.createHash('sha1').up
 const scripts=s=>[...s.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)];
 const installedR12=()=>{
  const current=fs.readFileSync('index.html','utf8');
- return ['b5a39705baf83e9782695c14bede8b9dde6ddf52','dab5be5dedfa56c49d76d40a4cb824a0098903f0'].includes(blob(current))?cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r13_builders_enemy_editor.cjs','--restore-r12'],{maxBuffer:10*1024*1024}).toString('utf8'):current;
+ return ['b5a39705baf83e9782695c14bede8b9dde6ddf52','dab5be5dedfa56c49d76d40a4cb824a0098903f0','9f35eb833a6ede4b91399854f19bb9bef59f45ab'].includes(blob(current))?cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r13_builders_enemy_editor.cjs','--restore-r12'],{maxBuffer:10*1024*1024}).toString('utf8'):current;
 };
 
 function select(body){

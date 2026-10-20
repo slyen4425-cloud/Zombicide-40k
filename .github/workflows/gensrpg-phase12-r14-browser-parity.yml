@@ -36,6 +36,13 @@ jobs:
           done
           curl -fIs 'http://127.0.0.1:8878/assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js'
           node tests/gensrpg_phase12_r14_rpg_editor_browser_parity.cjs
+      - name: Survival and Dungeon builtin-override browser boundary
+        shell: bash
+        env:
+          NODE_PATH: /tmp/gensrpg-r14-playwright/node_modules
+        run: |
+          set -euo pipefail
+          node tests/gens_phase6_survival_builtin_boundary_browser_characterization_v1.test.cjs
       - name: Expose browser parity SHA result
         if: always()
         shell: bash

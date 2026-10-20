@@ -39,6 +39,6 @@ assert.ok(names.every(name=>typeof ctx[name]==='function'),'historical globals p
 const sw=fs.readFileSync('service-worker.js','utf8'),owners=JSON.parse(fs.readFileSync('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json','utf8'));
 assert.ok(sw.includes('"./'+owner+'"')&&sw.includes('-r14-builders-rpg-universe-editor'),'PWA cache');
 assert.equal(owners.files?.[owner]?.domain,'builders','exactly one Builders owner');
-assert.equal(Object.keys(owners.files).length,132,'R13 131 + R14 1');
+assert.equal(Object.keys(owners.files).length,133,'R13 131 + R14 1 + R15 1; historical R14 owner retained');
 cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r14_builders_rpg_universe_editor.cjs','--verify']);
 console.log('R14: 41 exact original globals, 151 parser tags, R14->R13 rollback, PWA and 132 owners PASS');

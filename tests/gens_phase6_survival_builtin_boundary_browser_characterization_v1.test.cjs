@@ -6,6 +6,12 @@ const {chromium}=require('playwright');
 
 const root=path.join(__dirname,'..');
 const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const enemyEditorOwner='assets/gensrpg/builders/legacy-enemy-editor-v1.js';
+const enemyEditorSource=fs.readFileSync(path.join(root,enemyEditorOwner),'utf8');
+assert.equal(indexSource.split('<script src="'+enemyEditorOwner+'"></script>').length-1,1,
+  'R13 enemy editor must load once synchronously at the original parser position');
+assert.equal(indexSource.includes('function saveEnemyEditor('),false,
+  'R13 must not leave duplicate builtin save code inline');
 
 const applyHeader='function applyBuiltinEnemyOverrides(bases=BASE_ZOMBIE_TYPES){';
 assert.equal(indexSource.split(applyHeader).length-1,1,
@@ -33,8 +39,8 @@ assert.equal(indexSource.split(ensureBody).length-1,1,
   'Dungeon ensure owner must obtain Dungeon bases and apply shared overrides explicitly');
 
 const saveCall='    applyBuiltinEnemyOverrides([builtinEnemyBase(baseId)].filter(Boolean));\n\n    const cfg=loadZombieConfig();';
-assert.equal(indexSource.split(saveCall).length-1,1,
-  'builtin editor save must apply overrides only to the resolved builtin base');
+assert.equal(enemyEditorSource.split(saveCall).length-1,1,
+  'builtin editor save in the R13 Builders owner must apply overrides only to the resolved builtin base');
 
 const resetCall='  applyBuiltinEnemyOverrides([base]);\n  renderEnemyLibrary();';
 assert.equal(indexSource.split(resetCall).length-1,1,

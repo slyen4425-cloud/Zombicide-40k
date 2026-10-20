@@ -86,8 +86,9 @@
       "file": "assets/gensrpg/gens-rpg-tactical-wall-dice-stats-16781145.js",
       "status": "tests-docs-only",
       "serviceWorkerCached": false,
-      "workflowReferenced": false,
+      "workflowReferenced": true,
       "refs": [
+        ".github/workflows/gensrpg-phase12-r14-validation.yml",
         "docs/GENSRPG_PHASE2_RUNTIME_CARTOGRAPHY.md",
         "docs/GENSRPG_PHASE4_DICE_PREAUDIT.md",
         "docs/GENSRPG_PHASE4_STATS_S7_SNAPSHOT_AUDIT.md",

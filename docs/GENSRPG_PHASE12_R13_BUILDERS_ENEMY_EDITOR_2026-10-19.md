@@ -22,3 +22,12 @@
 - Aucune modification autorisée de `main` gelé `e8681f9823573ced8aec59c8ddc47a72b02bc663`, ni laboratoires Combat/Exploration. Validation manuelle future de la bibliothèque ennemis recommandée.
 
 **Phase 12 EXIT encore ouverte** ; ne pas fractionner ce périmètre en micro-lots ni préjuger de R14.
+
+
+## Certification finale — 20 octobre 2026
+
+- **R13 GREEN certifié**, 7/7 GitHub Actions SUCCESS sur le même SHA de code `e22de3ae8d0d4f07ef7972c80f838dbf96d9e9ec` : `architecture-sentinels`, `browser-sentinel`, `dock-chromium`, `dock-firefox`, `dock-contract`, `firefox-wall-zoom`, `builders-rollback`.
+- Checkpoint final `checkpoint/gensrpg-phase12-r13-builders-enemy-editor-green-2026-10-20` créé à cet SHA après les contrôles, sans fusion dans `main`.
+- `index.html` 1 820 094 octets / Git blob `b5a39705baf83e9782695c14bede8b9dde6ddf52` ; JS Builders 44 044 octets / blob `47b8d0e2b65bfffca4128d29c345b7e82af2a5fe` ; rollback R13→R12 et historique maintenus.
+- Corps des 31 déclarations inchangés ; sentinelles, compte de propriétaires (131), chargement et pré-cache mis à jour. **Aucune validation manuelle exhaustive de la bibliothèque ennemis revendiquée.**
+- Le présent rapport pré-GREEN reste conservé comme historique de procédure. **Phase 12 globale toujours ouverte** ; audit de décision suivant sur `work/gensrpg-phase12-post-r13-exit-audit-2026-10-20` avec gate §26.

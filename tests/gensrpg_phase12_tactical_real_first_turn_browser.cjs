@@ -119,22 +119,30 @@ async function exercise(browser,label){
   await page.locator('#dc200ModalOk').click({timeout:15000});
   await page.waitForTimeout(300);
   s=await step(page,label+'/room-modal-closed');
-  const btn=page.locator('#dc01Explore');
-  assert.ok(/COMBAT|ATTAQUER|PORTEUR/i.test(await btn.textContent()),label+' real main action exposes enemy or fight');
-  assert.equal(await btn.isDisabled(),false,label+' combat entry button enabled');
-  // An actual effect popup may appear after closing the room narration.
-  // A player dismisses it with OK; do not bypass the overlay or force a click.
+  // A real skeleton may detect the entered hero *before* the manual fight
+  // button is clicked. Both entry contracts are legitimate, and the overlay
+  // must never be bypassed to click the hidden Dungeon button.
+  const battleAlreadyOpen=await page.evaluate(()=>!!window.GensRpgTacticalCombatV2Ui?.getBattle?.());
   let clicked=false;
-  for(let attempt=0;attempt<4&&!clicked;attempt++){
-    const popup=page.locator('#effectModal.open');
-    if(await popup.isVisible()) await popup.locator('button.effectClose').click({timeout:5000});
-    try{await btn.click({timeout:3500});clicked=true}
-    catch(error){
-      if(!(await popup.isVisible()))throw error;
-      await popup.locator('button.effectClose').click({timeout:5000});
+  if(!battleAlreadyOpen){
+    const btn=page.locator('#dc01Explore');
+    assert.ok(/COMBAT|ATTAQUER|PORTEUR/i.test(await btn.textContent()),label+' manual fight available');
+    assert.equal(await btn.isDisabled(),false,label+' real fight button enabled');
+    for(let attempt=0;attempt<4&&!clicked;attempt++){
+      if(await page.evaluate(()=>!!window.GensRpgTacticalCombatV2Ui?.getBattle?.()))break;
+      const popup=page.locator('#effectModal.open');
+      if(await popup.isVisible()) await popup.locator('button.effectClose').click({timeout:5000});
+      try{await btn.click({timeout:3500});clicked=true}
+      catch(error){
+        if(await page.evaluate(()=>!!window.GensRpgTacticalCombatV2Ui?.getBattle?.()))break;
+        if(!(await popup.isVisible()))throw error;
+        await popup.locator('button.effectClose').click({timeout:5000});
+      }
     }
   }
-  assert.equal(clicked,true,label+' real fight button clicked after dismissing user-visible effect popups');
+  const battleOpened=await page.evaluate(()=>!!window.GensRpgTacticalCombatV2Ui?.getBattle?.());
+  assert.ok(clicked||battleAlreadyOpen||battleOpened,label+' Tactical must be entered through the UI fight or real detection');
+  console.log('DUNGEON_TACTICAL_ENTRY '+label+' '+JSON.stringify({manualClick:clicked,automaticDetection:battleAlreadyOpen,route:await page.evaluate(()=>window.__gensTacticalV2LastRoute?.entry||null)}));
   await page.waitForTimeout(4500);
   s=await step(page,label+'/engaged-combat');
   console.log('DUNGEON_TACTICAL_BRIDGE_TRACE '+label+' '+JSON.stringify(await page.evaluate(()=>{

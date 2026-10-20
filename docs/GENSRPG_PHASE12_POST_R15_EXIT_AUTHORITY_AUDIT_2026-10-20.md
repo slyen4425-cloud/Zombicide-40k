@@ -59,3 +59,9 @@ L'inventaire exhaustif machine est recalculable par `node tests/gensrpg_phase12_
 5. **Critère d'arrêt Phase 12 :** `index.html` ne contient plus de moteur/règles actifs inline (seuls bootstraps explicitement documentés permis) ; aucun changement d'autorité non audité ni résidu de patch multi-écrivain ; propriétaires Core/Shell/Survie/Dungeon/Tactical/Capture/PvP/Builders documentés ; CI navigateur Chromium/Firefox, Tactical et les quatre modes + sauvegarde/reprise et PWA vérifiés au même SHA ; validation manuelle smartphone distinguée de la CI.
 
 **Conclusion de chantier :** R15 GREEN est conservé et **aucun R16 n'est créé dans cet audit**. Le prochain chantier utile n'est pas « extraire encore 5 Ko » : c'est un diagnostic de la chaîne **Dungeon combat/IA et rendu de carte**, isolé par checkpoint/branche propres si modification, pour supprimer les sources de vérité concurrentes. Le présent lot est exclusivement documentaire/test et ne change ni `index.html`, ni le moteur, ni la PWA, ni `main`, ni les laboratoires.
+
+## 5. Résultat du chantier d'audit (GREEN)
+
+- Sentinelle automatisée sur SHA `577352f0b7092d2a3e87630f7168926c5c8957e0` : **SUCCESS** dans le [run GitHub Actions 39430951106](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39430951106). Les étapes de vérification du SHA original R15, de diff runtime exact, des 152 scripts/935 765 octets et des 38 multi-écrivains sont toutes SUCCESS.
+- **Checkpoint documentaire GREEN créé** : `checkpoint/gensrpg-phase12-post-r15-exit-authority-audit-green-2026-10-20` sur ce SHA certifié. Les modifications documentaires post-checkpoint n'altèrent ni le code R15 GREEN ni l'inventaire testé.
+- Ce GREEN **valide le diagnostic statique, pas la résolution des 38 contrats**. Aucun bug métier n'a été déclaré réparé, aucun test tactile mobile prétendu et aucune phase globale clôturée.

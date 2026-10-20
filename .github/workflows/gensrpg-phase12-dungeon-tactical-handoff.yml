@@ -14,12 +14,34 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Guard exact HTML and unchanged external runtime during diagnosis
+      - name: Guard exact HTML, one Tactical owner diff and historical protections
         run: |
           set -euo pipefail
           test "$(git hash-object index.html)" = '9f35eb833a6ede4b91399854f19bb9bef59f45ab'
-          git diff --exit-code 739d947ec601ee54e2fecb2f73078eaf4c6e4894 -- index.html service-worker.js assets/
+          git diff --exit-code 739d947ec601ee54e2fecb2f73078eaf4c6e4894 -- index.html service-worker.js assets/gensrpg/dungeon/ assets/gensrpg/core/ assets/gensrpg/capture/ assets/gensrpg/survival/ assets/dungeon/
+          test "$(git diff --name-only 739d947ec601ee54e2fecb2f73078eaf4c6e4894 -- assets/)" = 'assets/gensrpg/tactical/entry-v1.js'
+          node --check assets/gensrpg/tactical/entry-v1.js
           node tests/gensrpg_phase12_dungeon_core200_spawn_order_guard.test.cjs
+          node tests/gensrpg_phase12_r15_builders_character_entity_sentinel.test.cjs
+          node tests/gensrpg_phase12_r14_builders_rpg_universe_sentinel.test.cjs
+          node tests/gensrpg_phase12_r13_builders_enemy_editor_sentinel.test.cjs
+          node tests/gensrpg_phase12_r12_dungeon_rpg_rules_talents_sentinel.test.cjs
+          node tests/gensrpg_phase12_r11_retired_scripts_sentinel.test.cjs
+          node tests/gensrpg_phase12_r10_capture_sentinel.test.cjs
+          node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
+          node tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs
+          node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+          node tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs
+          node tests/gens_phase3_target_structure_contracts_v1.test.cjs
+          node tests/gens_runtime_composition_guard_v11411.test.cjs
+          node tests/gens_phase4_dice_d10048_raccord_v1.test.cjs
+          node tests/gens_phase4_dice_first_raccord_preaudit_v1.test.cjs
+          node tests/gens_architecture_global_side_effect_guard.test.cjs
+          node tests/gens_rpg_tactical_session_guard_v16781144.test.cjs
+          node tests/gens_phase4_stats_s7_snapshot_audit_v1.test.cjs
+          node tests/gensrpg_phase12_post_r15_inline_authority_baseline.test.cjs
       - name: Install isolated browser runtime
         run: |
           set -euo pipefail

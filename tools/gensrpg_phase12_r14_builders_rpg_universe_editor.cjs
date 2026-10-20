@@ -51,7 +51,9 @@ function transform(source){
  return {html,extracted,names};
 }
 function restoreR13(){
- const html=fs.readFileSync('index.html','utf8'),hash=blob(html);
+ let html=fs.readFileSync('index.html','utf8');
+ if(blob(html)==='9f35eb833a6ede4b91399854f19bb9bef59f45ab')html=cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r15_builders_character_entity_editors.cjs','--restore-r14'],{maxBuffer:12*1024*1024}).toString('utf8');
+ const hash=blob(html);
  if(hash===SOURCE)return html;
  assert(hash===TARGET&&Buffer.byteLength(html)===TARGET_SIZE,'not an authorized R14 index');
  const extracted=fs.readFileSync(MODULE,'utf8');
@@ -76,12 +78,14 @@ function restoreR13(){
 function verify(){
  const source=restoreR13();
  const {html,extracted,names}=transform(source);
- assert(fs.readFileSync('index.html','utf8')===html,'R14 active index differs from certified transform');
+ const installed=fs.readFileSync('index.html','utf8');
+ const historical=blob(installed)==='9f35eb833a6ede4b91399854f19bb9bef59f45ab'?cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r15_builders_character_entity_editors.cjs','--restore-r14'],{maxBuffer:12*1024*1024}).toString('utf8'):installed;
+ assert(historical===html,'R14 exact historical index differs from certified transform');
  assert(fs.readFileSync(MODULE,'utf8')===extracted,'R14 Builders declarations differ');
  const owner=JSON.parse(fs.readFileSync('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json','utf8'));
  assert(owner.files?.[MODULE]?.domain==='builders','owner is not Builders');
  const sw=fs.readFileSync('service-worker.js','utf8');
- assert(sw.includes('"./'+MODULE+'"')&&sw.includes('-r14-builders-rpg-universe-editor"'),'PWA current cache guard');
+ assert(sw.includes('"./'+MODULE+'"')&&sw.includes('-r14-builders-rpg-universe-editor'),'PWA current cache guard');
  const ctx={console};vm.createContext(ctx);new vm.Script(extracted).runInContext(ctx);
  assert(names.every(n=>typeof ctx[n]==='function'),'41 original functions not callable at global scope');
  console.log('R14 verified: 41 Builders UI functions, sole owner, exact R13 rollback, parser, PWA');

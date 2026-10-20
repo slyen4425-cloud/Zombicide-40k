@@ -89,7 +89,23 @@ async function exercise(browser,label){
    saveDungeonConfig({...cfg,rooms:10,boss:'none',roomWeights:{enemy:100,ambush:0,trap:0,chest:0,merchant:0,rest:0,mystery:0}});
   });
   await page.locator('#dc01Explore').click({timeout:15000});
+  await page.waitForTimeout(500);
   s=await step(page,label+'/explored');
+  console.log('DUNGEON_REAL_ENCOUNTER_DIAG '+label+' '+JSON.stringify(await page.evaluate(()=>{
+    const all=typeof loadActiveEnemies==='function'?loadActiveEnemies():[];
+    const reserve=typeof loadZombieReserve==='function'?loadZombieReserve():{};
+    const dungeonIds=typeof DUNGEON_ENEMY_IDS!=='undefined'?DUNGEON_ENEMY_IDS:[];
+    return {
+      activeEnemies:all.slice(0,12).map(z=>({id:z.id,enemyId:z.enemyId,hp:z.hp,defeated:z.defeated,room:z.room})),
+      activeEnemiesCount:all.length,
+      reserveDungeonIds:Object.entries(reserve).filter(([k])=>dungeonIds.includes(k)).slice(0,22),
+      dungeonMonsterDefinitions:typeof ZOMBIE_TYPES!=='undefined'?ZOMBIE_TYPES.filter(z=>dungeonIds.includes(z.id)).slice(0,6).map(z=>({id:z.id,name:z.name,defaultCount:z.defaultCount})):[],
+      lastState:typeof loadDungeonState==='function'?loadDungeonState()?.last:null,
+      modal:document.getElementById('dc01Modal')?.outerHTML.slice(0,550),
+      currentProfile:getActiveGameProfile?.()?.id
+    };
+  })));
+  console.log('DUNGEON_REAL_ENCOUNTER_ERRORS '+label+' '+JSON.stringify(errs));
   assert.equal(s.room,1,label+' user clicked first real room');
   assert.ok(s.enemyCount>0,label+' actual encounter generated real Dungeon enemies');
   assert.equal(s.lastKind,'enemy',label+' encounter selection is real enemy case');

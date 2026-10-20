@@ -19,6 +19,16 @@ async function exercise(browser,version){
   await page.waitForFunction(()=>typeof window.saveSharedEntity==='function'&&typeof window.saveCustomHero==='function'&&typeof window.openHeroCreator==='function',{timeout:40000});
   data.functions=await page.evaluate(()=>['hcStartingItemOptions','openHeroCreator','saveCustomHero','openSharedEntityEditor','saveSharedEntity','renderControllableCreatureLibrary','z40kPrepareAvatar'].map(n=>typeof window[n]));
   assert.ok(data.functions.every(x=>x==='function'),'global editor API present');
+  // The historical shared-entity store intentionally rejects Survival-family writes.
+  // Select the existing Dungeon profile through its real public profile API, identically on R14/R15.
+  data.context=await page.evaluate(()=>{
+    const profiles=window.loadGameProfiles();
+    const target=profiles.find(p=>p.id==='game_profile_dungeon_demo');
+    if(!target||target.gameStyle!=='dungeon')throw Error('certified RPG demo profile missing');
+    window.setActiveGameProfileId(target.id);
+    return {id:window.getActiveGameProfile().id,family:window.gensCurrentContentFamily()};
+  });
+  assert.equal(data.context.family,'rpg','RPG family must be active for shared entity storage');
   await page.evaluate(()=>window.openSharedEntityEditor({},'creature'));
   await page.locator('#sharedEntityEditorModal').waitFor({state:'visible',timeout:15000});
   await page.locator('#sharedEntityName').fill(LABEL);

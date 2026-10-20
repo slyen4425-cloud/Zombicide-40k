@@ -51,8 +51,8 @@ while(queue.length){
 }
 
 const mapped=new Set(Object.keys(manifest.files||{}));
-assert.equal(reachable.size,132,'R14 adds one Builders RPG editor module to the R13 production graph');
-assert.equal(mapped.size,132,'R14 owner manifest must classify all 132 reachable production files');
+assert.equal(reachable.size,133,'R15 adds a Builders characters and entities editor module to R14');
+assert.equal(mapped.size,133,'R15 owner manifest must classify all 133 reachable production files');
 assert.equal(manifest.files['assets/gensrpg/capture/legacy-monolith-functions-v1.js']?.domain,'capture','R10 must be owned exclusively by Capture');
 assert.equal(manifest.files['assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js']?.domain,'dungeon','R12 must be exclusively owned by Dungeon');
 assert.equal(manifest.files['assets/gensrpg/builders/legacy-enemy-editor-v1.js']?.domain,'builders','R13 is exclusively owned by Builders');

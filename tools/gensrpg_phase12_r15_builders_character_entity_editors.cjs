@@ -76,7 +76,7 @@ function verify(){
  const map=JSON.parse(fs.readFileSync('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json','utf8'));
  assert(map.files?.[MODULE]?.domain==='builders','owner not Builders');
  const sw=fs.readFileSync('service-worker.js','utf8');
- assert(sw.includes('"./'+MODULE+'"')&&sw.includes('-r15-builders-character-entity-editors"'),'R15 PWA marker absent');
+ assert(sw.includes('"./'+MODULE+'"')&&sw.includes('-r15-builders-character-entity-editors'),'R15 PWA marker absent');
  const cx={console};vm.createContext(cx);new vm.Script(expected.extracted).runInContext(cx);
  assert(NAMES.every(n=>typeof cx[n]==='function'),'54 historical globals no longer callable');
  console.log('R15 verified 54 original Builders globals, 152 parser tags, R14 exact rollback and PWA');

@@ -42,12 +42,16 @@ async function run(browser,label,probe){
   const out=await page.evaluate(targets=>{
    const names={};
    for(const key of targets){const fn=window[key]; names[key]={type:typeof fn,body:typeof fn==='function'?Function.prototype.toString.call(fn):null};}
-   return {names,trace:window.__gensrpgAuthorityTrace?.snaps||[],flags:{tacticalRender:typeof window.__dc214RenderCombat,dungeonDebug:typeof window.dungeonDebug303},domReady:document.readyState};
+   const mapSample=typeof window.dungeonMapHtml==='function'
+     ?window.dungeonMapHtml({size:2,shape:'room',cells:['floor','wall','entry','chest']})
+     :null;
+   return {names,trace:window.__gensrpgAuthorityTrace?.snaps||[],flags:{tacticalRender:typeof window.__dc214RenderCombat,dungeonDebug:typeof window.dungeonDebug303},domReady:document.readyState,mapSample};
   },TARGETS);
   if(probe){
    assert.equal(out.trace.length,152,label+' all original parser boundaries reached');
    assert.deepEqual(out.trace.map(s=>s.script),Array.from({length:152},(_,i)=>i),label+' stable parser order');
   }else assert.equal(out.trace.length,0,'unmodified baseline has no probes');
+  assert.ok(out.mapSample?.includes('dc080Grid')&&out.mapSample.includes('dungeon_door_closed.png')&&out.mapSample.includes('dc080InnerWall'),label+' actual final Dungeon map renderer must produce floor, doors and walls');
   return {out,errors:[...new Set(errors)].sort()};
  }finally{await context.close();}
 }
@@ -57,6 +61,7 @@ async function run(browser,label,probe){
   try{
    const baseline=await run(browser,name,false);
    const observed=await run(browser,name,true);
+   assert.equal(observed.out.mapSample,baseline.out.mapSample,name+' original vs probed map renderer functional parity');
    for(const key of TARGETS)assert.equal(observed.out.names[key].body,baseline.out.names[key].body,
     name+' probe must not alter final effective function '+key);
    const milestones=[51,58,60,61,63,64,65,68,69,73,74,79,84,89,90,91,92,93,94,100,107,132,136,151];

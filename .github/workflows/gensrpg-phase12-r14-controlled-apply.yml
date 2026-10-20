@@ -1,0 +1,49 @@
+name: GenSrpG Phase12 R14 guarded Builders RPG universe editor extraction
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r14-builders-rpg-universe-editor-2026-10-20'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r14-controlled-apply.yml'
+permissions:
+  contents: write
+jobs:
+  guarded-r14-extraction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Prove exact R13 source and R14 starting checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r14-builders-rpg-universe-editor-2026-10-20'
+          test "$(git hash-object index.html)" = 'b5a39705baf83e9782695c14bede8b9dde6ddf52'
+          test "$(wc -c < index.html | tr -d ' ')" = '1820094'
+          test ! -e assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js
+          git fetch origin 'refs/heads/checkpoint/gensrpg-start-phase12-r14-builders-rpg-universe-editor-2026-10-20:refs/remotes/origin/checkpoint/gensrpg-start-phase12-r14-builders-rpg-universe-editor-2026-10-20'
+          test "$(git rev-parse refs/remotes/origin/checkpoint/gensrpg-start-phase12-r14-builders-rpg-universe-editor-2026-10-20)" = 'e22de3ae8d0d4f07ef7972c80f838dbf96d9e9ec'
+          node tools/gensrpg_phase12_r14_builders_rpg_universe_editor.cjs --check-source
+      - name: Apply controlled relocation and prove exact rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/gensrpg_phase12_r14_builders_rpg_universe_editor.cjs --apply
+          node tools/gensrpg_phase12_r14_builders_rpg_universe_editor.cjs --verify
+          node --check assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js
+          test "$(git hash-object index.html)" = 'dab5be5dedfa56c49d76d40a4cb824a0098903f0'
+          test "$(git hash-object assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js)" = '3faa1131bd6a9a2c4a672a4f18d49f49bcdb9107'
+          test "$(node tools/gensrpg_phase12_r14_builders_rpg_universe_editor.cjs --restore-r13 | git hash-object --stdin)" = 'b5a39705baf83e9782695c14bede8b9dde6ddf52'
+      - name: Commit only four intended changes on the dedicated branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          test "$(git diff --cached --name-only | wc -l | tr -d ' ')" = '4'
+          git -c core.whitespace=-blank-at-eol,-blank-at-eof diff --cached --check
+          git commit -m 'refactor(phase12 R14): extract 41 original Builders RPG universe editor functions'
+          git push origin "HEAD:$GITHUB_REF_NAME"

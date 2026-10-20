@@ -39,12 +39,17 @@ async function exercise(browser,label){
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForFunction(()=>typeof window.DungeonCore01?.start==='function'&&typeof window.switchGameModeFromHome==='function',{timeout:20000});
   await step(page,label+'/load');
-  const selector=page.locator('#homeGameModeSelect');
-  await selector.waitFor({state:'attached',timeout:10000});
-  const opts=await selector.locator('option').evaluateAll(nodes=>nodes.map(x=>({value:x.value,label:x.textContent.trim()})));
-  console.log('DUNGEON_REAL_PROFILE_OPTIONS '+label+' '+JSON.stringify(opts));
-  assert.ok(opts.some(x=>x.value==='game_profile_dungeon_demo'),label+' built-in Dungeon profile present');
-  await selector.selectOption('game_profile_dungeon_demo');
+  // The live interface is hierarchical: mode family -> game -> new session.
+  // The old profile-switcher exists in HTML but is deliberately hidden.
+  await page.locator('#gensRootHome .gensRootModeCard.adventure').click({timeout:15000});
+  await page.locator('#gensFamilyHome').waitFor({state:'visible',timeout:15000});
+  const games=page.locator('#gensFamilyGames .gensFamilyGameCard');
+  await games.first().waitFor({state:'visible',timeout:15000});
+  console.log('DUNGEON_REAL_PROFILE_OPTIONS '+label+' '+JSON.stringify(await games.allTextContents()));
+  const dungeonGame=games.filter({hasText:/dungeon/i}).first();
+  assert.ok(await dungeonGame.count(),label+' built-in Dungeon available in adventure family');
+  await dungeonGame.click({timeout:15000});
+  await page.locator('#gensGameHome').waitFor({state:'visible',timeout:15000});
   const selected=await step(page,label+'/profile-selected');
   assert.equal(selected.gameStyle,'dungeon',label+' player-selected profile is Dungeon');
   await page.locator('#gensGameHomeActions button.newGameBtn').click({timeout:15000});

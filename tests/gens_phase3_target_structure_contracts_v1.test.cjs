@@ -133,8 +133,8 @@ assert.equal(exists(r13BuildersEnemyOwner),true,
   'R13 physical Builders enemy editor module must exist');
 assert.equal(composition.index.split(r13BuildersEnemyOwner).length-1,1,
   'R13 Builders enemy editor must load exactly once in the source index');
-assert.equal(Object.keys(ownerManifest.files||{}).length,113+captureR06OwnerPaths.length,
-  'R13 adds one Builders enemy editor owner, preserving the 18 R06 Capture patch owners and all prior Phase 3 entries');
+assert.equal(Object.keys(ownerManifest.files||{}).length,114+captureR06OwnerPaths.length,
+  'R14 adds one further Builders RPG editor owner, preserving R13 and the 18 Capture patch owners');
 assert.equal(ownerManifest.files?.['assets/gensrpg/core/legacy-cloud-sync-backup-v1.js']?.domain,'core',
   'R05 cloud-sync/local-backup must have a sole Core owner');
 assert.equal(composition.index.split('assets/gensrpg/core/legacy-cloud-sync-backup-v1.js').length-1,1,

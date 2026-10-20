@@ -25,11 +25,11 @@ jobs:
             node "$file" || failures="${failures} ${file##*/}"
             echo "::endgroup::"
           done <<'TEST_FILES'
-tests/gensrpg_phase12_r14_builders_rpg_universe_sentinel.test.cjs
-tests/gensrpg_phase12_r13_builders_enemy_editor_sentinel.test.cjs
-tests/gensrpg_phase12_r12_dungeon_rpg_rules_talents_sentinel.test.cjs
-tests/gensrpg_phase12_r11_retired_scripts_sentinel.test.cjs
-tests/gensrpg_phase12_r10_capture_sentinel.test.cjs
+          tests/gensrpg_phase12_r14_builders_rpg_universe_sentinel.test.cjs
+          tests/gensrpg_phase12_r13_builders_enemy_editor_sentinel.test.cjs
+          tests/gensrpg_phase12_r12_dungeon_rpg_rules_talents_sentinel.test.cjs
+          tests/gensrpg_phase12_r11_retired_scripts_sentinel.test.cjs
+          tests/gensrpg_phase12_r10_capture_sentinel.test.cjs
           TEST_FILES
           if [ -n "$failures" ]; then
             printf 'FAILED:%s\n' "$failures" | tee r14_failure_summary.txt
@@ -77,14 +77,14 @@ tests/gensrpg_phase12_r10_capture_sentinel.test.cjs
             node "$file" || failures="${failures} ${file##*/}"
             echo "::endgroup::"
           done <<'TEST_FILES'
-tests/gens_phase2_runtime_load_graph_v11411.test.cjs
-tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
-tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs
-tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
-tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
-tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs
-tests/gens_phase3_target_structure_contracts_v1.test.cjs
-tests/gens_runtime_composition_guard_v11411.test.cjs
+          tests/gens_phase2_runtime_load_graph_v11411.test.cjs
+          tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
+          tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs
+          tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
+          tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+          tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs
+          tests/gens_phase3_target_structure_contracts_v1.test.cjs
+          tests/gens_runtime_composition_guard_v11411.test.cjs
           TEST_FILES
           if [ -n "$failures" ]; then
             printf 'FAILED:%s\n' "$failures" | tee r14_failure_summary.txt
@@ -132,8 +132,8 @@ tests/gens_runtime_composition_guard_v11411.test.cjs
             node "$file" || failures="${failures} ${file##*/}"
             echo "::endgroup::"
           done <<'TEST_FILES'
-tests/gens_phase4_dice_d10048_raccord_v1.test.cjs
-tests/gens_phase4_dice_first_raccord_preaudit_v1.test.cjs
+          tests/gens_phase4_dice_d10048_raccord_v1.test.cjs
+          tests/gens_phase4_dice_first_raccord_preaudit_v1.test.cjs
           TEST_FILES
           if [ -n "$failures" ]; then
             printf 'FAILED:%s\n' "$failures" | tee r14_failure_summary.txt

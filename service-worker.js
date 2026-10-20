@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.114.11-phase4-stats-s11-core-snapshot-1-r05-core-cloud-sync-r06-capture-inline-exit-r07-magic-sound-data-r08-shared-ability-skill-catalog-r09-survival-wave-spawn-r10-capture-main-functions-r11-retired-disabled-r12-dungeon-rpg-rules-talents-r13-builders-enemy-editor-r14-builders-rpg-universe-editor-r15-builders-character-entity-editors";
+const CACHE_NAME = "gensrpg-cache-16.78.114.11-phase4-stats-s11-core-snapshot-1-r05-core-cloud-sync-r06-capture-inline-exit-r07-magic-sound-data-r08-shared-ability-skill-catalog-r09-survival-wave-spawn-r10-capture-main-functions-r11-retired-disabled-r12-dungeon-rpg-rules-talents-r13-builders-enemy-editor-r14-builders-rpg-universe-editor-r15-builders-character-entity-editors-dungeon-room-stamp";
 // gensrpg-cache-16.78.114.11-native-ui-authority
 // gensrpg-cache-16.78.114.11-armor-melee-damage
 // gensrpg-cache-16.78.114.10-hit-entry-compositor-walls

@@ -50,7 +50,7 @@ function forward(source){
 }
 function restoreR09(){
   const current=fs.readFileSync('index.html','utf8');
-  const html=['f257bd9e193648dc62cd8a40d510831debfe045a','b0d0c73292e4374fc4f23e86edffad5c1b39a7b6','b5a39705baf83e9782695c14bede8b9dde6ddf52','dab5be5dedfa56c49d76d40a4cb824a0098903f0'].includes(blob(current))
+  const html=['f257bd9e193648dc62cd8a40d510831debfe045a','b0d0c73292e4374fc4f23e86edffad5c1b39a7b6','b5a39705baf83e9782695c14bede8b9dde6ddf52','dab5be5dedfa56c49d76d40a4cb824a0098903f0','9f35eb833a6ede4b91399854f19bb9bef59f45ab'].includes(blob(current))
     ? cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{maxBuffer:10*1024*1024}).toString('utf8')
     : current;
   const extracted=fs.readFileSync(MODULE,'utf8');

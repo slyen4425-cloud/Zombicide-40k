@@ -387,8 +387,11 @@ function explore(){
     return modal('🚪 '+heroName(heroId)+' avance','Le héros rejoint la salle '+targetRoom+'. Les autres héros conservent leur salle et leur position.');
   }
 
-  x.room=targetRoom;x.enemyCells={};x.branch=null;
+  x.room=targetRoom;x.enemyCells={};x.branch=null;x.last=null;
   spatialSetRoom(x,heroId,targetRoom);
+  // Le générateur d'ennemis lit la salle publiée via loadDungeonState().
+  // Publier la nouvelle salle avant dungeonEncounter/createRoom, pas après.
+  saveRt(x);
   const kind=chooseKind(x.room),made=createRoom(x.room,kind);
   x.last={kind,room:x.room,at:Date.now(),title:made.result.title,map:made.map,narrative:'',exitLocked:false,keyEnemyId:''};
   const entry=spawnIndex(x.last?.map);

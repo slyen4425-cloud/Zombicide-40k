@@ -212,13 +212,27 @@ async function exercise(browser,label){
   assert.ok(beforeTurn.hero[0].canonical>0,label+' real hero contains canonical stat records');
   assert.ok(beforeTurn.hero[0].statsVersion,label+' hero has cached canonical Tactical snapshot');
   await page.locator('.gtv2Overlay .gtv2Actions button[data-end]').click({timeout:12000});
-  await page.waitForFunction(previous=>{
-    const B=window.GensRpgTacticalCombatV2Ui?.getBattle?.(),E=window.GensRpgTacticalCombatV2;
-    if(!B||!E)return false;
-    const events=B.log.slice(previous);
-    return events.some(x=>x.type==='turn'&&String(x.actorId||'').startsWith('enemy:')) &&
-      (B.status!=='active'||E.currentActor(B)?.side==='hero');
-  },beforeTurn.logLength,{timeout:30000});
+  try{
+    await page.waitForFunction(previous=>{
+      const B=window.GensRpgTacticalCombatV2Ui?.getBattle?.(),E=window.GensRpgTacticalCombatV2;
+      if(!B||!E)return false;
+      const events=B.log.slice(previous);
+      return events.some(x=>x.type==='turn'&&String(x.actorId||'').startsWith('enemy:')) &&
+        (B.status!=='active'||E.currentActor(B)?.side==='hero');
+    },beforeTurn.logLength,{timeout:12000});
+  }catch(error){
+    console.log('DUNGEON_TACTICAL_FIRST_TURN_TIMEOUT '+label+' '+JSON.stringify(await page.evaluate(previous=>{
+      const B=window.GensRpgTacticalCombatV2Ui?.getBattle?.(),E=window.GensRpgTacticalCombatV2;
+      return {battle:!!B,status:B?.status,round:B?.round,turnIndex:B?.turnIndex,
+        current:B&&E?.currentActor?.(B)?{id:E.currentActor(B).id,side:E.currentActor(B).side}:null,
+        events:B?.log?.slice(previous)?.map(x=>({type:x.type,actorId:x.actorId,attackerId:x.attackerId,targetId:x.targetId,damage:x.damage,hit:x.hit})),
+        heroEndButton:document.querySelector('.gtv2Overlay .gtv2Actions [data-end]')?.outerHTML||null,
+        dock:document.querySelector('[data-v110-dock]')?.outerHTML.slice(0,1500)||null,
+        dice:[...document.querySelectorAll('[class*="dice"],[class*="Dice"],[class*="gtv2Die"]')].filter(n=>n.getClientRects().length>0).slice(0,8).map(n=>({cls:n.className,text:n.textContent.slice(0,80)}))
+      }
+    },beforeTurn.logLength)));
+    throw error;
+  }
   const afterTurn=await page.evaluate(previous=>{
     const B=window.GensRpgTacticalCombatV2Ui.getBattle(),E=window.GensRpgTacticalCombatV2;
     const events=B.log.slice(previous);

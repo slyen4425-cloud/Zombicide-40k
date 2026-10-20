@@ -12,6 +12,18 @@ const privateFiles=[
   "assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js",
 ];
 const files=[detectionFile,...privateFiles,facadeFile];
+// Existing Core Stats owners. Tactical activates them on demand before it
+// builds RPG hero snapshots; no stat calculation is duplicated in Tactical.
+const coreStatsFiles=[
+  ["GensStatsNormalizationV1","assets/gensrpg/core/stats-normalization-v1.js"],
+  ["GensStatsValueEngineV1","assets/gensrpg/core/stats-value-engine-v1.js"],
+  ["GensStatsHeroValuesV1","assets/gensrpg/core/stats-hero-values-v1.js"],
+  ["GensStatsModifierProviderV1","assets/gensrpg/core/stats-modifier-provider-v1.js"],
+  ["GensStatsDerivedValuesV1","assets/gensrpg/core/stats-derived-values-v1.js"],
+  ["GensStatsSnapshotV1","assets/gensrpg/core/stats-snapshot-v1.js"],
+  ["GensCleanRpgStats167874","assets/gensrpg/gens-rpg-stats-clean-167874.js"]
+];
+
 let installed=false,facadeLoading=false,facadeReady=!!R.GensRpgTacticalCombatV2Bridge;
 let detectionLoading=false,detectionReady=!!R.GensRpgTacticalRuntimeAuthority1678113;
 let activating=false,active=false,baseReady=false,compatibilityDone=false,compatibilityOk=false,bridgeInstalled=false;
@@ -46,6 +58,20 @@ function baseLoaded(){
   startCompatibility();
   return finishIfReady();
 }
+function loadCoreStats(i,next){
+  if(i>=coreStatsFiles.length){next();return}
+  const [key,file]=coreStatsFiles[i];
+  if(R[key]){loadCoreStats(i+1,next);return}
+  const script=D.createElement("script");
+  script.src=file+"?v=1";
+  script.async=false;
+  script.onload=()=>{
+    if(!R[key]){console.error("GenSrpG Tactical Core Stats owner not installed",key);activating=false;flushReady(false);return}
+    loadCoreStats(i+1,next);
+  };
+  script.onerror=()=>{console.error("GenSrpG Tactical Core Stats dependency failed",file);activating=false;flushReady(false)};
+  (D.head||D.documentElement).appendChild(script);
+}
 function loadPrivate(i){
   if(i>=privateFiles.length){baseLoaded();return}
   const file=privateFiles[i],s=D.createElement("script");
@@ -74,9 +100,12 @@ function activate(onReady){
   }
   R.__gensTacticalV2Loader105=true;
   activating=true;active=false;baseReady=false;compatibilityDone=false;compatibilityOk=false;bridgeInstalled=false;
-  const warm=!!(R.GensRpgTacticalCombatV2&&R.GensRpgTacticalCombatV2Adapter&&R.GensRpgTacticalCombatV2Ui&&R.GensRpgTacticalCombatV2Bridge&&R.GensRpgTacticalCompatibilityChainPhase8);
-  if(warm){baseLoaded();return true}
-  loadPrivate(0);
+  // Core Stats precedes Tactical even on a warm/lazy re-entry. This also
+  // repairs the case where Tactical was cached but the Core snapshot was not.
+  loadCoreStats(0,()=>{
+    const warm=!!(R.GensRpgTacticalCombatV2&&R.GensRpgTacticalCombatV2Adapter&&R.GensRpgTacticalCombatV2Ui&&R.GensRpgTacticalCombatV2Bridge&&R.GensRpgTacticalCompatibilityChainPhase8);
+    if(warm)baseLoaded();else loadPrivate(0);
+  });
   return true;
 }
 function deactivate(){

@@ -22,7 +22,7 @@ const ctx={console};vm.createContext(ctx);new vm.Script(ext).runInContext(ctx);
 assert.ok(names.every(n=>typeof ctx[n]==='function'),'all original globals callable');
 assert.equal((latest.match(/<script\b[^>]*type=["']application\/x-gensrpg-disabled["']/gi)||[]).length,0);
 const sw=fs.readFileSync('service-worker.js','utf8'),owners=JSON.parse(fs.readFileSync('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json','utf8'));
-assert.ok(sw.includes('"./'+owner+'"')&&sw.includes('-r15-builders-character-entity-editors"'));
+assert.ok(sw.includes('"./'+owner+'"')&&sw.includes('-r15-builders-character-entity-editors'));
 assert.equal(owners.files?.[owner]?.domain,'builders');assert.equal(Object.keys(owners.files).length,133);
 cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r15_builders_character_entity_editors.cjs','--verify']);
 console.log('R15: 54 original Builders globals, 152 scripts, R14 inverse byte-exact, sole owner and PWA GREEN');

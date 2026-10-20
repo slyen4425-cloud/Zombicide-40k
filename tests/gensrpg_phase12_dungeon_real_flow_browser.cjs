@@ -88,7 +88,23 @@ async function exercise(browser,label){
    const cfg=loadDungeonConfig();
    saveDungeonConfig({...cfg,rooms:10,boss:'none',roomWeights:{enemy:100,ambush:0,trap:0,chest:0,merchant:0,rest:0,mystery:0}});
   });
+  // Diagnostic observation only: preserve all storage behavior and original values.
+  await page.evaluate(()=>{
+    window.__gensDungeonStorageTrace=[];
+    const old=Storage.prototype.setItem;
+    Storage.prototype.setItem=function(key,value){
+      if(['gensrpg_dungeon_state_v1','gensrpg_active_enemies_v1'].includes(String(key))){
+        let saved=null;try{saved=JSON.parse(value)}catch(e){}
+        window.__gensDungeonStorageTrace.push({key:String(key),writeRoom:saved?.room??null,
+          currentDungeonRoom:typeof loadDungeonState==='function'?loadDungeonState()?.room:null,
+          enemyStamps:key==='gensrpg_active_enemies_v1'&&Array.isArray(saved)?saved.map(e=>({enemyId:e.enemyId,dungeonRoom:e.dungeonRoom})):null,
+          stack:new Error().stack.split('\\n').slice(1,5).map(s=>s.trim())});
+      }
+      return old.call(this,key,value);
+    };
+  });
   await page.locator('#dc01Explore').click({timeout:15000});
+  console.log('DUNGEON_REAL_STORAGE_TRACE '+label+' '+JSON.stringify(await page.evaluate(()=>window.__gensDungeonStorageTrace)));
   await page.waitForTimeout(500);
   s=await step(page,label+'/explored');
   console.log('DUNGEON_REAL_ENCOUNTER_DIAG '+label+' '+JSON.stringify(await page.evaluate(()=>{

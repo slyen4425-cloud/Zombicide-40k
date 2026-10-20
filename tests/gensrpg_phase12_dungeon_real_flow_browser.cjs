@@ -98,7 +98,7 @@ async function exercise(browser,label){
         window.__gensDungeonStorageTrace.push({key:String(key),writeRoom:saved?.room??null,
           currentDungeonRoom:typeof loadDungeonState==='function'?loadDungeonState()?.room:null,
           enemyStamps:key==='gensrpg_active_enemies_v1'&&Array.isArray(saved)?saved.map(e=>({enemyId:e.enemyId,dungeonRoom:e.dungeonRoom})):null,
-          stack:new Error().stack.split('\\n').slice(1,5).map(s=>s.trim())});
+          stack:new Error().stack.split(String.fromCharCode(10)).slice(1,7).map(s=>s.trim())});
       }
       return old.call(this,key,value);
     };

@@ -238,7 +238,11 @@ async function exercise(browser,label){
     }
     const available=now.previews.find(p=>p.ok);
     if(available&&now.current.actionsLeft>0){
-      const attack=page.locator('.gtv2Overlay [data-attack]').first();
+      // V108 intentionally hides legacy [data-attack] controls and offers a
+      // visible equipment/attack panel. Use the same Attaquer button as players.
+      const attack=page.locator('.gtv2Overlay [data-v108-panel] [data-v108-attack-go]').first();
+      await attack.waitFor({state:'visible',timeout:7000});
+      assert.equal(await attack.isDisabled(),false,label+' player-visible attack control enabled');
       await attack.click({timeout:7000});
       heroClicks++;await page.waitForTimeout(170);
     }else if(now.buttons.approach){

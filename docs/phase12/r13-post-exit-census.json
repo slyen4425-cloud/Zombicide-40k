@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-20",
+  "auditScope": "exact R13 GREEN index.html only",
+  "source": {
+    "checkpoint": "checkpoint/gensrpg-phase12-r13-builders-enemy-editor-green-2026-10-20",
+    "commit": "e22de3ae8d0d4f07ef7972c80f838dbf96d9e9ec",
+    "userArchive": "e1.zip",
+    "member": "index.html(1).txt",
+    "bytes": 1820094,
+    "gitBlob": "b5a39705baf83e9782695c14bede8b9dde6ddf52",
+    "sha256": "e54d03be07e7efb9b9cfa39d9289823ecc09b1eaf3524c39abfe5338ed60594b"
+  },
+  "scriptCensus": {
+    "total": 150,
+    "external": 61,
+    "inlineActive": 89,
+    "inlineDisabledByType": 0,
+    "inlineActiveBodyBytes": 1026171,
+    "anonymousActive": 5,
+    "anonymousActiveBytes": 691391,
+    "idActive": 84,
+    "idActiveBytes": 334780,
+    "astParseDiagnostics": 0
+  },
+  "anonymous": [
+    {
+      "ordinal": 24,
+      "bytes": 589709,
+      "gitBlob": "bc60b190f9295f9bcb0e4f94cf26b919873c66ac",
+      "functions": 759,
+      "variableStatements": 131,
+      "topLevelExpressionStatements": 12,
+      "classification": "multidomain-runtime-and-editors"
+    },
+    {
+      "ordinal": 27,
+      "bytes": 94882,
+      "gitBlob": "50e5b25ce6d3d9bf41c6e684f5548cc5842be935",
+      "functions": 115,
+      "variableStatements": 13,
+      "topLevelExpressionStatements": 4,
+      "classification": "mixed-hero-entities-capture-editor"
+    },
+    {
+      "ordinal": 29,
+      "bytes": 219,
+      "gitBlob": "cdf33d5bbe5ba17c36d100b2e348c82e67818160",
+      "classification": "provisional-bootstrap-indexeddb"
+    },
+    {
+      "ordinal": 63,
+      "bytes": 6337,
+      "gitBlob": "ff958f9e2965130ed9c4da1ba8df721b47332d10",
+      "classification": "active-dungeon-ai-visual-iife"
+    },
+    {
+      "ordinal": 149,
+      "bytes": 244,
+      "gitBlob": "c43d47df21d662a46ae54c0770106d3694acf235",
+      "classification": "provisional-shell-pvp-bootstrap"
+    }
+  ],
+  "candidateRegions": [
+    {
+      "name": "abilityLibrary",
+      "functions": 14,
+      "bytes": 10947,
+      "status": "mono-owner-candidate-but-too-small-alone"
+    },
+    {
+      "name": "survivalProfiles",
+      "functions": 30,
+      "bytes": 16546,
+      "status": "cross-core-shell-api-analysis-required"
+    },
+    {
+      "name": "rpgProfileEditor",
+      "functions": 78,
+      "bytes": 66349,
+      "status": "mixed-authority-region-needs-narrowing"
+    },
+    {
+      "name": "enemyGameplay",
+      "functions": 41,
+      "bytes": 34929,
+      "status": "mixed-legacy-enemy-runtime-not-R13-editor"
+    },
+    {
+      "name": "dungeonClassicCombat",
+      "functions": 159,
+      "bytes": 136237,
+      "status": "mixed-tactical-dungeon-combat-high-risk"
+    }
+  ],
+  "caveats": [
+    "Counts include comment-only script bodies",
+    "AST syntax validation is not browser parity or runtime owner certification",
+    "Candidate regions may overlap in semantics and are not authorized moves",
+    "No new CI or manual playtest is claimed",
+    "No changed runtime files"
+  ]
+}

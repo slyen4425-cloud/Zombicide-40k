@@ -5,7 +5,7 @@ const assert=require('node:assert/strict'),cp=require('node:child_process');
 const pw=require(process.env.R15_PLAYWRIGHT_DIR+'/node_modules/playwright');
 const R14=cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r15_builders_character_entity_editors.cjs','--restore-r14'],{maxBuffer:12*1024*1024}).toString('utf8');
 const URL=process.env.R15_TEST_URL||'http://127.0.0.1:8879/index.html';
-const LABEL='R15 Browser Character and Creature parity';
+const LABEL='R15 Parite'; // Respect historic hcName maxlength, otherwise input truncates silently.
 async function exercise(browser,version){
  const ctx=await browser.newContext({viewport:{width:1280,height:780},locale:'fr-FR'});
  const page=await ctx.newPage();

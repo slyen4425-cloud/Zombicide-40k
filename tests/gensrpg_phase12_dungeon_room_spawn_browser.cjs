@@ -121,7 +121,7 @@ async function exercise(browser,label){
   assert.ok(/COMBAT|ATTAQUER|PORTEUR/i.test(await btn.textContent()),label+' real main action exposes enemy or fight');
   assert.equal(await btn.isDisabled(),false,label+' combat entry button enabled');
   await btn.click({timeout:15000});
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(3000);
   s=await step(page,label+'/engaged-combat');
   console.log('DUNGEON_REAL_COMBAT_DOM '+label+' '+JSON.stringify(await page.evaluate(()=>{
     const ids=['dungeonCombatModal','gtv2Root','gtv2Overlay','gensDungeonCore01','dc01Modal'];
@@ -131,6 +131,17 @@ async function exercise(browser,label){
       tacticalOwner:typeof window.GensRpgTacticalCombatV2Ui?.getBattle==='function'?!!window.GensRpgTacticalCombatV2Ui.getBattle():null
     }
   })));
+  console.log('DUNGEON_COMBAT_ERRORS '+label+' '+JSON.stringify(errs));
+  console.log('DUNGEON_COMBAT_MODALS '+label+' '+JSON.stringify(await page.evaluate(()=>({
+    effectOpen:document.getElementById('effectModal')?.classList.contains('open'),
+    effectTitle:document.getElementById('effectTitle')?.textContent,
+    core200Open:document.getElementById('dc200Modal')?.classList.contains('open'),
+    core200Title:document.getElementById('dc200ModalTitle')?.textContent,
+    core200Body:document.getElementById('dc200ModalBody')?.textContent?.slice(0,500),
+    battleActive:!!window.GensRpgTacticalCombatV2Ui?.getBattle?.(),
+    bridgeType:typeof window.GensRpgTacticalCombatV2Bridge?.requestCombat,
+    banner:document.getElementById('dungeonCombatSetupView')?.textContent?.slice(0,400)
+  }))));
   assert.ok(s.tacticalVisible,label+' real combat overlay opened after combat button');
   assert.equal(s.renderSource,true,label+' Core3.03 remains effective combat owner');
   assert.equal(s.aiOldNoop,true,label+' old AI remains retired by owner');

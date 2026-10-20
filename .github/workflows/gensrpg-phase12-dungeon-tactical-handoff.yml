@@ -1,0 +1,47 @@
+name: GenSrpG Phase12 Dungeon to Tactical real browser handoff
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-dungeon-tactical-handoff-2026-10-20'
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  tactical-real-flow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 34
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Guard exact HTML and unchanged external runtime during diagnosis
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = '9f35eb833a6ede4b91399854f19bb9bef59f45ab'
+          git diff --exit-code 739d947ec601ee54e2fecb2f73078eaf4c6e4894 -- index.html service-worker.js assets/
+          node tests/gensrpg_phase12_dungeon_core200_spawn_order_guard.test.cjs
+      - name: Install isolated browser runtime
+        run: |
+          set -euo pipefail
+          npm install --no-save --prefix /tmp/gensrpg-tactical-handoff-pw playwright@1.56.1
+          /tmp/gensrpg-tactical-handoff-pw/node_modules/.bin/playwright install --with-deps chromium firefox
+      - name: Replay actual Dungeon fight click in Chromium and Firefox
+        env:
+          GENSRPG_PW_ROOT: /tmp/gensrpg-tactical-handoff-pw
+          GENSRPG_TEST_URL: http://127.0.0.1:8898/index.html
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8898 --bind 127.0.0.1 > /tmp/gensrpg_tactical_handoff_http.log 2>&1 &
+          sid=$!
+          trap 'kill "$sid" 2>/dev/null || true' EXIT
+          for n in $(seq 1 25); do if curl -fsS -o /dev/null http://127.0.0.1:8898/index.html; then break; fi; sleep 1; done
+          node tests/gensrpg_phase12_dungeon_tactical_handoff_browser.cjs
+      - name: Immutable commit status
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RES: ${{ job.status }}
+        run: |
+          state=failure; if [ "$RES" = success ]; then state=success; fi
+          payload="$(jq -nc --arg state "$state" --arg context 'gensrpg/phase12/dungeon-tactical-handoff' --arg d "Dungeon→Tactical real Chromium/Firefox handoff $RES" --arg u "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$context,description:$d,target_url:$u}')"
+          curl -fsS --retry 2 -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -d "$payload" > /dev/null

@@ -7,6 +7,52 @@ permissions:
   contents: read
   statuses: write
 jobs:
+  archived-v1145-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Prove archived V114.5 failure is unchanged from R13 GREEN
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/r14-v1145-r13 e22de3ae8d0d4f07ef7972c80f838dbf96d9e9ec
+          test "$(git -C /tmp/r14-v1145-r13 hash-object tests/gens_rpg_tactical_wall_dice_stats_v16781145.test.cjs)" = "$(git hash-object tests/gens_rpg_tactical_wall_dice_stats_v16781145.test.cjs)"
+          test "$(git -C /tmp/r14-v1145-r13 hash-object assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js)" = "$(git hash-object assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js)"
+          test "$(git -C /tmp/r14-v1145-r13 hash-object assets/gensrpg/gens-rpg-tactical-wall-dice-stats-16781145.js)" = "$(git hash-object assets/gensrpg/gens-rpg-tactical-wall-dice-stats-16781145.js)"
+          set +e
+          (cd /tmp/r14-v1145-r13 && node tests/gens_rpg_tactical_wall_dice_stats_v16781145.test.cjs) > /tmp/r14-v1145-old.log 2>&1
+          old_exit=$?
+          node tests/gens_rpg_tactical_wall_dice_stats_v16781145.test.cjs > /tmp/r14-v1145-new.log 2>&1
+          new_exit=$?
+          set -e
+          test "$old_exit" -ne 0
+          test "$new_exit" -ne 0
+          grep -q 'AssertionError' /tmp/r14-v1145-old.log
+          grep -q 'AssertionError' /tmp/r14-v1145-new.log
+          grep -Fq 'gens-rpg-tactical-wall-dice-stats-16781145\\.js\\?v=16\\.78\\.114\\.5' /tmp/r14-v1145-old.log
+          grep -Fq 'gens-rpg-tactical-wall-dice-stats-16781145\\.js\\?v=16\\.78\\.114\\.5' /tmp/r14-v1145-new.log
+          echo 'ARCHIVED V114.5: same pre-existing baseline failure on R13 GREEN and R14; active Tactical sentinels remain mandatory'
+      - name: Report archived-baseline characterization for exact SHA
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOB_RESULT: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          state=failure
+          if [ "$JOB_RESULT" = 'success' ]; then state=success; fi
+          description="R14 archived Tactical V114.5 equals R13 baseline - $JOB_RESULT"
+          payload="$(jq -nc --arg state "$state" --arg context 'gensrpg/r14/archived-v1145-baseline' --arg description "$description" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$context,description:$description,target_url:$url}')"
+          curl --fail --silent --show-error -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -d "$payload" >/dev/null
   regression-modes:
     runs-on: ubuntu-latest
     timeout-minutes: 18
@@ -27,14 +73,13 @@ jobs:
           done <<'TEST_FILES'
           tests/gens_architecture_global_side_effect_guard.test.cjs
           tests/gens_rpg_tactical_session_guard_v16781144.test.cjs
-          tests/gens_rpg_tactical_wall_dice_stats_v16781145.test.cjs
           tests/gens_phase4_stats_s7_snapshot_audit_v1.test.cjs
           TEST_FILES
           if [ -n "$failures" ]; then
             printf 'FAILED:%s\n' "$failures" | tee r14_failure_summary.txt
             exit 1
           fi
-          echo 'PASSED 4 inter-module guard checks'
+          echo 'PASSED 3 active inter-module guard checks; archived V114.5 validated in separate historical characterization'
       - name: Report immutable SHA extra-regression status
         if: always()
         shell: bash

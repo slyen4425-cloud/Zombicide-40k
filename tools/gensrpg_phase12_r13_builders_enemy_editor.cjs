@@ -52,6 +52,7 @@ function transform(source){
 }
 function restoreR12(){
  let html=fs.readFileSync('index.html','utf8');
+ if(blob(html)==='9f35eb833a6ede4b91399854f19bb9bef59f45ab')html=cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r15_builders_character_entity_editors.cjs','--restore-r14'],{maxBuffer:12*1024*1024}).toString('utf8');
  if(blob(html)==='dab5be5dedfa56c49d76d40a4cb824a0098903f0')html=cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r14_builders_rpg_universe_editor.cjs','--restore-r13'],{maxBuffer:10*1024*1024}).toString('utf8');
  const hash=blob(html);
  if(hash===SOURCE)return html;
@@ -78,7 +79,8 @@ function restoreR12(){
 function verify(){
  const source=restoreR12();
  const {html,extracted,names}=transform(source);
- const installed=fs.readFileSync('index.html','utf8');
+ let installed=fs.readFileSync('index.html','utf8');
+ if(blob(installed)==='9f35eb833a6ede4b91399854f19bb9bef59f45ab')installed=cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r15_builders_character_entity_editors.cjs','--restore-r14'],{maxBuffer:12*1024*1024}).toString('utf8');
  const historical=blob(installed)==='dab5be5dedfa56c49d76d40a4cb824a0098903f0'?cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r14_builders_rpg_universe_editor.cjs','--restore-r13'],{maxBuffer:10*1024*1024}).toString('utf8'):installed;
  assert(historical===html,'R13 exact historical index differs from certified transform');
  assert(fs.readFileSync(MODULE,'utf8')===extracted,'R13 Builders declarations differ');

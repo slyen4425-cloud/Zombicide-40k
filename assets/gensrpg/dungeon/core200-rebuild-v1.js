@@ -389,6 +389,10 @@ function explore(){
 
   x.room=targetRoom;x.enemyCells={};x.branch=null;
   spatialSetRoom(x,heroId,targetRoom);
+  // Core200 owns room transitions: persist the target room before legacy
+  // encounter generation stamps newly spawned enemies from loadDungeonState().
+  // This is the existing saveRt -> syncLegacy authority, not a new fallback.
+  saveRt(x);
   const kind=chooseKind(x.room),made=createRoom(x.room,kind);
   x.last={kind,room:x.room,at:Date.now(),title:made.result.title,map:made.map,narrative:'',exitLocked:false,keyEnemyId:''};
   const entry=spawnIndex(x.last?.map);

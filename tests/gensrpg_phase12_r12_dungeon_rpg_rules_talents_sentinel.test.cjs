@@ -3,7 +3,7 @@ const fs=require('node:fs'),assert=require('node:assert/strict'),crypto=require(
 const blob=s=>{const b=Buffer.from(s);return crypto.createHash('sha1').update('blob '+b.length+'\0').update(b).digest('hex')};
 const owner='assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js';
 const installed=fs.readFileSync('index.html','utf8');
-const now=blob(installed)==='b5a39705baf83e9782695c14bede8b9dde6ddf52'?cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r13_builders_enemy_editor.cjs','--restore-r12'],{maxBuffer:10*1024*1024}).toString('utf8'):installed;
+const now=['b5a39705baf83e9782695c14bede8b9dde6ddf52','dab5be5dedfa56c49d76d40a4cb824a0098903f0'].includes(blob(installed))?cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r13_builders_enemy_editor.cjs','--restore-r12'],{maxBuffer:10*1024*1024}).toString('utf8'):installed;
 assert.equal(Buffer.byteLength(now),1863745);
 assert.equal(blob(now),'b0d0c73292e4374fc4f23e86edffad5c1b39a7b6');
 const source=cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r12_dungeon_rpg_rules_talents.cjs','--restore-r11'],{maxBuffer:10*1024*1024}).toString();

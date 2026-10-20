@@ -1,0 +1,63 @@
+name: GenSrpG Phase12 Dungeon to Tactical entry diagnosis
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-dungeon-tactical-entry-audit-2026-10-20'
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  capture-real-tactical-entry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Freeze latest GREEN runtime and preserve other modes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = '9f35eb833a6ede4b91399854f19bb9bef59f45ab'
+          test "$(git hash-object assets/gensrpg/dungeon/core200-rebuild-v1.js)" = '5158facb6cb1246cb892a396cf35ffdc0ea4bf70'
+          git diff --exit-code 6850f39e9b93462d7346618aafe151111fedc4aa -- index.html service-worker.js assets/ docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          node tests/gensrpg_phase12_r15_builders_character_entity_sentinel.test.cjs
+          node tests/gens_rpg_tactical_session_guard_v16781144.test.cjs
+      - name: Install isolated Chromium and Firefox
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --prefix /tmp/gensrpg-tactical-diagnosis playwright@1.56.1
+          /tmp/gensrpg-tactical-diagnosis/node_modules/.bin/playwright install --with-deps chromium firefox
+      - name: Observe real Dungeon to Tactical behavior after user click
+        shell: bash
+        env:
+          GENSRPG_PW_ROOT: /tmp/gensrpg-tactical-diagnosis
+          GENSRPG_TEST_URL: http://127.0.0.1:8898/index.html
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8898 --bind 127.0.0.1 >/tmp/gensrpg-tactical-diagnosis-http.log 2>&1 &
+          srv=$!
+          trap 'kill "$srv" 2>/dev/null || true' EXIT
+          for i in $(seq 1 25); do
+            if curl -fsS -o /dev/null http://127.0.0.1:8898/index.html; then break; fi
+            sleep 1
+          done
+          node tests/gensrpg_phase12_dungeon_tactical_entry_diagnostic.cjs | tee /tmp/gensrpg-tactical-diagnosis.log
+      - name: Publish immutable diagnostic SHA result
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOB_RESULT: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          state=failure
+          if [ "$JOB_RESULT" = success ]; then state=success; fi
+          payload="$(jq -nc --arg state "$state" --arg context 'gensrpg/phase12/dungeon-tactical-entry-audit' --arg desc "Non-invasive real Dungeon Tactical click diagnosis - $JOB_RESULT" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$context,description:$desc,target_url:$url}')"
+          curl --fail --silent --show-error --retry 2 -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -d "$payload" >/dev/null

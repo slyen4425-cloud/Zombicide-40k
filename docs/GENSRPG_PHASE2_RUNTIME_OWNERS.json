@@ -668,6 +668,11 @@
       "owner": "GenSrpG Builders / enemy editor and enemy library R13",
       "domain": "builders",
       "role": "31 byte-exact historical enemy editor functions. Classic synchronous before original anonymous script. No runtime spawn, enemy conversion or combat rules."
+    },
+    "assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js": {
+      "owner": "GenSrpG Builders RPG universe editor R14",
+      "domain": "builders",
+      "role": "41 byte-exact RPG universe UI/form/save functions, historical Core/profile/runtime calls unchanged; no initializer moved."
     }
   }
 }

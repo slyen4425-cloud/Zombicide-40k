@@ -1,6 +1,6 @@
 # GenSrpG — Phase 12 / R14 — Extraction de l'éditeur de configuration d'univers RPG
 
-**20 octobre 2026 — code R14 appliqué sur sa branche, GREEN non encore certifié.**
+**20 octobre 2026 — R14 GREEN structurel et automatisé : code certifié sur son SHA, sans fusion dans `main`.**
 
 ## Gouvernance et base (§§25–26)
 
@@ -39,11 +39,21 @@
 - **Exécuté par le workflow de transformation** : les quatre fichiers de code ont été effectivement engagés sur la branche ; les gardes du workflow conditionnent ce commit à `--apply`, `--verify`, `--restore-r13`, `node --check`, source Git, SHA et rollback. Ce constat ne remplace pas le relevé de conclusion d'un run.
 - **Sentinelle dédiée** : `tests/gensrpg_phase12_r14_builders_rpg_universe_sentinel.test.cjs`; workflow `gensrpg-phase12-r14-builders-sentinels.yml`. Vérifie les 41 noms et globals, 151 scripts, inverse R13 exact, absence des fonctions protégées dans le module, propriétaire et PWA.
 - **Manquent encore à la clôture** : l'état final de chaque suite Architecture/Chromium, Firefox, Tactical et de la sentinelle R14 sur **un unique HEAD final** ; adaptations justifiées de tests de cartographie qui attendent encore 150 scripts, 131 propriétaires et les empreintes R13 ; validation navigateur de l'ouverture, l'édition, la sauvegarde et la reprise des paramètres RPG. Les anciens tests ne doivent pas être affaiblis pour obtenir un vert artificiel.
-- **Aucune CI GREEN revendiquée pour R14** ; si un test est rouge, garder R13 comme référence, corriger uniquement la couverture devenue obsolète ou revenir au checkpoint plutôt que masquer une régression.
+- **État de certification final** : tous les contrôles actifs et les contrôles d'historique décrits ci-dessous sont GREEN sur **un seul SHA**. Un test archivistique Tactical V114.5 reste historiquement rouge, avec preuve qu'il échoue déjà sur le code R13 GREEN. Il n'a été ni modifié ni masqué ; son statut historique est documenté séparément et ne constitue pas un test de régression du déplacement R14.
 - Publication `main`, service worker production et laboratoires : **non modifiés**.
 
 ## Prochaine étape
 
-1. Confronter les vraies suites CI, adapter uniquement les attentes de recensement devenues incorrectes (ajout d'un script Builders, 132 propriétaires) sans perdre les tests historiques.
-2. Confirmer le comportement d'éditeur d'univers RPG dans Chromium, Firefox puis manuellement sur mobile.
-3. Seulement après **toutes les validations sur le même SHA**, créer le checkpoint `checkpoint/gensrpg-phase12-r14-builders-rpg-universe-editor-green-2026-10-20` et actualiser CURRENT_WORK. La Phase 12 globale **reste ouverte** même après ce jalon.
+1. **Accompli** : sentinelles d'architecture recertifiées pour le nouvel inventaire 151 scripts / 132 propriétaires, sans changement des règles d'unicité ni des contrats précédents.
+2. **Accompli** : parité navigateur Chromium/Firefox du parcours RPG (ouverture, identité, XP par niveau, sauvegarde et rechargement). Le test de séparation Survie/Dungeon des personnalisations d'ennemis passe également en Chromium. Validation tactile manuelle sur smartphone encore conseillée ; elle n'est pas présentée comme réalisée.
+3. **Accompli** : checkpoint GREEN créé exactement sur le SHA testé. Aucun prochain lot R15 ouvert automatiquement, Phase 12 EXIT **encore ouverte**.
+
+## Certification GREEN — 20 octobre 2026
+
+- **SHA unique certifié** : `39726aa1b00d8cf5e5a0ad5ff8af041093460fc9` sur `work/gensrpg-phase12-r14-builders-rpg-universe-editor-2026-10-20`.
+- **Checkpoint de fin §25** : `checkpoint/gensrpg-phase12-r14-builders-rpg-universe-editor-green-2026-10-20`, créé sur ce SHA **seulement après** vérification par le connecteur GitHub du statut `success` des six contextes et de l'identité du HEAD.
+- **GitHub Actions CI, cinq jobs GREEN** : https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39415175892 : `gensrpg/r14/r14-history` (5 sentinelles R10→R14), `gensrpg/r14/architecture` (8), `gensrpg/r14/core-tactical` (2), `gensrpg/r14/regression-modes` (3 contrôles actifs) et `gensrpg/r14/archived-v1145-baseline` (caractérisation de la sentinelle historique R13/R14).
+- **GitHub Actions navigateur GREEN** : https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39415175867 : **Chromium et Firefox** ont exécuté les mêmes scénarios R13 et R14 (ouvrir/configurer/enregistrer/recharger le nom et 17 XP par niveau) avec résultats identiques. Une autre sentinelle Chromium a confirmé la préservation des personnalisations d'ennemis Survie/Dungeon et des ennemis personnalisés.
+- **Réserve historique factuelle** : le test archivistique de l'intégration Tactical V114.5 demande un chargement historiquement inactif. Le contrôle `archived-v1145-baseline` exécute effectivement cette même sentinelle dans deux working trees Git R13 GREEN / R14 et observe le **même échec préexistant** ; fichier de test et fichiers Tactical cibles sont bit-identiques entre R13 et R14. Ce n'est pas présenté comme « test Tactical V114.5 vert ». Les tests Tactical actifs (session, Core Dice, stats et composition) sont verts.
+- **Portée GREEN** : extraction structurelle à comportement fonctionnel comparable aux scénarios R13 testés. Pas de nouvelle autorité runtime, pas d'ajout de mécanique de jeu, pas de preuve prétendue pour une session manuelle mobile. Les 32 images historiques Survie, les laboratoires et la branche `main` ne sont pas modifiés.
+- **Validation post-GREEN** : le rapport et `GENSRPG_CURRENT_WORK.md` pourront être engagés comme *documentation seulement* après le checkpoint, sans déplacer le pointeur GREEN ni appeler un nouveau commit « même SHA validé ».

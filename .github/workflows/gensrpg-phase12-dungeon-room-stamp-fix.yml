@@ -1,0 +1,68 @@
+name: GenSrpG Phase12 Dungeon room stamp real UI regression
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-dungeon-room-stamp-fix-2026-10-20'
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  room-stamp-and-architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify strict fix perimeter and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = '9f35eb833a6ede4b91399854f19bb9bef59f45ab'
+          test "$(git rev-parse refs/remotes/origin/checkpoint/gensrpg-start-phase12-dungeon-room-stamp-fix-2026-10-20)" = '95740b6353a116c7e66b5d1095338b81d8b223bf'
+          git diff --quiet 95740b6353a116c7e66b5d1095338b81d8b223bf -- index.html docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          node --check assets/gensrpg/dungeon/core200-rebuild-v1.js
+          node tests/gensrpg_phase12_r15_builders_character_entity_sentinel.test.cjs
+          node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
+          node tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
+          node tests/gens_rpg_tactical_session_guard_v16781144.test.cjs
+          git diff --name-only 95740b6353a116c7e66b5d1095338b81d8b223bf -- assets/ | tee /tmp/dungeon-runtime-changed.txt
+          test "$(cat /tmp/dungeon-runtime-changed.txt)" = 'assets/gensrpg/dungeon/core200-rebuild-v1.js'
+      - name: Install isolated Chromium and Firefox
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --prefix /tmp/gensrpg-dungeon-room-pw playwright@1.56.1
+          /tmp/gensrpg-dungeon-room-pw/node_modules/.bin/playwright install --with-deps chromium firefox
+      - name: Real Dungeon profile, encounter, room stamp and UI
+        shell: bash
+        env:
+          GENSRPG_PW_ROOT: /tmp/gensrpg-dungeon-room-pw
+          GENSRPG_TEST_URL: http://127.0.0.1:8898/index.html
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8898 --bind 127.0.0.1 >/tmp/gensrpg-room-stamp-http.log 2>&1 &
+          srv=$!
+          trap 'kill "$srv" 2>/dev/null || true' EXIT
+          for i in $(seq 1 25); do
+            if curl -fsS -o /dev/null http://127.0.0.1:8898/index.html; then break; fi
+            sleep 1
+          done
+          node tests/gensrpg_phase12_dungeon_room_stamp_browser.cjs | tee /tmp/gensrpg-room-stamp-proof.log
+      - name: Publish SHA-bound result
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOB_RESULT: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          state=failure
+          if [ "$JOB_RESULT" = success ]; then state=success; fi
+          payload="$(jq -nc --arg state "$state" --arg context 'gensrpg/phase12/dungeon-room-stamp-fix' --arg desc "Dungeon Core200 correct room native spawn Chromium/Firefox: $JOB_RESULT" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$context,description:$desc,target_url:$url}')"
+          curl --fail --silent --show-error --retry 2 -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -d "$payload" >/dev/null

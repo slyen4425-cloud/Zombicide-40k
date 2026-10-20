@@ -96,13 +96,15 @@ async function exercise(browser,label){
     const reserve=typeof loadZombieReserve==='function'?loadZombieReserve():{};
     const dungeonIds=typeof DUNGEON_ENEMY_IDS!=='undefined'?DUNGEON_ENEMY_IDS:[];
     return {
-      activeEnemies:all.slice(0,12).map(z=>({id:z.id,enemyId:z.enemyId,hp:z.hp,defeated:z.defeated,room:z.room})),
+      activeEnemies:all.slice(0,12).map(z=>({id:z.id,enemyId:z.enemyId,hp:z.hp,defeated:z.defeated,room:z.room,dungeonRoom:z.dungeonRoom,removed:z.removed,bypassed:z.bypassed})),
       activeEnemiesCount:all.length,
       reserveDungeonIds:Object.entries(reserve).filter(([k])=>dungeonIds.includes(k)).slice(0,22),
       dungeonMonsterDefinitions:typeof ZOMBIE_TYPES!=='undefined'?ZOMBIE_TYPES.filter(z=>dungeonIds.includes(z.id)).slice(0,6).map(z=>({id:z.id,name:z.name,defaultCount:z.defaultCount})):[],
       lastState:typeof loadDungeonState==='function'?loadDungeonState()?.last:null,
       modal:document.getElementById('dc01Modal')?.outerHTML.slice(0,550),
-      currentProfile:getActiveGameProfile?.()?.id
+      currentProfile:getActiveGameProfile?.()?.id,isDungeonMode:typeof isDungeonMode==='function'?isDungeonMode():null,
+      livingImplementation:typeof dungeonLivingEnemies==='function'?Function.prototype.toString.call(dungeonLivingEnemies).slice(0,850):'absent',
+      anyRoomMatches:all.filter(z=>Number(z.dungeonRoom||0)===Number(loadDungeonState?.()?.room||0)).length
     };
   })));
   console.log('DUNGEON_REAL_ENCOUNTER_ERRORS '+label+' '+JSON.stringify(errs));

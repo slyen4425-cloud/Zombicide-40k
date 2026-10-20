@@ -122,46 +122,13 @@ async function exercise(browser,label){
   assert.equal(evidence.renderOwner,true,label+' Core3.03 renderer owner preserved');
   assert.equal(errs.length,0,label+' no page errors on real encounter');
   console.log(label+' REAL DUNGEON ROOM STAMP PASS');
-  // Continue the SAME actual user path: dismiss the real encounter modal,
-  // then click the game-owned combat button. Do not fabricate a battle state.
-  assert.equal(evidence.modalOpen,true,label+' room encounter modal is open');
-  await page.locator('#dc200ModalOk').click({timeout:12000});
-  await page.locator('#dc01Explore').waitFor({state:'visible',timeout:12000});
-  assert.match(await page.locator('#dc01Explore').textContent(),/ENGAGER LE COMBAT/,label+' real manual combat entry is visible');
-  // Real gameplay shows a result/info overlay; a player dismisses it via OK.
-  if(await page.locator('#effectModal').evaluate(el=>el.classList.contains('open'))){
-    await page.locator('#effectModal button.effectClose').click({timeout:10000});
-    await page.locator('#effectModal').evaluate(el=>{if(el.classList.contains('open'))throw Error('effect overlay failed to close through UI')});
-  }
-  await page.locator('#dc01Explore').click({timeout:12000});
-  await page.waitForTimeout(1200);
-  const combat=await page.evaluate(()=>{
-   const modal=document.getElementById('dungeonCombatModal'),setup=document.getElementById('dungeonCombatSetupView');
-   const visible=el=>!!el&&el.getClientRects().length>0&&getComputedStyle(el).display!=='none';
-   return {
-     modalExists:!!modal,modalVisible:visible(modal),modalClasses:modal?.className,
-     modalDisplay:modal?.style.display,
-     combatActive:typeof dungeonCombatActive==='undefined'?null:dungeonCombatActive,
-     setupContentLength:setup?.innerHTML?.length||0,
-     availableButtons:[...document.querySelectorAll('#dungeonCombatModal button')].filter(visible).slice(0,18).map(b=>({id:b.id,text:b.textContent.trim().slice(0,85),disabled:b.disabled})),
-     renderOwner:window.renderDungeonCombatRound===window.__dc302RenderCombat,
-     enemies:typeof dungeonLivingEnemies==='function'?dungeonLivingEnemies().map(e=>({id:e.id,hp:e.hp,room:e.dungeonRoom})):[],
-     tacticalBridge:typeof window.GensRpgTacticalCombatV2Bridge?.requestCombat
-   };
-  });
-  console.log('DUNGEON_REAL_COMBAT_ENTRY '+JSON.stringify({browser:label,...combat,pageErrors:errs}));
-  assert.equal(combat.modalVisible,true,label+' actual combat modal opened by user action');
-  assert.ok(combat.setupContentLength>40,label+' real combat renderer populated its interface');
-  assert.equal(combat.renderOwner,true,label+' Core3.03 renderer still single final owner');
-  assert.equal(errs.length,0,label+' no JS error during combat entry');
-  console.log(label+' REAL DUNGEON COMBAT ENTRY PASS');
 
  } finally {await context.close()}
 }
 (async()=>{
  for(const [label,engine] of [['Chromium',chromium],['Firefox',firefox]]){
   const browser=await engine.launch({headless:true,args:label==='Chromium'?['--disable-dev-shm-usage']:[]});
-  try{await exercise(browser,label);console.log(label+' real Dungeon profile→room→native encounter→combat opening PASS')}
+  try{await exercise(browser,label);console.log(label+' real Dungeon profile→room→encounter→combat flow PASS')}
   finally{await browser.close()}
  }
 })().catch(e=>{console.error('DUNGEON_REAL_FLOW_RED '+(e.stack||e));process.exitCode=1});

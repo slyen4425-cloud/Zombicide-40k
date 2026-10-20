@@ -21,7 +21,7 @@ jobs:
           git diff --exit-code 739d947ec601ee54e2fecb2f73078eaf4c6e4894 -- index.html service-worker.js assets/gensrpg/dungeon/ assets/gensrpg/core/ assets/gensrpg/capture/ assets/gensrpg/survival/ assets/dungeon/
           test "$(git diff --name-only 739d947ec601ee54e2fecb2f73078eaf4c6e4894 -- assets/)" = 'assets/gensrpg/tactical/entry-v1.js'
           node --check assets/gensrpg/tactical/entry-v1.js
-          node tests/gensrpg_phase12_dungeon_core200_spawn_order_guard.test.cjs
+          test "$(git hash-object assets/gensrpg/dungeon/core200-rebuild-v1.js)" = '9523187d72913c284bfd8afab85858c1834e31d2'
           node tests/gensrpg_phase12_r15_builders_character_entity_sentinel.test.cjs
           node tests/gensrpg_phase12_r14_builders_rpg_universe_sentinel.test.cjs
           node tests/gensrpg_phase12_r13_builders_enemy_editor_sentinel.test.cjs

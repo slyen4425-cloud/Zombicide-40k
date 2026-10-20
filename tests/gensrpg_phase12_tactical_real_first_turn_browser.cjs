@@ -212,27 +212,35 @@ async function exercise(browser,label){
   assert.ok(beforeTurn.hero[0].canonical>0,label+' real hero contains canonical stat records');
   assert.ok(beforeTurn.hero[0].statsVersion,label+' hero has cached canonical Tactical snapshot');
   await page.locator('.gtv2Overlay .gtv2Actions button[data-end]').click({timeout:12000});
-  try{
-    await page.waitForFunction(previous=>{
+  let enemyTurnFinished=false,diceConfirmations=0;
+  // A real attack intentionally waits for the player to acknowledge the dice
+  // popup. Do NOT skip it: press the existing CONTINUER button only after the
+  // animation enables it. An enemy move needs no such confirmation.
+  for(let n=0;n<60&&!enemyTurnFinished;n++){
+    enemyTurnFinished=await page.evaluate(previous=>{
       const B=window.GensRpgTacticalCombatV2Ui?.getBattle?.(),E=window.GensRpgTacticalCombatV2;
       if(!B||!E)return false;
       const events=B.log.slice(previous);
-      return events.some(x=>x.type==='turn'&&String(x.actorId||'').startsWith('enemy:')) &&
+      return events.some(x=>x.type==='turn'&&String(x.actorId||'').startsWith('enemy:'))&&
         (B.status!=='active'||E.currentActor(B)?.side==='hero');
-    },beforeTurn.logLength,{timeout:12000});
-  }catch(error){
-    console.log('DUNGEON_TACTICAL_FIRST_TURN_TIMEOUT '+label+' '+JSON.stringify(await page.evaluate(previous=>{
-      const B=window.GensRpgTacticalCombatV2Ui?.getBattle?.(),E=window.GensRpgTacticalCombatV2;
-      return {battle:!!B,status:B?.status,round:B?.round,turnIndex:B?.turnIndex,
-        current:B&&E?.currentActor?.(B)?{id:E.currentActor(B).id,side:E.currentActor(B).side}:null,
-        events:B?.log?.slice(previous)?.map(x=>({type:x.type,actorId:x.actorId,attackerId:x.attackerId,targetId:x.targetId,damage:x.damage,hit:x.hit})),
-        heroEndButton:document.querySelector('.gtv2Overlay .gtv2Actions [data-end]')?.outerHTML||null,
-        dock:document.querySelector('[data-v110-dock]')?.outerHTML.slice(0,1500)||null,
-        dice:[...document.querySelectorAll('[class*="dice"],[class*="Dice"],[class*="gtv2Die"]')].filter(n=>n.getClientRects().length>0).slice(0,8).map(n=>({cls:n.className,text:n.textContent.slice(0,80)}))
-      }
-    },beforeTurn.logLength)));
-    throw error;
+    },beforeTurn.logLength);
+    if(enemyTurnFinished)break;
+    const continueButton=page.locator('.gtv2DiceBackdrop button[data-dice-continue]');
+    if(await continueButton.isVisible()){
+      await page.waitForFunction(()=>{const el=document.querySelector('.gtv2DiceBackdrop button[data-dice-continue]');return !!el&&!el.disabled},null,{timeout:12000});
+      await continueButton.click({timeout:7000});
+      diceConfirmations++;
+      console.log('DUNGEON_TACTICAL_DICE_ACK '+JSON.stringify({browser:label,count:diceConfirmations,via:'real-button'}));
+    }else await page.waitForTimeout(250);
   }
+  if(!enemyTurnFinished)console.log('DUNGEON_TACTICAL_FIRST_TURN_BLOCKED '+label+' '+JSON.stringify(await page.evaluate(previous=>{
+    const B=window.GensRpgTacticalCombatV2Ui?.getBattle?.(),E=window.GensRpgTacticalCombatV2;
+    return {status:B?.status,round:B?.round,current:B&&E?.currentActor?.(B)?.id,
+      events:B?.log?.slice(previous)?.map(x=>({type:x.type,actorId:x.actorId,attackerId:x.attackerId,damage:x.damage})),
+      diceVisible:!!document.querySelector('.gtv2DiceBackdrop button[data-dice-continue]'),
+      diceDisabled:document.querySelector('.gtv2DiceBackdrop button[data-dice-continue]')?.disabled};
+  },beforeTurn.logLength)));
+  assert.equal(enemyTurnFinished,true,label+' actual enemy AI turn must return to hero after visible dice confirmation');
   const afterTurn=await page.evaluate(previous=>{
     const B=window.GensRpgTacticalCombatV2Ui.getBattle(),E=window.GensRpgTacticalCombatV2;
     const events=B.log.slice(previous);

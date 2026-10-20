@@ -273,6 +273,20 @@ async function exercise(browser,label){
   assert.ok(after?.log?.some(row=>row.type==='turn'&&before.actors.some(x=>x.side==='enemy'&&x.id===row.actorId)),label+' real enemy AI turn recorded by engine');
   assert.ok(after.log.some(row=>row.type==='attack'&&before.actors.some(x=>x.side==='hero'&&x.id===row.attackerId)),label+' hero attack recorded by real engine');
   assert.ok(heroClicks>0,label+' browser actually clicked a hero attack');
+  assert.ok(after.round>=2,label+' real Tactical engine advances round after the AI acts');
+  assert.equal(after.current?.side,'hero',label+' initiative passes back to a hero after AI');
+  const attacks=after.log.filter(row=>row.type==='attack');
+  assert.ok(attacks.length>=1,label+' native D100 attack records exist');
+  for(const attack of attacks){
+    assert.ok(Number.isInteger(attack.roll)&&attack.roll>=1&&attack.roll<=100,label+' legitimate D100 log for '+attack.attackerId);
+    assert.ok(Number.isFinite(attack.damage)&&attack.damage>=0,label+' valid computed damage for '+attack.attackerId);
+  }
+  for(const starting of before.actors){
+    const taken=attacks.filter(row=>row.targetId===starting.id).reduce((sum,row)=>sum+row.damage,0);
+    const current=after.actors.find(a=>a.id===starting.id);
+    assert.ok(current,label+' original actor remains in battle snapshot');
+    assert.equal(current.hp,Math.max(0,starting.hp-taken),label+' native HP equals recorded damage for '+starting.id);
+  }
   assert.equal(errs.length,0,label+' no uncaught page errors during first turns');
 
   console.log('DUNGEON_REAL_RESULT '+JSON.stringify({browser:label,certifiedScope:'combat-handoff',

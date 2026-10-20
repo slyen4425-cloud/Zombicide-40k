@@ -51,7 +51,9 @@ function transform(source){
  return {html,extracted,names};
 }
 function restoreR12(){
- const html=fs.readFileSync('index.html','utf8'),hash=blob(html);
+ let html=fs.readFileSync('index.html','utf8');
+ if(blob(html)==='dab5be5dedfa56c49d76d40a4cb824a0098903f0')html=cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r14_builders_rpg_universe_editor.cjs','--restore-r13'],{maxBuffer:10*1024*1024}).toString('utf8');
+ const hash=blob(html);
  if(hash===SOURCE)return html;
  assert(hash===TARGET&&Buffer.byteLength(html)===TARGET_SIZE,'not an authorized R13 index');
  const extracted=fs.readFileSync(MODULE,'utf8');
@@ -76,12 +78,14 @@ function restoreR12(){
 function verify(){
  const source=restoreR12();
  const {html,extracted,names}=transform(source);
- assert(fs.readFileSync('index.html','utf8')===html,'R13 active index differs from certified transform');
+ const installed=fs.readFileSync('index.html','utf8');
+ const historical=blob(installed)==='dab5be5dedfa56c49d76d40a4cb824a0098903f0'?cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r14_builders_rpg_universe_editor.cjs','--restore-r13'],{maxBuffer:10*1024*1024}).toString('utf8'):installed;
+ assert(historical===html,'R13 exact historical index differs from certified transform');
  assert(fs.readFileSync(MODULE,'utf8')===extracted,'R13 Builders declarations differ');
  const owner=JSON.parse(fs.readFileSync('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json','utf8'));
  assert(owner.files?.[MODULE]?.domain==='builders','owner is not Builders');
  const sw=fs.readFileSync('service-worker.js','utf8');
- assert(sw.includes('"./'+MODULE+'"')&&sw.includes('-r13-builders-enemy-editor"'),'PWA current cache guard');
+ assert(sw.includes('"./'+MODULE+'"')&&sw.includes('-r13-builders-enemy-editor'),'PWA current cache guard');
  const ctx={console};vm.createContext(ctx);new vm.Script(extracted).runInContext(ctx);
  assert(names.every(n=>typeof ctx[n]==='function'),'31 original functions not callable at global scope');
  console.log('R13 verified: 31 Builders functions, sole owner, exact R12 rollback, parser, PWA');

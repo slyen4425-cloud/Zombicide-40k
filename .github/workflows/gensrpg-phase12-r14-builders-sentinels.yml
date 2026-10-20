@@ -1,0 +1,23 @@
+name: GenSrpG Phase12 R14 Builders RPG universe editor rollback
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r14-builders-rpg-universe-editor-2026-10-20'
+permissions:
+  contents: read
+jobs:
+  builders-rpg-universe-rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: R14 historical globals, exact R13 inverse, parser and PWA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = 'dab5be5dedfa56c49d76d40a4cb824a0098903f0'
+          test "$(git hash-object assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js)" = '3faa1131bd6a9a2c4a672a4f18d49f49bcdb9107'
+          node --check tools/gensrpg_phase12_r14_builders_rpg_universe_editor.cjs
+          node --check assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js
+          node tests/gensrpg_phase12_r14_builders_rpg_universe_sentinel.test.cjs
+          test "$(node tools/gensrpg_phase12_r14_builders_rpg_universe_editor.cjs --restore-r13 | git hash-object --stdin)" = 'b5a39705baf83e9782695c14bede8b9dde6ddf52'

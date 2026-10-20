@@ -39,6 +39,9 @@ async function exercise(browser,label){
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
   await page.waitForFunction(()=>typeof window.DungeonCore01?.start==='function'&&typeof window.switchGameModeFromHome==='function',{timeout:20000});
   await step(page,label+'/load');
+  // Core 0.71 explicitly schedules cold-start home resets at 0/80/220/500ms.
+  // A human waits until the welcome screen has settled before choosing a mode.
+  await page.waitForTimeout(800);
   // The live interface is hierarchical: mode family -> game -> new session.
   // The old profile-switcher exists in HTML but is deliberately hidden.
   await page.locator('#gensRootHome .gensRootModeCard.adventure').click({timeout:15000});
@@ -51,6 +54,7 @@ async function exercise(browser,label){
   console.log('DUNGEON_REAL_CARD_HTML '+label+' '+(await dungeonGame.evaluate(n=>n.outerHTML)).slice(0,5500));
   await dungeonGame.locator('button.gensUniverseMainBtn').click({timeout:15000});
   await page.waitForTimeout(250);
+  console.log('DUNGEON_REAL_AFTER_CARD_ERRORS '+label+' '+JSON.stringify(errs));
   console.log('DUNGEON_REAL_AFTER_CARD '+label+' '+JSON.stringify(await page.evaluate(()=>({family:document.getElementById('gensFamilyHome')?.style.display,game:document.getElementById('gensGameHome')?.style.display,root:document.getElementById('gensRootHome')?.style.display,active:getActiveGameProfile?.()?.id,visiblePanels:[...document.querySelectorAll('#gensFamilyGames button')].filter(n=>n.getClientRects().length>0).map(n=>({text:n.textContent.trim().slice(0,90),onclick:n.getAttribute('onclick')})).slice(0,12)}))));
   await page.locator('#gensGameHome').waitFor({state:'visible',timeout:5000});
   const selected=await step(page,label+'/profile-selected');

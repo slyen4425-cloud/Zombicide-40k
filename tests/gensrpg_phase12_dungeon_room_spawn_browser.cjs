@@ -158,7 +158,7 @@ async function exercise(browser,label){
 (async()=>{
  for(const [label,engine] of [['Chromium',chromium],['Firefox',firefox]]){
   const browser=await engine.launch({headless:true,args:label==='Chromium'?['--disable-dev-shm-usage']:[]});
-  try{await exercise(browser,label);console.log(label+' real Dungeon profile→room→encounter→combat flow PASS')}
+  try{await exercise(browser,label);console.log(label+' Dungeon profile→room→actual enemy spawn PASS; Tactical overlay remains unvalidated')}
   finally{await browser.close()}
  }
 })().catch(e=>{console.error('DUNGEON_REAL_FLOW_RED '+(e.stack||e));process.exitCode=1});

@@ -1,0 +1,65 @@
+name: GenSrpG Phase12 Tactical real first hero and enemy turn
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-tactical-real-first-turn-2026-10-20'
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  tactical-real-flow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 34
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Guard exact HTML, one Tactical owner diff and historical protections
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = '9f35eb833a6ede4b91399854f19bb9bef59f45ab'
+          git diff --exit-code d35a0a5fd8228863c87a2da130fb1cc46a84679d -- index.html service-worker.js assets/\n          test "$(git hash-object assets/gensrpg/dungeon/core200-rebuild-v1.js)" = '9523187d72913c284bfd8afab85858c1834e31d2'\n          test "$(git hash-object assets/gensrpg/tactical/entry-v1.js)" = '9def3ebbc5e642f0258aa3ef040664faced18acf'\n          node tests/gensrpg_phase12_r15_builders_character_entity_sentinel.test.cjs
+          node tests/gensrpg_phase12_r14_builders_rpg_universe_sentinel.test.cjs
+          node tests/gensrpg_phase12_r13_builders_enemy_editor_sentinel.test.cjs
+          node tests/gensrpg_phase12_r12_dungeon_rpg_rules_talents_sentinel.test.cjs
+          node tests/gensrpg_phase12_r11_retired_scripts_sentinel.test.cjs
+          node tests/gensrpg_phase12_r10_capture_sentinel.test.cjs
+          node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
+          node tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs
+          node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+          node tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs
+          node tests/gens_phase3_target_structure_contracts_v1.test.cjs
+          node tests/gens_runtime_composition_guard_v11411.test.cjs
+          node tests/gens_phase4_dice_d10048_raccord_v1.test.cjs
+          node tests/gens_phase4_dice_first_raccord_preaudit_v1.test.cjs
+          node tests/gens_architecture_global_side_effect_guard.test.cjs
+          node tests/gens_rpg_tactical_session_guard_v16781144.test.cjs
+          node tests/gens_phase4_stats_s7_snapshot_audit_v1.test.cjs
+          node tests/gensrpg_phase12_post_r15_inline_authority_baseline.test.cjs
+      - name: Install isolated browser runtime
+        run: |
+          set -euo pipefail
+          npm install --no-save --prefix /tmp/gensrpg-tactical-handoff-pw playwright@1.56.1
+          /tmp/gensrpg-tactical-handoff-pw/node_modules/.bin/playwright install --with-deps chromium firefox
+      - name: Replay actual Dungeon fight click in Chromium and Firefox
+        env:
+          GENSRPG_PW_ROOT: /tmp/gensrpg-tactical-handoff-pw
+          GENSRPG_TEST_URL: http://127.0.0.1:8898/index.html
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8898 --bind 127.0.0.1 > /tmp/gensrpg_tactical_handoff_http.log 2>&1 &
+          sid=$!
+          trap 'kill "$sid" 2>/dev/null || true' EXIT
+          for n in $(seq 1 25); do if curl -fsS -o /dev/null http://127.0.0.1:8898/index.html; then break; fi; sleep 1; done
+          node tests/gensrpg_phase12_tactical_real_first_turn_browser.cjs
+      - name: Immutable commit status
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RES: ${{ job.status }}
+        run: |
+          state=failure; if [ "$RES" = success ]; then state=success; fi
+          payload="$(jq -nc --arg state "$state" --arg context 'gensrpg/phase12/tactical-real-first-turn' --arg d "Tactical real first hero and enemy turn in Chromium/Firefox $RES" --arg u "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$context,description:$d,target_url:$u}')"
+          curl -fsS --retry 2 -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -d "$payload" > /dev/null

@@ -1,7 +1,7 @@
 'use strict';
-/* R14 Builders Enemy Library and Editor — strict byte-exact declarations only.
+/* R14 Builders RPG Universe Editor — strict byte-exact declarations only.
  * Source R13 is derived from the verified user archive and pinned to its GREEN Git blob.
- * All 31 function bodies remain original, with one Builders owner and no side-effect moved.
+ * All 41 function bodies remain original, with one Builders owner and no side-effect moved.
  */
 const fs=require('node:fs'),crypto=require('node:crypto'),vm=require('node:vm'),cp=require('node:child_process'),path=require('node:path');
 const SOURCE='b5a39705baf83e9782695c14bede8b9dde6ddf52',SOURCE_SIZE=1820094;
@@ -81,7 +81,7 @@ function verify(){
  const owner=JSON.parse(fs.readFileSync('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json','utf8'));
  assert(owner.files?.[MODULE]?.domain==='builders','owner is not Builders');
  const sw=fs.readFileSync('service-worker.js','utf8');
- assert(sw.includes('"./'+MODULE+'"')&&sw.includes('-r13-builders-enemy-editor"'),'PWA current cache guard');
+ assert(sw.includes('"./'+MODULE+'"')&&sw.includes('-r14-builders-rpg-universe-editor"'),'PWA current cache guard');
  const ctx={console};vm.createContext(ctx);new vm.Script(extracted).runInContext(ctx);
  assert(names.every(n=>typeof ctx[n]==='function'),'41 original functions not callable at global scope');
  console.log('R14 verified: 41 Builders UI functions, sole owner, exact R13 rollback, parser, PWA');
@@ -107,6 +107,6 @@ if(mode==='--check-source'){
  fs.writeFileSync(MODULE,r.extracted);fs.writeFileSync('index.html',r.html);
  fs.writeFileSync(swp,nextSw);fs.writeFileSync(op,JSON.stringify(owners,null,2)+'\n');
  verify();console.log('R14 applied, four files only');
-}else if(mode==='--restore-r12')process.stdout.write(restoreR13());
+}else if(mode==='--restore-r13')process.stdout.write(restoreR13());
 else if(mode==='--verify')verify();
 else throw Error('unknown R14 action');

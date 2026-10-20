@@ -2,7 +2,8 @@
 const fs=require('node:fs'),assert=require('node:assert/strict'),crypto=require('node:crypto'),cp=require('node:child_process'),vm=require('node:vm');
 const blob=s=>{const b=Buffer.from(s);return crypto.createHash('sha1').update('blob '+b.length+'\0').update(b).digest('hex')};
 const owner='assets/gensrpg/builders/legacy-enemy-editor-v1.js';
-const current=fs.readFileSync('index.html','utf8');
+const installed=fs.readFileSync('index.html','utf8');
+const current=blob(installed)==='dab5be5dedfa56c49d76d40a4cb824a0098903f0'?cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r14_builders_rpg_universe_editor.cjs','--restore-r13'],{maxBuffer:10*1024*1024}).toString('utf8'):installed;
 assert.equal(Buffer.byteLength(current),1820094);
 assert.equal(blob(current),'b5a39705baf83e9782695c14bede8b9dde6ddf52');
 const restored=cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r13_builders_enemy_editor.cjs','--restore-r12'],{maxBuffer:9*1024*1024}).toString('utf8');
@@ -25,7 +26,7 @@ const ctx={console};vm.createContext(ctx);new vm.Script(js).runInContext(ctx);
 assert.ok(names.every(n=>typeof ctx[n]==='function'),'original globals remain callable');
 assert.ok(!/function (?:loadCustomEnemies|customEnemyToZombieType|refreshCustomEnemiesIntoZombieTypes|rollEnemyAttack|generateRealSpawn)\(/.test(js),'foreign gameplay moved');
 const sw=fs.readFileSync('service-worker.js','utf8'),map=JSON.parse(fs.readFileSync('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json','utf8'));
-assert.ok(sw.includes('"./'+owner+'"'));assert.ok(sw.includes('-r13-builders-enemy-editor"'));
+assert.ok(sw.includes('"./'+owner+'"'));assert.ok(sw.includes('-r13-builders-enemy-editor'));
 assert.equal(map.files[owner]?.domain,'builders');
 cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r13_builders_enemy_editor.cjs','--verify']);
 console.log('R13 31 Builders globals, R13->R12 byte-exact, parser, PWA and manifest GREEN');

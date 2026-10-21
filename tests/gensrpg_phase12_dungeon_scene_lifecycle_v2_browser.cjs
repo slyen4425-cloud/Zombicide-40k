@@ -486,6 +486,21 @@ async function exercise(browser,label){
   console.log('DUNGEON_CHEST_BEFORE '+JSON.stringify({browser:label,room2ChestBefore}));
   assert.equal(room2ChestBefore.lastKind,'chest',label+' authoring UI generated a real chest room 2');
   assert.ok(room2ChestBefore.chests.length>0,label+' real chest scene generated and visible');
+  // First restore an unopened chest: hydration must preserve both the marker
+  // and the original scene object, not recreate a phantom chest or duplicate it.
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForTimeout(800);
+  await page.locator('#gensRootHome .gensRootModeCard.adventure').click({timeout:15000});
+  await page.locator('#gensFamilyHome').waitFor({state:'visible',timeout:15000});
+  await page.locator('#gensFamilyGames .gensUniverseCard[data-rpg-profile="game_profile_dungeon_demo"] button.gensUniverseMainBtn').click({timeout:15000});
+  await page.locator('#gensGameHome').waitFor({state:'visible',timeout:15000});
+  await page.locator('#gensGameHomeActions button.resumeBtn').click({timeout:15000});
+  await page.locator('#gensDungeonCore01').waitFor({state:'visible',timeout:15000});
+  const unopenedReload=await sceneState();
+  console.log('DUNGEON_CHEST_UNOPENED_RELOAD '+JSON.stringify({browser:label,original:room2ChestBefore,restored:unopenedReload}));
+  assert.equal(unopenedReload.room,2,label+' unopened chest room remains room 2 after resume');
+  assert.deepEqual(unopenedReload.sceneMap,room2ChestBefore.sceneMap,label+' unopened chest map identical after reload');
+  assert.deepEqual(unopenedReload.chests,room2ChestBefore.chests,label+' unopened chest scene not duplicated, lost, or replaced');
   let consumeAttempts=0;
   for(;consumeAttempts<4;consumeAttempts++){
     const s=await sceneState();

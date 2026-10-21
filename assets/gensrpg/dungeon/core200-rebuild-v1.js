@@ -206,6 +206,11 @@ function renderScene200(x){
      }
    });
 
+   // Persist the positions of ALREADY loaded scenes before creating new
+   // ones. addDungeonSceneElement owns the persistence of its new entry;
+   // saving the stale pre-addition "all" afterwards would erase that entry.
+   if(changed)saveDungeonSceneElements?.(all);
+
    // Case 🎁 sans objet scène : reconstruire l'objet interactif sur CETTE case.
    mapCells.forEach((idx,k)=>{
      if(roomChests[k])return;
@@ -223,10 +228,7 @@ function renderScene200(x){
      changed=true;
    });
 
-   if(changed){
-     saveDungeonSceneElements?.(all);
-     saveRt(x);
-   }
+   if(changed)saveRt(x);
  }catch(e){console.warn('Core 2.08 chest authority',e)}
 }
 function chestAt(pos,x){

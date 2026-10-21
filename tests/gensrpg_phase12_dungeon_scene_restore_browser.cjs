@@ -396,7 +396,7 @@ async function exercise(browser,label){
       popTitle:document.getElementById('dc200ModalTitle')?.textContent,
       tactical:typeof window.dc305PositionalGameplay==='function'?window.dc305PositionalGameplay():null,
       activeEnemies:(loadActiveEnemies?.()||[]).filter(e=>Number(e.hp)>0&&!e.defeated).map(e=>({id:e.id,room:e.dungeonRoom,hp:e.hp})),
-      chests:(loadDungeonSceneElements?.()||[]).filter(e=>e.kind==='chest'&&Number(e.room)===Number(x.room)).map(e=>({id:e.id,challenge:!!e.challenge,done:!!e.challengeDone,idx:e.cellIndex})),
+      chests:(loadDungeonSceneElements?.()||[]).filter(e=>e.kind==='chest'&&Number(e.room)===Number(x.room)).map(e=>({id:e.id,challenge:!!e.challenge,done:!!e.challengeDone,idx:e.cellIndex,fromMap:e.fromMap===true,gmAdded:e.gmAdded===true})),
       boardCells:document.querySelectorAll('#dc047RoomBoard .dc047Grid >.dc047Cell').length
     }
   });

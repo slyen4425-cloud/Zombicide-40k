@@ -454,6 +454,19 @@ function assignChallenges051(){
   });
   if(sceneChanged)saveScene051(all);
 }
+// Contrat Dungeon explicite: Core200 émet une création de coffre, Core051
+// reste seul propriétaire des chances et du tirage. Pas d'effet UI implicite.
+window.GensDungeonChallengeLifecycle051={
+  onChestCreated(id){
+    const r=room051();
+    if(r<=0||!id)return false;
+    const found=(loadDungeonSceneElements?.()||[]).some(el=>
+      el.kind==="chest" && String(el.id)===String(id) && Number(el.room||0)===r);
+    if(!found)return false;
+    assignChallenges051();
+    return true;
+  }
+};
 
 function challengeChance051(ch){
   const id=hero051(),stat=ch.stat||"intelligence";

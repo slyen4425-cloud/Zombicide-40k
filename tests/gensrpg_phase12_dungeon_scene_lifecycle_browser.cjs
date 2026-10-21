@@ -130,6 +130,10 @@ async function exercise(browser,label){
     if(await popup.isVisible()) await popup.locator('button.effectClose').click({timeout:5000});
     try{await btn.click({timeout:3500});clicked=true}
     catch(error){
+      // A lazy Tactical overlay may already have opened during Playwright's
+      // pointer stability wait. Do not click Dungeon again through combat:
+      // the assertions below will still require a real active battle.
+      if(await page.evaluate(()=>!!window.GensRpgTacticalCombatV2Ui?.getBattle?.())){clicked=true;break;}
       if(!(await popup.isVisible()))throw error;
       await popup.locator('button.effectClose').click({timeout:5000});
     }

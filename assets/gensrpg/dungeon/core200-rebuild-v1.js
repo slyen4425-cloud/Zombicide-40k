@@ -210,7 +210,7 @@ function renderScene200(x){
    mapCells.forEach((idx,k)=>{
      if(roomChests[k])return;
      const rarity=dungeonPickChestRarity?.(cfg())||'common';
-     addDungeonSceneElement?.({
+     const created=addDungeonSceneElement?.({
        kind:'chest',
        name:'Coffre '+(dungeonRarityLabel?.(rarity)||rarity),
        rarity,
@@ -220,6 +220,9 @@ function renderScene200(x){
        fromMap:true,
        branch200:branch
      });
+     // Conserver dans la sauvegarde finale le coffre que le propriétaire
+     // de scène vient de créer ; "all" précède cet ajout.
+     if(created?.id&&!all.some(e=>String(e.id)===String(created.id)))all.push(created);
      changed=true;
    });
 

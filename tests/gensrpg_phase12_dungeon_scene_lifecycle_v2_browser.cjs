@@ -522,7 +522,7 @@ async function exercise(browser,label){
     if(dismissed.modalOpen)await page.locator('#dc200ModalOk').click({timeout:9000});
   }
   const chestAfter=await sceneState();
-  console.log('DUNGEON_CHEST_AFTER '+JSON.stringify({browser:label,consumeAttempts,chestAfter}));
+  console.log('DUNGEON_CHEST_AFTER '+JSON.stringify({browser:label,consumeAttempts,chestAfter,ownerTraces:consoleErrors.filter(x=>x.includes('DC200_DIAG'))}));
   assert.equal(chestAfter.chests.length,0,label+' chest consumed exactly once through native modal callback');
   assert.equal(chestAfter.sceneMap.filter(x=>x==='chest').length,0,label+' chest tile removed after loot');
   const settled=chestAfter;

@@ -1,0 +1,26 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const crypto=require('node:crypto');
+const root=path.resolve(__dirname,'..');
+const historical=fs.readFileSync(path.join(root,'tests/fixtures/gensrpg_phase12_d2_core051_original_2026-10-21.txt'));
+const current=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core051-exploration-polish-v1.js'));
+const gitBlob=b=>crypto.createHash('sha1').update('blob '+b.length+'\0').update(b).digest('hex');
+assert.equal(historical.length,47962,'preserve exact historical D2 byte length');
+assert.equal(gitBlob(historical),'d7ec321ffa05b8749de5d7bf9e8264e55b24f919','preserve original D2 Git blob hash');
+const src=current.toString('utf8'),startMarker='// Contrat Dungeon explicite: Core200 émet une création de coffre, Core051';
+const start=src.indexOf(startMarker);
+assert.ok(start>0,'explicit single-owner creation hook must exist');
+assert.equal(src.indexOf(startMarker,start+1),-1,'no duplicate hook');
+const end=src.indexOf('\nfunction challengeChance051(ch)',start);
+assert.ok(end>start,'hook ends before original challenge resolver');
+const inserted=src.slice(start,end);
+assert.match(inserted,/window\.GensDungeonChallengeLifecycle051=/,'public Core051-only domain contract');
+assert.match(inserted,/onChestCreated\(id\)/,'single explicit chest creation entry');
+assert.match(inserted,/assignChallenges051\(\)/,'use original Core051 evaluation, not a second engine');
+assert.match(inserted,/Number\(el\.room\|\|0\)===r/,'same-room ownership gate');
+const withoutHook=Buffer.from(src.slice(0,start)+src.slice(end));
+assert.equal(Buffer.compare(withoutHook,historical),0,
+ 'historical Core051 remains byte-for-byte intact outside the deliberate owner hook');
+console.log('PASS D2 immutable source reconstruction and exclusive Core051 owner hook');

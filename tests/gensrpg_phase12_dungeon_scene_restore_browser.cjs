@@ -388,7 +388,7 @@ async function exercise(browser,label){
       ex=Number.isInteger(Number(map.exitIdx))?Number(map.exitIdx):map.cells?.indexOf('exit');
     return {room:x.room,hero,heroRoom:x.heroRooms?.[hero],heroPos:x.positions?.[hero],
       remaining:x.remaining?.[hero],exit:ex,lastKind:x.last?.kind,branch:x.branch?.active||false,
-      roomStateKeys:Object.keys(x.roomStates||{}),room1Cells:x.roomStates?.['1']?.last?.map?.cells?.slice()||[],
+      roomStateKeys:Object.keys(x.roomStates||{}),room1Cells:x.roomStates?.['1']?.last?.map?.cells?.slice()||[],room2StoredCells:x.roomStates?.['2']?.last?.map?.cells?.slice()||[],
       sceneMap:map.cells?.slice()||[],lastTitle:x.last?.title||'',
       action:document.getElementById('dc01Explore')?.textContent?.trim()||'',
       actionDisabled:!!document.getElementById('dc01Explore')?.disabled,

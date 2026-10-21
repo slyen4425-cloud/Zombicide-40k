@@ -33,7 +33,7 @@ async function step(page,name){const s=await snapshot(page);console.log('DUNGEON
 async function exercise(browser,label){
  const context=await browser.newContext({locale:'fr-FR',viewport:{width:1280,height:840},serviceWorkers:'block'});
  const page=await context.newPage(),errs=[],alerts=[],consoleErrors=[],scriptsFailed=[];
- page.on('console',m=>{if(m.type()==='error'||m.type()==='warning')consoleErrors.push(m.type()+': '+m.text().slice(0,1000))});
+ page.on('console',m=>{if(m.text().startsWith('DUNGEON_CHEST_TRACE_'))console.log('DUNGEON_CHEST_TRACE_BROWSER '+label+' '+m.text());if(m.type()==='error'||m.type()==='warning')consoleErrors.push(m.type()+': '+m.text().slice(0,1000))});
  page.on('requestfailed',req=>scriptsFailed.push(req.url().split('/').slice(-1)[0]+' '+req.failure()?.errorText));
  page.on('pageerror',e=>errs.push(e.message));
  page.on('dialog',async d=>{alerts.push(d.type()+': '+d.message().slice(0,160));await d.accept()});

@@ -407,8 +407,10 @@ async function exercise(browser,label){
   // writing localStorage or invoking any scene creation function from test.
   // It exercises the public add > loot > removal lifecycle and catches the
   // silent repeatable 'Ouvrir le coffre' regression regardless of room RNG.
+  const roleChoice=page.locator('#dc01Role');
+  await roleChoice.selectOption('gm',{timeout:9000});
   const gmButton=page.locator('#dc01Gm');
-  assert.equal(await gmButton.isVisible(),true,label+' native Dungeon GM tools visible in local GM session');
+  assert.equal(await gmButton.isVisible(),true,label+' native Dungeon GM tools become available when player selects GM role');
   await gmButton.click({timeout:9000});
   const addChest=page.locator('#dc200ModalBody button').filter({hasText:/Coffre commun/i}).first();
   await addChest.waitFor({state:'visible',timeout:9000});

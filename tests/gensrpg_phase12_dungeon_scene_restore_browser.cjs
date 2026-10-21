@@ -412,10 +412,26 @@ async function exercise(browser,label){
     if(scene.room===2)break;
     if(scene.modalOpen){await page.locator('#dc200ModalOk').click({timeout:8500});continue;}
     if(/COFFRE/i.test(scene.action)){
-      // Clicks follow the native open -> confirm -> loot callback chain.
+      // Diagnostic of *real* UI clicks: do not call any private gameplay API.
       const chestBefore=scene.chests.length;
-      assert.ok(chestBefore>0,label+' real chest exists for chest-priority action');
-      await page.locator('#dc01Explore').click({timeout:8500});chestClicks++;
+      assert.ok(chestBefore>0,label+' a real scene chest is linked to the map');
+      const view=()=>page.evaluate(()=>({
+        runtime:(()=>{const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'{}');return {room:x.room,sceneCells:x.last?.map?.cells?.map((k,i)=>['chest','cache'].includes(k)?i:null).filter(x=>x!==null)}})(),
+        scenes:(loadDungeonSceneElements?.()||[]).filter(x=>x.kind==='chest').map(e=>({id:e.id,room:e.room,idx:e.cellIndex})),
+        modalOpen:document.getElementById('dc200Modal')?.classList.contains('open'),
+        modalTitle:document.getElementById('dc200ModalTitle')?.textContent,
+        okExists:!!document.getElementById('dc200ModalOk'),
+        okHandler:document.getElementById('dc200ModalOk')?.onclick?.toString()?.slice(0,350),
+        action:document.getElementById('dc01Explore')?.textContent?.trim(),
+        sceneElementsStorage:[...Object.keys(localStorage)].filter(k=>/scene|dungeon.*element/i.test(k)).map(k=>({key:k,len:(localStorage.getItem(k)||'').length}))
+      }));
+      const diagBefore=await view();
+      await page.locator('#dc01Explore').click({timeout:8500});
+      const diagAfter=await view();
+      chestClicks++;
+      console.log('DUNGEON_CHEST_CYCLE '+JSON.stringify({browser:label,chestClicks,diagBefore,diagAfter}));
+      if(chestClicks>2&&diagAfter.scenes.some(x=>diagBefore.scenes.some(y=>y.id===x.id))&&/COFFRE/i.test(diagAfter.action))
+        assert.fail(label+' real chest remains after three UI attempts; owner callback or removal is broken');
       continue;
     }
     if(/REJOINDRE LA SORTIE/.test(scene.action)){

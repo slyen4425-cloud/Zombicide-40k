@@ -499,7 +499,7 @@ async function exercise(browser,label){
     const opened=await sceneState();
     console.log('DUNGEON_CHEST_OPEN '+JSON.stringify({browser:label,attempt:consumeAttempts,opened}));
     assert.equal(opened.modalOpen,true,label+' click opens native chest modal');
-    assert.match(opened.popTitle||'',/COFFRE|Coffre/,label+' native chest dialog');
+    assert.match(opened.popTitle||'',/coffre/i,label+' native chest dialog');
     await page.locator('#dc200ModalOk').click({timeout:9000});
     await page.waitForTimeout(220);
     const dismissed=await sceneState();

@@ -258,6 +258,18 @@ async function exercise(browser,label){
     if(attempt%12===0)console.log('DUNGEON_END_PROGRESS '+JSON.stringify({browser:label,attempt,heroClicks,turnClicks,approachClicks,diceClicks,state:await combatSnapshot()}));
     await page.waitForTimeout(150);
   }
+  // A lethal blow ends the engine immediately, but the last native dice
+  // overlay is still awaiting the player's Continuer click. Finish that UI
+  // interaction before requiring the victory/result button.
+  for(let n=0;n<8;n++){
+    const lastDice=page.locator('.gtv2DiceBackdrop [data-dice-continue]');
+    if(!(await lastDice.count()))break;
+    await page.waitForFunction(()=>{const e=document.querySelector('.gtv2DiceBackdrop [data-dice-continue]');return e&&!e.disabled},{timeout:12000});
+    await lastDice.click({timeout:8000});diceClicks++;
+    await page.waitForTimeout(120);
+  }
+  await page.waitForFunction(()=>!!document.querySelector('.gtv2Overlay [data-commit]'),{timeout:12000});
+  ended=await combatSnapshot();
   console.log('DUNGEON_END_BATTLE '+JSON.stringify({browser:label,ended,heroClicks,turnClicks,approachClicks,diceClicks,lastAction,errs,consoleErrors}));
   assert.ok(ended,label+' battle reaches a native ended state through player UI');
   assert.ok(['hero','enemy'].includes(ended.winner),label+' engine declares a legitimate winner');

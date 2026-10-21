@@ -2,7 +2,7 @@ name: GenSrpG Phase12 Dungeon GM chest one-shot challenge evaluation
 on:
   push:
     branches:
-      - 'work/gensrpg-phase12-dungeon-gm-chest-evaluation-replay-2026-10-21'
+      - 'work/gensrpg-phase12-dungeon-gm-chest-evaluation-2026-10-21'
 permissions:
   contents: read
   statuses: write

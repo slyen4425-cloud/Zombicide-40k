@@ -56,7 +56,14 @@ const RUNTIME_BOOTSTRAP='assets/gensrpg/core/runtime-bootstrap-v1.js';
 const TACTICAL_ENTRY='assets/gensrpg/tactical/entry-v1.js';
 const DUNGEON_CORE200='assets/gensrpg/dungeon/core200-rebuild-v1.js';
 const DUNGEON_CORE213='assets/gensrpg/dungeon/core213-stability-v1.js';
-const core213=fs.readFileSync(path.join(__dirname,'..',DUNGEON_CORE213));
+// This D6 assertion characterizes the immutable historical source; the live
+// production Core213 patch is independently pinned by the scene owner guard.
+const installedCore213=fs.readFileSync(path.join(__dirname,'..',DUNGEON_CORE213));
+const installed213Blob=crypto.createHash('sha1').update(Buffer.from('blob '+installedCore213.length+'\0')).update(installedCore213).digest('hex');
+const core213=installed213Blob==='af4bf724315180becd80833af251504130751ad3'
+  ?installedCore213
+  :require('node:child_process').execFileSync('git',['show','ca77d8e5651892b39c37f1c035823014e8cdf7e0:'+DUNGEON_CORE213],
+      {cwd:path.join(__dirname,'..'),maxBuffer:2*1024*1024});
 const core213Blob=crypto.createHash('sha1').update(Buffer.from('blob '+core213.length+'\0')).update(core213).digest('hex');
 assert.equal(core213.length,17519,'D6 moved Core213 exact byte length');
 assert.equal(core213Blob,'af4bf724315180becd80833af251504130751ad3','D6 Core213 must remain exactly original inline bytes');

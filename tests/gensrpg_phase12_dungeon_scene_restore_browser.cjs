@@ -527,7 +527,40 @@ async function exercise(browser,label){
   assert.deepEqual(afterReloadRoom2.chests,settled.chests,label+' persisted room2 chest scene IDs and cells unchanged after resume');
   assert.deepEqual(afterReloadRoom2.room1Cells,settled.room1Cells,label+' room 1 stays immutable across room-2 reload');
   assert.deepEqual(afterReloadRoom2.activeEnemies,settled.activeEnemies,label+' no duplicated monsters or cross-room enemies after room-2 reload');
+
   assert.deepEqual(afterReloadXp,beforeReloadXp,label+' original XP and wounds never change merely from resuming');
+  // Consume the real persisted chest through the player-visible dialog flow.
+  // Never call consumeChest, removeDungeonSceneElement or mutate map/storage.
+  assert.match(afterReloadRoom2.action||'',/COFFRE/,label+' after resume the chest offers a real public interaction');
+  const chestId=afterReloadRoom2.chests[0].id;
+  const initialChestCell=afterReloadRoom2.chests[0].idx;
+  await page.locator('#dc01Explore').click({timeout:9000});
+  assert.equal(await page.locator('#dc200Modal.open').isVisible(),true,label+' native chest opening confirmation exists');
+  const firstChestDialog=await page.locator('#dc200ModalTitle').textContent();
+  assert.match(firstChestDialog||'',/Ouvrir le coffre/i,label+' chest opens normal confirmation');
+  const beforeConfirm=await sceneState();
+  await page.locator('#dc200ModalOk').click({timeout:9000});
+  await page.waitForTimeout(250);
+  const afterConfirm=await sceneState();
+  console.log('DUNGEON_CHEST_CONSUME '+JSON.stringify({browser:label,initialChestCell,chestId,beforeConfirm,afterConfirm}));
+  assert.equal(afterConfirm.chests.some(c=>c.id===chestId),false,label+' real chest scene removed after public confirmation');
+  assert.notEqual(afterConfirm.sceneMap[initialChestCell],'chest',label+' original chest tile cleared by owner');
+  assert.equal(afterConfirm.modalOpen,true,label+' normal loot report appears');
+  assert.match(afterConfirm.popTitle||'',/Coffre fouillé/i,label+' actual chest result is announced');
+  await page.locator('#dc200ModalOk').click({timeout:9000});
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForTimeout(850);
+  await page.locator('#gensRootHome .gensRootModeCard.adventure').click({timeout:15000});
+  await page.locator('#gensFamilyHome').waitFor({state:'visible',timeout:15000});
+  await page.locator('#gensFamilyGames .gensUniverseCard[data-rpg-profile="game_profile_dungeon_demo"] button.gensUniverseMainBtn').click({timeout:15000});
+  await page.locator('#gensGameHome').waitFor({state:'visible',timeout:15000});
+  await page.locator('#gensGameHomeActions button.resumeBtn').click({timeout:15000});
+  await page.locator('#gensDungeonCore01').waitFor({state:'visible',timeout:15000});
+  const afterConsumeReload=await sceneState();
+  console.log('DUNGEON_CHEST_FINAL_RESTART '+JSON.stringify({browser:label,initialChestCell,chestId,afterConsumeReload}));
+  assert.equal(afterConsumeReload.room,2,label+' chest result reload retains room 2');
+  assert.equal(afterConsumeReload.chests.some(c=>c.id===chestId),false,label+' native chest removal persisted without scene resurrection');
+  assert.notEqual(afterConsumeReload.sceneMap[initialChestCell],'chest',label+' tile remains cleared after another official resume');
   assert.equal(errs.length,0,label+' no uncaught page exceptions in room transition');
   console.log('DUNGEON_ROOM2_SUCCESS '+JSON.stringify({browser:label,hero:next.hero,room:next.room,kind:next.lastKind,monsterCount:next.activeEnemies.length,previousRoomSaved:true,chestClicks}));
 

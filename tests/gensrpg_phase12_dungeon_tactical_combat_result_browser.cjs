@@ -376,7 +376,7 @@ async function exercise(browser,label){
   assert.equal(visibleResume.xp,Number(finish.hero.xp)||0,label+' XP not paid a second time on UI resume');
   assert.equal(visibleResume.wounds,Number(finish.hero.wounds)||0,label+' real combat wounds retained on UI resume');
   assert.equal(visibleResume.overlay,false,label+' no stale Tactical overlay intercepting Dungeon after resume');
-  assert.ok(/EXPLORER|SORTIE|REJOINDRE/.test(visibleResume.explore||''),label+' Dungeon exploration action is present after resume');
+  assert.ok(/EXPLORER|SORTIE|REJOINDRE|COFFRE|FOUILLER|DÉVERROUILLER|PASSAGE/.test(visibleResume.explore||''),label+' existing Dungeon world exposes its actual scene action after resume (chest takes precedence over exit)');
   console.log('DUNGEON_RESULT_SCOPE_PASS '+JSON.stringify({browser:label,scope:'combat-result-and-reload-storage',winner:ended.winner,heroClicks,turnClicks,diceClicks}));
  } finally {await context.close()}
 }

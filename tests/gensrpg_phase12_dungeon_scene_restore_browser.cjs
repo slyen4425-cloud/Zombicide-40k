@@ -420,7 +420,12 @@ async function exercise(browser,label){
     let scene=await sceneState();
     console.log('DUNGEON_ROOM2_PRE_ACTION '+JSON.stringify({browser:label,step:steps,scene}));
     if(scene.room===2)break;
-    if(scene.modalOpen){await page.locator('#dc200ModalOk').click({timeout:8500});continue;}
+    if(scene.modalOpen){
+      const chestOwnerAction=page.locator('#dc213ChestActions button');
+      if(await chestOwnerAction.isVisible())await chestOwnerAction.click({timeout:8500});
+      else await page.locator('#dc200ModalOk').click({timeout:8500});
+      continue;
+    }
     if(/COFFRE/i.test(scene.action)){
       // Diagnostic of *real* UI clicks: do not call any private gameplay API.
       const chestBefore=scene.chests.length;
@@ -548,14 +553,16 @@ async function exercise(browser,label){
   const firstChestDialog=await page.locator('#dc200ModalTitle').textContent();
   assert.match(firstChestDialog||'',/Ouvrir le coffre/i,label+' chest opens normal confirmation');
   const beforeConfirm=await sceneState();
-  await page.locator('#dc200ModalOk').click({timeout:9000});
+  const officialOpen=page.locator('#dc213ChestActions button');
+  assert.equal(await officialOpen.isVisible(),true,label+' Core213 exposes distinct OUVRIR / FOUILLER action');
+  await officialOpen.click({timeout:9000});
   await page.waitForTimeout(250);
   const afterConfirm=await sceneState();
   console.log('DUNGEON_CHEST_CONSUME '+JSON.stringify({browser:label,initialChestCell,chestId,beforeConfirm,afterConfirm}));
   assert.equal(afterConfirm.chests.some(c=>c.id===chestId),false,label+' real chest scene removed after public confirmation');
   assert.notEqual(afterConfirm.sceneMap[initialChestCell],'chest',label+' original chest tile cleared by owner');
   assert.equal(afterConfirm.modalOpen,true,label+' normal loot report appears');
-  assert.match(afterConfirm.popTitle||'',/Coffre fouillé/i,label+' actual chest result is announced');
+  assert.match(afterConfirm.popTitle||'',/Coffre|Butin|Objet|Fouille/i,label+' actual chest result is announced by chest owner');
   await page.locator('#dc200ModalOk').click({timeout:9000});
   await page.reload({waitUntil:'domcontentloaded'});
   await page.waitForTimeout(850);

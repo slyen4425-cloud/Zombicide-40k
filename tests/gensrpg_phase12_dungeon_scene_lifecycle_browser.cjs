@@ -424,7 +424,7 @@ async function exercise(browser,label){
   assert.equal(prior.room,1,label+' actual resume is in the cleared room');
   assert.ok(prior.room1Cells.length>0,label+' original room 1 has a stored real generated map');
   assert.equal(prior.activeEnemies.filter(e=>e.room===1).length,0,label+' old enemy stays defeated before exiting');
-  let chestClicks=0,steps=0;
+  let chestClicks=0,steps=0,room1AtExit=null;
   for(;steps<15;steps++){
     let scene=await sceneState();
     console.log('DUNGEON_ROOM2_PRE_ACTION '+JSON.stringify({browser:label,step:steps,scene}));
@@ -477,6 +477,7 @@ async function exercise(browser,label){
       continue;
     }
     assert.match(scene.action,/EXPLORER LA SALLE SUIVANTE/,label+' main UI offers real next-room transition');
+    room1AtExit=scene; // after any legitimate chest has been looted and removed
     assert.equal(scene.actionDisabled,false,label+' transition remains enabled');
     await page.locator('#dc01Explore').click({timeout:9000});
   }
@@ -487,7 +488,8 @@ async function exercise(browser,label){
   assert.equal(next.branch,false,label+' main dungeon progression does not enter secret branch');
   assert.ok(next.sceneMap.length>0,label+' next room generated a real map');
   assert.ok(next.roomStateKeys.includes('1')&&next.roomStateKeys.includes('2'),label+' per-room states retain both rooms');
-  assert.deepEqual(next.room1Cells,prior.room1Cells,label+' previous room map remains unchanged after entering room 2');
+  assert.ok(room1AtExit,label+' real Dungeon exit navigation happened');
+  assert.deepEqual(next.room1Cells,room1AtExit.room1Cells,label+' consumed chest state and previous-room map preserved across new room generation');
   assert.ok(next.activeEnemies.every(e=>e.room===2),label+' active enemies must not leak from defeated room 1');
   assert.equal(next.modalOpen,true,label+' native room 2 narration modal appears');
   assert.match(next.popTitle||'',/SALLE 2/,label+' actual room 2 is announced');

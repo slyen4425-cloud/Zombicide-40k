@@ -459,10 +459,22 @@ async function exercise(browser,label){
   assert.equal(next.modalOpen,true,label+' native room 2 narration modal appears');
   assert.match(next.popTitle||'',/SALLE 2/,label+' actual room 2 is announced');
   await page.locator('#dc200ModalOk').click({timeout:9000});
-  // Closing the room narration executes the real Dungeon maybeEvent('room')
-  // callback, which may schedule its authorized scene/piece rendering at 0ms.
-  // Do not compare a transient pre-event map with a fully restored save.
-  await page.waitForTimeout(650);
+  // Dungeon can legitimately chain the room-intro narrative into secondary
+  // objective, encounter or chest notifications. A real user dismisses all
+  // visible modal stages before leaving the room or reloading the page.
+  // Closing each stage invokes Core200.render() and chest/scene authority.
+  for(let notice=0;notice<9;notice++){
+    await page.waitForTimeout(260);
+    if(await page.locator('#dc200Modal.open').isVisible()){
+      console.log('DUNGEON_ROOM2_EXTRA_MODAL '+JSON.stringify({browser:label,notice,title:await page.locator('#dc200ModalTitle').textContent()}));
+      await page.locator('#dc200ModalOk').click({timeout:8500});
+      continue;
+    }
+    await page.waitForTimeout(340);
+    if(!(await page.locator('#dc200Modal.open').isVisible()))break;
+  }
+  await page.waitForTimeout(350);
+  assert.equal(await page.locator('#dc200Modal.open').isVisible(),false,label+' all genuine room 2 narrative and objective dialogs are dismissed');
   const settled=await sceneState();
   const beforeReloadXp=await page.evaluate(()=>({xp:Number(loadState('dungeon_aldren')?.xp)||0,wounds:Number(loadState('dungeon_aldren')?.wounds)||0}));
   await page.reload({waitUntil:'domcontentloaded'});

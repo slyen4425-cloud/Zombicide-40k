@@ -314,6 +314,12 @@ async function exercise(browser,label){
   assert.equal(finish.events.length,1,label+' one real Tactical→Dungeon finish event');
   assert.equal(finish.events[0].winner,ended.winner,label+' winner transferred from engine to Dungeon');
   assert.equal(finish.activeSession,true,label+' game session remains resumable');
+  if(ended.winner==='hero'){
+    const shares=finish.events[0].summary?.rewards?.flatMap(r=>r.xp?.shares||[])||[];
+    const earned=shares.filter(row=>row.id==='dungeon_aldren').reduce((n,row)=>n+Number(row.xp||0),0);
+    assert.ok(earned>0,label+' actual skeleton defeat grants native XP');
+    assert.equal(Number(finish.hero.xp),Number(preCommit.hero.xp)+earned,label+' real XP matches only the native reward shares');
+  }
   assert.equal(finish.live.length,ended.winner==='hero'?0:finish.live.length,label+' victory clears defeated enemy from live room');
   if(ended.winner==='hero'){
     assert.ok(Array.isArray(finish.events[0].summary?.rewards),label+' native result includes a rewards array');
@@ -340,6 +346,37 @@ async function exercise(browser,label){
   assert.equal(resumed.session,true,label+' active Dungeon session persisted after combat');
   assert.equal(resumed.room,1,label+' Dungeon room persisted after refresh');
   if(ended.winner==='hero')assert.equal(resumed.live.length,0,label+' cleared enemy remains defeated/removed after reload');
+  // Use the visible player navigation to resume; reading localStorage alone
+  // is not proof that the saved Dungeon actually renders as a playable scene.
+  await page.locator('#gensRootHome .gensRootModeCard.adventure').click({timeout:15000});
+  await page.locator('#gensFamilyHome').waitFor({state:'visible',timeout:15000});
+  await page.locator('#gensFamilyGames .gensUniverseCard[data-rpg-profile="game_profile_dungeon_demo"] button.gensUniverseMainBtn').click({timeout:15000});
+  await page.locator('#gensGameHome').waitFor({state:'visible',timeout:15000});
+  const resumeButton=page.locator('#gensGameHomeActions button.resumeBtn');
+  assert.equal(await resumeButton.isVisible(),true,label+' native REPRENDRE LA PARTIE is offered after reload');
+  await resumeButton.click({timeout:15000});
+  await page.locator('#gensDungeonCore01').waitFor({state:'visible',timeout:15000});
+  const visibleResume=await page.evaluate(()=>({
+    coreActive:!!window.DungeonCore01?.active,
+    coreVisible:!!document.getElementById('gensDungeonCore01')?.getClientRects().length,
+    room:loadDungeonState()?.room,
+    live:dungeonLivingEnemies()?.length,
+    xp:Number(loadState('dungeon_aldren')?.xp)||0,
+    wounds:Number(loadState('dungeon_aldren')?.wounds)||0,
+    participantIds:loadGameParticipants(),
+    explore:document.getElementById('dc01Explore')?.textContent?.trim(),
+    overlay:!!document.querySelector('.gtv2Overlay'),
+    enemies:loadActiveEnemies().map(e=>({id:e.id,hp:e.hp,defeated:e.defeated}))
+  }));
+  console.log('DUNGEON_END_UI_RESUME '+JSON.stringify({browser:label,visibleResume}));
+  assert.equal(visibleResume.coreActive,true,label+' official resume reactivates Dungeon Core');
+  assert.equal(visibleResume.coreVisible,true,label+' official resume shows playable Dungeon');
+  assert.equal(visibleResume.room,1,label+' official resume returns to cleared room 1');
+  assert.equal(visibleResume.live,0,label+' defeated enemy is still absent after UI resume');
+  assert.equal(visibleResume.xp,Number(finish.hero.xp)||0,label+' XP not paid a second time on UI resume');
+  assert.equal(visibleResume.wounds,Number(finish.hero.wounds)||0,label+' real combat wounds retained on UI resume');
+  assert.equal(visibleResume.overlay,false,label+' no stale Tactical overlay intercepting Dungeon after resume');
+  assert.ok(/EXPLORER|SORTIE|REJOINDRE/.test(visibleResume.explore||''),label+' Dungeon exploration action is present after resume');
   console.log('DUNGEON_RESULT_SCOPE_PASS '+JSON.stringify({browser:label,scope:'combat-result-and-reload-storage',winner:ended.winner,heroClicks,turnClicks,diceClicks}));
  } finally {await context.close()}
 }

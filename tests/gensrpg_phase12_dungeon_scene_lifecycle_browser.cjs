@@ -403,6 +403,20 @@ async function exercise(browser,label){
       boardCells:document.querySelectorAll('#dc047RoomBoard .dc047Grid >.dc047Cell').length
     }
   });
+  // Deterministic chest authored through REAL in-game GM controls, not by
+  // writing localStorage or invoking any scene creation function from test.
+  // It exercises the public add > loot > removal lifecycle and catches the
+  // silent repeatable 'Ouvrir le coffre' regression regardless of room RNG.
+  const gmButton=page.locator('#dc01Gm');
+  assert.equal(await gmButton.isVisible(),true,label+' native Dungeon GM tools visible in local GM session');
+  await gmButton.click({timeout:9000});
+  const addChest=page.locator('#dc200ModalBody button').filter({hasText:/Coffre commun/i}).first();
+  await addChest.waitFor({state:'visible',timeout:9000});
+  await addChest.click({timeout:9000});
+  console.log('DUNGEON_SCENE_GM_CHEST_ADDED '+JSON.stringify({browser:label,state:await sceneState()}));
+  // Adding a chest opens the game's native confirmation modal.
+  if(await page.locator('#dc200Modal.open').isVisible())await page.locator('#dc200ModalOk').click({timeout:9000});
+  assert.ok((await sceneState()).chests.length>0,label+' GM-authored chest stored by native Dungeon API');
   const prior=await sceneState();
   console.log('DUNGEON_ROOM2_BEFORE '+JSON.stringify({browser:label,prior}));
   assert.equal(prior.room,1,label+' actual resume is in the cleared room');

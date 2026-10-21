@@ -62,7 +62,12 @@ function restoreHistoricalHubSnapshot(index,root){
   const tag=Buffer.from('<script id="dungeonCore213Stability" src="assets/gensrpg/dungeon/core213-stability-v1.js"></script>');
   const at=index.indexOf(tag);
   assert.ok(at>0 && index.indexOf(tag,at+tag.length)<0,'D6 exactly one owner');
-  const code=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core213-stability-v1.js'));
+  // Historical D6 snapshot owns exact old bytes; never absorb this live fix.
+  const installed213=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core213-stability-v1.js'));
+  const code=hash(installed213)==='af4bf724315180becd80833af251504130751ad3'
+    ? installed213
+    : require('node:child_process').execFileSync('git',['show',
+        'ca77d8e5651892b39c37f1c035823014e8cdf7e0:assets/gensrpg/dungeon/core213-stability-v1.js'],{cwd:root,maxBuffer:2*1024*1024});
   assert.equal(code.length,17519);
   assert.equal(hash(code),'af4bf724315180becd80833af251504130751ad3');
   index=Buffer.concat([index.subarray(0,at),Buffer.from('<script id="dungeonCore213Stability">'),code,Buffer.from('</script>'),index.subarray(at+tag.length)]);

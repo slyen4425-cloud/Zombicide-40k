@@ -579,6 +579,8 @@ async function exercise(browser,label){
   assert.equal(afterConsumeReload.room,2,label+' chest result reload retains room 2');
   assert.equal(afterConsumeReload.chests.some(c=>c.id===chestId),false,label+' native chest removal persisted without scene resurrection');
   assert.notEqual(afterConsumeReload.sceneMap[initialChestCell],'chest',label+' tile remains cleared after another official resume');
+  assert.equal(afterConsumeReload.chests.length,0,label+' consumed chest must not respawn under a new instance ID in another cell');
+  assert.equal(afterConsumeReload.sceneMap.filter(k=>k==='chest'||k==='cache').length,0,label+' no ghost chest tiles may appear after removing room chest');
   assert.equal(errs.length,0,label+' no uncaught page exceptions in room transition');
   console.log('DUNGEON_ROOM2_SUCCESS '+JSON.stringify({browser:label,hero:next.hero,room:next.room,kind:next.lastKind,monsterCount:next.activeEnemies.length,previousRoomSaved:true,chestClicks}));
 

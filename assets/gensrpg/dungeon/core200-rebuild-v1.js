@@ -192,7 +192,15 @@ function renderScene200(x){
    roomChests.forEach((e,k)=>{
      let idx=mapCells[k];
      if(!Number.isInteger(idx)){
-       // Coffre scène sans case : créer une vraie case libre.
+       // La carte fait autorité pour les coffres provenant de la carte.
+       // Après fouille, une vieille scène fromMap ne peut recréer une case
+       // coffre à une autre position durant REPRENDRE LA PARTIE.
+       if(e.fromMap===true){
+         const stale=all.findIndex(a=>String(a.id)===String(e.id));
+         if(stale>=0){all.splice(stale,1);changed=true}
+         return;
+       }
+       // Les coffres créés explicitement hors carte conservent leur raccord.
        idx=nearestFree(x);
        if(Number.isInteger(idx)&&idx>=0){
          m.cells[idx]='chest';

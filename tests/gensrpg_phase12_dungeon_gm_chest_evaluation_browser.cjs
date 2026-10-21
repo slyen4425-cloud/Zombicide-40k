@@ -449,6 +449,14 @@ async function exercise(browser,label){
   // writing localStorage or invoking any scene creation function from test.
   // It exercises the public add > loot > removal lifecycle and catches the
   // silent repeatable 'Ouvrir le coffre' regression regardless of room RNG.
+  // Scope the unrelated room-1 prerequisite to an unchallenged GM chest via
+  // the actual Dungeon authoring configuration, not by editing a scene.
+  // Restore the original configured chance for the room-2 chest under test.
+  const originalChallengeChances=await page.evaluate(()=>{
+    const c=loadDungeonConfig();
+    saveDungeonConfig({...c,challengeChestChance:0,challengeDoorChance:0});
+    return {chest:c.challengeChestChance,door:c.challengeDoorChance};
+  });
   const roleChoice=page.locator('#dc01Role');
   await roleChoice.selectOption('gm',{timeout:9000});
   const gmButton=page.locator('#dc01Gm');
@@ -554,6 +562,12 @@ async function exercise(browser,label){
   assert.equal(await page.locator('#dc200Modal.open').isVisible(),false,label+' all genuine room 2 narrative and objective dialogs are dismissed');
   // Room 2 must also retain an UNCONSUMED real chest, not merely an empty
   // map after opening everything in room 1. Author it through native GM UI.
+  // The room-2 creation is the scenario under test, using the user's
+  // original authored probabilities rather than the room-1 traversal setup.
+  await page.evaluate(chances=>{
+    const c=loadDungeonConfig();
+    saveDungeonConfig({...c,challengeChestChance:chances.chest,challengeDoorChance:chances.door});
+  },originalChallengeChances);
   const beforeRoom2Chest=await sceneState();
   // An actual Dungeon event can open its own effects dialog after the room
   // narration. Close via the documented public close button; never force

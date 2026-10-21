@@ -431,7 +431,15 @@ async function exercise(browser,label){
     if(scene.room===2)break;
     if(scene.modalOpen){
       console.log('DUNGEON_SCENE_MODAL_BEFORE '+JSON.stringify({browser:label,step:steps,title:scene.popTitle,scene}));
-      await page.locator('#dc200ModalOk').click({timeout:8500});
+      // Core213 is the active chest owner. Its "CONTINUER" dismisses
+      // the information dialog; the actual loot/removal action is a second
+      // public button inside the dialog ("OUVRIR / FOUILLER").
+      const core213ChestOpen=page.locator('#dc213ChestActions button').first();
+      if(await core213ChestOpen.isVisible()){
+        await core213ChestOpen.click({timeout:8500});
+      }else{
+        await page.locator('#dc200ModalOk').click({timeout:8500});
+      }
       console.log('DUNGEON_SCENE_MODAL_AFTER '+JSON.stringify({browser:label,step:steps,scene:await sceneState()}));
       continue;
     }

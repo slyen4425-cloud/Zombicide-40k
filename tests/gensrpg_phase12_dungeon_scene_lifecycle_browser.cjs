@@ -510,7 +510,16 @@ async function exercise(browser,label){
   }
   await page.waitForTimeout(350);
   assert.equal(await page.locator('#dc200Modal.open').isVisible(),false,label+' all genuine room 2 narrative and objective dialogs are dismissed');
+  // Room 2 must also retain an UNCONSUMED real chest, not merely an empty
+  // map after opening everything in room 1. Author it through native GM UI.
+  const beforeRoom2Chest=await sceneState();
+  await page.locator('#dc01Gm').click({timeout:9000});
+  await page.locator('#dc200ModalBody button').filter({hasText:/Coffre commun/i}).first().click({timeout:9000});
+  assert.match(await page.locator('#dc200ModalTitle').textContent(),/Coffre ajouté/,label+' room2 GM chest was created by native UI');
+  await page.locator('#dc200ModalOk').click({timeout:9000});
   const settled=await sceneState();
+  const createdRoom2Chests=settled.chests.filter(e=>!beforeRoom2Chest.chests.some(old=>old.id===e.id));
+  assert.equal(createdRoom2Chests.length,1,label+' exactly one GM-authored chest exists in room2 before reload');
   const beforeReloadXp=await page.evaluate(()=>({xp:Number(loadState('dungeon_aldren')?.xp)||0,wounds:Number(loadState('dungeon_aldren')?.wounds)||0}));
   await page.reload({waitUntil:'domcontentloaded'});
   await page.waitForTimeout(800);
@@ -529,6 +538,8 @@ async function exercise(browser,label){
   assert.equal(afterReloadRoom2.heroRoom,2,label+' hero position remains assigned to room 2 after reload');
   assert.equal(afterReloadRoom2.heroPos,settled.heroPos,label+' no avatar teleport after room-2 reload');
   assert.deepEqual(afterReloadRoom2.sceneMap,settled.sceneMap,label+' room 2 map is not regenerated at resume');
+  assert.deepEqual(afterReloadRoom2.chests,settled.chests,label+' unconsumed room2 chest ids and case indices survive native reload without duplication');
+  assert.deepEqual(afterReloadRoom2.fullScene,settled.fullScene,label+' all native room2 scene items survive native reload unchanged');
   assert.deepEqual(afterReloadRoom2.room1Cells,settled.room1Cells,label+' room 1 stays immutable across room-2 reload');
   assert.deepEqual(afterReloadRoom2.activeEnemies,settled.activeEnemies,label+' no duplicated monsters or cross-room enemies after room-2 reload');
   assert.deepEqual(afterReloadXp,beforeReloadXp,label+' original XP and wounds never change merely from resuming');

@@ -513,6 +513,15 @@ async function exercise(browser,label){
   // Room 2 must also retain an UNCONSUMED real chest, not merely an empty
   // map after opening everything in room 1. Author it through native GM UI.
   const beforeRoom2Chest=await sceneState();
+  // An actual Dungeon event can open its own effects dialog after the room
+  // narration. Close via the documented public close button; never force
+  // clicking through an overlay or mutate its state.
+  for(let effectNotice=0;effectNotice<4;effectNotice++){
+    const effectDialog=page.locator('#effectModal.open');
+    if(!(await effectDialog.isVisible()))break;
+    await effectDialog.locator('button.effectClose').click({timeout:9000});
+    await page.waitForTimeout(120);
+  }
   await page.locator('#dc01Gm').click({timeout:9000});
   await page.locator('#dc200ModalBody button').filter({hasText:/Coffre commun/i}).first().click({timeout:9000});
   assert.match(await page.locator('#dc200ModalTitle').textContent(),/Coffre ajouté/,label+' room2 GM chest was created by native UI');

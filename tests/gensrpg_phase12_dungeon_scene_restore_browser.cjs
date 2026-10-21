@@ -534,6 +534,13 @@ async function exercise(browser,label){
   assert.match(afterReloadRoom2.action||'',/COFFRE/,label+' after resume the chest offers a real public interaction');
   const chestId=afterReloadRoom2.chests[0].id;
   const initialChestCell=afterReloadRoom2.chests[0].idx;
+  const ownerWitness=await page.evaluate(()=>({
+    apiSearch:String(window.DungeonCore01?.searchChest||'').slice(0,2400),
+    apiModal:String(window.DungeonCore01?.modal||'').slice(0,900),
+    apiSearchName:window.DungeonCore01?.searchChest?.name||'',
+    apiSearchOwn:Object.prototype.hasOwnProperty.call(window.DungeonCore01||{},'searchChest')
+  }));
+  console.log('DUNGEON_CHEST_ACTIVE_OWNER '+JSON.stringify({browser:label,ownerWitness}));
   await page.locator('#dc01Explore').click({timeout:9000});
   assert.equal(await page.locator('#dc200Modal.open').isVisible(),true,label+' native chest opening confirmation exists');
   const firstChestDialog=await page.locator('#dc200ModalTitle').textContent();

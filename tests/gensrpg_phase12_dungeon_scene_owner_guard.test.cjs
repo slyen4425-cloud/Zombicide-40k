@@ -12,6 +12,14 @@ assert.equal(original.split(beforeGhost).length,2,'one Core200 missing-map scene
 assert.equal(modified,original.replace(before,after).replace(beforeGhost,afterGhost),
   'only both approved changes within Core200 scene authority, no other production drift');
 new vm.Script(modified,{filename:FILE});
+const FILE213='assets/gensrpg/dungeon/core213-stability-v1.js';
+const original213=cp.execFileSync('git',['show',BASE+':'+FILE213],{encoding:'utf8',maxBuffer:2*1024*1024});
+const modified213=fs.readFileSync(FILE213,'utf8');
+const before213='  if(x.last?.map&&cp>=0)x.last.map.cells[cp]="floor";\\n  saveRt(x);'.replace('\\n','\n');
+const after213='  if(x.last?.map&&cp>=0)x.last.map.cells[cp]="floor";\\n  // Le marqueur existant Core051 doit appartenir aussi au runtime Dungeon.\\n  // Sinon Core200 republie le snapshot sans marqueur et recrée le coffre.\\n  if(el.fromMap&&x.last?.map)x.last.map._dc051ChestConsumed=true;\\n  saveRt(x);'.replaceAll('\\n','\n');
+assert.equal(original213.split(before213).length,2,'exact Core213 consume seam');
+assert.equal(modified213,original213.replace(before213,after213),'Core213 only publishes existing consumed map marker before render');
+new vm.Script(modified213,{filename:FILE213});
 const changed=cp.execFileSync('git',['diff','--name-only',BASE,'--','assets/','index.html','service-worker.js','docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'],{encoding:'utf8'}).trim();
-assert.equal(changed,FILE,'only approved Core200 source changed; all runtime and modes otherwise unchanged');
+assert.equal(changed,[FILE,FILE213].join('\n'),'only approved Core200 scene authority and Core213 consumption seam; no other runtime drift');
 console.log('Dungeon Core200 scene ownership exact diff PASS, all other runtime unchanged');

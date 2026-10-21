@@ -459,6 +459,28 @@ async function exercise(browser,label){
   assert.equal(next.modalOpen,true,label+' native room 2 narration modal appears');
   assert.match(next.popTitle||'',/SALLE 2/,label+' actual room 2 is announced');
   await page.locator('#dc200ModalOk').click({timeout:9000});
+  const settled=await sceneState();
+  const beforeReloadXp=await page.evaluate(()=>({xp:Number(loadState('dungeon_aldren')?.xp)||0,wounds:Number(loadState('dungeon_aldren')?.wounds)||0}));
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForTimeout(800);
+  await page.locator('#gensRootHome .gensRootModeCard.adventure').click({timeout:15000});
+  await page.locator('#gensFamilyHome').waitFor({state:'visible',timeout:15000});
+  await page.locator('#gensFamilyGames .gensUniverseCard[data-rpg-profile="game_profile_dungeon_demo"] button.gensUniverseMainBtn').click({timeout:15000});
+  await page.locator('#gensGameHome').waitFor({state:'visible',timeout:15000});
+  const resumeAgain=page.locator('#gensGameHomeActions button.resumeBtn');
+  assert.equal(await resumeAgain.isVisible(),true,label+' Dungeon session saved after advancing to room 2');
+  await resumeAgain.click({timeout:15000});
+  await page.locator('#gensDungeonCore01').waitFor({state:'visible',timeout:15000});
+  const afterReloadRoom2=await sceneState();
+  const afterReloadXp=await page.evaluate(()=>({xp:Number(loadState('dungeon_aldren')?.xp)||0,wounds:Number(loadState('dungeon_aldren')?.wounds)||0}));
+  console.log('DUNGEON_ROOM2_UI_RESTART '+JSON.stringify({browser:label,settled,afterReloadRoom2,beforeReloadXp,afterReloadXp,errs}));
+  assert.equal(afterReloadRoom2.room,2,label+' second native resume keeps room 2');
+  assert.equal(afterReloadRoom2.heroRoom,2,label+' hero position remains assigned to room 2 after reload');
+  assert.equal(afterReloadRoom2.heroPos,settled.heroPos,label+' no avatar teleport after room-2 reload');
+  assert.deepEqual(afterReloadRoom2.sceneMap,settled.sceneMap,label+' room 2 map is not regenerated at resume');
+  assert.deepEqual(afterReloadRoom2.room1Cells,settled.room1Cells,label+' room 1 stays immutable across room-2 reload');
+  assert.deepEqual(afterReloadRoom2.activeEnemies,settled.activeEnemies,label+' no duplicated monsters or cross-room enemies after room-2 reload');
+  assert.deepEqual(afterReloadXp,beforeReloadXp,label+' original XP and wounds never change merely from resuming');
   assert.equal(errs.length,0,label+' no uncaught page exceptions in room transition');
   console.log('DUNGEON_ROOM2_SUCCESS '+JSON.stringify({browser:label,hero:next.hero,room:next.room,kind:next.lastKind,monsterCount:next.activeEnemies.length,previousRoomSaved:true,chestClicks}));
 

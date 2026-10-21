@@ -122,7 +122,8 @@ function restoreHistoricalHubSnapshot(index,root){
   const at=index.indexOf(tag);
   assert.ok(at>0,'D2 Core051 owner load must be present');
   assert.equal(index.indexOf(tag,at+tag.length),-1,'D2 Core051 must load only once');
-  const body=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core051-exploration-polish-v1.js'));
+  // Reconstruct D2 from its immutable historical bytes, not the current Core051 runtime.
+  const body=fs.readFileSync(path.join(root,'tests/fixtures/gensrpg_phase12_d2_core051_original_2026-10-21.txt'));
   assert.equal(body.length,47962,'D2 Core051 source length');
   assert.equal(hash(body),'d7ec321ffa05b8749de5d7bf9e8264e55b24f919','D2 Core051 source Git blob');
   index=Buffer.concat([index.subarray(0,at),Buffer.from('<script id="dungeonCore051ExplorationPolish">'),body,Buffer.from('</script>'),index.subarray(at+tag.length)]);

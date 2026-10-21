@@ -575,6 +575,14 @@ async function exercise(browser,label){
   await page.locator('#gensGameHomeActions button.resumeBtn').click({timeout:15000});
   await page.locator('#gensDungeonCore01').waitFor({state:'visible',timeout:15000});
   const afterConsumeReload=await sceneState();
+  const sceneOwner=await page.evaluate(()=>({
+    scripts:[...document.querySelectorAll('script[src]')].map(s=>s.getAttribute('src')||'').filter(s=>/dungeon|213|scene/i.test(s)).slice(-85),
+    openChest213:String(window.dc213OpenChest||'').slice(0,3600),
+    searchChestOwner:String(window.DungeonCore01?.searchChest||'').slice(0,1900),
+    hookNames:Object.keys(window).filter(k=>/dc213|scene.*chest|chest.*scene/i.test(k)).slice(0,45),
+    savedSceneKey:localStorage.getItem('gensrpg_dungeon_scene_v1')?.slice(0,4000)
+  }));
+  console.log('DUNGEON_SCENE_OWNER_SOURCE '+JSON.stringify({browser:label,sceneOwner}));
   console.log('DUNGEON_CHEST_FINAL_RESTART '+JSON.stringify({browser:label,initialChestCell,chestId,afterConsumeReload}));
   assert.equal(afterConsumeReload.room,2,label+' chest result reload retains room 2');
   assert.equal(afterConsumeReload.chests.some(c=>c.id===chestId),false,label+' native chest removal persisted without scene resurrection');

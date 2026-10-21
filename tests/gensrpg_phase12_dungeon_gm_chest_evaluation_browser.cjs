@@ -543,6 +543,14 @@ async function exercise(browser,label){
   assert.ok(next.activeEnemies.every(e=>e.room===2),label+' active enemies must not leak from defeated room 1');
   assert.equal(next.modalOpen,true,label+' native room 2 narration modal appears');
   assert.match(next.popTitle||'',/SALLE 2/,label+' actual room 2 is announced');
+  // An authentic room-entry effect popup can cover the narration modal.
+  // Close it with the normal user-facing button, never force a hidden click.
+  for(let effect=0;effect<4;effect++){
+    const openEffect=page.locator('#effectModal.open');
+    if(!(await openEffect.isVisible()))break;
+    await openEffect.locator('button.effectClose').click({timeout:9000});
+    await page.waitForTimeout(120);
+  }
   await page.locator('#dc200ModalOk').click({timeout:9000});
   // Dungeon can legitimately chain the room-intro narrative into secondary
   // objective, encounter or chest notifications. A real user dismisses all

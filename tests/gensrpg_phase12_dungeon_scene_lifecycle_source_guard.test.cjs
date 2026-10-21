@@ -1,0 +1,16 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),cp=require('node:child_process'),vm=require('node:vm');
+const file="assets/gensrpg/dungeon/core200-rebuild-v1.js";
+const baseline=cp.execFileSync('git',['show',"ca77d8e5651892b39c37f1c035823014e8cdf7e0:assets/gensrpg/dungeon/core200-rebuild-v1.js"],{encoding:'utf8'});
+const current=fs.readFileSync(file,'utf8');
+const originalStart="   // Case 🎁 sans objet scène : reconstruire l'objet interactif sur CETTE case.\n   mapCells.forEach((idx,k)=>{";
+const revisedStart="   // Persist the positions of ALREADY loaded scenes before creating new\n   // ones. addDungeonSceneElement owns the persistence of its new entry;\n   // saving the stale pre-addition \"all\" afterwards would erase that entry.\n   if(changed)saveDungeonSceneElements?.(all);\n\n   // Case 🎁 sans objet scène : reconstruire l'objet interactif sur CETTE case.\n   mapCells.forEach((idx,k)=>{";
+const originalEnd="   if(changed){\n     saveDungeonSceneElements?.(all);\n     saveRt(x);\n   }";
+const revisedEnd="   if(changed)saveRt(x);";
+assert.equal(baseline.split(originalStart).length,2);
+assert.equal(baseline.split(originalEnd).length,2);
+assert.equal(current,baseline.replace(originalStart,revisedStart).replace(originalEnd,revisedEnd),'only Core200 scene save order changed');
+new vm.Script(current,{filename:file});
+const diff=cp.execFileSync('git',['diff','--name-only',"ca77d8e5651892b39c37f1c035823014e8cdf7e0",'--','index.html','assets/','service-worker.js','docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'],{encoding:'utf8'}).trim();
+assert.equal(diff,file,'other runtime strictly unchanged');
+console.log('Dungeon scene reconciliation: old scene positions persisted before additions, no stale save after new scenes, exact one-owner production diff');

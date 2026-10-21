@@ -428,6 +428,8 @@ async function exercise(browser,label){
       const view=()=>page.evaluate(()=>({
         runtime:(()=>{const x=JSON.parse(localStorage.getItem('gensrpg_dungeon_runtime_v2')||'{}');return {room:x.room,sceneCells:x.last?.map?.cells?.map((k,i)=>['chest','cache'].includes(k)?i:null).filter(x=>x!==null)}})(),
         scenes:(loadDungeonSceneElements?.()||[]).filter(x=>x.kind==='chest').map(e=>({id:e.id,room:e.room,idx:e.cellIndex})),
+        activeSearchOwner:String(window.DungeonCore01?.searchChest||'').slice(0,1700),
+        activeModalOwner:String(window.DungeonCore01?.modal||'').slice(0,650),
         modalOpen:document.getElementById('dc200Modal')?.classList.contains('open'),
         modalTitle:document.getElementById('dc200ModalTitle')?.textContent,
         okExists:!!document.getElementById('dc200ModalOk'),

@@ -209,6 +209,9 @@ function removeChest213(id){
   }catch(e){console.warn("Core 2.13 chest loot",e)}
   try{removeDungeonSceneElement?.(id)}catch(e){}
   if(x.last?.map&&cp>=0)x.last.map.cells[cp]="floor";
+  // Le marqueur existant Core051 doit appartenir aussi au runtime Dungeon.
+  // Sinon Core200 republie le snapshot sans marqueur et recrée le coffre.
+  if(el.fromMap&&x.last?.map)x.last.map._dc051ChestConsumed=true;
   saveRt(x);
   const m=document.getElementById("dc200Modal");if(m)m.classList.remove("open");
   try{DungeonCore01?.render?.()}catch(e){}

@@ -400,6 +400,16 @@ async function exercise(browser,label){
       boardCells:document.querySelectorAll('#dc047RoomBoard .dc047Grid >.dc047Cell').length
     }
   });
+  // This lot tests actual scene/chest lifecycle. Author a 100% chest
+  // encounter through the same normal Dungeon configuration UI storage API,
+  // after the certified room-1 combat, before generating room 2. Do not
+  // inject any chest, map tile or scene record.
+  await page.evaluate(()=>{
+    const cfg=loadDungeonConfig();
+    saveDungeonConfig({...cfg,boss:'none',challenges:[],challengeDoorChance:0,
+      challengeChestChance:0,chestTrapChance:0,
+      roomWeights:{enemy:0,ambush:0,trap:0,chest:100,merchant:0,rest:0,mystery:0}});
+  });
   const prior=await sceneState();
   console.log('DUNGEON_ROOM2_BEFORE '+JSON.stringify({browser:label,prior}));
   assert.equal(prior.room,1,label+' actual resume is in the cleared room');
@@ -466,6 +476,7 @@ async function exercise(browser,label){
   const next=await sceneState();
   console.log('DUNGEON_ROOM2_AFTER '+JSON.stringify({browser:label,prior,next,chestClicks,steps,errs,consoleErrors}));
   assert.equal(next.room,2,label+' actual Dungeon core enters new room 2 via public UI');
+  assert.equal(next.lastKind,'chest',label+' authorized Dungeon room weights generated a true chest room');
   assert.equal(next.heroRoom,2,label+' currently active hero owns generated room 2');
   assert.equal(next.branch,false,label+' main dungeon progression does not enter secret branch');
   assert.ok(next.sceneMap.length>0,label+' next room generated a real map');
@@ -492,6 +503,9 @@ async function exercise(browser,label){
   await page.waitForTimeout(350);
   assert.equal(await page.locator('#dc200Modal.open').isVisible(),false,label+' all genuine room 2 narrative and objective dialogs are dismissed');
   const settled=await sceneState();
+  console.log('DUNGEON_SCENE_CHEST_AUTHORITY '+JSON.stringify({browser:label,map: settled.sceneMap,sceneChests:settled.chests}));
+  assert.ok(settled.sceneMap.includes('chest'),label+' generated chest room must have a genuine chest tile');
+  assert.ok(settled.chests.length>0,label+' true chest tile must have a persisted scene chest');
   const beforeReloadXp=await page.evaluate(()=>({xp:Number(loadState('dungeon_aldren')?.xp)||0,wounds:Number(loadState('dungeon_aldren')?.wounds)||0}));
   await page.reload({waitUntil:'domcontentloaded'});
   await page.waitForTimeout(800);
@@ -510,6 +524,7 @@ async function exercise(browser,label){
   assert.equal(afterReloadRoom2.heroRoom,2,label+' hero position remains assigned to room 2 after reload');
   assert.equal(afterReloadRoom2.heroPos,settled.heroPos,label+' no avatar teleport after room-2 reload');
   assert.deepEqual(afterReloadRoom2.sceneMap,settled.sceneMap,label+' room 2 map is not regenerated at resume');
+  assert.deepEqual(afterReloadRoom2.chests,settled.chests,label+' persisted room2 chest scene IDs and cells unchanged after resume');
   assert.deepEqual(afterReloadRoom2.room1Cells,settled.room1Cells,label+' room 1 stays immutable across room-2 reload');
   assert.deepEqual(afterReloadRoom2.activeEnemies,settled.activeEnemies,label+' no duplicated monsters or cross-room enemies after room-2 reload');
   assert.deepEqual(afterReloadXp,beforeReloadXp,label+' original XP and wounds never change merely from resuming');

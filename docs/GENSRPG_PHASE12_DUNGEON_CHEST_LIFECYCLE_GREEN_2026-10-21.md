@@ -1,47 +1,45 @@
-# GenSrpG — Phase 12 / Dungeon : cycle de vie des coffres et restauration de scène — GREEN ciblé
+# GenSrpG — Phase 12 / Dungeon : coffres, sauvegarde et reprise — GREEN ciblé, événements différés encore RED
 
-**Date : 21 octobre 2026.** Le scénario réel de coffre en partie Dungeon est validé sur Chromium et Firefox, jusqu'au retour en salle 2 après seconde reprise. Ce GREEN ne constitue pas une certification exhaustive de toutes les variantes d'événements pièges, ni de la Phase 12 globale.
+**21 octobre 2026.** Deux checkpoints distincts ont été créés au fil des preuves. Le lot corrige la persistance des coffres créés par la synchronisation Dungeon ; il ne certifie pas que les pièges, énigmes et sous-salles générés par événements restent entièrement identiques après un reload.
 
-## Source, charte et checkpoint
+## Autorité, branche et charte
 
-- Dernier jalon GREEN de départ : `checkpoint/gensrpg-phase12-dungeon-room2-entry-green-2026-10-21`, SHA `ca77d8e5651892b39c37f1c035823014e8cdf7e0` (CI 39564370399).
-- §25 START de ce lot, **avant toute modification** : `checkpoint/gensrpg-start-phase12-dungeon-scene-lifecycle-2026-10-21` au SHA `ca77d8e5651892b39c37f1c035823014e8cdf7e0` ; branche de travail `work/gensrpg-phase12-dungeon-scene-lifecycle-2026-10-21`.
-- `index.html` **inchangé** (blob `9f35eb833a6ede4b91399854f19bb9bef59f45ab`, 1 729 855 octets), [permalien exact](https://github.com/slyen4425-cloud/Zombicide-40k/blob/4d1b096fe4834cd803e2c4c48ed1db363de95397/index.html). §26 respecté, aucune lecture du HTML énorme via GitHub.
-- Dernier commit certifié **`4d1b096fe4834cd803e2c4c48ed1db363de95397`** ; [CI GitHub Actions 39579919307](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39579919307) : deux jobs SUCCESS, contextes exact-SHA `gensrpg/phase12/scene-lifecycle/regression` et `gensrpg/phase12/scene-lifecycle/browser`, tous deux `success`.
-- Checkpoint GREEN créé **après** les deux succès : `checkpoint/gensrpg-phase12-dungeon-chest-lifecycle-green-2026-10-21`, pointant exactement sur ce commit, immuable ; documents ultérieurs distincts du checkpoint.
+- **Base GREEN** : `checkpoint/gensrpg-phase12-dungeon-room2-entry-green-2026-10-21`, SHA `ca77d8e5651892b39c37f1c035823014e8cdf7e0`. Ce checkpoint validait une véritable victoire en salle 1 et une première entrée en salle 2, mais non la restauration complète des scènes.
+- **START §25 avant mutation** : `checkpoint/gensrpg-start-phase12-dungeon-scene-lifecycle-2026-10-21`, SHA `ca77d8e5651892b39c37f1c035823014e8cdf7e0`; branche dédiée `work/gensrpg-phase12-dungeon-scene-lifecycle-2026-10-21`. Tentative précédente `work/gensrpg-phase12-dungeon-scene-restore-2026-10-21` RED, préservée comme diagnostic, pas réutilisée comme base.
+- **§26** : `index.html` jamais lu via API GitHub ni modifié, blob `9f35eb833a6ede4b91399854f19bb9bef59f45ab`, taille 1 729 855 octets ; [source au dernier code GREEN de départ](https://github.com/slyen4425-cloud/Zombicide-40k/blob/ca77d8e5651892b39c37f1c035823014e8cdf7e0/index.html).
+- **Seul diff de production** : `assets/gensrpg/dungeon/core200-rebuild-v1.js`, fonction `syncChestAuthority208`. La liste des scènes déjà chargées est sauvegardée **avant** l'ajout éventuel de coffres manquants, et `addDungeonSceneElement` conserve sa responsabilité normale de persister ces nouveaux coffres. Suppression du `saveDungeonSceneElements(all)` postérieur qui écrasait une liste plus récente. Pas d'autre fichier runtime modifié ; aucun nouveau moteur, listener, wrapper global ni mutation de Tactical/Stats/D100/IA/XP.
+- **Traces temporaires supprimées** : les `DUNGEON_CHEST_TRACE_*` qui ont servi à identifier la vraie interface d'ouverture ne figurent pas dans le code certifié. Le test source vérifie le diff exact et le gel de tous les autres fichiers de production.
 
-## Diagnostic et résolution : deux problèmes à ne pas confondre
+## Résolution de la confusion « CONTINUER » / « OUVRIR »
 
-1. **Vraie anomalie de stockage du propriétaire Dungeon Core200** : `syncChestAuthority208` chargeait une liste `all`, créait des coffres manquants via `addDungeonSceneElement`, puis enregistrait la liste `all` antérieure aux ajouts. La sauvegarde finale pouvait annuler les créations faites par l'API officielle. Correction minimaliste et sans nouvelle autorité dans `assets/gensrpg/dungeon/core200-rebuild-v1.js` : enregistrer les déplacements des scènes existantes **avant** de créer les scènes manquantes, laisser `addDungeonSceneElement` persister les nouveaux objets, et ne pas écraser cet état ensuite. La sentinelle source exige exactement ce seul changement dans les fichiers runtime.
-2. **Erreur de navigation du test de diagnostic antérieur**, pas un défaut du jeu : la fonction effectivement propriétaire de l'interaction de coffre est `openChest213` dans `assets/gensrpg/dungeon/core213-stability-v1.js`, et non `searchChest` de Core200. Core213 ouvre un dialogue comportant un bouton **« 🎁 OUVRIR / FOUILLER »** distinct du bouton « CONTINUER ». Une trace de pile l'a formellement confirmé. Cliquer sur « CONTINUER » ferme seulement le dialogue, conformément à Core213 : l'ancien test créait une fausse boucle de non-consommation. Le nouveau test clique sur la vraie commande visible. **Core213 n'a pas été modifié.**
-3. Les traces temporaires du propriétaire ont été **retirées intégralement** avant la CI finale, et ne figurent pas dans le checkpoint.
+Le code effectivement actif pour rechercher un coffre est `openChest213` dans **`assets/gensrpg/dungeon/core213-stability-v1.js`**. Ce propriétaire affiche une fenêtre d'information et un bouton spécial **« 🎁 OUVRIR / FOUILLER »**. Le bouton générique « CONTINUER » ferme la fenêtre, sans consommer l'objet. Une trace de pile Chromium a prouvé que ce second bouton, et non le callback interne prévu dans Core200, constitue le chemin utilisateur effectif.
 
-## Vrai scénario navigateur certifié
+Le diagnostic antérieur cliquait à tort sur « CONTINUER » et attribuait cette non-consommation au moteur. Le test final utilise **uniquement la commande réelle**, et a validé « Coffre fouillé » puis le retrait du coffre de la scène et de la carte. **Core213 n'a pas été modifié.**
 
-- Accueil → Aventure RPG → Dungeon → nouvelle partie Aldren/Lyra/Brom → salle 1 : vrai squelette 5 PV et combat Tactical réel jusqu'à victoire → résultat et 1 XP → rechargement de la page → navigation normale et bouton **REPRENDRE LA PARTIE**.
-- Depuis la salle 1 reprise, choix du rôle **MJ par le sélecteur visible**, ouverture des outils MJ puis création d'un coffre avec le bouton de menu **Coffre commun**, et ouverture par les commandes réelles `FOUILLER` puis `OUVRIR / FOUILLER`. Le test ne modifie jamais directement les coffres, les PV, les scènes, les jets, l'XP, l'IA ou le résultat ; aucun clic forcé ni appel direct aux fonctions de consommation.
-- Contrôle de la carte **après fouille**, pour tenir compte du retrait normal de la case coffre, puis transition réelle vers la salle 2 ; comparaison stricte des cartes `roomStates[1]` au départ de la salle et à l'arrivée.
-- Fermeture des dialogues natifs, deuxième reload, navigation d'accueil et deuxième clic **REPRENDRE LA PARTIE**. Comparaison exacte de la carte de salle 2, des scènes coffre enregistrées, de la salle et de la position du héros, des ennemis éventuels, et de l'XP/blessures.
+## Validation automatisée sur le vrai chemin
 
-### Échantillon exact de la CI finale
+Playwright Chromium et Firefox parcourent réellement : accueil > Dungeon > nouvelle partie Aldren/Lyra/Brom > génération d'un squelette en salle 1 > combat Tactical jusqu'à victoire par vraies attaques et D100 > application native du résultat > 1 XP > reload > menu > **REPRENDRE**.
 
-- Chromium : **2** interactions de coffre, salle 2 générée comme rencontre, **1** ennemi 5 PV dans la salle 2, carte identique après deuxième reprise, Aldren **1 XP** et **2 blessures** après retour.
-- Firefox : **1** interaction de coffre, salle 2 générée comme rencontre, **1** ennemi 5 PV dans la salle 2, carte identique après deuxième reprise, Aldren **1 XP** et **0 blessure** après retour.
-- Les résultats de combat sont aléatoires. Le test n'invente jamais de valeur. Les deux navigateurs ont aussi réussi le jeu antérieur (victoire et reprise) et les sentinelles historiques R10–R15/architecture/stats/dés/Tactical. Diff du runtime avec base GREEN : **seulement Core200** ; `main` et autres modules inchangés.
+- Le test sélectionne le rôle MJ avec le sélecteur UI visible puis crée un coffre commun par le vrai menu **OUTILS MJ**. Il le fouille avec les boutons de Core213, constate sa disparition, puis franchit réellement la sortie de la salle 1. La carte de salle 1 est comparée à son état **après** fouille, et non à celui d'avant, car le retrait d'un coffre modifie intentionnellement la carte.
+- En salle 2, le test utilise de nouveau les outils MJ pour y déposer **un coffre qu'il laisse fermé**. Après fermeture normale des dialogues de jeu, il recharge la page, navigue de l'accueil vers Dungeon puis clique **REPRENDRE**. Les ID de coffre et leur indice de cellule, ainsi que toutes les cases `chest/cache`, doivent être **strictement identiques** après cette deuxième reprise. Le même héro, la même salle 2 et les ennemis vivants éventuels doivent être conservés, sans variation d'XP ou de blessures due au rechargement.
+- Les événements automatiques postérieurs (nouveau piège ou changement d'énigme) sont **observés et consignés comme écarts non couverts**, jamais réattribués au propriétaire des coffres ni présentés comme corrigés.
+- Aucun ajout direct de monstre, de scène, de jet, de récompense ou de PV dans le stockage du test ; le contenu déterministe provient exclusivement des outils MJ publics, les combats sont réels.
 
-## Limites explicitement non couvertes
+## Checkpoints et preuves
 
-- Le cas généré aléatoirement qui change un marqueur `trap` après une reprise n'a pas été reproduit dans la CI finale. Une vérification dédiée des producteurs d'événements `trap` et de leur état de reprise est nécessaire pour affirmer la parité générale des pièges.
-- Pas de certification de victoire/défaite de groupe, de butin positif effectivement tombé, de multi-héros répartis sur plusieurs salles, d'actions tactiques de déplacement, de mobile/PWA ou de publication de production.
-- `main` reste à `e8681f9823573ced8aec59c8ddc47a72b02bc663` ; aucune fusion/déploiement Pages. Laboratoires Combat/Exploration, Survie, Capture et PvP intouchés.
-- Le projet Phase 12 global reste **OUVERT**.
+**Premier jalon GREEN limité au cycle de coffre et à une reprise échantillonnée** : `checkpoint/gensrpg-phase12-dungeon-chest-lifecycle-green-2026-10-21`, commit `4d1b096fe4834cd803e2c4c48ed1db363de95397`, [CI 39579919307](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39579919307), les deux jobs verts.
 
-## Livrables
+**Renforcement de la sentinelle** : commit `7c9fe8f17ab0e36e23f8f15bafa5b799a575b4a5`, [CI 39582252735](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39582252735) : régression et navigateur Chromium/Firefox **success** avec coffre non consommé en salle 2, comparaison stricte des identifiants et marqueurs, écarts événementiels explicitement visibles :
+- Chromium : deux coffres en salle 2 ; mêmes IDs et indices **9 et 15** après reload, mais un coffre reçoit un `challenge` (de false à true) après reprise.
+- Firefox : coffre à l'indice **13** avec même ID après reload ; une nouvelle scène `trap` est créée à l'indice **20** et le marqueur de carte change alors de `floor` à `trap`. **La carte complète n'est donc pas identique**. Le coffre, lui, est conservé.
+- Ces traces sont des exemples de runs aléatoires et ne sont pas des valeurs imposées par le test.
 
-- Source minimale : `assets/gensrpg/dungeon/core200-rebuild-v1.js`.
-- Scénario Playwright réel : `tests/gensrpg_phase12_dungeon_scene_lifecycle_browser.cjs`.
-- Garde de source : `tests/gensrpg_phase12_dungeon_scene_lifecycle_source_guard.test.cjs`.
-- Workflow : `.github/workflows/gensrpg-phase12-dungeon-scene-lifecycle.yml`.
-- Point de reprise : `docs/GENSRPG_CURRENT_WORK.md`, à mettre à jour sur la branche après le checkpoint immuable.
+Le checkpoint renforcé doit être créé **seulement** après une CI success sur le SHA documentaire final, sans déplacer le précédent. Le point de reprise officiel sera actualisé après certification.
 
-Charte : `docs/GENSRPG_CHARTE.md` §§1–5, 12–26 ; `docs/GENSRPG_CHECKPOINT_POLICY.md`.
+## Limites et prochaine étape
+
+- **Encore NON GREEN** : cycle des événements de salle (`trap`, `special_branch`) et attribution différée des défis de coffre ; risque de mutation de carte/scène après reprise. Un nouveau §25 START/lot propre doit suivre l'identité des producteurs et les transitions de sauvegarde. Ne pas masquer l'écart par des comparaisons moins exigeantes dans ce prochain lot.
+- Non testés : défaite complète, récompense positive d'un monstre avec loot, multi-héros sur salles distinctes, expérience manuelle Pixel/smartphone, PWA/cache. Certains warnings 404 de ressources historiques sont aussi hors périmètre.
+- Production `main` toujours gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663` ; aucun merge ou publication Pages/PWA. Laboratoires Combat/Exploration et modes Survie/Capture/PvP intouchés. **Phase 12 globale OUVERTE**.
+
+Références : `docs/GENSRPG_CHARTE.md` §§1–5, 12–26 ; `docs/GENSRPG_CHECKPOINT_POLICY.md`; `tests/gensrpg_phase12_dungeon_scene_lifecycle_browser.cjs`, `tests/gensrpg_phase12_dungeon_scene_lifecycle_source_guard.test.cjs`.

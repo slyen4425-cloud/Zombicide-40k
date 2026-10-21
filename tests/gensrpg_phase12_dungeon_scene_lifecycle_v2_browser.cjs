@@ -491,6 +491,10 @@ async function exercise(browser,label){
     const s=await sceneState();
     if(!s.chests.length)break;
     assert.match(s.action,/COFFRE/,label+' primary action offers genuine chest interaction');
+    // A genuine effect popup can overlay the game after a room event.
+    // Dismiss it using its visible public Close button, never force-click.
+    const effect=page.locator('#effectModal.open');
+    if(await effect.isVisible())await effect.locator('button.effectClose').click({timeout:7000});
     await page.locator('#dc01Explore').click({timeout:9000});
     const opened=await sceneState();
     console.log('DUNGEON_CHEST_OPEN '+JSON.stringify({browser:label,attempt:consumeAttempts,opened}));

@@ -14,13 +14,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Protected outside Core200 and historical R10-R15 regression suite
+      - name: Protected Core051+Core200 owner boundary and historical R10-R15 regression suite
         run: |
           set -euo pipefail
           test "$(git hash-object index.html)" = '9f35eb833a6ede4b91399854f19bb9bef59f45ab'
           git diff --exit-code 7e82bf8e1b3235bc4ee8dcf2ce4535eb6d9e7aa7 -- index.html service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
           changed_assets="$(git diff --name-only 7e82bf8e1b3235bc4ee8dcf2ce4535eb6d9e7aa7 -- assets/)"
-          test "$changed_assets" = 'assets/gensrpg/dungeon/core200-rebuild-v1.js'
+          expected_assets="$(printf 'assets/gensrpg/dungeon/core051-exploration-polish-v1.js\nassets/gensrpg/dungeon/core200-rebuild-v1.js')"
+          test "$changed_assets" = "$expected_assets"
           git diff --check 7e82bf8e1b3235bc4ee8dcf2ce4535eb6d9e7aa7
           for t in tests/gensrpg_phase12_r15_builders_character_entity_sentinel.test.cjs tests/gensrpg_phase12_r14_builders_rpg_universe_sentinel.test.cjs tests/gensrpg_phase12_r13_builders_enemy_editor_sentinel.test.cjs tests/gensrpg_phase12_r12_dungeon_rpg_rules_talents_sentinel.test.cjs tests/gensrpg_phase12_r11_retired_scripts_sentinel.test.cjs tests/gensrpg_phase12_r10_capture_sentinel.test.cjs tests/gens_phase2_runtime_load_graph_v11411.test.cjs tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs tests/gens_phase2_inline_owner_manifest_v11411.test.cjs tests/gens_phase2_inline_global_last_owner_v11411.test.cjs tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs tests/gens_phase3_target_structure_contracts_v1.test.cjs tests/gens_runtime_composition_guard_v11411.test.cjs tests/gens_phase4_dice_d10048_raccord_v1.test.cjs tests/gens_phase4_dice_first_raccord_preaudit_v1.test.cjs tests/gens_architecture_global_side_effect_guard.test.cjs tests/gens_rpg_tactical_session_guard_v16781144.test.cjs tests/gens_phase4_stats_s7_snapshot_audit_v1.test.cjs tests/gensrpg_phase12_post_r15_inline_authority_baseline.test.cjs; do node "$t"; done
       - name: Post status regression
@@ -30,7 +31,7 @@ jobs:
           RES: ${{ job.status }}
         run: |
           state=failure; if [ "$RES" = success ]; then state=success; fi
-          p="$(jq -nc --arg state "$state" --arg ctx 'gensrpg/phase12/gm-chest-evaluation/regression' --arg desc "Protected Core200-only change + R10–R15 regression: $RES" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$ctx,description:$desc,target_url:$url}')"
+          p="$(jq -nc --arg state "$state" --arg ctx 'gensrpg/phase12/gm-chest-evaluation/regression' --arg desc "Protected Core200-to-Core051 hook + R10–R15 regression: $RES" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$ctx,description:$desc,target_url:$url}')"
           curl -fsS -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -d "$p" >/dev/null
   browser:
     runs-on: ubuntu-latest

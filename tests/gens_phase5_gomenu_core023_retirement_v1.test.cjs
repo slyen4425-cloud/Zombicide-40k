@@ -51,11 +51,17 @@ assert.match(core023,/specialDiceModal/,
 assert.match(core023,/dungeonCombatActive/,
   'Core 0.23 combat guard must remain intact');
 
-// D4 physically moved this exact classic Dungeon owner out of index.html.
-// Keep the real production body and its fingerprint under the goMenu sentinel.
+// D4 moved Core200 out of index.html. Keep the live parser tag and check
+// that the *current* owner never retakes goMenu, independently of the
+// byte-identical D4 historic source used for legacy assertions below.
 const core200Tag='<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>';
 assert.equal(source.split(core200Tag).length-1,1,'one Core200 production parser tag');
-const core200Bytes=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'));
+const currentCore200=read('assets/gensrpg/dungeon/core200-rebuild-v1.js');
+assert.doesNotMatch(currentCore200,/window\.goMenu\s*=/,
+  'current Dungeon Core200 must not restore the global goMenu authority');
+// The strict D4 fingerprint must always refer to the original immutable
+// bytes, not later approved runtime edits (e.g. Dungeon encounter ordering).
+const core200Bytes=fs.readFileSync(path.join(root,'tests/fixtures/gensrpg_phase12_d4_core200_original_2026-10-22.txt'));
 const crypto=require('node:crypto');
 const sha=crypto.createHash('sha1').update(Buffer.from('blob '+core200Bytes.length+'\0')).update(core200Bytes).digest('hex');
 assert.equal(core200Bytes.length,55842,'exact historical Core200 length');

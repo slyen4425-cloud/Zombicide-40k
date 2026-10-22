@@ -43,7 +43,17 @@ assert.equal(indexSource.split(catalogTag).length-1,1,'R08 catalog must have exa
 assert.ok(fs.existsSync(path.join(root,'assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js')),
   'R08 catalog module must physically exist');
 
-const customMarker='function loadCustomHeroesMulti(){';
+// The real Builders character owner supplies hcNormalizeProgressionSlots.
+ // The reduced Capture harness must preserve that parser dependency, not mock it.
+ const characterEditorTag='<script src="assets/gensrpg/builders/legacy-character-entity-editors-v1.js"></script>';
+ const characterEditorOwner=indexSource.indexOf(characterEditorTag);
+ assert.ok(characterEditorOwner>shellScriptEnd,'character editor must follow the real Shell owner');
+ assert.equal(indexSource.split(characterEditorTag).length-1,1,
+   'character editor must retain one production parser slot');
+ assert.ok(fs.existsSync(path.join(root,'assets/gensrpg/builders/legacy-character-entity-editors-v1.js')),
+   'character editor dependency must physically exist');
+ 
+ const customMarker='function loadCustomHeroesMulti(){';
 const customOwner=indexSource.indexOf(customMarker,onlineScriptEnd);
 const customScriptStart=indexSource.lastIndexOf('<script',customOwner);
 const customScriptEnd=indexSource.indexOf('</script>',customOwner);
@@ -97,8 +107,11 @@ for(let i=1;i<captureOwnerScripts.length;i++){
 const realCaptureHtml=
   indexSource.slice(0,shellScriptEnd+'</script>'.length)+
   '\n'+indexSource.slice(onlineScriptStart,onlineScriptEnd+'</script>'.length)+
-  '\n'+indexSource.slice(catalogOwner,catalogOwner+catalogTag.length)+
-  '\n'+indexSource.slice(customScriptStart,customScriptEnd+'</script>'.length)+
+  '\n'+[
+    {start:catalogOwner,body:indexSource.slice(catalogOwner,catalogOwner+catalogTag.length)},
+    {start:characterEditorOwner,body:indexSource.slice(characterEditorOwner,characterEditorOwner+characterEditorTag.length)},
+    {start:customScriptStart,body:indexSource.slice(customScriptStart,customScriptEnd+'</script>'.length)}
+  ].sort((a,b)=>a.start-b.start).map(x=>x.body).join('\n')+
   '\n</body></html>';
 
 const mime={

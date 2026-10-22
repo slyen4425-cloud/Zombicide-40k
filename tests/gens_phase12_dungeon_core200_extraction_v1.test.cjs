@@ -65,7 +65,7 @@ const indexBeforeD5=Buffer.concat([
 ]);
 assert.equal(indexBeforeD5.length,7780333);
 assert.equal(sha(indexBeforeD5),"ca15dd7b483963d7bd0767b7b5baca915d17ec43");
-const page=indexBeforeD5,code=read("assets/gensrpg/dungeon/core200-rebuild-v1.js");
+const page=indexBeforeD5,code=read("tests/fixtures/gensrpg_phase12_d4_core200_original_2026-10-22.txt");
 const old=Buffer.from('<script id="dungeonCore200Rebuild">');
 const tag=Buffer.from('<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>');
 assert.equal(page.length,7780333);

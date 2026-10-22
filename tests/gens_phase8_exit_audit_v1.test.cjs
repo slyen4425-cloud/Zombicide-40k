@@ -47,6 +47,15 @@ assert.match(entry,/__gensTacticalV2Loader105=false/);
 const counts={chainActivate:0,chainDeactivate:0,bridgeInstall:0,bridgeDispose:0,uiInstall:0,uiDispose:0};
 let appended=0;
 const sandbox={console};
+// Warm-session characterization: shared Core Stats were already loaded by
+// a prior session. Re-activation must reuse each owner without script injection.
+const preloadedCoreStatsOwners=[
+  'GensStatsNormalizationV1','GensStatsValueEngineV1',
+  'GensStatsHeroValuesV1','GensStatsModifierProviderV1',
+  'GensStatsDerivedValuesV1','GensStatsSnapshotV1',
+  'GensCleanRpgStats167874'
+];
+for(const owner of preloadedCoreStatsOwners)sandbox[owner]={};
 sandbox.document={
   head:{appendChild(){appended++;throw new Error('warm lifecycle audit must not reload scripts')}},
   createElement(){return {src:'',async:false,onload:null,onerror:null}}
@@ -109,6 +118,8 @@ assert.deepEqual(
   {chain:2,bridge:2,ui:2},
   'second session must reinstall exactly one stack'
 );
+assert.ok(preloadedCoreStatsOwners.every(owner=>!!sandbox[owner]),
+  'all shared Core Stats owners must remain available to warm Tactical sessions');
 assert.equal(appended,0,'warm reactivation must reuse loaded APIs instead of duplicating scripts');
 sandbox.GensTacticalV1.deactivate();
 

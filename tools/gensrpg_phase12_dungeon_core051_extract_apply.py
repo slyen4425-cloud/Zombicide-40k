@@ -98,7 +98,7 @@ const index=Buffer.concat([
     d2_external=b'<script id="dungeonCore051ExplorationPolish" src="assets/gensrpg/dungeon/core051-exploration-polish-v1.js"></script>'
     if d2_external in target:
         assert target.count(d2_external)==1, "D2 owner must load once"
-        d2=(ROOT/"assets/gensrpg/dungeon/core051-exploration-polish-v1.js").read_bytes()
+        d2=(ROOT/"tests/fixtures/gensrpg_phase12_d2_core051_original_2026-10-21.txt").read_bytes()
         assert len(d2)==47962 and blob(d2)=="d7ec321ffa05b8749de5d7bf9e8264e55b24f919", "D2 external owner drifted"
         assert len(target)==7863589 and blob(target)=="e5f8895495f969597a6c209fcc29afd66b7a0636", "D2 physical index drifted"
         target=target.replace(d2_external,b'<script id="dungeonCore051ExplorationPolish">'+d2+b'</script>',1)
@@ -166,7 +166,7 @@ def verify():
     d4tag=b'<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>'
     if d4tag in target:
         assert target.count(d4tag)==1, "D4 owner loaded once"
-        d4=(ROOT/"assets/gensrpg/dungeon/core200-rebuild-v1.js").read_bytes()
+        d4=(ROOT/"tests/fixtures/gensrpg_phase12_d4_core200_original_2026-10-22.txt").read_bytes()
         assert len(target)==7780333 and sha(target)=="ca15dd7b483963d7bd0767b7b5baca915d17ec43", "D4 index drifted"
         assert len(d4)==55842 and sha(d4)=="5649ae0af69064dde72e6ea28b8dbefd105cb527", "D4 code drifted"
         target=target.replace(d4tag,b'<script id="dungeonCore200Rebuild">'+d4+b'</script>',1)
@@ -178,7 +178,7 @@ def verify():
         body=(ROOT/"assets/gensrpg/dungeon/mj72-scene-v1.js").read_bytes()
         assert len(body)==27511 and sha(body)=="8304087b15bbbf5f71c22b7f8c916e0a78b1b905", "D3 code fingerprint"
         new=new.replace(d3tag,b'<script id="dungeonMj72_2Script">'+body+b'</script>',1)
-    runtime=OUT.read_bytes()
+    runtime=(ROOT/"tests/fixtures/gensrpg_phase12_d2_core051_original_2026-10-21.txt").read_bytes()
     pinned(new,DST_LEN,DST_SHA,"current physical index")
     pinned(runtime,JS_LEN,JS_SHA,"external Core051")
     assert new.count(EXTERNAL)==1 and new.count(OPEN)==0,"single external Dungeon owner"

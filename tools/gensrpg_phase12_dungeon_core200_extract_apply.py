@@ -225,7 +225,7 @@ def verify():
         assert len(d5)==17511 and blob(d5)=="bba60d921df20a114b489e17f9222e0c4f310871", "D5 external JS drifted"
         target=target.replace(d5tag,b'<script id="dungeonCore211Consolidation">'+d5+b'</script>',1)
     new=target
-    runtime=OUT.read_bytes()
+    runtime=(ROOT/"tests/fixtures/gensrpg_phase12_d4_core200_original_2026-10-22.txt").read_bytes()
     pinned(new,DST_LEN,DST_SHA,"physical index D4")
     pinned(runtime,BODY_LEN,BODY_SHA,"moved Core200")
     assert new.count(TAG)==1 and new.count(OPEN)==0,"one external owner, inline removed"

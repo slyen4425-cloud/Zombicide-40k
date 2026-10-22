@@ -1,5 +1,15 @@
 # GenSrpG — CURRENT_WORK officiel (22 octobre 2026)
 
+## Phase 12 — CI historique Phase 8 Tactical, HARNESS TEST UNIQUEMENT (NON GREEN)
+
+- **START §25 créé AVANT tout changement de code** : `checkpoint/gensrpg-start-phase12-phase8-tactical-test-harness-2026-10-22`, SHA de base `f2d9dfab558cf5270dba958fd0a1a53ce793523a`, branche `work/gensrpg-phase12-phase8-tactical-test-harness-2026-10-22`. Héritage d'une base **NON GREEN globale** ; dernier GREEN fonctionnel limité au cycle coffres : `7e82bf8e1b3235bc4ee8dcf2ce4535eb6d9e7aa7`. Main gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Motif exact** : [CI architecture 39757796994](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39757796994) passe 270 étapes (y compris les historiques R08, Capture, D4, autorité globale et inventaire combat) puis échoue dans `tests/gens_phase8_tactical_entry_runtime_v1.test.cjs` : sa simulation de scripts ne crée pas les sept propriétaires Core Stats que `assets/gensrpg/tactical/entry-v1.js` charge avant le moteur privé. Elle reçoit `?v=1` Core Stats en lieu des cinq scripts privés attendus. Les CI Tactical et Firefox de la même révision sont GREEN.
+- **Propriétaire unique** : uniquement le harness `tests/gens_phase8_tactical_entry_runtime_v1.test.cjs`. Simuler explicitement les sept propriétaires Core Stats, vérifier leur ordre de chargement avant les cinq scripts privés et conserver la détection V113 eager, le Bridge, les rappels de readiness, idempotence, teardown/re-arm. Le test doit échouer si la dépendance Core n'est pas satisfaite. Ce n'est pas permission de modifier une API ni de retirer des assertions.
+- **Interdits** : `index.html` (§26), tous les assets/runtime/modules/éditeurs, Core Stats eux-mêmes, Tactical lui-même, Capture, Dungeon, Survie, PvP, PWA, règles, service worker, `main`, publication. Aucun nouveau lot d'extraction dans ce chantier.
+- **Preuves** : relancer CI architecture complète et sentinelles Tactical/Firefox sur SHA exact, vérifier les diffs de la branche, produire un checkpoint GREEN seulement si l'ensemble exigé passe ; sinon identifier le prochain blocage sans extension spontanée. Estimer le **reliquat réel de travail fonctionnel** séparément du reliquat CI au lieu de promettre un nombre de lots arbitraire.
+
+
+
 ## Phase 12 — sentinelle historique D4/Core200 (lot TEST uniquement, EN COURS, NON GREEN)
 
 - **START charte §25** : `checkpoint/gensrpg-start-phase12-d4-core200-historical-fixture-2026-10-22` au SHA `b8d4287a629f8af72ea38d1d5260d48abf4b19b5` ; branche `work/gensrpg-phase12-d4-core200-historical-fixture-2026-10-22` créée depuis ce checkpoint. Base de travail à CI globale non GREEN, explicitement non certifiée. Dernier GREEN limité au cycle coffres : `7e82bf8e1b3235bc4ee8dcf2ce4535eb6d9e7aa7`. `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.

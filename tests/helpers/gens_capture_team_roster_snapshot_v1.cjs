@@ -88,13 +88,10 @@ function restoreHistoricalHubSnapshot(index,root){
   const tag=Buffer.from('<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>');
   const at=index.indexOf(tag);
   assert.ok(at>0 && index.indexOf(tag,at+tag.length)<0,'single D4 Core200 owner');
-  // Historical D4 snapshot uses the original Core200 bytes, not the current
-  // production bug fix. Rehydrate the immutable pre-fix Git object only here.
-  const installed=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'));
-  const code=hash(installed)==='5649ae0af69064dde72e6ea28b8dbefd105cb527'
-    ? installed
-    : require('node:child_process').execFileSync('git',['show',
-        '905856d0cb4ce04068daf8f7d9bd08b46d556799:assets/gensrpg/dungeon/core200-rebuild-v1.js'],{cwd:root,maxBuffer:2*1024*1024});
+  // D4 historical sentinels always use the immutable original Core200 blob,
+  // never the evolving gameplay owner or a git-show path absent at that SHA.
+  // This fixture is test-only, pinned to its original Git blob at byte level.
+  const code=fs.readFileSync(path.join(root,'tests/fixtures/gensrpg_phase12_d4_core200_original_2026-10-22.txt'));
   assert.equal(code.length,55842);
   assert.equal(hash(code),'5649ae0af69064dde72e6ea28b8dbefd105cb527');
   index=Buffer.concat([index.subarray(0,at),Buffer.from('<script id="dungeonCore200Rebuild">'),code,Buffer.from('</script>'),index.subarray(at+tag.length)]);

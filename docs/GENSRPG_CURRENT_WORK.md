@@ -1,5 +1,17 @@
 # GenSrpG — CURRENT_WORK officiel (22 octobre 2026)
 
+## Phase 12 — sentinelle historique D4/Core200 (lot TEST uniquement, EN COURS, NON GREEN)
+
+- **START charte §25** : `checkpoint/gensrpg-start-phase12-d4-core200-historical-fixture-2026-10-22` au SHA `b8d4287a629f8af72ea38d1d5260d48abf4b19b5` ; branche `work/gensrpg-phase12-d4-core200-historical-fixture-2026-10-22` créée depuis ce checkpoint. Base de travail à CI globale non GREEN, explicitement non certifiée. Dernier GREEN limité au cycle coffres : `7e82bf8e1b3235bc4ee8dcf2ce4535eb6d9e7aa7`. `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Jalon R08 réussi mais NON GREEN global** : `checkpoint/gensrpg-phase12-r08-historical-replay-tests-passed-2026-10-22`, SHA `b8d4287a629f8af72ea38d1d5260d48abf4b19b5`. [CI 39719530500](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39719530500) : vérification R08, inventaire, rollback R07, 57 fonctions et hash exact **PASS** ; l'étape suivante Capture Phase 9 échoue dans un helper historique de D4.
+- **Cause indépendante et reproductible** : `tests/helpers/gens_capture_team_roster_snapshot_v1.cjs` cherche la source historique de `assets/gensrpg/dungeon/core200-rebuild-v1.js` via `git show 905856d0cb4ce04068daf8f7d9bd08b46d556799:...`. Ce fichier n'existe pas à ce commit. Le Core200 actif a évolué pour le contrat coffre MJ et ne doit pas remplacer les octets du Core200 D4 (55 842 octets, blob Git `5649ae0af69064dde72e6ea28b8dbefd105cb527`).
+- **Périmètre propriétaire** : uniquement la **reconstruction historique utilisée dans les tests**, pas le jeu. Obtenir le blob Git D4 canonique depuis sa SHA, l'ajouter à `tests/fixtures/` comme cliché immuable ; imposer taille et blob Git identiques ; utiliser ce cliché dans le test D4 sans dépendance à un SHA de commit qui ne contient pas le fichier. Aucun changement de valeur attendue pour les autres D4/D3/D2/D1/Phase 9 et aucune désactivation de test.
+- **Interdits** : `index.html` et son contenu exact (§26), Core200/Core051 actifs, moteurs du jeu, Capture, Survie, PvP, Tactical, PWA/service worker, scripts historiques de rollback fonctionnels, Git `main`, déploiement. Test-only / fixture-only, aucun changement de gameplay.
+- **Preuves** : blob exact du fixture, résultat D4 reconstruit bit-à-bit, suite Phase 9 Capture, toutes les étapes de la CI architecture, sentinelles navigateur Tactical et Dungeon déjà existantes. GREEN seulement si CI complète et tests obligatoires verts. Si autre anomalie indépendante, nouveau diagnostic, pas de rustine multi-domaines.
+- **Prochaine action** : enregistrer fixture immutable, modifier le seul helper historique, contrôler CI et les diffs. Les événements Dungeon `trap` et `special_branch` restent un chantier ultérieur isolé.
+
+## Jalon précédent et contexte
+
 ## Phase 12 — garde historique R08 sur l'index R15, lot isolé (EN COURS, NON GREEN)
 
 - **Dernier GREEN certifié fonctionnel** : `checkpoint/gensrpg-phase12-dungeon-chest-reload-parity-green-2026-10-21` — `7e82bf8e1b3235bc4ee8dcf2ce4535eb6d9e7aa7` ; couvre coffre/position/reprise, pas tous les événements secondaires.

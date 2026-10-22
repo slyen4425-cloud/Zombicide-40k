@@ -92,10 +92,19 @@ def apply():
 
 def verify():
     out=(ROOT/"index.html").read_bytes()
-    # R11 -> R10 -> R09 -> R08 : chaque étape est reconstruite et vérifiée par son garde d'empreinte.
-    # Strictly whitelist both known Git blobs; never loosen the source gate.
-    if (len(out)==2093066 and gitblob(out)=="4dbe3314d5048f2def404ed674498c0670c04fc1") or (len(out)==2031649 and gitblob(out)=="b8ef8dcb497cad94c91094ed008136a5d9800155") or (len(out)==1934253 and gitblob(out)=="f257bd9e193648dc62cd8a40d510831debfe045a") or (len(out)==1863745 and gitblob(out)=="b0d0c73292e4374fc4f23e86edffad5c1b39a7b6") or (len(out)==1820094 and gitblob(out)=="b5a39705baf83e9782695c14bede8b9dde6ddf52"):
-        out=subprocess.check_output(["node",str(ROOT/"tools/gensrpg_phase12_r09_wave_extract_apply.cjs"),"--restore-r08"],cwd=ROOT)
+    # Historical verification operates on the exact R08 view, not the evolving
+    # R15 index. Reuse the already hash-guarded R15 -> R11 -> R10 -> R09 -> R08
+    # rollback owner shared with the R07/R08 JavaScript sentinels.
+    # Unknown or altered index sources must still fail the strict R08 pin below.
+    if len(out)!=NEW_N or gitblob(out)!=NEW_SHA:
+        out=subprocess.check_output([
+            "node", "-e",
+            'const fs=require("node:fs");'
+            'const view=require(process.argv[1]);'
+            'process.stdout.write(view(fs.readFileSync(process.argv[2]),process.argv[3]));',
+            str(ROOT/"tests/helpers/gens_phase12_r09_wave_source_view_v1.cjs"),
+            str(ROOT/"index.html"), str(ROOT)
+        ],cwd=ROOT)
     asset=(ROOT/REL).read_bytes()
     old=restore(out,asset)
     if extract(old)!=(out,asset):raise ValueError("R08 forward-backward drift")

@@ -1,4 +1,17 @@
-# GenSrpG — CURRENT_WORK officiel (21 octobre 2026)
+# GenSrpG — CURRENT_WORK officiel (22 octobre 2026)
+
+## Phase 12 — garde historique R08 sur l'index R15, lot isolé (EN COURS, NON GREEN)
+
+- **Dernier GREEN certifié fonctionnel** : `checkpoint/gensrpg-phase12-dungeon-chest-reload-parity-green-2026-10-21` — `7e82bf8e1b3235bc4ee8dcf2ce4535eb6d9e7aa7` ; couvre coffre/position/reprise, pas tous les événements secondaires.
+- **Travail Dungeon testé mais NON GREEN global** : `work/gensrpg-phase12-dungeon-gm-chest-evaluation-2026-10-21`, HEAD de reprise `7d382c81a7d0e47541ce0fc1f2e82fb161c209f7`. Le contrat Core200 → Core051 évalue les défis de coffre MJ une fois à la création ; tests Chromium/Firefox et R10–R15 verts au [run 39670712642](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39670712642). Aucun GREEN final ni publication.
+- **START §25** : `checkpoint/gensrpg-start-phase12-r08-historical-replay-2026-10-22`, exactement au commit `7d382c81a7d0e47541ce0fc1f2e82fb161c209f7` (base de travail *non globalement certifiée*, déclarée telle quelle). Branche dédiée `work/gensrpg-phase12-r08-historical-replay-2026-10-22` depuis ce checkpoint. `main` reste gelée à `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Diagnostic prouvé** : [CI globale 39670712690](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39670712690) tombe avant les autres étapes sur `tools/gensrpg_phase12_r08_shared_catalog_extract_apply.py --verify` ; le script sait rétrograder jusqu'à certains états intermédiaires mais pas l'index actuel : taille `1729855`, Git blob `9f35eb833a6ede4b91399854f19bb9bef59f45ab`. L'attendu R08 exact reste `2131805 / 6eeed45a0a12085c1b107ee6c24b49040277ca54`. Ce n'est PAS une régression R08 démontrée, seulement une rupture d'entrée du vérificateur.
+- **Propriétaire/périmètre** : sentinelle d'extraction historique R08 uniquement. Réutiliser `tests/helpers/gens_phase12_r09_wave_source_view_v1.cjs` qui remonte avec empreintes strictes R15 → R09 → R08, puis garder le rollback bit-à-bit R08 → R07 et la vérification du module, du service worker et des propriétaires existants. Ne pas ajouter de nouvelle source de vérité ni désactiver un garde.
+- **Interdits de ce lot** : ne modifier **ni** `index.html`, **ni** Core051/Core200/Tactical, Survie/Capture/PvP, règles/éditeurs, état utilisateur, service worker, assets, publication, ni `main`. §26 : le contenu exact du grand HTML ne doit pas être demandé au connecteur ; seul son blob Git est connu. En cas de nécessité réelle de lire le HTML, demander le ZIP utilisateur depuis [index au SHA de base](https://github.com/slyen4425-cloud/Zombicide-40k/blob/7d382c81a7d0e47541ce0fc1f2e82fb161c209f7/index.html).
+- **Preuves exigées** : reconstruction canonique stricte de R08 et R07, JS 57 fonctions inchangé, CI architecture complète verte, sentinelles inter-modules et tests navigateur Dungeon du travail Core051/Core200 toujours verts. Vérifier les fichiers modifiés via comparaison Git ; aucun GREEN final si une CI exigée reste rouge.
+- **Après ce lot** : reprendre sur une **autre branche/checkpoint** l'audit des autres événements secondaires Dungeon (`trap`, `special_branch`, défis porte), sans supposer leur parité ni mélanger les propriétaires.
+
+## Historique de travail précédent (non publié)
 
 ## Phase 12 / Dungeon — Évaluation unique des défis des coffres MJ (lot isolé, NON GREEN)
 

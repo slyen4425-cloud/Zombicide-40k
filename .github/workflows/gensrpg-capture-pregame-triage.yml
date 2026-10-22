@@ -1,0 +1,42 @@
+name: GenSrpG Capture pregame targeted triage
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-capture-pregame-browser-triage-2026-10-22'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture-pregame-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+      - name: Préparer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Installer Chromium pour diagnostic Capture
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Comparer les trois sentinelles de pré-game avec le parcours réel
+        shell: bash
+        run: |
+          set +e
+          node tests/gens_capture_current_shell_browser_v11411.test.cjs
+          current_status=$?
+          node tests/gens_phase9_capture_post_shell_without_dungeon_style_browser_characterization_v1.test.cjs
+          post_shell_status=$?
+          node tests/gens_phase5_module_launch_s3_capture_provider_browser_v1.test.cjs
+          provider_status=$?
+          node tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs
+          preview_status=$?
+          echo "CAPTURE_TRIAGE current=$current_status post_shell=$post_shell_status provider=$provider_status full_preview=$preview_status"
+          if [ "$current_status" -ne 0 ] || [ "$post_shell_status" -ne 0 ] || [ "$provider_status" -ne 0 ] || [ "$preview_status" -ne 0 ]; then
+            exit 1
+          fi

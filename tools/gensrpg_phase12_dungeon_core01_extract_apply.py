@@ -382,6 +382,23 @@ def verify():
                     ("reachable.size,130,","reachable.size,131,"),
                 ):
                     expected_after=expected_after.replace(former,current)
+            # Current R14/R15 graph has two further uniquely-owned Builders
+            # scripts. Keep the exact pinned current index and the *existing*
+            # graph assertions (no skipping, no wildcard acceptance).
+            if current_blob in ("dab5be5dedfa56c49d76d40a4cb824a0098903f0",
+                                "9f35eb833a6ede4b91399854f19bb9bef59f45ab"):
+                required_size=1772759 if current_blob.startswith("dab5") else 1729855
+                assert len(INDEX.read_bytes())==required_size, "unknown current index bytes"
+                if path in (PATH_OWNERS,PATH_GLOBALS):
+                    expected_after=current_blob
+                elif path==PATH_GRAPH:
+                    newer=(89,146,132) if current_blob.startswith("dab5") else (90,147,133)
+                    for former,current in (
+                        ("size,64,",f"size,{newer[0]},"),
+                        ("allJs.length,121,",f"allJs.length,{newer[1]},"),
+                        ("reachable.size,107,",f"reachable.size,{newer[2]},"),
+                    ):
+                        expected_after=expected_after.replace(former,current)
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

@@ -319,9 +319,41 @@ const server=http.createServer((req,res)=>{
     assert.notEqual(state.session,'1');
 
     mark('open-current-capture-pregame');
-    await page.locator('#gensGameHomeActions .newGameBtn').click();
-    await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
-    await page.waitForFunction(()=>document.body.classList.contains('gensCapturePregame'));
+    const pregameButton=page.locator('#gensGameHomeActions .newGameBtn');
+    const beforePregame=await page.evaluate(()=>({
+      profile:typeof activeGameProfileId==='function'?activeGameProfileId():'missing',
+      family:typeof gensSelectedFamily==='undefined'?'missing':gensSelectedFamily,
+      mode151:typeof gensMode151==='function'?gensMode151():'missing',
+      captureContext138:typeof isCaptureContext138==='function'?isCaptureContext138():'missing',
+      pregame:document.getElementById('pregameSetup')?.style?.display??'absent',
+      button:document.querySelector('#gensGameHomeActions .newGameBtn')?.outerHTML?.slice(0,600)||'absent'
+    }));
+    await pregameButton.click();
+    try{
+      await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
+      await page.waitForFunction(()=>document.body.classList.contains('gensCapturePregame'));
+    }catch(error){
+      // Never force the modal open in the test: prove the actual failure mode.
+      const afterPregame=await page.evaluate(()=>({
+        profile:typeof activeGameProfileId==='function'?activeGameProfileId():'missing',
+        family:typeof gensSelectedFamily==='undefined'?'missing':gensSelectedFamily,
+        contentFamily:typeof gensCurrentContentFamily==='function'?gensCurrentContentFamily():'missing',
+        mode151:typeof gensMode151==='function'?gensMode151():'missing',
+        captureContext138:typeof isCaptureContext138==='function'?isCaptureContext138():'missing',
+        capturePregameMode:typeof gensCapturePregameMode==='function'?gensCapturePregameMode():'missing',
+        shellActiveModule:typeof gensShellActiveModuleV1==='function'?gensShellActiveModuleV1():'missing',
+        captureOwner:window.GensCaptureV1?.status?.()??'missing',
+        pregameExists:!!document.getElementById('pregameSetup'),
+        pregameDisplay:document.getElementById('pregameSetup')?getComputedStyle(document.getElementById('pregameSetup')).display:'absent',
+        homeDisplay:document.getElementById('gensGameHome')?getComputedStyle(document.getElementById('gensGameHome')).display:'absent',
+        capturePregameClass:document.body.classList.contains('gensCapturePregame'),
+        bodyClasses:[...document.body.classList].slice(0,30),
+        visibleDialog:[...document.querySelectorAll('[role="dialog"],.modal')].filter(e=>getComputedStyle(e).display!=='none').slice(0,8).map(e=>e.id||e.className),
+        activeSession:localStorage.getItem('z40k_session_active_v1')
+      })).catch(e=>({diagnosticError:String(e)}));
+      console.error('[capture-current] pregame-state-diagnostic',JSON.stringify({beforePregame,afterPregame,browserErrors,dialogs}));
+      throw error;
+    }
 
     const pregame=await page.evaluate(()=>({
       captureClass:document.body.classList.contains('gensCapturePregame'),

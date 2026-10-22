@@ -324,7 +324,34 @@ const server=http.createServer((req,res)=>{
 
     mark('open-current-capture-pregame');
     await page.locator('#gensGameHomeActions .newGameBtn').click();
-    await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
+    try{
+      await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
+    }catch(error){
+      // Record the real failure without changing the original timeout.
+      const diagnostic=await page.evaluate(()=>{
+        const visibility=id=>{const el=document.getElementById(id);
+          return el?{display:getComputedStyle(el).display,hidden:el.hidden,classes:el.className}:'absent'};
+        const button=document.querySelector('#gensGameHomeActions .newGameBtn');
+        return {
+          activeProfile:typeof activeGameProfileId==='function'?activeGameProfileId():'missing',
+          family:typeof gensSelectedFamily!=='undefined'?String(gensSelectedFamily):'missing',
+          contentFamily:typeof gensCurrentContentFamily==='function'?gensCurrentContentFamily():'missing',
+          mode151:typeof gensMode151==='function'?gensMode151():'missing',
+          shellActiveModule:typeof window.GensShellModuleLaunchV1?.activeModule==='function'
+            ?window.GensShellModuleLaunchV1.activeModule():'missing',
+          captureInstalled:window.GensCaptureV1?.status?.()||null,
+          pregameOpen:typeof window.openPregameSetup,
+          newGameButton:button?.outerHTML?.slice(0,350)||'absent',
+          pregame:visibility('pregameSetup'),gameHome:visibility('gensGameHome'),
+          rootHome:visibility('gensRootHome'),
+          bodyClasses:[...document.body.classList]
+        };
+      }).catch(e=>({diagnosticError:String(e)}));
+      console.error('[capture-post-shell-no-dungeon-style] pregame-open-diagnostic',JSON.stringify({
+        diagnostic,browserErrors,dialogs
+      }));
+      throw error;
+    }
     let pregameIdentityDiagnostic=null;
     try{
       await page.waitForFunction(()=>document.body.classList.contains('gensCapturePregame'),null,{timeout:2500});

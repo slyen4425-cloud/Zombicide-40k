@@ -1118,7 +1118,6 @@ jobs:
         run: node tests/gens_asset_resolver_loot_owner_v1.test.cjs
 
   browser-sentinel:
-    needs: architecture-sentinels
     runs-on: ubuntu-latest
     steps:
       - name: Récupérer le dépôt

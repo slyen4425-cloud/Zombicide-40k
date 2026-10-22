@@ -10,6 +10,17 @@ const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 
 const entrySrc=read('assets/gensrpg/tactical/entry-v1.js');
 const integrationSrc=read('assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js');
+// The public entry loads shared Core Stats in order before its private stack.
+// Keep this first-request simulation strict about the seven required owners.
+const coreStatsOwners=[
+  ['GensStatsNormalizationV1','assets/gensrpg/core/stats-normalization-v1.js'],
+  ['GensStatsValueEngineV1','assets/gensrpg/core/stats-value-engine-v1.js'],
+  ['GensStatsHeroValuesV1','assets/gensrpg/core/stats-hero-values-v1.js'],
+  ['GensStatsModifierProviderV1','assets/gensrpg/core/stats-modifier-provider-v1.js'],
+  ['GensStatsDerivedValuesV1','assets/gensrpg/core/stats-derived-values-v1.js'],
+  ['GensStatsSnapshotV1','assets/gensrpg/core/stats-snapshot-v1.js'],
+  ['GensCleanRpgStats167874','assets/gensrpg/gens-rpg-stats-clean-167874.js']
+];
 
 // Target 1: bootstrap loads only V113 detection and inert Bridge facade.
 {
@@ -18,6 +29,8 @@ const integrationSrc=read('assets/gensrpg/gens-rpg-tactical-combat-v2-integratio
   const sandbox={console};
   const head={appendChild(s){
     loaded.push(s.src);
+    const owner=coreStatsOwners.find(([,file])=>s.src===file+'?v=1');
+    if(owner)sandbox[owner[0]]={};
     if(s.src.startsWith('assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js')){
       sandbox.GensRpgTacticalRuntimeAuthority1678113={install(){return true}};
       s.onload?.();return s;
@@ -51,9 +64,11 @@ const integrationSrc=read('assets/gensrpg/gens-rpg-tactical-combat-v2-integratio
   assert.equal(typeof sandbox.GensTacticalV1?.activate,'function','public Tactical entry must expose session activation');
 
   sandbox.GensTacticalV1.activate(ok=>{assert.equal(ok,true);readyCallbacks++});
+  assert.ok(coreStatsOwners.every(([name])=>!!sandbox[name]),'shared Core Stats must all install before private Tactical');
   assert.deepEqual(loaded,[
     'assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js?v=16.78.114.10',
     'assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js?v=16.78.105',
+    ...coreStatsOwners.map(([,file])=>file+'?v=1'),
     'assets/gensrpg/gens-rpg-tactical-combat-v2.js?v=16.78.105',
     'assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js?v=16.78.105',
     'assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js?v=16.78.105',

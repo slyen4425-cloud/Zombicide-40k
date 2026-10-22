@@ -74,7 +74,19 @@ assert.equal(core200Script,
   '<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>',
   'Core200 must load its byte-identical external script at the same parser position');
 const core200Body=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8');
-assert.equal(Buffer.byteLength(core200Body,'utf8'),55842,'D4 Core200 exact historical source');
+// A live Dungeon owner may evolve without changing the immutable D4 body.
+// Pin the historical source separately, and keep all provider assertions
+// below aimed at the *actual* external JS executed by the browser.
+const historicalCore200=fs.readFileSync(path.join(root,'tests/fixtures/gensrpg_phase12_d4_core200_original_2026-10-22.txt'));
+assert.equal(historicalCore200.length,55842,'D4 Core200 exact historical source');
+const crypto=require('node:crypto');
+const historicalBlob=crypto.createHash('sha1')
+  .update(Buffer.from('blob '+historicalCore200.length+'\0'))
+  .update(historicalCore200).digest('hex');
+assert.equal(historicalBlob,'5649ae0af69064dde72e6ea28b8dbefd105cb527',
+  'D4 Core200 historical Git blob must remain immutable');
+assert.doesNotMatch(core200Body,/window\.goMenu\s*=/,
+  'active Core200 must not retake the global Shell menu authority');
 const core304Script=exactScript('dungeonCore304DefeatExit');
 const core307Script=exactScript('dungeonCore307CriticalResumeFix');
 const core308Script=exactScript('dungeonCore308NewRunReset');

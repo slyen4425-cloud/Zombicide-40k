@@ -68,7 +68,7 @@ assert.equal(sha(indexBeforeD5),"ca15dd7b483963d7bd0767b7b5baca915d17ec43");
 const actualD4=indexBeforeD5;
 const core200Tag=Buffer.from('<script id="dungeonCore200Rebuild" src="assets/gensrpg/dungeon/core200-rebuild-v1.js"></script>');
 const core200Open=Buffer.from('<script id="dungeonCore200Rebuild">');
-const core200Body=read("assets/gensrpg/dungeon/core200-rebuild-v1.js");
+const core200Body=read("tests/fixtures/gensrpg_phase12_d4_core200_original_2026-10-22.txt");
 const core200At=actualD4.indexOf(core200Tag);
 assert.ok(core200At>0 && actualD4.indexOf(core200Tag,core200At+core200Tag.length)<0,"D4 owner appears exactly once");
 const indexBeforeD4=Buffer.concat([

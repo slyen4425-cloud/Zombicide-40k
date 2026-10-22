@@ -24,9 +24,18 @@ function scriptBody(id){
     assert.ok(m[0].includes('src="assets/gensrpg/dungeon/core200-rebuild-v1.js"'),
       'D4 Core200 must retain its original parser-ordered owner');
     assert.equal(m[1],'','Core200 must not be duplicated inline');
-    const runtime=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8');
-    assert.equal(Buffer.byteLength(runtime,'utf8'),55842,'D4 legacy Core200 exact byte count');
-    return runtime;
+    // The E2E contract must examine the current live owner. The D4
+    // byte-exact historical baseline is a separate, immutable test fixture:
+    // later approved live fixes must not rewrite historical replay.
+    const original=fs.readFileSync(path.join(root,'tests/fixtures/gensrpg_phase12_d4_core200_original_2026-10-22.txt'));
+    assert.equal(original.length,55842,'D4 legacy Core200 exact byte count');
+    const crypto=require('node:crypto');
+    const originalBlob=crypto.createHash('sha1')
+      .update(Buffer.from('blob '+original.length+'\\0'))
+      .update(original).digest('hex');
+    assert.equal(originalBlob,'5649ae0af69064dde72e6ea28b8dbefd105cb527',
+      'D4 historical Core200 must remain byte-identical');
+    return fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8');
   }
   return m[1];
 }

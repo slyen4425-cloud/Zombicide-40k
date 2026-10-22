@@ -68,7 +68,9 @@ function restore(root){
     assert.equal(sha(moved),"bba60d921df20a114b489e17f9222e0c4f310871","D5 moved code unchanged");
     actual=Buffer.concat([actual.subarray(0,at),Buffer.from('<script id="dungeonCore211Consolidation">'),moved,Buffer.from("</script>"),actual.subarray(at+d5Tag.length)]);
   }
-  const code=fs.readFileSync(path.join(root,"assets/gensrpg/dungeon/core200-rebuild-v1.js"));
+  // Use the byte-pinned D4 archival source; the active Core200 is allowed to
+  // evolve under its own runtime tests and must not rewrite historical D3.
+  const code=fs.readFileSync(path.join(root,"tests/fixtures/gensrpg_phase12_d4_core200_original_2026-10-22.txt"));
   assert.equal(actual.length,7780333,"D4 expected physical index length");
   assert.equal(sha(actual),"ca15dd7b483963d7bd0767b7b5baca915d17ec43","D4 active index fingerprint");
   assert.equal(code.length,55842,"D4 external legacy code length");

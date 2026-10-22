@@ -31,7 +31,7 @@ function scriptBody(id){
     assert.equal(original.length,55842,'D4 legacy Core200 exact byte count');
     const crypto=require('node:crypto');
     const originalBlob=crypto.createHash('sha1')
-      .update(Buffer.from('blob '+original.length+'\\0'))
+      .update(Buffer.from('blob '+original.length+'\0'))
       .update(original).digest('hex');
     assert.equal(originalBlob,'5649ae0af69064dde72e6ea28b8dbefd105cb527',
       'D4 historical Core200 must remain byte-identical');

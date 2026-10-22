@@ -6,9 +6,22 @@ const path=require('node:path');
 const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'assets/gensrpg/tactical/entry-v1.js'),'utf8');
 const loaded=[],timers=[];let bridgeInstalls=0,detectionInstalls=0,ready=0;
+// Each Core Stats owner is a real, independently loaded dependency of the
+// Tactical public entry. Mock its installation without bypassing that load.
+const coreStatsOwners=[
+ ['GensStatsNormalizationV1','assets/gensrpg/core/stats-normalization-v1.js'],
+ ['GensStatsValueEngineV1','assets/gensrpg/core/stats-value-engine-v1.js'],
+ ['GensStatsHeroValuesV1','assets/gensrpg/core/stats-hero-values-v1.js'],
+ ['GensStatsModifierProviderV1','assets/gensrpg/core/stats-modifier-provider-v1.js'],
+ ['GensStatsDerivedValuesV1','assets/gensrpg/core/stats-derived-values-v1.js'],
+ ['GensStatsSnapshotV1','assets/gensrpg/core/stats-snapshot-v1.js'],
+ ['GensCleanRpgStats167874','assets/gensrpg/gens-rpg-stats-clean-167874.js']
+];
 const sandbox={console,setTimeout(fn,ms){timers.push(ms);return timers.length}};
 const head={appendChild(s){
  loaded.push(s.src);
+ const statsOwner=coreStatsOwners.find(([,file])=>s.src===file+'?v=1');
+ if(statsOwner)sandbox[statsOwner[0]]={};
  if(s.src.startsWith('assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js'))sandbox.GensRpgTacticalRuntimeAuthority1678113={install(){detectionInstalls++;return true}};
  if(s.src.startsWith('assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js'))sandbox.GensRpgTacticalCombatV2Bridge={install(){bridgeInstalls++;return true}};
  if(s.src.startsWith('assets/gensrpg/gens-rpg-tactical-combat-v2.js'))sandbox.GensRpgTacticalCombatV2={};
@@ -28,7 +41,9 @@ assert.equal(detectionInstalls,1,'Dungeon detection V113 must be available befor
 assert.equal(sandbox.GensTacticalV1.status().detectionReady,true);
 assert.equal(bridgeInstalls,0);assert.notEqual(sandbox.__gensTacticalV2Loader105,true);
 sandbox.GensTacticalV1.activate(ok=>{assert.equal(ok,true);ready++});
+assert.ok(coreStatsOwners.every(([owner])=>!!sandbox[owner]),'all seven shared Core Stats owners must install before private Tactical');
 assert.deepEqual(loaded.slice(2),[
+ ...coreStatsOwners.map(([,file])=>file+'?v=1'),
  'assets/gensrpg/gens-rpg-tactical-combat-v2.js?v=16.78.105',
  'assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js?v=16.78.105',
  'assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js?v=16.78.105',

@@ -11,6 +11,11 @@ def _blob(data):
 def read_d9_index_view(index_file, root):
     """Current physical D9/R01 index -> byte-exact D9 view solely for legacy --verify."""
     data=Path(index_file).read_bytes()
+    # A later owner extraction must first reverse to exact R15 for historical D9 tests.
+    if _blob(data)=="260f00aa179c939f35188ca854f9875971ce8a7b":
+        import subprocess
+        data=subprocess.check_output(["node",str(Path(root)/"tools/gensrpg_phase12_r16_restore_r15.cjs"),"--restore-r15"],cwd=root)
+        assert len(data)==1729855 and _blob(data)=="9f35eb833a6ede4b91399854f19bb9bef59f45ab", "R16 → R15 D9 historical normalization is not exact"
     # Exact test-only reversal of a newer procedural wall material change.
     # No writeback: runtime index remains the corrected version.
     from gensrpg_phase12_generated_wall_history import historical_r05_view

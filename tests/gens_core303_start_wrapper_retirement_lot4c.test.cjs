@@ -5,13 +5,18 @@ const root=path.join(__dirname,'..');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const bridge=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-bridge.js'),'utf8');
 
-function scriptById(id){
-  const m=html.match(new RegExp('<script id="'+id+'"[^>]*>([\\s\\S]*?)<\\/script>'));
-  assert.ok(m,`missing script #${id}`);
-  return m[1];
-}
-
-const core=scriptById('dungeonCore303TimelineRootFix');
+// R16 externalizes Core303 byte-identically at the original classic parser slot.
+const owner='assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js';
+const tag='<script id="dungeonCore303TimelineRootFix" src="'+owner+'"></script>';
+assert.equal(html.split(tag).length-1,1,'Core303 classic owner must load once');
+assert.doesNotMatch(html,/<script id="dungeonCore303TimelineRootFix">/,'No second inline Core303 writer');
+assert.ok(html.indexOf('src="assets/dungeon/dungeon-core-316.js"')<html.indexOf(tag),'Core303 stays after Core316');
+assert.ok(html.indexOf(tag)<html.indexOf('id="dungeonCore304DefeatExit"'),'Core303 stays before Core304');
+const core=fs.readFileSync(path.join(root,owner),'utf8');
+const bytes=Buffer.from(core,'utf8');
+const crypto=require('node:crypto');
+const sha=crypto.createHash('sha1').update('blob '+bytes.length+String.fromCharCode(0)).update(bytes).digest('hex');
+assert.equal(sha,'fe7c0cff03f7e19f49d3c743257c5fe717f40593','Core303 original code must remain byte-exact');
 
 // Core 3.03 stays active as the timeline/turn owner.
 assert.match(core,/let T=\{sig:"",order:\[\],index:0,aiBusy:false,pendingHero:false\}/,

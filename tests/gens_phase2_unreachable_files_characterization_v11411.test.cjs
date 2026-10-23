@@ -65,8 +65,10 @@ assert.equal(rawDirect.filter(x=>x===R09_SURVIVAL_WAVE).length,1,
 assert.equal(reachable.has(R09_SURVIVAL_WAVE),true,
   'R09 Survival wave owner must remain reachable in the real production graph');
 const R13_BUILDERS_ENEMY='assets/gensrpg/builders/legacy-enemy-editor-v1.js';
-assert.equal(reachable.size,115+captureR06Files.length,
-  'production graph must preserve R13, R14 and one R15 Builders editor module');
+assert.equal(reachable.size,116+captureR06Files.length,
+  'R16 graph must retain R13–R15 Builders owners and add the single physical Core303 Dungeon owner');
+assert.equal(reachable.has('assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js'),true,
+  'R16 live Dungeon Core303 timeline must not be classified as a non-production file');
 assert.equal(rawDirect.filter(x=>x===R13_BUILDERS_ENEMY).length,1,
   'R13 Builders enemy editor must be loaded once in the real production index');
 assert.equal(reachable.has('assets/gensrpg/builders/legacy-character-entity-editors-v1.js'),true,'R15 Builders must be production-reachable');

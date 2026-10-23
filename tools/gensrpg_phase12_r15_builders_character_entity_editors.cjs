@@ -45,7 +45,7 @@ function transform(source){
  return {html,extracted,chunks};
 }
 function restoreR14(){
- const current=fs.readFileSync('index.html','utf8');
+ const current=require('./gensrpg_phase12_r16_restore_r15.cjs').canonicalR15();
  if(blob(current)===SOURCE)return current;
  assert(blob(current)===TARGET&&Buffer.byteLength(current)===TARGET_SIZE,'not authorized R15 HTML');
  const owner=fs.readFileSync(MODULE,'utf8');
@@ -71,7 +71,7 @@ function restoreR14(){
 function verify(){
  const reconstructed=restoreR14();
  const expected=transform(reconstructed);
- assert(fs.readFileSync('index.html','utf8')===expected.html,'active index not exact output');
+ assert(require('./gensrpg_phase12_r16_restore_r15.cjs').canonicalR15()===expected.html,'R15 historical rollback not exact output');
  assert(fs.readFileSync(MODULE,'utf8')===expected.extracted,'active owner not exact output');
  const map=JSON.parse(fs.readFileSync('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json','utf8'));
  assert(map.files?.[MODULE]?.domain==='builders','owner not Builders');

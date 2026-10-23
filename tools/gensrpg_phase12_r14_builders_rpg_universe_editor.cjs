@@ -52,7 +52,7 @@ function transform(source){
 }
 function restoreR13(){
  let html=fs.readFileSync('index.html','utf8');
- if(blob(html)==='9f35eb833a6ede4b91399854f19bb9bef59f45ab')html=cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r15_builders_character_entity_editors.cjs','--restore-r14'],{maxBuffer:12*1024*1024}).toString('utf8');
+ if(['9f35eb833a6ede4b91399854f19bb9bef59f45ab','260f00aa179c939f35188ca854f9875971ce8a7b'].includes(blob(html)))html=cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r15_builders_character_entity_editors.cjs','--restore-r14'],{maxBuffer:12*1024*1024}).toString('utf8');
  const hash=blob(html);
  if(hash===SOURCE)return html;
  assert(hash===TARGET&&Buffer.byteLength(html)===TARGET_SIZE,'not an authorized R14 index');
@@ -79,7 +79,7 @@ function verify(){
  const source=restoreR13();
  const {html,extracted,names}=transform(source);
  const installed=fs.readFileSync('index.html','utf8');
- const historical=blob(installed)==='9f35eb833a6ede4b91399854f19bb9bef59f45ab'?cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r15_builders_character_entity_editors.cjs','--restore-r14'],{maxBuffer:12*1024*1024}).toString('utf8'):installed;
+ const historical=['9f35eb833a6ede4b91399854f19bb9bef59f45ab','260f00aa179c939f35188ca854f9875971ce8a7b'].includes(blob(installed))?cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r15_builders_character_entity_editors.cjs','--restore-r14'],{maxBuffer:12*1024*1024}).toString('utf8'):installed;
  assert(historical===html,'R14 exact historical index differs from certified transform');
  assert(fs.readFileSync(MODULE,'utf8')===extracted,'R14 Builders declarations differ');
  const owner=JSON.parse(fs.readFileSync('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json','utf8'));

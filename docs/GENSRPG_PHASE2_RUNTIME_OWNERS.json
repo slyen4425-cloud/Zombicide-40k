@@ -678,6 +678,11 @@
       "owner": "GenSrpG Builders R15 — hero/controllable-creature/companion editors",
       "domain": "builders",
       "role": "54 original byte-identical UI/authoring declarations, no Core entity storage or Capture runtime, synchronous at original parser seam"
+    },
+    "assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js": {
+      "owner": "Dungeon Core303 / timeline combat",
+      "domain": "dungeon",
+      "role": "9 158 octets originaux du propriétaire historique final Core303 déplacés à l'identique au même parser slot après Core316. Anciens wrappers inchangés pour parité jusqu'à preuve de retrait."
     }
   }
 }

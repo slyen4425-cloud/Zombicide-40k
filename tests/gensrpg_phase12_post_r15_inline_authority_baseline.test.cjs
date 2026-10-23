@@ -2,8 +2,23 @@
 // Phase 12 / post-R15 EXIT — reproducible *static* authority census of exact certified HTML.
 // A multi-writer match identifies a potential conflict, not proof the writes all execute.
 const fs=require('node:fs'),crypto=require('node:crypto'),assert=require('node:assert/strict');
-const html=fs.readFileSync('index.html','utf8');
-const blob=b=>crypto.createHash('sha1').update('blob '+b.length+'\0').update(b).digest('hex');
+const blob=b=>crypto.createHash('sha1').update('blob '+b.length+'\\0').update(b).digest('hex');
+const live=fs.readFileSync('index.html','utf8');
+const tag='<script id="dungeonCore303TimelineRootFix" src="assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js"></script>';
+const extracted=fs.readFileSync('assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js','utf8');
+assert.equal(blob(Buffer.from(live,'utf8')),'260f00aa179c939f35188ca854f9875971ce8a7b','R16 exact production HTML Git blob');
+assert.equal(blob(Buffer.from(extracted,'utf8')),'fe7c0cff03f7e19f49d3c743257c5fe717f40593','R16 extracted owner must be byte-exact');
+assert.equal(live.split(tag).length,2,'R16 Core303 owner must load once from its canonical parser slot');
+assert.ok(live.indexOf('src="assets/dungeon/dungeon-core-316.js"') < live.indexOf(tag),'R16 Core303 remains after the prior Dungeon Core316');
+assert.ok(live.indexOf(tag) < live.indexOf('id="dungeonCore304DefeatExit"'),'R16 Core303 remains before Dungeon Core304');
+assert.doesNotMatch(live,/<script id="dungeonCore303TimelineRootFix">/,'R16 must remove inline duplicate authority');
+const liveScripts=[...live.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script\\s*>/gi)];
+assert.equal(liveScripts.length,152,'R16 parser script count unchanged');
+assert.equal(liveScripts.filter(m=>/\\bsrc\\s*=/.test(m[1])).length,64,'R16 external owner replaces one inline slot');
+assert.equal(liveScripts.filter(m=>!/\\bsrc\\s*=/.test(m[1])).length,88,'R16 removes one active inline script');
+const html=live.replace(tag,'<script id="dungeonCore303TimelineRootFix">'+extracted+'</script>');
+// Reconstruct the immutable R15 historical census rather than pretending its SHA is the live R16 source.
+
 const payload=Buffer.from(html,'utf8');
 assert.equal(payload.length,1729855,'§26 exact post-R15 source length');
 assert.equal(blob(payload),'9f35eb833a6ede4b91399854f19bb9bef59f45ab','§26 exact post-R15 source Git blob');

@@ -73,6 +73,7 @@ assert.deepEqual(rawDirect,[
   'assets/gensrpg/dungeon/core213-stability-v1.js',
   'assets/gensrpg/dungeon/core214-single-authority-v1.js',
   'assets/dungeon/dungeon-core-316.js',
+  'assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js',
   'assets/dungeon/dungeon-core-317.js',
   'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
   'assets/gensrpg/pvp/session-v1.js',
@@ -106,12 +107,12 @@ const productionDirect=[
   ].includes(x)),
   ...injected
 ];
-assert.equal(new Set(productionDirect).size,90,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
+assert.equal(new Set(productionDirect).size,91,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,112,'R11 must retire exactly 17 previously disabled named script tags from 129');
 assert.equal((index.match(/<script\b[^>]*type=["']application\/x-gensrpg-disabled["']/gi)||[]).length,0,'R11 must leave no legacy disabled script tags');
-assert.equal([...index.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)].length,152,'R15 adds one classic Builders owner to the 151 R14 tags');
+assert.equal([...index.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)].length,152,'R16 replaces the inline Core303 slot by a single external entry, preserving 152 tags');
 
 const assetRefs=source=>[...source.matchAll(/assets\/(?:gensrpg|dungeon)\/[^"'\x60\s)]+\.js(?:\?[^"'\x60\s)]*)?/g)]
   .map(m=>stripQuery(m[0]))
@@ -218,9 +219,9 @@ const phase10Set=new Set([...phase10ConnectedServices,...phase10InertServices]);
 const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel)&&!phase10Set.has(rel)&&!phase12Set.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,147,'physical JS inventory includes S3 inert PvP setup UI in addition to S2 services');
+assert.equal(allJs.length,148,'physical JS inventory includes S3 inert PvP setup UI in addition to S2 services');
 assert.equal(phase2Js.length,82,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
-assert.equal(reachable.size,133,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
+assert.equal(reachable.size,134,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
 const connectedPhaseEntrypoints=new Set([
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',

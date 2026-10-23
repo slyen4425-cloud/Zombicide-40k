@@ -41,9 +41,10 @@ while(queue.length){
   reachable.add(rel);
   for(const dep of assetRefs(read(rel)))if(!reachable.has(dep))queue.push(dep);
 }
-assert.equal(reachable.size,133,'R15 adds one Builders character/entity editor owner to R14 reachable graph');
+assert.equal(reachable.size,134,'R16 adds the byte-identical Core303 Dungeon timeline owner to the R15 reachable graph');
 assert.equal(reachable.has('assets/gensrpg/capture/legacy-monolith-functions-v1.js'),true,'R10 Capture owner must be genuinely reachable in the production graph');
 assert.equal(reachable.has('assets/gensrpg/core/legacy-magic-sounds-v1.js'),true,'R07 audio data must be genuinely production-reachable');
+assert.equal(reachable.has('assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js'),true,'R16 Core303 must be reachable from its actual synchronous parser slot');
 for(const rel of reachable)assert.ok(manifest.files?.[rel],rel+' must be owned before side-effect inventory');
 
 const disabled=new Set([

@@ -96,12 +96,8 @@ for(let i=1;i<captureOwnerScripts.length;i++){
   assert.ok(captureOwnerScripts[i].start>captureOwnerScripts[i-1].start,'Capture owner scripts must keep production order');
 }
 
-const realCaptureHtml=
-  indexSource.slice(0,shellScriptEnd+'</script>'.length)+
-  '\n'+indexSource.slice(onlineScriptStart,onlineScriptEnd+'</script>'.length)+
-  '\n'+indexSource.slice(abilityCatalogOwner,abilityCatalogOwner+abilityCatalogTag.length)+
-  '\n'+indexSource.slice(customScriptStart,customScriptEnd+'</script>'.length)+
-  '\n</body></html>';
+// Browser proof uses the exact, complete production composition served by preview.html.
+// Preserve the parser-slot/order assertions above; never manually re-inject Capture owners.
 
 const mime={
   '.html':'text/html; charset=utf-8',
@@ -118,11 +114,6 @@ const mime={
 
 const server=http.createServer((req,res)=>{
   const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
-  if(pathname==='/__gens_capture_current_real.html'){
-    res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store'});
-    res.end(realCaptureHtml);
-    return;
-  }
   const rel=pathname==='/'?'/index.html':pathname;
   const file=path.resolve(root,'.'+rel);
   if(!file.startsWith(root+path.sep)){res.writeHead(403);res.end('forbidden');return}
@@ -143,7 +134,7 @@ const server=http.createServer((req,res)=>{
 
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const port=server.address().port;
-  const url=`http://127.0.0.1:${port}/__gens_capture_current_real.html`;
+  const url=`http://127.0.0.1:${port}/preview.html`;
   const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
   const context=await browser.newContext({
     viewport:{width:412,height:915},
@@ -175,19 +166,9 @@ const server=http.createServer((req,res)=>{
   });
   await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
 
-  const installCaptureOwners=async()=>{
-    for(const owner of captureOwnerScripts){
-      mark('install-'+owner.id);
-      if(owner.url){
-        await page.addScriptTag({url:'http://127.0.0.1:'+port+'/'+owner.url});
-      }else{
-        await page.addScriptTag({content:owner.source});
-      }
-    }
-    await page.evaluate(()=>{try{window.gensReconcile151?.('sentinel-install')}catch(e){}});
-  };
-
-  const waitOwners=()=>page.waitForFunction((captureId)=>{
+  const waitOwners=async()=>{
+    await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:60000});
+    await page.waitForFunction((captureId)=>{
     const p=typeof loadGameProfiles==='function'?loadGameProfiles().find(x=>String(x.id)===captureId):null;
     return typeof window.openGensFamily==='function' &&
       typeof window.openGensBuiltInGame==='function' &&
@@ -195,16 +176,14 @@ const server=http.createServer((req,res)=>{
       typeof window.gensMode151==='function' &&
       typeof window.ensureBuiltinMonsterCapture162==='function' &&
       !!p;
-  },CAPTURE_ID);
+    },CAPTURE_ID,{timeout:60000});
+  };
 
   try{
     mark('navigate-real-capture-shell');
     await page.goto(url,{waitUntil:'domcontentloaded',timeout:45000});
 
-    mark('install-current-capture-owners');
-    await installCaptureOwners();
-
-    mark('wait-current-capture-owners');
+    mark('wait-full-production-capture-owners');
     await waitOwners();
 
     mark('characterize-capture-without-dungeon-style');
@@ -280,8 +259,7 @@ const server=http.createServer((req,res)=>{
         page.waitForNavigation({waitUntil:'domcontentloaded',timeout:15000}),
         captureCard.click()
       ]);
-      mark('reinstall-current-capture-owners-after-v155-reload');
-      await installCaptureOwners();
+      mark('wait-production-capture-owners-after-v155-reload');
       await waitOwners();
       const reloaded=await page.evaluate((captureId)=>({
         active:activeGameProfileId(),

@@ -179,7 +179,7 @@ const phase5ConnectedServices=[
   'assets/gensrpg/shell/module-launch-final-authority-v1.js'
 ];
 const phase5Set=new Set(phase5ConnectedServices);
-const phase12ConnectedServices=["assets/gensrpg/builders/equipment-library-editor-v1.js","assets/gensrpg/core/legacy-cloud-sync-backup-v1.js","assets/gensrpg/core/legacy-magic-sounds-v1.js","assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js","assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js","assets/gensrpg/capture/legacy-monolith-functions-v1.js","assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js","assets/gensrpg/builders/legacy-enemy-editor-v1.js","assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js","assets/gensrpg/builders/legacy-character-entity-editors-v1.js"];
+const phase12ConnectedServices=["assets/gensrpg/builders/equipment-library-editor-v1.js","assets/gensrpg/core/legacy-cloud-sync-backup-v1.js","assets/gensrpg/core/legacy-magic-sounds-v1.js","assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js","assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js","assets/gensrpg/capture/legacy-monolith-functions-v1.js","assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js","assets/gensrpg/builders/legacy-enemy-editor-v1.js","assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js","assets/gensrpg/builders/legacy-character-entity-editors-v1.js","assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js"];
 const phase12Set=new Set(phase12ConnectedServices);
 const phase9ConnectedServices=[
   'assets/gensrpg/capture/session-start-v1.js',

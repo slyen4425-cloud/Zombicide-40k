@@ -294,7 +294,27 @@ const server=http.createServer((req,res)=>{
 
     mark('open-current-capture-pregame');
     await page.locator('#gensGameHomeActions .newGameBtn').click();
-    await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
+    try{
+      await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
+    }catch(error){
+      // Diagnose the real browser state; do not force the pre-game open or
+      // weaken the expected behavior when Capture/Shell routing regresses.
+      const snapshot=await page.evaluate(()=>({
+        active:typeof activeGameProfileId==='function'?activeGameProfileId():'missing',
+        family:typeof gensSelectedFamily==='undefined'?'missing':String(gensSelectedFamily||''),
+        mode151:typeof gensMode151==='function'?gensMode151():'missing',
+        contentFamily:typeof gensCurrentContentFamily==='function'?gensCurrentContentFamily():'missing',
+        captureMode:typeof gensCapturePregameMode==='function'?gensCapturePregameMode():'missing',
+        shellActive:window.GensShellModuleLaunchV1?.activeModule?.()||'missing',
+        pregame:document.getElementById('pregameSetup')?getComputedStyle(document.getElementById('pregameSetup')).display:'absent',
+        gameHome:document.getElementById('gensGameHome')?getComputedStyle(document.getElementById('gensGameHome')).display:'absent',
+        bodyClasses:[...document.body.classList],
+        newGameClick:document.querySelector('#gensGameHomeActions .newGameBtn')?.getAttribute('onclick')||'missing'
+      })).catch(e=>({diagnosticFailure:String(e)}));
+      console.error('[capture-pregame-full-composition] blocked after Nouvelle partie',
+        JSON.stringify({snapshot,browserErrors}));
+      throw error;
+    }
     await page.waitForFunction(()=>document.body.classList.contains('gensCapturePregame'));
 
     const pregame=await page.evaluate(()=>({

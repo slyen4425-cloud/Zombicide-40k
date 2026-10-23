@@ -75,6 +75,16 @@ def historical_r05_view(data):
         "9f35eb833a6ede4b91399854f19bb9bef59f45ab":1729855,
     }
     current_sha=blob(data)
+    if current_sha=="260f00aa179c939f35188ca854f9875971ce8a7b":
+        from pathlib import Path
+        root=Path(__file__).resolve().parents[1]
+        owner=(root/"assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js").read_bytes()
+        assert len(data)==1720766 and len(owner)==9158 and blob(owner)=="fe7c0cff03f7e19f49d3c743257c5fe717f40593", "R16 source/owner drift"
+        hook=b'<script id="dungeonCore303TimelineRootFix" src="assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js"></script>'
+        assert data.count(hook)==1, "R16 historical parser slot drift"
+        data=data.replace(hook,b'<script id="dungeonCore303TimelineRootFix">'+owner+b'</script>',1)
+        current_sha=blob(data)
+        assert len(data)==1729855 and current_sha=="9f35eb833a6ede4b91399854f19bb9bef59f45ab", "R16 historical inverse mismatch"
     if current_sha in exact_current:
         assert len(data)==exact_current[current_sha], "unknown historical index size"
         data=_exact_r10_to_r09()

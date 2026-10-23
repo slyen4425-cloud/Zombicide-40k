@@ -48,6 +48,17 @@ const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\
       assert.equal(hash,'72481ac3ee62bc67f6c0646eb724baf4a87a2f88','D7 Core214 byte-identical owner');
       return {id:m[1],body:bytes.toString('utf8'),offset:m.index};
     }
+    if(m[1]==='dungeonCore303TimelineRootFix'){
+      const rel='assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js';
+      assert.equal(m[0],'<script id="dungeonCore303TimelineRootFix" src="'+rel+'"></script>',
+        'R16 Core303 must retain its original synchronous parser position');
+      const bytes=fs.readFileSync(path.join(root,rel));
+      const crypto=require('node:crypto');
+      const hash=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+String.fromCharCode(0))).update(bytes).digest('hex');
+      assert.equal(bytes.length,9158,'R16 Core303 original owner byte length');
+      assert.equal(hash,'fe7c0cff03f7e19f49d3c743257c5fe717f40593','R16 Core303 owner code remains byte-identical');
+      return {id:m[1],body:bytes.toString('utf8'),offset:m.index};
+    }
     if(captureR06Names.has(m[1])){
       const rel=captureR06Rel(m[1]);
       assert.equal(m[0],'<script id="'+m[1]+'" src="'+rel+'"></script>',

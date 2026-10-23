@@ -1,6 +1,16 @@
 # GenSrpG — CURRENT_WORK officiel (23 octobre 2026)
 
 
+## Phase 12 — Sentinelle interférences quatre modes : composition réelle (23 octobre, START / NON GREEN)
+
+- **Source et reprise charte §25** : HEAD du lot précédent `work/gensrpg-phase12-capture-provider-s3-full-composition-2026-10-23`, SHA `92fb2d0dc14173ae83f2f68e49b96c0028766003`, architecture SUCCESS, Tactical complet SUCCESS, Firefox wall SUCCESS, mais browser-sentinel FAILURE. Checkpoint START exact à ce SHA : `checkpoint/gensrpg-start-phase12-four-mode-browser-real-composition-2026-10-23`, avant toute modification. Branche indépendante `work/gensrpg-phase12-four-mode-browser-real-composition-2026-10-23`. La source n'est **pas** certifiée GREEN globale ; `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+- **Défaut prouvé** : [CI 39956374111](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39956374111) : les quatre tests Capture avant l'interférence passent, y compris S3 et Capture pleine composition. Le test `tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs` échoue ligne 340 : timeout 20 s après les navigations Survie → Dungeon → Survie → Capture au démarrage pré-game. Il se fonde sur une mini-page assemblée depuis un fragment historique de `index.html` et réinjecte six scripts Capture après chaque reload V155, contrairement au véritable `preview.html` validé.
+- **Périmètre autorisé** : uniquement ce test et `docs/GENSRPG_CURRENT_WORK.md`. La sentinelle doit charger la vraie composition `preview.html` et attendre le runtime effectif, sans faux Shell ni réinjection de scripts. Conserver les vérifications existantes : quatre cartes, isolement de familles/autorités, enchaînement réel Survie/Dungeon/Survie/Capture/PvP, rechargements V155, pré-game sans Dungeon, aucune session ou sauvegarde Dungeon parasite, création/persistance d'un monde Capture indépendant (éditeur réel), erreurs navigateur vides.
+- **Interdits** : ne pas affaiblir des assertions, altérer les moteurs ou raccourcir des chemins utilisateurs ; aucun patch runtime, `index.html`, YAML CI, PWA, labos, ni `main`. Aucun transfert par connecteur de l'immense contenu intégral de `index.html` (§26). En cas de preuve de vrai défaut dans les propriétaires, isoler une branche de correction distincte avec START propre avant modification de gameplay.
+- **Gate de validation** : architecture statique et browser complet Chromium, Tactical contract/Firefox/Chromium et sentinelle Firefox sur un **même SHA**. Tant que la matrice n'est pas SUCCESS, rester NON GREEN et ne pas créer de checkpoint final.
+
+
+
 ## Phase 12 — Capture S3 provider : parité navigateur sur composition réelle (23 octobre, START / NON GREEN)
 
 - **Base non GREEN explicite / §25** : branche parente `work/gensrpg-phase12-capture-browser-real-composition-2026-10-23`, SHA `17ef339df080ccd9b5f71e1b04dd0f1fc6a72c8d`. Checkpoint START `checkpoint/gensrpg-start-phase12-capture-provider-s3-full-composition-2026-10-23` créé **avant changement du test** à ce même SHA ; branche dédiée `work/gensrpg-phase12-capture-provider-s3-full-composition-2026-10-23`. Dernier GREEN fonctionnel indépendant : `checkpoint/gensrpg-phase12-dungeon-chest-reload-parity-green-2026-10-21` à `7e82bf8e1b3235bc4ee8dcf2ce4535eb6d9e7aa7`. `main` figée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.

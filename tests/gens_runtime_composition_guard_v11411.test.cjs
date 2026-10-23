@@ -83,6 +83,7 @@ assert.deepEqual(directSrcs,[
   'assets/gensrpg/dungeon/core213-stability-v1.js',
   'assets/gensrpg/dungeon/core214-single-authority-v1.js',
   'assets/dungeon/dungeon-core-316.js',
+  'assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js',
   'assets/dungeon/dungeon-core-317.js',
   'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
   'assets/gensrpg/pvp/session-v1.js',

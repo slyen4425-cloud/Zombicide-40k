@@ -66,7 +66,7 @@ function exactScript(id){
     assert.ok(fs.existsSync(path.join(root,externalUrl.split('?')[0])),
       'external Capture script must physically exist: '+id);
   }
-  return {id,start,source:externalUrl?null:indexSource.slice(openEnd+1,end),url:externalUrl};
+  return {id,start};
 }
 
 const ownerIds=[
@@ -80,12 +80,6 @@ const ownerIds=[
 const ownerScripts=ownerIds.map(exactScript);
 for(let i=1;i<ownerScripts.length;i++)assert.ok(ownerScripts[i].start>ownerScripts[i-1].start,'owner scripts must keep production order');
 
-const realShellHtml=
-  indexSource.slice(0,shellScriptEnd+'</script>'.length)+
-  '\n'+indexSource.slice(onlineScriptStart,onlineScriptEnd+'</script>'.length)+
-  '\n'+indexSource.slice(customScriptStart,customScriptEnd+'</script>'.length)+
-  '\n</body></html>';
-
 const mime={
   '.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8',
   '.css':'text/css; charset=utf-8','.json':'application/json',
@@ -95,10 +89,6 @@ const mime={
 
 const server=http.createServer((req,res)=>{
   const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
-  if(pathname==='/__gens_four_module_real.html'){
-    res.writeHead(200,{'content-type':'text/html; charset=utf-8','cache-control':'no-store'});
-    res.end(realShellHtml);return;
-  }
   const rel=pathname==='/'?'/index.html':pathname;
   const file=path.resolve(root,'.'+rel);
   if(!file.startsWith(root+path.sep)){res.writeHead(403);res.end('forbidden');return}
@@ -116,7 +106,7 @@ const server=http.createServer((req,res)=>{
 
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   const port=server.address().port;
-  const url=`http://127.0.0.1:${port}/__gens_four_module_real.html`;
+  const url=`http://127.0.0.1:${port}/preview.html`;
   const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
   const context=await browser.newContext({
     viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,
@@ -144,29 +134,22 @@ const server=http.createServer((req,res)=>{
   page.on('dialog',async dialog=>{await dialog.accept()});
   await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
 
-  const installOwners=async()=>{
-    for(const owner of ownerScripts){
-      mark('install-'+owner.id);
-      if(owner.url){
-        await page.addScriptTag({url:'http://127.0.0.1:'+port+'/'+owner.url});
-      }else{
-        await page.addScriptTag({content:owner.source});
-      }
-    }
-    await page.evaluate(()=>{try{window.gensReconcile151?.('four-module-install')}catch(e){}});
+  // Full production preview: no selected inline-fragment Shell and no injected owners.
+  // Parser-slot identity and ordering are independently guarded above.
+  const waitOwners=async()=>{
+    await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:60000});
+    await page.waitForFunction((captureId)=>{
+      const profiles=typeof loadGameProfiles==='function'?loadGameProfiles():[];
+      return typeof window.openGensFamily==='function' &&
+        typeof window.openGensBuiltInGame==='function' &&
+        typeof window.showGensRootHome==='function' &&
+        typeof window.backToGensFamily==='function' &&
+        typeof window.gensMode151==='function' &&
+        typeof window.gensProfileContentFamily155==='function' &&
+        typeof window.ensureBuiltinMonsterCapture162==='function' &&
+        profiles.some(p=>String(p.id)===captureId);
+    },CAPTURE_ID,{timeout:60000});
   };
-
-  const waitOwners=()=>page.waitForFunction((captureId)=>{
-    const profiles=typeof loadGameProfiles==='function'?loadGameProfiles():[];
-    return typeof window.openGensFamily==='function' &&
-      typeof window.openGensBuiltInGame==='function' &&
-      typeof window.showGensRootHome==='function' &&
-      typeof window.backToGensFamily==='function' &&
-      typeof window.gensMode151==='function' &&
-      typeof window.gensProfileContentFamily155==='function' &&
-      typeof window.ensureBuiltinMonsterCapture162==='function' &&
-      profiles.some(p=>String(p.id)===captureId);
-  },CAPTURE_ID);
 
   const snapshot=()=>page.evaluate(()=>({
     active:typeof activeGameProfileId==='function'?activeGameProfileId():'',
@@ -202,8 +185,8 @@ const server=http.createServer((req,res)=>{
   };
 
   const reopenAfterReload=async(family,selector,profileId)=>{
-    mark('reinstall-after-v155-reload');
-    await installOwners();await waitOwners();
+    mark('wait-production-owners-after-v155-reload');
+    await waitOwners();
     const post=await page.evaluate(id=>({active:activeGameProfileId(),forced:localStorage.getItem('gensrpg_forced_mode_reload_155')}),profileId);
     assert.equal(post.active,profileId,'V16.155 reload must preserve target profile');
     assert.equal(post.forced,null,'V16.155 handoff must be consumed after reload');
@@ -240,7 +223,7 @@ const server=http.createServer((req,res)=>{
   try{
     mark('navigate-real-shell');
     await page.goto(url,{waitUntil:'domcontentloaded',timeout:45000});
-    await installOwners();await waitOwners();
+    await waitOwners();
 
     mark('four-first-level-cards-and-family-exclusivity');
     assert.equal(await page.locator('#gensRootHome .gensRootModeCard').count(),4,'Shell must expose all four modes at root');
@@ -375,8 +358,7 @@ const server=http.createServer((req,res)=>{
     await openFamily('capture');
     const previousProfileId=await page.evaluate(()=>activeGameProfileId());
     await page.locator('#gensFamilyGames button.gensFamilyGameCard[onclick*="createNewRpgUniverse"]').click();
-    // The reduced real-Shell composition intentionally excludes the full RPG editor modal.
-    // Prove creation and persistence here; the full editor is covered by preview E2E tests.
+    // Exercise the production Capture world creator and editor without synthetic mocks.
     await page.waitForFunction(previous=>{
       const id=typeof activeGameProfileId==='function'?activeGameProfileId():null;
       if(!id||String(id)===String(previous))return false;

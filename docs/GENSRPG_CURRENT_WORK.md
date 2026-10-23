@@ -1,7 +1,7 @@
 # GenSrpG — CURRENT_WORK officiel (23 octobre 2026)
 
 
-## Phase 12 — Sentinelle interférences quatre modes : composition réelle (23 octobre, START / NON GREEN)
+## Phase 12 — Sentinelle interférences quatre modes : composition réelle (23 octobre, GREEN vérifié)
 
 - **Source et reprise charte §25** : HEAD du lot précédent `work/gensrpg-phase12-capture-provider-s3-full-composition-2026-10-23`, SHA `92fb2d0dc14173ae83f2f68e49b96c0028766003`, architecture SUCCESS, Tactical complet SUCCESS, Firefox wall SUCCESS, mais browser-sentinel FAILURE. Checkpoint START exact à ce SHA : `checkpoint/gensrpg-start-phase12-four-mode-browser-real-composition-2026-10-23`, avant toute modification. Branche indépendante `work/gensrpg-phase12-four-mode-browser-real-composition-2026-10-23`. La source n'est **pas** certifiée GREEN globale ; `main` gelée `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
 - **Défaut prouvé** : [CI 39956374111](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39956374111) : les quatre tests Capture avant l'interférence passent, y compris S3 et Capture pleine composition. Le test `tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs` échoue ligne 340 : timeout 20 s après les navigations Survie → Dungeon → Survie → Capture au démarrage pré-game. Il se fonde sur une mini-page assemblée depuis un fragment historique de `index.html` et réinjecte six scripts Capture après chaque reload V155, contrairement au véritable `preview.html` validé.
@@ -9,6 +9,8 @@
 - **Interdits** : ne pas affaiblir des assertions, altérer les moteurs ou raccourcir des chemins utilisateurs ; aucun patch runtime, `index.html`, YAML CI, PWA, labos, ni `main`. Aucun transfert par connecteur de l'immense contenu intégral de `index.html` (§26). En cas de preuve de vrai défaut dans les propriétaires, isoler une branche de correction distincte avec START propre avant modification de gameplay.
 - **Gate de validation** : architecture statique et browser complet Chromium, Tactical contract/Firefox/Chromium et sentinelle Firefox sur un **même SHA**. Tant que la matrice n'est pas SUCCESS, rester NON GREEN et ne pas créer de checkpoint final.
 
+
+- **Clôture CI vérifiée (23 octobre 2026)** : [run Architecture 39960988619](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39960988619) **SUCCESS sur les deux jobs** : architecture (359 sentinelles), Chromium navigateur complet (dont quatre modes, Capture S3, PvP et Equipment). [Tactical 39960988738](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39960988738) SUCCESS contrats + Chromium + Firefox. [Firefox walls 39960988455](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39960988455) SUCCESS. SHA source exact **`fb47398a2b6d6cc6c4b1e48fd2ffde3b716d83c4`**, checkpoint GREEN créé **`checkpoint/gensrpg-phase12-four-mode-browser-real-composition-green-2026-10-23`** avant cette note. Diff de ce lot = **seulement le test quatre-modes et ce journal**, pas de moteur/HTML/PWA/main. Les trois lots Capture/four-modes successifs sont donc validés sur ce SHA de composition, mais **ce GREEN ne clôt pas la phase 12 globale** (résidus inline et propriétaires multiples consignés dans audit post-R15). Prochain vrai axe architectural : chronologie des écrivains globaux Dungeon combat/IA et carte, puis consolidation soustractive après preuve, pas création mécanique de nouveaux micro-tests.
 
 
 ## Phase 12 — Capture S3 provider : parité navigateur sur composition réelle (23 octobre, START / NON GREEN)

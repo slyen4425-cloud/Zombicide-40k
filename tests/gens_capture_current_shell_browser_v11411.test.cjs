@@ -221,8 +221,8 @@ const server=http.createServer((req,res)=>{
     assert.match(captureCardText,/Monster Capture/);
     assert.match(captureCardText,/dresseur/i,
       'Capture card must describe its trainer role instead of the generic RPG hero label');
-    assert.match(captureCardText,/Capture de créatures/i,
-      'Capture card must expose Capture-specific content semantics');
+    assert.match(captureCardText,/\b\d+\s+créatures\b\s*·\s*\d+\s+objets\b/i,
+      'Capture card must expose real creature and item counts, not the generic Dungeon summary');
     assert.doesNotMatch(captureCardText,/\bhéros\b.*\bobjets\b.*\bmonstres\b/i,
       'Capture card must not reuse the generic Dungeon RPG summary');
     // Two independent root families: no Dungeon card should exist in Capture.

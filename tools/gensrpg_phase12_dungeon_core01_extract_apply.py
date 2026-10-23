@@ -98,7 +98,12 @@ def apply():
 def verify():
     # Historical byte-pinned graph checks use the exact R05 view. The live
     # corrected Dungeon 0.79 index is not modified or rolled back on disk.
-    historical_source_blob=blob(historical_r05_view(INDEX.read_bytes()))
+    historic_bytes=INDEX.read_bytes()
+    if blob(historic_bytes)=="260f00aa179c939f35188ca854f9875971ce8a7b":
+        import subprocess
+        historic_bytes=subprocess.check_output(["node",str(ROOT/"tools/gensrpg_phase12_r16_restore_r15.cjs"),"--restore-r15"],cwd=ROOT)
+        assert len(historic_bytes)==1729855 and blob(historic_bytes)=="9f35eb833a6ede4b91399854f19bb9bef59f45ab", "R16 historical D1 source not byte-exact"
+    historical_source_blob=blob(historical_r05_view(historic_bytes))
     # D2 is an independent downstream physical extraction. Undo only its
     # verified external tag in memory to inspect the immutable D1 state.
     target=read_d9_index_view(INDEX,ROOT)

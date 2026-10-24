@@ -16,10 +16,54 @@ if ! adb shell pm list packages | grep -q 'package:com.android.chrome'; then
 fi
 adb shell logcat -c || true
 adb shell am start -W -a android.intent.action.VIEW -d "$URL" -p com.android.chrome | tee artifacts/android/launch.txt
-sleep 20
+sleep 6
+adb shell uiautomator dump /sdcard/gensrpg-welcome.xml >/dev/null 2>&1 || true
+adb exec-out cat /sdcard/gensrpg-welcome.xml > artifacts/android/welcome.xml 2>/dev/null || true
+# Android emulator Chrome starts with an obligatory first-run welcome page.
+# Locate the "Use without an account" UI element from actual accessibility bounds.
+tap_onboarding_button() {
+  local name="$1" target
+  adb shell uiautomator dump /sdcard/gensrpg-ui.xml >/dev/null 2>&1 || true
+  adb exec-out cat /sdcard/gensrpg-ui.xml > artifacts/android/current-ui.xml 2>/dev/null || true
+  target=$(python3 - "$name" <<'PY'
+import re,sys,xml.etree.ElementTree as ET
+try:
+  root=ET.parse('artifacts/android/current-ui.xml').getroot()
+  for el in root.iter('node'):
+    id=(el.get('resource-id') or '').lower()
+    txt=(el.get('text') or '').lower()
+    needle=sys.argv[1].lower()
+    if needle in id or needle in txt:
+      v=re.findall(r'\d+',el.get('bounds',''))
+      if len(v)==4:
+        print((int(v[0])+int(v[2]))//2,(int(v[1])+int(v[3]))//2)
+        break
+except Exception as e:
+  print('',end='')
+PY
+)
+  if [ -n "$target" ]; then
+    echo "Onboarding dismiss $name at $target" | tee -a artifacts/android/launch.txt
+    adb shell input tap $target
+    sleep 7
+    return 0
+  fi
+  return 1
+}
+tap_onboarding_button signin_fre_dismiss_button || true
+tap_onboarding_button 'Not now' || true
+tap_onboarding_button 'No thanks' || true
+# Launch the game again only AFTER Chrome onboarding has been dismissed.
+adb shell am start -W -a android.intent.action.VIEW -d "$URL" -p com.android.chrome | tee -a artifacts/android/launch.txt
+sleep 22
 adb exec-out screencap -p > artifacts/android/01-home.png || true
 adb shell uiautomator dump /sdcard/gensrpg-window.xml >/dev/null 2>&1 || true
 adb exec-out cat /sdcard/gensrpg-window.xml > artifacts/android/window.xml 2>/dev/null || true
+if grep -Eiq 'Welcome to Chrome|signin_fre_dismiss_button' artifacts/android/window.xml; then
+  echo "BLOCKED: Chrome first-run UI still visible; game was not opened" | tee artifacts/android/result.txt
+  exit 4
+fi
+echo "First-run onboarding no longer visible; verify game UI in screenshot." | tee -a artifacts/android/launch.txt
 size=$(adb shell wm size | sed -n 's/.*Physical size: \([0-9]\+x[0-9]\+\).*/\1/p' | head -1 | tr -d '\r')
 w=$(echo "$size" | cut -dx -f1)
 h=$(echo "$size" | cut -dx -f2)

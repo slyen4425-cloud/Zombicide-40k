@@ -73,6 +73,16 @@ def _exact_r10_to_r09():
     return data
 
 def historical_r05_view(data):
+    # A source-only Chrome bootstrap repair cannot alter immutable Phase12
+    # historical snapshots. Invert only its exact SHA-pinned active blob.
+    if blob(data)=="cc355585acab68958bd349ffcf8fa0de4eab9b0d":
+        from pathlib import Path
+        import subprocess
+        root=Path(__file__).resolve().parents[1]
+        data=subprocess.check_output(
+            ["python3",str(root/"tests/gens_chrome_hero_recursion_patch_20261024.py"),"--reverse-stdout"],
+            input=data,cwd=root)
+        assert len(data)==1720766 and blob(data)=="260f00aa179c939f35188ca854f9875971ce8a7b", "historical Chrome rollback mismatched old blob"
     # New R11 source is strictly reconstructed via R11→R10→R09 before old snapshot checks.
     # Validate only known, exact subsequent physical index snapshots. In
     # particular R14/R15 must replay to R09 before D9's strict historical

@@ -1,5 +1,11 @@
-# GenSrpG — CURRENT_WORK officiel (23 octobre 2026)
+# GenSrpG — CURRENT_WORK officiel (24 octobre 2026)
 
+## Publication familiale et gouvernance des lots (24 octobre ; en cours)
+
+- **Source publiée sur `main`** : PR #157 fusionnée, commit `6ad27bac8798c9473996e73ad455891701a21f15`, arbre Git identique au checkpoint R16 GREEN `7c805e4fa20dcdfa659981df40d222a9c5f47f4c`. Sauvegarde prépublication `checkpoint/gensrpg-main-before-green-r16-publication-2026-10-24`. La fusion est réelle, mais l'ancien workflow Pages de `main` a échoué sur tests historiques désormais couplés aux scripts inline ; **ne pas annoncer la PWA réinstallable à jour tant que Pages n'est pas vert**.
+- **Publication Pages — chantier dédié** : START `checkpoint/gensrpg-start-family-pages-release-fix-2026-10-24` au commit de `main` publié, branche `work/gensrpg-family-pages-release-fix-2026-10-24`, PR #158. Périmètre : vérification des fichiers JS externalisés par tests historiques, compatibilité Playwright des runners, tests de prépublication Pages sur PR. Aucun changement de gameplay voulu. Gate : PR + CI intégration + Pages sur `main` réussies, vérification de l'URL puis test famille avec export sauvegardes.
+- **Charte reprise fonctionnalités — lot indépendant** : START `checkpoint/gensrpg-start-charte-developpement-parallele-2026-10-24` sur le même SHA de `main`, branche `work/gensrpg-charte-developpement-parallele-2026-10-24`. Seuls `docs/GENSRPG_CHARTE.md` et `docs/GENSRPG_CURRENT_WORK.md` : ajouter §27 pour le développement fonctionnel prioritaire, lots parallèles indépendants, séparation laboratoires, tests ciblés + validation d'intégration, PWA familiale. Aucune modification du runtime. Gate : revue et sentinelles de la branche avant PR/merge. Ne pas confondre validation CI technique et validation manuelle par les enfants.
+- **Priorité après publication : fonctionnalités demandées**, non poursuite automatique du nettoyage Phase 12. Aucun recouvrement des propriétaires partagés entre branches ; chaque nouvelle fonctionnalité part de la dernière version `main` GREEN et passe son propre checkpoint START (§25).
 
 ## Phase 12 — R16 : migration propriétaire Dungeon combat/IA (extraction Core303, CI à vérifier)
 

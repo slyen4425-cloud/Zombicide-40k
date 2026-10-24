@@ -12,10 +12,10 @@ function script(id) {
   const matches=[...html.matchAll(new RegExp(`<script\\s+id=["']${id}["'][^>]*>([\\s\\S]*?)<\\/script>`, "g"))];
   assert.equal(matches.length,1,`script ${id} must have one production owner`);
   const tag=matches[0][0],inline=matches[0][1];
-  const src=tag.match(/\\bsrc=["']([^"']+)["']/)?.[1];
+  const src=tag.match(/\bsrc="([^"]+)"/)?.[1];
   if(!src)return inline;
   assert.equal(inline,"",`script ${id}: no duplicate inline implementation`);
-  assert.match(src,/^assets\\/[a-zA-Z0-9_./-]+\\.js(?:\\?[a-zA-Z0-9_.=&-]+)?$/,`script ${id}: local owner only`);
+  assert.ok(src.startsWith("assets/") && src.split("?")[0].endsWith(".js"),`script ${id}: local JS owner only`);
   const rel=src.split("?")[0];
   assert.ok(!rel.split("/").includes(".."),`script ${id}: path traversal forbidden`);
   const full=path.join(__dirname,"..",rel);

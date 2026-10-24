@@ -55,5 +55,17 @@ const statements=ast.body.map((n,i)=>({
 }));
 const executable=statements.filter(s=>s.topLevel);
 const out={publishedCodeScript29Hash:crypto.createHash('sha256').update(body).digest('hex'),bodyBytes:Buffer.byteLength(body),programStatements:statements.length,executableCount:executable.length,executable:executable.map(x=>({n:x.n,type:x.type,atLine:x.atLine,throughLine:x.throughLine,bytes:x.bytes,role:x.role,sample:x.sample})),functionNames:statements.filter(s=>s.type==='FunctionDeclaration').map(s=>({atLine:s.atLine,role:s.role,sample:s.sample.slice(0,95)})).slice(0,20)};
+const lookup=['z40kApplyCustomHeroes','loadCustomHeroesMulti','applyCustomHeroesMulti','saveCustomHeroesMulti'];
+const details=lookup.map(fn=>{
+ const declaration=ast.body.find(n=>n.type==='FunctionDeclaration'&&n.id?.name===fn);
+ const allReferences=[...body.matchAll(new RegExp('\\\\b'+fn+'\\\\s*\\\\(','g'))].length;
+ if(!declaration)return {function:fn,definedInScript:false,references:allReferences};
+ const snippet=body.slice(declaration.start,declaration.end);
+ return {function:fn,definedInScript:true,atLine:declaration.loc.start.line+15891,
+   throughLine:declaration.loc.end.line+15891,bytes:snippet.length,
+   excerptStart:snippet.slice(0,3300),excerptEnd:snippet.slice(-350),
+   references:allReferences};
+});
+out.heroChain=details;
 console.log('GENSRPG_SCRIPT29_TOPLEVEL '+JSON.stringify(out));
 fs.writeFileSync('artifacts/gensrpg-chrome-script29-toplevel.json',JSON.stringify(out,null,2));

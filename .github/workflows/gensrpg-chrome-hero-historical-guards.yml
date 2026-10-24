@@ -10,6 +10,8 @@ on:
       - 'tools/gensrpg_phase12_r16_restore_r15.cjs'
       - 'tests/helpers/gens_chrome_historical_subprocess_view_20261024.cjs'
       - 'tests/helpers/gens_phase12_r09_wave_source_view_v1.cjs'
+      - 'tests/helpers/gens_phase12_r02_r01_source_view_v1.cjs'
+      - 'tools/gensrpg_phase12_r01_d9_source_view.py'
       - '.github/workflows/gensrpg-chrome-hero-historical-guards.yml'
   workflow_dispatch:
 permissions:
@@ -37,6 +39,8 @@ jobs:
           node tests/gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs
           node tests/gens_phase9_capture_shell_home_return_boundary_v1.test.cjs
           node tests/gens_phase9_capture_combat_core_owner_v1.test.cjs
+      - name: Confirm Dungeon extraction rollback remains byte-exact
+        run: node tests/gens_phase12_dungeon_core01_extraction_v1.test.cjs
       - name: Confirm Armor and Survival historic snapshot after Chrome fix
         run: |
           node tests/gens_phase6_survival_legacy_guard_retirement_v1.test.cjs

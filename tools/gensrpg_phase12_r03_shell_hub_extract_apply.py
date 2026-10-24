@@ -41,14 +41,14 @@ def historical_shell_owner_for_verified_rollback(js):
     current=blob(js)
     if current==JS_SHA:return js
     assert current=='1323e83467feacccc69d2c2cd3d3c3cea37608eb', ('unrecognized current Shell owner',current)
-    old=b'  profiles=profiles.filter(p=>(gensContentFamilyForProfile(p)=="creature")===(family==="capture"));\n  const cards=profiles.map(p=>{'
+    old=b'  profiles=profiles.filter(p=>(gensContentFamilyForProfile(p)==="creature")===(family==="capture"));\n  const cards=profiles.map(p=>{'
     new=b'\n'.join((
         b'  // Shell presentation only: one card per persisted profile ID, even when an',
         b'  // older Chrome session contains multiple copies of the built-in Dungeon ID.',
         b'  // Never rewrite or delete profiles here: stored copies and saves stay intact.',
         b'  const shownProfileIds=new Set();',
         b'  profiles=profiles.filter(p=>{',
-        b'    if((gensContentFamilyForProfile(p)=="creature")!==(family==="capture"))return false;',
+        b'    if((gensContentFamilyForProfile(p)==="creature")!==(family==="capture"))return false;',
         b'    const id=String(p?.id??"");',
         b'    if(!id)return true; // do not silently hide malformed/unsaved profiles',
         b'    if(shownProfileIds.has(id))return false;',

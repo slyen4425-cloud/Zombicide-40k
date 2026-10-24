@@ -24,7 +24,13 @@ module.exports=function r08View(index,root=path.resolve(__dirname,'../..')){
   }
   if(blob(index)!==R09)return index;
   assert.equal(index.length,2093066);
-  const restored=cp.execFileSync('node',[path.join(root,'tools/gensrpg_phase12_r09_wave_extract_apply.cjs'),'--restore-r08'],{cwd:root,maxBuffer:4*1024*1024});
+  const restored=cp.execFileSync('node',[path.join(root,'tools/gensrpg_phase12_r09_wave_extract_apply.cjs'),'--restore-r08'],{
+    cwd:root,maxBuffer:4*1024*1024,
+    // R09 recursively invokes R10->R16 rollback subprocesses; propagate the
+    // byte-exact historical source view down this test-only subprocess chain.
+    env:{...process.env,NODE_OPTIONS:[process.env.NODE_OPTIONS||'',
+      '--require='+path.join(root,'tests/helpers/gens_chrome_historical_subprocess_view_20261024.cjs')].filter(Boolean).join(' ')}
+  });
   assert.equal(blob(restored),R08,'R09 must reconstruct exact R08 before historical guards');
   return restored;
 };

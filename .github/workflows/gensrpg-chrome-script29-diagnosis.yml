@@ -23,10 +23,14 @@ jobs:
           curl -fLSs --retry 2 --max-time 40 -H 'Cache-Control: no-cache' 'https://slyen4425-cloud.github.io/Zombicide-40k/index.html?diag_script29_probe=20261024' -o artifacts/published-index.html
           test $(wc -c < artifacts/published-index.html) -gt 1000000
           DIAG_INDEX_PATH=artifacts/published-index.html node tests/gens_chrome_script29_map_20261024.cjs
+          npm install --no-save --prefix /tmp/gensrpg-stage-parser acorn@8.15.0
+          NODE_PATH=/tmp/gensrpg-stage-parser/node_modules node tests/gens_chrome_script29_top_level_20261024.cjs
       - name: Upload short script-stage mapping
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: chrome-script29-map
-          path: artifacts/gensrpg-chrome-script29-map-*.json
+          path: |
+            artifacts/gensrpg-chrome-script29-map-*.json
+            artifacts/gensrpg-chrome-script29-toplevel.json
           if-no-files-found: warn

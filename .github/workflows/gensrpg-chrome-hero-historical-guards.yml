@@ -8,6 +8,8 @@ on:
       - 'tests/helpers/gens_capture_team_roster_snapshot_v1.cjs'
       - 'tests/gens_chrome_hero_recursion_patch_20261024.py'
       - 'tools/gensrpg_phase12_r16_restore_r15.cjs'
+      - 'tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs'
+      - 'tools/gensrpg_phase12_generated_wall_history.py'
       - 'tests/helpers/gens_chrome_historical_subprocess_view_20261024.cjs'
       - 'tests/helpers/gens_phase12_r09_wave_source_view_v1.cjs'
       - 'tests/helpers/gens_phase12_r02_r01_source_view_v1.cjs'
@@ -35,6 +37,8 @@ jobs:
           assert.ok(hist.length<b.length);
           console.log('HISTORICAL_CHROME_INDEX_OK',hist.length,b.length);
           NODE
+      - name: Confirm historical Core R05 source and backups remain byte-exact
+        run: node tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs
       - name: Confirm Phase 9 Hub historical owner remains exact
         run: |
           node tests/gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs

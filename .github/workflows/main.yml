@@ -17,8 +17,10 @@ permissions:
   pages: write
   id-token: write
 
+# Release builds for separate PRs must not cancel or block each other.
+# Only deployments/updates of the same ref share a concurrency lock.
 concurrency:
-  group: "pages"
+  group: "pages-${{ github.event_name }}-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:

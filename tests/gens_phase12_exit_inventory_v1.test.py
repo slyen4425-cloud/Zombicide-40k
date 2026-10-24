@@ -49,7 +49,7 @@ class ExitInventoryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="gensrpg-historical-r06-") as tmp:
             historical = Path(tmp)
             (historical / "index.html").write_bytes(original)
-            for name in ("tools", "assets"):
+            for name in ("tools", "assets", "docs"):
                 os.symlink(root / name, historical / name, target_is_directory=True)
             r08_index = subprocess.check_output(
                 ["node", str(root / "tools/gensrpg_phase12_r09_wave_extract_apply.cjs"), "--restore-r08"],

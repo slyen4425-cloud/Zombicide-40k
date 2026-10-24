@@ -31,7 +31,7 @@ $("clear").addEventListener("click",()=>{
  if(!confirm("Effacer seulement le journal de diagnostic ? Les sauvegardes du jeu ne seront pas touchées."))return;
  try{localStorage.removeItem(KEY)}catch(_){}show()
 });
-$("start").addEventListener("click",()=>{location.href="diagnostic.html?run=1"});
+$("start").addEventListener("click",()=>{try{sessionStorage.setItem("__gensDiagManualStart","1")}catch(_){}location.href="diagnostic.html?run=1"});
 show();
 if(new URLSearchParams(location.search).get("run")!=="1")return;
 $("loading").style.display="grid";

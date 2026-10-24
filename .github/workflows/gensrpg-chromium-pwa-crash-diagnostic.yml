@@ -29,11 +29,17 @@ jobs:
         env:
           NODE_PATH: /tmp/gensrpg-pwa-probe/node_modules
         run: node tests/gens_chromium_pwa_crash_diagnostic_20261024.cjs
+      - name: Check DOM accumulation across real game-family navigation
+        env:
+          NODE_PATH: /tmp/gensrpg-pwa-probe/node_modules
+        run: node tests/gens_chromium_dom_navigation_diagnostic_20261024.cjs
       - name: Attach measurements (no real user saved data)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gensrpg-chromium-pwa-diagnostic
-          path: artifacts/chromium-pwa-diagnostic.json
+          path: |
+            artifacts/chromium-pwa-diagnostic.json
+            artifacts/chromium-dom-navigation.json
           if-no-files-found: warn
           retention-days: 7

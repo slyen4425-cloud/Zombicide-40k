@@ -1,0 +1,25 @@
+name: Dungeon profile duplication root-cause trace (nonproduction)
+on:
+  push:
+    branches:
+      - work/gensrpg-dungeon-profile-duplicate-rootcause-2026-10-24
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: 
+          node-version: '22'
+      - name: Install Chromium for controlled browser inspection
+        run: |
+          npm install --no-save --prefix /tmp/gensrpg-dungeon-trace playwright@1.55.0
+          /tmp/gensrpg-dungeon-trace/node_modules/.bin/playwright install --with-deps chromium
+      - name: Trace each real profile-array write, without altering production
+        env:
+          NODE_PATH: /tmp/gensrpg-dungeon-trace/node_modules
+        run: node tests/gens_dungeon_profile_write_trace_20261024.cjs

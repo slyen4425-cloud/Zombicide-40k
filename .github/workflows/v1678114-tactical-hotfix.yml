@@ -91,7 +91,8 @@ jobs:
           npm install --no-save --no-package-lock playwright@1.55.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
           node tests/gens_v11411_native_ui_browser.test.cjs
-          node tests/gensrpg_phase12_dungeon_tactical_handoff_browser.cjs
+          node tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs
+          node tests/gens_tactical_dock_browser_v11411.test.cjs
       - name: Exact adapter D100 scale and entered-hero boundary
         run: |
           node tests/gens_rpg_tactical_combat_v2.test.cjs

@@ -25,6 +25,9 @@ let graphs=[];let seq=0;const builderApi={loadLibrary(){return graphs.map(clone)
 const context={console,Math,Date,document,setTimeout(fn){fn();return 1},MutationObserver:function(){throw new Error('global MutationObserver interdit dans le template UI')},PointerEvent:function(){},showToast(){},DungeonRoomCreator100:roomApi,DungeonZoneContent167824:zoneApi,DungeonRoomVisualConfig167826:visualApi,DungeonWorldBuilder167821:builderApi};context.window=context;context.globalThis=context;
 vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-room-template-content-167828.js'});
 const api=context.DungeonRoomTemplateContent167828;assert.ok(api);assert.equal(api.APP_VERSION,'16.78.29');
+// This fixture sets document.readyState='loading'; execute the real DOMContentLoaded
+// install that its mock addEventListener otherwise silently discards.
+assert.equal(api.install(),true,'real template owner must install before editor actions');
 assert.equal(library.length,0,'la pièce peut ne pas encore être enregistrée ni appartenir à un monde');
 assert.equal(api.setTemplateMode(true),true,'la configuration directe doit fonctionner sans World Builder');assert.equal(saves,1,'activer la configuration doit sauvegarder automatiquement la grille courante');assert.equal(library[0].cells[5].object,'enemy');assert.equal(api.templateContent('room-direct').enemies[0].configured,false,'un réglage par défaut automatique ne doit pas être affiché comme configuré par l’utilisateur');
 api.decorateGrid();assert.equal(typeof enemyCell.onpointerdown,'function','l’ennemi fraîchement posé doit devenir directement tactile');let prevented=false;enemyCell.onpointerdown({preventDefault(){prevented=true},stopPropagation(){},stopImmediatePropagation(){}});assert.equal(prevented,true);const modal=elements.get('drt167828Modal');assert.ok(modal&&modal.classList.contains('open'),'toucher l’ennemi doit ouvrir sa fiche sans contexte Monde/Zone');

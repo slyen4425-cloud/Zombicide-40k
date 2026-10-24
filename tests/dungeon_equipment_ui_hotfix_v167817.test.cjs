@@ -60,6 +60,14 @@ vm.runInNewContext(baseUi,context,{filename:"dungeon-equipment-ui.js"});
 const equippedOwner=fs.readFileSync(require("node:path").join(__dirname,"..","assets","gensrpg","core","inventory-equipped-view-v1.js"),"utf8");
 vm.runInNewContext(equippedOwner,context,{filename:"inventory-equipped-view-v1.js"});
 assert.equal(typeof context.GensInventoryEquippedViewV1?.equippedItems,"function");
+// Get the real isolated Core316 set aggregation, not a synthetic set-state mock.
+const core316=fs.readFileSync(require("node:path").join(__dirname,"..","assets","dungeon","dungeon-core-316.js"),"utf8");
+const setStart=core316.indexOf("function thresholds316(set){");
+const setEnd=core316.indexOf("window.dungeonSetStateFromItems316=setState316;",setStart);
+assert.ok(setStart>=0 && setEnd>setStart,"Core316 set owner must exist in source");
+const setSource=core316.slice(setStart,setEnd+"window.dungeonSetStateFromItems316=setState316;".length);
+vm.runInNewContext(setSource,context,{filename:"dungeon-core-316-set-owner.js"});
+assert.equal(typeof context.dungeonSetStateFromItems316,"function");
 vm.runInNewContext(hotfix,context,{filename:"dungeon-equipment-hotfix-167817.js"});
 
 const equipped=context.dungeonEquippedItems();

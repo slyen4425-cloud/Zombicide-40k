@@ -9,6 +9,13 @@ const server=http.createServer((req,res)=>{
  const file=path.resolve(root,'.'+(pathname==='/'?'/index.html':pathname));
  if(!file.startsWith(root+path.sep)){res.writeHead(403);return res.end()}
  fs.stat(file,(err,st)=>{if(err||!st.isFile()){res.writeHead(404);return res.end()}
+ if(pathname==='/diagnostic-boot.js'){
+   let js=fs.readFileSync(file,'utf8');
+   const needle='const count=(diagEventCounts[type]||0)+1;diagEventCounts[type]=count;';
+   assert.ok(js.includes(needle));
+   js=js.replace(needle,needle+'if((type==="hero-apply-enter"||type==="hero-hydrate-before")&&[1,2,10,50,100,500,1000].includes(count))try{localStorage.setItem("__chrome_loop_stack_"+type+"_"+count,(new Error().stack||"").slice(0,5000))}catch(_){}');
+   res.writeHead(200,{'content-type':'text/javascript; charset=utf-8','cache-control':'no-store'});return res.end(js);
+ }
  res.writeHead(200,{'content-type':mime[path.extname(file).toLowerCase()]||'application/octet-stream','cache-control':'no-store'});fs.createReadStream(file).pipe(res)})
 });
 const hero=(id,gameMode,extras={})=>({id,name:'HEROS TEST '+id,gameMode,avatar:'',avatarCrop:{x:0,y:0,scale:1,rot:0},hp:3,armor:2,skills:[],startingEquipment:[],progressionSlots:[],...extras});
@@ -52,6 +59,10 @@ async function execute(browser,name,scenario,port){
   for(const original of scenario.heroes)assert.ok(state.heroes.some(h=>h.id===original.id),'preserve original hero '+original.id);
   assert.ok(state.events.some(e=>e.type==='hero-call-after'),'bootstrap completes');
   console.log('HERO_PROFILE_SCENARIO_DEBUG '+JSON.stringify({browser:name,scenario:scenario.name,events:state.events,profiles:state.profiles,heroes:state.heroes,ready:state.ready}));
+  if(name==='chromium'&&scenario.name==='uninitialized-profiles-legacy-dungeon-hero'){
+    const stacks=await page.evaluate(()=>Object.keys(localStorage).filter(x=>x.startsWith('__chrome_loop_stack_')).sort().map(x=>({key:x,stack:localStorage.getItem(x)})));
+    console.log('HERO_RECURSION_STACKS '+JSON.stringify(stacks));
+  }
   assert.ok(!state.events.some(e=>e.type==='hero-apply-enter'&&e.count>=1000),'no persistent hero bootstrap recursion');
   assert.ok(!state.events.some(e=>e.type==='hero-hydrate-before'&&e.count>=1000),'no persistent hydrate storm');
   assert.ok(['rpg','survival'].includes(state.family),'family remains a meaningful mode');

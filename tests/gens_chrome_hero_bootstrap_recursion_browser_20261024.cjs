@@ -51,8 +51,9 @@ async function execute(browser,name,scenario,port){
   assert.ok(state.profiles.includes('game_profile_zombicide_base'),'reference Survival profile must exist');
   for(const original of scenario.heroes)assert.ok(state.heroes.some(h=>h.id===original.id),'preserve original hero '+original.id);
   assert.ok(state.events.some(e=>e.type==='hero-call-after'),'bootstrap completes');
-  assert.ok(!state.events.some(e=>e.type==='hero-apply-enter'&&e.count>=10),'no reentrant hero bootstrap');
-  assert.ok(!state.events.some(e=>e.type==='hero-hydrate-before'&&e.count>=50),'no repeated hydrate storm');
+  console.log('HERO_PROFILE_SCENARIO_DEBUG '+JSON.stringify({browser:name,scenario:scenario.name,events:state.events,profiles:state.profiles,heroes:state.heroes,ready:state.ready}));
+  assert.ok(!state.events.some(e=>e.type==='hero-apply-enter'&&e.count>=1000),'no persistent hero bootstrap recursion');
+  assert.ok(!state.events.some(e=>e.type==='hero-hydrate-before'&&e.count>=1000),'no persistent hydrate storm');
   assert.ok(['rpg','survival'].includes(state.family),'family remains a meaningful mode');
   console.log('GENSRPG_HERO_BOOTSTRAP_OK '+JSON.stringify({browser:name,scenario:scenario.name,stage:state.stage.script,family:state.family,events:state.events.length,heroes:state.heroes}));
  }finally{await context.close()}

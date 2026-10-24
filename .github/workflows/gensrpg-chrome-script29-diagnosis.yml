@@ -17,10 +17,16 @@ jobs:
       - uses: actions/checkout@v4
       - name: Locate exact parser-stage 29 from checked-out production HTML
         run: node tests/gens_chrome_script29_map_20261024.cjs
+      - name: Fetch published GitHub Pages HTML without browser local caches
+        run: |
+          mkdir -p artifacts
+          curl -fLSs --retry 2 --max-time 40 -H 'Cache-Control: no-cache' 'https://slyen4425-cloud.github.io/Zombicide-40k/index.html?diag_script29_probe=20261024' -o artifacts/published-index.html
+          test $(wc -c < artifacts/published-index.html) -gt 1000000
+          DIAG_INDEX_PATH=artifacts/published-index.html node tests/gens_chrome_script29_map_20261024.cjs
       - name: Upload short script-stage mapping
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: chrome-script29-map
-          path: artifacts/gensrpg-chrome-script29-map.json
+          path: artifacts/gensrpg-chrome-script29-map-*.json
           if-no-files-found: warn

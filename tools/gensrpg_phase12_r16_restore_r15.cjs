@@ -7,7 +7,11 @@ const PATH='assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js';
 const HOOK='<script id="dungeonCore303TimelineRootFix" src="'+PATH+'"></script>';
 const sha=s=>{const b=Buffer.from(s,'utf8');return crypto.createHash('sha1').update('blob '+b.length+'\0').update(b).digest('hex')};
 function canonicalR15(){
- const index=fs.readFileSync('index.html','utf8'),hash=sha(index);
+ // Reconstruct the exact pre-Chrome-fix bytes only for historical sentinel
+ // comparisons. Never alter the active index, saved data or runtime owner.
+ const active=fs.readFileSync('index.html');
+ const index=require('../tests/helpers/gens_chrome_hero_recursion_source_view_20261024.cjs')(active).toString('utf8');
+ const hash=sha(index);
  if(hash===PRE)return index;
  if(hash!==CURRENT)throw Error('R16 unauthorized source: cannot reconstruct R15');
  const owner=fs.readFileSync(PATH,'utf8');

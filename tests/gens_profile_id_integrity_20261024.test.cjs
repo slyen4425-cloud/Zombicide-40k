@@ -1,6 +1,6 @@
 "use strict";
 const assert=require("node:assert/strict");
-const check=require("../assets/gensrpg/core/profile-id-integrity-v1.js");
+const check=require("./helpers/gens_profile_id_integrity_v1.cjs");
 const dungeon={id:"game_profile_dungeon_demo",name:"Dungeon",builtIn:true,rpgUniverse:{gameplay:{modules:{items:true}},stats:{base:3}}};
 const forty={id:"game_profile_zombicide_base",name:"40K",builtIn:true};
 const capture={id:"gp_mt7ker7t_m2iw9",name:"Monster Capture",builtIn:true};

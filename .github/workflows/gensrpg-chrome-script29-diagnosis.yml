@@ -5,6 +5,7 @@ on:
       - work/gensrpg-chrome-script29-investigation-2026-10-24
     paths:
       - 'tests/gens_chrome_script29_map_20261024.cjs'
+      - 'tests/gens_chrome_script29_top_level_20261024.cjs'
       - '.github/workflows/gensrpg-chrome-script29-diagnosis.yml'
   workflow_dispatch:
 permissions:

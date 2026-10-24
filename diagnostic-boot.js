@@ -17,7 +17,16 @@ let state;
 try{
   const before=localStorage.getItem(KEY);
   const old=before?JSON.parse(before):null;
-  state={version:1,startedAt:now(),lastPulse:null,ended:false,origin:"diagnostic.html",id:Date.now().toString(36),agent:clean(navigator.userAgent),previousUnfinished:!!(old&&!old.ended),events:[]};
+  const manualStart=sessionStorage.getItem("__gensDiagManualStart")==="1";
+  sessionStorage.removeItem("__gensDiagManualStart");
+  const recent=old&&old.version===1&&old.startedAt&&(Date.now()-new Date(old.startedAt).getTime()<1800000);
+  if(recent&&!manualStart){
+    state=old;
+    state.ended=false;
+    state.bootCount=(state.bootCount||1)+1;
+  }else{
+    state={version:1,startedAt:now(),lastPulse:null,ended:false,origin:"diagnostic.html",id:Date.now().toString(36),agent:clean(navigator.userAgent),previousUnfinished:!!(old&&!old.ended),bootCount:1,events:[]};
+  }
   localStorage.setItem(KEY,JSON.stringify(state));
 }catch(_){
   state={version:1,startedAt:now(),ended:false,events:[],storageUnavailable:true};
@@ -48,7 +57,7 @@ const target=e=>{
   if(/^(input|textarea|select)$/.test(tag))return tag;
   return clean(tag+(node.id?"#"+node.id:"")+(typeof node.className==="string"?"."+node.className.trim().replace(/\s+/g,".").slice(0,50):""));
 };
-rec("start",{ready:document.readyState},true);
+rec(state.bootCount>1?"boot-again":"start",{ready:document.readyState,bootCount:state.bootCount||1},true);
 window.addEventListener("error",e=>{
   if(e.target&&e.target!==window){const el=e.target;rec("resource-error",{tag:el.tagName||"",path:(()=>{try{return new URL(el.src||el.href||"",location.href).pathname}catch(_){return ""}})()},true)}
   else rec("javascript-error",{message:e.message||"unknown",file:(()=>{try{return new URL(e.filename||"",location.href).pathname}catch(_){return ""}})(),line:e.lineno||0,col:e.colno||0},true)

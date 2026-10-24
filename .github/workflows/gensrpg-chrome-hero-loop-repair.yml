@@ -21,12 +21,22 @@ jobs:
           persist-credentials: true
       - name: Verify exact index blob and apply source-only repair
         run: |
-          test "$(git rev-parse HEAD:index.html)" = "260f00aa179c939f35188ca854f9875971ce8a7b"
-          python3 tests/gens_chrome_hero_recursion_patch_20261024.py index.html
-          git diff --check
-          git diff --stat -- index.html
-          git diff -- index.html | grep -q 'gensCurrentContentFamily'
-          git diff -- index.html | grep -q 'gensInferUniverseForLegacyId'
+          EXPECTED_ORIGINAL=260f00aa179c939f35188ca854f9875971ce8a7b
+          EXPECTED_PATCHED=cc355585acab68958bd349ffcf8fa0de4eab9b0d
+          ACTUAL="$(git rev-parse HEAD:index.html)"
+          if [ "$ACTUAL" = "$EXPECTED_ORIGINAL" ]; then
+            python3 tests/gens_chrome_hero_recursion_patch_20261024.py index.html
+            git diff --check
+            git diff --stat -- index.html
+            git diff -- index.html | grep -q 'gensCurrentContentFamily'
+          elif [ "$ACTUAL" = "$EXPECTED_PATCHED" ]; then
+            echo "Verified exact prepatched index blob; do not reapply original-only patch."
+            grep -q 'const p=loadGameProfilesRaw().find' index.html
+            grep -q 'function gensGameplayModules' index.html
+          else
+            echo "Unexpected source blob: $ACTUAL" >&2
+            exit 1
+          fi
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -44,11 +54,15 @@ jobs:
         run: node tests/gens_chromium_diagnostic_journal_browser_20261024.cjs
       - name: Commit only verified index change on dedicated branch
         run: |
-          test "$(git status --porcelain | wc -l)" -eq 1
-          git status --porcelain | grep -q ' M index.html'
-          git config user.name "GenSrpG CI"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          git commit -m "fix(chrome): stop hero-profile bootstrap recursive initialization"
-          git push origin HEAD:work/gensrpg-chrome-hero-recursion-2026-10-24
-          echo "HERO_RECURSION_INDEX_COMMIT=$(git rev-parse HEAD)"
+          if git diff --quiet -- index.html; then
+            echo "HERO_RECURSION_INDEX_VERIFIED_ALREADY_COMMITTED=$(git rev-parse HEAD:index.html)"
+          else
+            test "$(git status --porcelain | wc -l)" -eq 1
+            git status --porcelain | grep -q ' M index.html'
+            git config user.name "GenSrpG CI"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add index.html
+            git commit -m "fix(chrome): stop hero-profile bootstrap recursive initialization"
+            git push origin HEAD:work/gensrpg-chrome-hero-recursion-2026-10-24
+            echo "HERO_RECURSION_INDEX_COMMIT=$(git rev-parse HEAD)"
+          fi

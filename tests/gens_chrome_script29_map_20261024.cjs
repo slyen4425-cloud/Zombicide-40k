@@ -37,7 +37,7 @@ function scan(html){
 const all=scan(index);
 assert.ok(all.length>40,'real index has many scripts');
 const target=all.find(x=>x.n===29);
-assert.equal(target.kind,'inline','user's #29 is inline');
+assert.equal(target.kind,'inline',"user's #29 is inline");
 const selected=all.filter(x=>x.n>=23&&x.n<=35).map(({body,...meta})=>meta);
 const body=target.body;
 const excerpt=body.split('\n').map((line,i)=>({line:target.firstLine+i+1,src:line.trim()})).filter(x=>x.src).slice(0,28).map(x=>({line:x.line,src:x.src.slice(0,160)}));

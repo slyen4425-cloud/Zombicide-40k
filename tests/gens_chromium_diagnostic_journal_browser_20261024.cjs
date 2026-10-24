@@ -43,6 +43,7 @@ async function run(browserType,name,port){
    assert.ok(log.events.some(e=>e.type==='start'),'logger must launch before gameplay');
    assert.ok(log.events.some(e=>e.type==='pointer'),'real pointer must be recorded');
    assert.ok(log.events.some(e=>e.type==='click'),'real click must be recorded');
+   for(const type of ['hero-call-before','hero-call-after','hero-apply-enter','hero-hydrate-before','hero-hydrate-after']) assert.ok(log.events.some(e=>e.type===type),'Expected startup trace '+type);
    assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg_diag_test_savemarker')),'preserve-me','game storage must survive diagnostic');
    // Simulate normal in-app navigation reload; diagnostic log must survive.
    await page.reload({waitUntil:'domcontentloaded'});

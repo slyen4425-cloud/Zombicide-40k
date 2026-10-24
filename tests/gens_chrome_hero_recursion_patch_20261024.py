@@ -103,5 +103,39 @@ new='''function gensInferUniverseForLegacyId(contentId,poolField){
 assert s.count(old)==1,"Unexpected gensInferUniverseForLegacyId body"
 s=s.replace(old,new)
 
+# The actual reentrant stack from the synthetic Android profile fixture is:
+# ensureBaseGameProfile -> itemsForMode -> gensGameplayModules ->
+# loadGameProfiles -> ensureBaseGameProfile. Module and settings readers must
+# not construct the profiles they are being queried to describe.
+old='''function gensGameplayModules(){
+  const empty={
+    heroCombat:false,controllableCreatures:false,capture:false,companions:false,
+    equipment:false,elements:false,economy:false,mana:false,progression:false,
+    evolution:false,permadeath:false,ko:false,talentTrees:false,movement:false
+  };
+  try{
+    const editorOpen=document.getElementById("rpgUniverseEditorModal")?.style.display==="block";
+    const id=editorOpen?rpgEditingId:activeGameProfileId();
+    if(!id)return empty;
+    const p=loadGameProfiles().find(x=>String(x.id)===String(id));
+    if(!p)return empty;
+    if(!window.GensCaptureV1?.isProfile?.(p) && p.gameStyle!=="dungeon")return empty;
+    const g=getStoredRpgGameplay(id);
+    return {...empty,...(g.modules||{})};
+  }catch(e){return empty}
+}'''
+new=old.replace('const p=loadGameProfiles().find(', 'const p=loadGameProfilesRaw().find(').replace(
+    '  try{\n    const editorOpen=', '  // Read only. Called from itemsForMode during ensureBaseGameProfile.\n  try{\n    const editorOpen=')
+assert s.count(old)==1,"Unexpected gensGameplayModules body"
+s=s.replace(old,new)
+
+old='''function getStoredRpgGameplay(profileId){
+  const p=loadGameProfiles().find(x=>String(x.id)===String(profileId)&&x.gameStyle==="dungeon");'''
+new='''function getStoredRpgGameplay(profileId){
+  // The caller may run while a reference profile is being initialized.
+  const p=loadGameProfilesRaw().find(x=>String(x.id)===String(profileId)&&x.gameStyle==="dungeon");'''
+assert s.count(old)==1,"Unexpected getStoredRpgGameplay body"
+s=s.replace(old,new)
+
 p.write_bytes(s.encode("utf8"))
 print("GENSRPG_HERO_LOOP_PATCH_OK",hashlib.sha256(p.read_bytes()).hexdigest(),p.stat().st_size)

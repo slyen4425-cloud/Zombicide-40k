@@ -15,6 +15,20 @@ jobs:
       - uses: actions/setup-node@v4
         with: 
           node-version: '22'
+      - name: Verify pure profile ID integrity and no-loss conflict handling
+        run: node tests/gens_profile_id_integrity_20261024.test.cjs
+      - name: Inspect read-only content audit for unsafe mutations
+        run: |
+          node - <<'JS'
+          const fs=require('fs'),assert=require('assert/strict'),vm=require('vm');
+          const s=fs.readFileSync('dungeon-profiles-content-audit.html','utf8');
+          const m=s.match(/<script>\s*([\s\S]*?)<\/script>/);
+          assert.ok(m);new vm.Script(m[1]);
+          assert.doesNotMatch(m[1],/localStorage\s*\.\s*(setItem|removeItem|clear)\s*\(/);
+          assert.doesNotMatch(m[1],/\b(?:fetch|XMLHttpRequest|sendBeacon|WebSocket)\s*\(/);
+          assert.ok(m[1].includes("localStorage.getItem(KEY)"));
+          console.log('GREEN profile content audit: read-only and no network');
+          JS
       - name: Install Chromium for controlled browser inspection
         run: |
           npm install --no-save --prefix /tmp/gensrpg-dungeon-trace playwright@1.55.0

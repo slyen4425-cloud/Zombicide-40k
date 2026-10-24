@@ -20,6 +20,10 @@ jobs:
           node-version: '22'
       - name: Confirm exact-id card filtering preserves persisted data and other modes
         run: node tests/gens_dungeon_profile_card_idempotency_20261024.test.cjs
+      - name: Confirm immutable historic Phase 9 Shell snapshots still restore unchanged
+        run: |
+          node tests/gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs
+          node tests/gens_phase9_capture_shell_home_return_boundary_v1.test.cjs
       - name: Install Chromium for actual mobile Shell menu integration
         run: |
           npm install --no-save --prefix /tmp/gensrpg-dungeon-cards playwright@1.55.0

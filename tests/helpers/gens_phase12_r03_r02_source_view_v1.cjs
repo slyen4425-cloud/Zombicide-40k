@@ -10,7 +10,8 @@ module.exports=function r02SourceView(index,root=path.resolve(__dirname,"../..")
   if(hash(index)===R02){assert.equal(index.length,2869485);return index;}
   if(["554bf6100aeb0f40bfc098dc90863af7d2d5e439","485de2e6a08ffd89e4f1fb9410e40c938774d62f"].includes(hash(index)))index=require("./gens_phase12_r04_r03_source_view_v1.cjs")(index,root);
   assert.equal(index.length,2862906);assert.equal(hash(index),R03,"R03 current source");
-  const js=fs.readFileSync(path.join(root,REL));assert.equal(js.length,6651);assert.equal(hash(js),JS);
+  const js=require('./gens_dungeon_card_historical_source_view_20261024.cjs')(fs.readFileSync(path.join(root,REL)));
+  assert.equal(js.length,6651);assert.equal(hash(js),JS);
   let s=index.toString("utf8");
   assert.equal(s.split(TAG).length,2,"one synchronous Shell Hub owner");
   s=s.replace(TAG,"");

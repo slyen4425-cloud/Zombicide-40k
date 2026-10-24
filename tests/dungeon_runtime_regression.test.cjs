@@ -741,7 +741,7 @@ function testEquipmentSetsAndZipCatalogue() {
   assert.equal(heroStore.brom.itemCooldowns[`${guardian.id}:guardian_group_heal`], 2, "le cooldown d'objet doit diminuer avec le moteur de tours existant");
 
   assert.match(html, /assets\/dungeon\/dungeon-core-316\.js/);
-  assert.match(html, /dungeonCombatUseItemAbility316/, "les compétences d'objet doivent rejoindre la timeline finale");
+  assert.match(script("dungeonCore303TimelineRootFix"), /dungeonCombatUseItemAbility316/, "les compétences d'objet doivent rejoindre le propriétaire actif Core303");
   assert.match(html, /GenSrpG V16\.78\.11/);
 }
 

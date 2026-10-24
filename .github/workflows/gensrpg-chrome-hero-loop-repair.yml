@@ -1,0 +1,54 @@
+name: GenSrpG Chrome Android hero bootstrap loop repair
+on:
+  push:
+    branches:
+      - work/gensrpg-chrome-hero-recursion-2026-10-24
+    paths:
+      - 'tests/gens_chrome_hero_recursion_patch_20261024.py'
+      - 'tests/gens_chrome_hero_bootstrap_recursion_browser_20261024.cjs'
+      - '.github/workflows/gensrpg-chrome-hero-loop-repair.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  verify-and-commit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-chrome-hero-recursion-2026-10-24
+          persist-credentials: true
+      - name: Verify exact index blob and apply source-only repair
+        run: |
+          test "$(git rev-parse HEAD:index.html)" = "260f00aa179c939f35188ca854f9875971ce8a7b"
+          python3 tests/gens_chrome_hero_recursion_patch_20261024.py index.html
+          git diff --check
+          git diff --stat -- index.html
+          git diff -- index.html | grep -q 'gensCurrentContentFamily'
+          git diff -- index.html | grep -q 'gensInferUniverseForLegacyId'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated Chromium and Firefox
+        run: |
+          npm install --no-save --prefix /tmp/gensrpg-hero-loop-browser playwright@1.56.1
+          /tmp/gensrpg-hero-loop-browser/node_modules/.bin/playwright install --with-deps chromium firefox
+      - name: Verify real mobile bootstrap with synthetic old heroes and no profiles
+        env:
+          NODE_PATH: /tmp/gensrpg-hero-loop-browser/node_modules
+        run: node tests/gens_chrome_hero_bootstrap_recursion_browser_20261024.cjs
+      - name: Retest existing diagnostic, pointer, reload and safe saved-data preservation
+        env:
+          NODE_PATH: /tmp/gensrpg-hero-loop-browser/node_modules
+        run: node tests/gens_chromium_diagnostic_journal_browser_20261024.cjs
+      - name: Commit only verified index change on dedicated branch
+        run: |
+          test "$(git status --porcelain | wc -l)" -eq 1
+          git status --porcelain | grep -q ' M index.html'
+          git config user.name "GenSrpG CI"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "fix(chrome): stop hero-profile bootstrap recursive initialization"
+          git push origin HEAD:work/gensrpg-chrome-hero-recursion-2026-10-24
+          echo "HERO_RECURSION_INDEX_COMMIT=$(git rev-parse HEAD)"

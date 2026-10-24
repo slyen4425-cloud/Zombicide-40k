@@ -1,6 +1,18 @@
 # GenSrpG — CURRENT_WORK officiel (23 octobre 2026)
 
 
+## Diagnostic prioritaire — Crash PWA Chrome Android, absent Firefox (24 octobre 2026)
+
+- **Retour réel utilisateur** : la version R16 publiée sur main se charge, mais Chrome Android / PWA crashe jusqu'à perturber le téléphone ; le défaut existait **bien avant la restructuration**, Firefox ne le reproduit pas selon le retour. NE PAS présenter R16 comme une correction de ce crash.
+- **Gouvernance §25** : SHA de départ \`main\` exact \`e696162108e695e682b1d52f4b70fb254aef12a9\` ; checkpoint \`checkpoint/gensrpg-start-chromium-pwa-crash-diagnostic-2026-10-24\` créé à cet exact SHA **avant le code** ; branche \`work/gensrpg-chromium-pwa-crash-diagnostic-2026-10-24\` issue de ce même SHA. \`main\` inchangée.
+- **Lot unique / propriétaire** : diagnostic navigateur et PWA uniquement, sans modification du runtime, du jeu, de \`index.html\`, des sauvegardes ou du service worker. Le cache reste propriété du service worker ; les quatre modules restent intacts.
+- **Risques vérifiables, pas causes démontrées** : gros scripts historiques dont données visuelles et manifeste dynamique, installation et remplissage du cache PWA, cycles de redessin / observers / timers, usage mémoire / CPU / GPU du moteur Chromium. La sentinelle existante \`gens_preview_chrome_firefox_pwa_characterization_v11411.test.cjs\` sert de faux HTML et de JS stub dans ses parcours ; la preview neutralise le service worker, donc les GREEN antérieurs ne reproduisent **pas** cette panne Chrome Android.
+- **Test créé** : \`tests/gens_chromium_pwa_crash_diagnostic_20261024.cjs\` sert le véritable \`index.html\` du checkout CI et tous les assets sans modification ; compare Chromium et Firefox en viewport tactile, avec/sans vrai service worker, observe frames, long tasks, heartbeat, crash, requêtes, DOM et JS heap. \`index.html\` sera seulement lu sur le runner, **jamais transféré via le connecteur**, conformément à §26.
+- **Limite importante** : Playwright sur Linux avec viewport mobile n'est **pas** Chrome Android physique ; le test explore des indices, ne prouve pas l'absence de crash sur téléphone ni les sauvegardes réelles de l'utilisateur. Les mesures ne sont pas un GREEN fonctionnel ; confirmer les conditions réelles par essai ciblé et, si nécessaire, profilage Android Chrome / tracing mémoire avant toute correction.
+- **Étape suivante** : exécuter la CI diagnostique, analyser son artefact JSON ; cibler le propriétaire fautif, reproduire, écrire test de régression puis choisir une correction soustractive en lot distinct, respecter triple CI et manuel Android. Interdiction de modifier / publier directement \`main\` sur simple hypothèse.
+
+
+
 ## Phase 12 — R16 : migration propriétaire Dungeon combat/IA (extraction Core303, CI à vérifier)
 
 - **Dernier GREEN vérifié** : `checkpoint/gensrpg-phase12-four-mode-browser-real-composition-green-2026-10-23` au SHA `fb47398a2b6d6cc6c4b1e48fd2ffde3b716d83c4`. [CI Architecture + browser 39960988619](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39960988619), [Tactical complet 39960988738](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39960988738), [Firefox 39960988455](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39960988455) : **tous SUCCESS sur ce même SHA**, notamment transition réelle Survie→Dungeon→Survie→Capture→PvP, provider S3, reprise Capture et équipement. GREEN limité au code testé, **pas EXIT Phase 12**.

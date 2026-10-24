@@ -24,6 +24,8 @@ jobs:
         run: |
           node tests/gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs
           node tests/gens_phase9_capture_shell_home_return_boundary_v1.test.cjs
+          node tests/gens_phase12_r03_shell_hub_extraction_v1.test.cjs
+          node tests/gens_phase12_r02_legacy_visual_data_extraction_v1.test.cjs
       - name: Install Chromium for actual mobile Shell menu integration
         run: |
           npm install --no-save --prefix /tmp/gensrpg-dungeon-cards playwright@1.55.0

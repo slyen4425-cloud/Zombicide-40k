@@ -1,0 +1,21 @@
+name: Dungeon duplicates read-only diagnostic
+on:
+  push:
+    branches:
+      - work/gensrpg-dungeon-profile-duplicates-2026-10-24
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify diagnostic never edits or transmits saved data
+        run: node tests/gens_dungeon_profile_diagnostic_readonly_20261024.test.cjs

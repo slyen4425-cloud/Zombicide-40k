@@ -1,7 +1,8 @@
 "use strict";
 const fs=require("node:fs"),path=require("node:path"),assert=require("node:assert/strict"),vm=require("node:vm"),crypto=require("node:crypto"),cp=require("node:child_process");
 const root=path.join(__dirname,".."),read=x=>fs.readFileSync(path.join(root,x)),rel="assets/gensrpg/core/legacy-cloud-sync-backup-v1.js";
-const b=require("./helpers/gens_phase12_generated_wall_material_source_view_v1.cjs")(read("index.html")),js=read(rel),html=b.toString("utf8"),text=js.toString("utf8");
+const originalIndex=require("./helpers/gens_chrome_hero_recursion_source_view_20261024.cjs")(read("index.html"));
+const b=require("./helpers/gens_phase12_generated_wall_material_source_view_v1.cjs")(originalIndex),js=read(rel),html=b.toString("utf8"),text=js.toString("utf8");
 const hash=b=>crypto.createHash("sha1").update(Buffer.from("blob "+b.length+"\0")).update(b).digest("hex");
 assert.equal(b.length,2781436);assert.equal(hash(b),"485de2e6a08ffd89e4f1fb9410e40c938774d62f");
 assert.equal(js.length,53746);assert.equal(hash(js),"8d7f8179676b096a53816cd1ca2530c120e3cf18");

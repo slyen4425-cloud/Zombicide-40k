@@ -101,6 +101,11 @@ jobs:
             cp -f diagnostic.html diagnostic-shell.js diagnostic-boot.js _site/
           fi
 
+          # Optional read-only Dungeon profile diagnostic; not loaded by the game.
+          if [ -f "dungeon-profiles-diagnostic.html" ]; then
+            cp -f dungeon-profiles-diagnostic.html _site/dungeon-profiles-diagnostic.html
+          fi
+
           if [ -f "manifest.webmanifest" ]; then
             cp -f manifest.webmanifest _site/manifest.webmanifest
           fi

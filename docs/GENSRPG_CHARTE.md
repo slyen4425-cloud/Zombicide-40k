@@ -472,3 +472,33 @@ Une lecture légère de métadonnées GitHub reste autorisée pour :
 Mais si le **contenu exact** du fichier est nécessaire, la demande du fichier à l'utilisateur devient la voie normale, pas une solution de dernier recours.
 
 Cette procédure est un mécanisme d'accès contrôlé au gros fichier ; elle ne remplace pas GitHub comme source de vérité du projet.
+
+## 27. Reprise du développement fonctionnel et lots parallèles (24 octobre 2026)
+
+**But : créer, tester et partager le jeu.** La restructuration inachevée ne constitue pas un verrou général sur les nouvelles fonctionnalités. Les dettes techniques non bloquantes restent dans le backlog, avec propriétaire, impact et risque. On ne rouvre une dette que lorsqu'elle menace un travail concret, une sauvegarde, un contrat ou un test. Ne pas confondre « GREEN sur un périmètre » et « refonte entière terminée ».
+
+### Deux voies de travail, sans double autorité
+
+- **Fonctionnalités** (prioritaires) : nouveau contenu, règles éditables, assets, éditeurs, confort mobile et corrections demandées. Un lot cohérent livre une capacité utilisable **de bout en bout** ; ne pas fragmenter artificiellement une fonction en dizaines de micro-lots.
+- **Maintenance/restructuration** (ponctuelle) : uniquement un défaut démontré ou une dépendance indispensable. Pas de chantier global automatique au détriment des fonctions demandées.
+
+### Plusieurs lots en parallèle : conditions impératives
+
+1. Chaque lot a sa branche `work/...`, son checkpoint START §25 au SHA exact et une fiche courte : objectif utilisateur, module, propriétaire autoritaire, fichiers prévus, interfaces partagées, risque sur les quatre modes et tests. Le checkpoint de départ est créé **avant** les modifications.
+2. Deux lots peuvent avancer simultanément si leurs **fichiers, responsabilités, états persistés et contrats de chargement ne se chevauchent pas**. Aucun lot ne modifie le même `index.html`, `service-worker.js`, fichier de schéma, contrat Core/Shell ou API partagée simultanément sans ordre d'intégration fixé au préalable.
+3. Si un chevauchement apparaît, **ne pas fusionner à l'aveugle** : intégrer ou terminer le premier lot, puis rebaser/recréer le second depuis le GREEN courant et reprendre ses tests. Une fusion Git sans conflit textuel ne prouve jamais l'absence de conflit d'autorité.
+4. Chaque branche teste son scénario réel et les sentinelles des domaines qu'elle touche. Avant fusion vers `main`, exécuter les contrôles d'intégration requis (quatre modes, sauvegardes, frontières, PWA) sur le **même SHA exact** ; une CI rouge ou un échec de publication bloque la validation et doit être corrigé à la source.
+5. Les laboratoires Combat dynamique et Exploration gardent leurs dépôts et chartes propres ; leurs travaux ne sont **pas** présents dans GenSrpG principal tant qu'un raccord explicite n'est pas intégré et testé.
+6. Les sauvegardes existantes sont préservées. Toute migration ou changement de stockage est versionné, idempotent, testé, et documente sauvegarde/export et restauration ; aucun test familial ne doit effacer silencieusement les données de production.
+
+### Cycle de livraison simplifié
+
+**START → développement cohérent → tests ciblés + régressions → PR/revue → CI intégration verte → `main` → Pages/PWA vérifiée → essai utilisateur.** Conserver checkpoint GREEN et rollback, sans refaire tout l'audit historique à chaque changement d'icône ou de compétence. Le test manuel est une étape d'acceptation de l'expérience, distincte de la validation technique CI. La version doit être présentée comme « prête à tester » après Pages vert, pas comme « validée par les enfants » avant leurs retours.
+
+### Mise en production familiale de la PWA
+
+- Publier **exactement** les fichiers testés : le builder Pages ne doit pas injecter un autre moteur, inverser l'ordre des scripts ou réactiver une autorité retirée. Vérifier que les scripts/assets nécessaires existent dans le site produit.
+- Incrémenter de manière contrôlée la version/cache du service worker lorsqu'un changement l'exige ; vérifier l'activation de la nouvelle version et la compatibilité des sauvegardes. En cas de doute, proposer export/sauvegarde avant réinstallation.
+- Chaque livraison note les liens : commit exact, checkpoint, PR, CI, Pages et test ciblé. La production stable est la base des nouveaux lots ; une branche laboratoire non validée n'est jamais publiée implicitement.
+
+**Règle d'arbitrage :** si le nettoyage n'est pas nécessaire pour livrer une fonctionnalité sans risque démontré, livrer la fonctionnalité et planifier le nettoyage séparément. Les §§1–26, notamment unicité de propriété, absence de rustines et accès §26 à `index.html`, restent intégralement applicables.

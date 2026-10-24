@@ -33,6 +33,17 @@ class ExitInventoryTests(unittest.TestCase):
         # en prétendant qu'il est byte-identique aux extractions précédentes.
         root = Path(__file__).resolve().parents[1]
         certified_ref = "3f197edeccd10d7f103126a6eb8c3f5db92bf609"
+        # GitHub Actions checks out PRs with shallow history. Fetch the exact
+        # certified checkpoint only if its commit object is not present.
+        has_ref = subprocess.run(
+            ["git", "cat-file", "-e", f"{certified_ref}^{{commit}}"],
+            cwd=root, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        ).returncode == 0
+        if not has_ref:
+            subprocess.run(
+                ["git", "fetch", "--no-tags", "--depth=1", "origin", certified_ref],
+                cwd=root, check=True, stdout=subprocess.DEVNULL,
+            )
         original = subprocess.check_output(["git", "show", f"{certified_ref}:index.html"], cwd=root)
         self.assertEqual(git_blob(original), "260f00aa179c939f35188ca854f9875971ce8a7b")
         with tempfile.TemporaryDirectory(prefix="gensrpg-historical-r06-") as tmp:

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GenS RPG — Diagnostic Dungeon</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{font:16px system-ui,sans-serif;margin:0;padding:16px;background:#101319;color:#eee}
+main{max-width:740px;margin:auto}h1{font-size:1.45rem}.box{background:#1d242e;border:1px solid #576270;border-radius:14px;margin:14px 0;padding:16px}
+p{line-height:1.5}button{background:#297cb4;border:0;border-radius:10px;color:white;padding:14px 18px;font:600 16px system-ui}
+textarea{display:block;width:100%;height:330px;padding:12px;background:#131922;color:white;font:12px monospace;border:1px solid #65717e;border-radius:10px}
+</style></head><body><main>
+<h1>🧭 Diagnostic des profils Dungeon</h1>
+<div class="box"><p><strong>Lecture seule :</strong> cette page n'efface ni ne modifie aucune sauvegarde. Elle lit seulement les noms et identifiants des univers enregistrés dans ce navigateur. Aucune donnée n'est transmise.</p></div>
+<div class="box"><p id="status">Analyse des profils…</p><p>Le rapport ne contient pas les personnages, les objets ou les parties sauvegardées.</p></div>
+<p><button id="copy">📋 Copier le rapport</button></p><p id="feedback" aria-live="polite"></p>
+<label for="report">Rapport à partager :</label><textarea id="report" readonly spellcheck="false"></textarea>
+<p>Si la copie échoue, effectue un appui long dans le rapport, puis sélectionne tout et copie.</p>
+</main><script>
+(function(){
+'use strict';
+const key='gensrpg_game_profiles_v1';
+const status=document.getElementById('status');
+const report=document.getElementById('report');
+const feedback=document.getElementById('feedback');
+let result;
+try{
+  const raw=localStorage.getItem(key);
+  const profiles=raw?JSON.parse(raw):[];
+  if(!Array.isArray(profiles))throw new Error('Liste de profils non valide');
+  const rows=profiles.map((p,i)=>({
+    position:i+1,
+    id:String(p&&p.id!=null?p.id:'(sans identifiant)'),
+    nom:String(p&&p.name!=null?p.name:'(sans nom)'),
+    integre:!!(p&&p.builtIn),
+    famille:String(p&&p.contentFamily||''),
+    mode:String(p&&p.gameMode||''),
+    universRpg:!!(p&&p.rpgUniverse)
+  }));
+  const group=(key)=>Object.values(rows.reduce((acc,p)=>{
+    const k=p[key];if(!acc[k])acc[k]={valeur:k,occurrences:0};
+    acc[k].occurrences++;return acc;
+  },Object.create(null))).filter(x=>x.occurrences>1);
+  const dungeon=rows.filter(x=>x.nom.toLowerCase()==='dungeon');
+  result={version:'gensrpg-dungeon-duplicate-audit-v1',profilsTotal:rows.length,dungeonTotal:dungeon.length,identifiantsRepetes:group('id'),nomsRepetees:group('nom'),profils:rows};
+  status.textContent='Profils enregistrés : '+rows.length+' — entrées nommées Dungeon : '+dungeon.length;
+}catch(e){
+  result={version:'gensrpg-dungeon-duplicate-audit-v1',erreur:String(e&&e.message||e)};
+  status.textContent='Lecture impossible : '+result.erreur;
+}
+report.value=JSON.stringify(result,null,2);
+document.getElementById('copy').addEventListener('click',async()=>{
+  try{
+    await navigator.clipboard.writeText(report.value);
+    feedback.textContent='Rapport copié. Colle-le dans la conversation.';
+  }catch(_){
+    report.focus();report.select();
+    feedback.textContent='Texte sélectionné. Utilise Copier dans le menu de sélection.';
+  }
+});
+})();
+</script></body></html>

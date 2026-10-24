@@ -1,5 +1,15 @@
 # GenSrpG — CURRENT_WORK officiel (23 octobre 2026)
 
+## Incident isolé — Dungeon dupliqué dans la liste Univers RPG (24 octobre, diagnostic en cours)
+
+- **Restructuration mise en pause à la demande de l'utilisateur.** Aucune reprise de Phase 12 ou modification du runtime dans ce lot.
+- Capture réelle Chrome Android : au moins six cartes identiques **Dungeon**, « 3 héros · 35 objets · 20 monstres », bouton « Modifier » seul. L'utilisateur n'a créé qu'un univers : le Dungeon de référence. Ce sont des profils affichés par le Shell, **pas six sessions Dungeon**.
+- Cause exacte **non établie** : copies enregistrées sous le même ID, clones sous plusieurs IDs, ou répétition pendant lecture/normalisation. Ne pas supprimer, filtrer ou corriger en aveugle les données de l'utilisateur.
+- BASE main : `5cfde410e136204f201eb5860f4712329446be83`. START créé avant code : `checkpoint/gensrpg-start-dungeon-profile-duplicates-2026-10-24` sur ce SHA. Branche dédiée `work/gensrpg-dungeon-profile-duplicates-2026-10-24`. Dernier checkpoint du correctif Chrome : `checkpoint/gensrpg-chrome-hero-recursion-green-2026-10-24` à `4e0e5b4463847c8501e0acbfbf9e4abdaae22c10`.
+- Périmètre : page opt-in `dungeon-profiles-diagnostic.html` de **lecture seule** sur la même origine, montrant uniquement IDs, noms et compte des duplications depuis `gensrpg_game_profiles_v1` ; aucun inventaire, sauvegarde, héros, réseau ni écriture localStorage. Test de non-mutation + workflow dédiés, et une copie de ce fichier optionnel dans le build Pages `main.yml` (sans chargement automatique dans le jeu). Aucune modification de `index.html`, Service Worker, Core, jeu ou profil.
+- Gate : tests ciblés, validations de sécurité, CI et revue. Publication contrôlée de la page de diagnostic ; demander le rapport anonymisable à l'utilisateur, distinguer défaut de données vs runtime, puis décider d'un correctif **séparé** avec START propre et préservation des sauvegardes. Aucun nettoyage automatique.
+
+
 ## P0 Chrome Android — validation de la PR #165 (24 octobre, NON GREEN)
 
 - Branche `work/gensrpg-chrome-hero-recursion-2026-10-24`, checkpoint START `checkpoint/gensrpg-start-chrome-hero-recursion-2026-10-24` à `3f197edeccd10d7f103126a6eb8c3f5db92bf609`, PR #165. `main` inchangée à ce SHA ; ne pas confondre le déploiement Pages de branche avec une publication stable.

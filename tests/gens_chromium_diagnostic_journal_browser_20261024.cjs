@@ -41,6 +41,13 @@ async function run(browserType,name,port){
    assert.ok(log.events.some(e=>e.type==='pointer'),'real pointer must be recorded');
    assert.ok(log.events.some(e=>e.type==='click'),'real click must be recorded');
    assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg_diag_test_savemarker')),'preserve-me','game storage must survive diagnostic');
+   // Simulate normal in-app navigation reload; diagnostic log must survive.
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.waitForFunction(()=>!!window.__gensMobileDiagV1,{timeout:25000});
+   await page.waitForTimeout(600);
+   let afterReload=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
+   assert.ok(afterReload.events.some(e=>e.type==='pointer'),'previous tap must survive a game reload');
+   assert.ok(afterReload.events.some(e=>e.type==='boot-again'),'reload should append not replace diagnostic session');
    await page.goto('http://127.0.0.1:'+port+'/diagnostic.html',{waitUntil:'domcontentloaded'});
    await page.locator('#report').waitFor();
    assert.match(await page.locator('#report').innerText(),/pointer/);

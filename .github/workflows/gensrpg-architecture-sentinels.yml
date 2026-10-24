@@ -1292,6 +1292,9 @@ jobs:
       - name: Caractériser Capture dans la composition complète Phase 2
         run: node tests/gens_phase2_full_composition_capture_browser_v11411.test.cjs
 
+      - name: Tracer les écritures combat/IA Dungeon et prouver le propriétaire final Core303 (R17)
+        run: node tests/gens_phase12_r17_dungeon_combat_writer_chronology_browser_v1.test.cjs
+
       - name: Vérifier la non-interférence des quatre modules
         run: node tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs
 

@@ -1,6 +1,14 @@
 # GenSrpG — CURRENT_WORK officiel (23 octobre 2026)
 
 
+## Priorité P0 — Chrome Android : tracer le gel avant DOMContentLoaded (24 octobre 2026)
+
+- Rapport réel transmis par l'utilisateur : fichier `gensrpg-diagnostic-chrome-2026-10-24.json` du 24 octobre 2026, session `mvm953le` : 2 événements à 10:24:32.883 et 10:24:32.892 UTC (`start`, `service-worker`), `lastPulse=null`, `ended=false`, **aucun `dom-ready`, `loaded`, clic ni pulse**. `previousUnfinished=true`, sans trace détaillée de l'essai précédent. Rien ne démontre qu'un service worker soit la cause ; une session précédente peut avoir été remplacée par un lancement manuel.
+- Cause non identifiée ; ce signal cadre avec un chargement interrompu avant DOMContentLoaded, mais ne prouve ni crash navigateur ni script précis.
+- START avant code : `checkpoint/gensrpg-start-chrome-early-loader-logs-2026-10-24` au SHA exact `2776734f89aaa34e9289994b64a671508e61cb71`. Branche lot unique `work/gensrpg-chrome-early-loader-logs-2026-10-24` dérivée de ce SHA. Issue [#161](https://github.com/slyen4425-cloud/Zombicide-40k/issues/161).
+- Périmètre : `diagnostic-boot.js` et `diagnostic-shell.js` uniquement pour instrumentation opt-in + test navigateur dédié et CI ; aucun changement de `index.html`, du runtime des modes, du service worker, du stockage de jeu ni de l'URL normale. Chaque script HTML possède un jalon `before` / `after` conservé dans une clé locale dédiée distincte pour résister au blocage du parseur. Trois anciens essais archivés avant réinitialisation manuelle.
+- Régression recherchée : vérifier sur vrais assets Chromium + Firefox, rechargement, clic, export, archives, sauvegarde intacte ; ne pas publier si échec CI. Attendre une nouvelle trace utilisateur avec `scriptStage` et ancien(s) essais avant tout correctif au propriétaire. Ne pas supprimer les données de site.
+
 ## Phase 12 — R16 : migration propriétaire Dungeon combat/IA (extraction Core303, CI à vérifier)
 
 - **Dernier GREEN vérifié** : `checkpoint/gensrpg-phase12-four-mode-browser-real-composition-green-2026-10-23` au SHA `fb47398a2b6d6cc6c4b1e48fd2ffde3b716d83c4`. [CI Architecture + browser 39960988619](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39960988619), [Tactical complet 39960988738](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39960988738), [Firefox 39960988455](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39960988455) : **tous SUCCESS sur ce même SHA**, notamment transition réelle Survie→Dungeon→Survie→Capture→PvP, provider S3, reprise Capture et équipement. GREEN limité au code testé, **pas EXIT Phase 12**.

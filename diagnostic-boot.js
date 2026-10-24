@@ -4,6 +4,7 @@
 (function(){
 "use strict";
 const KEY="gensrpg_mobile_diag_v1";
+const HISTORY_KEY="gensrpg_mobile_diag_history_v2",STAGE_KEY="gensrpg_mobile_diag_script_stage_v2";
 const MAX_EVENTS=120,MAX_BYTES=45000;
 const now=()=>new Date().toISOString();
 const perf=()=>Math.round(performance.now());
@@ -25,6 +26,16 @@ try{
     state.ended=false;
     state.bootCount=(state.bootCount||1)+1;
   }else{
+    // Keep prior diagnostics, including an unfinished crash, even when a new
+    // test is explicitly launched. Never touch other localStorage keys.
+    if(old&&old.events&&old.events.length){
+      try{
+        const saved=JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");
+        const priorStage=JSON.parse(localStorage.getItem(STAGE_KEY)||"null");
+        saved.unshift({log:old,stage:priorStage&&priorStage.session===old.id?priorStage:null});
+        localStorage.setItem(HISTORY_KEY,JSON.stringify(saved.slice(0,3)));
+      }catch(_){}
+    }
     state={version:1,startedAt:now(),lastPulse:null,ended:false,origin:"diagnostic.html",id:Date.now().toString(36),agent:clean(navigator.userAgent),previousUnfinished:!!(old&&!old.ended),bootCount:1,events:[]};
   }
   localStorage.setItem(KEY,JSON.stringify(state));
@@ -88,5 +99,15 @@ try{
     navigator.serviceWorker.getRegistration().then(reg=>rec("service-worker",{active:!!reg?.active,controller:!!navigator.serviceWorker.controller},true)).catch(()=>{});
   }
 }catch(_){}
-window.__gensMobileDiagV1={version:1,log:rec,read:()=>JSON.parse(JSON.stringify(state))};
+function markScript(phase,index,source){
+  // Dedicated tiny synchronous breadcrumb: survives a parser-blocking script
+  // where neither click listeners nor long-task observers can run.
+  try{
+    localStorage.setItem(STAGE_KEY,JSON.stringify({
+      session:state.id,at:now(),ms:perf(),phase:phase==="after"?"after":"before",
+      script:index,source:clean(source||"inline")
+    }));
+  }catch(_){}
+}
+window.__gensMobileDiagV1={version:2,log:rec,markScript,read:()=>JSON.parse(JSON.stringify(state))};
 })();

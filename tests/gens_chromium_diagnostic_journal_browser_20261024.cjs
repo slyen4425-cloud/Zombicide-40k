@@ -36,6 +36,9 @@ async function run(browserType,name,port){
    const button=page.locator('button.gensRootModeCard.survival');
    await button.tap({timeout:12000});
    await page.waitForTimeout(400);
+   const stage=await page.evaluate(()=>JSON.parse(localStorage.getItem('gensrpg_mobile_diag_script_stage_v2')||'null'));
+   assert.ok(stage&&stage.script>0,'parser stage index must be persisted synchronously');
+   assert.match(stage.source,/inline|\/|data:/,'stage records source identifier');
    let log=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
    assert.ok(log.events.some(e=>e.type==='start'),'logger must launch before gameplay');
    assert.ok(log.events.some(e=>e.type==='pointer'),'real pointer must be recorded');
@@ -51,9 +54,20 @@ async function run(browserType,name,port){
    await page.goto('http://127.0.0.1:'+port+'/diagnostic.html',{waitUntil:'domcontentloaded'});
    await page.locator('#report').waitFor();
    assert.match(await page.locator('#report').innerText(),/pointer/);
+   assert.match(await page.locator('#report').innerText(),/Dernier script/);
    assert.match(await page.locator('#status').innerText(),/Dernière session/);
+   const reportState=await page.evaluate(()=>({current:JSON.parse(localStorage.getItem('gensrpg_mobile_diag_v1')),stage:JSON.parse(localStorage.getItem('gensrpg_mobile_diag_script_stage_v2'))}));
+   assert.equal(reportState.stage.session,reportState.current.id);
    await page.locator('#download').click();
    assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg_diag_test_savemarker')),'preserve-me','export should not affect saves');
+   await page.locator('#start').click();
+   await page.waitForFunction(()=>window.__gensMobileDiagV1&&window.__gensMobileDiagV1.version===2,{timeout:25000});
+   await page.goto('http://127.0.0.1:'+port+'/diagnostic.html',{waitUntil:'domcontentloaded'});
+   const archive=await page.evaluate(()=>JSON.parse(localStorage.getItem('gensrpg_mobile_diag_history_v2')||'[]'));
+   assert.ok(archive.length>=1,'new manual run must archive previous session');
+   assert.ok(archive[0].log.events.some(e=>e.type==='pointer'),'previous touch events must remain in archive');
+   assert.ok(archive[0].stage&&archive[0].stage.script>0,'previous parser-stage checkpoint must remain in archive');
+   assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg_diag_test_savemarker')),'preserve-me','manual relaunch must preserve game data');
    log=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
    console.log('GENSRPG_DIAGNOSTIC_OK '+JSON.stringify({browser:name,eventTypes:[...new Set(log.events.map(x=>x.type))],count:log.events.length,status:log.ended?'pagehide':'unfinished',appLoaded:requests.includes('/index.html'),errors:errors.slice(0,5)}));
  }finally{await context.close();await browser.close()}

@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 mkdir -p artifacts/android
-URL="https://slyen4425-cloud.github.io/Zombicide-40k/"
+URL="http://127.0.0.1:8123/index.html"
+# Serve the exact checked-out production runtime locally, since Android AVD
+# may have no internet. Android treats loopback as a secure origin for SW.
+python3 -m http.server 8123 --bind 127.0.0.1 > artifacts/android/local-http-server.log 2>&1 &
+SERVER_PID=$!
+trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+for i in 1 2 3 4 5 6 7 8 9 10; do
+  if curl -fsS -o /dev/null "$URL"; then break; fi
+  sleep 1
+done
+adb reverse tcp:8123 tcp:8123
+echo "Android loopback forwarding active; runtime is exact checkout" | tee artifacts/android/transport.txt
 {
  echo "Date UTC: $(date -u +%FT%TZ)"
  echo "Android properties:"
@@ -59,8 +70,8 @@ sleep 22
 adb exec-out screencap -p > artifacts/android/01-home.png || true
 adb shell uiautomator dump /sdcard/gensrpg-window.xml >/dev/null 2>&1 || true
 adb exec-out cat /sdcard/gensrpg-window.xml > artifacts/android/window.xml 2>/dev/null || true
-if grep -Eiq 'Welcome to Chrome|signin_fre_dismiss_button' artifacts/android/window.xml; then
-  echo "BLOCKED: Chrome first-run UI still visible; game was not opened" | tee artifacts/android/result.txt
+if grep -Eiq 'Welcome to Chrome|signin_fre_dismiss_button|No internet' artifacts/android/window.xml; then
+  echo "BLOCKED: Chrome welcome or offline UI still visible; game was not opened" | tee artifacts/android/result.txt
   exit 4
 fi
 echo "First-run onboarding no longer visible; verify game UI in screenshot." | tee -a artifacts/android/launch.txt

@@ -36,4 +36,5 @@ jobs:
           node tests/gens_phase9_capture_combat_core_owner_v1.test.cjs
       - name: Confirm Armor and Survival historic snapshot after Chrome fix
         run: |
-          node tests/gens_phase6_survival_dungeon_isolation_retired_guard_v1.test.cjs
+          node tests/gens_phase6_survival_legacy_guard_retirement_v1.test.cjs
+          node tests/gens_phase6_survival_builtin_boundary_retirement_v1.test.cjs

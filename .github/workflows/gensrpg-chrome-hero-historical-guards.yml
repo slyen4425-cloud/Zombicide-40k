@@ -12,6 +12,7 @@ on:
       - 'tests/helpers/gens_phase12_r09_wave_source_view_v1.cjs'
       - 'tests/helpers/gens_phase12_r02_r01_source_view_v1.cjs'
       - 'tools/gensrpg_phase12_r01_d9_source_view.py'
+      - 'tools/gensrpg_phase12_generated_wall_history.py'
       - '.github/workflows/gensrpg-chrome-hero-historical-guards.yml'
   workflow_dispatch:
 permissions:

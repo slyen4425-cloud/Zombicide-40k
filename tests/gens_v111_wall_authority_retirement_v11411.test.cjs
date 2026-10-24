@@ -1,0 +1,23 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const block=(source,startSig,nextSig,label)=>{const start=source.indexOf(startSig);assert.ok(start>=0,`${label}: missing ${startSig}`);const end=source.indexOf(nextSig,start);assert.ok(end>start,`${label}: missing ${nextSig}`);return source.slice(start,end)};
+const v111=read('assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js');
+const ui=read('assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js');
+
+assert.match(v111,/function paintWalls\(rt=R\)/,'V111 historical wall painter must stay inspectable');
+const maintain=block(v111,'function maintain(rt=R){','function queueMaintain','V111 maintain');
+const install=block(v111,'function install(rt=R){','function installWithRetries','V111 install');
+assert.doesNotMatch(maintain,/paintWalls\(rt\)/,'V111 maintain must not repaint walls');
+assert.doesNotMatch(install,/paintWalls\(rt\)/,'V111 install must not repaint walls directly');
+for(const required of ['hideRuntimeTabs(rt)','ensureDock(rt)','paintDiceOverlay(rt)'])assert.ok(maintain.includes(required),`V111 maintain lost ${required}`);
+for(const required of ['ensureStyle(rt)','hookAdapter(rt)','hookMultiDice(rt)','bindClicks(rt)','refreshBattleAttacks(rt,b)','maintain(rt)'])assert.ok(install.includes(required),`V111 install lost ${required}`);
+assert.doesNotMatch(install,/hookDetection\(rt\)/,'V111 detection authority must remain retired');
+assert.doesNotMatch(install,/observe\(rt\)/,'V111 observer authority must remain retired');
+assert.match(v111,/function attackDice\(/,'V111 multi-dice support must remain');
+assert.match(v111,/function refreshBattleAttacks\(/,'V111 attack refresh must remain');
+assert.match(v111,/function ensureDock\(/,'V111 fixed action dock must remain');
+for(const required of [/function wallTileHtml\(/,/function ensureWallTile\(el\)/,/function paintLiveWalls\(\)/,/function patchDungeonMapHtml\(\)/,/function hookDungeonRender\(\)/])assert.match(ui,required,'canonical Tactical wall pipeline must remain intact');
+console.log('GenSrpG V114.11: V111 active wall painting retired; multi-dice/dock/refresh preserved; Tactical UI owns walls');

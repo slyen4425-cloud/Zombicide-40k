@@ -1,0 +1,27 @@
+name: GenSrpG progression characterization
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-progression-victory-reconnect-*'
+      - 'work/gensrpg-xp-portrait-cleanfix-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  progression-characterization:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate native manual XP runtime
+        run: node tests/gens_manual_xp_statpoints_characterization_v11411.test.cjs
+      - name: Characterize native progression and rewards
+        run: node tests/gens_progression_authority_characterization_v11411.test.cjs
+      - name: Verify Tactical victory rewards summary
+        run: node tests/gens_tactical_victory_rewards_v11411.test.cjs
+      - name: Execute Tactical victory to Dungeon XP and loot
+        run: node tests/gens_tactical_victory_rewards_runtime_v11411.test.cjs
+      - name: Characterize manual level authority
+        run: node tests/gens_manual_level_authority_characterization_v11411.test.cjs

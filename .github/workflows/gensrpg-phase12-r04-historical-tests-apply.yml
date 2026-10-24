@@ -1,0 +1,41 @@
+name: GenSrpG Phase12 R04 historical fixtures controlled adaptation
+# Publish historical tests separately from workflow-permission protected Architecture CI
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r04-builders-equipment-library-2026-10-17'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r04-historical-tests-apply.yml'
+permissions:
+  contents: write
+jobs:
+  adapt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Assert exact R04 runtime SHA before adapting historical tests
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r04-builders-equipment-library-2026-10-17'
+          test "$(git hash-object index.html)" = '554bf6100aeb0f40bfc098dc90863af7d2d5e439'
+          test "$(git hash-object assets/gensrpg/builders/equipment-library-editor-v1.js)" = '27cadba87c766b5293ac3a7fe3ddffb8510adc40'
+          python3 tools/gensrpg_phase12_r04_builders_equipment_extract_apply.py --verify
+      - name: Preserve all earlier checkpoint fixtures and explicit Builder owner count
+        run: |
+          python3 tools/gensrpg_phase12_r04_historical_sentinels_update.py
+          node tests/gens_phase12_r04_builders_equipment_extraction_v1.test.cjs
+          node tests/gens_phase12_r03_shell_hub_extraction_v1.test.cjs
+          node tests/gens_phase12_r02_legacy_visual_data_extraction_v1.test.cjs
+          node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
+          node tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
+          node tests/gens_runtime_composition_guard_v11411.test.cjs
+          git diff --check
+      - name: Publish only audited historical tests and Architecture gate
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tests tools/gensrpg_phase12_r01_d9_source_view.py
+          git diff --cached --check
+          git commit -m "test(phase12): chain strict R04->R03->R02 history and recognize Builders owner"
+          git push origin "HEAD:$GITHUB_REF_NAME"

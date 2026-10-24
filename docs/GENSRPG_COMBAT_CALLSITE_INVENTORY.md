@@ -1,0 +1,261 @@
+# GenSrpG — Inventaire des points d’entrée combat historiques
+
+Date : 2026-09-17
+Base : restructuration issue de V16.78.114.11
+
+## But
+
+Avant de remplacer les anciens noms globaux par le contrat unique `GensRpgTacticalCombatV2Bridge.requestCombat()`, figer les appels encore présents dans `index.html` et dans les propriétaires historiques déplacés byte-identiques hors du monolithe.
+
+Le but n’est pas de faire tomber artificiellement tous les compteurs à zéro : un nom historique peut rester lorsqu’il constitue un adaptateur de compatibilité caractérisé, sans autorité Dungeon propre. Toute migration doit préserver les règles de participants, la détection, l’embuscade, les modes MJ et le retour exploration.
+
+## Comptage actuel dans `index.html` et `assets/gensrpg/dungeon/core200-rebuild-v1.js` (Phase 12 D4)
+
+| Symbole historique | Occurrences | Rôle observé |
+|---|---:|---|
+| `dc200StartCombat` | 1 | alias historique Core 2.x caractérisé au lot 4G comme seed de fallback non-Dungeon capturé par le Bridge ; aucun consommateur Dungeon actif ne l’appelle |
+| `openDungeonCombatSetup` | 1 | définition historique conservée uniquement comme rollback capturé par le Bridge ; aucun Core actif ne l’appelle ou ne la réinstalle |
+| `launchCombat200` | 2 | lanceur historique Core 2.x caractérisé au lot 4H comme seed de fallback non-Dungeon capturé par le Bridge ; le nom public Dungeon est remplacé par l’adaptateur `requestCombat` |
+| `startCombat` | 2 | fonction Core 2.x historique + alias vers `dc200StartCombat` ; tous les callsites Dungeon actifs ont quitté ce groupe (`stealth_fail` 4I, `manual` 4K, `ambush` 4L, `cell` 4M) |
+
+## Groupes à migrer
+
+### A. Entrée Core 2.x (`dc200StartCombat` / `startCombat`)
+
+Le dernier alias `window.dc200StartCombat = startCombat` a été caractérisé au lot 4G. Il est volontairement conservé : lors de l’installation, le Bridge capture ce starter historique avant de remplacer le global ; hors Dungeon son adaptateur le rappelle, tandis qu’en Dungeon le même adaptateur passe par `requestCombat` et le scope canonique.
+
+Cet alias n’est donc plus une dette d’appel Dungeon à supprimer isolément. Toute évolution future de `startCombat` devra préserver explicitement le fallback des autres modes et faire l’objet d’un lot séparé.
+
+Les boutons de rencontre Core 2.01 ont quitté ce groupe au lot 4A. Le wrapper Core 3.01 désactivé a été retiré au lot 4B. Le wrapper de démarrage Core 3.03 a été retiré au lot 4C. La détection Core 2.11 passe par le Bridge depuis le lot 4D, la détection Core 2.09 depuis le lot 4E, l’embuscade Core 2.09 depuis le lot 4F, l’échec de furtivité Runtime 2.00 depuis le lot 4I, l’action manuelle Runtime 2.00 depuis le lot 4K et l’embuscade Runtime 2.00 depuis le lot 4L.
+
+Le lot 4M a migré le dernier callsite lexical Runtime 2.00, `cell`, après caractérisation de sa logique de cible et de renforts. `startCombat` ne subsiste désormais que comme fonction historique et alias de compatibilité capturé par le Bridge.
+
+### B. Ancien setup Dungeon (`openDungeonCombatSetup`)
+
+Une seule définition historique reste pour rollback capturé par le Bridge. Aucun consommateur Dungeon actif ne doit la réinstaller ou l’appeler.
+
+### C. Lancement interne (`launchCombat200`)
+
+Les deux occurrences conservées (l'une ou l'autre source physique du moteur historique) correspondent à la définition historique du lanceur et à son rappel depuis le flux Core 2.x après préparation/sélection.
+
+Le lot 4H a établi que ce lanceur historique n’est pas une seconde autorité Dungeon active à supprimer brutalement : `Bridge.install()` le capture comme `legacyLaunch`, puis remplace le nom global par son adaptateur. Hors Dungeon, cet adaptateur rappelle exactement le lanceur historique ; en Dungeon, il ne rappelle jamais le legacy et délègue à `requestCombat` avec `entry:"launchCombat200"`.
+
+Le compteur reste donc volontairement à 2 tant qu’un futur lot d’extraction ne retire pas réellement l’implémentation historique tout en préservant les autres modes.
+
+## Migration validée — lot UI manuel 1
+
+Les deux boutons natifs `#dungeonCombatMenuBtn` et `#dungeonCombatSheetBtn` sont migrés directement vers `GensRpgTacticalCombatV2Bridge.requestCombat(window, options)` avec `reason: "manual-setup"`.
+
+## Migration validée — lot 2, Core 0.99 désactivé
+
+Le script `#dungeonCore099FinalTacticalAuthority`, déjà désactivé par `type="application/x-gensrpg-disabled"`, est retiré du monolithe. Son fallback historique vers `openDungeonCombatSetup` n’appartient plus au runtime.
+
+Le CSS `#dungeonCore099FinalTacticalCss` et le nettoyage UI Core 1.00 sont restés hors périmètre.
+
+## Migration validée — lot 3, ancien setup Dungeon
+
+Le fallback Core 0.53 et les consommateurs actifs ont été reconnectés au Bridge sans modifier les gardes métier. Une unique définition historique de `openDungeonCombatSetup` reste uniquement comme rollback capturé par le Bridge.
+
+## Migration validée — lot 4A, boutons de rencontre Core 2.01
+
+Les commandes `ENGAGER LE COMBAT` et `ATTAQUER` passent par un helper local sans état, qui transmet uniquement `enemyIds` et `reason` au Bridge. Le mode positionnel et la cible sur case restent inchangés.
+
+## Migration validée — lot 4B, timeline Core 3.01 désactivée
+
+Le script `#dungeonCore301Timeline`, déjà désactivé, est supprimé au lieu d’être modernisé. Son CSS historique reste hors périmètre.
+
+## Migration validée — lot 4C, wrapper de démarrage Core 3.03
+
+Core 3.03 conserve timeline, changement de tour, IA et UI de tour. Seul son wrapper inutile autour de `window.dc200StartCombat` est retiré, le Bridge réinstallant ensuite l’adaptateur final.
+
+## Migration validée — lot 4D, détection Core 2.11
+
+Core 2.11 conserve garde d’activation, filtre `sameView`, déduplication/persistance, sélection exacte des `enemyIds`, délai 80 ms et libération à 250 ms. Seule l’entrée finale passe de `dc200StartCombat(ids,"detection")` à `Bridge.requestCombat(... reason:"detection" ...)`.
+
+## Migration validée — lot 4E, détection Core 2.09
+
+Core 2.09 conserve garde `triggering`, héros actif, position courante, sélection des détecteurs, déduplication/persistance `dc209Detected`, délai 80 ms et libération à 250 ms. Seule l’entrée finale de détection passe au Bridge avec `entry:"dc209EnemyDetection"`.
+
+Pendant 4E, l’embuscade était volontairement hors périmètre ; son entrée est traitée séparément au lot 4F.
+
+## Migration validée — lot 4F, embuscade Core 2.09
+
+Core 2.09 conserve intégralement les responsabilités propres à l’embuscade :
+
+- garde `ambushStarting`, événement `kind==="ambush"` et salle valide ;
+- source exacte `living(x)` ;
+- déduplication/persistance `dc209AmbushDone` ;
+- verrou `ambushStarting` ;
+- délai de déclenchement 120 ms ;
+- libération du verrou à 250 ms.
+
+Seule l’entrée finale du combat change :
+
+`dc200StartCombat(live.map(e=>String(e.id)),"ambush")`
+
+devient :
+
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:"ambush",entry:"dc209Ambush"})`
+
+Les participants et le scope restent calculés par l’autorité V113 via le Bridge. Aucune règle V113 n’est recopiée dans Core 2.09.
+
+Le lot retire exactement deux occurrences textuelles de `dc200StartCombat`, faisant passer l’inventaire de 3 à 1.
+
+## Caractérisation validée — lot 4G, alias historique `dc200StartCombat`
+
+Le lot 4G n’effectue aucune modification du runtime. Il caractérise la dernière occurrence brute, `window.dc200StartCombat = startCombat`, et verrouille son rôle de compatibilité.
+
+Le test permanent `tests/gens_legacy_dc200_fallback_contract_lot4g.test.cjs`, exécuté par la sentinelle d’inventaire, vérifie que :
+
+- une seule occurrence de cet alias subsiste ;
+- `Bridge.install()` capture l’ancien `dc200StartCombat` avant de poser son propre adaptateur ;
+- hors Dungeon, l’adaptateur Bridge rappelle exactement le starter historique capturé, en préservant arguments, retour et liaison `this` ;
+- en Dungeon, le starter historique n’est pas appelé et l’entrée passe par `requestCombat` vers Tactical/V113 ;
+- l’alias restant n’est donc pas une seconde autorité de combat Dungeon.
+
+Conclusion du lot : conserver l’alias est actuellement plus conforme à la charte que le supprimer. Son compteur reste volontairement à 1.
+
+## Caractérisation validée — lot 4H, fallback historique `launchCombat200`
+
+Le lot 4H n’effectue aucune modification du runtime. Il verrouille le rôle des deux occurrences historiques de `launchCombat200` avant toute extraction future.
+
+Le test permanent `tests/gens_legacy_launch200_fallback_contract_lot4h.test.cjs`, exécuté depuis la sentinelle d’inventaire, vérifie que :
+
+- `Bridge.install()` capture l’ancien `launchCombat200` comme `legacyLaunch` avant de remplacer le global ;
+- hors Dungeon, l’adaptateur rappelle exactement ce lanceur historique en préservant les deux arguments, leurs identités, le retour et la liaison `this` ;
+- hors Dungeon, ce fallback n’ouvre pas Tactical V2 ;
+- en Dungeon, le lanceur historique n’est pas rappelé ;
+- en Dungeon, les `enemyIds` issus de `chosen` sont transmis à `requestCombat` avec `reason:"legacy-launch"` et `entry:"launchCombat200"` ;
+- le nom historique restant est donc un adaptateur de compatibilité, pas une deuxième autorité Dungeon.
+
+Conclusion du lot : ne pas supprimer les deux occurrences uniquement pour réduire l’inventaire. Leur retrait devra être un futur lot d’extraction explicite qui préserve les modes non-Dungeon.
+
+## Migration validée — lot 4I, échec de furtivité Runtime 2.00
+
+Le lot 4I retire uniquement le callsite lexical `startCombat(ids,'stealth_fail')` du résolveur `window.dc047ResolveStealth`.
+
+Le comportement qui précédait réellement le lancement est conservé dans le propriétaire Runtime 2.00 :
+
+- même source d’ennemis vivants `liveEnemies()` ;
+- mêmes `enemyIds` convertis en chaînes ;
+- fermeture de la modale de test de furtivité avant le résultat ;
+- même popup `🥷 REPÉRAGE ÉCHOUÉ` ;
+- même liste des ennemis et même héros actif dans le message ;
+- aucun combat si aucun ennemi vivant n’est présent, avec retour au `render()` ;
+- lancement seulement après validation de la popup.
+
+L’entrée finale passe désormais directement par :
+
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:ids,reason:'stealth_fail',entry:'dc200StealthFailure'})`
+
+Le scope et les participants restent donc calculés par l’autorité canonique V113 via le Bridge. Les trois autres actions de contexte `manual`, `cell` et `ambush` restaient volontairement hors périmètre de 4I.
+
+Le lot faisait passer l’inventaire brut de `startCombat` de 6 à 5.
+
+## Migration validée — lot 4K, action manuelle Runtime 2.00
+
+Le lot 4K caractérise d’abord l’unique bouton non positionnel `⚔️ ENGAGER LE COMBAT` de Runtime 2.00, puis retire uniquement son callsite lexical :
+
+`startCombat(live.map(e=>String(e.id)),'manual')`
+
+devient :
+
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:'manual',entry:'dc200ManualAction'})`
+
+La caractérisation préalable a établi que `reason:'manual'` n’avait aucune branche métier propre dans `startCombat()`. Le lot conserve exactement :
+
+- la garde mode non positionnel `!positional` ;
+- la présence d’ennemis `live.length` ;
+- la garde `combatEnabled200()` ;
+- le libellé et le comportement du bouton ;
+- la source `liveEnemies()` et donc les exclusions `dc200Bypassed` / `dc200BypassedBy[heroActif]` ;
+- les mêmes `enemyIds` convertis en chaînes ;
+- `reason:'manual'`.
+
+Le scope et les participants restent calculés par V113 via le Bridge. `ambush` n’est pas inclus dans ce lot car V113 le classe comme raison de détection. `cell` n’est pas inclus car l’ancien `startCombat()` lui ajoute des renforts de proximité et une popup dédiée.
+
+Le lot fait passer l’inventaire brut de `startCombat` de 5 à 4 : définition historique + alias `dc200StartCombat` + actions `cell` / `ambush`.
+
+## Migration validée — lot 4L, embuscade Runtime 2.00
+
+Le lot 4L caractérise d’abord l’action `⚔️ EMBUSCADE — COMBATTRE` de Runtime 2.00 avant toute migration.
+
+La caractérisation établit une différence importante avec l’embuscade Core 2.09 :
+
+- Runtime 2.00 transmet historiquement **tous** les ennemis issus de `liveEnemies()` ;
+- son ancien `startCombat(...,'ambush')` ne possède aucune branche métier `ambush` et ne filtre pas ce seed par visibilité ;
+- en revanche, un appel mécanique `requestCombat(..., reason:'ambush')` active `prepareV113Detection()` ;
+- cette préparation croise alors les `enemyIds` demandés avec `V113.detectionPairs()`, donc avec la portée de vision et la ligne de vue ;
+- une migration mécanique aurait donc pu retirer des ennemis de l’embuscade Runtime 2.00.
+
+Le Bridge reçoit un contrat étroit et explicite :
+
+`preserveEnemyIds:true`
+
+Ce flag saute **uniquement** la préparation/intersection de détection V113 pour cet appel dont le propriétaire Runtime 2.00 a déjà construit le seed d’ennemis. Il ne désactive pas `V113.selectCombatants()` : le scope et la sélection canonique des participants restent donc sous autorité V113.
+
+Le callsite :
+
+`startCombat(live.map(e=>String(e.id)),'ambush')`
+
+devient :
+
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:live.map(e=>String(e.id)),reason:'ambush',entry:'dc200AmbushAction',preserveEnemyIds:true})`
+
+Le lot conserve exactement :
+
+- la garde `x.last?.kind==='ambush' && live.length` ;
+- le libellé `⚔️ EMBUSCADE — COMBATTRE` ;
+- la source `liveEnemies()` ;
+- les exclusions de contournement `dc200Bypassed` / `dc200BypassedBy[heroActif]` ;
+- les mêmes `enemyIds` convertis en chaînes ;
+- `reason:'ambush'`.
+
+Les autres routes d’embuscade ne passent pas `preserveEnemyIds:true`. Elles conservent donc le filtrage de détection V113 existant, notamment Core 2.09.
+
+Les tests permanents `gens_core200_ambush_entry_characterization_lot4l.test.cjs` et `gens_core200_ambush_bridge_contract_lot4l.test.cjs` verrouillent à la fois cette distinction et le nouveau callsite canonique.
+
+Le lot fait passer l’inventaire brut de `startCombat` de 4 à 3 : définition historique + alias `dc200StartCombat` + action `cell`.
+
+## Migration validée — lot 4M, action `cell` Runtime 2.00
+
+Le lot 4M caractérise d’abord l’action `⚔️ ATTAQUER` déclenchée lorsqu’un ennemi occupe la case du héros actif. Dungeon reste propriétaire de la préparation spécifique à cette interaction :
+
+- cible revalidée via `liveEnemies()` ;
+- renforts calculés autour de la case de la cible par distance de Manhattan ;
+- probabilité inchangée : 65 % à distance 1, 30 % à distance 2, 0 au-delà ;
+- fusion sans doublon du seul ensemble cible + renforts sélectionnés ;
+- popup `⚔️ RENFORTS ENNEMIS` conservée avant l’ouverture du combat lorsqu’un renfort rejoint l’affrontement.
+
+Une migration mécanique vers le Bridge n’était pas équivalente : `V113.selectCombatants()` peut ajouter d’autres ennemis visibles au seed demandé. Le Bridge reçoit donc un contrat étroit :
+
+`limitEnemyIdsToRequest:true`
+
+Ce flag ne remplace pas l’autorité V113. `selectCombatants()` reste appelée pour calculer le scope et les participants, puis sa liste d’ennemis est limitée à l’ensemble déjà sélectionné par Dungeon. Un ennemi demandé mais refusé par V113 n’est jamais forcé à revenir ; seuls les ajouts hors seed Dungeon sont écartés.
+
+Le bouton Runtime 2.00 délègue désormais à `startCellCombat(target,x)`, qui conserve la préparation Dungeon ci-dessus puis entre par :
+
+`GensRpgTacticalCombatV2Bridge.requestCombat(window,{enemyIds:chosen.map(e=>String(e.id)),reason:'cell',entry:'dc200CellAction',limitEnemyIdsToRequest:true})`
+
+La branche `reason==='cell'` et la popup de renforts sont retirées de l’ancien `startCombat()`. Le lot fait passer l’inventaire brut de `startCombat` de 3 à 2 : définition historique + alias `dc200StartCombat`, sans callsite Dungeon actif.
+
+## Contrat cible déjà disponible
+
+Le Bridge Tactical dispose d’une seule entrée interne Dungeon :
+
+`GensRpgTacticalCombatV2Bridge.requestCombat(runtime, options)`
+
+Le contrat `preserveEnemyIds:true` reste l’option étroite de l’embuscade 4L : le caller a déjà sélectionné son seed et celui-ci ne doit pas être recroisé avec `detectionPairs()` avant `selectCombatants()`. Le contrat `limitEnemyIdsToRequest:true` ajouté en 4M est distinct : V113 sélectionne toujours canoniquement les combattants, puis aucun ennemi extérieur au seed Dungeon déjà préparé n’est ajouté à la route `cell`.
+
+Les noms historiques restants sont des adaptateurs de compatibilité ou des fonctions internes caractérisés progressivement. Ils ne doivent plus devenir des propriétaires indépendants de la logique de démarrage Dungeon.
+
+## Règle de migration
+
+1. migrer un petit groupe d’appels à la fois ;
+2. conserver les mêmes `enemyIds`, `reason` et comportements de retour ;
+3. faire passer les sentinelles V112/V113/Bridge + navigateur ;
+4. ne diminuer un compteur que lorsque le runtime correspondant a réellement été retiré ;
+5. conserver et documenter un adaptateur si sa suppression casserait un autre mode ;
+6. créer un checkpoint vert avant le groupe suivant.
+
+Aucune suppression en masse du gros `index.html` n’est autorisée sans cette progression testée.

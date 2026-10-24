@@ -12,7 +12,7 @@ const RT_KEY="gensrpg_dungeon_runtime_v2";
 const VERSION="1.1.0",APP_VERSION="16.78.64";
 let installed=false;
 function readRt(){try{const x=JSON.parse(localStorage.getItem(RT_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
-function activeHero(x){const a=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,a.length-1),Number(x?.index)||0));return String(a[i]||"")}
+function activeHero(x){return ROOT.GensDungeonV1.movement.resolveAuthoredActiveHero(x?.participants,x?.index)}
 function currentNode(x,hero){const s=x?.authored167839||{},roomKey=String(Number(x?.room)||0);return String(s?.roomNodes?.[roomKey]||s?.heroNodes?.[hero]||x?.last?.worldNodeId||"")}
 function authoredActive(){const x=readRt();return !!x?.last?.authoredRuntime167839}
 function branchReturnActive(){const x=readRt();if(!x?.last?.authoredRuntime167839)return false;const hero=activeHero(x);if(!hero)return false;const stack=x?.authored167847ReturnStacks?.[hero];if(!Array.isArray(stack)||!stack.length)return false;const top=stack[stack.length-1];return !!top&&String(top.targetNodeId||"")===currentNode(x,hero)}

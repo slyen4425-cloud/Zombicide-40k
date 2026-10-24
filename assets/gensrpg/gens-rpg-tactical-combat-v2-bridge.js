@@ -9,9 +9,12 @@
   "use strict";
   const VERSION="0.6.0",APP_VERSION="16.78.114.10";
   let opening=false,installed=false,repairLoading=false;
-  let legacyStart=null,legacySetup=null,legacyLaunch=null,legacyStartCombatFn=null;
+  const repairTimers=new Set();
+  let legacyStart=null,legacySetup=null,legacyLaunch=null,legacyStartCombatFn=null,legacyOpenTactical=null;
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
+  const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
+  const esc=v=>str(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
   function activeProfile(rt=R){
     try{const p=rt?.getActiveGameProfile?.();if(p)return p}catch(e){}
@@ -47,10 +50,39 @@
     return {ok:true,heroes:heroes.length,enemies:enemies.length,heroIds:heroes.map(str),enemyIds:enemies.map(e=>str(e.id))};
   }
   function currentBattle(rt=R){try{return rt?.GensRpgTacticalCombatV2Ui?.getBattle?.()||null}catch(e){return null}}
+  function rewardHeroName(rt=R,id=""){
+    const key=str(id);
+    try{return str(rt?.CHARS?.[key]?.name||rt?.findCustomHero?.(key)?.name||key||"Héros")}catch(e){return key||"Héros"}
+  }
+  function rewardSummaryHtml(rt=R,summary=null){
+    const rewards=arr(summary?.rewards),xp=new Map(),drops=new Map();
+    for(const reward of rewards){
+      for(const share of arr(reward?.xp?.shares)){
+        const id=str(share?.id);if(!id)continue;xp.set(id,(xp.get(id)||0)+Math.max(0,num(share?.xp,0)));
+      }
+      for(const drop of arr(reward?.drops)){
+        const heroId=str(reward?.killerId),itemId=str(drop?.itemId||drop?.name||"drop"),key=heroId+"|"+itemId;
+        const row=drops.get(key)||{heroId,itemId,name:str(drop?.name||itemId||"Objet"),qty:0};
+        row.qty+=Math.max(1,Math.round(num(drop?.qty,1)));drops.set(key,row);
+      }
+    }
+    const xpLines=[...xp.entries()].filter(([,value])=>value>0).map(([id,value])=>'<div class="dungeonVictoryLine"><span class="dungeonVictoryHero">'+esc(rewardHeroName(rt,id))+'</span> : ⭐ +'+value+' XP</div>').join("");
+    const dropLines=[...drops.values()].map(row=>'<div class="dungeonVictoryLine">🎁 '+esc(row.name)+' ×'+row.qty+(row.heroId?' → <span class="dungeonVictoryHero">'+esc(rewardHeroName(rt,row.heroId))+'</span>':'')+'</div>').join("");
+    return '<div class="dungeonVictorySummary">'+
+      '<div class="dungeonVictoryBlock"><strong>⭐ Expérience</strong>'+(xpLines||'<div class="dungeonVictoryLine">Aucun XP gagné.</div>')+'</div>'+
+      '<div class="dungeonVictoryBlock"><strong>🎁 Butin</strong>'+(dropLines||'<div class="dungeonVictoryLine">Aucun objet obtenu.</div>')+'</div>'+
+      '</div>';
+  }
+  function showOutcomeModal(rt=R,battle=null,summary=null){
+    if(battle?.winner!=="hero")return false;
+    const modal=rt?.DungeonCore01?.modal;if(typeof modal!=="function")return false;
+    try{modal.call(rt.DungeonCore01,"🏆 Victoire — récompenses",rewardSummaryHtml(rt,summary));return true}catch(e){try{rt?.console?.error?.("Combat tactique V2 reward modal",e)}catch(_){}return false}
+  }
   function finishExploration(rt,battle,summary,reason){
     try{rt.document?.body?.style&&(rt.document.body.style.overflow="")}catch(e){}
     try{rt.updateDungeonExploreButtons?.()}catch(e){}
-    try{rt.DungeonCore01?.render?.()}catch(e){try{rt.renderDungeonCore01?.()}catch(_){}}
+    try{rt.DungeonCore01?.render?.()}catch(e){try{rt.renderDungeonCore01?.()}catch(_){} }
+    showOutcomeModal(rt,battle,summary);
     try{
       const win=battle?.winner;
       if(win==="hero")rt.showToast?.("🏆 Combat tactique remporté");
@@ -65,6 +97,36 @@
     try{rt.console?.error?.("Combat tactique V2 route blocked",{entry,detail,result})}catch(e){}
     return result||{ok:false,reason:detail};
   }
+  function isV113DetectionReason(reason){return /detect|vision|rep[eé]rage|ambush|embuscade/i.test(str(reason))}
+  function prepareV113Detection(rt=R,authority=null,options={}){
+    if(options.preserveEnemyIds===true||!isV113DetectionReason(options.reason)||typeof authority?.detectionPairs!=="function")return {ok:true,options};
+    const pairs=arr(authority.detectionPairs(rt)),visible=new Set(pairs.map(p=>str(p?.enemyId)).filter(Boolean));
+    let enemyIds=arr(options.enemyIds).map(str).filter(Boolean);if(!enemyIds.length)enemyIds=[...visible];
+    enemyIds=enemyIds.filter(id=>visible.has(id));if(!enemyIds.length)return {ok:false,reason:"not-detected-v113",pairs};
+    const relevant=pairs.filter(p=>enemyIds.includes(str(p?.enemyId))),sourceHeroIds=[...new Set(relevant.map(p=>str(p?.heroId)).filter(Boolean))],scope=relevant.find(p=>p?.scope)?.scope||options.scope;
+    const prepared={...options,enemyIds,scope,sourceHeroIds};
+    if(scope&&sourceHeroIds.length){
+      rt.__gensTacticalV113Context={scope,sourceHeroIds,enemyIds,reason:options.reason,at:Date.now()};
+    }
+    return {ok:true,options:prepared,pairs};
+  }
+  function scopedRequest(rt=R,options={}){
+    const authority=rt?.GensRpgTacticalRuntimeAuthority1678113;
+    if(typeof authority?.selectCombatants!=="function")return {ok:true,options};
+    try{
+      const prepared=prepareV113Detection(rt,authority,options);if(!prepared.ok)return prepared;
+      const preparedOptions=prepared.options||{},selection=authority.selectCombatants(rt,preparedOptions),heroIds=arr(selection?.heroIds).map(str).filter(Boolean),requestedEnemyIds=arr(preparedOptions.enemyIds).map(str).filter(Boolean),selectedEnemyIds=arr(selection&&selection.enemyIds).map(str).filter(Boolean),enemyIds=preparedOptions.limitEnemyIdsToRequest===true&&requestedEnemyIds.length?selectedEnemyIds.filter(id=>requestedEnemyIds.includes(id)):selectedEnemyIds;
+      if(!heroIds.length||!enemyIds.length)return {ok:false,reason:"no-scoped-combatants-v113",selection};
+      return {ok:true,options:{...prepared.options,heroIds,enemyIds,scope:selection?.scope||prepared.options?.scope,sourceHeroIds:arr(selection?.sourceHeroIds).map(str).filter(Boolean)},selection};
+    }catch(error){
+      try{rt?.console?.error?.("Combat tactique V2 V113 scope",error)}catch(e){}
+      return {ok:false,reason:"scope-failed-v113",error};
+    }
+  }
+  function retireLegacyCombatLayer(rt=R,options={}){
+    if(str(options.entry).startsWith("runtime-renderer:"))return false;
+    try{rt?.GensRpgRuntimeRepair1678106?.closeLegacyCombat?.(rt);return true}catch(e){try{rt?.console?.error?.("Combat tactique V2 legacy layer cleanup",e)}catch(_){}return false}
+  }
   function openCurrent(rt=R,options={}){
     if(opening||currentBattle(rt))return {ok:false,reason:"battle-already-open"};
     const e=eligible(rt,options);if(!e.ok)return e;
@@ -72,6 +134,7 @@
     try{
       const merged={...options,heroIds:e.heroIds,enemyIds:e.enemyIds,onFinish:({battle,summary}={})=>finishExploration(rt,battle,summary,options.reason)};
       const battle=rt.GensRpgTacticalCombatV2Ui.openCurrentEncounter(merged);
+      retireLegacyCombatLayer(rt,options);
       try{rt.document?.body?.style&&(rt.document.body.style.overflow="hidden")}catch(_){ }
       rt.__gensTacticalV2LastRoute={entry:options.entry||"openCurrent",reason:options.reason||"",at:Date.now(),enemyIds:e.enemyIds,heroIds:e.heroIds};
       return {ok:true,battle};
@@ -80,27 +143,50 @@
       return {ok:false,reason:"open-failed",error:err};
     }finally{opening=false}
   }
+  function privateRuntimeReady(rt=R){return !!(rt?.GensRpgTacticalCombatV2&&rt?.GensRpgTacticalCombatV2Adapter&&rt?.GensRpgTacticalCombatV2Ui)}
+  function requestCombat(rt=R,options={}){
+    const entry=str(options.entry||"requestCombat")||"requestCombat";
+    if(!privateRuntimeReady(rt)){
+      if(options.__gensActivationReplay===true)return reportBlocked(rt,{ok:false,reason:"modules-missing"},entry);
+      const activate=rt?.GensTacticalV1?.activate;
+      if(typeof activate!=="function")return reportBlocked(rt,{ok:false,reason:"modules-missing"},entry);
+      const replayOptions={...options,entry,__gensActivationReplay:true};
+      let started=false;
+      try{
+        started=activate(ok=>{
+          if(ok===false){reportBlocked(rt,{ok:false,reason:"activation-failed"},entry);return}
+          requestCombat(rt,replayOptions);
+        })!==false;
+      }catch(error){
+        try{rt?.console?.error?.("Combat tactique V2 activation",error)}catch(e){}
+        return reportBlocked(rt,{ok:false,reason:"activation-failed",error},entry);
+      }
+      if(!started)return reportBlocked(rt,{ok:false,reason:"activation-failed"},entry);
+      return {ok:true,pending:true,reason:"tactical-activating"};
+    }
+    const cleanOptions={...options};delete cleanOptions.__gensActivationReplay;
+    const enemyIds=arr(cleanOptions.enemyIds).map(str).filter(Boolean),scoped=scopedRequest(rt,{...cleanOptions,enemyIds,entry});
+    if(!scoped.ok)return reportBlocked(rt,scoped,entry);
+    const result=openCurrent(rt,{...scoped.options,entry});
+    return result.ok?result:reportBlocked(rt,result,entry);
+  }
   function startDefault(rt=R,enemyIds=[],reason="manual"){
     if(!dungeonContext(rt))return typeof legacyStart==="function"?legacyStart.call(rt,enemyIds,reason):{ok:false,reason:"not-dungeon"};
-    const ids=arr(enemyIds).map(str);const result=openCurrent(rt,{enemyIds:ids,reason,entry:"dc200StartCombat"});
-    return result.ok?result:reportBlocked(rt,result,"dc200StartCombat");
+    return requestCombat(rt,{enemyIds:arr(enemyIds).map(str),reason,entry:"dc200StartCombat"});
   }
   function setupDefault(rt=R){
     if(!dungeonContext(rt))return typeof legacySetup==="function"?legacySetup.call(rt):{ok:false,reason:"not-dungeon"};
-    const result=openCurrent(rt,{reason:"manual-setup",entry:"openDungeonCombatSetup"});
-    return result.ok?result:reportBlocked(rt,result,"openDungeonCombatSetup");
+    return requestCombat(rt,{reason:"manual-setup",entry:"openDungeonCombatSetup"});
   }
   function launchDefault(rt=R,x=null,chosen=[]){
     if(!dungeonContext(rt))return typeof legacyLaunch==="function"?legacyLaunch.apply(rt,[x,chosen]):false;
     const ids=arr(chosen).map(e=>str(e?.id??e)).filter(Boolean);
-    const result=openCurrent(rt,{enemyIds:ids,reason:"legacy-launch",entry:"launchCombat200"});
-    if(result.ok)return true;
-    reportBlocked(rt,result,"launchCombat200");
-    return false;
+    const result=requestCombat(rt,{enemyIds:ids,reason:"legacy-launch",entry:"launchCombat200"});
+    return !!result.ok;
   }
   function directStartDefault(rt=R,ids=[],reason="manual"){
     if(!dungeonContext(rt))return typeof legacyStartCombatFn==="function"?legacyStartCombatFn.apply(rt,[ids,reason]):false;
-    return startDefault(rt,ids,reason);
+    return requestCombat(rt,{enemyIds:arr(ids).map(str),reason,entry:"dc200StartCombat"});
   }
   function rememberLegacy(current,kind){
     if(typeof current!=="function"||current.__gensTacticalV2Default)return;
@@ -121,7 +207,7 @@
       const s=D.createElement("script");
       s.src="assets/gensrpg/gens-rpg-runtime-repair-1678106.js?v=16.78.106";
       s.async=false;
-      s.onload=()=>{repairLoading=false;installRepair(rt);setTimeout(()=>installRepair(rt),250);setTimeout(()=>installRepair(rt),1200)};
+      s.onload=()=>{repairLoading=false;installRepair(rt);const t250=setTimeout(()=>{repairTimers.delete(t250);installRepair(rt)},250);repairTimers.add(t250);const t1200=setTimeout(()=>{repairTimers.delete(t1200);installRepair(rt)},1200);repairTimers.add(t1200)};
       s.onerror=()=>{repairLoading=false;try{rt.console?.error?.("GenSrpG V106 runtime repair load failed")}catch(e){}};
       (D.head||D.documentElement)?.appendChild?.(s);
       return true;
@@ -135,7 +221,7 @@
     rememberLegacy(rt.startCombat,"startCombat");
 
     const start=function(enemyIds,reason){return startDefault(rt,enemyIds,reason)};
-    start.__gensTacticalV2Default=true;start.__legacy=legacyStart;rt.dc200StartCombat=start;
+    start.__gensTacticalV2Default=true;start.__gensRpg113Start=true;start.__gensRpg112Start=true;start.__legacy=legacyStart;rt.dc200StartCombat=start;
 
     const setup=function(){return setupDefault(rt)};
     setup.__gensTacticalV2Default=true;setup.__legacy=legacySetup;rt.openDungeonCombatSetup=setup;
@@ -149,7 +235,9 @@
       direct.__gensTacticalV2Default=true;direct.__legacy=legacyStartCombatFn;rt.startCombat=direct;
     }
 
-    rt.openTacticalCombatV2=(opts={})=>openCurrent(rt,{...opts,entry:opts.entry||"openTacticalCombatV2"});
+    if(typeof rt.openTacticalCombatV2==="function"&&!rt.openTacticalCombatV2.__gensTacticalV2Default&&!legacyOpenTactical)legacyOpenTactical=rt.openTacticalCombatV2;
+    rt.openTacticalCombatV2=(opts={})=>requestCombat(rt,{...opts,entry:opts.entry||"openTacticalCombatV2"});
+    rt.openTacticalCombatV2.__gensTacticalV2Default=true;rt.openTacticalCombatV2.__legacy=legacyOpenTactical;
     rt.GENS_TACTICAL_V2_DEFAULT=true;
     rt.GENS_TACTICAL_V2_ROUTER_VERSION=APP_VERSION;
     installed=true;
@@ -157,6 +245,23 @@
     try{rt.dispatchEvent?.(new CustomEvent("gensrpg:tactical-combat-ready",{detail:{version:APP_VERSION}}))}catch(e){}
     return true;
   }
+  function restoreOwned(rt,name,legacy){
+    const cur=rt?.[name];if(typeof cur!=="function"||!cur.__gensTacticalV2Default)return false;
+    if(typeof legacy==="function")rt[name]=legacy;else try{delete rt[name]}catch(e){rt[name]=undefined}
+    return true;
+  }
+  function dispose(rt=R){
+    for(const id of repairTimers)try{clearTimeout(id)}catch(e){}repairTimers.clear();
+    restoreOwned(rt,"startCombat",legacyStartCombatFn);
+    restoreOwned(rt,"launchCombat200",legacyLaunch);
+    restoreOwned(rt,"openDungeonCombatSetup",legacySetup);
+    restoreOwned(rt,"dc200StartCombat",legacyStart);
+    restoreOwned(rt,"openTacticalCombatV2",legacyOpenTactical);
+    try{delete rt.GENS_TACTICAL_V2_DEFAULT;delete rt.GENS_TACTICAL_V2_ROUTER_VERSION}catch(e){}
+    opening=false;installed=false;repairLoading=false;
+    legacyStart=null;legacySetup=null;legacyLaunch=null;legacyStartCombatFn=null;legacyOpenTactical=null;
+    return true;
+  }
   function status(rt=R){return {installed,dungeon:dungeonContext(rt),router:rt?.GENS_TACTICAL_V2_ROUTER_VERSION||"",battle:!!currentBattle(rt),repair:rt?.GensRpgRuntimeRepair1678106?.status?.(rt)||null,last:rt?.__gensTacticalV2LastRoute||null}}
-  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,openCurrent,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,status};
+  return {VERSION,APP_VERSION,dungeonContext,eligible,currentBattle,rewardSummaryHtml,showOutcomeModal,isV113DetectionReason,prepareV113Detection,scopedRequest,openCurrent,requestCombat,startDefault,setupDefault,launchDefault,ensureRuntimeRepair,install,dispose,status};
 });

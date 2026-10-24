@@ -1,0 +1,98 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+
+const root=path.join(__dirname,'..');
+const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const DUNGEON_CORE01_SCRIPT='assets/gensrpg/dungeon/core01-session-ui-v1.js';
+const DUNGEON_CORE01_TAG='<script id="gensDungeonCore01Js" src="'+DUNGEON_CORE01_SCRIPT+'"></script>';
+assert.equal(source.split(DUNGEON_CORE01_TAG).length-1,1,
+  'Dungeon Core01 must be loaded exactly once as the original parser-ordered owner');
+const r06CaptureNames=new Set(['captureGameplayModalMount','capturePlaytestFix128',...Array.from({length:12},(_,i)=>'captureFix'+(129+i)),'captureItems141','captureBuffs142','captureBuffFx143','captureAbilityTruth144']);
+const captureRel=id=>'assets/gensrpg/capture/legacy-patches/'+id.replace(/([A-Z])/g,'-$1').toLowerCase().replace(/^-/,'')+'-v1.js';
+const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
+  .map(m=>{
+    const id=m[1];
+    let body=m[2];
+    if(id==='gensDungeonCore01Js')body=fs.readFileSync(path.join(root,DUNGEON_CORE01_SCRIPT),'utf8');
+    if(id==='dungeonCore200Rebuild')body=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8');
+    if(r06CaptureNames.has(id)){
+      const rel=captureRel(id);
+      assert.equal(m[0],'<script id="'+id+'" src="'+rel+'"></script>','R06 Capture owners must remain parser ordered and unique');
+      body=fs.readFileSync(path.join(root,rel),'utf8');
+    }
+    return {id,body,offset:m.index};
+  });
+
+function assignmentChain(name){
+  const re=new RegExp('window\\.'+name+'\\s*=','g');
+  const chain=[];
+  for(const block of blocks){
+    const hits=block.body.match(re);
+    if(hits?.length)chain.push({id:block.id,count:hits.length,body:block.body});
+  }
+  return chain;
+}
+
+const target='startConfiguredGame';
+const chain=assignmentChain(target);
+const total=chain.reduce((sum,x)=>sum+x.count,0);
+const ids=chain.flatMap(x=>Array(x.count).fill(x.id));
+
+assert.equal(total,2,'Phase 12 must retain both historical Capture/Dungeon owners across inline/external files');
+assert.deepEqual(ids,[
+  'captureFix138',
+  'gensDungeonCore01Js'
+],'Phase 9 target chain must keep Capture138 compatibility and Dungeon Core01 while retiring Capture139');
+
+const capture131=blocks.find(x=>x.id==='captureFix131');
+assert.ok(capture131,'captureFix131 block must remain present');
+assert.doesNotMatch(capture131.body,/window\.startConfiguredGame\s*=/,
+  'captureFix131 must no longer assign startConfiguredGame');
+
+for(const id of ['captureFix138','gensDungeonCore01Js']){
+  assert.ok(chain.some(x=>x.id===id),id+' must remain an active historical startConfiguredGame owner');
+}
+assert.ok(!chain.some(x=>x.id==='captureFix139'),
+  'Capture139 must remain retired as a global startConfiguredGame owner after Phase 9 session-start transfer');
+assert.equal(chain.at(-1)?.id,'gensDungeonCore01Js',
+  'Dungeon Core01 must remain the last historical global startConfiguredGame owner after captureFix135 retirement');
+
+const c135=blocks.find(x=>x.id==='captureFix135')?.body||'';
+assert.doesNotMatch(c135,/window\.startConfiguredGame\s*=/,
+  'captureFix135 must remain retired as a global startConfiguredGame owner');
+const c138=blocks.find(x=>x.id==='captureFix138')?.body||'';
+const c139=blocks.find(x=>x.id==='captureFix139')?.body||'';
+const dc01=blocks.find(x=>x.id==='gensDungeonCore01Js')?.body||'';
+const dc200=blocks.find(x=>x.id==='dungeonCore200Rebuild')?.body||'';
+
+assert.match(c135,/target135\(/);
+assert.match(c135,/render135\(/);
+assert.match(c135,/captureBattleLiveBody/);
+assert.match(c135,/captureCreatureDetailBody/);
+assert.match(c135,/oldPlayerText135/);
+assert.match(c138,/isCaptureContext138/);
+assert.match(c138,/renderCaptureWorldHub/);
+assert.doesNotMatch(c139,/window\.startConfiguredGame\s*=|const\s+start139\s*=|gensCaptureStartConfiguredGame139V1/,
+  'Capture139 session-start wrapper/reference must remain retired');
+assert.match(c139,/GensCaptureSessionStartV1\.install\(/,
+  'Capture139 may only wire explicit dependencies to the Capture session-start owner');
+assert.match(c139,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/,
+  'Capture public entry must bind the dedicated session-start owner');
+assert.match(c139,/markSessionActive:\(\)=>markSessionActive\(true\)/);
+assert.match(dc01,/if\(eligible\?*\(\)?|if\(eligible\(\)\)/);
+assert.match(dc200,/isDungeonMode/);
+assert.match(dc200,/isCaptureContext138/);
+assert.match(dc200,/startOutside200/);
+assert.match(dc200,/const gensDungeonStartConfiguredGame200V1=async function/,
+  'Core200 must retain its stable local Dungeon launch dispatcher');
+assert.doesNotMatch(dc200,/window\.startConfiguredGame\s*=(?!=)/,
+  'Core200 global startConfiguredGame assignment must remain retired');
+
+console.log(JSON.stringify({
+  scenario:'Phase 5 retire captureFix131 startConfiguredGame wrapper',
+  assignments:total,
+  chain:ids,
+  lastOwner:chain.at(-1)?.id||null
+},null,2));

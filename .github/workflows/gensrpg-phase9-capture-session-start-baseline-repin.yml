@@ -1,0 +1,44 @@
+name: GenSrpG Phase 9 Capture session-start baseline repin one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-session-start-owner-transfer-2026-10-07'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture-session-start-baseline-repin.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repin-session-start-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify transferred runtime baseline
+        run: |
+          test "$(git hash-object index.html)" = "560966d096134cd58ff4dc6ab2be589cee936ba7"
+          test "$(wc -c < index.html)" = "8165614"
+
+      - name: Repin exact baseline constants in tests only
+        run: python tools/gensrpg_phase9_capture_session_start_repin.py
+
+      - name: Verify mechanical scope
+        run: |
+          ! grep -RIl --exclude-dir=.git '20381d1df0b10b664d5163f308f909cd7a6e45df\|8166499' tests
+          git diff --check
+          test -z "$(git diff --name-only | grep -v '^tests/')" || (echo "Non-test file modified" && exit 1)
+          echo "Changed test files: $(git diff --name-only | wc -l)"
+          git diff --stat
+
+      - name: Commit repinned test baselines
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests
+          git commit -m "test(phase9): repin index after Capture session-start transfer"
+          git push origin "HEAD:$GITHUB_REF_NAME"

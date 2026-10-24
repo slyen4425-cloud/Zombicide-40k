@@ -15,7 +15,9 @@
   const RUNTIME_KEY="gensrpg_dungeon_runtime_v2";
   const DETECTION_RADIUS=1;
   const STYLE_ID="gensRpgTacticalPolish1678108Style";
-  let observer=null,installed=false,lastDetectionStamp="",lastDetectionAt=0;
+  let installed=false,lastDetectionStamp="",lastDetectionAt=0,changeHandler=null,clickHandler=null;
+  let tacticalReadyListener=null,afterRenderUi=null,afterRenderCallback=null,unsubscribeAfterRender=null;
+  const retryTimers=new Set();
   const arr=v=>Array.isArray(v)?v:[];
   const str=v=>String(v??"");
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
@@ -101,7 +103,6 @@
     const style=D.createElement("style");style.id=STYLE_ID;
     style.textContent=`
       .gtv2Pawn img{object-fit:contain!important;object-position:center top!important;transform:scale(.96);transform-origin:center top;background:transparent!important}
-      .gtv2Cell.blocked,#drc100Grid .drc100Cell.wall{background-image:url("${WALL_ASSET}")!important;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
       .gtv2108Panel{display:grid;gap:8px;margin:8px 0;padding:9px;border:1px solid #3b4657;border-radius:12px;background:rgba(10,15,24,.92)}
       .gtv2108Row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:center}
       .gtv2108Row.weapon{grid-template-columns:minmax(0,1fr) auto auto}
@@ -119,8 +120,7 @@
   function paintWalls(rt=R){
     const D=doc(rt);if(!D)return 0;let count=0;
     for(const el of D.querySelectorAll?.("#drc100Grid .drc100Cell.wall")||[]){el.style?.setProperty?.("background-image",`url("${WALL_ASSET}")`,"important");el.style?.setProperty?.("background-size","cover","important");count++}
-    const state=runtimeState(rt),map=state?.last?.map,kinds=arr(map?.cells),cells=[...(D.querySelectorAll?.("#dc047RoomBoard .dc047Grid > .dc047Cell")||[])];
-    for(let i=0;i<cells.length;i++)if(str(kinds[i]).toLowerCase()==="wall"){cells[i].style?.setProperty?.("background-image",`url("${WALL_ASSET}")`,"important");cells[i].style?.setProperty?.("background-size","cover","important");cells[i].style?.setProperty?.("background-position","center","important");count++}
+    // Native Dungeon map styling belongs to the existing 0.79/167877 owners.
     return count;
   }
   function patchDungeonMapHtml(rt=R){
@@ -168,7 +168,17 @@
     const st=inventoryState(rt,heroId),idx=num(inventoryIndex,-1);if(!st||idx<0||idx>=arr(st.inventory).length)return false;
     const item=itemFromEntry(rt,st.inventory[idx]);if(str(item?.type).toLowerCase()!=="arme")return false;
     st.rightHand=idx;
-    try{rt?.saveState?.(heroId,st)}catch(e){return false}
+    // In the real game there is no global saveState(heroId, state). The
+    // heroic profile is stored by the Core storage owner under key(heroId).
+    // Never report an equipment change as successful without persistence.
+    try{
+      if(typeof rt?.saveState==="function"){
+        if(rt.saveState(heroId,st)===false)return false;
+      }else if(typeof rt?.GensStorageV1?.writeJson==="function"&&typeof rt?.key==="function"){
+        rt.GensStorageV1.writeJson(rt.localStorage,rt.key(heroId),st);
+      }else return false;
+    }catch(e){return false}
+    if(Number(inventoryState(rt,heroId)?.rightHand)!==idx)return false;
     refreshActorFromState(rt,heroId);return true;
   }
   function reloadWeapon(rt=R,heroId="",inventoryIndex=-1){
@@ -177,21 +187,22 @@
     try{if(typeof rt?.refillWeapon==="function"){rt.refillWeapon(idx);setTimeout(()=>refreshActorFromState(rt,heroId),0);return true}}catch(e){}
     return false;
   }
-  function legacyConsumableArgs(fn,heroId,item,index){
-    let names=[];try{const src=Function.prototype.toString.call(fn),m=src.match(/^[^(]*\(([^)]*)\)/);if(m)names=m[1].split(",").map(x=>x.trim().toLowerCase()).filter(Boolean)}catch(e){}
-    if(!names.length){if(fn.length>=2)return [heroId,item.id];if(fn.length===1)return [item.id];return []}
-    return names.map((name,pos)=>{if(/hero|char|actor/.test(name))return heroId;if(/index|idx|slot|inventory/.test(name))return index;if(/item|object|objet|consum/.test(name))return item.id;if(/qty|quant|count|amount/.test(name))return 1;return pos===0?heroId:pos===1?item.id:index});
-  }
   async function useConsumable(rt=R,heroId="",itemId="",qty=1){
     const options=itemOptions(rt,heroId),opt=options.find(x=>x.id===str(itemId));if(!opt)return false;
     const fn=rt?.dungeonCombatUseItem061;if(typeof fn!=="function")return false;
     const count=Math.max(1,Math.min(num(qty,1),opt.qty));
+    let consumed=0;
     for(let i=0;i<count;i++){
       const latest=itemOptions(rt,heroId).find(x=>x.id===opt.id);if(!latest)break;
-      const args=legacyConsumableArgs(fn,heroId,latest.item,latest.index);
-      if(!args.length)return false;
-      await Promise.resolve(fn.apply(rt,args));
+      // Core 0.61 public contract: dungeonCombatUseItem061(heroId, index, targetId).
+      // Legacy turn guards wrap this function with fn(heroId) but forward
+      // arguments; inspecting fn.length/toString would drop index and target.
+      await Promise.resolve(fn.call(rt,heroId,latest.index,""));
+      const remaining=itemOptions(rt,heroId).find(x=>x.id===opt.id)?.qty||0;
+      if(remaining>=latest.qty)break; // rejected/no-op must not report success
+      consumed+=latest.qty-remaining;
     }
+    if(!consumed)return false;
     refreshActorFromState(rt,heroId);return true;
   }
 
@@ -227,38 +238,59 @@
   }
   function bindControls(rt=R){
     const D=doc(rt);if(!D||D.__gensRpg108Controls)return true;D.__gensRpg108Controls=true;
-    D.addEventListener?.("change",ev=>{const t=ev?.target;if(t?.matches?.("[data-v108-item]"))updateQtySelect(rt,t)});
-    D.addEventListener?.("click",async ev=>{
+    changeHandler=ev=>{const t=ev?.target;if(t?.matches?.("[data-v108-item]"))updateQtySelect(rt,t)};
+    clickHandler=async ev=>{
       const btn=ev?.target?.closest?.("button[data-v108-attack-go],button[data-v108-equip],button[data-v108-reload],button[data-v108-use]");if(!btn)return;
       const panel=btn.closest?.("[data-v108-panel]"),heroId=panel?.getAttribute?.("data-v108-panel")||"";if(!panel||!heroId)return;
       ev.preventDefault?.();ev.stopPropagation?.();
-      if(btn.hasAttribute("data-v108-attack-go")){
-        const id=panel.querySelector?.("[data-v108-attack]")?.value,legacy=[...(D.querySelectorAll?.(".gtv2Actions button[data-attack]")||[])].find(b=>str(b.dataset?.attack)===str(id));legacy?.click?.();return;
-      }
+      if(btn.hasAttribute("data-v108-attack-go")){const id=panel.querySelector?.("[data-v108-attack]")?.value,legacy=[...(D.querySelectorAll?.(".gtv2Actions button[data-attack]")||[])].find(b=>str(b.dataset?.attack)===str(id));legacy?.click?.();return}
       const weaponIndex=num(panel.querySelector?.("[data-v108-weapon]")?.value,-1);
       if(btn.hasAttribute("data-v108-equip")){equipWeapon(rt,heroId,weaponIndex);return}
       if(btn.hasAttribute("data-v108-reload")){reloadWeapon(rt,heroId,weaponIndex);return}
-      if(btn.hasAttribute("data-v108-use")){
-        const itemId=panel.querySelector?.("[data-v108-item]")?.value,qty=num(panel.querySelector?.("[data-v108-qty]")?.value,1);btn.disabled=true;
-        try{await useConsumable(rt,heroId,itemId,qty)}finally{btn.disabled=false;try{ui(rt)?.render?.()}catch(e){}}
-      }
-    },true);return true;
+      if(btn.hasAttribute("data-v108-use")){const itemId=panel.querySelector?.("[data-v108-item]")?.value,qty=num(panel.querySelector?.("[data-v108-qty]")?.value,1);btn.disabled=true;try{await useConsumable(rt,heroId,itemId,qty)}finally{btn.disabled=false;try{ui(rt)?.render?.()}catch(e){}}}
+    };
+    D.addEventListener?.("change",changeHandler);D.addEventListener?.("click",clickHandler,true);return true;
   }
   function hookUiRender(rt=R){
-    const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;if(old.__gensRpg108Polish)return true;
-    const wrapped=function(){const out=old.apply(this,arguments);try{enhanceActions(rt);paintWalls(rt)}catch(e){}return out};wrapped.__gensRpg108Polish=true;wrapped.__original=old;U.render=wrapped;return true;
+    const U=ui(rt),old=U?.render;if(typeof old!=="function")return false;
+    // Use the Tactical-owned render hook: its UI is loaded lazily on first combat.
+    // Re-registering the SAME callback is idempotent (Set), and repairs the hook
+    // when Tactical.dispose() cleared its callbacks between encounters.
+    if(typeof U.onAfterRender==="function"){
+      if(afterRenderUi!==U){
+        try{unsubscribeAfterRender?.()}catch(e){}
+        afterRenderUi=U;
+        afterRenderCallback=()=>{try{enhanceActions(rt)}catch(e){}};
+      }
+      unsubscribeAfterRender=U.onAfterRender(afterRenderCallback);
+      return true;
+    }
+    // Legacy UI compatibility only when the owner's public hook is unavailable.
+    if(old.__gensRpg108Polish)return true;
+    const wrapped=function(){const out=old.apply(this,arguments);try{enhanceActions(rt)}catch(e){}return out};wrapped.__gensRpg108Polish=true;wrapped.__original=old;U.render=wrapped;return true;
   }
-  function observe(rt=R){
-    const D=doc(rt);if(!D||observer||typeof rt?.MutationObserver!=="function")return false;
-    observer=new rt.MutationObserver(()=>{try{enhanceActions(rt);paintWalls(rt)}catch(e){}});observer.observe(D.body||D.documentElement,{childList:true,subtree:true});return true;
+  function bindTacticalReady(rt=R){
+    if(tacticalReadyListener||typeof rt?.addEventListener!=="function")return;
+    tacticalReadyListener=()=>{hookUiRender(rt);enhanceActions(rt)};
+    rt.addEventListener("gensrpg:tactical-combat-ready",tacticalReadyListener);
   }
   function install(rt=R){
-    ensureStyle(rt);patchDungeonMapHtml(rt);hookDungeonRender(rt);hookDetection(rt);bindControls(rt);hookUiRender(rt);observe(rt);paintWalls(rt);enhanceActions(rt);
+    ensureStyle(rt);bindControls(rt);bindTacticalReady(rt);hookUiRender(rt);enhanceActions(rt);
     try{rt.GENS_RPG_TACTICAL_POLISH_VERSION=APP_VERSION}catch(e){}
     installed=true;return true;
   }
-  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function"){for(const ms of [80,220,600,1200,2500])setTimeout(()=>install(rt),ms)}return true}
-  const api={VERSION,APP_VERSION,WALL_ASSET,RUNTIME_KEY,DETECTION_RADIUS,mapSize,gridDistance,detectionEnemyIds,runtimeState,scanImmediateDetection,hookDetection,paintWalls,patchDungeonMapHtml,weaponOptions,itemOptions,equipWeapon,reloadWeapon,useConsumable,actionPanelHtml,enhanceActions,install,installWithRetries,status:()=>({installed,wall:WALL_ASSET,detectionRadius:DETECTION_RADIUS})};
+  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function"){for(const ms of [80,220,600,1200,2500]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}}return true}
+  function dispose(rt=R){
+    for(const id of retryTimers)try{clearTimeout(id)}catch(e){}retryTimers.clear();
+    if(tacticalReadyListener)rt?.removeEventListener?.("gensrpg:tactical-combat-ready",tacticalReadyListener);
+    tacticalReadyListener=null;
+    try{unsubscribeAfterRender?.()}catch(e){}
+    unsubscribeAfterRender=null;afterRenderUi=null;afterRenderCallback=null;
+    const D=doc(rt),U=ui(rt);if(D){if(changeHandler)D.removeEventListener?.("change",changeHandler);if(clickHandler)D.removeEventListener?.("click",clickHandler,true);try{delete D.__gensRpg108Controls}catch(e){D.__gensRpg108Controls=false}}
+    const cur=U?.render;if(cur?.__gensRpg108Polish&&typeof cur.__original==="function")U.render=cur.__original;
+    D?.getElementById?.(STYLE_ID)?.remove?.();changeHandler=null;clickHandler=null;installed=false;return true;
+  }
+  const api={VERSION,APP_VERSION,WALL_ASSET,RUNTIME_KEY,DETECTION_RADIUS,mapSize,gridDistance,detectionEnemyIds,runtimeState,scanImmediateDetection,hookDetection,paintWalls,patchDungeonMapHtml,weaponOptions,itemOptions,equipWeapon,reloadWeapon,useConsumable,actionPanelHtml,enhanceActions,install,installWithRetries,dispose,status:()=>({installed,wall:WALL_ASSET,detectionRadius:DETECTION_RADIUS})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

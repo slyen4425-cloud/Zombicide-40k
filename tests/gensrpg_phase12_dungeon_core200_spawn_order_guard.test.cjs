@@ -1,0 +1,17 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),cp=require('node:child_process'),crypto=require('node:crypto'),vm=require('node:vm');
+const file='assets/gensrpg/dungeon/core200-rebuild-v1.js';
+const old=cp.execFileSync('git',['show','905856d0cb4ce04068daf8f7d9bd08b46d556799:'+file],{maxBuffer:2*1024*1024}).toString('utf8');
+const now=fs.readFileSync(file,'utf8');
+const hash=b=>{const x=Buffer.from(b);return crypto.createHash('sha1').update('blob '+x.length+'\0').update(x).digest('hex')};
+assert.equal(hash(old),'5649ae0af69064dde72e6ea28b8dbefd105cb527','known Core200 baseline');
+const before="  x.room=targetRoom;x.enemyCells={};x.branch=null;\n  spatialSetRoom(x,heroId,targetRoom);\n  const kind=chooseKind(x.room),made=createRoom(x.room,kind);";
+const after="  x.room=targetRoom;x.enemyCells={};x.branch=null;x.last=null;\n  spatialSetRoom(x,heroId,targetRoom);\n  // Le générateur d'ennemis lit la salle publiée via loadDungeonState().\n  // Publier la nouvelle salle avant dungeonEncounter/createRoom, pas après.\n  saveRt(x);\n  const kind=chooseKind(x.room),made=createRoom(x.room,kind);";
+assert.equal(old.split(before).length,2,'one exact source match');
+assert.equal(now,old.replace(before,after),'only approved one-block reordering in Core200');
+new vm.Script(now,{filename:file});
+const selected=now.slice(now.indexOf('function explore(){'),now.indexOf('function moveTo(',now.indexOf('function explore(){')));
+assert.ok(selected.indexOf('saveRt(x);')<selected.indexOf('createRoom(x.room,kind)'),'publish before spawn');
+const gitDiff=cp.execFileSync('git',['diff','--name-only','95740b6353a116c7e66b5d1095338b81d8b223bf','--','index.html','service-worker.js','assets/gensrpg','assets/dungeon','docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
+assert.deepEqual(gitDiff,[file],'no other production file modified');
+console.log('Core200 target room published before real enemy spawn, original otherwise preserved; no other runtime files changed');

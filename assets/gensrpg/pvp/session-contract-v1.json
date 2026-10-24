@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "phase": 10,
+  "module": "pvp",
+  "stage": "S0-session-ownership-not-composed",
+  "owner": "pvp",
+  "entry": "assets/gensrpg/pvp/session-v1.js",
+  "lifecycle": [
+    "install",
+    "prepare",
+    "start",
+    "stop",
+    "dispose"
+  ],
+  "api": [
+    "status",
+    "snapshot"
+  ],
+  "session": {
+    "sides": "at least two opposing sides",
+    "participants": "unique ids within the session",
+    "rules": "explicit JSON-compatible configuration; no hard-coded combat rules"
+  },
+  "shell": "requires explicit activeModule() injected binding; no production registration yet",
+  "currentUserExperience": "PVP — À VENIR (unchanged; no duel gameplay implemented)",
+  "forbidden": [
+    "read Dungeon/Survival/Capture private state",
+    "modify Shell global navigation",
+    "auto-install or poll",
+    "read/write storage without Core",
+    "invent combat rules"
+  ],
+  "futureGate": [
+    "wire provider to Shell by explicit authority after source-exact index procedure",
+    "configure session, combat and UI with owner-owned API",
+    "prove real mobile UI and cross-module save/quit and noninterference"
+  ]
+}

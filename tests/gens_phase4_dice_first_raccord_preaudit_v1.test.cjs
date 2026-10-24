@@ -1,0 +1,90 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const vm=require('node:vm');
+
+const root=path.join(__dirname,'..');
+const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const r13Builders=fs.readFileSync(path.join(root,'assets/gensrpg/builders/legacy-enemy-editor-v1.js'),'utf8');
+assert.ok(index.includes('<script src="assets/gensrpg/builders/legacy-enemy-editor-v1.js"></script>'),'R13 sole owner loaded at parser position');
+const r12Dungeon=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js'),'utf8');
+assert.ok(index.includes('<script src="assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js"></script>'),'R12 Dungeon owner must load via the real index');
+const coreSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','dice-v1.js'),'utf8');
+
+const thresholdOccurrences=((index+'\n'+r13Builders).match(/\bd100ThresholdFromChance\s*\(/g)||[]).length;
+const universalOccurrences=((index+'\n'+r12Dungeon).match(/\bdungeonUniversalTest\s*\(/g)||[]).length;
+assert.equal(thresholdOccurrences,16,'D100 threshold seam must remain one definition + fifteen callsites');
+assert.equal(universalOccurrences,2,'universal test must remain one definition + one callsite');
+
+const thresholdMatch=index.match(/function d100ThresholdFromChance\(chance\)\{\s*const c=Math\.max\(1,Math\.min\(100,Number\(chance\)\|\|1\)\);\s*return GensDiceV1\.thresholdFromChance\(c\);\s*\}/);
+assert.ok(thresholdMatch,'selected D100 boundary must preserve legacy normalization and delegate to Core Dice');
+
+const legacy=chance=>{
+  const c=Math.max(1,Math.min(100,Number(chance)||1));
+  return Math.max(1,Math.min(100,101-c));
+};
+
+const coreCtx={console,Math,Number,Object,RangeError,TypeError};
+coreCtx.window=coreCtx;coreCtx.globalThis=coreCtx;
+vm.createContext(coreCtx);
+vm.runInContext(coreSrc,coreCtx,{filename:'dice-v1.js'});
+const Core=coreCtx.GensDiceV1;
+assert.ok(Core,'Core Dice API missing');
+
+for(const value of [-500,-1,0,1,5,25,50,50.5,95,99,100,150,500,'50','',null,false]){
+  assert.equal(
+    Core.thresholdFromChance(value),
+    legacy(value),
+    'finite/coercible threshold parity drifted for '+String(value)
+  );
+}
+
+const tolerantLegacy=[
+  {value:undefined,expected:100,label:'undefined'},
+  {value:Number.NaN,expected:100,label:'NaN'},
+  {value:Number.POSITIVE_INFINITY,expected:1,label:'+Infinity'},
+  {value:Number.NEGATIVE_INFINITY,expected:100,label:'-Infinity'}
+];
+for(const row of tolerantLegacy){
+  assert.equal(legacy(row.value),row.expected,'legacy tolerant boundary drifted: '+row.label);
+  assert.throws(
+    ()=>Core.thresholdFromChance(row.value),
+    /chance must be finite/,
+    'Core must stay strict for non-finite input: '+row.label
+  );
+}
+
+assert.match(r12Dungeon,/function dungeonUniversalTest\(statValue,opt=\{\}\)\{[\s\S]*?loadDungeonRpgRules\(\)/,
+  'universal test must still read configurable RPG rules');
+assert.match(r12Dungeon,/dungeonUniversalTest\(statValue,opt=\{\}\)\{[\s\S]*?if\(!r\.testsEnabled\)return \{enabled:false,success:true,total:Number\(statValue\)\|\|0,roll:0\}/,
+  'universal test disabled semantics drifted');
+assert.match(r12Dungeon,/const sides=Math\.max\(2,Number\(opt\.die\)\|\|r\.testDie\|\|20\),roll=1\+Math\.floor\(Math\.random\(\)\*sides\)/,
+  'universal test still owns tolerant configurable-sided random roll');
+assert.match(r12Dungeon,/difficulty=Math\.max\(1,Number\(opt\.difficulty\)\|\|r\.testDefaultDifficulty\|\|10\)/,
+  'universal test difficulty normalization drifted');
+assert.match(r12Dungeon,/return \{enabled:true,success:total>=difficulty,total,roll,sides,modifier:mod,difficulty\}/,
+  'universal test result shape drifted');
+
+assert.equal(index.includes('assets/gensrpg/core/dice-v1.js'),true,
+  'selected first raccord must explicitly load Core Dice');
+
+const selection={
+  first:'d100ThresholdFromChance',
+  reason:'single central seam; finite/coercible parity already exact; non-finite tolerance can stay in a tiny boundary adapter',
+  deferred:'dungeonUniversalTest (now owned by Dungeon R12)',
+  deferredReasons:[
+    'testsEnabled branch',
+    'runtime rule lookup',
+    'tolerant configurable side count',
+    'legacy coercions',
+    'legacy result shape'
+  ]
+};
+
+console.log(JSON.stringify({
+  scenario:'Phase 4 Core Dice first-raccord preaudit',
+  threshold:{callsites:thresholdOccurrences-1,finiteParity:true,nonFiniteBoundaryAdapterRequired:true},
+  universalTest:{callsites:universalOccurrences-1,directCoreParity:false},
+  selection,
+  runtimeChanged:true
+},null,2));

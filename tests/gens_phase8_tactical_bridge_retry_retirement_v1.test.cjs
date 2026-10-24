@@ -1,0 +1,11 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const entry=fs.readFileSync(path.join(root,'assets/gensrpg/tactical/entry-v1.js'),'utf8');
+assert.equal((entry.match(/setTimeout\(apply,/g)||[]).length,0,'public Tactical entry must not schedule delayed Bridge reinstalls');
+assert.match(entry,/function activate\(onReady\)/,'Bridge install must be session-activation owned');
+assert.match(entry,/GensRpgTacticalCombatV2Bridge\?\.install\?\.\(R\)/,'one immediate Bridge install must remain after private base readiness');
+assert.match(entry,/const facadeFile="assets\/gensrpg\/gens-rpg-tactical-combat-v2-bridge\.js"/,'Bridge facade must be resident without eager installation');
+console.log(JSON.stringify({scenario:'Phase 8 Tactical Bridge retry retirement',bootstrapInstalls:0,firstActivationInstalls:1,delayedReinstalls:[]},null,2));

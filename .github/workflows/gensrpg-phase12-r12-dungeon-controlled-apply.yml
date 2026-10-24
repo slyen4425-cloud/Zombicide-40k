@@ -1,0 +1,50 @@
+name: GenSrpG Phase12 R12 controlled Dungeon RPG rules talents extraction
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r12-dungeon-rpg-rules-talents-2026-10-19'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r12-dungeon-controlled-apply.yml'
+permissions:
+  contents: write
+jobs:
+  guarded-dungeon-rpg-apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout full certified R11 history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Block wrong branch or wrong exact R11 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r12-dungeon-rpg-rules-talents-2026-10-19'
+          test "$(git hash-object index.html)" = 'f257bd9e193648dc62cd8a40d510831debfe045a'
+          test "$(wc -c < index.html | tr -d ' ')" = '1934253'
+          test ! -e assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js
+          node tools/gensrpg_phase12_r12_dungeon_rpg_rules_talents.cjs --check-source
+      - name: Apply one verified Dungeon-only extraction, rollback and pre-cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/gensrpg_phase12_r12_dungeon_rpg_rules_talents.cjs --apply
+          node tools/gensrpg_phase12_r12_dungeon_rpg_rules_talents.cjs --verify
+          node --check assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js
+          test "$(git hash-object index.html)" = 'b0d0c73292e4374fc4f23e86edffad5c1b39a7b6'
+          test "$(git hash-object assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js)" = '82c847234e75adbfe33ef70ca8f58fa1ebdc381d'
+          test "$(node tools/gensrpg_phase12_r12_dungeon_rpg_rules_talents.cjs --restore-r11 | git hash-object --stdin)" = 'f257bd9e193648dc62cd8a40d510831debfe045a'
+          git -c core.whitespace=-blank-at-eof diff --check
+      - name: Commit only the four expected generated files on the R12 branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          test "$(git diff --cached --name-only | wc -l | tr -d ' ')" = '4'
+          # Preserve byte-exact legacy function whitespace; continue to check other patch errors.
+          git -c core.whitespace=-blank-at-eol,-blank-at-eof diff --cached --check
+          git commit -m 'refactor(phase12 R12): move 96 byte-identical Dungeon RPG rules and talent functions'
+          git push origin "HEAD:$GITHUB_REF_NAME"

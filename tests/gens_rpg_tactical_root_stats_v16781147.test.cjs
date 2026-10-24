@@ -5,6 +5,12 @@ const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
 const source=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
+const statsNormalizationSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','stats-normalization-v1.js'),'utf8');
+const statsValueEngineSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','stats-value-engine-v1.js'),'utf8');
+const statsHeroValuesSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','stats-hero-values-v1.js'),'utf8');
+const statsModifierProviderSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','stats-modifier-provider-v1.js'),'utf8');
+const statsDerivedValuesSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','stats-derived-values-v1.js'),'utf8');
+const statsSnapshotSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','stats-snapshot-v1.js'),'utf8');
 const Stats=require(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-stats-1678110.js'));
 
 const state={rpgAttributes:{force:17,agilite:13,intelligence:11,esprit:9,endurance:15,initiative:8,defense:12,armor:2,movement:4},mana:6};
@@ -31,6 +37,12 @@ const ctx={
   setTimeout:fn=>{fn();return 1},clearTimeout:()=>{},
 };
 vm.createContext(ctx);
+vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});
+vm.runInContext(statsValueEngineSrc,ctx,{filename:'stats-value-engine-v1.js'});
+vm.runInContext(statsHeroValuesSrc,ctx,{filename:'stats-hero-values-v1.js'});
+vm.runInContext(statsModifierProviderSrc,ctx,{filename:'stats-modifier-provider-v1.js'});
+vm.runInContext(statsDerivedValuesSrc,ctx,{filename:'stats-derived-values-v1.js'});
+vm.runInContext(statsSnapshotSrc,ctx,{filename:'stats-snapshot-v1.js'});
 vm.runInContext(source,ctx,{filename:'gens-rpg-stats-clean-167874.js'});
 const api=ctx.GensCleanRpgStats167874;
 assert.ok(api,'canonical stats API must install');
@@ -54,7 +66,7 @@ assert.equal(ctx.current,'hero','snapshot builder must restore active hero conte
 assert.equal(ctx.state,state,'snapshot builder must restore active hero state');
 
 const baseStart=source.indexOf('function baseValue');
-const baseEnd=source.indexOf('function compare',baseStart);
+const baseEnd=source.indexOf('const compare=StatsNorm.compare',baseStart);
 assert.ok(baseStart>0&&baseEnd>baseStart);
 assert.doesNotMatch(source.slice(baseStart,baseEnd),/nativeAttr\.call/,'canonical current-hero values must not fall back to the obsolete native reader');
 console.log('V16.78.114.7 rebuilt canonical hero stats -> Tactical V110 snapshot OK');

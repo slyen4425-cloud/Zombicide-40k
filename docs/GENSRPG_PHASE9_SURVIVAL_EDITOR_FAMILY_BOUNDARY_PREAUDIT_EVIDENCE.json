@@ -1,0 +1,1285 @@
+{
+  "baseSha": "7d317cc77683f1c3ce0f5e8696984f8c9b65a2a7",
+  "indexBytes": 8165926,
+  "indexBlob": "d721d1665ba937b855d8de6c5b59c8d04d4a2bdf",
+  "owners": [
+    "loadGameProfilesRaw",
+    "saveGameProfiles",
+    "loadGameProfiles",
+    "activeGameProfileId",
+    "setActiveGameProfileId",
+    "getActiveGameProfile",
+    "gensReferenceSurvivalSettings",
+    "gensBlankSurvivalSettings",
+    "ensureSurvivalProfileData",
+    "gensContentFamilyForProfile",
+    "survivalProfiles",
+    "gensFamilyForProfile",
+    "gensFamilyForProfileId",
+    "activeSurvivalModId",
+    "activeSurvivalMod",
+    "setActiveSurvivalMod",
+    "openSurvivalModEditor",
+    "currentSmodProfile",
+    "currentSmod",
+    "selectSurvivalModProfile",
+    "checkedSmodPool",
+    "readSmodLevels",
+    "saveSurvivalModPools",
+    "addSurvivalThreatLevel",
+    "removeSurvivalThreatLevel",
+    "saveSurvivalModIdentity",
+    "saveSurvivalModProgression",
+    "saveSurvivalModRules",
+    "saveSurvivalModWaveRules",
+    "duplicateSurvivalModProfile",
+    "deleteSurvivalModProfile"
+  ],
+  "cases": [
+    {
+      "id": "game_profile_zombicide_base",
+      "style": "zombicide",
+      "family": "survival",
+      "activeEditorId": "game_profile_zombicide_base",
+      "currentEditorId": "game_profile_zombicide_base",
+      "libraryContainsActive": true,
+      "legacyFamily": "survival",
+      "shellFamily": "survival",
+      "writesOnOpen": 0,
+      "sourceFunctionsPreserved": true,
+      "setActiveAdmits": true
+    },
+    {
+      "id": "survival-custom",
+      "style": "zombicide",
+      "family": "survival",
+      "activeEditorId": "survival-custom",
+      "currentEditorId": "survival-custom",
+      "libraryContainsActive": true,
+      "legacyFamily": "survival",
+      "shellFamily": "survival",
+      "writesOnOpen": 0,
+      "sourceFunctionsPreserved": true,
+      "setActiveAdmits": true
+    },
+    {
+      "id": "survival-neutral",
+      "style": "",
+      "family": "survival",
+      "activeEditorId": "survival-neutral",
+      "currentEditorId": "survival-neutral",
+      "libraryContainsActive": true,
+      "legacyFamily": "survival",
+      "shellFamily": "survival",
+      "writesOnOpen": 0,
+      "sourceFunctionsPreserved": true,
+      "setActiveAdmits": true
+    },
+    {
+      "id": "game_profile_dungeon_demo",
+      "style": "dungeon",
+      "family": "rpg",
+      "activeEditorId": "game_profile_zombicide_base",
+      "currentEditorId": "game_profile_zombicide_base",
+      "libraryContainsActive": false,
+      "legacyFamily": "adventure",
+      "shellFamily": "adventure",
+      "writesOnOpen": 0,
+      "sourceFunctionsPreserved": true,
+      "setActiveAdmits": false
+    },
+    {
+      "id": "manga",
+      "style": "dungeon",
+      "family": "manga",
+      "activeEditorId": "game_profile_zombicide_base",
+      "currentEditorId": "game_profile_zombicide_base",
+      "libraryContainsActive": false,
+      "legacyFamily": "adventure",
+      "shellFamily": "adventure",
+      "writesOnOpen": 0,
+      "sourceFunctionsPreserved": true,
+      "setActiveAdmits": false
+    },
+    {
+      "id": "capture-new",
+      "style": "",
+      "family": "creature",
+      "activeEditorId": "capture-new",
+      "currentEditorId": "capture-new",
+      "libraryContainsActive": false,
+      "legacyFamily": "survival",
+      "shellFamily": "adventure",
+      "writesOnOpen": 0,
+      "sourceFunctionsPreserved": true,
+      "setActiveAdmits": true
+    },
+    {
+      "id": "capture-historical",
+      "style": "dungeon",
+      "family": "creature",
+      "activeEditorId": "game_profile_zombicide_base",
+      "currentEditorId": "game_profile_zombicide_base",
+      "libraryContainsActive": false,
+      "legacyFamily": "adventure",
+      "shellFamily": "adventure",
+      "writesOnOpen": 0,
+      "sourceFunctionsPreserved": true,
+      "setActiveAdmits": false
+    },
+    {
+      "id": "capture-modules",
+      "style": "",
+      "family": "creature",
+      "activeEditorId": "capture-modules",
+      "currentEditorId": "capture-modules",
+      "libraryContainsActive": false,
+      "legacyFamily": "survival",
+      "shellFamily": "adventure",
+      "writesOnOpen": 0,
+      "sourceFunctionsPreserved": true,
+      "setActiveAdmits": true
+    },
+    {
+      "id": "capture-survival-style",
+      "style": "survival",
+      "family": "creature",
+      "activeEditorId": "capture-survival-style",
+      "currentEditorId": "capture-survival-style",
+      "libraryContainsActive": false,
+      "legacyFamily": "survival",
+      "shellFamily": "adventure",
+      "writesOnOpen": 0,
+      "sourceFunctionsPreserved": true,
+      "setActiveAdmits": true
+    },
+    {
+      "id": "capture-disabled-modules",
+      "style": "",
+      "family": "creature",
+      "activeEditorId": "capture-disabled-modules",
+      "currentEditorId": "capture-disabled-modules",
+      "libraryContainsActive": false,
+      "legacyFamily": "survival",
+      "shellFamily": "adventure",
+      "writesOnOpen": 0,
+      "sourceFunctionsPreserved": true,
+      "setActiveAdmits": true
+    },
+    {
+      "id": "partial-capture",
+      "style": "",
+      "family": "survival",
+      "activeEditorId": "partial-capture",
+      "currentEditorId": "partial-capture",
+      "libraryContainsActive": true,
+      "legacyFamily": "survival",
+      "shellFamily": "survival",
+      "writesOnOpen": 0,
+      "sourceFunctionsPreserved": true,
+      "setActiveAdmits": true
+    },
+    {
+      "id": "string-modules",
+      "style": "",
+      "family": "survival",
+      "activeEditorId": "string-modules",
+      "currentEditorId": "string-modules",
+      "libraryContainsActive": true,
+      "legacyFamily": "survival",
+      "shellFamily": "survival",
+      "writesOnOpen": 0,
+      "sourceFunctionsPreserved": true,
+      "setActiveAdmits": true
+    }
+  ],
+  "writes": [
+    {
+      "id": "survival-custom",
+      "family": "survival",
+      "owner": "saveSurvivalModPools",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "survival-custom"
+      ],
+      "error": null
+    },
+    {
+      "id": "survival-custom",
+      "family": "survival",
+      "owner": "addSurvivalThreatLevel",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "survival-custom",
+      "family": "survival",
+      "owner": "removeSurvivalThreatLevel",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "survival-custom",
+      "family": "survival",
+      "owner": "saveSurvivalModIdentity",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "survival-custom"
+      ],
+      "error": null
+    },
+    {
+      "id": "survival-custom",
+      "family": "survival",
+      "owner": "saveSurvivalModProgression",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "survival-custom"
+      ],
+      "error": null
+    },
+    {
+      "id": "survival-custom",
+      "family": "survival",
+      "owner": "saveSurvivalModRules",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "survival-custom"
+      ],
+      "error": null
+    },
+    {
+      "id": "survival-custom",
+      "family": "survival",
+      "owner": "saveSurvivalModWaveRules",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "survival-custom"
+      ],
+      "error": null
+    },
+    {
+      "id": "survival-custom",
+      "family": "survival",
+      "owner": "duplicateSurvivalModProfile",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": false,
+      "profileStillExists": true,
+      "duplicateFamily": "survival",
+      "applied": [
+        "new-copy"
+      ],
+      "error": null
+    },
+    {
+      "id": "survival-custom",
+      "family": "survival",
+      "owner": "deleteSurvivalModProfile",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": false,
+      "duplicateFamily": null,
+      "applied": [
+        "game_profile_zombicide_base"
+      ],
+      "error": null
+    },
+    {
+      "id": "game_profile_dungeon_demo",
+      "family": "rpg",
+      "owner": "saveSurvivalModPools",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "game_profile_dungeon_demo"
+      ],
+      "error": null
+    },
+    {
+      "id": "game_profile_dungeon_demo",
+      "family": "rpg",
+      "owner": "addSurvivalThreatLevel",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "game_profile_dungeon_demo",
+      "family": "rpg",
+      "owner": "removeSurvivalThreatLevel",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "game_profile_dungeon_demo",
+      "family": "rpg",
+      "owner": "saveSurvivalModIdentity",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "game_profile_dungeon_demo"
+      ],
+      "error": null
+    },
+    {
+      "id": "game_profile_dungeon_demo",
+      "family": "rpg",
+      "owner": "saveSurvivalModProgression",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "game_profile_dungeon_demo"
+      ],
+      "error": null
+    },
+    {
+      "id": "game_profile_dungeon_demo",
+      "family": "rpg",
+      "owner": "saveSurvivalModRules",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "game_profile_dungeon_demo"
+      ],
+      "error": null
+    },
+    {
+      "id": "game_profile_dungeon_demo",
+      "family": "rpg",
+      "owner": "saveSurvivalModWaveRules",
+      "persistentWrites": 1,
+      "profilesChanged": false,
+      "foreignProfileChanged": false,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "game_profile_dungeon_demo"
+      ],
+      "error": null
+    },
+    {
+      "id": "game_profile_dungeon_demo",
+      "family": "rpg",
+      "owner": "duplicateSurvivalModProfile",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": false,
+      "profileStillExists": true,
+      "duplicateFamily": "survival",
+      "applied": [
+        "new-copy"
+      ],
+      "error": null
+    },
+    {
+      "id": "game_profile_dungeon_demo",
+      "family": "rpg",
+      "owner": "deleteSurvivalModProfile",
+      "persistentWrites": 0,
+      "profilesChanged": false,
+      "foreignProfileChanged": false,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "capture-new",
+      "family": "creature",
+      "owner": "saveSurvivalModPools",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-new"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-new",
+      "family": "creature",
+      "owner": "addSurvivalThreatLevel",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "capture-new",
+      "family": "creature",
+      "owner": "removeSurvivalThreatLevel",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "capture-new",
+      "family": "creature",
+      "owner": "saveSurvivalModIdentity",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-new"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-new",
+      "family": "creature",
+      "owner": "saveSurvivalModProgression",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-new"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-new",
+      "family": "creature",
+      "owner": "saveSurvivalModRules",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-new"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-new",
+      "family": "creature",
+      "owner": "saveSurvivalModWaveRules",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-new"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-new",
+      "family": "creature",
+      "owner": "duplicateSurvivalModProfile",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": false,
+      "profileStillExists": true,
+      "duplicateFamily": "creature",
+      "applied": [
+        "new-copy"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-new",
+      "family": "creature",
+      "owner": "deleteSurvivalModProfile",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": false,
+      "duplicateFamily": null,
+      "applied": [
+        "game_profile_zombicide_base"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-historical",
+      "family": "creature",
+      "owner": "saveSurvivalModPools",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-historical"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-historical",
+      "family": "creature",
+      "owner": "addSurvivalThreatLevel",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "capture-historical",
+      "family": "creature",
+      "owner": "removeSurvivalThreatLevel",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "capture-historical",
+      "family": "creature",
+      "owner": "saveSurvivalModIdentity",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-historical"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-historical",
+      "family": "creature",
+      "owner": "saveSurvivalModProgression",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-historical"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-historical",
+      "family": "creature",
+      "owner": "saveSurvivalModRules",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-historical"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-historical",
+      "family": "creature",
+      "owner": "saveSurvivalModWaveRules",
+      "persistentWrites": 1,
+      "profilesChanged": false,
+      "foreignProfileChanged": false,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-historical"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-historical",
+      "family": "creature",
+      "owner": "duplicateSurvivalModProfile",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": false,
+      "profileStillExists": true,
+      "duplicateFamily": "survival",
+      "applied": [
+        "new-copy"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-historical",
+      "family": "creature",
+      "owner": "deleteSurvivalModProfile",
+      "persistentWrites": 0,
+      "profilesChanged": false,
+      "foreignProfileChanged": false,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "capture-modules",
+      "family": "creature",
+      "owner": "saveSurvivalModPools",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-modules"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-modules",
+      "family": "creature",
+      "owner": "addSurvivalThreatLevel",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "capture-modules",
+      "family": "creature",
+      "owner": "removeSurvivalThreatLevel",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "capture-modules",
+      "family": "creature",
+      "owner": "saveSurvivalModIdentity",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-modules"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-modules",
+      "family": "creature",
+      "owner": "saveSurvivalModProgression",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-modules"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-modules",
+      "family": "creature",
+      "owner": "saveSurvivalModRules",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-modules"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-modules",
+      "family": "creature",
+      "owner": "saveSurvivalModWaveRules",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-modules"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-modules",
+      "family": "creature",
+      "owner": "duplicateSurvivalModProfile",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": false,
+      "profileStillExists": true,
+      "duplicateFamily": "creature",
+      "applied": [
+        "new-copy"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-modules",
+      "family": "creature",
+      "owner": "deleteSurvivalModProfile",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": false,
+      "duplicateFamily": null,
+      "applied": [
+        "game_profile_zombicide_base"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-survival-style",
+      "family": "creature",
+      "owner": "saveSurvivalModPools",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-survival-style"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-survival-style",
+      "family": "creature",
+      "owner": "addSurvivalThreatLevel",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "capture-survival-style",
+      "family": "creature",
+      "owner": "removeSurvivalThreatLevel",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "capture-survival-style",
+      "family": "creature",
+      "owner": "saveSurvivalModIdentity",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-survival-style"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-survival-style",
+      "family": "creature",
+      "owner": "saveSurvivalModProgression",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-survival-style"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-survival-style",
+      "family": "creature",
+      "owner": "saveSurvivalModRules",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-survival-style"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-survival-style",
+      "family": "creature",
+      "owner": "saveSurvivalModWaveRules",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-survival-style"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-survival-style",
+      "family": "creature",
+      "owner": "duplicateSurvivalModProfile",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": false,
+      "profileStillExists": true,
+      "duplicateFamily": "creature",
+      "applied": [
+        "new-copy"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-survival-style",
+      "family": "creature",
+      "owner": "deleteSurvivalModProfile",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": false,
+      "duplicateFamily": null,
+      "applied": [
+        "game_profile_zombicide_base"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-disabled-modules",
+      "family": "creature",
+      "owner": "saveSurvivalModPools",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-disabled-modules"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-disabled-modules",
+      "family": "creature",
+      "owner": "addSurvivalThreatLevel",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "capture-disabled-modules",
+      "family": "creature",
+      "owner": "removeSurvivalThreatLevel",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [],
+      "error": null
+    },
+    {
+      "id": "capture-disabled-modules",
+      "family": "creature",
+      "owner": "saveSurvivalModIdentity",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-disabled-modules"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-disabled-modules",
+      "family": "creature",
+      "owner": "saveSurvivalModProgression",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-disabled-modules"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-disabled-modules",
+      "family": "creature",
+      "owner": "saveSurvivalModRules",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-disabled-modules"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-disabled-modules",
+      "family": "creature",
+      "owner": "saveSurvivalModWaveRules",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": true,
+      "duplicateFamily": null,
+      "applied": [
+        "capture-disabled-modules"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-disabled-modules",
+      "family": "creature",
+      "owner": "duplicateSurvivalModProfile",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": false,
+      "profileStillExists": true,
+      "duplicateFamily": "creature",
+      "applied": [
+        "new-copy"
+      ],
+      "error": null
+    },
+    {
+      "id": "capture-disabled-modules",
+      "family": "creature",
+      "owner": "deleteSurvivalModProfile",
+      "persistentWrites": 1,
+      "profilesChanged": true,
+      "foreignProfileChanged": true,
+      "profileStillExists": false,
+      "duplicateFamily": null,
+      "applied": [
+        "game_profile_zombicide_base"
+      ],
+      "error": null
+    }
+  ],
+  "loadedScripts": [
+    {
+      "path": "assets/dungeon/dungeon-authored-cache-visual-167852.js",
+      "blob": "b1ce2f8e5cf0e15db6cc59befe93c55d25f51058",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-authored-runtime-167839.js",
+      "blob": "8502befbd2ced67a0f874938f4746347f7595315",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-core-316.js",
+      "blob": "576a894f0a3381f94194330b8af0fdce0263dc7e",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-core-317.js",
+      "blob": "d67720a0fc17dbe536ba832b631f480fdf351b0f",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-core-318.js",
+      "blob": "c69c726df41731e5abaf5d7d501e04adec0e8890",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-equipment-hotfix-167817.js",
+      "blob": "2d046133a9da32c56a32fb59946c926cf3e799e3",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-equipment-ui.js",
+      "blob": "52df0e9d5cb69f8dcada48c8bb7f2cd4a1322de4",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-large-room-support-167834.js",
+      "blob": "28c5aa228d91556913c17b2e3076198c66d9636c",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-room-creator-100.js",
+      "blob": "309dd3d9acdfb588d6de5c8148f8624c025454e3",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-room-creator-feedback-167821.js",
+      "blob": "3bece14079ce72823b9de2bb5d6f38316e82ba06",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-room-creator-v2-167819.js",
+      "blob": "1f2024427319b90e0f0d9d669456b3e157ccbb05",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-room-runtime-167822.js",
+      "blob": "d494f7bdc449c51c577dc5e92637368c3d3b0435",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-set-editor-167818.js",
+      "blob": "9e418ba8e4bc0c8f54db9bd658ba3e4e5302c6be",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-source-render-stability-167877.js",
+      "blob": "0a06cceadf6aabad07af8a2577754a0fb1c8bee3",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-world-builder-167821.js",
+      "blob": "3a1453f382cca5210adcfd9df4858011dc5c56b0",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-world-runtime-167823.js",
+      "blob": "3deb200649146afc812f6923a5fbc150a6d6ac28",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/dungeon/dungeon-zone-content-167824.js",
+      "blob": "63f710f4102404f5fa51a84a234fc4f7c646a699",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/capture/entry-v1.js",
+      "blob": "abcc951b6e73281c9471956f1d9a8d78807daf2c",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/core/asset-resolver-v1.js",
+      "blob": "d56c6fc05874ca649f6d945b93cc6903b62cb12c",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/core/dice-v1.js",
+      "blob": "1813b6edb1ac69317d158e8cac6eb5c8ac353855",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/core/equipment-bonus-sets-v1.js",
+      "blob": "53971693ecbd52a01db49ffe8d8390201575ce8b",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/core/equipment-evolution-v1.js",
+      "blob": "d8c4f3e703198926fb8320817a154cacf4a20a79",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/core/inventory-equipped-view-v1.js",
+      "blob": "a45eeb7cac5fcef912bdb0203c655ea3b18ff71b",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/core/progression-v1.js",
+      "blob": "3cca29084ce436a8dcae95e5d6d745edd4afa3cf",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/core/stats-derived-values-v1.js",
+      "blob": "5556790de7e6bb7acb2e070abaf6d42a5bc7580b",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/core/stats-hero-values-v1.js",
+      "blob": "9aad71f2a05f293fb044af6e35a0f63e7a6e5275",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/core/stats-modifier-provider-v1.js",
+      "blob": "b2e2089d8ee743cb776a1779a02d51c422ad8f79",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/core/stats-normalization-v1.js",
+      "blob": "4f2bd72b1d1d304402af9eb72175bad574752aff",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/core/stats-snapshot-v1.js",
+      "blob": "7277979917c70f1dc3a425b814c81e1dddf3e492",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/core/stats-value-engine-v1.js",
+      "blob": "e59695b6ac9bae8987646779034e147faf4f7dd3",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/core/storage-v1.js",
+      "blob": "6df28dc2e123c275a505da4f15879566d148221a",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/core/text-utils-v1.js",
+      "blob": "d8dd5091963e180a18dfa5274aa4030cbaadaa90",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/dungeon/entry-v1.js",
+      "blob": "68c9ca1571d90aeb119683bd8af4ece6933fa342",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/gens-dungeon-hero-art-repair-167874.js",
+      "blob": "65eb1dcfd6ab7bd10b71c2b031dad0a25aed4f7a",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/gens-mobile-combat-performance-16781022.js",
+      "blob": "e8fd9f1049a6597118eb026976bca7548f11b284",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/gens-rpg-stats-clean-167874.js",
+      "blob": "477fb20e2333fc78d21b157fcaf05bfafe36a125",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/gens-world-summary-167820.js",
+      "blob": "8738020f4b590b4f4e0421af8ece7f6e3d43a238",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/shell/module-launch-final-authority-v1.js",
+      "blob": "abeec800b2d668ab1134bfddcc781be63ed0774d",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    },
+    {
+      "path": "assets/gensrpg/survival/entry-v1.js",
+      "blob": "f07b2cf44747ee263cb87b242f6e05d449b1f8b9",
+      "gensFamilyReferences": 0,
+      "editorReferences": 0
+    }
+  ],
+  "staticLegacyReferencesInline": 1
+}

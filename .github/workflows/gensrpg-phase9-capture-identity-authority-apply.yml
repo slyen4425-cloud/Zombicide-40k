@@ -1,0 +1,63 @@
+name: GenSrpG Phase 9 Capture identity authority one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-identity-authority-raccord-2026-10-03'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture-identity-authority-apply.yml'
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  apply-capture-identity-authority:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Rule 26 baseline
+        run: |
+          test "$(git hash-object index.html)" = "f523410e175ee4946059da8e8ee8519295fb63c5"
+          test "$(wc -c < index.html)" = "8169430"
+
+      - name: Apply exact Capture identity authority seam
+        run: python tools/gensrpg_phase9_capture_identity_authority_apply.py
+
+      - name: Verify exact runtime result
+        run: |
+          test "$(git hash-object index.html)" = "1d4bd0f6eddb6a58fa0939b666bbebdbb07dc3b1"
+          test "$(wc -c < index.html)" = "8168382"
+          grep -q 'function isProfile(profile)' assets/gensrpg/capture/entry-v1.js
+          grep -q 'GensCaptureV1.isProfile(profile)' index.html
+          grep -q 'window.GensCaptureV1?.isProfile?.(profile)' index.html
+
+      - name: Run dedicated TDD target
+        run: node tests/gens_phase9_capture_identity_authority_raccord_v1.test.cjs
+
+      - name: Review exact scope
+        run: |
+          git diff --check
+          git diff --stat
+          git diff -- index.html assets/gensrpg/capture/entry-v1.js assets/gensrpg/capture/module-contract-v1.json | sed -n '1,260p'
+
+      - name: Commit exact runtime seam
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/gensrpg/capture/entry-v1.js assets/gensrpg/capture/module-contract-v1.json
+          test "$(git diff --cached --name-only | wc -l)" = "3"
+          git commit -m "refactor: give Capture canonical profile identity"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+
+      - name: Dispatch required validation on runtime SHA
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run gensrpg-architecture-sentinels.yml --ref "$GITHUB_REF_NAME"
+          gh workflow run gensrpg-firefox-wall-sentinel.yml --ref "$GITHUB_REF_NAME"
+          gh workflow run gensrpg-tactical-dock-sentinel.yml --ref "$GITHUB_REF_NAME"

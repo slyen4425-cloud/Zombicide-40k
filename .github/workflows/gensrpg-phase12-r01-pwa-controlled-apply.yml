@@ -1,0 +1,54 @@
+name: GenSrpG Phase12 R01 PWA controlled apply
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r01-pwa-dynamic-manifest-extraction-2026-10-16'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r01-pwa-controlled-apply.yml'
+permissions:
+  contents: write
+concurrency:
+  group: gensrpg-phase12-r01-apply
+  cancel-in-progress: false
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Enforce exact D9 source, R01 parser placement, and certified PWA owner
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r01-pwa-dynamic-manifest-extraction-2026-10-16'
+          test "$(git hash-object index.html)" = 'fce949665fea47a2aa2a535ede7289b06936f986'
+          node tests/gens_phase12_r01_pwa_manifest_source_characterization_v1.test.cjs
+          python3 tools/gensrpg_phase12_r01_pwa_manifest_extract_apply.py --apply
+          python3 tools/gensrpg_phase12_r01_pwa_manifest_extract_apply.py --verify
+          node --check assets/gensrpg/shell/pwa-manifest-dynamic-v1.js
+          node tests/gens_phase12_r01_pwa_manifest_source_characterization_v1.test.cjs
+          node tests/gens_phase12_r01_pwa_manifest_extraction_v1.test.cjs
+      - name: Register one Shell PWA owner in source-of-truth runtime inventory
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          p=Path("docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json")
+          raw=p.read_text()
+          anchor='  "files": {\n'
+          assert raw.count(anchor)==1
+          key='assets/gensrpg/shell/pwa-manifest-dynamic-v1.js'
+          assert key not in raw
+          entry='    "'+key+'": {\n      "owner": "GenSrpG Shell PWA Dynamic Manifest",\n      "domain": "shell",\n      "role": "byte-exact 734440-byte historical dynamic Blob manifest IIFE, one synchronous parser owner; no static manifest migration"\n    },\n'
+          new=raw.replace(anchor,anchor+entry,1)
+          assert json.loads(new)["files"][key]["domain"]=="shell"
+          p.write_text(new)
+          PY
+      - name: Publish only R01 physical movement and owner declaration
+        run: |
+          test "$(git hash-object index.html)" = 'caf31c121d926b7b76b9bb05688fab8f2839814e'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/shell/pwa-manifest-dynamic-v1.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          git diff --cached --check
+          git commit -m "refactor(phase12): externalize dynamic PWA manifest byte-exact in R01"
+          git push origin "HEAD:$GITHUB_REF_NAME"

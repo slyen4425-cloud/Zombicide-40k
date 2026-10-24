@@ -1,0 +1,63 @@
+name: GenSrpG Phase12 Dungeon Tactical result and persistent room
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-dungeon-tactical-combat-result-2026-10-21'
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Runtime identical to preceding GREEN; historical regression suite
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = '9f35eb833a6ede4b91399854f19bb9bef59f45ab'
+          git diff --exit-code 1387565eae166abb337083956e4fb6c9d62159be -- index.html service-worker.js assets/ docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          for t in tests/gensrpg_phase12_r15_builders_character_entity_sentinel.test.cjs tests/gensrpg_phase12_r14_builders_rpg_universe_sentinel.test.cjs tests/gensrpg_phase12_r13_builders_enemy_editor_sentinel.test.cjs tests/gensrpg_phase12_r12_dungeon_rpg_rules_talents_sentinel.test.cjs tests/gensrpg_phase12_r11_retired_scripts_sentinel.test.cjs tests/gensrpg_phase12_r10_capture_sentinel.test.cjs tests/gens_phase2_runtime_load_graph_v11411.test.cjs tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs tests/gens_phase2_inline_owner_manifest_v11411.test.cjs tests/gens_phase2_inline_global_last_owner_v11411.test.cjs tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs tests/gens_phase3_target_structure_contracts_v1.test.cjs tests/gens_runtime_composition_guard_v11411.test.cjs tests/gens_phase4_dice_d10048_raccord_v1.test.cjs tests/gens_phase4_dice_first_raccord_preaudit_v1.test.cjs tests/gens_architecture_global_side_effect_guard.test.cjs tests/gens_rpg_tactical_session_guard_v16781144.test.cjs tests/gens_phase4_stats_s7_snapshot_audit_v1.test.cjs tests/gensrpg_phase12_post_r15_inline_authority_baseline.test.cjs; do node "$t"; done
+      - name: Post status regression
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RES: ${{ job.status }}
+        run: |
+          state=failure; if [ "$RES" = success ]; then state=success; fi
+          p="$(jq -nc --arg state "$state" --arg ctx 'gensrpg/phase12/combat-result/regression' --arg desc "Protected unmodified runtime + R10–R15 regression: $RES" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$ctx,description:$desc,target_url:$url}')"
+          curl -fsS -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -d "$p" >/dev/null
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 34
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Chromium Firefox
+        run: |
+          set -euo pipefail
+          npm install --no-save --prefix /tmp/gensrpg-combat-result-pw playwright@1.56.1
+          /tmp/gensrpg-combat-result-pw/node_modules/.bin/playwright install --with-deps chromium firefox
+      - name: Real UI encounter, complete battle, real result and reload
+        env:
+          GENSRPG_PW_ROOT: /tmp/gensrpg-combat-result-pw
+          GENSRPG_TEST_URL: http://127.0.0.1:8898/index.html
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8898 --bind 127.0.0.1 >/tmp/gensrpg-combat-result-http.log 2>&1 &
+          sid=$!
+          trap 'kill "$sid" 2>/dev/null || true' EXIT
+          for n in $(seq 1 25); do if curl -fsS -o /dev/null http://127.0.0.1:8898/index.html; then break; fi; sleep 1; done
+          node tests/gensrpg_phase12_dungeon_tactical_combat_result_browser.cjs
+      - name: Post status browser
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RES: ${{ job.status }}
+        run: |
+          state=failure; if [ "$RES" = success ]; then state=success; fi
+          p="$(jq -nc --arg state "$state" --arg ctx 'gensrpg/phase12/combat-result/browser' --arg desc "Real Dungeon battle end, rewards and persistent room Chromium/Firefox: $RES" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$ctx,description:$desc,target_url:$url}')"
+          curl -fsS -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -d "$p" >/dev/null

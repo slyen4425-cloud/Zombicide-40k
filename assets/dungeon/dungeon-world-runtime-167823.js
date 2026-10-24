@@ -20,7 +20,7 @@ function roomApi(){return ROOT.DungeonRoomCreator100||null}
 function currentAdventureId(){try{return String(ROOT.activeDungeonAdventureId?.()||"default")}catch(e){return "default"}}
 function readRuntime(){const x=readJson(RT_KEY,null);return x&&typeof x==="object"?x:null}
 function writeRuntime(x){return writeJson(RT_KEY,x||{})}
-function activeHeroId(x){const list=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,list.length-1),Number(x?.index)||0));return String(list[i]||"")}
+function activeHeroId(x){return ROOT.GensDungeonV1.movement.resolveAuthoredActiveHero(x?.participants,x?.index)}
 function nodeLabel(graph,nodeId){const n=(graph?.nodes||[]).find(x=>x.id===String(nodeId||""));if(!n)return String(nodeId||"Zone");const r=roomApi()?.findRoom?.(n.roomId);return String(n.label||r?.name||"Zone")}
 function graphFor(id){try{return builder()?.findDungeon?.(String(id||""))||null}catch(e){return null}}
 function validGraph(g){try{return !!g&&!!builder()?.validation?.(g)?.valid&&!!g.startNodeId}catch(e){return !!g&&Array.isArray(g.nodes)&&g.nodes.length>0&&!!g.startNodeId}}

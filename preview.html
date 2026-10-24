@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GenSrpG — Preview restructuration</title>
+<style>
+html,body{margin:0;width:100%;height:100%;background:#080808;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+#status{position:fixed;inset:0;display:grid;place-items:center;padding:24px;text-align:center;background:#080808;z-index:2}
+small{display:block;margin-top:10px;opacity:.7}
+</style>
+</head>
+<body>
+<div id="status"><div><strong>Chargement de la preview GenSrpG…</strong><small>Composition GitHub Pages reproduite depuis ce commit.</small></div></div>
+<script>
+(async()=>{
+  const tags=[
+    '<script src="assets/dungeon/dungeon-event-runtime-fix-167878.js"><\/script>',
+    '<script src="assets/dungeon/dungeon-core-318.js"><\/script>',
+    '<script src="assets/dungeon/dungeon-large-room-support-167834.js?v=167836"><\/script>',
+    '<script src="assets/gensrpg/core/text-utils-v1.js"><\/script>',
+    '<script src="assets/dungeon/dungeon-room-creator-100.js"><\/script>',
+    '<script src="assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819"><\/script>',
+    '<script src="assets/dungeon/dungeon-room-creator-feedback-167821.js?v=167821"><\/script>',
+    '<script src="assets/dungeon/dungeon-world-builder-167821.js?v=167821"><\/script>',
+    '<script src="assets/dungeon/dungeon-room-runtime-167822.js?v=167822"><\/script>',
+    '<script src="assets/dungeon/dungeon-world-runtime-167823.js?v=167838"><\/script>',
+    '<script src="assets/dungeon/dungeon-zone-content-167824.js?v=167824"><\/script>',
+    '<script src="assets/dungeon/dungeon-authored-runtime-167839.js?v=167840"><\/script>',
+    '<script src="assets/dungeon/dungeon-authored-cache-visual-167852.js?v=167875"><\/script>',
+    '<script src="assets/dungeon/dungeon-source-render-stability-167877.js?v=167877"><\/script>',
+    '<script src="assets/dungeon/dungeon-equipment-ui.js"><\/script>',
+    '<script src="assets/gensrpg/core/inventory-equipped-view-v1.js?v=1"><\/script>',
+    '<script src="assets/gensrpg/core/equipment-bonus-sets-v1.js?v=1"><\/script>',
+    '<script src="assets/gensrpg/core/equipment-evolution-v1.js?v=1"><\/script>',
+    '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"><\/script>',
+    '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"><\/script>',
+    '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"><\/script>',
+    '<script src="assets/gensrpg/core/stats-normalization-v1.js?v=1"><\/script>',
+    '<script src="assets/gensrpg/core/stats-value-engine-v1.js?v=1"><\/script>',
+    '<script src="assets/gensrpg/core/stats-hero-values-v1.js?v=1"><\/script>',
+    '<script src="assets/gensrpg/core/stats-modifier-provider-v1.js?v=1"><\/script>',
+    '<script src="assets/gensrpg/core/stats-derived-values-v1.js?v=1"><\/script>',
+    '<script src="assets/gensrpg/core/stats-snapshot-v1.js?v=1"><\/script>',
+    '<script src="assets/gensrpg/gens-rpg-stats-clean-167874.js?v=167874"><\/script>',
+    '<script src="assets/gensrpg/gens-dungeon-hero-art-repair-167874.js?v=167874"><\/script>',
+    '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"><\/script>',
+    '<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"><\/script>'
+  ];
+  const previewGuard='<script>(()=>{window.__GENSRPG_PREVIEW__=true;const fake={scope:location.href,active:null,waiting:null,installing:null,update:async()=>{},unregister:async()=>true,addEventListener:()=>{},removeEventListener:()=>{}};try{if(!window.supabase){const offlineError=()=>new Error("Preview hors ligne : synchronisation Supabase indisponible");const chain={select(){return this},eq(){return this},like(){return this},maybeSingle:async()=>({data:null,error:offlineError()}),upsert:async()=>({data:null,error:offlineError()})};window.supabase={createClient:()=>({auth:{getSession:async()=>({data:{session:null}}),signInAnonymously:async()=>({data:{session:null},error:offlineError()})},from:()=>Object.create(chain),rpc:async()=>({data:null,error:offlineError()}),channel:()=>({on(){return this},subscribe(){return this}}),removeChannel:async()=>true})}}}catch(_){}try{if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations?.().then(rs=>Promise.all(rs.filter(r=>String(r.scope||"").includes("/slyen4425-cloud/Zombicide-40k/")).map(r=>r.unregister?.()))).catch(()=>{});try{Object.defineProperty(navigator.serviceWorker,"register",{configurable:true,value:async()=>fake})}catch(_){try{navigator.serviceWorker.register=async()=>fake}catch(__){}}try{Object.defineProperty(navigator.serviceWorker,"ready",{configurable:true,get:()=>Promise.resolve(fake)})}catch(_){}}}catch(_){}try{if("caches" in window)caches.keys().then(keys=>Promise.all(keys.filter(k=>String(k).startsWith("gensrpg-cache-")).map(k=>caches.delete(k)))).catch(()=>{})}catch(_){}})();<\/script>';
+
+  try{
+    if("caches" in window){
+      const cacheKeys=await caches.keys();
+      await Promise.all(cacheKeys.filter(k=>String(k).startsWith("gensrpg-cache-")).map(k=>caches.delete(k)));
+    }
+    const resolveSource=()=>{
+      try{
+        const params=new URLSearchParams(location.search);
+        const original=params.get('url')||((location.search||'').startsWith('?https://')?location.search.slice(1):'');
+        const m=String(original||'').match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/([0-9a-f]{40})\/preview\.html(?:[?#].*)?$/i);
+        if(m){
+          const base='https://raw.githack.com/'+m[1]+'/'+m[2]+'/'+m[3]+'/';
+          return {base,index:base+'index.html',external:true};
+        }
+      }catch(_){}
+      const base=new URL('./',location.href).href;
+      return {base,index:new URL('index.html',base).href,external:false};
+    };
+    const source=resolveSource();
+    let html=await fetch(source.index,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('index '+r.status);return r.text()});
+    const perf='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"><\/script>';
+    const finalShell='<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"><\/script>';
+    html=html.split(perf).join('');
+    html=html.split(finalShell).join('');
+    const base=source.base;
+    html=html.replace(/<head([^>]*)>/i,(m,a)=>`<head${a}><base href="${base}">${previewGuard}`);
+    if(!/<\/body>/i.test(html))throw new Error('</body> absent');
+    // Preview-only readiness gate: prevent a game switch/reload from cancelling
+    // the external auxiliary script graph before it is fully installed.
+    html=html.replace(/<body([^>]*)>/i,(m)=>m+'<div id="gensrpgPreviewLoadGate" role="status" aria-live="polite" style="position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;background:#080808;color:#eee;font:600 17px system-ui;text-align:center;padding:24px">Chargement de GenSrpG…</div>');
+    // Keep the historical parser-inserted composition for the local preview.
+    // The external HTML preview transport sometimes fails to execute those
+    // auxiliary tags: only then load the explicit script graph exactly once.
+    const ready='<script>document.documentElement.dataset.gensrpgPreviewReady="1";<\/script>';
+    if(!source.external)html=html.replace(/<\/body>/i,tags.join('\n')+'\n'+ready+'\n</body>');
+    document.open();
+    document.write(html);
+    document.close();
+    if(document.readyState==="loading"){
+      await new Promise(resolve=>document.addEventListener("DOMContentLoaded",resolve,{once:true}));
+    }
+    if(source.external){
+      for(const tag of tags){
+        const match=tag.match(/src="([^"]+)"/);
+        if(!match)throw new Error("Script de preview invalide");
+        const src=new URL(match[1],source.base).href;
+        await new Promise((resolve,reject)=>{
+          const script=document.createElement("script");
+          script.src=src;
+          script.async=false;
+          script.dataset.gensrpgPreviewAux="1";
+          script.onload=resolve;
+          script.onerror=()=>reject(new Error("Script de preview inaccessible : "+match[1]));
+          document.body.appendChild(script);
+        });
+      }
+    }
+    document.documentElement.dataset.gensrpgPreviewReady="1";
+    document.getElementById("gensrpgPreviewLoadGate")?.remove();
+  }catch(err){
+    const gate=document.getElementById("gensrpgPreviewLoadGate");
+    if(gate)gate.textContent="Preview impossible à charger : "+String(err&&err.message||err);
+    const status=document.getElementById('status');
+    if(status)status.innerHTML='<div><strong>Preview impossible à charger.</strong><small>'+String(err&&err.message||err)+'</small></div>';
+  }
+})();
+</script>
+</body>
+</html>

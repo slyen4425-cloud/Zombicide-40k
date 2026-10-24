@@ -10,8 +10,8 @@ let installed=false,lastNormalButton=null;
 function api(){return R.DungeonAuthoredRuntime167839||null}
 function runtime(){try{const x=JSON.parse(localStorage.getItem(RT_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
 function save(x){try{localStorage.setItem(RT_KEY,JSON.stringify(x||{}));return true}catch(e){return false}}
-function blocked(x){try{if(R.dungeonRoomExitLocked102?.())return true}catch(e){}if(x?.last?.exitLocked)return true;return String(x?.last?.map?.objective?.status||x?.last?.objective?.status||"")==="locked"}
-function activeHero(x){const a=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,a.length-1),Number(x?.index)||0));return String(a[i]||"")}
+function blocked(x){try{if(R.dungeonRoomExitLocked102?.())return true}catch(e){}return R.GensDungeonV1.movement.isAuthoredExitBlocked(x?.last?.exitLocked,x?.last?.map?.objective?.status,x?.last?.objective?.status)}
+function activeHero(x){return R.GensDungeonV1.movement.resolveAuthoredActiveHero(x?.participants,x?.index)}
 function inSecondaryBranch(x,hero){
   if(x?.branch?.active)return true;
   const stacks=x?.authored167847ReturnStacks;
@@ -28,9 +28,9 @@ function finalState(){
   if(x.last.worldNodeId&&String(x.last.worldNodeId)!==String(p.currentNodeId))return null;
   const map=x?.last?.map||{},cells=Array.isArray(map.cells)?map.cells:[];
   const direct=Number(map.exitIdx),exitIdx=Number.isInteger(direct)&&direct>=0?direct:cells.findIndex(v=>String(v||"").toLowerCase()==="exit");
-  const pos=Number(x?.positions?.[hero]),positional=!!a.positional?.();
+  const positional=!!a.positional?.();
   const hasExit=exitIdx>=0&&exitIdx<cells.length&&String(cells[exitIdx]||"").toLowerCase()==="exit";
-  const atExit=hasExit&&(!positional||pos===exitIdx);
+  const atExit=hasExit&&R.GensDungeonV1.movement.isAuthoredTerminalExit(hero,exitIdx,positional,x?.positions?.[hero]);
   return {a,x,g,p,hero,map,exitIdx,positional,hasExit,atExit};
 }
 function notice(title,text,onDone){try{return R.DungeonCore01?.modal?.(title,text,onDone)}catch(e){}try{R.showToast?.(title+" · "+text)}catch(e){}if(typeof onDone==="function")setTimeout(onDone,0)}

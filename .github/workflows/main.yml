@@ -144,8 +144,11 @@ jobs:
           from pathlib import Path
           index = Path("_site/index.html")
           modules = [
+              (Path("_site/assets/gensrpg/core/storage-v1.js"), '<script src="assets/gensrpg/core/storage-v1.js"></script>', "GenSrpG Core storage service missing"),
+              (Path("_site/assets/dungeon/dungeon-event-runtime-fix-167878.js"), '<script src="assets/dungeon/dungeon-event-runtime-fix-167878.js"></script>', "Dungeon event proximity fix missing"),
               (Path("_site/assets/dungeon/dungeon-core-318.js"), '<script src="assets/dungeon/dungeon-core-318.js"></script>', "Dungeon Core 3.18 asset missing"),
               (Path("_site/assets/dungeon/dungeon-large-room-support-167834.js"), '<script src="assets/dungeon/dungeon-large-room-support-167834.js?v=167836"></script>', "Dungeon large-room support missing"),
+              (Path("_site/assets/gensrpg/core/text-utils-v1.js"), '<script src="assets/gensrpg/core/text-utils-v1.js"></script>', "GenSrpG Core Text Utils v1 missing"),
               (Path("_site/assets/dungeon/dungeon-room-creator-100.js"), '<script src="assets/dungeon/dungeon-room-creator-100.js"></script>', "Room Creator asset missing"),
               (Path("_site/assets/dungeon/dungeon-room-creator-v2-167819.js"), '<script src="assets/dungeon/dungeon-room-creator-v2-167819.js?v=167819"></script>', "Room Creator V2 asset missing"),
               (Path("_site/assets/dungeon/dungeon-room-creator-feedback-167821.js"), '<script src="assets/dungeon/dungeon-room-creator-feedback-167821.js?v=167821"></script>', "Room Creator autosave feedback missing"),
@@ -157,20 +160,32 @@ jobs:
               (Path("_site/assets/dungeon/dungeon-authored-cache-visual-167852.js"), '<script src="assets/dungeon/dungeon-authored-cache-visual-167852.js?v=167875"></script>', "Authored Dungeon runtime wall/token bridge missing"),
               (Path("_site/assets/dungeon/dungeon-source-render-stability-167877.js"), '<script src="assets/dungeon/dungeon-source-render-stability-167877.js?v=167877"></script>', "Dungeon source render stability missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-ui.js"), '<script src="assets/dungeon/dungeon-equipment-ui.js"></script>', "Dungeon equipment UI bridge missing"),
+              (Path("_site/assets/gensrpg/core/inventory-equipped-view-v1.js"), '<script src="assets/gensrpg/core/inventory-equipped-view-v1.js?v=1"></script>', "GenSrpG Core Inventory equipped view missing"),
+              (Path("_site/assets/gensrpg/core/equipment-bonus-sets-v1.js"), '<script src="assets/gensrpg/core/equipment-bonus-sets-v1.js?v=1"></script>', "GenSrpG Core Equipment bonus + sets missing"),
+              (Path("_site/assets/gensrpg/core/equipment-evolution-v1.js"), '<script src="assets/gensrpg/core/equipment-evolution-v1.js?v=1"></script>', "GenSrpG Core Equipment evolution missing"),
               (Path("_site/assets/dungeon/dungeon-equipment-hotfix-167817.js"), '<script src="assets/dungeon/dungeon-equipment-hotfix-167817.js?v=167817"></script>', "Dungeon equipment editor hotfix missing"),
               (Path("_site/assets/dungeon/dungeon-set-editor-167818.js"), '<script src="assets/dungeon/dungeon-set-editor-167818.js?v=167818"></script>', "Dungeon set editor missing"),
               (Path("_site/assets/gensrpg/gens-world-summary-167820.js"), '<script src="assets/gensrpg/gens-world-summary-167820.js?v=167820"></script>', "GenSrpG live world summary module missing"),
+              (Path("_site/assets/gensrpg/core/stats-normalization-v1.js"), '<script src="assets/gensrpg/core/stats-normalization-v1.js?v=1"></script>', "GenSrpG Core Stats normalization missing"),
+              (Path("_site/assets/gensrpg/core/stats-value-engine-v1.js"), '<script src="assets/gensrpg/core/stats-value-engine-v1.js?v=1"></script>', "GenSrpG Core Stats value engine missing"),
+              (Path("_site/assets/gensrpg/core/stats-hero-values-v1.js"), '<script src="assets/gensrpg/core/stats-hero-values-v1.js?v=1"></script>', "GenSrpG Core Stats hero values provider missing"),
+              (Path("_site/assets/gensrpg/core/stats-modifier-provider-v1.js"), '<script src="assets/gensrpg/core/stats-modifier-provider-v1.js?v=1"></script>', "GenSrpG Core Stats modifier provider missing"),
+              (Path("_site/assets/gensrpg/core/stats-derived-values-v1.js"), '<script src="assets/gensrpg/core/stats-derived-values-v1.js?v=1"></script>', "GenSrpG Core Stats derived values missing"),
+              (Path("_site/assets/gensrpg/core/stats-snapshot-v1.js"), '<script src="assets/gensrpg/core/stats-snapshot-v1.js?v=1"></script>', "GenSrpG Core Stats snapshot missing"),
               (Path("_site/assets/gensrpg/gens-rpg-stats-clean-167874.js"), '<script src="assets/gensrpg/gens-rpg-stats-clean-167874.js?v=167874"></script>', "GenSrpG clean dynamic RPG stat module missing"),
               (Path("_site/assets/gensrpg/gens-dungeon-hero-art-repair-167874.js"), '<script src="assets/gensrpg/gens-dungeon-hero-art-repair-167874.js?v=167874"></script>', "Dungeon built-in hero art repair missing"),
               (Path("_site/assets/gensrpg/gens-mobile-combat-performance-16781022.js"), '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>', "GenSrpG mobile combat performance module missing"),
+              (Path("_site/assets/gensrpg/shell/module-launch-final-authority-v1.js"), '<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>', "GenSrpG final Shell module launch authority missing"),
           ]
           html = index.read_text(encoding="utf-8")
           if "</body>" not in html:
               raise SystemExit("Cannot inject GenSrpG modules: </body> missing")
-          # This bridge must be the final runtime layer even when source index.html
-          # already contains it for raw branch previews.
+          # The performance bridge must stay immediately before the final Shell launch authority.
+          # Remove both source tail tags first so Pages rebuilds the same canonical order.
           perf_tag = '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>'
+          final_shell_tag = '<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>'
           html = html.replace(perf_tag + "\n", "").replace(perf_tag, "")
+          html = html.replace(final_shell_tag + "\n", "").replace(final_shell_tag, "")
           for module, tag, error in modules:
               if not module.exists():
                   raise SystemExit(error)

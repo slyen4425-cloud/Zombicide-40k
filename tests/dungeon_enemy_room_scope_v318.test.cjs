@@ -3,6 +3,7 @@ const fs=require('node:fs');
 const vm=require('node:vm');
 const path=require('node:path');
 const patch=fs.readFileSync(path.join(__dirname,'..','assets','dungeon','dungeon-core-318.js'),'utf8');
+const entry=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','dungeon','entry-v1.js'),'utf8');
 
 function storage(initial={}){
   const m=new Map(Object.entries(initial));
@@ -49,7 +50,7 @@ function makeContext({dungeon=true,runtimeRoom=3,legacyRoom=8}={}){
   };
   context.dungeonMjSpawnEnemy=function(){return context.trackSpawnedEnemyInstances('dng_orc',1)};
   context.window=context;context.globalThis=context;
-  vm.createContext(context);vm.runInContext(patch,context);
+  vm.createContext(context);vm.runInContext(entry,context,{filename:'assets/gensrpg/dungeon/entry-v1.js'});vm.runInContext(patch,context);
   return {context,getEnemies:()=>enemies};
 }
 
@@ -180,7 +181,7 @@ function makeBranchContext(){
     return true;
   };
   context.window=context;context.globalThis=context;
-  vm.createContext(context);vm.runInContext(patch,context);
+  vm.createContext(context);vm.runInContext(entry,context,{filename:'assets/gensrpg/dungeon/entry-v1.js'});vm.runInContext(patch,context);
   function switchTo(index){
     const x=JSON.parse(store.getItem(RT));
     spatial.persist(x);

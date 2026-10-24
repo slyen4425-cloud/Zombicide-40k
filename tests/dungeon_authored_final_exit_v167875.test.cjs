@@ -2,6 +2,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const path=require('node:path');
+const entry=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','dungeon','entry-v1.js'),'utf8');
 const src=fs.readFileSync(path.join(__dirname,'..','assets','dungeon','dungeon-authored-final-exit-167875.js'),'utf8');
 assert.doesNotThrow(()=>new Function(src));
 assert.match(src,/SORTIE FINALE/);
@@ -14,7 +15,7 @@ const core={explore(){return 'legacy'},render(){return true},show(){return true}
 let home=false,session=true;
 const ctx={console,setTimeout:f=>f(),clearTimeout,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,String(v))},DungeonCore01:core,DungeonAuthoredRuntime167839:{active:()=>true,graph:()=>({id:'world1'}),plan:()=>({currentNodeId:'node3',outgoing:[],targetNodeId:'',needsExit:false}),positional:()=>true},markSessionActive:v=>{session=!!v},dc033ForceHome:()=>{home=true},saveDungeonState:()=>{},showToast:()=>{}};
 ctx.window=ctx;ctx.globalThis=ctx;
-vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'dungeon-authored-final-exit-167875.js'});
+vm.createContext(ctx);vm.runInContext(entry,ctx,{filename:'assets/gensrpg/dungeon/entry-v1.js'});vm.runInContext(src,ctx,{filename:'dungeon-authored-final-exit-167875.js'});
 const api=ctx.DungeonAuthoredFinalExit167875;assert.ok(api);
 const f=api.finalState();assert.ok(f&&f.atExit,'terminal authored node on exit cell must be recognized');
 assert.equal(api.finish(),true);

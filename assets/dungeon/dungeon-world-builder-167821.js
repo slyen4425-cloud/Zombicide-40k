@@ -23,13 +23,10 @@ function interApi(){return ROOT.DungeonRoomCreatorV2||null}
 function roomLibrary(){return arr(roomApi()?.loadLibrary?.())}
 function findRoom(id){return roomApi()?.findRoom?.(id)||null}
 
-function readStore(){
-  try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");return Array.isArray(raw)?raw:[]}
-  catch(e){return []}
-}
+function readStore(){const raw=ROOT.GensStorageV1.readJson(ROOT.localStorage,STORAGE_KEY,[]);return Array.isArray(raw)?raw:[]}
 function writeStore(list){
   const clean=arr(list).map(normalizeGraph).filter(Boolean);
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(clean));
+  ROOT.GensStorageV1.writeJson(ROOT.localStorage,STORAGE_KEY,clean);
   return clean;
 }
 function normalizeNode(raw){

@@ -1,0 +1,48 @@
+name: GenSrpG Phase12 R13 guarded Builders Enemy Editor extraction
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r13-builders-enemy-editor-2026-10-19'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r13-controlled-apply.yml'
+permissions:
+  contents: write
+jobs:
+  guarded-builders-extraction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Assert R12 source is exact and START was done
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r13-builders-enemy-editor-2026-10-19'
+          test "$(git hash-object index.html)" = 'b0d0c73292e4374fc4f23e86edffad5c1b39a7b6'
+          test "$(wc -c < index.html | tr -d ' ')" = '1863745'
+          test ! -e assets/gensrpg/builders/legacy-enemy-editor-v1.js
+          git show-ref --verify 'refs/remotes/origin/checkpoint/gensrpg-start-phase12-r13-builders-enemy-editor-2026-10-19'
+          node tools/gensrpg_phase12_r13_builders_enemy_editor.cjs --check-source
+      - name: Apply once and prove R13 to R12 exact rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/gensrpg_phase12_r13_builders_enemy_editor.cjs --apply
+          node tools/gensrpg_phase12_r13_builders_enemy_editor.cjs --verify
+          node --check assets/gensrpg/builders/legacy-enemy-editor-v1.js
+          test "$(git hash-object index.html)" = 'b5a39705baf83e9782695c14bede8b9dde6ddf52'
+          test "$(git hash-object assets/gensrpg/builders/legacy-enemy-editor-v1.js)" = '47b8d0e2b65bfffca4128d29c345b7e82af2a5fe'
+          test "$(node tools/gensrpg_phase12_r13_builders_enemy_editor.cjs --restore-r12 | git hash-object --stdin)" = 'b0d0c73292e4374fc4f23e86edffad5c1b39a7b6'
+      - name: Commit only four intended artifacts without editing legacy whitespace
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/builders/legacy-enemy-editor-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          test "$(git diff --cached --name-only | wc -l | tr -d ' ')" = '4'
+          git -c core.whitespace=-blank-at-eol,-blank-at-eof diff --cached --check
+          git commit -m 'refactor(phase12 R13): extract 31 original Builders enemy editor functions'
+          git push origin "HEAD:$GITHUB_REF_NAME"

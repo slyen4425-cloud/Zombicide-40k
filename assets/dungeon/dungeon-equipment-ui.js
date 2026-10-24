@@ -81,24 +81,6 @@ function equippedItems(){
   }catch(e){}
   return [];
 }
-function fallbackSetStates(items){
-  const registry=ROOT.DUNGEON_EQUIPMENT_SETS||{};
-  const groups={};
-  (items||[]).forEach(item=>{
-    const setId=String(item?.setId||"");
-    const set=registry[setId];
-    if(!set)return;
-    const piece=String(item?.setPieceId||item?.id||"");
-    if(!piece)return;
-    const group=groups[setId]||(groups[setId]={setId,set,count:0,pieces:new Set(),items:[],activeThresholds:[],bonuses:{}});
-    if(group.pieces.has(piece))return;
-    group.pieces.add(piece);group.items.push(item);group.count=group.pieces.size;
-  });
-  return Object.values(groups).map(group=>{
-    group.activeThresholds=thresholds(group.set).filter(t=>group.count>=Math.max(1,numeric(t?.pieces,1)));
-    return group;
-  });
-}
 function setStates(items=equippedItems()){
   try{
     if(typeof ROOT.dungeonSetStateFromItems316==="function"){
@@ -106,7 +88,7 @@ function setStates(items=equippedItems()){
       if(Array.isArray(states))return states;
     }
   }catch(e){}
-  return fallbackSetStates(items);
+  return [];
 }
 function getSetProgress(items=equippedItems()){
   return setStates(items).map(state=>{

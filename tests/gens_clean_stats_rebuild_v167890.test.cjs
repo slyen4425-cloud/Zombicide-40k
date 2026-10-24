@@ -4,6 +4,7 @@ const vm=require('node:vm');
 const path=require('node:path');
 const root=path.join(__dirname,'..');
 const src=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-stats-clean-167874.js'),'utf8');
+const statsNormalizationSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','stats-normalization-v1.js'),'utf8');
 let profiles=[{id:'dungeon',name:'Dungeon',gameStyle:'dungeon',rpgUniverse:{stats:{dynamicDefinitions:[],active:[]}}}];
 let rules={physicalDamageStep:10,physicalDamageGain:1,meleeHitStep:10,meleeHitGain:2};
 function makeCtx(){
@@ -11,7 +12,8 @@ function makeCtx(){
   currentRpgProfile:()=>profiles[0],getActiveGameProfile:()=>profiles[0],loadGameProfiles:()=>profiles,
   saveGameProfiles:a=>{profiles=JSON.parse(JSON.stringify(a))},activeGameProfileId:()=>profiles[0].id,getActiveGameProfileId:()=>profiles[0].id,
   loadDungeonRpgRules:()=>({...rules}),saveDungeonRpgRules:r=>{rules={...r}},isDungeonMode:()=>false,showToast:()=>{}};
- ctx.window=ctx;ctx.globalThis=ctx;vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});return ctx;
+ ctx.window=ctx;ctx.globalThis=ctx;vm.createContext(ctx);vm.runInContext(statsNormalizationSrc,ctx,{filename:'stats-normalization-v1.js'});
+vm.runInContext(src,ctx,{filename:'gens-rpg-stats-clean-167874.js'});return ctx;
 }
 let ctx=makeCtx(),api=ctx.GensCleanRpgStats167874;
 assert.ok(api,'clean stats API missing');
@@ -33,4 +35,18 @@ assert.equal(api.legacyEffects().length,10,'pre-migration historical Dungeon rul
 assert.match(src,/data-add-stat/,'editor must own its new-stat button');
 assert.match(src,/data-add-effect/,'editor must own per-stat add-effect buttons');
 assert.doesNotMatch(src,/GensUnifiedStats167885|GensStatsActionsDirect167887|GensRpgStatsEditorActions167888/,'clean rebuild must not depend on stacked stat patch modules');
-console.log('GenSrpG V16.78.114.7 clean stat rebuild compatibility: persistence + reload + effects OK');
+
+let mixedProfiles=[
+ {id:'base',name:'Base',gameStyle:'zombicide'},
+ {id:'dungeon',name:'Dungeon',gameStyle:'dungeon',rpgUniverse:{stats:{dynamicDefinitions:[],active:[]}}}
+];
+const mixedCtx={console,Math,Date,JSON,setTimeout:fn=>{if(typeof fn==='function')fn();return 0},clearTimeout:()=>{},
+ currentRpgProfile:()=>mixedProfiles[1],getActiveGameProfile:()=>mixedProfiles[0],loadGameProfiles:()=>mixedProfiles,
+ saveGameProfiles:a=>{mixedProfiles=JSON.parse(JSON.stringify(a))},activeGameProfileId:()=>mixedProfiles[0].id,getActiveGameProfileId:()=>mixedProfiles[0].id,
+ loadDungeonRpgRules:()=>({physicalDamageStep:10,physicalDamageGain:1}),saveDungeonRpgRules:()=>{},isDungeonMode:()=>false};
+mixedCtx.window=mixedCtx;mixedCtx.globalThis=mixedCtx;vm.createContext(mixedCtx);vm.runInContext(statsNormalizationSrc,mixedCtx,{filename:'stats-normalization-v1.js'});
+vm.runInContext(src,mixedCtx,{filename:'gens-rpg-stats-clean-167874.js'});
+assert.equal(mixedCtx.GensCleanRpgStats167874.install(),true,'Core Stats install should complete with Base active and Dungeon profile selected by its owner');
+assert.deepEqual(mixedProfiles.map(p=>p.id),['base','dungeon'],'saving Dungeon stats must never overwrite the active Base profile');
+
+console.log('GenSrpG V16.78.114.7 clean stat rebuild compatibility: persistence + reload + effects + profile ownership OK');

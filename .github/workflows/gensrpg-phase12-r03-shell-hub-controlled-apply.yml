@@ -1,0 +1,63 @@
+name: GenSrpG Phase12 R03 Shell Hub UI controlled apply
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r03-shell-hub-family-ui-extraction-2026-10-16'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r03-shell-hub-controlled-apply.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate exact R02 source and deterministic Shell extraction
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r03-shell-hub-family-ui-extraction-2026-10-16'
+          test "$(git hash-object index.html)" = '062c4cd37634f504cc75ce3329d6e69e19b5f547'
+          test ! -e assets/gensrpg/shell/legacy-hub-family-ui-v1.js
+          python3 tools/gensrpg_phase12_r03_shell_hub_extract_apply.py --check-source
+          python3 tools/gensrpg_phase12_r03_shell_hub_extract_apply.py --apply
+          node --check assets/gensrpg/shell/legacy-hub-family-ui-v1.js
+      - name: Add versioned offline cache and explicit Shell UI owner
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('service-worker.js')
+          s=p.read_text()
+          old='gensrpg-cache-16.78.114.11-phase4-stats-s11-core-snapshot-1-r02-visual-data'
+          assert s.count(old)==1
+          s=s.replace(old,'gensrpg-cache-16.78.114.11-phase4-stats-s11-core-snapshot-1-r03-shell-hub',1)
+          anchor='"./assets/gensrpg/core/legacy-visual-data-v1.js",'
+          assert s.count(anchor)==1
+          s=s.replace(anchor,anchor+'"./assets/gensrpg/shell/legacy-hub-family-ui-v1.js",',1)
+          p.write_text(s)
+          p=Path('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json')
+          s=p.read_text()
+          anchor='  "files": {\n'
+          assert s.count(anchor)==1
+          owner='assets/gensrpg/shell/legacy-hub-family-ui-v1.js'
+          assert owner not in s
+          entry=('    "'+owner+'": {\n'
+                '      "owner": "GenSrpG Shell Hub Family UI R03",\n'
+                '      "domain": "shell",\n'
+                '      "role": "six classic function declarations for family cards and four-mode home UI; no game-state persistence or game-mode runtime authority"\n'
+                '    },\n')
+          p.write_text(s.replace(anchor,anchor+entry,1))
+          PY
+          node tests/gens_phase12_r03_shell_hub_extraction_v1.test.cjs
+          git diff --check
+      - name: Commit only R03 verified runtime and cache/manifest changes on the same branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/shell/legacy-hub-family-ui-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          # The preserved source block ends with a historical blank line. Exclude
+          # this one byte-pinned migrated asset from the whitespace-style check;
+          # its exact content is independently asserted by the R03 test above.
+          git diff --cached --check -- ':!assets/gensrpg/shell/legacy-hub-family-ui-v1.js'
+          git commit -m "refactor(phase12): relocate six Shell Hub UI functions without changing their bodies"
+          git push origin "HEAD:$GITHUB_REF_NAME"

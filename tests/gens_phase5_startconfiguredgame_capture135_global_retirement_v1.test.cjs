@@ -1,0 +1,119 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+
+const root=path.join(__dirname,'..');
+const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
+const index=read('index.html');
+const r06CaptureNames=new Set(['captureGameplayModalMount','capturePlaytestFix128',...Array.from({length:12},(_,i)=>'captureFix'+(129+i)),'captureItems141','captureBuffs142','captureBuffFx143','captureAbilityTruth144']);
+const captureR06Rel=id=>'assets/gensrpg/capture/legacy-patches/'+id.replace(/([A-Z])/g,'-$1').toLowerCase().replace(/^-/,'')+'-v1.js';
+const finalShell=read('assets/gensrpg/shell/module-launch-final-authority-v1.js');
+const captureEntry=read('assets/gensrpg/capture/entry-v1.js');
+
+function blockBody(id){
+  const m=index.match(new RegExp('<script\\b[^>]*\\bid=["\\\']'+id+'["\\\'][^>]*>([\\s\\S]*?)<\\/script>','i'));
+  assert.ok(m,'missing historical owner block '+id);
+  if(id==='gensDungeonCore01Js'){
+    assert.ok(m[0].includes('src="assets/gensrpg/dungeon/core01-session-ui-v1.js"'),
+      'Dungeon Core01 must remain a parser-ordered external owner');
+    assert.equal(m[1],'','no inline Dungeon Core01 duplicate');
+    return read('assets/gensrpg/dungeon/core01-session-ui-v1.js');
+  }
+  if(id==='dungeonCore200Rebuild'){
+    assert.ok(m[0].includes('src="assets/gensrpg/dungeon/core200-rebuild-v1.js"'),
+      'D4 Dungeon Core200 must be a synchronous external owner');
+    assert.equal(m[1],'','Core200 external script must have no inline duplicate');
+    return read('assets/gensrpg/dungeon/core200-rebuild-v1.js');
+  }
+  if(r06CaptureNames.has(id)){
+    const rel=captureR06Rel(id);
+    assert.equal(m[0],'<script id="'+id+'" src="'+rel+'"></script>','R06 Capture script remains classic, unique and parser-ordered');
+    assert.equal(m[1],'','R06 has no inline duplicate for '+id);
+    return read(rel);
+  }
+  return m[1];
+}
+
+function globalOwners(name){
+  const scriptRe=new RegExp('<script\\b[^>]*\\bid=["\\\']([^"\\\']+)["\\\'][^>]*>([\\s\\S]*?)<\\/script>','gi');
+  const blocks=[...index.matchAll(scriptRe)];
+  const re=new RegExp('window\\.'+name+'\\s*=(?!=)','g');
+  const ids=[];
+  for(const m of blocks){
+    const body=m[1]==='gensDungeonCore01Js'||r06CaptureNames.has(m[1])?blockBody(m[1]):m[2];
+    const hits=body.match(re)||[];
+    for(let i=0;i<hits.length;i++)ids.push(m[1]);
+  }
+  return ids;
+}
+
+const c135=blockBody('captureFix135');
+const c138=blockBody('captureFix138');
+const c139=blockBody('captureFix139');
+const dc01=blockBody('gensDungeonCore01Js');
+const dc200=blockBody('dungeonCore200Rebuild');
+
+assert.doesNotMatch(
+  c135,
+  /window\.startConfiguredGame\s*=(?!=)/,
+  'RED: captureFix135 must stop publishing startConfiguredGame globally'
+);
+
+const owners=globalOwners('startConfiguredGame');
+assert.deepEqual(
+  owners,
+  ['captureFix138','gensDungeonCore01Js'],
+  'Phase 9 must preserve Capture135 retirement and additionally retire Capture139 from the global chain'
+);
+
+assert.match(c135,/target135\(/,'captureFix135 ally-targeting responsibility must remain');
+assert.match(c135,/render135\(/,'captureFix135 battle rendering/log responsibility must remain');
+assert.match(c135,/captureBattleLiveBody/,'captureFix135 detailed combat-log UI must remain');
+assert.match(c135,/captureCreatureDetailBody/,'captureFix135 creature stats/detail UX must remain');
+assert.match(c135,/oldPlayerText135/,'captureFix135 player-text compatibility layer must remain');
+
+assert.match(c138,/window\.startConfiguredGame\s*=\s*async\s+function/,'captureFix138 global owner must remain');
+assert.match(c138,/isCaptureContext138/,'captureFix138 Capture-context routing must remain');
+assert.match(c138,/renderCaptureWorldHub/,'captureFix138 post-launch Capture UI responsibility must remain');
+
+assert.doesNotMatch(c139,/window\.startConfiguredGame\s*=|const\s+start139\s*=|gensCaptureStartConfiguredGame139V1/,
+  'Capture139 global launch owner must remain retired after Phase 9 transfer');
+assert.match(c139,/GensCaptureSessionStartV1\.install\(/);
+assert.match(c139,/markSessionActive:\(\)=>markSessionActive\(true\)/,
+  'Capture139 wiring must preserve the shared session activation dependency');
+
+assert.match(dc01,/window\.startConfiguredGame\s*=\s*async\s+function/,'Dungeon Core01 global owner must remain');
+assert.match(dc01,/eligible\(\)/,'Dungeon Core01 launch eligibility must remain');
+assert.match(dc01,/return start\(\)/,'Dungeon Core01 launch action must remain');
+
+assert.match(dc200,/const gensDungeonStartConfiguredGame200V1=async function/,'Core200 local Dungeon dispatcher must remain');
+assert.doesNotMatch(dc200,/window\.startConfiguredGame\s*=(?!=)/,'Core200 global owner must remain retired');
+assert.match(dc200,/GensShellModuleLaunchV1\.register\("dungeon",gensDungeonStartModuleSessionV1\)/,'Dungeon provider S4 must remain');
+
+assert.doesNotMatch(c139,/GensShellModuleLaunchV1\.register\("capture"/,'Capture139 must no longer register the public provider directly');
+assert.match(c139,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/,
+  'Capture139 must bind the dedicated Capture session-start owner into the public entry');
+assert.match(captureEntry,/shell\.register\("capture",startModuleSession\)/,'Capture public entry must keep the provider registered exactly once');
+assert.match(finalShell,/window\.startConfiguredGame=async function/,'Shell final authority must remain visible');
+assert.match(finalShell,/launchService\.startModuleSession\(moduleId\)/,'Shell final authority must continue delegating through the module registry');
+
+for(const p of [
+  'tests/gens_capture_current_shell_browser_v11411.test.cjs',
+  'tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs',
+  'tests/gens_dungeon_after_survival_start_state_browser_v11411.test.cjs',
+  'tests/gens_savequit_resume_shell_browser_v11411.test.cjs',
+  'tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs'
+]){
+  assert.ok(fs.existsSync(path.join(root,p)),'required regression proof missing: '+p);
+}
+
+console.log(JSON.stringify({
+  scenario:'Phase 5 retire captureFix135 global startConfiguredGame owner',
+  owners,
+  capture135BlockRetained:true,
+  preservedOwners:['captureFix138','gensDungeonCore01Js'],
+  retiredByPhase9:'captureFix139',
+  core200LocalDispatcher:true,
+  shellFinalAuthority:true
+},null,2));

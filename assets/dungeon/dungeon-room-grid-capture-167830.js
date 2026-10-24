@@ -7,7 +7,7 @@
 const ROOT=typeof window!=="undefined"?window:globalThis;
 const DOC=typeof document!=="undefined"?document:null;
 const VERSION="1.0.2",APP_VERSION="16.78.30";
-let boundGrid=null,boundHandler=null,installed=false;
+let boundGrid=null,boundPointerHandler=null,boundTouchHandler=null,boundClickHandler=null,suppressNextClick=false,installed=false;
 function templateActive(){return !!DOC?.getElementById("drt167828Toggle")?.classList?.contains("on")}
 function zoneActive(){return !!DOC?.getElementById("drv167826Toggle")?.classList?.contains("on")}
 function stop(ev){ev?.preventDefault?.();ev?.stopPropagation?.();ev?.stopImmediatePropagation?.()}
@@ -17,21 +17,28 @@ function roomObject(index){
   return String(room?.cells?.[Number(index)]?.object||"");
 }
 function capture(ev){
-  const el=ev?.target?.closest?.("[data-drc-index]");if(!el)return false;
-  const idx=Number(el.dataset.drcIndex);
-  if(templateActive()){
-    stop(ev);const obj=roomObject(idx);ROOT.DungeonRoomTemplateContent167828?.openEditor?.(idx,obj);return true;
-  }
-  if(zoneActive()){
-    stop(ev);ROOT.DungeonRoomVisualConfig167826?.activateCell?.(idx);return true;
-  }
+  const el=ev?.target?.closest?.("[data-drc-index]");if(!el||(!templateActive()&&!zoneActive()))return false;
+  ev?.stopPropagation?.();return true;
+}
+function openForElement(el,ev){
+  if(!el)return false;const idx=Number(el.dataset.drcIndex);
+  if(templateActive()){stop(ev);const obj=roomObject(idx);ROOT.DungeonRoomTemplateContent167828?.openEditor?.(idx,obj);return true}
+  if(zoneActive()){stop(ev);ROOT.DungeonRoomVisualConfig167826?.activateCell?.(idx);return true}
   return false;
 }
+function activateTouch(ev){const el=ev?.target?.closest?.("[data-drc-index]");if(!el)return false;suppressNextClick=true;return openForElement(el,ev)}
+function activateClick(ev){const el=ev?.target?.closest?.("[data-drc-index]");if(!el)return false;if(suppressNextClick){suppressNextClick=false;stop(ev);return true}return openForElement(el,ev)}
 function bindGrid(){
   if(!DOC)return false;const grid=DOC.getElementById("drc100Grid");if(!grid)return false;
-  if(boundGrid===grid&&boundHandler)return true;
-  if(boundGrid&&boundHandler)try{boundGrid.removeEventListener("pointerdown",boundHandler,true)}catch(e){}
-  boundGrid=grid;boundHandler=capture;grid.addEventListener("pointerdown",boundHandler,true);return true;
+  if(boundGrid===grid&&boundPointerHandler&&boundTouchHandler&&boundClickHandler)return true;
+  if(boundGrid&&boundPointerHandler)try{boundGrid.removeEventListener("pointerdown",boundPointerHandler,true)}catch(e){}
+  if(boundGrid&&boundTouchHandler)try{boundGrid.removeEventListener("touchend",boundTouchHandler,true)}catch(e){}
+  if(boundGrid&&boundClickHandler)try{boundGrid.removeEventListener("click",boundClickHandler,true)}catch(e){}
+  boundGrid=grid;boundPointerHandler=capture;boundTouchHandler=activateTouch;boundClickHandler=activateClick;
+  grid.addEventListener("pointerdown",boundPointerHandler,true);
+  grid.addEventListener("touchend",boundTouchHandler,true);
+  grid.addEventListener("click",boundClickHandler,true);
+  return true;
 }
 function wrapRoomOpen(){
   const api=ROOT.DungeonRoomCreator100;if(!api||api.__drgc167830Wrapped||typeof api.open!=="function")return false;
@@ -46,6 +53,6 @@ function install(){
   if(installed){wrapRoomOpen();bindGrid();loadUiRecovery();return true}installed=true;try{ROOT.GENSRPG_VERSION=APP_VERSION}catch(e){}
   wrapRoomOpen();bindGrid();loadUiRecovery();return true;
 }
-ROOT.DungeonRoomGridCapture167830={VERSION,APP_VERSION,templateActive,zoneActive,capture,bindGrid,wrapRoomOpen,loadUiRecovery,install};
+ROOT.DungeonRoomGridCapture167830={VERSION,APP_VERSION,templateActive,zoneActive,capture,openForElement,activateTouch,activateClick,bindGrid,wrapRoomOpen,loadUiRecovery,install};
 if(DOC){if(DOC.readyState==="loading")DOC.addEventListener("DOMContentLoaded",install,{once:true});else install()}else install();
 })();

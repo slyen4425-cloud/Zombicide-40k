@@ -22,7 +22,8 @@
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const esc=v=>str(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  let installed=false,adapterHooked=false,startHooked=false,resultHooked=false,detectionHooked=false,detailBound=false,observer=null,queued=false,lastScanSignature="",detailActorId="";
+  let installed=false,adapterHooked=false,startHooked=false,resultHooked=false,detectionHooked=false,detailBound=false,queued=false,lastScanSignature="",detailActorId="",detailHandler=null,startWrapped=null;
+  const retryTimers=new Set();
 
   function doc(rt=R){return rt?.document||null}
   function engine(rt=R){return rt?.GensRpgTacticalCombatV2||null}
@@ -153,7 +154,7 @@
       let requested=arr(ids).map(str);if(isDetectionReason(reason)){const visible=new Set(detectionEnemyIds(rt,state));requested=requested.filter(id=>visible.has(id));if(!requested.length)return {ok:false,reason:"not-detected-v112"};const pairs=detectionPairs(rt,state).filter(p=>requested.includes(p.enemyId));setContext(rt,{room:num(state.room,0),sourceHeroIds:[...new Set(pairs.map(p=>p.heroId))],enemyIds:requested,reason:"vision-v112"})}
       const sel=selectCombatants(rt,{enemyIds:requested});if(!sel.heroIds.length||!sel.enemyIds.length)return {ok:false,reason:"no-spatial-combatants-v112"};setContext(rt,{room:sel.room,sourceHeroIds:sel.sourceHeroIds,enemyIds:sel.enemyIds,reason});return old.call(this,sel.enemyIds,reason);
     };
-    wrapped.__gensRpg112Start=true;wrapped.__original=old;rt.dc200StartCombat=wrapped;startHooked=true;return true;
+    wrapped.__gensRpg112Start=true;wrapped.__original=old;rt.dc200StartCombat=wrapped;startWrapped=wrapped;startHooked=true;return true;
   }
 
   function hookResultDetails(rt=R){
@@ -183,26 +184,30 @@
 
   function ensureStyle(rt=R){const D=doc(rt);if(!D||D.getElementById?.(STYLE_ID))return !!D;const s=D.createElement("style");s.id=STYLE_ID;s.textContent=`
     .gtv2111Dock{width:min(88vw,440px)!important;gap:5px!important;padding:5px!important;border-radius:12px!important}.gtv2111Dock button{min-height:38px!important;font-size:12.5px!important;padding:5px 7px!important;border-radius:8px!important}.gtv2Overlay{padding-bottom:calc(62px + env(safe-area-inset-bottom,0px))!important}
-    .${WALL_CLASS},.gtv2Cell.blocked,#drc100Grid .drc100Cell.wall{position:relative!important;background:#171512 url("${WALL_ASSET}") center/cover no-repeat!important;overflow:hidden!important}
-    .${WALL_CLASS}::before,.gtv2Cell.blocked::before,#drc100Grid .drc100Cell.wall::before{content:none!important;display:none!important}
-    .${WALL_CLASS}>*,.gtv2Cell.blocked>* ,#drc100Grid .drc100Cell.wall>*{position:relative;z-index:1}.dav167870WallCell.${WALL_CLASS}>*{visibility:hidden!important}
     .gtv2112TrueSheet{margin-top:10px;padding-top:10px;border-top:1px solid #45505e}.gtv2112TrueSheet h3{margin:9px 0 6px}.gtv2112StatGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.gtv2112Stat{display:grid;grid-template-columns:24px 1fr auto;gap:5px;align-items:center;padding:6px;background:#10151c;border:1px solid #303a47;border-radius:8px;font-size:12px}.gtv2112DerivedGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-bottom:7px}.gtv2112Derived{display:flex;justify-content:space-between;gap:8px;padding:6px 7px;background:#202733;border-radius:8px;font-size:12px}.gtv2112Attack,.gtv2112Gear{display:grid;gap:3px;padding:7px 8px;margin:5px 0;background:#10151c;border:1px solid #303a47;border-radius:9px}.gtv2112Attack span,.gtv2112Gear span,.gtv2112Attack small,.gtv2112Gear small{font-size:11px;color:#c5ccd5}.gtv2112Empty{font-size:12px;color:#aab2bd;padding:6px}
     .gtv2112Explain{margin-top:8px;padding:8px 9px;background:#151c25;border:1px solid #39495a;border-radius:9px;font-size:12px;line-height:1.4}
     @media(max-width:430px){.gtv2111Dock{width:calc(100vw - 36px)!important}.gtv2111Dock button{min-height:36px!important;font-size:11.5px!important}.gtv2112StatGrid{grid-template-columns:1fr}.gtv2112DerivedGrid{grid-template-columns:1fr 1fr}}
   `;(D.head||D.documentElement||D.body)?.appendChild(s);return true}
   function markWallCells(rt=R){const D=doc(rt);if(!D)return 0;let n=0;const state=runtimeState(rt),kinds=arr(state?.last?.map?.cells),cells=[...(D.querySelectorAll?.("#dc047RoomBoard .dc047Grid > .dc047Cell")||[])];for(let i=0;i<cells.length;i++){const wall=normalizeText(kinds[i])==="wall"||cells[i].classList?.contains?.("dav167870WallCell");if(!wall)continue;const el=cells[i];el.classList?.add(WALL_CLASS);el.style?.setProperty?.("background-image",`url("${WALL_ASSET}")`,"important");el.style?.setProperty?.("background-size","cover","important");el.style?.setProperty?.("background-position","center","important");el.style?.setProperty?.("background-repeat","no-repeat","important");n++}for(const el of D.querySelectorAll?.(".gtv2Cell.blocked,#drc100Grid .drc100Cell.wall,#dc047RoomBoard .dav167870WallCell")||[]){el.classList?.add(WALL_CLASS);el.style?.setProperty?.("background-image",`url("${WALL_ASSET}")`,"important");el.style?.setProperty?.("background-size","cover","important");el.style?.setProperty?.("background-position","center","important");el.style?.setProperty?.("background-repeat","no-repeat","important");n++}return n}
   function patchDice(rt=R){const D=doc(rt),card=D?.querySelector?.(".gtv2DiceCard");if(!card)return false;const row=latestAttackRow(rt);if(!row)return false;let note=card.querySelector?.(".gtv2112Explain");if(!note){note=D.createElement("div");note.className="gtv2112Explain";const button=card.querySelector?.("[data-dice-continue]");if(button)card.insertBefore(note,button);else card.appendChild(note)}note.textContent=explainAttack(row);return true}
-  function maintain(rt=R){queued=false;ensureStyle(rt);markWallCells(rt);patchDetail(rt);patchDice(rt);return true}
+  function maintain(rt=R){queued=false;ensureStyle(rt);patchDetail(rt);patchDice(rt);return true}
   function queueMaintain(rt=R){if(queued)return;queued=true;const run=()=>maintain(rt);if(typeof rt?.requestAnimationFrame==="function")rt.requestAnimationFrame(run);else setTimeout(run,0)}
-  function bindDetail(rt=R){if(detailBound)return true;const D=doc(rt);if(!D?.addEventListener)return false;D.addEventListener("click",ev=>{const b=ev.target?.closest?.("button");if(!b)return;if(b.dataset?.detail){detailActorId=str(b.dataset.detail);setTimeout(()=>patchDetail(rt),0)}else if(b.hasAttribute?.("data-detail-close"))detailActorId=""},true);detailBound=true;return true}
-  function observe(rt=R){const D=doc(rt);if(observer||!D?.body||typeof rt?.MutationObserver!=="function")return !!observer;observer=new rt.MutationObserver(muts=>{for(const m of muts){for(const node of m.addedNodes||[]){if(node?.nodeType!==1)continue;if(node.matches?.(".gtv2DiceBackdrop,.gtv271DetailBackdrop,.dc047Grid")||node.querySelector?.(".gtv2DiceBackdrop,.gtv271DetailBackdrop,.dc047Grid")){queueMaintain(rt);return}}}});observer.observe(D.body,{childList:true,subtree:true});return true}
+  function bindDetail(rt=R){if(detailBound)return true;const D=doc(rt);if(!D?.addEventListener)return false;detailHandler=ev=>{const b=ev.target?.closest?.("button");if(!b)return;if(b.dataset?.detail){detailActorId=str(b.dataset.detail);setTimeout(()=>patchDetail(rt),0)}else if(b.hasAttribute?.("data-detail-close"))detailActorId=""};D.addEventListener("click",detailHandler,true);detailBound=true;return true}
 
   function wrapDetectionFunction(rt,name,reason,force=false){const old=rt?.[name];if(typeof old!=="function"||old.__gensRpg112Detection)return false;const w=function(){const out=old.apply(this,arguments);scheduleDetection(rt,reason,force);return out};w.__gensRpg112Detection=true;w.__original=old;rt[name]=w;return true}
   function hookDetection(rt=R){wrapDetectionFunction(rt,"dungeonMoveHero098","movement-vision-v112",false);wrapDetectionFunction(rt,"applyDungeonTurnEvent","event-vision-v112",true);wrapDetectionFunction(rt,"dungeonEventSpawn","spawn-vision-v112",true);wrapDetectionFunction(rt,"trackSpawnedEnemyInstances","spawn-vision-v112",true);const core=rt?.DungeonCore01;if(core)for(const name of ["render","show"]){const old=core[name];if(typeof old!=="function"||old.__gensRpg112Detection)continue;const w=function(){const out=old.apply(this,arguments);markWallCells(rt);scheduleDetection(rt,"room-vision-v112",false);return out};w.__gensRpg112Detection=true;w.__original=old;core[name]=w}detectionHooked=true;return true}
 
-  function install(rt=R){ensureStyle(rt);hookAdapter(rt);hookStart(rt);hookResultDetails(rt);hookDetection(rt);bindDetail(rt);observe(rt);maintain(rt);scheduleDetection(rt,"install-vision-v112",true);try{rt.GENSRPG_VERSION=APP_VERSION;rt.GENS_RPG_TACTICAL_COHERENCE_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&startHooked&&resultHooked);return installed}
-  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000])setTimeout(()=>install(rt),ms);return true}
-  const api={VERSION,APP_VERSION,WALL_ASSET,DEFAULT_PERCEPTION,MAX_SENSE,mapInfo,cellXY,lineOfSightCells,pathDistance,roomOfHero,heroesInRoom,enemyVision,heroPerception,detectionPairs,detectionEnemyIds,scanDetection,selectCombatants,applyRuntimePositions,explainAttack,markWallCells,patchDice,patchDetail,hookAdapter,hookStart,hookResultDetails,install,installWithRetries,status:()=>({installed,adapterHooked,startHooked,resultHooked,detectionHooked})};
+  function install(rt=R){ensureStyle(rt);hookAdapter(rt);hookResultDetails(rt);bindDetail(rt);maintain(rt);try{rt.GENSRPG_VERSION=APP_VERSION;rt.GENS_RPG_TACTICAL_COHERENCE_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&resultHooked);return installed}
+  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}return true}
+  function dispose(rt=R){
+    for(const id of retryTimers)try{clearTimeout(id)}catch(e){}retryTimers.clear();
+    const D=doc(rt),A=adapter(rt),E=engine(rt);if(D&&detailHandler)D.removeEventListener?.("click",detailHandler,true);
+    const create=A?.createBattle;if(create?.__gensRpg112Spatial&&!create?.__gensRpg113Scope&&typeof create.__original==="function")A.createBattle=create.__original;
+    const resolve=E?.resolveAttack;if(resolve?.__gensRpg112Explain&&typeof resolve.__original==="function")E.resolveAttack=resolve.__original;
+    if(startWrapped&&rt?.dc200StartCombat===startWrapped&&typeof startWrapped.__original==="function")rt.dc200StartCombat=startWrapped.__original;
+    D?.getElementById?.(STYLE_ID)?.remove?.();detailHandler=null;startWrapped=null;installed=false;adapterHooked=false;startHooked=false;resultHooked=false;detectionHooked=false;detailBound=false;queued=false;detailActorId="";return true;
+  }
+  const api={VERSION,APP_VERSION,WALL_ASSET,DEFAULT_PERCEPTION,MAX_SENSE,mapInfo,cellXY,lineOfSightCells,pathDistance,roomOfHero,heroesInRoom,enemyVision,heroPerception,detectionPairs,detectionEnemyIds,scanDetection,selectCombatants,applyRuntimePositions,explainAttack,markWallCells,patchDice,patchDetail,hookAdapter,hookStart,hookResultDetails,install,installWithRetries,dispose,status:()=>({installed,adapterHooked,startHooked,resultHooked,detectionHooked})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

@@ -1,0 +1,75 @@
+name: GenSrpG Phase 9 Dungeon editor single-owner controlled apply
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-dungeon-editor-single-owner-2026-10-11'
+    paths:
+      - '.github/workflows/gensrpg-phase9-dungeon-editor-single-owner-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-single-owner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout declared work branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify exact source and branch
+        run: |
+          test "$(git branch --show-current)" = 'work/gensrpg-phase9-dungeon-editor-single-owner-2026-10-11'
+          test "$(wc -c < index.html)" = '7959154'
+          test "$(git hash-object index.html)" = 'd19fb899e646ee97ec21d055b5271ac2cbba91a2'
+
+      - name: Apply subtractive single-owner correction and prove byte-exact rollback
+        env:
+          GENSRPG_SINGLE_OWNER_APPROVED: '1'
+        run: |
+          python tools/gensrpg_phase9_dungeon_editor_single_owner_apply.py --apply
+          python tools/gensrpg_phase9_dungeon_editor_single_owner_apply.py --verify
+          test "$(wc -c < index.html)" = '7959089'
+          test "$(git hash-object index.html)" = 'e777d484ab10049650440fee04f47cf2dfdc3043'
+
+      # Canonical Shell capability is available without the optional V151 launcher.
+      - name: Prove canonical mode owner and historical snapshots
+        run: |
+          node tests/gens_phase9_dungeon_editor_single_owner_v1.test.cjs
+          node tests/gens_phase9_capture_world_physical_extraction_v1.test.cjs
+          node tests/gens_phase9_capture_seed_physical_extraction_v1.test.cjs
+          node tests/gens_phase9_capture_world_creator_preservation_v1.test.cjs
+          node tests/gens_runtime_composition_guard_v11411.test.cjs
+
+      - name: Install real browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Prove Capture Dungeon boundary and real Dungeon Builder
+        run: |
+          node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs
+          node tests/gens_capture_current_shell_browser_v11411.test.cjs
+
+      - name: Check exact narrow runtime diff
+        run: |
+          git restore -- node_modules/.package-lock.json
+          git diff --check
+          test "$(git diff --name-only)" = 'index.html'
+          python tools/gensrpg_phase9_dungeon_editor_single_owner_apply.py --verify
+          git diff --stat
+          git diff -- index.html | sed -n '1,180p'
+
+      - name: Commit real owner correction on work branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          test "$(git diff --cached --name-only)" = 'index.html'
+          git commit -m "refactor(phase9): single Shell owner for Dungeon editor access"
+          # These historical sentinels deliberately inspect HEAD:index.html.
+          node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+          git push origin "HEAD:$GITHUB_REF_NAME"

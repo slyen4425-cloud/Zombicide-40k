@@ -24,11 +24,7 @@ function readRuntime(){
 function writeRuntime(x){
   try{localStorage.setItem(RT_KEY,JSON.stringify(x||{}));return true}catch(e){return false}
 }
-function activeHeroId(x){
-  const list=Array.isArray(x?.participants)?x.participants:[];
-  const i=Math.max(0,Math.min(Math.max(0,list.length-1),Number(x?.index)||0));
-  return String(list[i]||"");
-}
+function activeHeroId(x){return ROOT.GensDungeonV1.movement.resolveAuthoredActiveHero(x?.participants,x?.index)}
 function runtimeRoom(){
   const x=readRuntime();if(!x)return 0;
   try{

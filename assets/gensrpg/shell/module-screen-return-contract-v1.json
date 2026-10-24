@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "phase": 5,
+  "contract": "module-screen-return",
+  "owner": "shell",
+  "operation": "returnToPrimaryView",
+  "providers": [
+    "survival",
+    "dungeon",
+    "capture",
+    "pvp"
+  ],
+  "arguments": [],
+  "returns": "handled:boolean",
+  "invariants": [
+    "Shell selects the provider only from public active module routing state",
+    "the selected module decides its own primary view",
+    "no DOM identifier or module-owned DOM structure is exposed to the Shell",
+    "no private runtime state is read or transported through this contract",
+    "no gameplay rule or gameplay state ownership moves into the Shell",
+    "a provider may affect only its own module-owned UI",
+    "the contract remains metadata-only until an explicit Phase 5 runtime raccord is separately approved"
+  ],
+  "forbidden": [
+    "cross-module view mutation",
+    "private module storage inspection by Shell",
+    "global compatibility wrapper",
+    "observer timer retry or polling authority",
+    "Tactical combat routing"
+  ]
+}

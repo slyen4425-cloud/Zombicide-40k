@@ -1,0 +1,66 @@
+name: GenSrpG Phase12 R14 editor parity in Chromium and Firefox
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r14-builders-rpg-universe-editor-2026-10-20'
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  browser-rpg-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install isolated Playwright test environment and browsers
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --prefix /tmp/gensrpg-r14-playwright playwright@1.56.1
+          /tmp/gensrpg-r14-playwright/node_modules/.bin/playwright install --with-deps chromium firefox
+      - name: Start local production-source server and run exact R13/R14 browser parity
+        shell: bash
+        env:
+          R14_PLAYWRIGHT_DIR: /tmp/gensrpg-r14-playwright
+          R14_TEST_URL: http://127.0.0.1:8878/index.html
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8878 --bind 127.0.0.1 > /tmp/gensrpg_r14_http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -fsS -o /dev/null 'http://127.0.0.1:8878/index.html'; then break; fi
+            sleep 1
+          done
+          curl -fIs 'http://127.0.0.1:8878/assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js'
+          node tests/gensrpg_phase12_r14_rpg_editor_browser_parity.cjs
+      - name: Survival and Dungeon builtin-override browser boundary
+        shell: bash
+        env:
+          NODE_PATH: /tmp/gensrpg-r14-playwright/node_modules
+        run: |
+          set -euo pipefail
+          legacy_pkg="$(node -p 'require.resolve("playwright/package.json",{paths:[process.cwd()+"/tests"]})')"
+          legacy_cli="$(dirname "$legacy_pkg")/cli.js"
+          echo "Archived Survival browser test uses Playwright $(node -p 'require("playwright/package.json").version')"
+          node "$legacy_cli" install chromium
+          node tests/gens_phase6_survival_builtin_boundary_browser_characterization_v1.test.cjs
+      - name: Expose browser parity SHA result
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOB_RESULT: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          status=success
+          if [ "$JOB_RESULT" != success ]; then status=failure; fi
+          payload="$(jq -nc --arg state "$status" --arg ctx 'gensrpg/r14/browser-parity' --arg description "Chromium and Firefox RPG editor R13/R14 identity and XP save/reload - $JOB_RESULT" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$ctx,description:$description,target_url:$url}')"
+          curl --fail --silent --show-error --retry 2 -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -d "$payload" >/dev/null

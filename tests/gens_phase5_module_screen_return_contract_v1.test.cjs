@@ -1,0 +1,130 @@
+'use strict';
+
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const crypto=require('node:crypto');
+
+const root=path.join(__dirname,'..');
+const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
+const json=rel=>JSON.parse(read(rel));
+const exists=rel=>fs.existsSync(path.join(root,rel));
+const runtime=require('./helpers/gens_capture_v162_legacy_snapshot_v1.cjs').legacyBytes();
+
+function gitBlob(buf){
+  return crypto.createHash('sha1').update(Buffer.from('blob '+buf.length+'\0')).update(buf).digest('hex');
+}
+
+assert.equal(runtime.length,8165438,'contract lot must keep the current Phase 7 Dungeon generated Boss policy runtime size');
+assert.equal(gitBlob(runtime),'1a61147d5a32889fa85e6a09e846049103b9f0bf',
+  'contract lot must keep the current Phase 7 generated Boss policy index byte-identical');
+
+const sharedPath='assets/gensrpg/shell/module-screen-return-contract-v1.json';
+assert.equal(exists(sharedPath),true,'shared module screen-return contract is missing');
+const shared=json(sharedPath);
+
+assert.equal(shared.version,1);
+assert.equal(shared.phase,5);
+assert.equal(shared.contract,'module-screen-return');
+assert.equal(shared.owner,'shell');
+assert.equal(shared.operation,'returnToPrimaryView');
+assert.deepEqual(shared.providers,['survival','dungeon','capture','pvp']);
+assert.deepEqual(shared.arguments,[],'Shell must not pass module-private routing data');
+assert.equal(shared.returns,'handled:boolean');
+assert.ok(Array.isArray(shared.invariants)&&shared.invariants.length>=5);
+assert.ok(shared.invariants.some(x=>/public active module/i.test(x)),
+  'Shell selection must depend only on public active-module routing state');
+assert.ok(shared.invariants.some(x=>/module decides/i.test(x)),
+  'module must decide its own primary view');
+assert.ok(shared.invariants.some(x=>/no DOM/i.test(x)),
+  'contract must forbid DOM ownership leakage');
+assert.ok(shared.invariants.some(x=>/no private runtime state/i.test(x)),
+  'contract must forbid private runtime-state leakage');
+assert.ok(shared.invariants.some(x=>/no gameplay/i.test(x)),
+  'contract must forbid gameplay migration');
+
+const modules=['survival','dungeon','capture','pvp'];
+for(const module of modules){
+  const contractPath='assets/gensrpg/'+module+'/module-contract-v1.json';
+  const entryPath='assets/gensrpg/'+module+'/entry-v1.js';
+  const contract=json(contractPath);
+  const entry=read(entryPath);
+
+  const partialRuntime=module==='survival'||module==='dungeon'||module==='capture';
+  const expectedStatus=module==='pvp'?'shell-registered-structural-module-no-gameplay':partialRuntime?'partial-runtime-loaded':'contract-only-not-loaded';
+  assert.equal(contract.status,expectedStatus,
+    module+(module==='survival'
+      ?' may activate only its Phase 6 wave-rules slice'
+      :module==='dungeon'
+        ?' may activate only its pure Phase 7 exploration slices'
+        :module==='capture'
+          ?' may activate only its Phase 9 public module-launch boundary'
+          :' has Shell-registered structural providers, but no duel gameplay'));
+  assert.ok(contract.publicEntries&&contract.publicEntries.moduleScreenReturn,
+    module+' must declare moduleScreenReturn');
+  assert.deepEqual(contract.publicEntries.moduleScreenReturn,{
+    contract:sharedPath,
+    operation:'returnToPrimaryView',
+    status:module==='capture'?'loaded-public-provider':'declared-not-loaded',
+    ownership:'module-owned-primary-view'
+  },module+' screen-return declaration drifted');
+
+  const executable=entry
+    .replace(/\/\*[\s\S]*?\*\//g,'')
+    .replace(/\/\/.*$/gm,'')
+    .trim();
+  if(module==='survival'){
+    assert.equal(contract.publicRuntimeApi,'GensSurvivalV1',
+      'Phase 6 Survival entry must expose only its declared public runtime namespace');
+    assert.match(entry,/GensSurvivalV1/,'Phase 6 Survival wave-rules entry must remain active');
+    assert.doesNotMatch(entry,/returnToPrimaryView|GensShellScreenReturnV1|moduleScreenReturn/,
+      'activating Survival wave rules must not implement or take ownership of screen return');
+    assert.doesNotMatch(entry,/document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|Dungeon|Tactical|Capture|PvP/,
+      'active Survival wave-rules slice must stay pure and isolated');
+  }else if(module==='dungeon'){
+    assert.equal(contract.publicRuntimeApi,'GensDungeonV1',
+      'Phase 7 Dungeon entry must expose only its declared public runtime namespace');
+    assert.match(entry,/function planGeneratedAdvance\(/,
+      'Phase 7 Dungeon generated-advance planner must remain active');
+    assert.match(entry,/function pickWeightedGeneratedRoomKind\(/,
+      'Phase 7 Dungeon weighted room-kind selector must remain active');
+    assert.doesNotMatch(entry,/returnToPrimaryView|GensShellScreenReturnV1|moduleScreenReturn/,
+      'activating the Dungeon planner must not implement or take ownership of screen return');
+    assert.doesNotMatch(entry,/document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|Tactical|Capture|Survival|PvP/,
+      'active Dungeon generated-advance slice must stay pure and isolated');
+  }else if(module==='capture'){
+    assert.equal(contract.publicRuntimeApi,'GensCaptureV1');
+    assert.equal(contract.activatedPhase,9);
+    assert.match(entry,/GensCaptureV1/);
+    assert.match(entry,/function startModuleSession\(\)/);
+    assert.doesNotMatch(entry,/returnToPrimaryView|GensShellScreenReturnV1|moduleScreenReturn/,
+      'activating the Capture launch provider must not implement screen return');
+    assert.doesNotMatch(entry,/document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener|DungeonCore|DungeonSpatial|GensTactical|CombatRuntime|WorldDocument/,
+      'Capture public launch entry must remain routing-only');
+  }else{
+    assert.equal(executable,'"use strict";',module+' Phase 3 entry must remain inert');
+    assert.doesNotMatch(entry,/window\.|globalThis|document|localStorage|sessionStorage|indexedDB|MutationObserver|setTimeout|setInterval|addEventListener/,
+      module+' entry must not gain runtime side effects in the contract-only lot');
+  }
+}
+
+const captureReturn=read('assets/gensrpg/capture/screen-return-v1.js');
+assert.match(captureReturn,/shell\.register\("capture",returnToPrimaryView\)/,'Capture return is physically owned by its module');
+assert.doesNotMatch(captureReturn,/document\.|localStorage|sessionStorage|setTimeout|setInterval|MutationObserver/,'Capture return owner cannot recreate UI/storage/timer authority');
+const tactical=json('assets/gensrpg/tactical/module-contract-v1.json');
+assert.equal(tactical.publicEntries?.moduleScreenReturn,undefined,
+  'Tactical must stay outside general module screen-return routing');
+
+const shell=json('assets/gensrpg/shell/module-contract-v1.json');
+assert.ok(shell.consumes.includes('module public entry contracts'));
+assert.ok(shell.consumes.includes('module screen-return contract'),
+  'Shell must explicitly consume the new public screen-return contract');
+
+console.log(JSON.stringify({
+  scenario:'Phase 5 pure module screen-return contract',
+  runtime:{size:runtime.length,blob:gitBlob(runtime)},
+  sharedContract:sharedPath,
+  operation:shared.operation,
+  providers:shared.providers,
+  runtimeChanged:false
+},null,2));

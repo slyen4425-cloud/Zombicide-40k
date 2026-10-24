@@ -49,6 +49,26 @@ assert.deepEqual(P.detectionEnemyIds(rt,baseState(),enemies),['ep'],'active pare
   assert.deepEqual(sel.enemyIds,['eb']);
 }
 
+// Lot 4J permanent sentinel: Runtime 2.00 deliberately excludes enemies bypassed
+// globally or by the active hero. V113 must preserve that semantic when it expands
+// a valid seed to nearby enemies in the same combat scope.
+{
+  const state=baseState();
+  state.enemyCells.eg=11;
+  state.enemyCells.eh=12;
+  const scopedEnemies=[
+    enemies[0],
+    {id:'eg',enemyId:'goblin',hp:5,dungeonRoom:1,vision:2,dc200Bypassed:true},
+    {id:'eh',enemyId:'goblin',hp:5,dungeonRoom:1,vision:2,dc200BypassedBy:{h1:true}}
+  ];
+  const local={...rt,loadDungeonState:()=>state,loadActiveEnemies:()=>scopedEnemies};
+  const sel=P.selectCombatants(local,{enemyIds:['ep'],heroIds:['h1']});
+  assert.deepEqual(sel.enemyIds,['ep'],
+    'lot 4J: V113 must not reintroduce globally/per-active-hero bypassed enemies during scope expansion');
+  assert.deepEqual(P.detectionEnemyIds(local,state,scopedEnemies),['ep'],
+    'lot 4J: bypassed enemies must also remain excluded from V113 detection');
+}
+
 {
   const blocked=baseState();blocked.last.map.cells[7]='wall';const rtBlocked={...rt,loadDungeonState:()=>blocked};
   assert.deepEqual(P.detectionEnemyIds(rtBlocked,blocked,enemies),[],'wall must block enemy vision');
@@ -84,6 +104,28 @@ assert.deepEqual(P.detectionEnemyIds(rt,baseState(),enemies),['ep'],'active pare
   assert.equal(battle.meta.canonical,'v110');
 }
 
+// During exploration V113 is available before the Tactical engine/UI.
+// The public Bridge (which lazily activates Tactical) is the ONLY legal
+// combat-start owner; never wake an old Dungeon combat timeline.
+{
+  const state=baseState();
+  const calls=[];
+  const legacyStart=()=>{throw new Error('retired combat timeline must remain inert')};
+  const local={...rt,loadDungeonState:()=>state,dc200StartCombat:legacyStart,
+    GensRpgTacticalCombatV2Bridge:{requestCombat:(runtime,options)=>{calls.push({runtime,options});return {ok:true,pending:true}}},
+    GensRpgTacticalCombatV2Ui:{getBattle:()=>null}};
+  assert.equal(P.hookStart(local),false,'must not take ownership of legacy combat start');
+  assert.equal(local.dc200StartCombat,legacyStart,'old global is never wrapped by V113');
+  const matched=P.detectionPairs(local,state);
+  assert.ok(matched.some(p=>p.enemyId==='ep'),'test fixture must have a real visible nearby enemy');
+  const detected=P.scanDetection(local,'movement-detection-v113',true);
+  assert.deepEqual(detected,['ep'],'V113 detection must pass detected enemies through the public Bridge');
+  assert.equal(calls.length,1,'single combat request, no retries or duplicate authority');
+  assert.equal(calls[0].options.reason,'movement-detection-v113');
+  assert.deepEqual(calls[0].options.enemyIds,['ep']);
+  assert.equal(calls[0].options.entry,'dungeon-detection-v113');
+}
+
 assert.deepEqual(P.rowRolls({rollsDisplay:[12,88]}),[12,88]);
 assert.deepEqual(P.rowRolls({roll:42}),[42]);
 assert.equal(P.animateDiceOverlay(rt),false,'V113 no longer owns visual dice animation');
@@ -103,4 +145,4 @@ assert.match(integration,/gens-rpg-tactical-runtime-authority-1678113\.js\?v=16\
 assert.match(sw,/gensrpg-cache-16\.78\.114\.6-consolidated-tactical-runtime/);
 assert.match(sw,/gens-rpg-tactical-runtime-authority-1678113\.js/);
 
-console.log('V16.78.113 scope/detection preserved; V114.6 owns final wall/dice presentation and reasserts V110 stats: OK');
+console.log('V16.78.113 scope/detection preserved; lot 4J bypass semantics locked; V114.6 owns final wall/dice presentation and reasserts V110 stats: OK');

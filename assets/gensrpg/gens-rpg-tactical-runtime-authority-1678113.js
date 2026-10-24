@@ -19,8 +19,9 @@
   const str=v=>String(v??"");
   const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-  let installed=false,adapterHooked=false,startHooked=false,clickBound=false,observer=null,maintainQueued=false;
-  let moveWrapped=null,eventWrapped=new Map(),lastDetectionSignature="";
+  let installed=false,adapterHooked=false,startHooked=false,clickBound=false,maintainQueued=false;
+  let moveWrapped=null,eventWrapped=new Map(),lastDetectionSignature="",onBoard=null,adapterWrapped=null,startWrapped=null;
+  const retryTimers=new Set(),detectionTimers=new Set();
 
   function doc(rt=R){return rt?.document||null}
   function adapter(rt=R){return rt?.GensRpgTacticalCombatV2Adapter||null}
@@ -77,7 +78,8 @@
     for(let qi=0;qi<q.length;qi++){const cur=q[qi],d=dist.get(cur)||0;if(d>=max)continue;const p=cellXY(state,cur);if(!p)continue;for(const [dx,dy] of dirs){const n=xyCell(state,p.x+dx,p.y+dy);if(n<0||dist.has(n)||blockedCell(state,n))continue;const nd=d+1;if(n===b)return nd;dist.set(n,nd);q.push(n)}}return Infinity;
   }
 
-  function activeEnemies(rt=R){try{return arr(rt?.loadActiveEnemies?.()).filter(e=>num(e?.hp,1)>0&&!e?.removed&&!e?.defeated)}catch(e){return []}}
+  function enemyAvailableForActiveHero(state,enemy,rt=R){const hero=activeHeroId(state,rt);return !!enemy&&num(enemy?.hp,1)>0&&!enemy?.removed&&!enemy?.defeated&&!enemy?.dc200Bypassed&&!(hero&&enemy?.dc200BypassedBy?.[hero])}
+  function activeEnemies(rt=R,state=runtimeState(rt)){try{return arr(rt?.loadActiveEnemies?.()).filter(e=>enemyAvailableForActiveHero(state,e,rt))}catch(e){return []}}
   function enemyCell(state,enemy){return num(state?.enemyCells?.[str(enemy?.id)],num(enemy?.dungeonCell200??enemy?.dungeonCell104,-1))}
   function perceptionDef(rt=R){let defs=[];try{defs=arr(rt?.GensCleanRpgStats167874?.runtimeDefs?.())}catch(e){}return defs.find(d=>/perception|vision|vigilance|awareness/.test(norm(d?.id)+" "+norm(d?.name)))||null}
   function fallbackPerception(rt=R){const mv=profile(rt)?.rpgUniverse?.movement||{},v=mv.combatAssistRange??mv.assistRange??mv.helpRange??mv.perceptionRange??DEFAULT_PERCEPTION;return clamp(Math.round(num(v,DEFAULT_PERCEPTION)),1,MAX_SENSE)}
@@ -95,9 +97,9 @@
   }
 
   function heroesInScope(state,scope,rt=R){return participants(state,rt).filter(id=>heroEntered(state,id)&&sameScope(heroScope(state,id,rt),scope))}
-  function enemiesInScope(rt,state,scope){return activeEnemies(rt).filter(e=>sameScope(enemyScope(state,e),scope))}
+  function enemiesInScope(rt,state,scope){return activeEnemies(rt,state).filter(e=>sameScope(enemyScope(state,e),scope))}
   function detectionPairs(rt=R,state=runtimeState(rt),list=null){
-    if(!state?.last?.map)return [];const scope=activeScope(state,rt),heroes=heroesInScope(state,scope,rt);if(!heroes.length)return [];const enemies=Array.isArray(list)?list.filter(e=>sameScope(enemyScope(state,e),scope)):enemiesInScope(rt,state,scope),pairs=[];
+    if(!state?.last?.map)return [];const scope=activeScope(state,rt),heroes=heroesInScope(state,scope,rt);if(!heroes.length)return [];const enemies=Array.isArray(list)?list.filter(e=>enemyAvailableForActiveHero(state,e,rt)&&sameScope(enemyScope(state,e),scope)):enemiesInScope(rt,state,scope),pairs=[];
     for(const enemy of enemies){const ec=enemyCell(state,enemy);if(ec<0)continue;for(const id of heroes){const hc=heroCell(state,id),vision=enemyVision(rt,enemy,id),distance=manhattan(state,ec,hc);if(distance>vision||!lineOfSightCells(state,ec,hc))continue;pairs.push({enemyId:str(enemy.id),heroId:id,scope,enemyCell:ec,heroCell:hc,distance,vision})}}
     return pairs;
   }
@@ -106,7 +108,7 @@
   function context(rt=R){const c=rt?.__gensTacticalV113Context;return c&&Date.now()-num(c.at,0)<3000?c:null}
   function setContext(rt=R,data={}){rt.__gensTacticalV113Context={...data,at:Date.now()};return rt.__gensTacticalV113Context}
   function targetScopeForOptions(rt,state,options={}){
-    const wanted=new Set(arr(options.enemyIds).map(str)),all=activeEnemies(rt),seed=all.filter(e=>wanted.has(str(e.id)));const scopes=[...new Set(seed.map(e=>scopeKey(enemyScope(state,e))))];
+    const wanted=new Set(arr(options.enemyIds).map(str)),all=activeEnemies(rt,state),seed=all.filter(e=>wanted.has(str(e.id)));const scopes=[...new Set(seed.map(e=>scopeKey(enemyScope(state,e))))];
     if(scopes.length===1)return enemyScope(state,seed[0]);const c=context(rt);if(c?.scope)return c.scope;return activeScope(state,rt);
   }
   function selectCombatants(rt=R,options={}){
@@ -124,43 +126,61 @@
 
   function applyRuntimePositions(rt=R,battle=null,sel=null){
     const state=runtimeState(rt);if(!state||!battle?.actors)return 0;const m=mapInfo(state),w=num(battle.grid?.width,0),h=num(battle.grid?.height,0),blocked=new Set(arr(battle.grid?.blocked).map(p=>`${p.x},${p.y}`)),used=new Set();let count=0;
-    const enemies=activeEnemies(rt);for(const actor of battle.actors){let cell=-1;if(actor.side==="hero")cell=heroCell(state,str(actor?.meta?.heroId||actor.id));else{const inst=enemies.find(e=>str(e.id)===str(actor?.meta?.instanceId));if(inst)cell=enemyCell(state,inst)}const p=cellXY(state,cell);if(!p||p.x>=w||p.y>=h)continue;const k=`${p.x},${p.y}`;if(blocked.has(k)||used.has(k))continue;actor.x=p.x;actor.y=p.y;used.add(k);count++}
+    const enemies=activeEnemies(rt,state);for(const actor of battle.actors){let cell=-1;if(actor.side==="hero")cell=heroCell(state,str(actor?.meta?.heroId||actor.id));else{const inst=enemies.find(e=>str(e.id)===str(actor?.meta?.instanceId));if(inst)cell=enemyCell(state,inst)}const p=cellXY(state,cell);if(!p||p.x>=w||p.y>=h)continue;const k=`${p.x},${p.y}`;if(blocked.has(k)||used.has(k))continue;actor.x=p.x;actor.y=p.y;used.add(k);count++}
     battle.meta=battle.meta&&typeof battle.meta==="object"?battle.meta:{};battle.meta.scopeV113={scope:sel?.scope,heroIds:arr(sel?.heroIds),enemyIds:arr(sel?.enemyIds),realPositions:count,mapWidth:m.width,mapHeight:m.height};return count;
   }
   function unwrap112Create(fn){return fn?.__gensRpg112Spatial&&typeof fn.__original==="function"?fn.__original:fn}
   function hookAdapter(rt=R){
     const A=adapter(rt);if(!A?.createBattle)return false;if(A.createBattle.__gensRpg113Scope){adapterHooked=true;return true}const base=unwrap112Create(A.createBattle);if(typeof base!=="function")return false;
     const wrapped=function(runtime,options={}){const realRt=runtime||rt,sel=selectCombatants(realRt,options||{}),next={...(options||{}),heroIds:sel.heroIds,enemyIds:sel.enemyIds},battle=base.call(this,realRt,next);applyRuntimePositions(realRt,battle,sel);try{realRt?.GensRpgTacticalStats1678110?.decorateBattle?.(realRt,battle,{force:true})}catch(e){}return battle};
-    wrapped.__gensRpg113Scope=true;wrapped.__gensRpg112Spatial=true;wrapped.__original=base;A.createBattle=wrapped;adapterHooked=true;return true;
+    wrapped.__gensRpg113Scope=true;wrapped.__gensRpg112Spatial=true;wrapped.__original=base;A.createBattle=wrapped;adapterWrapped=wrapped;adapterHooked=true;return true;
   }
 
   function isDetectionReason(reason){return /detect|vision|rep[eé]rage|ambush|embuscade/i.test(str(reason))}
   function unwrap112Start(fn){return fn?.__gensRpg112Start&&typeof fn.__original==="function"?fn.__original:fn}
   function hookStart(rt=R){
-    const cur=rt?.dc200StartCombat;if(typeof cur!=="function")return false;if(cur.__gensRpg113Start){startHooked=true;return true}const base=unwrap112Start(cur);if(typeof base!=="function")return false;
-    const wrapped=function(ids=[],reason="manual"){
-      const state=runtimeState(rt);if(!state)return base.apply(this,arguments);let requested=arr(ids).map(str).filter(Boolean);
-      if(isDetectionReason(reason)){const pairs=detectionPairs(rt,state),visible=new Set(pairs.map(p=>p.enemyId));requested=(requested.length?requested:[...visible]).filter(id=>visible.has(id));if(!requested.length)return {ok:false,reason:"not-detected-v113"};const source=[...new Set(pairs.filter(p=>requested.includes(p.enemyId)).map(p=>p.heroId))];setContext(rt,{scope:activeScope(state,rt),sourceHeroIds:source,enemyIds:requested,reason})}
-      const sel=selectCombatants(rt,{enemyIds:requested});if(!sel.heroIds.length||!sel.enemyIds.length)return {ok:false,reason:"no-scoped-combatants-v113"};setContext(rt,{scope:sel.scope,sourceHeroIds:sel.sourceHeroIds,enemyIds:sel.enemyIds,reason});return base.call(this,sel.enemyIds,reason);
-    };
-    wrapped.__gensRpg113Start=true;wrapped.__gensRpg112Start=true;wrapped.__original=base;rt.dc200StartCombat=wrapped;startHooked=true;return true;
+    const cur=rt?.dc200StartCombat;
+    if(typeof cur!=="function")return false;
+    // V113 owns detection and combatant scope, not the global combat-start
+    // function. Before Tactical activation the old global is LEGACY: do not
+    // wrap it and accidentally reawaken the retired combat timeline.
+    if(cur.__gensRpg113Start){startHooked=true;return true}
+    startHooked=false;return false;
   }
 
   function detectionSignature(rt,state){const scope=activeScope(state,rt),h=heroesInScope(state,scope,rt).map(id=>`${id}@${heroCell(state,id)}`).sort().join(","),e=enemiesInScope(rt,state,scope).map(x=>`${str(x.id)}@${enemyCell(state,x)}#${num(x.hp,0)}`).sort().join(",");return `${scopeKey(scope)}|${h}|${e}`}
   function scanDetection(rt=R,reason="vision-v113",force=false){
-    hookStart(rt);hookAdapter(rt);if(currentBattle(rt))return [];const state=runtimeState(rt);if(!state?.last?.map)return [];const sig=detectionSignature(rt,state);if(!force&&sig===lastDetectionSignature)return [];lastDetectionSignature=sig;const pairs=detectionPairs(rt,state);if(!pairs.length)return [];const ids=[...new Set(pairs.map(p=>p.enemyId))],source=[...new Set(pairs.map(p=>p.heroId))];setContext(rt,{scope:activeScope(state,rt),sourceHeroIds:source,enemyIds:ids,reason});try{rt?.dc200StartCombat?.(ids,reason)}catch(e){try{rt?.console?.warn?.("V16.78.113 detection",e)}catch(_){}}return ids;
+    hookStart(rt);hookAdapter(rt);if(currentBattle(rt))return [];
+    const bridge=rt?.GensRpgTacticalCombatV2Bridge;
+    // Only the public Bridge may activate lazy Tactical. Do not call the
+    // legacy global dc200StartCombat before Bridge owns it.
+    if(typeof bridge?.requestCombat!=="function")return [];
+    const state=runtimeState(rt);if(!state?.last?.map)return [];
+    const sig=detectionSignature(rt,state);if(!force&&sig===lastDetectionSignature)return [];
+    const pairs=detectionPairs(rt,state);if(!pairs.length){lastDetectionSignature=sig;return []}
+    const ids=[...new Set(pairs.map(p=>p.enemyId))],source=[...new Set(pairs.map(p=>p.heroId))];
+    setContext(rt,{scope:activeScope(state,rt),sourceHeroIds:source,enemyIds:ids,reason});
+    try{
+      const result=bridge.requestCombat(rt,{enemyIds:ids,reason,entry:"dungeon-detection-v113"});
+      if(result?.ok===true){lastDetectionSignature=sig;return ids}
+    }catch(e){try{rt?.console?.warn?.("V16.78.113 detection",e)}catch(_){}}
+    return [];
   }
-  function scheduleDetection(rt=R,reason="vision-v113",force=false,delay=0){const run=()=>scanDetection(rt,reason,force);if(typeof setTimeout==="function")setTimeout(run,Math.max(0,delay));else run()}
+  function scheduleDetection(rt=R,reason="vision-v113",force=false,delay=0){const run=()=>scanDetection(rt,reason,force);if(typeof setTimeout==="function"){const id=setTimeout(()=>{detectionTimers.delete(id);run()},Math.max(0,delay));detectionTimers.add(id)}else run()}
   function hookMovement(rt=R){
     const fn=rt?.dungeonMoveHero098;if(typeof fn!=="function")return false;if(fn.__gensRpg113Detection){moveWrapped=fn;return true}const old=fn;const wrapped=function(){const out=old.apply(this,arguments);scheduleDetection(rt,"movement-detection-v113",true,0);scheduleDetection(rt,"movement-detection-v113",true,90);return out};wrapped.__gensRpg113Detection=true;wrapped.__original=old;rt.dungeonMoveHero098=wrapped;moveWrapped=wrapped;return true;
   }
-  function hookEventFunction(rt,name){const fn=rt?.[name];if(typeof fn!=="function")return false;if(fn.__gensRpg113Detection){eventWrapped.set(name,fn);return true}const old=fn;const wrapped=function(){const out=old.apply(this,arguments);scheduleDetection(rt,`event-detection-v113:${name}`,true,0);scheduleDetection(rt,`event-detection-v113:${name}`,true,100);return out};wrapped.__gensRpg113Detection=true;wrapped.__original=old;rt[name]=wrapped;eventWrapped.set(name,wrapped);return true}
+  function hookEventFunction(rt,name){const fn=rt?.[name];if(typeof fn!=="function")return false;
+    // Another legitimate event owner (e.g. Dungeon event placement) may sit
+    // outside V113. Never wrap V113 again merely because it is not outermost.
+    for(let layer=fn,depth=0;typeof layer==="function"&&depth<20;layer=layer.__original,depth++){
+      if(layer.__gensRpg113Detection){eventWrapped.set(name,layer);return true}
+    }
+    const old=fn;const wrapped=function(){const out=old.apply(this,arguments);scheduleDetection(rt,`event-detection-v113:${name}`,true,0);scheduleDetection(rt,`event-detection-v113:${name}`,true,100);return out};wrapped.__gensRpg113Detection=true;wrapped.__original=old;rt[name]=wrapped;eventWrapped.set(name,wrapped);return true}
   function ensureDetectionHooks(rt=R){hookMovement(rt);for(const name of ["applyDungeonTurnEvent","dungeonEventSpawn","applyEnemyConfiguredAbilityEffect"])hookEventFunction(rt,name);hookStart(rt);hookAdapter(rt);return true}
-  function bindBoardClicks(rt=R){const D=doc(rt);if(!D?.addEventListener||clickBound)return !!D;const onBoard=ev=>{const cell=ev?.target?.closest?.("#dc047RoomBoard .dc047Cell");if(!cell)return;ensureDetectionHooks(rt);scheduleDetection(rt,"board-cell-detection-v113",true,0);scheduleDetection(rt,"board-cell-detection-v113",true,80)};D.addEventListener("click",onBoard,false);D.addEventListener("pointerup",onBoard,false);clickBound=true;return true}
+  function bindBoardClicks(rt=R){const D=doc(rt);if(!D?.addEventListener||clickBound)return !!D;onBoard=ev=>{const cell=ev?.target?.closest?.("#dc047RoomBoard .dc047Cell");if(!cell)return;ensureDetectionHooks(rt);scheduleDetection(rt,"board-cell-detection-v113",true,0);scheduleDetection(rt,"board-cell-detection-v113",true,80)};D.addEventListener("click",onBoard,false);D.addEventListener("pointerup",onBoard,false);clickBound=true;return true}
 
   function ensureStyle(rt=R){const D=doc(rt);if(!D||D.getElementById?.(STYLE_ID))return !!D;const s=D.createElement("style");s.id=STYLE_ID;s.textContent=`
-    .gtv2112WallCell::before{display:none!important;content:none!important;background:none!important}
-    .gtv2113Wall,.gtv2Cell.blocked,#drc100Grid .drc100Cell.wall,#dc047RoomBoard .dav167870WallCell{background-image:url("${WALL_ASSET}")!important;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
     .gtv2113DiceRow{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:10px 0}
     .gtv2113DiceRow .gtv2Die{width:64px;height:64px;font-size:27px;will-change:transform;animation:gtv2113DiceShake .17s linear infinite alternate}
     .gtv2113DiceRow.settled .gtv2Die{animation:gtv2113DiceLand .22s ease-out both}
@@ -175,12 +195,20 @@
   function rowRolls(row){const xs=arr(row?.rollsDisplay).filter(v=>Number.isFinite(Number(v))).map(v=>clamp(Math.round(num(v,1)),1,100));if(xs.length)return xs;if(Number.isFinite(Number(row?.roll)))return [clamp(Math.round(num(row.roll,1)),1,100)];return []}
   function animateDiceOverlay(rt=R){return false}
 
-  function maintain(rt=R){maintainQueued=false;ensureStyle(rt);ensureDetectionHooks(rt);paintWalls(rt);animateDiceOverlay(rt);return true}
+  function maintain(rt=R){maintainQueued=false;ensureStyle(rt);ensureDetectionHooks(rt);animateDiceOverlay(rt);return true}
   function queueMaintain(rt=R){if(maintainQueued)return;maintainQueued=true;const run=()=>maintain(rt);if(typeof requestAnimationFrame==="function")requestAnimationFrame(run);else if(typeof setTimeout==="function")setTimeout(run,0);else run()}
-  function observe(rt=R){const D=doc(rt);if(!D?.body||observer||typeof rt?.MutationObserver!=="function")return !!observer;observer=new rt.MutationObserver(()=>queueMaintain(rt));observer.observe(D.body,{childList:true,subtree:true});return true}
-  function install(rt=R){ensureStyle(rt);ensureDetectionHooks(rt);bindBoardClicks(rt);observe(rt);paintWalls(rt);animateDiceOverlay(rt);try{rt.GENS_RPG_TACTICAL_RUNTIME_AUTHORITY_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&startHooked);return installed}
-  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000,7500,10000])setTimeout(()=>install(rt),ms);return true}
-  const api={VERSION,APP_VERSION,WALL_ASSET,DEFAULT_PERCEPTION,MAX_SENSE,ROLL_DURATION,runtimeState,heroEntered,heroScope,enemyScope,scopeKey,sameScope,mapInfo,cellXY,lineOfSightCells,pathDistance,heroPerception,enemyVision,detectionPairs,detectionEnemyIds,selectCombatants,applyRuntimePositions,hookAdapter,hookStart,scanDetection,scheduleDetection,hookMovement,ensureDetectionHooks,paintWalls,rowRolls,animateDiceOverlay,install,installWithRetries,status:()=>({installed,adapterHooked,startHooked,moveHooked:!!moveWrapped})};
+  function install(rt=R){ensureStyle(rt);ensureDetectionHooks(rt);bindBoardClicks(rt);animateDiceOverlay(rt);try{rt.GENS_RPG_TACTICAL_RUNTIME_AUTHORITY_VERSION=APP_VERSION}catch(e){}installed=!!(adapterHooked&&startHooked);return installed}
+  function installWithRetries(rt=R){install(rt);if(typeof setTimeout==="function")for(const ms of [80,220,600,1200,2500,5000,7500,10000]){const id=setTimeout(()=>{retryTimers.delete(id);install(rt)},ms);retryTimers.add(id)}return true}
+  function dispose(rt=R){
+    for(const bag of [retryTimers,detectionTimers]){for(const id of bag)try{clearTimeout(id)}catch(e){}bag.clear()}
+    const D=doc(rt),A=adapter(rt);if(D&&onBoard){D.removeEventListener("click",onBoard,false);D.removeEventListener("pointerup",onBoard,false)}
+    if(moveWrapped&&rt?.dungeonMoveHero098===moveWrapped&&typeof moveWrapped.__original==="function")rt.dungeonMoveHero098=moveWrapped.__original;
+    for(const [name,wrapped] of eventWrapped){if(rt?.[name]===wrapped&&typeof wrapped.__original==="function")rt[name]=wrapped.__original}eventWrapped.clear();
+    if(startWrapped&&rt?.dc200StartCombat===startWrapped&&typeof startWrapped.__original==="function")rt.dc200StartCombat=startWrapped.__original;
+    if(adapterWrapped&&A?.createBattle===adapterWrapped&&typeof adapterWrapped.__original==="function")A.createBattle=adapterWrapped.__original;
+    D?.getElementById?.(STYLE_ID)?.remove?.();onBoard=null;moveWrapped=null;adapterWrapped=null;startWrapped=null;lastDetectionSignature="";installed=false;adapterHooked=false;startHooked=false;clickBound=false;maintainQueued=false;return true;
+  }
+  const api={VERSION,APP_VERSION,WALL_ASSET,DEFAULT_PERCEPTION,MAX_SENSE,ROLL_DURATION,runtimeState,heroEntered,heroScope,enemyScope,scopeKey,sameScope,mapInfo,cellXY,lineOfSightCells,pathDistance,heroPerception,enemyVision,detectionPairs,detectionEnemyIds,selectCombatants,applyRuntimePositions,hookAdapter,hookStart,scanDetection,scheduleDetection,hookMovement,ensureDetectionHooks,paintWalls,rowRolls,animateDiceOverlay,install,installWithRetries,dispose,status:()=>({installed,adapterHooked,startHooked,moveHooked:!!moveWrapped})};
   if(doc(R)){if(doc(R).readyState==="loading")doc(R).addEventListener?.("DOMContentLoaded",()=>installWithRetries(R),{once:true});else installWithRetries(R)}
   return api;
 });

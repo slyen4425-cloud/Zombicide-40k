@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "phase": 3,
+  "module": "pvp",
+  "stage": "S4-architectural-closure",
+  "status": "shell-registered-structural-module-no-gameplay",
+  "sourceOfTruth": "assets/gensrpg/pvp/module-contract-v1.json",
+  "owns": [
+    "PvP session and configured participants",
+    "future PvP rules and combat, not yet implemented",
+    "optional owner-local setup UI"
+  ],
+  "consumes": [
+    "Shell public module launch contract",
+    "Core public contracts only when required"
+  ],
+  "shell": {
+    "owner": "assets/gensrpg/shell/",
+    "route": "module launch provider registered as pvp via explicit composition",
+    "userFacingEntry": "PVP — À VENIR (expected; no playable mode)",
+    "ownership": "Shell retains navigation and home screens"
+  },
+  "runtime": {
+    "productionLoadedInOrder": [
+      "assets/gensrpg/pvp/session-v1.js",
+      "assets/gensrpg/pvp/module-launch-v1.js",
+      "assets/gensrpg/pvp/shell-composition-v1.js"
+    ],
+    "install": "explicit GensPvpShellCompositionV1.connect() invoked by the Shell composition script",
+    "sessionOwner": "GensPvpSessionV1",
+    "provider": "GensPvpModuleLaunchV1",
+    "setupUi": "assets/gensrpg/pvp/setup-ui-v1.js (isolated tested component, intentionally not loaded/mounted in production)",
+    "legacyEntry": "assets/gensrpg/pvp/entry-v1.js (historical inert Phase 3 stub, not used as production entry)",
+    "combatOwner": "reserved to future PvP, not implemented"
+  },
+  "lifecycle": {
+    "install": "one Shell registration only through composition",
+    "prepare": "only when activeModule() is pvp",
+    "start": "existing session interface only; no combat runtime",
+    "stop": "PvP-owned session only",
+    "dispose": "PvP-owned session and local UI only, Shell callback remains inert since Shell has no unregister"
+  },
+  "forbidden": [
+    "Survival private runtime",
+    "Dungeon private runtime",
+    "Capture private runtime",
+    "Tactical runtime ownership",
+    "replacement of Shell global navigation or foreign globals",
+    "global DOM listeners, polling, timers, or implicit installation",
+    "direct storage writes without Core",
+    "invented PvP combat rules, default victory formulas or mechanics"
+  ],
+  "exitCriteria": [
+    "exact real index load graph and registration order",
+    "single PvP-only session owner; no overrides of other three modes",
+    "four-mode real browser non-interference sentinels",
+    "S0-S3 unit and real browser sentinels, triple CI green on same SHA",
+    "PvP remains intentionally unavailable to players; gameplay out of scope"
+  ],
+  "outOfScope": [
+    "PvP duel combat gameplay",
+    "making PvP Hub card playable",
+    "PvP setup screen mounted publicly",
+    "PvP save/load or export rules; future separate scoped work"
+  ],
+  "historicalContracts": [
+    "session-contract-v1.json records S0 introduction",
+    "module-launch-contract-v1.json records S1 introduction",
+    "setup-ui-contract-v1.json records S3 isolated UI; S4 records current production graph"
+  ],
+  "publicEntries": {
+    "moduleScreenReturn": {
+      "contract": "assets/gensrpg/shell/module-screen-return-contract-v1.json",
+      "operation": "returnToPrimaryView",
+      "status": "declared-not-loaded",
+      "ownership": "module-owned-primary-view"
+    },
+    "moduleLaunch": {
+      "contract": "assets/gensrpg/shell/module-launch-contract-v1.json",
+      "operation": "startModuleSession",
+      "status": "registered-via-S2-shell-composition",
+      "ownership": "module-owned-session-start"
+    }
+  },
+  "activatedPhase": 10,
+  "plannedEntry": "assets/gensrpg/pvp/entry-v1.js",
+  "invariants": [
+    "Phase 3 entry-v1.js remains inert and is never loaded by the production index, preview or Core bootstrap",
+    "Phase 10 S2 public registration uses the dedicated PvP session, module launch and Shell composition files, not entry-v1.js",
+    "Shell alone owns global navigation and final module-launch authority; PvP owns session data only",
+    "The private S3 setup UI is not in the production index; gameplay and player-facing duel stay unavailable",
+    "No private runtime or global function of Survival, Dungeon, Capture or Tactical is replaced"
+  ]
+}

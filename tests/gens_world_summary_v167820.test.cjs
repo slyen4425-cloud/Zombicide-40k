@@ -4,6 +4,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
+const storageSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','storage-v1.js'),'utf8');
 const src=fs.readFileSync(path.join(root,'assets','gensrpg','gens-world-summary-167820.js'),'utf8');
 const builtArg=process.argv[2];
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');
@@ -47,7 +48,9 @@ values.set('gensrpg_shared_entities_v1__gp_mt7ker7t_m2iw9',JSON.stringify([
  {id:'c2',category:'creature',contentFamily:'creature'},
  {id:'c2',category:'creature',contentFamily:'creature'}
 ]));
-vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'gens-world-summary-167820.js'});
+vm.createContext(ctx);
+vm.runInContext(storageSrc,ctx,{filename:'storage-v1.js'});
+vm.runInContext(src,ctx,{filename:'gens-world-summary-167820.js'});
 const api=ctx.GensWorldSummary167820;
 assert.ok(api,'live world summary API missing');
 assert.equal(api.VERSION,'16.78.20');

@@ -1,0 +1,49 @@
+name: GenSrpG Phase12 R15 guarded Builders character and entity extraction
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r15-builders-character-entity-editors-2026-10-20'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r15-controlled-apply.yml'
+permissions:
+  contents: write
+jobs:
+  guarded-r15-extraction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Guard R14 original GREEN and R15 START
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r15-builders-character-entity-editors-2026-10-20'
+          test "$(git hash-object index.html)" = 'dab5be5dedfa56c49d76d40a4cb824a0098903f0'
+          test "$(wc -c < index.html | tr -d ' ')" = '1772759'
+          test ! -e assets/gensrpg/builders/legacy-character-entity-editors-v1.js
+          git fetch origin 'refs/heads/checkpoint/gensrpg-start-phase12-r15-builders-character-entity-editors-2026-10-20:refs/remotes/origin/checkpoint/gensrpg-start-phase12-r15-builders-character-entity-editors-2026-10-20'
+          test "$(git rev-parse refs/remotes/origin/checkpoint/gensrpg-start-phase12-r15-builders-character-entity-editors-2026-10-20)" = '39726aa1b00d8cf5e5a0ad5ff8af041093460fc9'
+          node tools/gensrpg_phase12_r15_builders_character_entity_editors.cjs --check-source
+      - name: Apply 54 original declarations once and prove exact inverse
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/gensrpg_phase12_r15_builders_character_entity_editors.cjs --apply
+          node tools/gensrpg_phase12_r15_builders_character_entity_editors.cjs --verify
+          node --check assets/gensrpg/builders/legacy-character-entity-editors-v1.js
+          test "$(git hash-object index.html)" = '9f35eb833a6ede4b91399854f19bb9bef59f45ab'
+          test "$(git hash-object assets/gensrpg/builders/legacy-character-entity-editors-v1.js)" = '318aad27b69593f338ace5f3602dfd7fa351c274'
+          test "$(node tools/gensrpg_phase12_r15_builders_character_entity_editors.cjs --restore-r14 | git hash-object --stdin)" = 'dab5be5dedfa56c49d76d40a4cb824a0098903f0'
+      - name: Commit only four intended files; preserve previous code
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/builders/legacy-character-entity-editors-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          test "$(git diff --cached --name-only | wc -l | tr -d ' ')" = '4'
+          git -c core.whitespace=-blank-at-eol,-blank-at-eof diff --cached --check
+          git commit -m 'refactor(phase12 R15): externalize 54 original Builders hero and entity editor functions'
+          git push origin "HEAD:$GITHUB_REF_NAME"

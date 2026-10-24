@@ -1,0 +1,30 @@
+name: GenSrpG hero sheet Talent flash post-4K
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-integrate-talent-after-4k-2026-09-17'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  characterize-talent-visibility:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Hero sheet Talent visibility regression
+        run: node tests/gens_hero_sheet_talent_flash_v11411.test.cjs

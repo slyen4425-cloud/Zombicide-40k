@@ -1,0 +1,55 @@
+name: GenSrpG Phase 9 Capture session-start owner transfer one-shot
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase9-capture-session-start-owner-transfer-2026-10-07'
+    paths:
+      - '.github/workflows/gensrpg-phase9-capture-session-start-owner-transfer-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-session-start-owner-transfer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Rule 26 GREEN baseline
+        run: |
+          test "$(git hash-object index.html)" = "20381d1df0b10b664d5163f308f909cd7a6e45df"
+          test "$(wc -c < index.html)" = "8166499"
+
+      - name: Apply exact Capture session-start owner transfer
+        run: python tools/gensrpg_phase9_capture_session_start_owner_transfer_apply.py
+
+      - name: Verify exact runtime result
+        run: |
+          test "$(git hash-object index.html)" = "560966d096134cd58ff4dc6ab2be589cee936ba7"
+          test "$(wc -c < index.html)" = "8165614"
+          test "$(grep -o 'assets/gensrpg/capture/session-start-v1.js' index.html | wc -l)" = "1"
+          test "$(grep -o '_captureStarting139' index.html | wc -l)" = "0"
+          test "$(grep -o 'gensCaptureStartConfiguredGame139V1' index.html | wc -l)" = "0"
+
+      - name: Run dedicated RED to GREEN target
+        run: node tests/gens_phase9_capture_session_start_owner_transfer_v1.test.cjs
+
+      - name: Review diff
+        run: |
+          git diff --check
+          git diff --stat
+          git diff -- assets/gensrpg/capture/entry-v1.js assets/gensrpg/capture/session-start-v1.js assets/gensrpg/capture/module-contract-v1.json | sed -n '1,260p'
+          git diff -- index.html | sed -n '1,220p'
+
+      - name: Commit exact runtime seam
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/gensrpg/capture/entry-v1.js assets/gensrpg/capture/session-start-v1.js assets/gensrpg/capture/module-contract-v1.json
+          test "$(git diff --cached --name-only | wc -l)" = "4"
+          git commit -m "refactor(phase9): transfer Capture session-start ownership"
+          git push origin "HEAD:$GITHUB_REF_NAME"

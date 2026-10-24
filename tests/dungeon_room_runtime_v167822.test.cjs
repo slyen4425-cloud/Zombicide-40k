@@ -4,6 +4,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
+const entry=fs.readFileSync(path.join(root,'assets','gensrpg','dungeon','entry-v1.js'),'utf8');
 const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-room-runtime-167822.js'),'utf8');
 const htmlArg=process.argv[2];
 const RT='gensrpg_dungeon_runtime_v2';
@@ -47,6 +48,7 @@ const core={
 const ctx={console,Math,Date,setTimeout(fn){fn();return 1},clearTimeout(){},localStorage:ls,DungeonCore01:core,DungeonSpatial313:spatial,activeDungeonAdventureId(){return 'adv1'},DungeonRoomCreator100:{loadLibrary(){return JSON.parse(JSON.stringify(rooms))},validateRoom(){return {valid:true}}}};
 ctx.globalThis=ctx;
 vm.createContext(ctx);
+vm.runInContext(entry,ctx,{filename:'entry-v1.js'});
 vm.runInContext(src,ctx,{filename:'dungeon-room-runtime-167822.js'});
 const api=ctx.DungeonRoomRuntime167822;
 assert.ok(api,'runtime bridge API loads');

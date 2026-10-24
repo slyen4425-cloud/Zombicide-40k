@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "phase": 3,
+  "module": "dungeon",
+  "status": "partial-runtime-loaded",
+  "plannedEntry": "assets/gensrpg/dungeon/entry-v1.js",
+  "owns": [
+    "Dungeon world state",
+    "exploration",
+    "movement",
+    "events",
+    "combat trigger",
+    "Dungeon persistence state"
+  ],
+  "consumes": [
+    "core public contracts",
+    "future Tactical public combat contract"
+  ],
+  "forbidden": [
+    "Tactical combat resolution",
+    "Capture runtime",
+    "Survival runtime",
+    "PvP runtime"
+  ],
+  "lifecycle": {
+    "install": "loaded once by the source index; the connected Phase 7 slice exposes only a pure Dungeon API",
+    "dispose": "no temporary state, listener, observer or timer is created by the connected slice"
+  },
+  "invariants": [
+    "the active entry exposes only the public GensDungeonV1 namespace",
+    "the connected Phase 7 exploration slices are the pure generated advance planner weighted room-kind selector generated room transition descriptor weighted generated branch-type selector generated branch chance gate and generated branch scene descriptor builder",
+    "the connected exploration slices have no DOM storage timer listener observer or Tactical dependency",
+    "generated room creation actual grid movement events spawn chest trap puzzle and combat remain outside these pure slices",
+    "the authored entry movement planner receives the remaining movement value explicitly and only decides remaining-versus-fallback without reading hero stats or spatial state",
+    "DungeonAuthoredRuntime167839 remains the owner of heroMoveAllowance and consumes the pure movement plan lazily before DungeonSpatial313 ensure/persist",
+    "the authored move allowance normalizer receives runtime and stat movement values explicitly while DungeonAuthoredRuntime167839 retains both global reads the try/catch and its fallback ownership",
+    "the authored outgoing edge selector receives outgoing edges hero position and positional mode explicitly while DungeonAuthoredRuntime167839 retains graph position and positional configuration reads",
+    "the authored real exit index resolver receives cells and direct exit index explicitly while DungeonAuthoredRuntime167839 retains map reads terminal-exit policy positional configuration and hero position reads",
+    "the authored terminal exit decision receives hero id real exit index positional mode and hero position explicitly while DungeonAuthoredRuntime167839 retains all runtime reads travel finish notifications and navigation policy",
+    "the authored arrival cell planner receives map cell count edge entry index and map entry index explicitly and only selects the arrival cell while Authored Runtime keeps position writes and DungeonSpatial313 keeps spatial persistence",
+    "the weighted room-kind selector receives its random roll explicitly and never owns random generation",
+    "the weighted generated branch-type selector receives its random roll explicitly after the Core 2.00 nearest-free gate and never owns random generation or branch materialization",
+    "the generated branch chance gate receives its random roll explicitly and only decides chance acceptance before the Core 2.00 nearest-free lookup",
+    "the generated branch scene descriptor builder owns only the plain trapdoor descriptor while nearest-free lookup random generation scene creation and map mutation remain owned by Core 2.00",
+    "generated Boss policy remains owned by Core 2.00 during this micro-lot",
+    "the generated room transition descriptor receives hero rooms created state and timestamp explicitly",
+    "DungeonSpatial313 remains the owner of room snapshot persistence and activation during this micro-lot",
+    "DungeonRoomRuntime167822 remains the consumer of created transition state during this micro-lot",
+    "authored World Builder travel remains owned by DungeonAuthoredRuntime167839 during this micro-lot",
+    "no compatibility wrapper is introduced by this contract",
+    "the authored exit lock decision receives last exit lock map objective status and fallback objective status explicitly while DungeonAuthoredRuntime167839 retains the dynamic dungeonRoomExitLocked102 guard its try catch runtime reads travel sync action button notices and navigation policy",
+    "DungeonAuthoredFinalExit167875 Final Exit consumes the canonical authored exit lock decision from GensDungeonV1.movement while retaining its dynamic dungeonRoomExitLocked102 guard runtime reads completion flow storage session popup and home navigation",
+    "DungeonAuthoredFinalExit167875 Final Exit consumes the canonical authored terminal exit decision from GensDungeonV1.movement while retaining its local exit index resolver hasExit guard graph and branch validation completion flow storage session popup and home navigation",
+    "the authored active hero selector receives participants and active index explicitly while DungeonAuthoredRuntime167839 retains runtime state reads plan terminal checks room entry travel persistence and UI ownership; Final Exit Return Persist and Branch Nav Cleanup retain their historical local selectors in this micro-lot",
+    "DungeonAuthoredFinalExit167875 Final Exit delegates only its pure active hero selection to GensDungeonV1.movement.resolveAuthoredActiveHero while retaining runtime reads secondary-branch rejection graph and terminal validation local exitIdx and hasExit lock finish storage session popup home navigation and UI; Return Persist and Branch Nav Cleanup remain unchanged in this micro-lot",
+    "DungeonAuthoredReturnPersist167862 preserves its public activeHero API but delegates only the pure authored hero selection to GensDungeonV1.movement.resolveAuthoredActiveHero while retaining runtime read write authored validation position checks DungeonSpatial313 ensure persist enterNode wrapping and install retry ownership; Branch Nav Cleanup remains unchanged in this micro-lot",
+    "DungeonAuthoredBranchNavCleanup167863 preserves its public activeHero API but delegates only the pure active hero selection to GensDungeonV1.movement.resolveAuthoredActiveHero while retaining runtime reads currentNode authored branch-stack policy DOM hide/restore sync/block render/show wrappers click listener and install timers",
+    "DungeonAuthoredActionFix167857 preserves its public activeHero API but delegates only the pure authored hero selection to GensDungeonV1.movement.resolveAuthoredActiveHero while retaining runtime reads primary/authored context positionKey exact chest rules legacy control filtering spatial persist wrapping Core render/show wrappers click listener and install timers",
+    "DungeonExactTrapRuntime167845 delegates only its private pure active hero selection to GensDungeonV1.movement.resolveAuthoredActiveHero while retaining authored validation exact trap content and state trap resolution scene cleanup DungeonSpatial313 persistence Core render/show/explore wrappers and install retry ownership",
+    "DungeonZoneLinks167846 delegates only its private pure active hero selection to GensDungeonV1.movement.resolveAuthoredActiveHero while retaining authored runtime and graph reads currentNodeId position reverse/cache/return transitions per-hero return stacks Builder cache binding and validation DOM buttons Core render wrapper editor click listener and install retry ownership",
+    "DungeonRoomRuntime167822 delegates only its private pure active hero selection to GensDungeonV1.movement.resolveAuthoredActiveHero while retaining adventure configuration room library validation template and chance selection map conversion encounter markers enemy remap created-transition guard active-hero entry placement remaining-movement preservation DungeonSpatial313 persistence DungeonCore01 explore wrapping configuration panel listeners and install timers",
+    "DungeonWorldRuntime167823 delegates only its private pure active hero selection to GensDungeonV1.movement.resolveAuthoredActiveHero while retaining authoritative-world configuration graph and edge routing room loading snapshots zone content directFixedNode DungeonSpatial313 persistence explore/render wrappers exit-button UI legacy-panel retirement and install timers",
+    "DungeonLargeRoom167834 delegates only its private pure active hero selection to GensDungeonV1.movement.resolveAuthoredActiveHero while retaining room-size and geometry policy generated-room repair authoritative World Builder selection world-state repair enemy and scene remap DungeonSpatial313 persistence render/show/explore wrappers UI retirement labels styles and install timers",
+    "DungeonCore318 delegates only its pure active hero selection to GensDungeonV1.movement.resolveAuthoredActiveHero while retaining runtime room resolution enemy room stamping spawn wrappers shared branch join ownership Spatial calls notices and install/debug behavior; Core 317 and Source Render remain unchanged because their historical selectors diverge from canonical semantics"
+  ],
+  "publicEntries": {
+    "moduleScreenReturn": {
+      "contract": "assets/gensrpg/shell/module-screen-return-contract-v1.json",
+      "operation": "returnToPrimaryView",
+      "status": "declared-not-loaded",
+      "ownership": "module-owned-primary-view"
+    },
+    "moduleLaunch": {
+      "contract": "assets/gensrpg/shell/module-launch-contract-v1.json",
+      "operation": "startModuleSession",
+      "status": "declared-not-loaded",
+      "ownership": "module-owned-session-start"
+    }
+  },
+  "activatedPhase": 7,
+  "publicRuntimeApi": "GensDungeonV1"
+}

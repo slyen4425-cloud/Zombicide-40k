@@ -1,0 +1,58 @@
+name: GenSrpG Phase12 R06 source intake preflight
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r06-inline-owner-scope-2026-10-18'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-intake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refuse runtime edits during R06 source preaudit
+        run: |
+          test "$(git hash-object index.html)" = '12fc91df4ee4c7989a172baa96f9790da6dc57f7'
+          test "$(git hash-object assets/gensrpg/core/legacy-cloud-sync-backup-v1.js)" = '8d7f8179676b096a53816cd1ca2530c120e3cf18'
+          test "$(git hash-object assets/gensrpg/core/legacy-visual-data-v1.js)" = 'f7adfca9b04b23c489aae71ae9284c9b849f1d0b'
+          test "$(git hash-object assets/gensrpg/shell/legacy-hub-family-ui-v1.js)" = 'e45f3b4e419a10b030c47bc921bded1ec0dc723b'
+          test "$(git hash-object assets/gensrpg/builders/equipment-library-editor-v1.js)" = '27cadba87c766b5293ac3a7fe3ddffb8510adc40'
+          test "$(git hash-object assets/dungeon/creatures/dng_wall_block.jpg)" = 'd21b657a8ffd84deab55633e2663a0a81ab9a6f2'
+      - name: Prove the local source/ZIP verifier fails closed
+        run: python3 tests/gens_phase12_r06_source_inventory_v1.test.py
+      - name: Verify byte-exact R06 Capture rollback
+        run: python3 tools/gensrpg_phase12_r06_capture_inline_extract_apply.py --verify
+      - name: Validate current Capture launch and return authority after 18 exact script relocations
+        run: |
+          node tests/gens_phase5_startconfiguredgame_capture131_retirement_v1.test.cjs
+          node tests/gens_phase5_startconfiguredgame_remaining_chain_preaudit_v1.test.cjs
+          node tests/gens_phase5_capture_public_launch_entry_preaudit_v1.test.cjs
+          node tests/gens_phase5_startconfiguredgame_capture135_global_retirement_v1.test.cjs
+          node tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs
+          node tests/gens_phase5_gomenu_screen_transitions_preaudit_v1.test.cjs
+          node tests/gens_phase5_gomenu_final_boundary_preaudit_v1.test.cjs
+          node tests/gens_phase5_module_screen_return_raccord_preaudit_v1.test.cjs
+          node tests/gens_phase5_module_screen_return_capture_raccord_v1.test.cjs
+          node tests/gens_phase5_module_screen_return_dungeon_s2_v1.test.cjs
+      - name: Phase9 Capture R06 physical-owner nonregression sentinels
+        run: |
+          node tests/gens_phase9_capture_public_entry_raccord_v1.test.cjs
+          node tests/gens_phase9_capture_top_level_entry_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture_session_start_owner_transfer_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture_session_start_owner_transfer_v1.test.cjs
+          node tests/gens_phase9_capture_screen_return_ownership_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture_hub_world_owner_characterization_v1.test.cjs
+          node tests/gens_phase9_capture_identity_ownership_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture_identity_authority_raccord_v1.test.cjs
+          node tests/gens_phase9_capture_participant_identity_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture_participant_identity_raccord_v1.test.cjs
+          node tests/gens_phase9_capture_dungeon_identity_coupling_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture_dungeon_button_owner_transfer_v1.test.cjs
+          node tests/gens_phase9_capture139_session_dependency_preaudit_v1.test.cjs
+          node tests/gens_phase9_capture139_base_profile_retirement_v1.test.cjs
+          node tests/gens_phase9_capture139_active_enemies_retirement_v1.test.cjs
+          node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
+      - name: Recheck validated generated-wall owner
+        run: node tests/gens_generated_dungeon_wall_core079_owner_v1.test.cjs

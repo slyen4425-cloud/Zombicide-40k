@@ -62,6 +62,29 @@ assert.equal(P.DETECTION_RADIUS,1);
   assert.deepEqual(engaged,{ids:['enemy1'],reason:'detection-immediate'});
 }
 
+// Production runtime does NOT declare global saveState(heroId,state).
+// Equipment must persist through the already loaded Core JSON storage API.
+{
+  require(path.join(__dirname,'..','assets','gensrpg','core','storage-v1.js'));
+  const stored=new Map();
+  const storage={getItem:k=>stored.get(k)||null,setItem:(k,v)=>{stored.set(k,v)}};
+  const original={inventory:[{itemId:'sword'},{itemId:'bow'}],rightHand:0,leftHand:null};
+  storage.setItem('hero-h1',JSON.stringify(original));
+  const defs={sword:{id:'sword',type:'Arme',name:'Épée'},bow:{id:'bow',type:'Arme',name:'Arc'}};
+  const rt={
+    localStorage:storage,key:id=>'hero-'+id,
+    GensStorageV1:globalThis.GensStorageV1,
+    loadState:id=>JSON.parse(storage.getItem('hero-'+id)),
+    getItemFromEntry:e=>defs[e.itemId]
+  };
+  assert.equal(typeof rt.saveState,'undefined','real runtime uses Core storage, not imagined saveState');
+  assert.equal(P.equipWeapon(rt,'h1',1),true,'Core equipment choice must be persisted');
+  assert.equal(JSON.parse(storage.getItem('hero-h1')).rightHand,1);
+  const noWriter={...rt,GensStorageV1:null};
+  assert.equal(P.equipWeapon(noWriter,'h1',0),false,'without canonical owner, must fail instead of falsely reporting success');
+  assert.equal(JSON.parse(storage.getItem('hero-h1')).rightHand,1,'failure leaves persistent hero unchanged');
+}
+
 const source=fs.readFileSync(path.join(__dirname,'..','assets','gensrpg','gens-rpg-tactical-combat-v2-polish-1678108.js'),'utf8');
 assert.match(source,/object-fit:contain!important/,'les pions ne doivent plus rogner les portraits');
 assert.match(source,/dng_wall_block\.jpg/,'la texture du Dungeon Builder doit être utilisée');

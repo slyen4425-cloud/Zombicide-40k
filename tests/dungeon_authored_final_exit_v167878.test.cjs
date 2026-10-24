@@ -4,6 +4,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 
 const root=path.join(__dirname,'..');
+const entry=fs.readFileSync(path.join(root,'assets','gensrpg','dungeon','entry-v1.js'),'utf8');
 const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-authored-final-exit-167875.js'),'utf8');
 const RT='gensrpg_dungeon_runtime_v2';
 const store=new Map();
@@ -20,7 +21,7 @@ const ctx={console,Math,Date,localStorage,document,DungeonAuthoredRuntime167839:
 ctx.window=ctx;ctx.globalThis=ctx;
 function save(pos,extra={}){localStorage.setItem(RT,JSON.stringify({participants:['aldren'],index:0,room:3,positions:{aldren:pos},last:{authoredRuntime167839:true,worldDungeonId:'world_1',worldNodeId:'last',map:{cells:['floor','cache','exit'],exitIdx:2}},branch:null,...extra}))}
 save(1);
-vm.createContext(ctx);vm.runInContext(src,ctx,{filename:'dungeon-authored-final-exit-167875.js'});
+vm.createContext(ctx);vm.runInContext(entry,ctx,{filename:'assets/gensrpg/dungeon/entry-v1.js'});vm.runInContext(src,ctx,{filename:'dungeon-authored-final-exit-167875.js'});
 const api=ctx.DungeonAuthoredFinalExit167875;
 assert.ok(api);assert.equal(api.APP_VERSION,'16.78.79');
 assert.equal(core.explore(),'normal-explore');

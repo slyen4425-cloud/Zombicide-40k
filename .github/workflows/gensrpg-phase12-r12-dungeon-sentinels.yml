@@ -1,0 +1,26 @@
+name: GenSrpG Phase12 R12 Dungeon RPG rules talents rollback sentinels
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r12-dungeon-rpg-rules-talents-2026-10-19'
+permissions:
+  contents: read
+jobs:
+  dungeon-rpg-rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require exact R12 index, 96 original Dungeon functions and historical rollbacks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = 'b0d0c73292e4374fc4f23e86edffad5c1b39a7b6'
+          test "$(git hash-object assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js)" = '82c847234e75adbfe33ef70ca8f58fa1ebdc381d'
+          node tests/gensrpg_phase12_r12_dungeon_rpg_rules_talents_sentinel.test.cjs
+          node tests/gensrpg_phase12_r11_retired_scripts_sentinel.test.cjs
+          node tests/gensrpg_phase12_r10_capture_sentinel.test.cjs
+          node tests/gensrpg_phase12_r09_wave_sentinel.test.cjs
+          node --check assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js

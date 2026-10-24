@@ -1,0 +1,38 @@
+name: GenSrpG Phase12 R08 guarded shared ability catalog
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r08-shared-ability-skill-catalog-2026-10-18'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r08-shared-catalog-controlled-apply.yml'
+permissions:
+  contents: write
+jobs:
+  guarded-apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require exact user supplied R07 source, not old archive
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r08-shared-ability-skill-catalog-2026-10-18'
+          test "$(git hash-object index.html)" = 'aca31c540d61c81e1504d3b915b034b372103b5b'
+          test ! -e assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js
+          python3 tools/gensrpg_phase12_r08_shared_catalog_extract_apply.py --check-source
+      - name: Publish exactly 57 unchanged functions, leave Escape listener inline
+        run: |
+          python3 tools/gensrpg_phase12_r08_shared_catalog_extract_apply.py --apply
+          python3 tools/gensrpg_phase12_r08_shared_catalog_extract_apply.py --verify
+          node --check assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js
+          git diff --check
+      - name: Publish only on the dedicated R08 work branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js service-worker.js docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          # Preserve original trailing newlines byte-exact; still reject all other whitespace errors.
+          git -c core.whitespace=-blank-at-eof diff --cached --check
+          git commit -m "refactor(phase12): extract shared ability skill catalog without moving keydown listener"
+          git push origin "HEAD:$GITHUB_REF_NAME"

@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "phase": 3,
+  "module": "builders",
+  "status": "contract-only-not-loaded",
+  "plannedEntry": "assets/gensrpg/builders/entry-v1.js",
+  "owns": [
+    "editors",
+    "data validation",
+    "authoring contracts"
+  ],
+  "consumes": [
+    "core schemas and public data contracts"
+  ],
+  "forbidden": [
+    "direct mutation of active module runtime",
+    "gameplay authority"
+  ],
+  "lifecycle": {
+    "install": "future explicit install only when the module is intentionally connected",
+    "dispose": "future temporary modules must release listeners, observers and timers"
+  },
+  "invariants": [
+    "not referenced by the current production load graph during Phase 3",
+    "no gameplay is moved into this contract",
+    "no compatibility wrapper is introduced by this contract"
+  ]
+}

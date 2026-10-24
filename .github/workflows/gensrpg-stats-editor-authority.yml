@@ -1,0 +1,35 @@
+name: GenSrpG stats editor authority
+
+on:
+  push:
+    branches:
+      - 'work/gensrpg-stats-editor-regression-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stats-editor-authority:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Caractériser les autorités de l'éditeur de stats
+        run: node tests/gens_stats_editor_authority_characterization_v11411.test.cjs
+      - name: Exiger le renderer canonique final de l'éditeur de stats
+        run: node tests/gens_stats_editor_single_authority_v11411.test.cjs
+
+  stats-editor-browser:
+    needs: stats-editor-authority
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Installer Chromium pour la sentinelle éditeur
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Vérifier que l'éditeur riche reste l'autorité finale
+        run: node tests/gens_stats_editor_browser_v11411.test.cjs

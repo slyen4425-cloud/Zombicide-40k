@@ -1,0 +1,148 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+
+const root=path.join(__dirname,'..');
+const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
+
+const dungeonCore01Path='assets/gensrpg/dungeon/core01-session-ui-v1.js';
+const captureR06Names=new Set(['captureGameplayModalMount','capturePlaytestFix128',...Array.from({length:12},(_,i)=>'captureFix'+(129+i)),'captureItems141','captureBuffs142','captureBuffFx143','captureAbilityTruth144']);
+const captureR06Rel=id=>'assets/gensrpg/capture/legacy-patches/'+id.replace(/([A-Z])/g,'-$1').toLowerCase().replace(/^-/,'')+'-v1.js';
+const blocks=[...source.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
+  .map(m=>{
+    if(m[1]==='dungeonCore200Rebuild'){
+      assert.match(m[0],/src="assets\/gensrpg\/dungeon\/core200-rebuild-v1\.js"/,
+        'D4 Core200 must load synchronously in the original parser position');
+      const d4=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core200-rebuild-v1.js'),'utf8');
+      assert.match(d4,/window\.DungeonCore01\s*=/,
+        'D4 Core200 remains the final DungeonCore01 owner');
+      return {id:m[1],body:d4,offset:m.index};
+    }
+    if(m[1]==='dungeonCore211Consolidation'){
+      assert.match(m[0],/src="assets\/gensrpg\/dungeon\/core211-consolidation-v1\.js"/,
+        'D5 Core211 must retain its parser position and unique classic script');
+      const bytes=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core211-consolidation-v1.js'));
+      const crypto=require('node:crypto');
+      const hash=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
+      assert.equal(bytes.length,17511,'D5 Core211 original size');
+      assert.equal(hash,'bba60d921df20a114b489e17f9222e0c4f310871','D5 Core211 unchanged source');
+      return {id:m[1],body:bytes.toString('utf8'),offset:m.index};
+    }
+    if(m[1]==='dungeonCore213Stability'){
+      assert.match(m[0],/src="assets\/gensrpg\/dungeon\/core213-stability-v1\.js"/,
+        'D6 Core213 must retain original synchronous parser position');
+      const bytes=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core213-stability-v1.js'));
+      const crypto=require('node:crypto');
+      const hash=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
+      assert.equal(bytes.length,17519,'D6 Core213 historical byte length');
+      assert.equal(hash,'af4bf724315180becd80833af251504130751ad3','D6 Core213 byte-identical owner');
+      return {id:m[1],body:bytes.toString('utf8'),offset:m.index};
+    }
+    if(m[1]==='dungeonCore214SingleAuthority'){
+      assert.match(m[0],/src="assets\/gensrpg\/dungeon\/core214-single-authority-v1\.js"/,
+        'D7 Core214 must retain its original synchronous parser position');
+      const bytes=fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core214-single-authority-v1.js'));
+      const crypto=require('node:crypto');
+      const hash=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
+      assert.equal(bytes.length,15795,'D7 Core214 historical byte length');
+      assert.equal(hash,'72481ac3ee62bc67f6c0646eb724baf4a87a2f88','D7 Core214 byte-identical owner');
+      return {id:m[1],body:bytes.toString('utf8'),offset:m.index};
+    }
+    if(m[1]==='dungeonCore303TimelineRootFix'){
+      const rel='assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js';
+      assert.equal(m[0],'<script id="dungeonCore303TimelineRootFix" src="'+rel+'"></script>',
+        'R16 Core303 must retain its original synchronous parser position');
+      const bytes=fs.readFileSync(path.join(root,rel));
+      const crypto=require('node:crypto');
+      const hash=crypto.createHash('sha1').update(Buffer.from('blob '+bytes.length+String.fromCharCode(0))).update(bytes).digest('hex');
+      assert.equal(bytes.length,9158,'R16 Core303 original owner byte length');
+      assert.equal(hash,'fe7c0cff03f7e19f49d3c743257c5fe717f40593','R16 Core303 owner code remains byte-identical');
+      return {id:m[1],body:bytes.toString('utf8'),offset:m.index};
+    }
+    if(captureR06Names.has(m[1])){
+      const rel=captureR06Rel(m[1]);
+      assert.equal(m[0],'<script id="'+m[1]+'" src="'+rel+'"></script>',
+        'R06 Capture must retain one synchronous owner and original parser position for '+m[1]);
+      return {id:m[1],body:fs.readFileSync(path.join(root,rel),'utf8'),offset:m.index};
+    }
+    if(m[1]!=='gensDungeonCore01Js')return {id:m[1],body:m[2],offset:m.index};
+    assert.match(m[0],/src="assets\/gensrpg\/dungeon\/core01-session-ui-v1\.js"/,
+      'Phase12 Dungeon source must be composed at its original parser position');
+    return {id:m[1],body:fs.readFileSync(path.join(root,dungeonCore01Path),'utf8'),offset:m.index};
+  });
+
+function assignmentChain(name){
+  const re=new RegExp('window\\.'+name+'\\s*=','g');
+  const chain=[];
+  for(const block of blocks){
+    const hits=block.body.match(re);
+    if(hits?.length)chain.push({id:block.id,count:hits.length,offset:block.offset});
+  }
+  return chain;
+}
+
+const expected={
+  // R11 removed five non-executing assignments in 17 retired script bodies:
+  // rpgTurnTargetFlow157 (1), rpgPlayerTargeting158 (1),
+  // rpgHeroTargeting159 (1), dungeonCore102RoomCycleFix (2).
+  // All 25 remaining executable assignments and final owner are still asserted.
+  renderDungeonCombatRound:{
+    assignments:25,
+    last:'dungeonCore303TimelineRootFix',
+    mustInclude:['dungeonCore214SingleAuthority','dungeonCore303TimelineRootFix']
+  },
+  captureRenderBattleLive:{
+    assignments:15,
+    last:'coreCombatPoolFix156',
+    mustInclude:['capturePlaytestFix128','captureAbilityTruth144','coreCombatPoolFix156']
+  },
+  startConfiguredGame:{
+    assignments:2,
+    last:'gensDungeonCore01Js',
+    exact:['captureFix138','gensDungeonCore01Js']
+  },
+  resumeGame:{
+    assignments:1,
+    last:'dungeonCore310PersistenceAndTokens',
+    exact:['dungeonCore310PersistenceAndTokens']
+  },
+  DungeonCore01:{
+    assignments:2,
+    last:'dungeonCore200Rebuild',
+    exact:['gensDungeonCore01Js','dungeonCore200Rebuild']
+  }
+};
+
+const report={};
+for(const [name,cfg] of Object.entries(expected)){
+  const chain=assignmentChain(name);
+  const total=chain.reduce((sum,x)=>sum+x.count,0);
+  assert.equal(total,cfg.assignments,name+' assignment count drifted');
+  assert.equal(chain.at(-1)?.id,cfg.last,name+' last inline assignment drifted');
+  if(cfg.exact)assert.deepEqual(chain.map(x=>x.id),cfg.exact,name+' assignment chain drifted');
+  if(cfg.mustInclude)for(const id of cfg.mustInclude)assert.ok(chain.some(x=>x.id===id),name+' must still include '+id);
+  report[name]={assignments:total,chain:chain.map(x=>x.id),last:chain.at(-1)?.id||null};
+}
+
+const render303=blocks.find(x=>x.id==='dungeonCore303TimelineRootFix')?.body||'';
+assert.match(render303,/window\.__dc214RenderCombat\(\)/,'Core 3.03 must remain a wrapper over the preserved Core 2.14 renderer');
+
+const capture156=blocks.find(x=>x.id==='coreCombatPoolFix156')?.body||'';
+assert.match(capture156,/const oldCaptureRender156=window\.captureRenderBattleLive/,'Core combat pool layer must keep delegating to the previous Capture renderer');
+
+const start200=blocks.find(x=>x.id==='dungeonCore200Rebuild')?.body||'';
+assert.match(start200,/const startOutside200=window\.startConfiguredGame/,'Dungeon Core 2.00 must preserve the previous shared launch chain');
+assert.match(start200,/const gensDungeonStartConfiguredGame200V1=async function/,'Dungeon Core 2.00 must retain its local launch dispatcher for the Dungeon provider');
+assert.doesNotMatch(start200,/window\.startConfiguredGame\s*=(?!=)/,'Dungeon Core 2.00 global launch assignment must remain retired');
+assert.match(
+  start200,
+  /if\(isDungeonMode\?\.\(\)&&!\(typeof isCaptureContext138==="function"&&isCaptureContext138\(\)\)\)return start\(\)/,
+  'Phase 2 must keep Dungeon launch interception while preserving the dedicated Capture module owner'
+);
+assert.doesNotMatch(
+  start200,
+  /if\(isDungeonMode\?\.\(\)\)return start\(\)/,
+  'Dungeon Core 2.00 must not steal Capture launches from the dedicated Capture owner'
+);
+
+console.log(JSON.stringify({scenario:'Phase 2 global owner inventory',report},null,2));

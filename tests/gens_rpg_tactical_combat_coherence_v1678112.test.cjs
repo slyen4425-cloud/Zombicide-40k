@@ -67,11 +67,13 @@ assert.match(P.explainAttack({hit:true,damage:0,damageType:'fire',rawDamage:4,re
 const source=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-coherence-1678112.js'),'utf8');
 const integration=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-combat-v2-integration.js'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
-assert.match(source,/gtv2112WallCell/,'V112 wall tagging remains explicit');
-assert.match(source,/background:#171512 url\("\$\{WALL_ASSET\}"\) center\/cover no-repeat!important/,'V112 must paint the Builder wall texture directly on the cell');
-assert.doesNotMatch(source,/background-image:none!important/,'V112 must never blank a wall before repaint');
-assert.match(source,/::before\{content:none!important;display:none!important/,'obsolete pseudo wall layer must stay disabled');
-assert.match(source,/min-height:38px/,'mobile fixed actions must be more compact');
+assert.match(source,/function markWallCells\(rt=R\)/,'V112 historical wall tagging helper remains inspectable');
+const styleStart=source.indexOf('function ensureStyle(rt=R){');
+const styleEnd=source.indexOf('function markWallCells(rt=R){',styleStart);
+assert.ok(styleStart>=0&&styleEnd>styleStart,'V112 ensureStyle block missing');
+const style=source.slice(styleStart,styleEnd);
+assert.doesNotMatch(style,/WALL_ASSET|gtv2Cell\.blocked|drc100Grid|dav167870WallCell|gtv2112WallCell/,'V112 no longer owns wall CSS; base Tactical UI owns walls');
+assert.match(style,/min-height:38px/,'mobile fixed actions must remain compact');
 assert.match(source,/data-v112-sheet/,'actor click detail must expose the full tactical sheet');
 assert.doesNotMatch(source,/gtv2112DiceRoll/,'V112 no longer owns dice animation; base tactical UI owns the single short roll');
 assert.match(source,/function patchDice\(rt=R\).*gtv2112Explain/s,'V112 must keep result explanations');
@@ -81,4 +83,4 @@ assert.match(integration,/gens-rpg-tactical-combat-coherence-1678112\.js\?v=16\.
 assert.match(sw,/gensrpg-cache-16\.78\.114\.6-consolidated-tactical-runtime/);
 assert.match(sw,/gens-rpg-tactical-combat-coherence-1678112\.js/);
 
-console.log('V16.78.112 spatial participants + LOS + sheets + explanations preserved; V114.6 owns direct walls and dice animation: OK');
+console.log('V16.78.112 spatial participants + LOS + sheets + explanations preserved; historical wall helper remains, CSS authority retired: OK');

@@ -1,0 +1,688 @@
+{
+  "version": 1,
+  "phase": "Phase 2 runtime cartography",
+  "baseCheckpoint": "checkpoint/gensrpg-phase1-complete-green-2026-09-18",
+  "note": "This manifest classifies production-reachable JS files. It documents current ownership; it does not authorize extraction or deletion.",
+  "allowedDomains": [
+    "core",
+    "shell",
+    "survival",
+    "dungeon",
+    "tactical",
+    "capture",
+    "pvp",
+    "builders"
+  ],
+  "files": {
+    "assets/gensrpg/core/legacy-cloud-sync-backup-v1.js": {
+      "owner": "GenSrpG Core Legacy Cloud Sync and Backup R05",
+      "domain": "core",
+      "role": "original single synchronous online-session sync, shared creation snapshot transfer and local backup recovery owner; all top-level side effects preserved byte-identically"
+    },
+    "assets/gensrpg/builders/equipment-library-editor-v1.js": {
+      "owner": "GenSrpG Builders Equipment Library Editor R04",
+      "domain": "builders",
+      "role": "26 original equipment library/editor functions shared across modes; startup ITEM refresh remains exactly once in legacy index"
+    },
+    "assets/gensrpg/shell/legacy-hub-family-ui-v1.js": {
+      "owner": "GenSrpG Shell Hub Family UI R03",
+      "domain": "shell",
+      "role": "six classic function declarations for family cards and four-mode home UI; no game-state persistence or game-mode runtime authority"
+    },
+    "assets/gensrpg/core/legacy-visual-data-v1.js": {
+      "owner": "GenSrpG Core Legacy Visual Data R02",
+      "domain": "core",
+      "role": "five bit-identical historical PNG/WebP data URLs for sheet, equipment card and enemy skins; no gameplay authority; loaded synchronously before the original monolithic script"
+    },
+    "assets/gensrpg/shell/pwa-manifest-dynamic-v1.js": {
+      "owner": "GenSrpG Shell PWA Dynamic Manifest",
+      "domain": "shell",
+      "role": "byte-exact 734440-byte historical dynamic Blob manifest IIFE, one synchronous parser owner; no static manifest migration"
+    },
+    "assets/dungeon/dungeon-authored-action-fix-167857.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "authoring action refresh and obsolete chest control guard"
+    },
+    "assets/dungeon/dungeon-authored-bootstrap-167849.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "sole production bootstrap for authored-world runtime extensions, including exact traps and zone links"
+    },
+    "assets/dungeon/dungeon-authored-branch-nav-cleanup-167863.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "authored branch navigation cleanup"
+    },
+    "assets/dungeon/dungeon-authored-cache-guard-167849.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "authored cache marker isolation from random Dungeon"
+    },
+    "assets/dungeon/dungeon-authored-cache-ux-167853.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "authored cache contextual UI refresh"
+    },
+    "assets/dungeon/dungeon-authored-cache-visual-167852.js": {
+      "owner": "Dungeon Authored Visual",
+      "domain": "dungeon",
+      "role": "authored terrain and actor visual bridge"
+    },
+    "assets/dungeon/dungeon-authored-event-cells-167877.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "configured authored event cells"
+    },
+    "assets/dungeon/dungeon-authored-final-exit-167875.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "terminal authored-world exit"
+    },
+    "assets/dungeon/dungeon-authored-return-persist-167862.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "return-position persistence"
+    },
+    "assets/dungeon/dungeon-authored-runtime-167839.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "built-world start and authored room transitions"
+    },
+    "assets/dungeon/dungeon-cache-editor-stability-167851.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "secondary-cache editor stability"
+    },
+    "assets/dungeon/dungeon-core-316.js": {
+      "owner": "Dungeon Equipment",
+      "domain": "dungeon",
+      "role": "equipment catalogue and generic set bonus engine"
+    },
+    "assets/dungeon/dungeon-core-317.js": {
+      "owner": "Dungeon Core",
+      "domain": "dungeon",
+      "role": "merchant stock, armor floor and spatial return; mixed debt"
+    },
+    "assets/dungeon/dungeon-core-318.js": {
+      "owner": "Dungeon Core",
+      "domain": "dungeon",
+      "role": "enemy room ownership and branch initialization"
+    },
+    "assets/dungeon/dungeon-equipment-hotfix-167817.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "equipment editor and set visibility UI bridge"
+    },
+    "assets/dungeon/dungeon-equipment-ui.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "equipment/set editor UI adapter"
+    },
+    "assets/dungeon/dungeon-event-runtime-fix-167878.js": {
+      "owner": "Dungeon Event Runtime",
+      "domain": "dungeon",
+      "role": "event-spawn placement"
+    },
+    "assets/dungeon/dungeon-exact-trap-runtime-167845.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "exact authored trap resolution"
+    },
+    "assets/dungeon/dungeon-grid-display-recovery-167856.js": {
+      "owner": "Dungeon Runtime UI",
+      "domain": "dungeon",
+      "role": "tactical grid display recovery"
+    },
+    "assets/dungeon/dungeon-large-room-support-167834.js": {
+      "owner": "Dungeon Session Boundary",
+      "domain": "dungeon",
+      "role": "room size and World Builder selection authority"
+    },
+    "assets/dungeon/dungeon-random-library-content-167832.js": {
+      "owner": "Dungeon Content Runtime",
+      "domain": "dungeon",
+      "role": "random choices backed by canonical Dungeon libraries"
+    },
+    "assets/dungeon/dungeon-room-content-ui-167831.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "exact-content editor controls"
+    },
+    "assets/dungeon/dungeon-room-creator-100.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "Room Creator base editor"
+    },
+    "assets/dungeon/dungeon-room-creator-feedback-167821.js": {
+      "owner": "Dungeon Builders Bootstrap",
+      "domain": "builders",
+      "role": "Room Creator feedback plus production extension loader; mixed debt"
+    },
+    "assets/dungeon/dungeon-room-creator-v2-167819.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "Room Creator attachments and cache links"
+    },
+    "assets/dungeon/dungeon-room-grid-capture-167830.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "Room Creator configuration grid capture"
+    },
+    "assets/dungeon/dungeon-room-runtime-167822.js": {
+      "owner": "Dungeon Room Runtime",
+      "domain": "dungeon",
+      "role": "custom-room runtime integration"
+    },
+    "assets/dungeon/dungeon-room-template-content-167828.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "direct exact-content room-template editing"
+    },
+    "assets/dungeon/dungeon-room-visual-config-167826.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "visual exact-content configuration"
+    },
+    "assets/dungeon/dungeon-room-visual-hotfix-167827.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "Room Creator visual presentation"
+    },
+    "assets/dungeon/dungeon-secondary-branch-content-fix-167860.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "secondary authored branch exact-content isolation"
+    },
+    "assets/dungeon/dungeon-set-editor-167818.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "generic set editor"
+    },
+    "assets/dungeon/dungeon-source-render-stability-167877.js": {
+      "owner": "Dungeon Authored Visual",
+      "domain": "dungeon",
+      "role": "pre-DOM authored terrain/token render stability"
+    },
+    "assets/dungeon/dungeon-world-builder-167821.js": {
+      "owner": "Dungeon Builders",
+      "domain": "builders",
+      "role": "zone graph / world builder"
+    },
+    "assets/dungeon/dungeon-world-runtime-167823.js": {
+      "owner": "Dungeon World Runtime",
+      "domain": "dungeon",
+      "role": "built-world activation and geometry runtime"
+    },
+    "assets/dungeon/dungeon-world-session-bridge-167832.js": {
+      "owner": "Dungeon Session Boundary",
+      "domain": "dungeon",
+      "role": "generated-vs-authored session separation"
+    },
+    "assets/dungeon/dungeon-zone-content-167824.js": {
+      "owner": "Dungeon Content Runtime",
+      "domain": "dungeon",
+      "role": "exact content per built-world zone; mixed runtime/editor seam"
+    },
+    "assets/dungeon/dungeon-zone-links-167846.js": {
+      "owner": "Dungeon Authored Runtime",
+      "domain": "dungeon",
+      "role": "authored main/secondary graph links and return stacks"
+    },
+    "assets/gensrpg/capture/builtin-seed-v1.js": {
+      "owner": "GenSrpG Monster Capture Built-in Showcase Seed V16.162",
+      "domain": "capture",
+      "role": "production-reachable non-destructive Capture sample-profile, creature and ability definitions; exact migration of inline seed, not a gameplay runtime owner"
+    },
+    "assets/gensrpg/capture/combat-core-v1.js": {
+      "owner": "GenSrpG Capture Combat Core V1",
+      "domain": "capture",
+      "role": "Single physically loaded Capture battle core owner for target selection, battle setup/state, phases, KO, status, recall, save and victory; 39 byte-exact relocated historical functions, no second engine"
+    },
+    "assets/gensrpg/capture/entry-v1.js": {
+      "owner": "GenSrpG Capture Public Entry",
+      "domain": "capture",
+      "role": "active Phase 9 Capture public entry owning the Shell module-launch provider and delegating session initialization to GensCaptureSessionStartV1"
+    },
+    "assets/gensrpg/capture/hub-entry-v1.js": {
+      "owner": "GenSrpG Capture Hub Entry",
+      "domain": "capture",
+      "role": "active Phase 9 unique UI transition owner for Capture Hub, injected legacy rendering dependencies, no Shell or world-data ownership"
+    },
+    "assets/gensrpg/capture/screen-return-v1.js": {
+      "owner": "GenSrpG Capture Screen Return",
+      "domain": "capture",
+      "role": "active Phase 9 unique Shell screen-return provider for Capture using explicitly injected Capture-owned session/context and Hub rendering bindings"
+    },
+    "assets/gensrpg/capture/session-start-v1.js": {
+      "owner": "GenSrpG Capture Session Start",
+      "domain": "capture",
+      "role": "active Phase 9 owner of Capture session initialization through explicit injected bindings; owns no Shell routing or screen-return authority"
+    },
+    "assets/gensrpg/capture/team-roster-v1.js": {
+      "owner": "GenSrpG Capture Team and Reserve V1",
+      "domain": "capture",
+      "role": "Single physically loaded Capture roster owner for active trainer creature team/reserve normalization, owned-instance lookup, existing hero save schema, roster moves, reserve and team display; legacy global APIs retained, byte-exact extraction"
+    },
+    "assets/gensrpg/capture/world-exploration-v1.js": {
+      "owner": "GenSrpG Capture World Exploration V1",
+      "domain": "capture",
+      "role": "Single physically loaded owner for legacy Capture world-state persistence, profile locations, day and turn progression, Hub-world rendering and exploration encounters; byte-exact relocated functions; legacy cross-script API intentionally retained"
+    },
+    "assets/gensrpg/core/asset-resolver-v1.js": {
+      "owner": "GenSrpG Core Assets",
+      "domain": "core",
+      "role": "canonical shared asset path resolver; pure Phase 4 service with no DOM, storage, timer or gameplay authority"
+    },
+    "assets/gensrpg/core/dice-v1.js": {
+      "owner": "GenSrpG Core Dice",
+      "domain": "core",
+      "role": "canonical pure D100 threshold primitive; first production raccord through the historical d100ThresholdFromChance boundary adapter"
+    },
+    "assets/gensrpg/core/equipment-bonus-sets-v1.js": {
+      "owner": "GenSrpG Core Equipment Bonus Sets",
+      "domain": "core",
+      "role": "canonical pure direct equipment and set bonus authority used by the existing Equipment runtime owner before evolution and performance caching"
+    },
+    "assets/gensrpg/core/equipment-evolution-v1.js": {
+      "owner": "GenSrpG Core Equipment Evolution",
+      "domain": "core",
+      "role": "canonical pure Equipment evolution bonus authority used by the existing cached evolution runtime boundary"
+    },
+    "assets/gensrpg/core/inventory-equipped-view-v1.js": {
+      "owner": "GenSrpG Core Inventory Equipped View",
+      "domain": "core",
+      "role": "canonical pure equipped-item view from explicit inventory and slot references, connected through the existing Dungeon Equipment runtime adapter"
+    },
+    "assets/gensrpg/core/progression-v1.js": {
+      "owner": "GenSrpG Core Progression",
+      "domain": "core",
+      "role": "canonical pure XP-to-level primitive used by the active Core 0.44 owner for configured progression profiles while the legacy no-profile fallback remains at the historical boundary"
+    },
+    "assets/gensrpg/core/runtime-bootstrap-v1.js": {
+      "owner": "Core Bootstrap",
+      "domain": "core",
+      "role": "runtime dependency loader"
+    },
+    "assets/gensrpg/core/stats-derived-values-v1.js": {
+      "owner": "GenSrpG Core Stats Derived Values",
+      "domain": "core",
+      "role": "canonical deterministic derived stat formulas feeding the Tactical snapshot boundary"
+    },
+    "assets/gensrpg/core/stats-hero-values-v1.js": {
+      "owner": "GenSrpG Core Stats Hero Values",
+      "domain": "core",
+      "role": "canonical explicit hero base-value provider used by the active Stats owner"
+    },
+    "assets/gensrpg/core/stats-modifier-provider-v1.js": {
+      "owner": "GenSrpG Core Stats Modifier Provider",
+      "domain": "core",
+      "role": "canonical explicit Equipment, Skill and Challenge modifier composition used by the active Stats owner"
+    },
+    "assets/gensrpg/core/stats-normalization-v1.js": {
+      "owner": "GenSrpG Core Stats Normalization",
+      "domain": "core",
+      "role": "canonical pure stat/effect normalization authority loaded before the legacy Stats runtime owner"
+    },
+    "assets/gensrpg/core/stats-snapshot-v1.js": {
+      "owner": "GenSrpG Core Stats Snapshot",
+      "domain": "core",
+      "role": "canonical immutable values and derived snapshot consumed through the active Stats runtime adapter"
+    },
+    "assets/gensrpg/core/stats-value-engine-v1.js": {
+      "owner": "GenSrpG Core Stats Value Engine",
+      "domain": "core",
+      "role": "canonical deterministic stat values and effect composition used by the active Stats owner"
+    },
+    "assets/gensrpg/core/storage-v1.js": {
+      "owner": "GenSrpG Core Storage",
+      "domain": "core",
+      "role": "canonical shared JSON storage service; production-connected first through Dungeon Room Creator 1.0"
+    },
+    "assets/gensrpg/core/text-utils-v1.js": {
+      "owner": "GenSrpG Core Text Utils",
+      "domain": "core",
+      "role": "canonical pure HTML escaping utility connected through Dungeon Room Creator 1.0"
+    },
+    "assets/gensrpg/dungeon/core01-session-ui-v1.js": {
+      "owner": "Dungeon Core01 Session/UI",
+      "domain": "dungeon",
+      "role": "byte-identical former gensDungeonCore01Js inline IIFE, loaded synchronously at its historical parser point; Dungeon session and legacy UI only"
+    },
+    "assets/gensrpg/dungeon/core051-exploration-polish-v1.js": {
+      "owner": "Dungeon Core051 Exploration Polish",
+      "domain": "dungeon",
+      "role": "byte-identical 47962-byte former dungeonCore051ExplorationPolish inline IIFE; synchronous Dungeon exploration and authored challenge UI at its original parser position"
+    },
+    "assets/gensrpg/dungeon/core200-rebuild-v1.js": {
+      "owner": "Dungeon Core200 Rebuild Runtime",
+      "domain": "dungeon",
+      "role": "byte-identical 55842-byte former dungeonCore200Rebuild active IIFE; synchronous Dungeon rebuild, interaction and start ownership in original parser order"
+    },
+    "assets/gensrpg/dungeon/core201-stability-v1.js": {
+      "owner": "Dungeon Core201 Stability",
+      "domain": "dungeon",
+      "role": "byte-identical 13990-byte native dungeonCore201Stability IIFE, keeping existing encounter UI, scene persistence, combat Bridge and original synchronous parser order"
+    },
+    "assets/gensrpg/dungeon/core202-content-density-v1.js": {
+      "owner": "Dungeon Core202 Content Density",
+      "domain": "dungeon",
+      "role": "byte-identical active 11821-byte Core202 IIFE: Dungeon encounter/trap/puzzle cadence; authored-world density guard and existing Core01 hooks at original synchronous parser position"
+    },
+    "assets/gensrpg/dungeon/core211-consolidation-v1.js": {
+      "owner": "Dungeon Core211 Consolidation",
+      "domain": "dungeon",
+      "role": "byte-identical 17511-byte former active dungeonCore211Consolidation IIFE; classic synchronous Dungeon traps, hero visibility and combat consolidation"
+    },
+    "assets/gensrpg/dungeon/core213-stability-v1.js": {
+      "owner": "Dungeon Core213 Stability",
+      "domain": "dungeon",
+      "role": "byte-identical 17519-byte former active dungeonCore213Stability IIFE; synchronous Dungeon combat, chests, pieces and puzzles stability at original parser position"
+    },
+    "assets/gensrpg/dungeon/core214-single-authority-v1.js": {
+      "owner": "Dungeon Core214 Single Authority",
+      "domain": "dungeon",
+      "role": "byte-identical 15795-byte active dungeonCore214SingleAuthority IIFE; native Dungeon scene, combat and token single-authority render kept at original parser position"
+    },
+    "assets/gensrpg/dungeon/entry-v1.js": {
+      "owner": "GenSrpG Dungeon Exploration",
+      "domain": "dungeon",
+      "role": "public Phase 7 Dungeon module entry exposing pure generated advance planning only; authored travel remains owned by DungeonAuthoredRuntime167839"
+    },
+    "assets/gensrpg/dungeon/mj72-scene-v1.js": {
+      "owner": "Dungeon MJ72 Scene / Content",
+      "domain": "dungeon",
+      "role": "byte-identical former dungeonMj72_2Script (27511 bytes); classic synchronous parser-time scene state, rarity and persistence primitives"
+    },
+    "assets/gensrpg/gens-dungeon-hero-art-repair-167874.js": {
+      "owner": "Dungeon Visual Bridge",
+      "domain": "dungeon",
+      "role": "board/editor visual compatibility; sheet portrait explicitly excluded"
+    },
+    "assets/gensrpg/gens-dungeon-hero-ingame-art-167898.js": {
+      "owner": "Dungeon Visual Bridge",
+      "domain": "dungeon",
+      "role": "built-in hero art on Dungeon boards only"
+    },
+    "assets/gensrpg/gens-dungeon-ui-cleanup-1678100.js": {
+      "owner": "Dungeon UI",
+      "domain": "dungeon",
+      "role": "targeted non-combat Dungeon UI cleanup"
+    },
+    "assets/gensrpg/gens-equipment-stat-cleanup-1678102.js": {
+      "owner": "Core Stats / Builders Bridge",
+      "domain": "core",
+      "role": "equipment editor cleanup and canonical set/evolution stats; mixed seam"
+    },
+    "assets/gensrpg/gens-hero-editor-dynamic-167897.js": {
+      "owner": "Core Stats / Builders Bridge",
+      "domain": "core",
+      "role": "canonical hero-editor stats and runtime sheet completion"
+    },
+    "assets/gensrpg/gens-mobile-combat-performance-16781022.js": {
+      "owner": "Core Performance / Bootstrap Handoff",
+      "domain": "core",
+      "role": "combat hot-path cache/dice performance plus RuntimeBootstrap entry; mixed debt"
+    },
+    "assets/gensrpg/gens-multiplayer-entry-167831.js": {
+      "owner": "Shell Multiplayer UI",
+      "domain": "shell",
+      "role": "host/join UI bridge to existing online system"
+    },
+    "assets/gensrpg/gens-rpg-runtime-repair-1678106.js": {
+      "owner": "Tactical / Dungeon Compatibility Bridge",
+      "domain": "tactical",
+      "role": "Runtime 2.00 combat seam repair and duplicate-profile repair; mixed debt"
+    },
+    "assets/gensrpg/gens-rpg-stats-clean-167874.js": {
+      "owner": "Core Stats",
+      "domain": "core",
+      "role": "canonical RPG stat/effect authority"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-coherence-1678112.js": {
+      "owner": "Tactical Historical Layer",
+      "domain": "tactical",
+      "role": "V112 spatial/readability compatibility still production-reachable"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js": {
+      "owner": "Tactical Adapter",
+      "domain": "tactical",
+      "role": "Dungeon-to-Tactical actor/weapon/runtime adapter"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js": {
+      "owner": "Tactical Bridge",
+      "domain": "tactical",
+      "role": "hard Dungeon combat router into Tactical V2"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js": {
+      "owner": "Tactical Integration",
+      "domain": "tactical",
+      "role": "combat outcome/reward integration and historical Tactical loader"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678108.js": {
+      "owner": "Tactical Historical Layer",
+      "domain": "tactical",
+      "role": "V108 interaction/readability layer still production-reachable"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678109.js": {
+      "owner": "Tactical Historical Layer",
+      "domain": "tactical",
+      "role": "V109 timeline/HUD/ranged layer still production-reachable"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-rules.js": {
+      "owner": "Tactical Rules",
+      "domain": "tactical",
+      "role": "cell cover and deterministic tactical rules"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js": {
+      "owner": "Tactical Stats Bridge",
+      "domain": "tactical",
+      "role": "cached canonical RPG stat snapshots"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js": {
+      "owner": "Tactical UI",
+      "domain": "tactical",
+      "role": "battlefield UI and current base wall rendering"
+    },
+    "assets/gensrpg/gens-rpg-tactical-combat-v2.js": {
+      "owner": "Tactical Engine",
+      "domain": "tactical",
+      "role": "isolated deterministic combat state engine"
+    },
+    "assets/gensrpg/gens-rpg-tactical-runtime-authority-1678113.js": {
+      "owner": "Tactical Runtime Authority",
+      "domain": "tactical",
+      "role": "room scope, detection and final runtime seam authority"
+    },
+    "assets/gensrpg/gens-rpg-tactical-runtime-fixes-1678111.js": {
+      "owner": "Tactical Historical Layer",
+      "domain": "tactical",
+      "role": "V111 dock/dice/runtime compatibility still production-reachable"
+    },
+    "assets/gensrpg/gens-rpg-tactical-visual-dice-16781142.js": {
+      "owner": "Tactical Final Resolution",
+      "domain": "tactical",
+      "role": "V114.11 visible D100/session/damage authority"
+    },
+    "assets/gensrpg/gens-stat-upgrade-policy-167898.js": {
+      "owner": "Core Stats / Progression Policy",
+      "domain": "core",
+      "role": "per-stat upgrade lock and characteristic-point cost policy"
+    },
+    "assets/gensrpg/gens-ui-recovery-167843.js": {
+      "owner": "Shell UI Recovery",
+      "domain": "shell",
+      "role": "Builder modal visibility recovery only"
+    },
+    "assets/gensrpg/gens-world-summary-167820.js": {
+      "owner": "Shell World Summary",
+      "domain": "shell",
+      "role": "live world-card summaries from content sources"
+    },
+    "assets/gensrpg/pvp/module-launch-v1.js": {
+      "owner": "GenSrpG PvP Module Launch V1",
+      "domain": "pvp",
+      "role": "Single opt-in PvP launch provider registered through the existing Shell contract; cannot launch unprepared sessions"
+    },
+    "assets/gensrpg/pvp/session-v1.js": {
+      "owner": "GenSrpG PvP Session V1",
+      "domain": "pvp",
+      "role": "PvP-only immutable configured session state and explicit lifecycle; no gameplay rule resolution"
+    },
+    "assets/gensrpg/pvp/shell-composition-v1.js": {
+      "owner": "GenSrpG PvP Shell Composition V1",
+      "domain": "pvp",
+      "role": "One explicit Shell-to-PvP binding without navigation ownership, combat or automatic start"
+    },
+    "assets/gensrpg/shell/module-launch-final-authority-v1.js": {
+      "owner": "GenSrpG Shell Module Launch Final Authority",
+      "domain": "shell",
+      "role": "final startConfiguredGame routing authority delegating only to the public GensShellModuleLaunchV1 registry"
+    },
+    "assets/gensrpg/survival/entry-v1.js": {
+      "owner": "GenSrpG Survival Wave Rules",
+      "domain": "survival",
+      "role": "active Survival module entry exposing pure wave-profile defaults and enemy-id collection"
+    },
+    "assets/gensrpg/tactical/entry-v1.js": {
+      "owner": "Tactical Module Entry",
+      "domain": "tactical",
+      "role": "public Tactical composition entry; owns ordered loading of the six base Tactical layers"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-gameplay-modal-mount-v1.js": {
+      "owner": "Monster Capture / historical captureGameplayModalMount",
+      "domain": "capture",
+      "role": "Existing single Capture captureGameplayModalMount script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-playtest-fix128-v1.js": {
+      "owner": "Monster Capture / historical capturePlaytestFix128",
+      "domain": "capture",
+      "role": "Existing single Capture capturePlaytestFix128 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix129-v1.js": {
+      "owner": "Monster Capture / historical captureFix129",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix129 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix130-v1.js": {
+      "owner": "Monster Capture / historical captureFix130",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix130 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix131-v1.js": {
+      "owner": "Monster Capture / historical captureFix131",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix131 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix132-v1.js": {
+      "owner": "Monster Capture / historical captureFix132",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix132 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix133-v1.js": {
+      "owner": "Monster Capture / historical captureFix133",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix133 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix134-v1.js": {
+      "owner": "Monster Capture / historical captureFix134",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix134 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix135-v1.js": {
+      "owner": "Monster Capture / historical captureFix135",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix135 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix136-v1.js": {
+      "owner": "Monster Capture / historical captureFix136",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix136 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix137-v1.js": {
+      "owner": "Monster Capture / historical captureFix137",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix137 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix138-v1.js": {
+      "owner": "Monster Capture / historical captureFix138",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix138 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix139-v1.js": {
+      "owner": "Monster Capture / historical captureFix139",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix139 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-fix140-v1.js": {
+      "owner": "Monster Capture / historical captureFix140",
+      "domain": "capture",
+      "role": "Existing single Capture captureFix140 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-items141-v1.js": {
+      "owner": "Monster Capture / historical captureItems141",
+      "domain": "capture",
+      "role": "Existing single Capture captureItems141 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-buffs142-v1.js": {
+      "owner": "Monster Capture / historical captureBuffs142",
+      "domain": "capture",
+      "role": "Existing single Capture captureBuffs142 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-buff-fx143-v1.js": {
+      "owner": "Monster Capture / historical captureBuffFx143",
+      "domain": "capture",
+      "role": "Existing single Capture captureBuffFx143 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/capture/legacy-patches/capture-ability-truth144-v1.js": {
+      "owner": "Monster Capture / historical captureAbilityTruth144",
+      "domain": "capture",
+      "role": "Existing single Capture captureAbilityTruth144 script physically moved byte-identical without changing behavior, parser order or global assignment ownership; not a second engine"
+    },
+    "assets/gensrpg/core/legacy-magic-sounds-v1.js": {
+      "owner": "GenSrpG Core / shared immutable magic audio library R07",
+      "domain": "core",
+      "role": "single byte-exact set of three embedded MP3 data URLs; synchronous pure data owner, no gameplay logic or new sound engine"
+    },
+    "assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js": {
+      "owner": "GenSrpG Builders / Shared Ability and Skill Catalog R08",
+      "domain": "builders",
+      "role": "57 original library/editor functions moved bit-identical, Escape listener unchanged at original parser position, no combat engine duplicated"
+    },
+    "assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js": {
+      "owner": "GenSrpG Survie / vague, réserve et apparition R09",
+      "domain": "survival",
+      "role": "72 fonctions originales de l'éditeur de vagues, pioche d'apparition et affichage spawn; aucun moteur de combat dupliqué; script classique synchrone"
+    },
+    "assets/gensrpg/capture/legacy-monolith-functions-v1.js": {
+      "owner": "GenSrpG Capture / 90 legacy declarations R10",
+      "domain": "capture",
+      "role": "90 fonctions historiques Capture originales (combat classique, creat/XP, inventaire, boutiques, soin, regles de mode). Aucun nouveau moteur. Chargement classique synchrone"
+    },
+    "assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js": {
+      "owner": "GenSrpG Dungeon / 96 RPG rules, progression and talents historical declarations R12",
+      "domain": "dungeon",
+      "role": "96 original top-level Dungeon RPG rule, character progression and talent declarations, byte-identical. No generic Builders ability library or shared Core rules. Classic synchronous before remaining monolith."
+    },
+    "assets/gensrpg/builders/legacy-enemy-editor-v1.js": {
+      "owner": "GenSrpG Builders / enemy editor and enemy library R13",
+      "domain": "builders",
+      "role": "31 byte-exact historical enemy editor functions. Classic synchronous before original anonymous script. No runtime spawn, enemy conversion or combat rules."
+    },
+    "assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js": {
+      "owner": "GenSrpG Builders RPG universe editor R14",
+      "domain": "builders",
+      "role": "41 byte-exact RPG universe UI/form/save functions, historical Core/profile/runtime calls unchanged; no initializer moved."
+    },
+    "assets/gensrpg/builders/legacy-character-entity-editors-v1.js": {
+      "owner": "GenSrpG Builders R15 — hero/controllable-creature/companion editors",
+      "domain": "builders",
+      "role": "54 original byte-identical UI/authoring declarations, no Core entity storage or Capture runtime, synchronous at original parser seam"
+    },
+    "assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js": {
+      "owner": "Dungeon Core303 / timeline combat",
+      "domain": "dungeon",
+      "role": "9 158 octets originaux du propriétaire historique final Core303 déplacés à l'identique au même parser slot après Core316. Anciens wrappers inchangés pour parité jusqu'à preuve de retrait."
+    }
+  }
+}

@@ -1,0 +1,53 @@
+# GenSrpG — Phase 12 R09 : extraction Survie, configuration vagues et apparitions
+
+**18 octobre 2026 — checkpoint technique GREEN sur `8580587f2aab5bc3918950bc152b4a56e4d79a8d` et retour manuel Survie positif de l'utilisateur.** Phase 12 reste ouverte.
+
+## Source et checkpoint (§§25–26)
+
+- R08 GREEN certifié et accepté : `f458f0dce79a6bf0034c69bca36313f671d51fc4` ; checkpoint `checkpoint/gensrpg-phase12-r08-shared-ability-skill-catalog-green-2026-10-18`.
+- Source transmise par l'utilisateur : `d7.zip` ; HTML exact R08 **2 131 805 octets**, Git blob `6eeed45a0a12085c1b107ee6c24b49040277ca54`. Contrôle positif avant modification.
+- START : `checkpoint/gensrpg-start-phase12-r09-survival-wave-spawn-2026-10-18` créé à partir du SHA exact ci-dessus **avant les modifications** ; branche `work/gensrpg-phase12-r09-survival-wave-spawn-2026-10-18`.
+- Production `main` gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`; aucun laboratoire concerné.
+
+## Périmètre effectivement déplacé
+
+72 **déclarations originales inchangées** sont physiquement sorties du grand script historique multi-domaines (vagues et réserves zombies, configuration et profils de vagues, ensembles, génération/pioche de cartes d'apparition, présentation des résultats). Elles sont maintenant dans `assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js` sous le propriétaire Survie. Il s'agit d'une extraction, **pas d'une modification des règles de gameplay** ni d'un second moteur. Les constantes communes, appels éventuels aux éditeurs et opérations hors ce groupe restent à leur place initiale.
+
+Chargement JS classique **synchrone immédiatement avant** le grand script qui déclare les constantes partagées et utilisait ces fonctions : les fonctions sont des déclarations hoistées, aucun appel d'initialisation n'est déplacé. Un import dans le service worker et une entrée `docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json` complètent le raccord.
+
+| Fichier | Octets | Blob Git |
+|---|---:|---|
+| `index.html` R08 source | 2 131 805 | `6eeed45a0a12085c1b107ee6c24b49040277ca54` |
+| `index.html` R09 projeté et publié | **2 093 066** | `4dbe3314d5048f2def404ed674498c0670c04fc1` |
+| `assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js` | **39 292** | `515642eda275802c50af867d5712517d47020414` |
+
+Réduction physique du HTML **38 739 octets** ; toutes les déclarations sont conservées dans le propriétaire externe. Aucun asset visuel ni stockage persistant déplacé. Il reste un grand script HTML historique multi-domaines : **la Phase 12 n'est pas terminée**.
+
+## Contrôles et retour arrière
+
+- L'extraction a été produite par `tools/gensrpg_phase12_r09_wave_extract_apply.cjs`, avec **vérification stricte de l'empreinte R08 à l'entrée, de chaque fonction extraite, des octets finaux, des positions et du rollback exact R09 → R08**. Son premier garde a échoué avant tout changement à cause d'une confusion de longueur UTF-16 ; le garde a été rectifié, sans affaiblir les SHA, puis l'[application contrôlée a réussi](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39134393939).
+- Le moteur vérifie `--verify` par comparaison avec le commit R08 et l'empreinte des fichiers R09. `--restore-r08` reconstruit les octets exacts du fichier validé R08 pour les tests anciens (sans lire un gros HTML via GitHub). La chaîne de retour `R09 → R08 → R07 → R06` permet de **préserver** les sentinelles historiques existantes sans modifier leurs attentes.
+- `tests/gensrpg_phase12_r09_wave_sentinel.test.cjs` protège les 72 déclarations globales, réserve et limites, sauvegarde de profil, pioche de cartes, ordre du chargement, SHA et compilation. CI dédiée `.github/workflows/gensrpg-phase12-r09-wave-sentinels.yml`.
+- **Tests requis exécutés :** R09 source/rollback, Firefox, Tactical, Architecture statique + navigateur Chromium, tous **SUCCESS sur le même SHA `8580587f2aab5bc3918950bc152b4a56e4d79a8d`**. Navigation Survie, Dungeon, Capture, Shell, PWA, PvP placeholder, sauvegardes et non-interférence couverts par les sentinelles. Aucun merge de `main`.
+
+Le nouveau code fonctionnel a été publié sur la branche R09 au commit `40e192a4b39e2e8fed17818cd69707ec297603cc`; les commits suivants ne modifient que la documentation, les contrôles et les fixtures de reconstruction pour la CI.
+
+## Preuves de certification et incident navigateur
+
+Quatre suites CI **SUCCESS**, toutes sur le commit de code/test `8580587f2aab5bc3918950bc152b4a56e4d79a8d` :
+
+- [Source R09, garde SHA et rollback R08](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39149826953)
+- [Firefox UI](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39149826901)
+- [Tactical Firefox et Chromium](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39149826949)
+- [Architecture statique (359 étapes) et navigateur Chromium PC/mobile](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39149826926)
+
+L'ancienne sentinelle de déplacements Dungeon PC/mobile était instable à cause d'une **embuscade aléatoire** lors du scénario « déplacement désactivé ». Sur la passe échouée, le vrai combat Tactical masquait la case du plateau en mobile ; la capture/action GitHub `39148724875` montre le combat, et les traces indiquent « ÉVÉNEMENT — Embuscade ». La correction limitée au **test** ouvre l'éditeur de profil, coupe les événements de round, sélectionne le déclenchement manuel et une chance de 0, sauvegarde ces réglages via les contrôles réels, puis confirme que le module de déplacement demeure désactivé avant de tester les clics/touches. Aucun code de jeu, aucune règle de combat, aucun faux événement injecté ; les parcours PC et mobile ainsi que tout Chromium ont ensuite réussi.
+
+Checkpoint final §25 créé **uniquement après les quatre succès** :
+`checkpoint/gensrpg-phase12-r09-survival-wave-spawn-green-2026-10-18` → `8580587f2aab5bc3918950bc152b4a56e4d79a8d`. R09 testé sur Survie avec retour utilisateur positif le 18 octobre 2026 ; checkpoint précédent R08 GREEN `f458f0dce79a6bf0034c69bca36313f671d51fc4`. `main` demeure gelée sur `e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Validation utilisateur R09 et prochaine décision
+
+Le 18 octobre 2026, après avoir testé Survie, l'utilisateur indique : « Ok, j'ai testé survie, tout semble très bien fonctionné ». Ce retour manuel est **positif** et ne signale aucun défaut sur le parcours testé. Il vaut acceptation manuelle de ce jalon Survie, mais **pas** validation exhaustive de tous les modes ni clôture de la Phase 12. Référence testée : [preview immuable R09](https://html-preview.github.io/?url=https://github.com/slyen4425-cloud/Zombicide-40k/blob/8580587f2aab5bc3918950bc152b4a56e4d79a8d/preview.html).
+
+**Suite :** auditer les frontières qui restent dans le grand HTML et définir un critère de sortie mesurable avant de cadrer un prochain lot ; ne pas ouvrir automatiquement R10, ne pas toucher aux laboratoires, aux 32 images historiques ni à `main`.

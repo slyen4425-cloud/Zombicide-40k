@@ -3,6 +3,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
+const entry=fs.readFileSync(path.join(root,'assets','gensrpg','dungeon','entry-v1.js'),'utf8');
 const src=fs.readFileSync(path.join(root,'assets','dungeon','dungeon-zone-links-167846.js'),'utf8');
 const RT='gensrpg_dungeon_runtime_v2';
 function storage(initial={}){const m=new Map(Object.entries(initial));return {getItem(k){return m.has(k)?m.get(k):null},setItem(k,v){m.set(k,String(v))},removeItem(k){m.delete(k)}}}
@@ -16,7 +17,7 @@ let authoredActive=true,nextRoom=2;
 const authored={active(){return authoredActive},graph(){return JSON.parse(JSON.stringify(graph))},enterNode(g,target,edge){const node=(g.nodes||[]).find(n=>n.id===target);if(!node)return false;const x=JSON.parse(store.getItem(RT));const s=x.authored167839||{worldId:g.id,heroNodes:{},nodeRooms:{},roomNodes:{},history:{hero:[]}};let rn=Number(s.nodeRooms[target]);if(!rn){rn=++nextRoom;s.nodeRooms[target]=rn;s.roomNodes[String(rn)]=target}x.room=rn;s.heroNodes.hero=target;x.authored167839=s;x.positions.hero=Number(edge?.toEntryIndex)||0;x.last={authoredRuntime167839:true,worldRuntime167823:true,worldDungeonId:g.id,worldNodeId:target,customRoomId:node.roomId,map:{cells:cellsForRoom(node.roomId)}};store.setItem(RT,JSON.stringify(x));return true},syncActionButton(){return true}};
 const roomApi={findRoom(id){return rooms[id]?JSON.parse(JSON.stringify(rooms[id])):null},loadLibrary(){return Object.values(rooms).map(r=>JSON.parse(JSON.stringify(r)))}};
 const context={console,JSON,Math,Date,localStorage:store,setTimeout(){return 1},DungeonAuthoredRuntime167839:authored,DungeonWorldBuilder167821:builder,DungeonRoomCreator100:roomApi,DungeonCore01:{render(){return true}},showToast(){}};
-context.window=context;context.globalThis=context;vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-zone-links-167846.js'});
+context.window=context;context.globalThis=context;vm.createContext(context);vm.runInContext(entry,context,{filename:'assets/gensrpg/dungeon/entry-v1.js'});vm.runInContext(src,context,{filename:'dungeon-zone-links-167846.js'});
 const api=context.DungeonZoneLinks167846;assert.ok(api);assert.equal(api.APP_VERSION,'16.78.50');assert.equal(api.VERSION,'1.2.1');
 const cacheClick={target:{closest(sel){if(sel==='#drc100Modal,#drc300Modal')return {};if(sel==='#drc300Caches')return {};return null}}};
 const structuralClick={target:{closest(sel){if(sel==='#drc100Modal,#drc300Modal')return {};if(sel==='#drc300Caches')return null;return null}}};

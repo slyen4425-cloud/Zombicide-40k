@@ -40,8 +40,9 @@ const ui=fs.readFileSync(path.join(root,'assets','gensrpg','gens-rpg-tactical-co
 assert.doesNotMatch(visual,/new\s+rt\.MutationObserver|observer\.observe\s*\(/,'final authority must not observe document.body');
 assert.doesNotMatch(visual,/U\.render\s*=|core\[name\]\s*=/,'final authority must not wrap renderers');
 assert.match(ui,/gtv2WallTile/,'base UI must emit the stable wall bitmap directly');
-assert.match(ui,/blocked\.has\(k\)\?wallTileHtml\(\)/,'tactical wall image must exist in initial render HTML');
-assert.match(ui,/insertAdjacentHTML\("afterbegin",wallTileHtml\(\)\)/,'Dungeon wall image must exist before live DOM insertion');
+assert.match(ui,/blocked\.has\(k\)\?\(borrowed\?"":wallTileHtml\(\)\)/,'Tactical image fallback must exist when Dungeon has no borrowed art');
+assert.match(ui,/function wallTileHtml\(\)/,'Tactical wall owner keeps its own canonical JPEG');
+assert.doesNotMatch(ui.slice(ui.indexOf('function installGlobalPolish(){'),ui.indexOf('function restoreOwned(')),/patchDungeonMapHtml\(\)|hookDungeonRender\(\)/,'Tactical install must never take native Dungeon wall authority');
 assert.match(ui,/calculationSummary/,'calculation summary must be visible in tactical UI');
 assert.match(ui,/Conversion de l’arme une seule fois, puis Défense, Esquive et Couvert une seule fois chacun/,'calculation UI must explain single application');
 assert.match(ui,/getAnimations/,'dice result must await the one CSS animation without another overlay timer');

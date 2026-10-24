@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "phase": 10,
+  "stage": "S3-configured-PvP-setup-UI-not-composed",
+  "module": "pvp",
+  "owner": "pvp",
+  "entry": "assets/gensrpg/pvp/setup-ui-v1.js",
+  "mount": "explicit injection of container, activeModule and existing PvP session provider",
+  "lifecycle": [
+    "mount",
+    "dispose",
+    "status"
+  ],
+  "data": {
+    "sessionId": "creator supplied; required",
+    "sides": "two or more, creator IDs and participants",
+    "rules": "explicit non-empty JSON object with creator values; no combat defaults"
+  },
+  "consumes": [
+    "GensPvpModuleLaunchV1.prepare",
+    "GensPvpSessionV1.prepare validates participant uniqueness and clones/freeze data"
+  ],
+  "forbidden": [
+    "gameplay or combat formula defaults",
+    "cross-module globals",
+    "foreign DOM changes",
+    "storage writes",
+    "global event listeners",
+    "timers and observers",
+    "implicit module load"
+  ],
+  "currentUserExperience": "PVP — À VENIR; not yet mounted in production",
+  "nextGate": "require exact index under §26 if full Shell UI route needs it; real browser and user manual test before claiming available screen"
+}

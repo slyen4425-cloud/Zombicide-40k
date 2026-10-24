@@ -3,8 +3,8 @@
 (function(){
 "use strict";
 const R=typeof window!=="undefined"?window:globalThis,D=typeof document!=="undefined"?document:null;
+const StatsNorm=R.GensStatsNormalizationV1;if(!StatsNorm)throw new Error("GensStatsNormalizationV1 must load before GensCleanRpgStats167874");
 const VERSION="3.5.0",APP_VERSION="16.78.114.7",EFFECT_KEY="dynamicEffects90",LEGACY_MIGRATION_KEY="legacyEffectsMigrated94",NATIVE_MIGRATION_KEY="nativeCoreMigrated95";
-const ALIAS={agility:"agilite",spirit:"esprit",strength:"force",dexterity:"agilite",wisdom:"esprit",constitution:"endurance",defence:"defense",armour:"armor",move:"movement"};
 const CORE=[
  ["force","Force","💪",10,0,999,"Dégâts physiques et précision de mêlée."],
  ["agilite","Agilité","🏃",10,0,999,"Distance, critique, esquive et initiative."],
@@ -37,17 +37,14 @@ const LEGACY=[
 ];
 const HERO_INPUTS={force:"hcRpgForce",agilite:"hcRpgAgility",intelligence:"hcRpgIntelligence",esprit:"hcRpgSpirit",endurance:"hcRpgEndurance",defense:"hcRpgDefense",armor:"hcRpgArmor",initiative:"hcRpgInitiative",movement:"hcRpgMovement"};
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const slug=v=>String(v||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9_ -]/g,"").replace(/[ -]+/g,"_").replace(/^_+|_+$/g,"");
-const canon=id=>ALIAS[String(id||"")]||String(id||"");
+const slug=StatsNorm.slug,canon=StatsNorm.canon;
 const num=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f,clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const clone=v=>{try{return JSON.parse(JSON.stringify(v))}catch(e){return v}};
 function dungeon(){try{return !!R.isDungeonMode?.()}catch(e){return false}}
 function profile(){try{return R.currentRpgProfile?.()||R.getActiveGameProfile?.()||null}catch(e){return null}}
 function profiles(){try{return R.loadGameProfiles?.()||[]}catch(e){return []}}
-function saveProfile(p){try{const a=profiles();if(!Array.isArray(a)||!p)return false;const ids=[p.id,R.activeGameProfileId?.(),R.getActiveGameProfileId?.()].filter(Boolean).map(String);let i=a.findIndex(x=>ids.includes(String(x?.id||"")));if(i<0&&p?.name){const same=a.map((x,n)=>String(x?.name||"")===String(p.name)?n:-1).filter(n=>n>=0);if(same.length===1)i=same[0]}if(i<0&&a.length===1)i=0;if(i<0)return false;a[i]=p;R.saveGameProfiles?.(a);return true}catch(e){console.warn("clean stats save profile",e);return false}}
-function normDef(d){if(!d)return null;const id=canon(slug(d.id||d.name));if(!id)return null;const min=num(d.min,0),max=Math.max(min,num(d.max,999));return {id,name:String(d.name||id),icon:String(d.icon||"📊"),defaultValue:clamp(num(d.defaultValue,0),min,max),min,max,visible:d.visible!==false,description:String(d.description||"")}}
-function targetValid(t){return TARGETS.some(x=>x[0]===t)||String(t||"").startsWith("stat:")}
-function normEffect(e,i=0){if(!e)return null;const source=canon(e.source),target=String(e.target||"");if(!source||!targetValid(target))return null;return {id:String(e.id||("effect_"+(i+1))),source,target,mode:e.mode==="threshold"?"threshold":"step",step:Math.max(1,num(e.step,1)),gain:num(e.gain,0),threshold:num(e.threshold,10),comparator:["gt","gte","lt","lte","eq"].includes(e.comparator)?e.comparator:"gt",enabled:e.enabled!==false}}
+function saveProfile(p){try{const a=profiles();if(!Array.isArray(a)||!p)return false;const pid=String(p?.id||"");let i=pid?a.findIndex(x=>String(x?.id||"")===pid):-1;if(i<0&&!pid){const ids=[R.activeGameProfileId?.(),R.getActiveGameProfileId?.()].filter(Boolean).map(String);i=a.findIndex(x=>ids.includes(String(x?.id||"")))}if(i<0&&p?.name){const same=a.map((x,n)=>String(x?.name||"")===String(p.name)?n:-1).filter(n=>n>=0);if(same.length===1)i=same[0]}if(i<0&&a.length===1)i=0;if(i<0)return false;a[i]=p;R.saveGameProfiles?.(a);return true}catch(e){console.warn("clean stats save profile",e);return false}}
+const normDef=StatsNorm.normalizeDefinition,targetValid=StatsNorm.isValidTarget,normEffect=StatsNorm.normalizeEffect;
 function root(p=profile()){
  if(!p?.rpgUniverse)return null;
  const s=p.rpgUniverse.stats=p.rpgUniverse.stats&&typeof p.rpgUniverse.stats==="object"?p.rpgUniverse.stats:{};
@@ -78,10 +75,11 @@ function specialBaseTotal(hero,id){let n=specialRaw(hero,id);if(hero===String(R.
 let nativeAttr=null,nativeChange=null,sheetObserver=null,heroEditorId=null;
 function customBase(hero,id){const d=def(id),st=stFor(hero),heroBase=num(heroDef(hero)?.dungeonStats?.[id],d?.defaultValue??0);if(!d)return 0;if(!st)return heroBase;st.rpgAttributes=st.rpgAttributes&&typeof st.rpgAttributes==="object"?st.rpgAttributes:{};if(!Number.isFinite(Number(st.rpgAttributes[id])))st.rpgAttributes[id]=heroBase;return clamp(num(st.rpgAttributes[id],heroBase),d.min,d.max)}
 function baseValue(hero,id){id=canon(id);const d=def(id);if(!d||!active(id))return 0;if(SPECIAL_NATIVE.has(id))return specialBaseTotal(hero,id);let n=customBase(hero,id);try{n+=num(R.dungeonEquipmentBonus?.(id),0)}catch(e){}try{n+=num(R.dungeonSkillEffectTotal?.("attribute",null,id),0)}catch(e){}try{n+=num(R.dungeonChallengeDebuffTotal067?.(id,stFor(hero)),0)}catch(e){}return n}
-function compare(v,c,t){return c==="gte"?v>=t:c==="lte"?v<=t:c==="lt"?v<t:c==="eq"?v===t:v>t}
+const compare=StatsNorm.compare;
 function effectAmount(e,hero,seen){if(!e?.enabled)return 0;const v=value(hero,e.source,seen);if(e.mode==="threshold")return compare(v,e.comparator,e.threshold)?e.gain:0;return Math.floor(v/Math.max(1,e.step))*e.gain}
 function statEffectTotal(id,hero,seen=new Set()){const target="stat:"+canon(id);return effects().filter(e=>e.enabled&&e.target===target).reduce((n,e)=>n+effectAmount(e,hero,seen),0)}
 function extraTotal(target,hero=String(R.current||""),seen=new Set()){return effects().filter(e=>e.enabled&&e.target===target).reduce((n,e)=>n+effectAmount(e,hero,seen),0)}
+function sourceEffectTotal(target,source,hero=String(R.current||""),seen=new Set()){source=canon(source);return effects().filter(e=>e.enabled&&e.target===target&&e.source===source).reduce((n,e)=>n+effectAmount(e,hero,seen),0)}
 function value(hero,id,seen=new Set()){id=canon(id);const d=def(id);if(!d||!active(id))return 0;if(seen.has(id))return baseValue(hero,id);const next=new Set(seen);next.add(id);let n=baseValue(hero,id)+statEffectTotal(id,hero,next);if(SPECIAL_NATIVE.has(id))n+=extraTotal(id,hero,next);return clamp(n,d.min,d.max)}
 function saveState(hero,st){try{if(hero===String(R.current||"")&&R.state===st){R.save?.();return true}if(typeof R.key==="function"){localStorage.setItem(R.key(hero),JSON.stringify(st));return true}R.saveState?.(hero,st);return true}catch(e){return false}}
 function runtimeDefs(){return defs().filter(d=>active(d.id)&&d.visible!==false)}
@@ -115,6 +113,62 @@ function renderHeroEditorStats(id=heroEditorId){if(!D)return false;heroEditorId=
 function readHeroDynamicFields(){const out={};if(!D)return out;for(const input of D.querySelectorAll("[data-gens-dynamic-hero-stat]"))out[input.getAttribute("data-gens-dynamic-hero-stat")]=num(input.value,def(input.getAttribute("data-gens-dynamic-hero-stat"))?.defaultValue||0);return out}
 function persistHeroDynamic(id,vals,beforeIds=[]){if(!id||!vals||!Object.keys(vals).length)return false;try{const list=R.loadCustomHeroesMulti?.()||[];let target=list.find(x=>String(x.id)===String(id));if(!target&&list.length){const old=new Set(beforeIds.map(String));target=list.find(x=>!old.has(String(x.id)))}if(target){target.dungeonStats=target.dungeonStats&&typeof target.dungeonStats==="object"?target.dungeonStats:{};Object.assign(target.dungeonStats,vals);R.saveCustomHeroesMulti?.(list);if(R.CHARS?.[target.id]?.dungeonStats)Object.assign(R.CHARS[target.id].dungeonStats,vals);return true}if(R.CHARS?.[id]){R.CHARS[id].dungeonStats=R.CHARS[id].dungeonStats&&typeof R.CHARS[id].dungeonStats==="object"?R.CHARS[id].dungeonStats:{};Object.assign(R.CHARS[id].dungeonStats,vals);return true}}catch(e){console.warn("hero dynamic stats save",e)}return false}
 function movementFallback(){return Math.max(0,num(profile()?.rpgUniverse?.movement?.defaults?.hero,3))}
+function coreStatsServices(){
+ const S3=R.GensStatsValueEngineV1,S4=R.GensStatsHeroValuesV1,S5=R.GensStatsModifierProviderV1,S6=R.GensStatsDerivedValuesV1,S7=R.GensStatsSnapshotV1;
+ if(!S3?.create||!S4?.resolve||!S5?.collect||!S6?.derive||!S7?.create)throw new Error("Core Stats S3-S7 must load before Tactical snapshot raccord");
+ return {S3,S4,S5,S6,S7}
+}
+function coreSnapshot(hero=String(R.current||"")){
+ hero=String(hero||R.current||"");if(!hero)return null;
+ const {S3,S4,S5,S6,S7}=coreStatsServices(),definitions=runtimeDefs(),s=root(),st=stFor(hero),rec=heroDef(hero)||{};
+ const definitionValues={...(rec?.dungeonStats&&typeof rec.dungeonStats==="object"?rec.dungeonStats:{})};
+ for(const id of SPECIAL_NATIVE)if(definitionValues[id]===undefined&&Number.isFinite(Number(rec?.[id])))definitionValues[id]=Number(rec[id]);
+ const baseValues=S4.resolve({
+  definitions,
+  definitionValues,
+  runtimeValues:st?.rpgAttributes&&typeof st.rpgAttributes==="object"?st.rpgAttributes:(st?{}:null),
+  fallbackValues:{movement:movementFallback()},
+  clampWithoutRuntime:[...SPECIAL_NATIVE]
+ }).baseValues;
+ const equipmentValues={},skillValues={},challengeValues={};
+ for(const d of definitions){
+  const id=d.id;
+  if(SPECIAL_NATIVE.has(id)){
+   if(id==="defense"||id==="armor"){
+    try{equipmentValues[id]=num(R.dungeonEquipmentBonus?.(id),0)}catch(e){}
+    try{skillValues[id]=num(R.dungeonSkillEffectTotal?.(id),0)}catch(e){}
+   }
+   continue;
+  }
+  try{equipmentValues[id]=num(R.dungeonEquipmentBonus?.(id),0)}catch(e){}
+  try{skillValues[id]=num(R.dungeonSkillEffectTotal?.("attribute",null,id),0)}catch(e){}
+  try{challengeValues[id]=num(R.dungeonChallengeDebuffTotal067?.(id,st),0)}catch(e){}
+ }
+ const modifiers=S5.collect({definitions,sources:[
+  {source:"equipment",values:equipmentValues},
+  {source:"skills",values:skillValues},
+  {source:"challenge",values:challengeValues}
+ ]});
+ const engine=S3.create({
+  definitions,
+  active:Array.isArray(s?.active)?s.active:definitions.map(d=>d.id),
+  baseValues,
+  modifiers,
+  effects:effects(),
+  directValueTargets:[...SPECIAL_NATIVE]
+ });
+ const values={};for(const d of definitions)values[d.id]=engine.value(d.id);
+ const external={};
+ for(const id of ["mana","crit","dodge","magicDefense"]){
+  let total=0;try{total+=num(R.dungeonEquipmentBonus?.(id),0)}catch(e){}
+  try{total+=num(R.dungeonSkillEffectTotal?.(id),0)}catch(e){}
+  external[id]=total;
+ }
+ const fx={};for(const target of ["damage:physical","damage:melee","damage:magic","max_hp","max_mana","crit","dodge","initiative","magic_resistance"])fx[target]=engine.extraTotal(target);
+ const rules=R.loadDungeonRpgRules?.()||{},baseHp=Math.max(1,num(rec?.maxHp??st?.maxWounds,3));
+ const derived=S6.derive({values,rules,baseHp,external,effects:fx});
+ return S7.create({heroId:hero,definitions,values,derived})
+}
 function installRuntime(){
  nativeAttr=wrap("dungeonAttributeValue",old=>function(id){id=canon(id);return dungeon()&&def(id)?(active(id)?value(String(R.current||""),id):0):old.apply(this,arguments)})||nativeAttr;
  nativeChange=wrap("changeDungeonAttribute",old=>function(id,delta){id=canon(id);const d=def(id);if(dungeon()&&d&&!active(id))return false;if(dungeon()&&SPECIAL_NATIVE.has(id))return changeSpecial(id,delta);if(dungeon()&&d&&!CORE_IDS.has(id)){syncHeroDefaults();const cur=customBase(String(R.current||""),id);if(num(delta,0)>0&&cur>=d.max)return false;if(num(delta,0)<0&&cur<=d.min)return false;const out=old.apply(this,[id,delta]);setTimeout(decorateCanonicalSheet,0);return out}return old.apply(this,arguments)})||nativeChange;
@@ -138,6 +192,6 @@ function installRuntime(){
  wrap("saveCustomHero",old=>function(){const vals=readHeroDynamicFields(),before=(R.loadCustomHeroesMulti?.()||[]).map(x=>x.id),editId=heroEditorId;const out=old.apply(this,arguments);setTimeout(()=>{let id=editId;if(!id){const oldIds=new Set(before.map(String)),list=R.loadCustomHeroesMulti?.()||[];id=list.find(x=>!oldIds.has(String(x.id)))?.id||null}persistHeroDynamic(id,vals,before)},0);return out})
 }
 function install(){try{R.GENSRPG_VERSION=APP_VERSION}catch(e){}const p=profile();if(p?.gameStyle==="dungeon"){root(p);migrateLegacyEffects(p);saveProfile(p)}syncCanonicalRuntime();installRuntime();observeCanonicalSheet();setTimeout(()=>{installRuntime();renderEditor();syncCanonicalRuntime();decorateCanonicalSheet();renderHeroEditorStats(heroEditorId)},0);return true}
-R.GensCleanRpgStats167874={VERSION,APP_VERSION,CORE,TARGETS,EFFECT_KEY,LEGACY_MIGRATION_KEY,NATIVE_MIGRATION_KEY,canon,root,defs,def,active,effects,legacyEffects,migrateLegacyEffects,allEffects,value,extraTotal,changeCustom,sentence,summaryFor,syncEditor,addStat,addEffect,removeStat,removeEffect,renderEditor,runtimeDefs,syncCanonicalAttributes,syncHeroDefaults,syncCanonicalRuntime,decorateCanonicalSheet,refreshCanonicalSheet,renderHeroEditorStats,readHeroDynamicFields,persistHeroDynamic,installRuntime,install};
+R.GensCleanRpgStats167874={VERSION,APP_VERSION,CORE,TARGETS,EFFECT_KEY,LEGACY_MIGRATION_KEY,NATIVE_MIGRATION_KEY,canon,root,defs,def,active,effects,legacyEffects,migrateLegacyEffects,allEffects,value,extraTotal,sourceEffectTotal,coreSnapshot,changeCustom,sentence,summaryFor,syncEditor,addStat,addEffect,removeStat,removeEffect,renderEditor,runtimeDefs,syncCanonicalAttributes,syncHeroDefaults,syncCanonicalRuntime,decorateCanonicalSheet,refreshCanonicalSheet,renderHeroEditorStats,readHeroDynamicFields,persistHeroDynamic,installRuntime,install};
 if(D){D.readyState==="loading"?D.addEventListener("DOMContentLoaded",install,{once:true}):install()}
 })();

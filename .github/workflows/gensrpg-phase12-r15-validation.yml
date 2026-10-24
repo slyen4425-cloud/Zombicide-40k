@@ -1,0 +1,144 @@
+name: GenSrpG Phase12 R15 strict source, history, owner and tactical validation
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r15-builders-character-entity-editors-2026-10-20'
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  history:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate R15 history without disabling prior sentinels
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/gensrpg_phase12_r15_builders_character_entity_sentinel.test.cjs
+          node tests/gensrpg_phase12_r14_builders_rpg_universe_sentinel.test.cjs
+          node tests/gensrpg_phase12_r13_builders_enemy_editor_sentinel.test.cjs
+          node tests/gensrpg_phase12_r12_dungeon_rpg_rules_talents_sentinel.test.cjs
+          node tests/gensrpg_phase12_r11_retired_scripts_sentinel.test.cjs
+          node tests/gensrpg_phase12_r10_capture_sentinel.test.cjs
+      - name: Publish exact SHA result for R15 history
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOB_RESULT: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          state=failure
+          if [ "$JOB_RESULT" = success ]; then state=success; fi
+          desc="R15 history: ${JOB_RESULT}"
+          payload="$(jq -nc --arg state "$state" --arg context 'gensrpg/r15/history' --arg description "$desc" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$context,description:$description,target_url:$url}')"
+          curl --fail --silent --show-error --retry 2 -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -d "$payload" >/dev/null
+  architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate R15 architecture without disabling prior sentinels
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
+          node tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs
+          node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+          node tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs
+          node tests/gens_phase3_target_structure_contracts_v1.test.cjs
+          node tests/gens_runtime_composition_guard_v11411.test.cjs
+      - name: Publish exact SHA result for R15 architecture
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOB_RESULT: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          state=failure
+          if [ "$JOB_RESULT" = success ]; then state=success; fi
+          desc="R15 architecture: ${JOB_RESULT}"
+          payload="$(jq -nc --arg state "$state" --arg context 'gensrpg/r15/architecture' --arg description "$desc" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$context,description:$description,target_url:$url}')"
+          curl --fail --silent --show-error --retry 2 -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -d "$payload" >/dev/null
+  tactical:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate R15 tactical without disabling prior sentinels
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/gens_phase4_dice_d10048_raccord_v1.test.cjs
+          node tests/gens_phase4_dice_first_raccord_preaudit_v1.test.cjs
+      - name: Publish exact SHA result for R15 tactical
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOB_RESULT: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          state=failure
+          if [ "$JOB_RESULT" = success ]; then state=success; fi
+          desc="R15 tactical: ${JOB_RESULT}"
+          payload="$(jq -nc --arg state "$state" --arg context 'gensrpg/r15/tactical' --arg description "$desc" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$context,description:$description,target_url:$url}')"
+          curl --fail --silent --show-error --retry 2 -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -d "$payload" >/dev/null
+  regression-modes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate R15 regression-modes without disabling prior sentinels
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/gens_architecture_global_side_effect_guard.test.cjs
+          node tests/gens_rpg_tactical_session_guard_v16781144.test.cjs
+          node tests/gens_phase4_stats_s7_snapshot_audit_v1.test.cjs
+      - name: Publish exact SHA result for R15 regression-modes
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOB_RESULT: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          state=failure
+          if [ "$JOB_RESULT" = success ]; then state=success; fi
+          desc="R15 regression-modes: ${JOB_RESULT}"
+          payload="$(jq -nc --arg state "$state" --arg context 'gensrpg/r15/regression-modes' --arg description "$desc" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$context,description:$description,target_url:$url}')"
+          curl --fail --silent --show-error --retry 2 -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -d "$payload" >/dev/null

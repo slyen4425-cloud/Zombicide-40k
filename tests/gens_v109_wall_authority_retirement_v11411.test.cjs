@@ -1,0 +1,24 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const root=path.join(__dirname,'..');
+const read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const block=(source,startSig,nextSig,label)=>{const start=source.indexOf(startSig);assert.ok(start>=0,`${label}: missing ${startSig}`);const end=source.indexOf(nextSig,start);assert.ok(end>start,`${label}: missing ${nextSig}`);return source.slice(start,end)};
+const v109=read('assets/gensrpg/gens-rpg-tactical-combat-v2-polish-1678109.js');
+const ui=read('assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js');
+
+assert.match(v109,/function paintBuilderWalls\(rt=R\)/,'V109 historical wall painter must stay inspectable');
+assert.match(v109,/function hookDungeonRender\(rt=R\)/,'V109 historical Dungeon wall hook must stay inspectable');
+const enhance=block(v109,'function enhance(rt=R){','function hookUi','V109 enhance');
+const install=block(v109,'function install(rt=R){','function installWithRetries','V109 install');
+assert.doesNotMatch(enhance,/paintBuilderWalls\(rt\)/,'V109 enhance must not repaint walls');
+assert.doesNotMatch(install,/hookDungeonRender\(rt\)/,'V109 install must not hook Dungeon wall renders');
+for(const required of ['ensureStyle(rt)','normalizeBattleRanges(battle)','renderTimeline(rt)','ensureUnarmedOption(rt)','ensureQuickAttack(rt)'])assert.ok(enhance.includes(required),`V109 enhance lost ${required}`);
+for(const required of ['ensureStyle(rt)','hookAdapterRanges(rt)','hookUi(rt)','bind(rt)','enhance(rt)'])assert.ok(install.includes(required),`V109 install lost ${required}`);
+assert.doesNotMatch(install,/observe\(rt\)/,'V109 observer authority must remain retired');
+assert.match(v109,/function normalizeRangedAttack\(/,'V109 ranged repair must remain');
+assert.match(v109,/function renderTimeline\(/,'V109 timeline must remain');
+assert.match(v109,/function equipUnarmed\(/,'V109 unarmed flow must remain');
+assert.match(v109,/function ensureQuickAttack\(/,'V109 quick attack must remain');
+for(const required of [/function wallTileHtml\(/,/function ensureWallTile\(el\)/,/function paintLiveWalls\(\)/,/function patchDungeonMapHtml\(\)/,/function hookDungeonRender\(\)/])assert.match(ui,required,'canonical Tactical wall pipeline must remain intact');
+console.log('GenSrpG V114.11: V109 active wall painting retired; timeline/range/unarmed/quick attack preserved; Tactical UI owns walls');

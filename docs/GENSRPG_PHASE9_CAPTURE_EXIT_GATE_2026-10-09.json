@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "date": "2026-10-09",
+  "project": "GenSrpG",
+  "phase": 9,
+  "phaseExitReady": false,
+  "criteria": {
+    "publicEntry": {
+      "status": "proven",
+      "evidence": [
+        "assets/gensrpg/capture/entry-v1.js",
+        "tests/gens_phase5_module_launch_s3_capture_provider_browser_v1.test.cjs"
+      ],
+      "meaning": "Entrée Capture canonique et provider Shell réels; profil sans gameStyle Dungeon."
+    },
+    "sessionAndHub": {
+      "status": "proven",
+      "evidence": [
+        "assets/gensrpg/capture/session-start-v1.js",
+        "assets/gensrpg/capture/hub-entry-v1.js",
+        "assets/gensrpg/capture/screen-return-v1.js",
+        "tests/gens_phase9_capture138_delayed_hub_guard_v1.test.cjs"
+      ],
+      "meaning": "Démarrage, accès Hub et retour UI délégués et validés; timer périmé protégé."
+    },
+    "worldExploration": {
+      "status": "partial",
+      "evidence": [
+        "tests/gens_phase9_capture_post_shell_without_dungeon_style_browser_characterization_v1.test.cjs"
+      ],
+      "missingProof": "Le Hub et le passage jour 1→2 sont vérifiés, pas un cycle d'exploration autonome avec moteur Capture propriétaire hors Dungeon."
+    },
+    "teamAndBattle": {
+      "status": "partial",
+      "evidence": [
+        "tests/gens_phase9_capture_persisted_profile_without_dungeon_style_resume_characterization_v1.test.cjs",
+        "tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs"
+      ],
+      "missingProof": "Bataille et victoire réelles démontrées par fonctions Capture historiques; aucune preuve que l'intégralité combat/équipe relève d'un runtime Capture isolé."
+    },
+    "saveAndResume": {
+      "status": "partial",
+      "evidence": [
+        "tests/gens_phase9_capture_persisted_profile_without_dungeon_style_resume_characterization_v1.test.cjs"
+      ],
+      "missingProof": "La reprise Capture fonctionne même lorsqu'une ancienne sauvegarde Dungeon existe; cette fixture ne démontre pas la reprise avec aucun état Dungeon et sans autorité Dungeon active."
+    },
+    "sessionShutdown": {
+      "status": "unproven",
+      "evidence": [
+        "assets/gensrpg/capture/entry-v1.js",
+        "assets/gensrpg/capture/session-start-v1.js",
+        "assets/gensrpg/capture/hub-entry-v1.js",
+        "assets/gensrpg/capture/screen-return-v1.js"
+      ],
+      "missingProof": "Les propriétaires partiels exposent dispose(); l'entrée Capture GensCaptureV1 n'expose pas un lifecycle complet install/start/stop/dispose de session, et aucun scénario navigateur complet de fermeture autonome n'est couvert ici."
+    },
+    "noForeignRuntime": {
+      "status": "unproven",
+      "evidence": [
+        "assets/gensrpg/capture/module-contract-v1.json",
+        "tests/gens_phase9_capture_post_shell_without_dungeon_style_browser_characterization_v1.test.cjs",
+        "tests/gens_phase9_capture_persisted_profile_without_dungeon_style_resume_characterization_v1.test.cjs"
+      ],
+      "missingProof": "Aucun scénario bout en bout démontré avec runtime privés Dungeon ET Survie absents/inactifs pendant l'exploration, le combat, la reprise et la fermeture."
+    }
+  },
+  "remainingCriticalAxes": [
+    "A — Vérifier en navigateur réel Capture seul : aucune création/activation de runtime Dungeon ou Survie au lancement, durant exploration et combat; si échec, transférer un propriétaire ciblé après TDD.",
+    "B — Boucler vrai cycle Capture: équipe → exploration → combat → victoire → sauvegarde → reload/reprise sans sauvegarde Dungeon préexistante.",
+    "C — Prouver fermeture et réouverture propre Capture: timers/listeners/sessions désactivés, aucun contrôle inter-module; si échec, relier un lifecycle Capture owner-local unique."
+  ],
+  "deferUntilAfterPhase9": [
+    "Confort des éditeurs et enrichissement de contenu/FX/assets vitrine.",
+    "Refonte graphique globale et intégration intégrale des laboratoires.",
+    "Suppression indiscriminée des wrappers historiques sans preuve qu'ils bloquent le critère de sortie.",
+    "Phase 10 PvP et Phase 11 assets: ne pas les annexer à Phase 9."
+  ],
+  "scope": {
+    "runtimeChanges": false,
+    "indexInspectedDirectly": false,
+    "mainTouched": false
+  },
+  "evidence": {
+    "baselineGreenSha": "3e47a393f9fca326bf9aab21a15ba4b4d315eddb",
+    "baseDocsSha": "d45f4d4d853289895b9d76ffc6a7eb8c284b7352",
+    "mainFrozenSha": "e8681f9823573ced8aec59c8ddc47a72b02bc663",
+    "architectureBrowserRun": 37995288162,
+    "firefoxRun": 37995288148,
+    "tacticalRun": 37995288208,
+    "simultaneousLegacy138Branch": "work/gensrpg-phase9-capture138-legacy-start-retirement-2026-10-09"
+  }
+}

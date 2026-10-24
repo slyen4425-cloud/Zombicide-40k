@@ -1,0 +1,47 @@
+name: GenSrpG Phase12 post-R15 exact authority audit
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-post-r15-exit-audit-2026-10-20'
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  exact-r15-authority-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify source and no runtime drift against R15 GREEN
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = '9f35eb833a6ede4b91399854f19bb9bef59f45ab'
+          test "$(git hash-object assets/gensrpg/builders/legacy-character-entity-editors-v1.js)" = '318aad27b69593f338ace5f3602dfd7fa351c274'
+          test "$(git rev-parse refs/remotes/origin/checkpoint/gensrpg-phase12-r15-builders-character-entity-editors-green-2026-10-20)" = '95740b6353a116c7e66b5d1095338b81d8b223bf'
+          git diff --quiet '95740b6353a116c7e66b5d1095338b81d8b223bf' -- index.html service-worker.js assets/gensrpg/ docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+      - name: Verify 152 parser tags, 935765 inline bytes and 38 global overlap sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/gensrpg_phase12_post_r15_inline_authority_baseline.test.cjs --detail
+      - name: Report SHA-bound audit status
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOB_RESULT: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          state=failure
+          if [ "$JOB_RESULT" = success ]; then state=success; fi
+          description="R15 post-extraction authority census and source freeze: $JOB_RESULT"
+          payload="$(jq -nc --arg state "$state" --arg context 'gensrpg/phase12/post-r15-exit-audit' --arg desc "$description" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$context,description:$desc,target_url:$url}')"
+          curl --fail --silent --show-error -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -d "$payload" >/dev/null

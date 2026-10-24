@@ -1,0 +1,63 @@
+'use strict';
+
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+
+const root=path.join(__dirname,'..');
+const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const captureEntry=fs.readFileSync(path.join(root,'assets/gensrpg/capture/entry-v1.js'),'utf8');
+
+const blocks=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)]
+    .map(m=>({
+    id:m[1],
+    body:m[1]==='captureFix138'||m[1]==='captureFix139'
+      ? (()=>{
+          const rel='assets/gensrpg/capture/legacy-patches/'+(m[1]==='captureFix138'?'capture-fix138-v1.js':'capture-fix139-v1.js');
+          assert.equal(m[0],'<script id="'+m[1]+'" src="'+rel+'"></script>','unique R06 Capture source');
+          return fs.readFileSync(path.join(root,rel),'utf8')
+        })()
+      : m[1]==='gensDungeonCore01Js'
+      ? (()=>{assert.ok(m[0].includes('src="assets/gensrpg/dungeon/core01-session-ui-v1.js"'));
+          assert.equal(m[2],'','no duplicate inline Dungeon owner');
+          return fs.readFileSync(path.join(root,'assets/gensrpg/dungeon/core01-session-ui-v1.js'),'utf8')})()
+      : m[2]
+  }));
+
+function strictChain(name){
+  const re=new RegExp('window\\.'+name+'\\s*=(?!=)','g');
+  const out=[];
+  for(const block of blocks){
+    for(const _ of block.body.matchAll(re))out.push(block.id);
+  }
+  return out;
+}
+
+const native=index.match(/function openChar\(id\)\{[\s\S]*?\n\}/)?.[0]||'';
+assert.match(native,/document\.getElementById\("sheet"\)/,'native Shell openChar must remain the shared hero-sheet owner');
+assert.match(native,/render\(\)/,'native Shell openChar must retain canonical rendering');
+
+assert.deepEqual(strictChain('openChar'),[],
+  'Phase 5 exit requires zero inline global openChar wrapper after Capture139 retirement');
+
+const capture=blocks.find(b=>b.id==='captureFix139')?.body||'';
+assert.ok(capture,'captureFix139 block must remain present');
+assert.doesNotMatch(capture,/const\s+openChar139\s*=\s*window\.openChar/);
+assert.doesNotMatch(capture,/window\.openChar\s*=(?!=)/);
+assert.doesNotMatch(capture,/return\s+openChar139\.apply\(this,arguments\)/);
+
+assert.deepEqual(strictChain('startConfiguredGame'),['captureFix138','gensDungeonCore01Js'],
+  'openChar retirement must preserve the post-extraction ownership across inline and external scripts');
+assert.doesNotMatch(capture,/window\.startConfiguredGame\s*=|gensCaptureStartConfiguredGame139V1|legacyStartConfiguredGame/);
+assert.match(capture,/GensCaptureSessionStartV1\.install\(/);
+assert.doesNotMatch(capture,/GensShellModuleLaunchV1\.register\(["']capture["']/);
+assert.match(capture,/GensCaptureV1\.install\(window\.GensCaptureSessionStartV1\)/);
+assert.match(captureEntry,/shell\.register\("capture",startModuleSession\)/);
+
+console.log(JSON.stringify({
+  scenario:'Phase 5 Capture139 openChar retirement',
+  globalOpenCharOwners:strictChain('openChar'),
+  nativeHeroSheetOwner:'function openChar(id)',
+  preservedStartConfiguredGameOwners:strictChain('startConfiguredGame'),
+  captureProviderPreserved:true
+},null,2));

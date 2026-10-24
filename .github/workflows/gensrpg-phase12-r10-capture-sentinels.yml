@@ -1,0 +1,28 @@
+name: GenSrpG Phase12 R10 Capture source rollback and smoke
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r10-capture-legacy-functions-2026-10-18'
+permissions:
+  contents: read
+jobs:
+  r10-capture-source-and-rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Certify exact R10 source and owner blobs
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = 'b8ef8dcb497cad94c91094ed008136a5d9800155'
+          test "$(git hash-object assets/gensrpg/capture/legacy-monolith-functions-v1.js)" = 'c6ea3c101a6861b99f8bc064d2d1fec874e7266b'
+          test "$(wc -c < index.html | tr -d ' ')" = '2031649'
+          node tools/gensrpg_phase12_r10_capture_extract_apply.cjs --verify
+          test "$(node tools/gensrpg_phase12_r10_capture_extract_apply.cjs --restore-r09 | git hash-object --stdin)" = '4dbe3314d5048f2def404ed674498c0670c04fc1'
+      - name: Exercise Capture functions and previous R09 Survie invariants
+        run: |
+          node --check assets/gensrpg/capture/legacy-monolith-functions-v1.js
+          node tests/gensrpg_phase12_r10_capture_sentinel.test.cjs
+          node tests/gensrpg_phase12_r09_wave_sentinel.test.cjs

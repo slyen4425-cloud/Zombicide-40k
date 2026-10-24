@@ -49,7 +49,11 @@ function placeNewAmbushEnemies(before){return placeNewEventEnemies(before)}
 function install(){
   const old=R.applyDungeonTurnEvent;
   if(typeof old!=="function"){if(retries++<40&&typeof setTimeout==="function")setTimeout(install,100);return false}
-  if(old.__der167879)return true;
+  // V113 wraps the event for detection. Its outer wrapper must not cause
+  // repeated installation of this same proximity placement owner.
+  for(let fn=old,depth=0;typeof fn==="function"&&depth<20;fn=fn.__original,depth++){
+    if(fn.__der167879)return true;
+  }
   const wrapped=function(evt){const close=isCloseSpawnEvent(evt),before=close?enemyIds():null;const out=old.apply(this,arguments);if(close)try{placeNewEventEnemies(before)}catch(e){console.warn("Dungeon event proximity placement",e)}return out};
   wrapped.__der167879=true;wrapped.__original=old;R.applyDungeonTurnEvent=wrapped;try{R.GENSRPG_VERSION=APP_VERSION}catch(e){}return true;
 }

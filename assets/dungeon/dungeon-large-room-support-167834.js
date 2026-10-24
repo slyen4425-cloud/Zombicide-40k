@@ -53,7 +53,7 @@ function generate(kind,enemyQty,sizeOverride,oldObjective){
   const objective=clone(oldObjective)||{type:"reach_exit",status:"open",title:"Atteindre la sortie",text:"La voie vers la porte suivante est libre."};
   return {version:4,size:n,width:n,height:n,cells:a,entry,exit,entryIdx:ei,exitIdx:xo,heroIdx:hi,chestIdx,trapIdx,enemies,objective,shape:s.type,environment:"dungeon",generatedAt:Date.now(),largeRoom167835:true};
 }
-function activeHero(x){const ids=Array.isArray(x?.participants)?x.participants:[],i=Math.max(0,Math.min(Math.max(0,ids.length-1),Number(x?.index)||0));return String(ids[i]||"")}
+function activeHero(x){return ROOT.GensDungeonV1.movement.resolveAuthoredActiveHero(x?.participants,x?.index)}
 function roomEnemies(room){try{return (ROOT.loadActiveEnemies?.()||[]).filter(e=>!e?.removed&&!e?.defeated&&Number(e?.hp)>0&&Number(e?.dungeonRoom)===Number(room))}catch(e){return []}}
 function remapEnemies(x,map){
   const ids=roomEnemies(x.room).map(e=>String(e.id)),anchors=[...(map.enemies||[])];
@@ -71,7 +71,7 @@ function repairGenerated(before,desired){
   const hero=activeHero(x);x.positions=x.positions&&typeof x.positions==="object"?x.positions:{};if(hero)x.positions[hero]=Math.max(0,Number(map.entryIdx)||0);
   remapEnemies(x,map);remapScene(x,map);persist(x);return true;
 }
-function readPrimarySelection(){try{const x=JSON.parse(localStorage.getItem(PRIMARY_KEY)||"null");return x&&typeof x==="object"?x:null}catch(e){return null}}
+function readPrimarySelection(){const x=ROOT.GensStorageV1.readJson(ROOT.localStorage,PRIMARY_KEY,null);return x&&typeof x==="object"?x:null}
 function selectedWorld(){
   let p=null;
   try{p=ROOT.DungeonWorldSessionBridge167832?.primary?.()||null}catch(e){}

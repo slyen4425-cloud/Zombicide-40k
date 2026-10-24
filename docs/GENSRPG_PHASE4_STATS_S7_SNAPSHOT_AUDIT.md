@@ -1,0 +1,433 @@
+# GenSrpG — Phase 4 Core Stats — S7 audit snapshot Core unique
+
+Date : 2026-09-21
+
+- Branche : `work/gensrpg-phase4-stats-s7-core-snapshot-2026-09-21`.
+- Checkpoint de départ : `checkpoint/gensrpg-start-phase4-stats-s7-core-snapshot-2026-09-21`.
+- Base exacte / dernier GREEN : `a98c32968fbb32a32827c7f6d03b9666db392be8`.
+- Checkpoint précédent : `checkpoint/gensrpg-phase4-stats-s6-derived-values-green-2026-09-21`.
+- Production gelée : `main = e8681f9823573ced8aec59c8ddc47a72b02bc663`.
+
+## Objet
+
+Caractériser le double chemin de snapshot héros réellement actif avant toute
+création ou migration vers un snapshot Core unique.
+
+S7 ne change aucune formule et ne retire aucun lecteur historique dans cet audit.
+
+## Source inline exacte
+
+Le `index.html` de la base S7 est toujours le blob vérifié par la règle 26 :
+- taille : `8 174 580` octets ;
+- blob Git : `5b9b9ae780f735eadef049afeb10acf0b57441fe`.
+
+Le fichier fourni dans le fil et déjà vérifié pour S6 est donc exactement
+réutilisable pour l'inspection S7.
+
+### dungeonCombatHeroSnapshot
+
+Le snapshot Dungeon inline :
+1. remplace temporairement `current/state` par le héros demandé ;
+2. lit max HP / wounds ;
+3. relit Force, Agilité, Intelligence, Esprit, Endurance ;
+4. relit Defense, Armor, armorReduction, magicResistance ;
+5. relit mana/maxMana, crit, dodge et initiative ;
+6. restaure `current/state`.
+
+Il produit déjà un premier snapshot avant Tactical.
+
+## Adapter Tactical actif
+
+Fichier :
+`assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js`.
+
+`heroSnapshot(rt,id)` :
+- appelle d'abord `dungeonCombatHeroSnapshot(id)` s'il existe ;
+- possède encore un fallback qui relit les helpers Dungeon.
+
+`heroActor()` consomme ce premier snapshot pour :
+- hp/maxHp ;
+- movement ;
+- initiative ;
+- defense ;
+- armor ;
+- dodge.
+
+Il conserve des fallbacks `canonicalStat()` vers
+`GensCleanRpgStats167874.value()`.
+
+Le chemin attaque reste séparé :
+- `effectiveAttackStats` ;
+- `weaponHitProfile` ;
+- lecture de la caractéristique de scaling ;
+- calcul hit/range/power.
+
+Ce chemin attaque appartient aux frontières Equipment/Combat/S10-S11 et ne doit
+pas être absorbé par S7.
+
+## V110 actif : second snapshot
+
+Fichier :
+`assets/gensrpg/gens-rpg-tactical-combat-v2-stats-1678110.js`.
+
+Le graphe actif charge V110 via
+`gens-rpg-tactical-combat-v2-integration.js`.
+
+`hookAdapter()` wrappe l'Adapter `createBattle()` :
+1. l'Adapter crée d'abord les acteurs depuis le snapshot Dungeon ;
+2. V110 appelle ensuite `decorateBattle(...,{force:true})` ;
+3. `buildHeroSnapshot()` reconstruit un second snapshot ;
+4. `applyHeroSnapshot()` réapplique une partie des valeurs sur l'acteur.
+
+### Relectures du second snapshot
+
+Pour chaque définition active, `buildHeroSnapshot()` appelle
+`GensCleanRpgStats167874.value(hero,id)`.
+
+Il relit aussi les dérivées historiques :
+- effectiveMaxWounds ;
+- movement fallback ;
+- initiative ;
+- defense ;
+- armor ;
+- dodge ;
+- crit ;
+- magicResistance ;
+- maxMana ;
+- physicalDamageBonus ;
+- magicDamageBonus.
+
+Puis il ajoute :
+- mana courant ;
+- résistances ;
+- criticalMultiplier.
+
+### Valeurs réappliquées à l'acteur
+
+`applyHeroSnapshot()` réécrit :
+- movement ;
+- initiative ;
+- defense ;
+- armor ;
+- dodge ;
+- `actor.meta.rpgStats`.
+
+Le mouvement restant est préservé/clampé.
+
+## Cache V110
+
+Après la création initiale, V110 n'est pas une boucle de recalcul permanente :
+- le snapshot reste en mémoire ;
+- `decorateBattle()` ne reconstruit que si version absente ou héros dirty ;
+- `markHeroDirty()` / invalidation contrôlent les reconstructions ;
+- preview et rendu lisent le snapshot.
+
+S7 doit donc supprimer à terme le **double passage initial**, pas casser ce
+principe de snapshot en mémoire.
+
+## V114.5
+
+`assets/gensrpg/gens-rpg-tactical-wall-dice-stats-16781145.js` contient
+`buildLinkedSnapshot/repairBattleStats`, mais la cartographie Phase 2 le classe
+explicitement dans les fichiers non atteignables de production.
+
+Il reste dette historique/dormante et ne doit pas devenir une autorité S7.
+
+## Contrat Core S7 recommandé
+
+Nouveau fichier cible :
+`assets/gensrpg/core/stats-snapshot-v1.js`.
+
+Global :
+`GensStatsSnapshotV1`.
+
+Entrée pure proposée :
+
+```text
+{
+  heroId,
+  definitions,
+  values,
+  derived
+}
+```
+
+Où :
+- `values` provient de la chaîne Core S3/S4/S5 ;
+- `derived` provient de S6 ;
+- `definitions` sert uniquement à produire les lignes canoniques
+  id/name/icon/value.
+
+Sortie immuable :
+
+```text
+{
+  heroId,
+  canonical: [{id,name,icon,value}],
+  values: {...},
+  derived: {...}
+}
+```
+
+### Dérivées admises S7
+
+Uniquement celles stabilisées par S6 :
+- physicalDamageBonus ;
+- magicDamageBonus ;
+- hpBonus ;
+- maxMana ;
+- crit ;
+- dodge ;
+- initiative ;
+- magicResistance.
+
+Movement, Defense et Armor restent accessibles comme **valeurs canoniques**
+dans `values`, sans nouvelle sémantique dérivée S7.
+
+## Hors du snapshot Core S7
+
+Ne pas mettre dans le propriétaire Core :
+- hp courant ;
+- mana courant ;
+- wounds ;
+- résistances (S8) ;
+- armorReduction (S9) ;
+- hitChance / D100 / couvert (S10) ;
+- dégâts finaux / attaque (S11) ;
+- criticalMultiplier ou règles combat ;
+- équipement/armes ;
+- positions ou ressources de tour.
+
+Un futur adaptateur peut composer ces données autour du snapshot Core sans en
+faire la responsabilité de Core Stats.
+
+## TDD S7 attendu
+
+La future sentinelle doit :
+1. construire un oracle V110 avec valeurs connues ;
+2. fournir les mêmes valeurs/definitions/derived au Core ;
+3. comparer `canonical` et `values` ;
+4. comparer le sous-ensemble dérivé S6 ;
+5. vérifier aliases et définitions ;
+6. vérifier immutabilité profonde utile ;
+7. vérifier absence de current resources / resistances / rules ;
+8. vérifier pureté : aucun DOM, stockage, runtime global, Tactical, timer,
+   observer ou wrapper.
+
+Le premier RED doit être l'absence du fichier
+`assets/gensrpg/core/stats-snapshot-v1.js`.
+
+## Raccord futur
+
+La création du module pur et le raccord Tactical ne doivent pas être confondus.
+
+Après GREEN du snapshot pur :
+- caractériser un adaptateur qui compose snapshot Core + données session ;
+- faire recevoir ce snapshot à Tactical ;
+- seulement après preuve comparative, retirer les doubles lectures démontrées.
+
+Aucune suppression de `dungeonCombatHeroSnapshot` ou de V110 n'est autorisée
+dans l'extraction pure.
+
+
+## Contrat S7 figé avant TDD
+
+Le snapshot Core S7 ne reconstruit ni le snapshot Dungeon ni le snapshot V110.
+Il transporte uniquement les résultats déjà calculés par les propriétaires S1
+à S6.
+
+Fichier Core cible :
+`assets/gensrpg/core/stats-snapshot-v1.js`.
+
+Global cible :
+`GensStatsSnapshotV1`.
+
+Dépendance pure :
+`GensStatsNormalizationV1`.
+
+### Entrée
+
+```text
+{
+  heroId,
+  definitions,
+  values,
+  derived
+}
+```
+
+- `definitions` : définitions Stats normalisées/normalisables ;
+- `values` : valeurs canoniques déjà calculées par S3/S4/S5 ;
+- `derived` : résultats S6 déjà calculés.
+
+S7 ne calcule aucun bonus métier et n'appelle aucun helper Dungeon/Tactical.
+
+### Sortie
+
+```text
+{
+  version,
+  heroId,
+  canonical: [{ id, name, icon, value }],
+  values: { [id]: number },
+  derived: {
+    physicalDamageBonus,
+    magicDamageBonus,
+    hpBonus,
+    maxMana,
+    crit,
+    dodge,
+    initiative,
+    magicResistance
+  }
+}
+```
+
+Règles :
+- les IDs de définition et de valeur sont canonisés via S2 ;
+- seuls les IDs connus des définitions entrent dans `values` ;
+- un alias de valeur peut alimenter son ID canonique ;
+- une valeur non finie retombe sur `definition.defaultValue`, puis 0 ;
+- l'ordre de `canonical` suit l'ordre des définitions normalisées ;
+- les définitions dupliquées après canonisation ne créent qu'une ligne ;
+- seules les huit dérivées S6 autorisées sont transportées ;
+- une dérivée non finie vaut 0 ;
+- la sortie et ses sous-structures sont immuables ;
+- aucune entrée n'est mutée.
+
+### Exclusions structurelles
+
+Même si elles sont fournies dans l'entrée, le snapshot Core ne doit jamais
+transporter :
+- hp courant ;
+- mana courant ;
+- wounds ;
+- resistances ;
+- rules ;
+- criticalMultiplier ;
+- armorReduction ;
+- hitChance / D100 ;
+- données d'équipement/arme ;
+- position / ressources de tour.
+
+Movement, Defense et Armor peuvent apparaître uniquement dans `values` et
+`canonical` lorsqu'ils existent comme définitions Stats ; S7 n'ajoute aucune
+sémantique dérivée à ces champs.
+
+### TDD
+
+Le RED doit vérifier :
+1. la composition déterministe de `canonical` ;
+2. la canonisation des aliases ;
+3. le fallback des valeurs non finies ;
+4. le sous-ensemble strict des huit dérivées S6 ;
+5. l'absence des ressources/session/résistances/règles ;
+6. l'immutabilité profonde du résultat ;
+7. l'absence de mutation des entrées ;
+8. la pureté du module ;
+9. l'absence de lecture Dungeon/Tactical.
+
+Le premier échec attendu est uniquement l'absence de
+`assets/gensrpg/core/stats-snapshot-v1.js`.
+
+### Autorité
+
+Ce lot reste **Phase 4 inert**.
+
+Le snapshot Core S7 n'est pas chargé par Pages/preview et ne remplace aucun
+lecteur historique. Le raccord vers Tactical fera l'objet d'un lot séparé après
+GREEN de cette extraction pure.
+
+
+## Résultat S7 — extraction pure
+
+### RED TDD observé
+
+Commit pré-module :
+`10160ba820e906a6cc4392dfa1768fc8c56508b2`.
+
+Run Architecture :
+`35585364039` — FAILURE attendu.
+
+La sentinelle S7 échoue exactement sur :
+`ENOENT assets/gensrpg/core/stats-snapshot-v1.js`.
+
+Les sentinelles précédentes, l'audit S7, Firefox et Tactical Dock restent GREEN
+sur ce commit.
+
+### Snapshot Core pur créé
+
+Fichier :
+`assets/gensrpg/core/stats-snapshot-v1.js`.
+
+Commit :
+`60d07a948e00ec887d119328a89ac3aeacd941c6`.
+
+API :
+`GensStatsSnapshotV1.create(config)`.
+
+Le snapshot :
+- dépend uniquement de `GensStatsNormalizationV1` ;
+- canonise definitions et valeurs ;
+- transporte uniquement les huit dérivées S6 autorisées ;
+- exclut hp/mana courants, wounds, résistances, règles et données combat ;
+- est immuable jusque dans `canonical`, `values`, `derived` et chaque ligne ;
+- ne mute aucune entrée ;
+- ne lit aucun global Dungeon/Tactical.
+
+La sentinelle de parité compare les lignes et valeurs canoniques à l'oracle V110
+et verrouille aliases, fallback non-fini, dérivées admises et exclusions.
+
+### Graphe Phase 2
+
+Commit :
+`70c6290434ba9c4e06ac905e7105452126626810`.
+
+`stats-snapshot-v1.js` est classé **Phase 4 inert**.
+
+Inventaire JS physique :
+`87 -> 88`.
+
+Le graphe production reste inchangé.
+Le snapshot S7 n'est chargé ni par Pages, ni par preview, ni par Tactical.
+
+### Validation GREEN technique
+
+HEAD technique :
+`70c6290434ba9c4e06ac905e7105452126626810`.
+
+Runs :
+- Architecture + navigateur complet : `35585530549` — SUCCESS ;
+- Firefox : `35585530588` — SUCCESS ;
+- Tactical Dock : `35585530540` — SUCCESS.
+
+Le navigateur complet valide notamment :
+- Survie ;
+- Fouiller + arts ;
+- Dungeon après Survie ;
+- Builder ;
+- Config objet ;
+- fiche RPG ;
+- caches/pièges authored ;
+- Save & Quit / reprise ;
+- PvP ;
+- Capture ;
+- non-interférence des quatre modules ;
+- murs ;
+- preview ;
+- resolver d'assets ;
+- tokens tardifs.
+
+Aucun `index.html`, propriétaire Dungeon, Adapter Tactical, V110 ou formule de
+combat n'a été modifié.
+
+## Clôture documentaire
+
+Le SHA documentaire final doit repasser Architecture + navigateur complet,
+Firefox et Tactical Dock.
+
+Après trois SUCCESS :
+- créer `checkpoint/gensrpg-phase4-stats-s7-core-snapshot-green-2026-09-21` ;
+- ouvrir S8 depuis ce checkpoint ;
+- S8 = normalisation des résistances array/object, sans modifier les pourcentages
+  ni leur application Dungeon/Tactical.

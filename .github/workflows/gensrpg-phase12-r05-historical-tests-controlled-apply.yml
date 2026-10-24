@@ -1,0 +1,44 @@
+name: GenSrpG Phase12 R05 historical chain controlled adaptation
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r05-core-cloud-sync-backup-2026-10-17'
+    paths:
+      - '.github/workflows/gensrpg-phase12-r05-historical-tests-controlled-apply.yml'
+permissions:
+  contents: write
+jobs:
+  adapt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify exact R05 code SHA and strict R04 rollback before historical updates
+        run: |
+          test "$GITHUB_REF_NAME" = 'work/gensrpg-phase12-r05-core-cloud-sync-backup-2026-10-17'
+          test "$(git hash-object index.html)" = '485de2e6a08ffd89e4f1fb9410e40c938774d62f'
+          test "$(git hash-object assets/gensrpg/core/legacy-cloud-sync-backup-v1.js)" = '8d7f8179676b096a53816cd1ca2530c120e3cf18'
+          python3 tools/gensrpg_phase12_r05_core_cloud_sync_extract_apply.py --verify
+      - name: Update exact historical views without modifying gameplay or old fixtures
+        run: |
+          python3 tools/gensrpg_phase12_r05_historical_sentinels_update.py
+          node tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs
+          node tests/gens_phase12_r04_builders_equipment_extraction_v1.test.cjs
+          node tests/gens_phase12_r03_shell_hub_extraction_v1.test.cjs
+          node tests/gens_phase12_r02_legacy_visual_data_extraction_v1.test.cjs
+          node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
+          node tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
+          node tests/gens_phase3_target_structure_contracts_v1.test.cjs
+          node tests/gens_runtime_composition_guard_v11411.test.cjs
+          node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
+          node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+          git diff --check
+      - name: Commit audited R05 historical sentinels, excluding protected workflow files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tests tools/gensrpg_phase12_r01_d9_source_view.py tools/gensrpg_phase12_dungeon_core01_extract_apply.py
+          git diff --cached --check
+          git commit -m "test(phase12): preserve strict R05 to R01 rollback and Core sync owner inventory"
+          git push origin "HEAD:$GITHUB_REF_NAME"

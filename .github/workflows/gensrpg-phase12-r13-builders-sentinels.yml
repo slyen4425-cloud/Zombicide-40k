@@ -1,0 +1,21 @@
+name: GenSrpG Phase12 R13 Builders enemy editor rollback sentinels
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-r13-builders-enemy-editor-2026-10-19'
+permissions:
+  contents: read
+jobs:
+  builders-rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact 31 original Builders functions and certified R12 rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = 'b5a39705baf83e9782695c14bede8b9dde6ddf52'
+          test "$(git hash-object assets/gensrpg/builders/legacy-enemy-editor-v1.js)" = '47b8d0e2b65bfffca4128d29c345b7e82af2a5fe'
+          node tests/gensrpg_phase12_r13_builders_enemy_editor_sentinel.test.cjs
+          node --check assets/gensrpg/builders/legacy-enemy-editor-v1.js

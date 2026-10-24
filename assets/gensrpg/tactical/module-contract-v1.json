@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "phase": 3,
+  "module": "tactical",
+  "status": "partial-runtime-loaded",
+  "plannedEntry": "assets/gensrpg/tactical/entry-v1.js",
+  "owns": [
+    "isolated tactical combat session",
+    "tactical rules",
+    "tactical UI",
+    "tactical AI"
+  ],
+  "consumes": [
+    "core public contracts",
+    "explicit combat snapshot"
+  ],
+  "forbidden": [
+    "Dungeon world navigation",
+    "Dungeon exploration state ownership",
+    "global character sheet ownership"
+  ],
+  "lifecycle": {
+    "install": "public Tactical entry owns ordered base composition during Phase 8; current bootstrap still loads the public entry eagerly",
+    "dispose": "future Phase 8 lifecycle lots must make temporary combat sessions release listeners, observers and timers"
+  },
+  "invariants": [
+    "public Tactical entry is the sole owner of the ordered six-file base Tactical composition",
+    "Core RuntimeBootstrap may load the public Tactical entry but must not know Tactical private base files",
+    "composition handoff does not change combat rules, hit, damage, armor, UI, AI or Dungeon bridge behavior",
+    "historical __gensTacticalV2Loader105 idempotency and bridge retry timings remain preserved until separately audited"
+  ],
+  "activatedPhase": 8,
+  "publicRuntimeApi": "GensTacticalV1"
+}

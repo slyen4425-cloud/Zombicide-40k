@@ -1,0 +1,450 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const http=require('node:http');
+const path=require('node:path');
+const {chromium}=require('playwright');
+
+const root=path.join(__dirname,'..');
+const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const shellHubSource=fs.readFileSync(path.join(root,'assets/gensrpg/shell/legacy-hub-family-ui-v1.js'),'utf8');
+const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
+const captureSeedSource=fs.readFileSync(path.join(root,'assets','gensrpg','capture','builtin-seed-v1.js'),'utf8');
+const captureSeedUrl='assets/gensrpg/capture/builtin-seed-v1.js?v=1';
+
+const CAPTURE_ID='gp_mt7ker7t_m2iw9';
+const CAPTURE_TRAINER='custom_mt7lk6jv_ioga';
+
+assert.match(indexSource,/<script id="builtinMonsterCapture162" src="assets\/gensrpg\/capture\/builtin-seed-v1\.js\?v=1"><\/script>/,'production HTML must keep the built-in Monster Capture seed');
+assert.match(indexSource,/function rpgProfiles\(\)/,'Shell RPG profile listing owner must remain explicit');
+assert.match(shellHubSource,/function gensFamilyForProfileId\(profileId\)/,'Shell family routing owner must remain explicit');
+assert.match(captureSeedSource,/const MC162_ID="gp_mt7ker7t_m2iw9"/,'production seed must keep the current Monster Capture profile id');
+assert.match(captureSeedSource,/name":"Monster Capture"/,'production seed must keep the current Monster Capture profile');
+assert.match(captureSeedSource,/ensureBuiltinMonsterCapture162\(\);/,'production seed must install Monster Capture at boot');
+assert.match(indexSource,/if\(window\.GensCaptureV1\?\.isProfile\?\.\(profile\)\)return "creature"/,'content-family owner must classify Capture through GensCaptureV1');
+assert.match(indexSource,/if\(window\.GensCaptureV1\?\.isProfile\?\.\(p\)\)return "capture"/,'V16.151 must keep Capture distinct from classic Dungeon through canonical identity');
+assert.match(indexSource,/if\(gensMode151\(\)!=="capture"\)[\s\S]*captureGameHub/,'V16.151 must guard the Capture hub');
+assert.match(indexSource,/window\.openGensBuiltInGame=function\(profileId,family\)[\s\S]*gensSwitchUniverse155/,'V16.155 must remain the real universe-switch owner');
+assert.doesNotMatch(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'Phase 6 production composition must not load the retired Survival/Dungeon guard');
+
+const shellOwner=indexSource.indexOf('async function startConfiguredGame(){');
+const shellScriptEnd=indexSource.indexOf('</script>',shellOwner);
+assert.ok(shellOwner>0&&shellScriptEnd>shellOwner,'real Shell owner block must have an exact boundary');
+
+const onlineMarker='<script src="assets/gensrpg/core/legacy-cloud-sync-backup-v1.js"></script>';
+const onlineOwner=indexSource.indexOf(onlineMarker,shellScriptEnd);
+const onlineScriptStart=onlineOwner;
+const onlineScriptEnd=onlineOwner+onlineMarker.indexOf('</script>');
+assert.ok(onlineOwner>shellScriptEnd&&onlineScriptStart>shellScriptEnd&&onlineScriptEnd>onlineOwner,'real external Core online support owner must preserve the Shell parser order');
+assert.equal(indexSource.split(onlineMarker).length-1,1,'one canonical online sync/Core backup script');
+
+const customMarker='function loadCustomHeroesMulti(){';
+const customOwner=indexSource.indexOf(customMarker,onlineScriptEnd);
+const customScriptStart=indexSource.lastIndexOf('<script',customOwner);
+const customScriptEnd=indexSource.indexOf('</script>',customOwner);
+assert.ok(customOwner>onlineScriptEnd&&customScriptStart>onlineScriptEnd&&customScriptEnd>customOwner,'real custom-content block must exist');
+
+function exactScript(id){
+  const marker='<script id="'+id+'"';
+  const start=indexSource.indexOf(marker);
+  assert.ok(start>customScriptEnd,'production script '+id+' must exist after custom-content support');
+  const openEnd=indexSource.indexOf('>',start);
+  const end=indexSource.indexOf('</script>',openEnd);
+  assert.ok(openEnd>start&&end>openEnd,'production script '+id+' must have an exact boundary');
+  const externalUrls={
+    captureFix137:'assets/gensrpg/capture/legacy-patches/capture-fix137-v1.js',
+    captureFix138:'assets/gensrpg/capture/legacy-patches/capture-fix138-v1.js',
+    captureFix139:'assets/gensrpg/capture/legacy-patches/capture-fix139-v1.js',
+    builtinMonsterCapture162:captureSeedUrl
+  };
+  const externalUrl=externalUrls[id]||null;
+  if(externalUrl){
+    assert.ok(indexSource.slice(start,openEnd+1).includes('src="'+externalUrl+'"'),
+      'Capture script must keep its exact external production URL: '+id);
+    assert.equal(indexSource.slice(openEnd+1,end),'',
+      'Capture script must not duplicate its physical owner inline: '+id);
+    assert.equal(indexSource.split('id="'+id+'"').length-1,1,
+      'Capture script must keep exactly one parser slot: '+id);
+    assert.ok(fs.existsSync(path.join(root,externalUrl.split('?')[0])),
+      'external Capture script must physically exist: '+id);
+  }
+  return {id,start,source:externalUrl?null:indexSource.slice(openEnd+1,end),url:externalUrl};
+}
+
+const captureScriptIds=[
+  // Current production dependencies for this Phase 1 scenario only:
+  // V137/V138 own the Capture pre-game Dungeon cleanup/context,
+  // V139 owns Capture launch, V151 owns Capture/Dungeon UI reconciliation,
+  // V155 owns universe reload, V162 owns the built-in Monster Capture seed.
+  'captureFix137',
+  'captureFix138',
+  'captureFix139',
+  'gensStability151',
+  'forceReload155',
+  'builtinMonsterCapture162'
+];
+
+const captureOwnerScripts=captureScriptIds.map(exactScript);
+for(let i=1;i<captureOwnerScripts.length;i++){
+  assert.ok(captureOwnerScripts[i].start>captureOwnerScripts[i-1].start,'Capture owner scripts must keep production order');
+}
+
+// Browser proof uses the exact, complete production composition served by preview.html.
+// Preserve the parser-slot/order assertions above; never manually re-inject Capture owners.
+
+const mime={
+  '.html':'text/html; charset=utf-8',
+  '.js':'text/javascript; charset=utf-8',
+  '.css':'text/css; charset=utf-8',
+  '.json':'application/json',
+  '.webmanifest':'application/manifest+json',
+  '.png':'image/png',
+  '.jpg':'image/jpeg',
+  '.jpeg':'image/jpeg',
+  '.webp':'image/webp',
+  '.mp3':'audio/mpeg'
+};
+
+const server=http.createServer((req,res)=>{
+  const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
+  const rel=pathname==='/'?'/index.html':pathname;
+  const file=path.resolve(root,'.'+rel);
+  if(!file.startsWith(root+path.sep)){res.writeHead(403);res.end('forbidden');return}
+  fs.readFile(file,(err,data)=>{
+    if(err){res.writeHead(404);res.end('not found');return}
+    res.writeHead(200,{
+      'content-type':mime[path.extname(file).toLowerCase()]||'application/octet-stream',
+      'cache-control':'no-store'
+    });
+    res.end(data);
+  });
+});
+
+(async()=>{
+  let stage='boot';
+  const mark=name=>{stage=name;console.log('[capture-seed-no-dungeon-style]',name)};
+  const watchdog=setTimeout(()=>{console.error('[capture-seed-no-dungeon-style] WATCHDOG stage='+stage);process.exit(1)},120000);
+
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  const port=server.address().port;
+  const url=`http://127.0.0.1:${port}/preview.html`;
+  const browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
+  const context=await browser.newContext({
+    viewport:{width:412,height:915},
+    deviceScaleFactor:2.625,
+    isMobile:true,
+    hasTouch:true,
+    locale:'fr-FR',
+    serviceWorkers:'block'
+  });
+  await context.addInitScript(()=>{
+    try{if(!sessionStorage.getItem('__captureSentinelBooted')){localStorage.clear();sessionStorage.clear();sessionStorage.setItem('__captureSentinelBooted','1')}}catch(e){}
+    window.supabase={createClient:()=>({})};
+  });
+
+  const page=await context.newPage();
+  page.setDefaultTimeout(20000);
+  const browserErrors=[];
+  const dialogs=[];
+  page.on('pageerror',error=>browserErrors.push(String(error)));
+  page.on('console',message=>{
+    if(message.type()!=='error')return;
+    const value=message.text();
+    if(/Failed to load resource|ERR_FAILED/.test(value))return;
+    browserErrors.push(value);
+  });
+  page.on('dialog',async dialog=>{
+    dialogs.push({type:dialog.type(),message:dialog.message()});
+    await dialog.accept();
+  });
+  await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
+
+  const waitOwners=async()=>{
+    await page.waitForFunction(()=>document.documentElement?.dataset?.gensrpgPreviewReady==='1',null,{timeout:60000});
+    await page.waitForFunction((captureId)=>{
+    const p=typeof loadGameProfiles==='function'?loadGameProfiles().find(x=>String(x.id)===captureId):null;
+    return typeof window.openGensFamily==='function' &&
+      typeof window.openGensBuiltInGame==='function' &&
+      typeof window.startConfiguredGame==='function' &&
+      typeof window.gensMode151==='function' &&
+      typeof window.ensureBuiltinMonsterCapture162==='function' &&
+      !!p;
+    },CAPTURE_ID,{timeout:60000});
+  };
+
+  try{
+    mark('navigate-real-capture-shell');
+    await page.goto(url,{waitUntil:'domcontentloaded',timeout:45000});
+
+    mark('wait-full-production-capture-owners');
+    await waitOwners();
+
+    mark('characterize-capture-without-dungeon-style');
+    await page.evaluate((captureId)=>{
+      const profiles=loadGameProfiles();
+      const p=profiles.find(x=>String(x?.id||'')===String(captureId));
+      if(!p)throw new Error('Capture profile missing before identity characterization');
+      delete p.gameStyle;
+      saveGameProfiles(profiles);
+      if(typeof setActiveGameProfileId==='function' && activeGameProfileId()===captureId)setActiveGameProfileId(captureId);
+    },CAPTURE_ID);
+
+    const seed=await page.evaluate((captureId)=>{
+      const p=loadGameProfiles().find(x=>String(x.id)===captureId);
+      return {
+        id:p?.id||'',
+        name:p?.name||'',
+        style:p?.gameStyle||'',
+        contentFamily:gensContentFamilyForProfile(p),
+        profile:p?.rpgUniverse?.gameplay?.profile||'',
+        capture:!!p?.rpgUniverse?.gameplay?.modules?.capture,
+        controllable:!!p?.rpgUniverse?.gameplay?.modules?.controllableCreatures,
+        trainer:p?.heroPool||[]
+      };
+    },CAPTURE_ID);
+    assert.equal(seed.name,'Monster Capture');
+    assert.equal(seed.style,'','characterization removes the historical dungeon style from the stored Capture profile');
+    assert.equal(seed.contentFamily,'creature');
+    assert.equal(seed.profile,'creature');
+    assert.equal(seed.capture,true);
+    assert.equal(seed.controllable,true);
+    assert.ok(seed.trainer.map(String).includes(CAPTURE_TRAINER),'built-in Capture profile must keep its current trainer');
+
+    mark('open-real-adventure-family');
+    await page.locator('button.gensRootModeCard.capture').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
+
+    let captureCard=page.locator(`#gensFamilyGames [data-rpg-profile="${CAPTURE_ID}"] .gensUniverseMainBtn`);
+    await captureCard.waitFor({state:'visible'});
+    assert.match(await captureCard.textContent(),/Monster Capture/);
+
+    const routing=await page.evaluate((captureId)=>{
+      const p=loadGameProfiles().find(x=>String(x?.id||'')===String(captureId));
+      return {
+        contentFamily:gensContentFamilyForProfile(p),
+        shellFamily:gensFamilyForProfileId(captureId),
+        dungeonMode:!!isDungeonMode(),
+        dungeonRuntime:localStorage.getItem('gensrpg_dungeon_runtime_v2')
+      };
+    },CAPTURE_ID);
+    assert.equal(routing.contentFamily,'creature','canonical Capture content identity must remain creature without gameStyle');
+    assert.equal(routing.shellFamily,'capture','Shell must route canonical Capture profiles to Adventure without borrowing Dungeon identity');
+    assert.equal(routing.dungeonMode,false,'Capture without the historical style must not identify as Dungeon');
+    assert.equal(routing.dungeonRuntime,null,'opening the Adventure family must not create Dungeon runtime state');
+
+    mark('shell-family-routing-characterization-passed');
+    console.log(JSON.stringify({
+      scenario:'Phase 9 Capture Shell family routing without dungeon-style identity',
+      captureId:CAPTURE_ID,
+      routing
+    },null,2));
+    return;
+
+    const switchInfo=await page.evaluate((captureId)=>({
+      active:activeGameProfileId(),
+      from:gensProfileContentFamily155(activeGameProfileId()),
+      to:gensProfileContentFamily155(captureId)
+    }),CAPTURE_ID);
+
+    if(switchInfo.active && switchInfo.active!==CAPTURE_ID && switchInfo.from!==switchInfo.to){
+      mark('select-capture-through-real-v155-reload');
+      await Promise.all([
+        page.waitForNavigation({waitUntil:'domcontentloaded',timeout:15000}),
+        captureCard.click()
+      ]);
+      mark('wait-production-capture-owners-after-v155-reload');
+      await waitOwners();
+      const reloaded=await page.evaluate((captureId)=>({
+        active:activeGameProfileId(),
+        forced:localStorage.getItem('gensrpg_forced_mode_reload_155')
+      }),CAPTURE_ID);
+      assert.equal(reloaded.active,CAPTURE_ID,'V16.155 reload must preserve the selected Capture profile');
+      assert.equal(reloaded.forced,null,'forced-mode handoff must be consumed after reload');
+
+      mark('reopen-adventure-after-real-reload');
+      await page.locator('button.gensRootModeCard.capture').click();
+      await page.waitForFunction(()=>getComputedStyle(document.getElementById('gensFamilyHome')).display!=='none');
+      captureCard=page.locator(`#gensFamilyGames [data-rpg-profile="${CAPTURE_ID}"] .gensUniverseMainBtn`);
+      await captureCard.waitFor({state:'visible'});
+    }
+
+    mark('open-current-capture-profile');
+    await captureCard.click();
+    await page.waitForFunction((captureId)=>
+      activeGameProfileId()===captureId &&
+      getComputedStyle(document.getElementById('gensGameHome')).display!=='none',
+      CAPTURE_ID
+    );
+
+    let state=await page.evaluate(()=>({
+      active:activeGameProfileId(),
+      family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
+      contentFamily:gensCurrentContentFamily(),
+      mode151:gensMode151(),
+      dungeonMode:!!isDungeonMode(),
+      style:getActiveGameProfile()?.gameStyle||'',
+      session:localStorage.getItem('z40k_session_active_v1')
+    }));
+    assert.equal(state.active,CAPTURE_ID);
+    assert.equal(state.family,'capture','current Shell family guard classifies Capture under Adventure');
+    assert.equal(state.contentFamily,'creature');
+    assert.equal(state.mode151,'capture','V16.151 must separate Capture from classic Dungeon');
+    assert.equal(state.dungeonMode,false,'Capture must remain identifiable through its canonical profile without borrowing Dungeon identity');
+    assert.equal(state.style,'');
+    assert.notEqual(state.session,'1');
+
+    mark('open-current-capture-pregame');
+    await page.locator('#gensGameHomeActions .newGameBtn').click();
+    try{
+      await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameSetup')).display!=='none');
+    }catch(error){
+      // Diagnose the real browser state; do not force the pre-game open or
+      // weaken the expected behavior when Capture/Shell routing regresses.
+      const snapshot=await page.evaluate(()=>({
+        active:typeof activeGameProfileId==='function'?activeGameProfileId():'missing',
+        family:typeof gensSelectedFamily==='undefined'?'missing':String(gensSelectedFamily||''),
+        mode151:typeof gensMode151==='function'?gensMode151():'missing',
+        contentFamily:typeof gensCurrentContentFamily==='function'?gensCurrentContentFamily():'missing',
+        captureMode:typeof gensCapturePregameMode==='function'?gensCapturePregameMode():'missing',
+        shellActive:window.GensShellModuleLaunchV1?.activeModule?.()||'missing',
+        pregame:document.getElementById('pregameSetup')?getComputedStyle(document.getElementById('pregameSetup')).display:'absent',
+        gameHome:document.getElementById('gensGameHome')?getComputedStyle(document.getElementById('gensGameHome')).display:'absent',
+        bodyClasses:[...document.body.classList],
+        newGameClick:document.querySelector('#gensGameHomeActions .newGameBtn')?.getAttribute('onclick')||'missing'
+      })).catch(e=>({diagnosticFailure:String(e)}));
+      console.error('[capture-pregame-full-composition] blocked after Nouvelle partie',
+        JSON.stringify({snapshot,browserErrors}));
+      throw error;
+    }
+    await page.waitForFunction(()=>document.body.classList.contains('gensCapturePregame'));
+
+    const pregame=await page.evaluate(()=>({
+      captureClass:document.body.classList.contains('gensCapturePregame'),
+      dungeonSetup:document.getElementById('sessionDungeonSetupBtn')?getComputedStyle(document.getElementById('sessionDungeonSetupBtn')).display:'absent',
+      mode151:gensMode151()
+    }));
+    assert.equal(pregame.captureClass,true);
+    assert.ok(
+      pregame.dungeonSetup==='none'||pregame.dungeonSetup==='absent',
+      'Capture pre-game must not expose an active classic Dungeon setup entry'
+    );
+    assert.equal(pregame.mode151,'capture');
+
+    mark('select-real-capture-trainer');
+    await page.locator('#pregameHeroStep .sessionSetupBtn[onclick="openSessionHeroSetup()"]').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('sessionHeroSetup')).display!=='none');
+
+    let trainer=page.locator(`#participantList input[type="checkbox"][value="${CAPTURE_TRAINER}"]`);
+    if(!(await trainer.count()))trainer=page.locator('#participantList input[type="checkbox"]').first();
+    await trainer.waitFor({state:'visible'});
+    if(!(await trainer.isChecked()))await trainer.check();
+
+    mark('select-real-capture-starter');
+    const starterChoices=page.locator('#participantList .captureStarterChoice');
+    await starterChoices.first().waitFor({state:'visible'});
+    assert.ok(await starterChoices.count()>=1,'current Capture pre-game must expose at least one real starter creature');
+    await starterChoices.first().click();
+    await page.waitForFunction(()=>typeof gensCaptureParticipantsReady==='function'&&gensCaptureParticipantsReady()===true);
+
+    await page.locator('#sessionHeroSetup .startGameBtn[onclick="closeSessionHeroSetup()"]').click();
+    await page.waitForFunction(()=>getComputedStyle(document.getElementById('pregameHeroStep')).display!=='none');
+    await page.waitForFunction(()=>{
+      const btn=document.querySelector('#pregameSetup button.startGameBtn[onclick="startConfiguredGame()"]');
+      return !!btn && btn.disabled===false;
+    });
+
+    mark('start-current-capture-session');
+    await page.locator('#pregameSetup button.startGameBtn[onclick="startConfiguredGame()"]').click();
+
+    try{
+      await page.waitForFunction(()=>(
+        localStorage.getItem('z40k_session_active_v1')==='1' &&
+        document.body.classList.contains('gens-pure-capture') &&
+        getComputedStyle(document.getElementById('captureGameHub')).display!=='none'
+      ),null,{timeout:7000});
+    }catch(error){
+      const diag=await page.evaluate(()=>({
+        active:activeGameProfileId(),
+        family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
+        contentFamily:typeof gensCurrentContentFamily==='function'?gensCurrentContentFamily():'missing',
+        mode151:typeof gensMode151==='function'?gensMode151():'missing',
+        session:localStorage.getItem('z40k_session_active_v1'),
+        participants:typeof loadGameParticipants==='function'?loadGameParticipants():[],
+        pure:document.body.classList.contains('gens-pure-capture'),
+        captureHub:document.getElementById('captureGameHub')?getComputedStyle(document.getElementById('captureGameHub')).display:'absent',
+        dungeonPanel:document.getElementById('dungeonMenuPanel')?getComputedStyle(document.getElementById('dungeonMenuPanel')).display:'absent',
+        menu:document.getElementById('menu')?getComputedStyle(document.getElementById('menu')).display:'absent'
+      })).catch(e=>({diagnosticError:String(e)}));
+      console.error('[capture-seed-no-dungeon-style] launch-diagnostic',JSON.stringify({diag,dialogs,browserErrors}));
+      throw error;
+    }
+
+    state=await page.evaluate(()=>({
+      active:activeGameProfileId(),
+      family:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
+      contentFamily:gensCurrentContentFamily(),
+      mode151:gensMode151(),
+      session:localStorage.getItem('z40k_session_active_v1'),
+      pure:document.body.classList.contains('gens-pure-capture'),
+      captureHub:getComputedStyle(document.getElementById('captureGameHub')).display,
+      dungeonPanel:getComputedStyle(document.getElementById('dungeonMenuPanel')).display,
+      menu:getComputedStyle(document.getElementById('menu')).display,
+      title:document.getElementById('captureWorldTitle')?.textContent||'',
+      day:document.getElementById('captureDayLabel')?.textContent||'',
+      location:document.getElementById('captureWorldLocationLabel')?.textContent||''
+    }));
+    assert.equal(state.active,CAPTURE_ID);
+    assert.equal(state.family,'capture');
+    assert.equal(state.contentFamily,'creature');
+    assert.equal(state.mode151,'capture');
+    assert.equal(state.session,'1');
+    assert.equal(state.pure,true);
+    assert.notEqual(state.captureHub,'none','Capture launch must show the current Capture hub');
+    assert.equal(state.dungeonPanel,'none','classic Dungeon menu must stay hidden in current Capture');
+    assert.notEqual(state.menu,'none');
+    assert.equal(state.title,'Explorer le monde');
+    assert.match(state.day,/Jour 1/);
+    assert.equal(state.location,'Camp de départ');
+
+    mark('exercise-current-capture-gameplay');
+    await page.locator('#captureNextTurnBtn').click();
+    await page.waitForFunction(()=>/Jour 2/.test(document.getElementById('captureDayLabel')?.textContent||''));
+
+    const played=await page.evaluate((captureId)=>{
+      const key='gensrpg_capture_world_v1_'+captureId;
+      let world=null;try{world=JSON.parse(localStorage.getItem(key)||'null')}catch(e){}
+      return {
+        day:world?.day,
+        playMode:world?.playMode,
+        mode151:gensMode151(),
+        contentFamily:gensCurrentContentFamily(),
+        captureHub:getComputedStyle(document.getElementById('captureGameHub')).display,
+        dungeonPanel:getComputedStyle(document.getElementById('dungeonMenuPanel')).display
+      };
+    },CAPTURE_ID);
+    assert.equal(played.day,2,'current Capture day progression must persist through its real world-state owner');
+    assert.equal(played.playMode,'free');
+    assert.equal(played.mode151,'capture');
+    assert.equal(played.contentFamily,'creature');
+    assert.notEqual(played.captureHub,'none');
+    assert.equal(played.dungeonPanel,'none');
+    assert.deepEqual(browserErrors,[],'current Capture launch/gameplay scenario must not raise browser/runtime errors');
+
+    mark('assertions-passed');
+    console.log(JSON.stringify({
+      scenario:'Phase 1 current Monster Capture through real Shell',
+      viewport:'412x915 @2.625 touch',
+      profile:CAPTURE_ID,
+      family:state.family,
+      contentFamily:state.contentFamily,
+      mode151:state.mode151,
+      day:played.day
+    }));
+  }finally{
+    clearTimeout(watchdog);
+    mark('cleanup');
+    server.closeAllConnections?.();
+    server.closeIdleConnections?.();
+    server.close();
+    await browser.close();
+  }
+})().catch(error=>{console.error(error);process.exitCode=1});

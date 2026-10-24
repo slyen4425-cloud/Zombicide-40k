@@ -1,0 +1,61 @@
+name: GenSrpG Phase12 Dungeon combat AI and map ownership browser trace
+on:
+  push:
+    branches:
+      - 'work/gensrpg-phase12-dungeon-authority-trace-2026-10-20'
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  dungeon-authority-trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Freeze R15 runtime and original HTML before collecting evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = '9f35eb833a6ede4b91399854f19bb9bef59f45ab'
+          git diff --exit-code '95740b6353a116c7e66b5d1095338b81d8b223bf' -- index.html service-worker.js assets/gensrpg/ docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json
+          node tests/gensrpg_phase12_post_r15_inline_authority_baseline.test.cjs
+      - name: Install isolated browser engines
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --prefix /tmp/gensrpg-dungeon-pw playwright@1.56.1
+          /tmp/gensrpg-dungeon-pw/node_modules/.bin/playwright install --with-deps chromium firefox
+      - name: Compare original and probed parser identities in Chromium and Firefox
+        shell: bash
+        env:
+          GENSRPG_DIAG_PW_ROOT: /tmp/gensrpg-dungeon-pw
+          GENSRPG_DIAG_URL: http://127.0.0.1:8895/index.html
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8895 --bind 127.0.0.1 >/tmp/gensrpg_dungeon_trace_http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 20); do
+            if curl -fsS -o /dev/null 'http://127.0.0.1:8895/index.html'; then break; fi
+            sleep 1
+          done
+          node tests/gensrpg_phase12_dungeon_authority_parser_trace.cjs 2>&1 | tee /tmp/gensrpg_dungeon_trace.log
+      - name: Publish immutable SHA result
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JOB_RESULT: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          state=failure
+          if [ "$JOB_RESULT" = success ]; then state=success; fi
+          payload="$(jq -nc --arg state "$state" --arg context 'gensrpg/phase12/dungeon-authority-trace' --arg description "R15 Dungeon parser combat/AI/map ownership trace - $JOB_RESULT" --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{state:$state,context:$context,description:$description,target_url:$url}')"
+          curl --fail --silent --show-error --retry 2 -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'X-GitHub-Api-Version: 2022-11-28' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -d "$payload" >/dev/null

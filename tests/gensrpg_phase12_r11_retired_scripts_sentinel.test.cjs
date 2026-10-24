@@ -1,0 +1,23 @@
+'use strict';
+const fs=require('node:fs'),assert=require('node:assert/strict'),crypto=require('node:crypto'),cp=require('node:child_process');
+const blob=x=>{const b=Buffer.from(x);return crypto.createHash('sha1').update('blob '+b.length+'\0').update(b).digest('hex')};
+const installed=fs.readFileSync('index.html','utf8');
+const html=['b0d0c73292e4374fc4f23e86edffad5c1b39a7b6','b5a39705baf83e9782695c14bede8b9dde6ddf52','dab5be5dedfa56c49d76d40a4cb824a0098903f0','9f35eb833a6ede4b91399854f19bb9bef59f45ab'].includes(blob(installed))
+  ?cp.execFileSync('node',['tools/gensrpg_phase12_r12_dungeon_rpg_rules_talents.cjs','--restore-r11'],{maxBuffer:10*1024*1024}).toString():installed;
+const original=cp.execFileSync('node',['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{maxBuffer:10*1024*1024}).toString();
+assert.equal(blob(original),'b8ef8dcb497cad94c91094ed008136a5d9800155');
+assert.equal(Buffer.byteLength(html),1934253);
+assert.equal(blob(html),'f257bd9e193648dc62cd8a40d510831debfe045a');
+const scripts=s=>[...s.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)];
+const before=scripts(original),after=scripts(html);
+assert.equal(before.length,165);assert.equal(after.length,148);
+const nonRetired=before.filter(x=>!x[1].includes('application/x-gensrpg-disabled'));
+assert.equal(nonRetired.length,after.length);
+after.forEach((x,i)=>assert.equal(x[0],nonRetired[i][0],'parser and byte order '+i));
+assert.ok(!html.includes('application/x-gensrpg-disabled'));
+for(const id of ['rpgTurnTargetFlow157Css','rpgPlayerTargeting158Css','rpgHeroTargeting159Css','dungeonCore091PostCombatUnlockCss','dungeonCore104CoherenceCss'])assert.ok(html.includes('id="'+id+'"'));
+const sw=fs.readFileSync('service-worker.js','utf8');assert.ok(sw.includes('-r10-capture-main-functions-r11-retired-disabled'));
+cp.execFileSync('node',['tools/gensrpg_phase12_r11_retired_scripts.cjs','--verify']);
+assert.equal(cp.execFileSync('node',['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{maxBuffer:10*1024*1024}).toString(),original);
+assert.equal(blob(cp.execFileSync('node',['tools/gensrpg_phase12_r10_capture_extract_apply.cjs','--restore-r09'],{maxBuffer:10*1024*1024})),'4dbe3314d5048f2def404ed674498c0670c04fc1');
+console.log('R11: exact R10/R09 rollback, scripts and CSS unchanged, PWA marker present');

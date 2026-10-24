@@ -137,5 +137,32 @@ new='''function getStoredRpgGameplay(profileId){
 assert s.count(old)==1,"Unexpected getStoredRpgGameplay body"
 s=s.replace(old,new)
 
+old='''function gensGameplayModules(){
+  const empty={
+    heroCombat:false,controllableCreatures:false,capture:false,companions:false,
+    equipment:false,elements:false,economy:false,mana:false,progression:false,
+    evolution:false,permadeath:false,ko:false,talentTrees:false,movement:false
+  };
+  try{
+    const editorOpen=document.getElementById("rpgUniverseEditorModal")?.style.display==="block";
+    const id=editorOpen?rpgEditingId:activeGameProfileId();
+    if(!id)return empty;
+    const p=loadGameProfiles().find(x=>String(x.id)===String(id));'''
+new='''function gensGameplayModules(){
+  const empty={
+    heroCombat:false,controllableCreatures:false,capture:false,companions:false,
+    equipment:false,elements:false,economy:false,mana:false,progression:false,
+    evolution:false,permadeath:false,ko:false,talentTrees:false,movement:false
+  };
+  try{
+    const editorOpen=document.getElementById("rpgUniverseEditorModal")?.style.display==="block";
+    const id=editorOpen?rpgEditingId:activeGameProfileId();
+    if(!id)return empty;
+    // Item filtering is also called while ensureBaseGameProfile() is building
+    // missing profiles. Reading those profiles must never rebuild them.
+    const p=loadGameProfilesRaw().find(x=>String(x.id)===String(id));'''
+assert s.count(old)==1,"Unexpected gensGameplayModules body"
+s=s.replace(old,new)
+
 p.write_bytes(s.encode("utf8"))
 print("GENSRPG_HERO_LOOP_PATCH_OK",hashlib.sha256(p.read_bytes()).hexdigest(),p.stat().st_size)

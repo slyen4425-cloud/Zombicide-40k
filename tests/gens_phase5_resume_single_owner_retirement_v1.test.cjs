@@ -7,7 +7,12 @@ const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 // R11 removed Core 1.00's already inert tag. Restore R10 byte-exact for
 // historical absence-of-authority assertions; check current DOM separately.
 const historicalR10=cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{
-  cwd:path.join(__dirname,'..'),maxBuffer:10*1024*1024
+  cwd:path.join(__dirname,'..'),maxBuffer:10*1024*1024,
+  // Exact pre-Chrome HTML applies exclusively inside this historical rollback
+  // child process; neither current runtime nor saved profiles are modified.
+  env:{...process.env,NODE_OPTIONS:[process.env.NODE_OPTIONS||'',
+    '--require='+path.join(__dirname,'helpers/gens_chrome_historical_subprocess_view_20261024.cjs')]
+    .filter(Boolean).join(' ')}
 }).toString('utf8');
 
 function block(id,source=html){

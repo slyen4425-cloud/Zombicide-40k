@@ -10,6 +10,7 @@ on:
       - 'tools/gensrpg_phase12_r16_restore_r15.cjs'
       - 'tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs'
       - 'tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs'
+      - 'tests/gens_phase5_resume_single_owner_retirement_v1.test.cjs'
       - 'tools/gensrpg_phase12_generated_wall_history.py'
       - 'tests/helpers/gens_chrome_historical_subprocess_view_20261024.cjs'
       - 'tests/helpers/gens_phase12_r09_wave_source_view_v1.cjs'
@@ -47,6 +48,8 @@ jobs:
           node tests/gens_phase9_capture_combat_core_owner_v1.test.cjs
       - name: Confirm Phase 9 immutable Capture exit-evidence source rollback
         run: node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs
+      - name: Confirm Phase 5 Dungeon Resume single-owner against certified R10 snapshot
+        run: node tests/gens_phase5_resume_single_owner_retirement_v1.test.cjs
       - name: Confirm Dungeon extraction rollback remains byte-exact
         run: node tests/gens_phase12_dungeon_core01_extraction_v1.test.cjs
       - name: Confirm R05 historical Core ownership and byte-exact rollback

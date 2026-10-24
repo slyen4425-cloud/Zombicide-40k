@@ -40,6 +40,7 @@ async function run(browserType,name,port){
    assert.ok(stage&&stage.script>0,'parser stage index must be persisted synchronously');
    assert.match(stage.source,/inline|\/|data:/,'stage records source identifier');
    let log=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
+   console.log('HERO_TRACE_DEBUG '+JSON.stringify({browser:name,eventCount:log.events.length,types:log.events.slice(0,15).map(e=>e.type),lastTypes:log.events.slice(-15).map(e=>e.type)}));
    assert.ok(log.events.some(e=>e.type==='start'),'logger must launch before gameplay');
    assert.ok(log.events.some(e=>e.type==='pointer'),'real pointer must be recorded');
    assert.ok(log.events.some(e=>e.type==='click'),'real click must be recorded');

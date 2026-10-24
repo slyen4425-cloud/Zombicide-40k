@@ -36,7 +36,34 @@ def transform(source):
     out=out.replace(MONO,TAG+MONO,1)
     pin(out,OUT_SIZE,OUT_SHA);pin(js,JS_SIZE,JS_SHA)
     return out,js
+def historical_shell_owner_for_verified_rollback(js):
+    """Inverse only the hash-pinned menu-card diff in memory for old R03 fixtures."""
+    current=blob(js)
+    if current==JS_SHA:return js
+    assert current=='1323e83467feacccc69d2c2cd3d3c3cea37608eb', ('unrecognized current Shell owner',current)
+    old=b'  profiles=profiles.filter(p=>(gensContentFamilyForProfile(p)=="creature")===(family==="capture"));\n  const cards=profiles.map(p=>{'
+    new=b'\n'.join((
+        b'  // Shell presentation only: one card per persisted profile ID, even when an',
+        b'  // older Chrome session contains multiple copies of the built-in Dungeon ID.',
+        b'  // Never rewrite or delete profiles here: stored copies and saves stay intact.',
+        b'  const shownProfileIds=new Set();',
+        b'  profiles=profiles.filter(p=>{',
+        b'    if((gensContentFamilyForProfile(p)=="creature")!==(family==="capture"))return false;',
+        b'    const id=String(p?.id??"");',
+        b'    if(!id)return true; // do not silently hide malformed/unsaved profiles',
+        b'    if(shownProfileIds.has(id))return false;',
+        b'    shownProfileIds.add(id);',
+        b'    return true;',
+        b'  });',
+        b'  const cards=profiles.map(p=>{'
+    ))
+    assert js.count(new)==1,'one exact new Shell list expression'
+    historic=js.replace(new,old,1)
+    pin(historic,JS_SIZE,JS_SHA)
+    return historic
+
 def reverse(index,js):
+    js=historical_shell_owner_for_verified_rollback(js)
     pin(index,OUT_SIZE,OUT_SHA);pin(js,JS_SIZE,JS_SHA)
     assert index.count(TAG)==1 and index.count(MONO)==1
     s=index.replace(TAG,b'',1)
@@ -50,7 +77,7 @@ def reverse(index,js):
     return ret
 def verify():
     idx=INDEX.read_bytes();js=ASSET.read_bytes()
-    assert transform(reverse(idx,js))==(idx,js)
+    assert transform(reverse(idx,js))==(idx,historical_shell_owner_for_verified_rollback(js))
     print('R03 VERIF: six Hub functions, no duplicate, bit-identical R02 restore')
 def apply():
     assert not ASSET.exists()

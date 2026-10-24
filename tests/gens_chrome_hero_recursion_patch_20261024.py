@@ -6,11 +6,14 @@ import sys
 
 EXPECTED_SHA256="e89bf6218200386fdf59740508aa993836819b466034b2698fbd9f029e09229e"
 EXPECTED_BLOB="260f00aa179c939f35188ca854f9875971ce8a7b"
-p=Path(sys.argv[1] if len(sys.argv)>1 else "index.html")
-raw=p.read_bytes()
+REVERSE=len(sys.argv)>1 and sys.argv[1]=="--reverse-stdout"
+p=None if REVERSE else Path(sys.argv[1] if len(sys.argv)>1 else "index.html")
+raw=sys.stdin.buffer.read() if REVERSE else p.read_bytes()
 sha=hashlib.sha256(raw).hexdigest()
 blob=hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\0"+raw).hexdigest()
-assert sha==EXPECTED_SHA256 and blob==EXPECTED_BLOB, f"Wrong index base {sha} {blob}"
+expected_blob="cc355585acab68958bd349ffcf8fa0de4eab9b0d" if REVERSE else EXPECTED_BLOB
+assert blob==expected_blob, f"Wrong exact index blob {blob}, expected {expected_blob}"
+if not REVERSE: assert sha==EXPECTED_SHA256, f"Wrong index SHA256 {sha}"
 s=raw.decode("utf8")
 
 old='''function gensCurrentContentFamily(){
@@ -40,8 +43,8 @@ new='''function gensCurrentContentFamily(){
   }catch(e){}
   return isDungeonMode()?"rpg":"survival";
 }'''
-assert s.count(old)==1,"Unexpected gensCurrentContentFamily body"
-s=s.replace(old,new)
+assert s.count(new if REVERSE else old)==1,"Unexpected gensCurrentContentFamily body"
+s=s.replace(new,old) if REVERSE else s.replace(old,new)
 
 old='''function gensCurrentUniverseId(){
   try{
@@ -74,8 +77,8 @@ new='''function gensCurrentUniverseId(){
   }catch(e){}
   return "";
 }'''
-assert s.count(old)==1,"Unexpected gensCurrentUniverseId body"
-s=s.replace(old,new)
+assert s.count(new if REVERSE else old)==1,"Unexpected gensCurrentUniverseId body"
+s=s.replace(new,old) if REVERSE else s.replace(old,new)
 
 old='''function gensFamilyForUniverseId(id){
   try{
@@ -90,8 +93,8 @@ new='''function gensFamilyForUniverseId(id){
     return p?gensContentFamilyForProfile(p):"rpg";
   }catch(e){return "rpg"}
 }'''
-assert s.count(old)==1,"Unexpected gensFamilyForUniverseId body"
-s=s.replace(old,new)
+assert s.count(new if REVERSE else old)==1,"Unexpected gensFamilyForUniverseId body"
+s=s.replace(new,old) if REVERSE else s.replace(old,new)
 
 old='''function gensInferUniverseForLegacyId(contentId,poolField){
   try{
@@ -100,8 +103,8 @@ new='''function gensInferUniverseForLegacyId(contentId,poolField){
   try{
     // Do not reenter ensureBaseGameProfile() from its legacy-hero migration.
     const profiles=loadGameProfilesRaw().filter(p=>p?.gameStyle==="dungeon");'''
-assert s.count(old)==1,"Unexpected gensInferUniverseForLegacyId body"
-s=s.replace(old,new)
+assert s.count(new if REVERSE else old)==1,"Unexpected gensInferUniverseForLegacyId body"
+s=s.replace(new,old) if REVERSE else s.replace(old,new)
 
 # The actual reentrant stack from the synthetic Android profile fixture is:
 # ensureBaseGameProfile -> itemsForMode -> gensGameplayModules ->
@@ -126,16 +129,22 @@ old='''function gensGameplayModules(){
 }'''
 new=old.replace('const p=loadGameProfiles().find(', 'const p=loadGameProfilesRaw().find(').replace(
     '  try{\n    const editorOpen=', '  // Read only. Called from itemsForMode during ensureBaseGameProfile.\n  try{\n    const editorOpen=')
-assert s.count(old)==1,"Unexpected gensGameplayModules body"
-s=s.replace(old,new)
+assert s.count(new if REVERSE else old)==1,"Unexpected gensGameplayModules body"
+s=s.replace(new,old) if REVERSE else s.replace(old,new)
 
 old='''function getStoredRpgGameplay(profileId){
   const p=loadGameProfiles().find(x=>String(x.id)===String(profileId)&&x.gameStyle==="dungeon");'''
 new='''function getStoredRpgGameplay(profileId){
   // The caller may run while a reference profile is being initialized.
   const p=loadGameProfilesRaw().find(x=>String(x.id)===String(profileId)&&x.gameStyle==="dungeon");'''
-assert s.count(old)==1,"Unexpected getStoredRpgGameplay body"
-s=s.replace(old,new)
+assert s.count(new if REVERSE else old)==1,"Unexpected getStoredRpgGameplay body"
+s=s.replace(new,old) if REVERSE else s.replace(old,new)
 
-p.write_bytes(s.encode("utf8"))
-print("GENSRPG_HERO_LOOP_PATCH_OK",hashlib.sha256(p.read_bytes()).hexdigest(),p.stat().st_size)
+result=s.encode("utf8")
+if REVERSE:
+    reverse_blob=hashlib.sha1(b"blob "+str(len(result)).encode()+b"\0"+result).hexdigest()
+    assert reverse_blob==EXPECTED_BLOB, f"Historical reconstruction mismatch {reverse_blob}"
+    sys.stdout.buffer.write(result)
+else:
+    p.write_bytes(result)
+    print("GENSRPG_HERO_LOOP_PATCH_OK",hashlib.sha256(result).hexdigest(),len(result))

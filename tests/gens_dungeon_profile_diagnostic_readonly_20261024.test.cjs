@@ -3,6 +3,8 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const html=fs.readFileSync('dungeon-profiles-diagnostic.html','utf8');
+const pages=fs.readFileSync('.github/workflows/main.yml','utf8');
+assert.match(pages,/cp -f dungeon-profiles-diagnostic\.html _site\/dungeon-profiles-diagnostic\.html/,'Pages must actually publish optional diagnostic');
 const found=html.match(/<script>\s*([\s\S]*?)\s*<\/script>/);
 assert.ok(found,'diagnostic script present');
 const script=found[1];

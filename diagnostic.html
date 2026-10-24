@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#141b30">
+<title>GenSrpG — Diagnostic Chrome</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;background:#101522;color:#f3f6ff;font-family:system-ui,-apple-system,Arial,sans-serif;padding:18px;line-height:1.5}
+main{max-width:680px;margin:0 auto}
+h1{font-size:1.48rem;margin:0 0 10px}
+p{color:#c9d2e6}
+.card{border:1px solid #344059;border-radius:14px;background:#1b2438;padding:16px;margin:16px 0}
+button,a.action{font:600 16px system-ui;border:0;border-radius:10px;padding:12px 14px;cursor:pointer;display:inline-block;text-decoration:none;margin:5px 6px 5px 0;background:#4676e5;color:#fff}
+button.secondary{background:#34425f}
+button.warn{background:#764849}
+.small{font-size:13px;color:#b0bfd9}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:55vh;overflow:auto;background:#0b101b;border-radius:10px;padding:12px;font:12px/1.4 ui-monospace,monospace}
+#loading{position:fixed;inset:0;background:#101522;z-index:999;display:none;place-items:center;text-align:center;padding:28px;font-size:17px}
+</style>
+</head>
+<body>
+<main>
+<h1>GenSrpG — Diagnostic Chrome Android</h1>
+<p>Ce mode permet de reproduire le gel de Chrome et de conserver un petit journal sur ton appareil. Aucune donnée de jeu n'est supprimée et aucun journal n'est envoyé automatiquement.</p>
+<div class="card">
+  <h2 style="font-size:1.1rem;margin-top:0">1. Lancer le test</h2>
+  <p>Ouvre GenSrpG avec le journal activé. Essaie uniquement une ou deux interactions. Si Chrome se ferme, rouvre <strong>cette même page de diagnostic</strong> pour consulter le journal précédent.</p>
+  <button id="start">Démarrer GenSrpG avec journal</button>
+  <p class="small">Le jeu est chargé depuis le même site, avec un très petit script ajouté au début. Cette méthode de diagnostic modifie légèrement le chargement, mais pas les règles ni les sauvegardes.</p>
+</div>
+<div class="card">
+  <h2 style="font-size:1.1rem;margin-top:0">2. Récupérer le journal</h2>
+  <p id="status">Lecture du dernier journal…</p>
+  <button id="copy" class="secondary">Copier le journal</button>
+  <button id="download" class="secondary">Exporter le journal JSON</button>
+  <button id="refresh" class="secondary">Actualiser</button>
+  <pre id="report">Aucun journal disponible.</pre>
+  <button id="clear" class="warn">Effacer seulement ce journal</button>
+  <p class="small">Ce journal ne contient ni identifiants, ni contenu des formulaires, ni sauvegardes. Les messages d'erreur peuvent néanmoins contenir des détails techniques : vérifie-les avant de les partager.</p>
+</div>
+</main>
+<div id="loading" role="status">Chargement de GenSrpG avec diagnostic…</div>
+<script src="diagnostic-shell.js"></script>
+</body>
+</html>

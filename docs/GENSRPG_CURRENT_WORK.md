@@ -1,5 +1,13 @@
 # GenSrpG — CURRENT_WORK officiel (23 octobre 2026)
 
+## Incident isolé — doublons du profil Dungeon dans le menu (24 octobre 2026, correctif ciblé)
+
+- **La restructuration reste suspendue.** Ticket #166. Rapport utilisateur via la page diagnostic : `gensrpg_game_profiles_v1` contient exactement 7 profils : un 40K unique, **5 occurrences du même ID** `game_profile_dungeon_demo`, un Monster Capture unique. Les 5 occurrences sont toutes des cartes Dungeon intégrées ; l’utilisateur n'a créé aucun monde supplémentaire. Ce sont des duplications enregistrées, pas 5 parties ni 5 univers différents. Origine de l'écriture répétée non prouvée ; éviter tout diagnostic causal excessif.
+- **Base / START** : main `42c81ddc0d445b7bbcc5d03e1d7a1fca2a5a63ed`; checkpoint de départ `checkpoint/gensrpg-start-dungeon-profile-card-idempotency-2026-10-24` à ce SHA ; branche dédiée `work/gensrpg-dungeon-profile-card-idempotency-2026-10-24`. Dernier jalon diagnostic PR #167 intégré sur main ; ne pas reprendre Phase 12.
+- **Périmètre du lot** : le propriétaire d'affichage Shell `assets/gensrpg/shell/legacy-hub-family-ui-v1.js`, test de non-régression ciblé, documentation ; aucun `index.html`, sauvegarde/migration, service worker ou gameplay. Afficher **une seule carte par ID de profil** dans la famille demandée, conserver le premier objet retourné et les autres univers aux IDs distincts même si leur nom est identique. Ne **jamais** modifier localStorage ni supprimer/écraser le profil, ses variantes ou sauvegardes ; cette correction ne nettoie pas les 4 copies stockées.
+- **Tests obligatoires** : reproduire 5x l'ID Dungeon et 40K + Capture, vérifier la seule carte visible, navigation/bouton Modifier conservés, filtres de famille, 2 univers distincts homonymes non masqués, aucune mutation de données ; CI du lot et CI générales navigateur/architecture sur un même SHA avant toute fusion ; checkpoint GREEN et validation Chrome utilisateur. Le propriétaire de la création répétée reste à investiguer séparément si les copies sont encore recréées.
+
+
 ## Incident isolé — Dungeon dupliqué dans la liste Univers RPG (24 octobre, diagnostic en cours)
 
 - **Restructuration mise en pause à la demande de l'utilisateur.** Aucune reprise de Phase 12 ou modification du runtime dans ce lot.

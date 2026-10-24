@@ -7,6 +7,7 @@ on:
       - 'tests/helpers/gens_chrome_hero_recursion_source_view_20261024.cjs'
       - 'tests/helpers/gens_capture_team_roster_snapshot_v1.cjs'
       - 'tests/gens_chrome_hero_recursion_patch_20261024.py'
+      - 'tools/gensrpg_phase12_r16_restore_r15.cjs'
       - '.github/workflows/gensrpg-chrome-hero-historical-guards.yml'
   workflow_dispatch:
 permissions:

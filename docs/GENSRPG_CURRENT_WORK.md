@@ -28,6 +28,15 @@
 
 
 
+### Diagnostic utilisateur embarqué opt-in (24 octobre 2026)
+
+- Demande utilisateur : produire les logs utiles directement sur son Chrome Android en cas de crash immédiat au premier toucher ; pouvoir rouvrir la page et exporter le journal JSON sans ordinateur.
+- Owner exclusif : trois nouveaux fichiers auxiliaires `diagnostic.html`, `diagnostic-shell.js`, `diagnostic-boot.js`, plus sentinelle `tests/gens_chromium_diagnostic_journal_browser_20261024.cjs` et workflow CI. Aucun accès/édition de `index.html`, aucun runtime ou SW modifié, aucune modification des moteurs ; page test uniquement. Base de travail sur `main` R16 e696162 et checkpoint de départ existant.
+- La page charge l'index réel via fetch no-store et `document.write` avec `base` de même origine et un bootstrap de logs ajouté en premier. Diffère légèrement de l'entrée native, ce qui peut changer la reproduction : explicitement déclaré à l'utilisateur.
+- Journal borné (~45 Ko et 120 événements) dans une seule clé locale `gensrpg_mobile_diag_v1` ; début/dernière pulsation, erreurs JS et chargements, promesses rejetées, tâches longues, frame gaps, compte DOM et mémoire JS si exposée, clics et cibles DOM sans texte des champs. Aucun envoi réseau des logs, aucun nettoyage des sauvegardes. Export volontaire par bouton. Un journal sans `pagehide` n'est pas preuve de crash (fermeture/gel possible).
+- Sentinelle Chromium et Firefox dédiée avec vrais assets runtime, toucher, reprise de la page de diagnostic, préservation d'une clé locale de sauvegarde de test et export. CI à valider avant publication d'un lien utilisateur.
+
+
 ## Phase 12 — R16 : migration propriétaire Dungeon combat/IA (extraction Core303, CI à vérifier)
 
 - **Dernier GREEN vérifié** : `checkpoint/gensrpg-phase12-four-mode-browser-real-composition-green-2026-10-23` au SHA `fb47398a2b6d6cc6c4b1e48fd2ffde3b716d83c4`. [CI Architecture + browser 39960988619](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39960988619), [Tactical complet 39960988738](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39960988738), [Firefox 39960988455](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/39960988455) : **tous SUCCESS sur ce même SHA**, notamment transition réelle Survie→Dungeon→Survie→Capture→PvP, provider S3, reprise Capture et équipement. GREEN limité au code testé, **pas EXIT Phase 12**.

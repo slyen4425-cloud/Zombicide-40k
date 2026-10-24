@@ -6,7 +6,7 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const original=fs.readFileSync.bind(fs);
 const indexPath=path.resolve(__dirname,'../../index.html');
-const sha=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\\0')).update(b).digest('hex');
+const sha=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length + String.fromCharCode(0))).update(b).digest('hex');
 const historical=require('./gens_chrome_hero_recursion_source_view_20261024.cjs');
 const NEW='cc355585acab68958bd349ffcf8fa0de4eab9b0d';
 fs.readFileSync=function(file,...args){

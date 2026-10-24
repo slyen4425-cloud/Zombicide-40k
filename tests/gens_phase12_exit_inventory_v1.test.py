@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Metadata-only Phase 12 EXIT inventory regressions. No production HTML loaded."""
 from pathlib import Path
+import os
+import subprocess
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
@@ -22,17 +25,25 @@ class ExitInventoryTests(unittest.TestCase):
         self.assertEqual(EXPECTED_BLOB, "12fc91df4ee4c7989a172baa96f9790da6dc57f7")
 
     def test_current_repo_index_matches_user_d2_zip_census(self):
-        source = Path(__file__).resolve().parents[1] / "index.html"
         from gensrpg_phase12_r07_magic_audio_extract_apply import reverse, ROOT, REL
         from gensrpg_phase12_r08_shared_catalog_extract_apply import restore as r08_restore, ROOT as R08_ROOT, REL as R08_REL
-        # R09 est une extraction physique. Reconstruire R08 octet-exact avant
-        # la chaîne historique R08 -> R07 -> R06 : aucune sentinelle retirée.
-        import subprocess
+        # Source historique figée certifiée à l'EXIT R06 -> R10. Le index
+        # courant est modifiable après R10 : ce test doit continuer à valider
+        # exactement les mêmes octets historiques, jamais un état récent
+        # en prétendant qu'il est byte-identique aux extractions précédentes.
         root = Path(__file__).resolve().parents[1]
-        r08_index = subprocess.check_output(
-            ["node", str(root / "tools/gensrpg_phase12_r09_wave_extract_apply.cjs"), "--restore-r08"],
-            cwd=root,
-        )
+        certified_ref = "3f197edeccd10d7f103126a6eb8c3f5db92bf609"
+        original = subprocess.check_output(["git", "show", f"{certified_ref}:index.html"], cwd=root)
+        self.assertEqual(git_blob(original), "260f00aa179c939f35188ca854f9875971ce8a7b")
+        with tempfile.TemporaryDirectory(prefix="gensrpg-historical-r06-") as tmp:
+            historical = Path(tmp)
+            (historical / "index.html").write_bytes(original)
+            for name in ("tools", "assets"):
+                os.symlink(root / name, historical / name, target_is_directory=True)
+            r08_index = subprocess.check_output(
+                ["node", str(root / "tools/gensrpg_phase12_r09_wave_extract_apply.cjs"), "--restore-r08"],
+                cwd=historical,
+            )
         report = summarize(reverse(r08_restore(r08_index, (R08_ROOT / R08_REL).read_bytes()), (ROOT / REL).read_bytes()))
         counts = report["counts"]
         self.assertEqual(counts["script_tags"], 161)

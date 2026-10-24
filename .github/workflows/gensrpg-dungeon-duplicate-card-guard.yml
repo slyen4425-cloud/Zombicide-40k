@@ -1,0 +1,30 @@
+name: GenSrpG Dungeon duplicate card display guard
+on:
+  push:
+    branches:
+      - work/gensrpg-dungeon-profile-card-idempotency-2026-10-24
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  dungeon-profile-card-guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm exact-id card filtering preserves persisted data and other modes
+        run: node tests/gens_dungeon_profile_card_idempotency_20261024.test.cjs
+      - name: Install Chromium for actual mobile Shell menu integration
+        run: |
+          npm install --no-save --prefix /tmp/gensrpg-dungeon-cards playwright@1.55.0
+          /tmp/gensrpg-dungeon-cards/node_modules/.bin/playwright install --with-deps chromium
+      - name: Verify five persisted Dungeon entries render once in the real mobile app
+        env:
+          NODE_PATH: /tmp/gensrpg-dungeon-cards/node_modules
+        run: node tests/gens_dungeon_profile_card_browser_20261024.cjs

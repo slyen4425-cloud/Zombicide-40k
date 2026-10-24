@@ -6,7 +6,18 @@ function renderGensRpgUniverseCards(family="adventure"){
     profiles=raw.map(p=>{try{return ensureRpgProfileData(p)}catch(err){console.error(err);return p}});
   }
 
-  profiles=profiles.filter(p=>(gensContentFamilyForProfile(p)==="creature")===(family==="capture"));
+  // Shell presentation only: one card per persisted profile ID, even when an
+  // older Chrome session contains multiple copies of the built-in Dungeon ID.
+  // Never rewrite or delete profiles here: stored copies and saves stay intact.
+  const shownProfileIds=new Set();
+  profiles=profiles.filter(p=>{
+    if((gensContentFamilyForProfile(p)==="creature")!==(family==="capture"))return false;
+    const id=String(p?.id??"");
+    if(!id)return true; // do not silently hide malformed/unsaved profiles
+    if(shownProfileIds.has(id))return false;
+    shownProfileIds.add(id);
+    return true;
+  });
   const cards=profiles.map(p=>{
     try{
       ensureRpgProfileData(p);

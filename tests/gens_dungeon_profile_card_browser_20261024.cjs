@@ -34,9 +34,11 @@ const server=http.createServer((req,res)=>{
     const items=[...arr.slice(),...cloned];
     localStorage.setItem('gensrpg_game_profiles_v1',JSON.stringify(items));
     const raw=localStorage.getItem('gensrpg_game_profiles_v1');
-    openGensFamily('adventure');
     return {raw,ids:items.map(x=>x.id)};
   });
+  // Use the real root navigation: openGensFamily() alone does not reveal its parent screen.
+  await page.locator('button.gensRootModeCard.adventure').click();
+  await page.locator('#gensFamilyHome').waitFor({state:'visible'});
   const cards=page.locator('#gensFamilyGames [data-rpg-profile="game_profile_dungeon_demo"]');
   await cards.first().waitFor({state:'visible'});
   assert.equal(await cards.count(),1,'five saved copies must render one Dungeon card');

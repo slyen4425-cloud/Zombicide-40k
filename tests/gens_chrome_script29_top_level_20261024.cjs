@@ -58,7 +58,7 @@ const out={publishedCodeScript29Hash:crypto.createHash('sha256').update(body).di
 const lookup=['z40kApplyCustomHeroes','loadCustomHeroesMulti','applyCustomHeroesMulti','saveCustomHeroesMulti'];
 const details=lookup.map(fn=>{
  const declaration=ast.body.find(n=>n.type==='FunctionDeclaration'&&n.id?.name===fn);
- const allReferences=[...body.matchAll(new RegExp('\\\\b'+fn+'\\\\s*\\\\(','g'))].length;
+ const allReferences=[...body.matchAll(new RegExp('\\b'+fn+'\\s*\\(','g'))].length;
  if(!declaration)return {function:fn,definedInScript:false,references:allReferences};
  const snippet=body.slice(declaration.start,declaration.end);
  return {function:fn,definedInScript:true,atLine:declaration.loc.start.line+15891,

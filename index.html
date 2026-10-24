@@ -8395,7 +8395,8 @@ function saveRpgGameplayByProfile(map){
   localStorage.setItem(GENS_RPG_GAMEPLAY_BY_PROFILE_KEY,JSON.stringify(map||{}));
 }
 function getStoredRpgGameplay(profileId){
-  const p=loadGameProfiles().find(x=>String(x.id)===String(profileId)&&x.gameStyle==="dungeon");
+  // The caller may run while a reference profile is being initialized.
+  const p=loadGameProfilesRaw().find(x=>String(x.id)===String(profileId)&&x.gameStyle==="dungeon");
   if(!p)return JSON.parse(JSON.stringify(gensBlankRpgSettings().gameplay));
   ensureRpgProfileData(p);
   return JSON.parse(JSON.stringify(p.rpgUniverse?.gameplay||gensBlankRpgSettings().gameplay));
@@ -8607,11 +8608,12 @@ function gensGameplayModules(){
     equipment:false,elements:false,economy:false,mana:false,progression:false,
     evolution:false,permadeath:false,ko:false,talentTrees:false,movement:false
   };
+  // Read only. Called from itemsForMode during ensureBaseGameProfile.
   try{
     const editorOpen=document.getElementById("rpgUniverseEditorModal")?.style.display==="block";
     const id=editorOpen?rpgEditingId:activeGameProfileId();
     if(!id)return empty;
-    const p=loadGameProfiles().find(x=>String(x.id)===String(id));
+    const p=loadGameProfilesRaw().find(x=>String(x.id)===String(id));
     if(!p)return empty;
     if(!window.GensCaptureV1?.isProfile?.(p) && p.gameStyle!=="dungeon")return empty;
     const g=getStoredRpgGameplay(id);
@@ -15995,21 +15997,29 @@ function gensContentFamilyForProfile(profile){
   return "rpg";
 }
 function gensCurrentContentFamily(){
+  // This lookup is also used inside profile/hero migration. Rebuilding the
+  // profiles from here would recursively restart ensureBaseGameProfile().
+  // Only the profile owner is permitted to create/migrate profiles.
   try{
+    const profiles=loadGameProfilesRaw();
     const editorOpen=document.getElementById("rpgUniverseEditorModal")?.style.display==="block";
     if(editorOpen && rpgEditingId){
-      const p=loadGameProfiles().find(x=>String(x.id)===String(rpgEditingId));
+      const p=profiles.find(x=>String(x.id)===String(rpgEditingId));
       if(p)return gensContentFamilyForProfile(p);
     }
+    const activeId=activeGameProfileId();
+    const p=profiles.find(x=>String(x.id)===String(activeId));
+    if(p)return gensContentFamilyForProfile(p);
   }catch(e){}
-  try{return gensContentFamilyForProfile(getActiveGameProfile?.())}catch(e){return isDungeonMode()?"rpg":"survival"}
+  return isDungeonMode()?"rpg":"survival";
 }
 function gensContentFamilyLabel(f=gensCurrentContentFamily()){
   return GENS_CONTENT_FAMILIES[f]?.label||"RPG";
 }
 function gensFamilyForUniverseId(id){
+  // Read-only: called from content migration while profiles may be incomplete.
   try{
-    const p=loadGameProfiles().find(x=>String(x.id)===String(id));
+    const p=loadGameProfilesRaw().find(x=>String(x.id)===String(id));
     return p?gensContentFamilyForProfile(p):"rpg";
   }catch(e){return "rpg"}
 }
@@ -16025,16 +16035,19 @@ function gensContentCompatible(record,kind){
   return gensLegacyContentFamily(record,kind)===wanted;
 }
 function gensCurrentUniverseId(){
+  // Legacy hero migration asks for this ID while profiles are still building.
+  // Resolve existing profiles without recursively rebuilding them.
   try{
+    const profiles=loadGameProfilesRaw();
     const rpgOpen=document.getElementById("rpgUniverseEditorModal")?.style.display==="block";
     if(rpgOpen && rpgEditingId){
-      const p=loadGameProfiles().find(x=>String(x.id)===String(rpgEditingId));
+      const p=profiles.find(x=>String(x.id)===String(rpgEditingId));
       if(p?.gameStyle==="dungeon")return String(p.id);
     }
-  }catch(e){}
-  try{
-    const p=getActiveGameProfile?.();
+    const id=activeGameProfileId();
+    const p=profiles.find(x=>String(x.id)===String(id));
     if(p?.gameStyle==="dungeon")return String(p.id);
+    if(!p && String(id)===String(GAME_PROFILE_DUNGEON_ID))return String(id);
   }catch(e){}
   return "";
 }
@@ -16064,7 +16077,8 @@ function gensAttachContentToUniverse(universeId,kind,contentId){
 }
 function gensInferUniverseForLegacyId(contentId,poolField){
   try{
-    const profiles=loadGameProfiles().filter(p=>p?.gameStyle==="dungeon");
+    // Do not reenter ensureBaseGameProfile() from its legacy-hero migration.
+    const profiles=loadGameProfilesRaw().filter(p=>p?.gameStyle==="dungeon");
     const matches=profiles.filter(p=>{
       if(poolField==="enemyConfig")return Object.prototype.hasOwnProperty.call(p.enemyConfig||{},String(contentId));
       return Array.isArray(p?.[poolField]) && p[poolField].map(String).includes(String(contentId));

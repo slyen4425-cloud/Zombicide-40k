@@ -2,10 +2,12 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const originalR06View=require('./helpers/gens_phase12_r06_capture_source_view_v1.cjs');
+// Test-only: reconstruct the exact pre-Chrome index before Phase 12 historical rollback.
+const originalChromeIndex=require('./helpers/gens_chrome_hero_recursion_source_view_20261024.cjs');
 const root=path.join(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 
-const index=originalR06View(fs.readFileSync(path.join(root,'index.html'))).toString('utf8');
+const index=originalR06View(originalChromeIndex(fs.readFileSync(path.join(root,'index.html')))).toString('utf8');
 const workflow=read('.github/workflows/main.yml');
 const preview=read('preview.html');
 

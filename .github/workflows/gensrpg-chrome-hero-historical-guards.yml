@@ -1,0 +1,71 @@
+name: GenSrpG Chrome Hero Loop Historical Guards
+on:
+  push:
+    branches:
+      - work/gensrpg-chrome-hero-recursion-2026-10-24
+    paths:
+      - 'tests/helpers/gens_chrome_hero_recursion_source_view_20261024.cjs'
+      - 'tests/helpers/gens_capture_team_roster_snapshot_v1.cjs'
+      - 'tests/gens_chrome_hero_recursion_patch_20261024.py'
+      - 'tools/gensrpg_phase12_r16_restore_r15.cjs'
+      - 'tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs'
+      - 'tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs'
+      - 'tests/gens_phase5_resume_single_owner_retirement_v1.test.cjs'
+      - 'tests/gens_phase4_storage_inline_audit_v1.test.cjs'
+      - 'tests/gens_phase4_storage_capture_progress_owner_v1.test.cjs'
+      - 'tests/gens_phase4_storage_capture_progress_parity_v1.test.cjs'
+      - 'tests/helpers/gens_phase12_r06_capture_source_view_v1.cjs'
+      - 'tools/gensrpg_phase12_generated_wall_history.py'
+      - 'tests/helpers/gens_chrome_historical_subprocess_view_20261024.cjs'
+      - 'tests/helpers/gens_phase12_r09_wave_source_view_v1.cjs'
+      - 'tests/helpers/gens_phase12_r02_r01_source_view_v1.cjs'
+      - 'tools/gensrpg_phase12_r01_d9_source_view.py'
+      - 'tools/gensrpg_phase12_generated_wall_history.py'
+      - '.github/workflows/gensrpg-chrome-hero-historical-guards.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  historical-equivalence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert Chrome fix can be inverted only on exact authored source
+        run: |
+          node - <<'NODE'
+          const assert=require('node:assert/strict'),fs=require('node:fs'),crypto=require('node:crypto');
+          const sha=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0')).update(b).digest('hex');
+          const b=fs.readFileSync('index.html');
+          assert.equal(sha(b),'cc355585acab68958bd349ffcf8fa0de4eab9b0d');
+          const hist=require('./tests/helpers/gens_chrome_hero_recursion_source_view_20261024.cjs')(b);
+          assert.equal(sha(hist),'260f00aa179c939f35188ca854f9875971ce8a7b');
+          assert.ok(hist.length<b.length);
+          console.log('HISTORICAL_CHROME_INDEX_OK',hist.length,b.length);
+          NODE
+      - name: Confirm historical Core R05 source and backups remain byte-exact
+        run: node tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs
+      - name: Confirm Phase 9 Hub historical owner remains exact
+        run: |
+          node tests/gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs
+          node tests/gens_phase9_capture_shell_home_return_boundary_v1.test.cjs
+          node tests/gens_phase9_capture_combat_core_owner_v1.test.cjs
+      - name: Confirm Phase 9 immutable Capture exit-evidence source rollback
+        run: node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs
+      - name: Confirm Phase 5 Dungeon Resume single-owner against certified R10 snapshot
+        run: node tests/gens_phase5_resume_single_owner_retirement_v1.test.cjs
+      - name: Confirm Phase 4 Capture storage audit against certified pre-fix source
+        run: |
+          node tests/gens_phase4_storage_inline_audit_v1.test.cjs
+          node tests/gens_phase4_storage_capture_progress_owner_v1.test.cjs
+          node tests/gens_phase4_storage_capture_progress_parity_v1.test.cjs
+      - name: Confirm Dungeon extraction rollback remains byte-exact
+        run: node tests/gens_phase12_dungeon_core01_extraction_v1.test.cjs
+      - name: Confirm R05 historical Core ownership and byte-exact rollback
+        run: |
+          node tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs
+          python3 tools/gensrpg_phase12_r05_core_cloud_sync_extract_apply.py --verify
+      - name: Confirm Armor and Survival historic snapshot after Chrome fix
+        run: |
+          node tests/gens_phase6_survival_legacy_guard_retirement_v1.test.cjs
+          node tests/gens_phase6_survival_builtin_boundary_retirement_v1.test.cjs

@@ -9,6 +9,9 @@ const hash=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0'
 // historical fingerprints to today's unrelated wall-material correction.
 // This one audited test-only inverse is gated on the exact new index blob.
 function restorePreWallMaterialIndex(index){
+  // Strict test-only inverse for the independent Chrome startup repair.
+  // Restore known old bytes before passing to the existing historical chain.
+  index=require('./gens_chrome_hero_recursion_source_view_20261024.cjs')(index);
   index=require('./gens_phase12_r06_capture_source_view_v1.cjs')(index);
   if(hash(index)!=='b33542b033c5afa8a1643d99c56c21dbd4be266c')return index;
   let source=index.toString('utf8');

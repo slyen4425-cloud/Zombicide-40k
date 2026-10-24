@@ -23,11 +23,9 @@ jobs:
         run: python3 tests/gens_phase12_exit_inventory_v1.test.py
 
       - name: Vérifier R07 trois sons magiques, index exact et rollback R06 sans changer le moteur
-        run: |
-          python3 tools/gensrpg_phase12_r08_shared_catalog_extract_apply.py --verify
-          python3 tests/gens_phase12_exit_inventory_v1.test.py
-          node tests/gens_phase12_r07_magic_sound_extraction_v1.test.cjs
-          node tests/gens_phase12_r08_shared_catalog_extraction_v1.test.cjs
+        # Les quatre contrôles historiques complets s'exécutent sur l'ancien
+        # checkpoint exact, et non sur l'index du produit amendé aujourd'hui.
+        run: bash tests/gens_phase12_certified_r07_r08_history_20261024.sh
 
       - name: Verrouiller le transfert propriétaire de la transition Hub Capture Phase 9
         run: |

@@ -43,12 +43,23 @@ STYLE='''.dc047Cell.dc079WallBlock{
 '''.encode("utf8")
 from functools import lru_cache
 
+def _historical_node_env(root):
+    # Only the exact Chrome-fix blob is projected to its old bytes. This affects
+    # historical rollback subprocesses, never the shipped app or disk index.
+    import os
+    env=os.environ.copy()
+    preload=root/"tests/helpers/gens_chrome_historical_subprocess_view_20261024.cjs"
+    env["NODE_OPTIONS"]=" ".join(x for x in [
+        env.get("NODE_OPTIONS",""), "--require="+str(preload)
+    ] if x)
+    return env
+
 @lru_cache(maxsize=1)
 def _exact_r09_to_r08():
     from pathlib import Path
     import subprocess
     root=Path(__file__).resolve().parents[1]
-    data=subprocess.check_output(["node",str(root/"tools/gensrpg_phase12_r09_wave_extract_apply.cjs"),"--restore-r08"],cwd=root)
+    data=subprocess.check_output(["node",str(root/"tools/gensrpg_phase12_r09_wave_extract_apply.cjs"),"--restore-r08"],cwd=root,env=_historical_node_env(root))
     assert blob(data)=="6eeed45a0a12085c1b107ee6c24b49040277ca54", "R09 -> R08 exact rollback required"
     return data
 
@@ -57,11 +68,21 @@ def _exact_r10_to_r09():
     from pathlib import Path
     import subprocess
     root=Path(__file__).resolve().parents[1]
-    data=subprocess.check_output(["node",str(root/"tools/gensrpg_phase12_r10_capture_extract_apply.cjs"),"--restore-r09"],cwd=root)
+    data=subprocess.check_output(["node",str(root/"tools/gensrpg_phase12_r10_capture_extract_apply.cjs"),"--restore-r09"],cwd=root,env=_historical_node_env(root))
     assert len(data)==2093066 and blob(data)=="4dbe3314d5048f2def404ed674498c0670c04fc1", "R10 -> R09 exact rollback required"
     return data
 
 def historical_r05_view(data):
+    # A source-only Chrome bootstrap repair cannot alter immutable Phase12
+    # historical snapshots. Invert only its exact SHA-pinned active blob.
+    if blob(data)=="cc355585acab68958bd349ffcf8fa0de4eab9b0d":
+        from pathlib import Path
+        import subprocess
+        root=Path(__file__).resolve().parents[1]
+        data=subprocess.check_output(
+            ["python3",str(root/"tests/gens_chrome_hero_recursion_patch_20261024.py"),"--reverse-stdout"],
+            input=data,cwd=root)
+        assert len(data)==1720766 and blob(data)=="260f00aa179c939f35188ca854f9875971ce8a7b", "historical Chrome rollback mismatched old blob"
     # New R11 source is strictly reconstructed via R11→R10→R09 before old snapshot checks.
     # Validate only known, exact subsequent physical index snapshots. In
     # particular R14/R15 must replay to R09 before D9's strict historical

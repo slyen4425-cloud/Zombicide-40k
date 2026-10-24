@@ -13,7 +13,13 @@ module.exports=function r08View(index,root=path.resolve(__dirname,'../..')){
   }
   if(['b8ef8dcb497cad94c91094ed008136a5d9800155','f257bd9e193648dc62cd8a40d510831debfe045a','b0d0c73292e4374fc4f23e86edffad5c1b39a7b6','b5a39705baf83e9782695c14bede8b9dde6ddf52','dab5be5dedfa56c49d76d40a4cb824a0098903f0','9f35eb833a6ede4b91399854f19bb9bef59f45ab'].includes(blob(index))){
     assert.ok((index.length===2031649&&blob(index)==='b8ef8dcb497cad94c91094ed008136a5d9800155')||(index.length===1934253&&blob(index)==='f257bd9e193648dc62cd8a40d510831debfe045a')||(index.length===1863745&&blob(index)==='b0d0c73292e4374fc4f23e86edffad5c1b39a7b6')||(index.length===1820094&&blob(index)==='b5a39705baf83e9782695c14bede8b9dde6ddf52')||(index.length===1772759&&blob(index)==='dab5be5dedfa56c49d76d40a4cb824a0098903f0')||(index.length===1729855&&blob(index)==='9f35eb833a6ede4b91399854f19bb9bef59f45ab'),'only certified R10/R11 historical input');
-    index=cp.execFileSync('node',[path.join(root,'tools/gensrpg_phase12_r10_capture_extract_apply.cjs'),'--restore-r09'],{cwd:root,maxBuffer:4*1024*1024});
+    index=cp.execFileSync('node',[path.join(root,'tools/gensrpg_phase12_r10_capture_extract_apply.cjs'),'--restore-r09'],{
+      cwd:root,maxBuffer:4*1024*1024,
+      // Only subprocesses that reconstruct immutable historical fixtures see
+      // exact old index bytes; disk/runtime remain unchanged.
+      env:{...process.env,NODE_OPTIONS:[process.env.NODE_OPTIONS||'',
+        '--require='+path.join(root,'tests/helpers/gens_chrome_historical_subprocess_view_20261024.cjs')].filter(Boolean).join(' ')}
+    });
     assert.equal(blob(index),R09,'R10 must reconstruct exact R09 for historical sentinels');
   }
   if(blob(index)!==R09)return index;

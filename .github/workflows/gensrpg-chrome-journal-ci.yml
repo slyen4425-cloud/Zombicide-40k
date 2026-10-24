@@ -1,0 +1,31 @@
+name: GenSrpG opt-in mobile diagnostic journal CI
+on:
+  push:
+    branches:
+      - 'work/gensrpg-chrome-mobile-diagnostic-ui-2026-10-24'
+    paths:
+      - 'diagnostic.html'
+      - 'diagnostic-shell.js'
+      - 'diagnostic-boot.js'
+      - 'tests/gens_chromium_diagnostic_journal_browser_20261024.cjs'
+      - '.github/workflows/gensrpg-chrome-journal-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-mobile-logger:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install isolated browsers
+        run: |
+          npm install --no-save --prefix /tmp/gensrpg-diag-browser playwright@1.55.0
+          /tmp/gensrpg-diag-browser/node_modules/.bin/playwright install --with-deps chromium firefox
+      - name: Verify real app startup, touch logging and storage preservation in both browsers
+        env:
+          NODE_PATH: /tmp/gensrpg-diag-browser/node_modules
+        run: node tests/gens_chromium_diagnostic_journal_browser_20261024.cjs

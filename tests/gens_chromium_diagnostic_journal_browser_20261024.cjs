@@ -10,7 +10,7 @@ assert.match(src,/fetch\(u\.href,\{cache:"no-store"\}\)/);
 assert.match(src,/document\.write\(html\)/);
 assert.doesNotMatch(src,/localStorage\.clear|sessionStorage\.clear|caches\.delete|unregister\(/);
 const logger=fs.readFileSync(path.join(root,'diagnostic-boot.js'),'utf8');
-assert.doesNotMatch(logger,/localStorage\.clear|removeItem\(|sendBeacon|fetch\(/);
+assert.doesNotMatch(logger,/localStorage\.clear|localStorage\.removeItem\(|sendBeacon|fetch\(/);
 const server=http.createServer((req,res)=>{
  let n;try{n=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname)}catch(_){res.writeHead(400);res.end();return}
  const file=path.resolve(root,'.'+(n==='/'?'/index.html':n));

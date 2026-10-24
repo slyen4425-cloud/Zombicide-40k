@@ -59,6 +59,28 @@ function scriptTagEnd(html,start){
  }
  return -1;
 }
+function instrumentHeroStartup(html){
+  // Test-page-only breadcrumbs. Does NOT read, change, skip or overwrite
+  // personalized heroes, their saved data, or any game decision.
+  const mark=kind=>'window.__gensMobileDiagV1&&window.__gensMobileDiagV1.log("'+kind+'",{},true);';
+  const targets=[
+    ['z40kApplyCustomHeroes();','hero-call-before','hero-call-after'],
+    ['const a=gensrpgHydrateAssets(JSON.parse(localStorage.getItem(Z40K_CUSTOM_HEROES_KEY)||"[]"));','hero-hydrate-before','hero-hydrate-after']
+  ];
+  let changed=0;
+  for(const [literal,a,b] of targets){
+    if(html.split(literal).length!==2)continue;
+    html=html.replace(literal,mark(a)+literal+mark(b));changed++;
+  }
+  const signature='function applyCustomHeroesMulti(){';
+  if(html.includes(signature)){
+    html=html.replace(signature,signature+'\n'+mark('hero-apply-enter'));
+    changed++;
+  }
+  launchStep('hero-breadcrumbs',changed+'/3 exact targets');
+  return html;
+}
+
 function instrumentScripts(html){
  const found=/<script(?=[\s>])/gi;
  const close=/<\/script\s*>/gi;
@@ -99,6 +121,7 @@ $("loading").style.display="grid";
    let html=await response.text();
    launchStep("html-received",html.length+" characters");
    if(!/<head(?:\s[^>]*)?>/i.test(html))throw Error("Structure de page de jeu introuvable");
+   html=instrumentHeroStartup(html);
    const traced=instrumentScripts(html);
    html=traced.html;
    launchStep("instrumented",traced.count+" script tags");

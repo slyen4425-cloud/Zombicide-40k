@@ -416,10 +416,10 @@ def verify():
                 # this exact index blob and by the live graph assertions.
                 import re
                 for expression,value in (
-                    (r"size,\\d+,'production composition", "size,91,'production composition"),
-                    (r"allJs\\.length,\\d+,", "allJs.length,148,"),
-                    (r"phase2Js\\.length,\\d+,", "phase2Js.length,82,"),
-                    (r"reachable\\.size,\\d+,", "reachable.size,134,")
+                    (r"size,\d+,'production composition", "size,91,'production composition"),
+                    (r"allJs\.length,\d+,", "allJs.length,148,"),
+                    (r"phase2Js\.length,\d+,", "phase2Js.length,82,"),
+                    (r"reachable\.size,\d+,", "reachable.size,134,")
                 ):
                     expected_after,n=re.subn(expression,value,expected_after)
                     assert n==1, f"R16 exact graph count not found: {expression}"

@@ -93,6 +93,14 @@ jobs:
 
           cp -f index.html _site/index.html
 
+          # Opt-in Chrome Android diagnostic is a separate URL, never injected
+          # into normal index.html, with all three pieces installed atomically.
+          if [ -f "diagnostic.html" ]; then
+            test -f "diagnostic-shell.js"
+            test -f "diagnostic-boot.js"
+            cp -f diagnostic.html diagnostic-shell.js diagnostic-boot.js _site/
+          fi
+
           if [ -f "manifest.webmanifest" ]; then
             cp -f manifest.webmanifest _site/manifest.webmanifest
           fi

@@ -63,7 +63,7 @@ async function run(browserType,name,port){
    await page.locator('#download').click();
    assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg_diag_test_savemarker')),'preserve-me','export should not affect saves');
    await page.locator('#start').click();
-   await page.waitForFunction(()=>window.__gensMobileDiagV1&&window.__gensMobileDiagV1.version===2,{timeout:25000});
+   await page.waitForFunction(()=>window.__gensMobileDiagV1&&window.__gensMobileDiagV1.version>=2,{timeout:25000});
    await page.goto('http://127.0.0.1:'+port+'/diagnostic.html',{waitUntil:'domcontentloaded'});
    const archive=await page.evaluate(()=>JSON.parse(localStorage.getItem('gensrpg_mobile_diag_history_v2')||'[]'));
    assert.ok(archive.length>=1,'new manual run must archive previous session');

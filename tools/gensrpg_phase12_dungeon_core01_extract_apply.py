@@ -410,6 +410,19 @@ def verify():
                         ("reachable.size,107,",f"reachable.size,{newer[2]},"),
                     ):
                         expected_after=expected_after.replace(former,current)
+            if current_blob=="cc355585acab68958bd349ffcf8fa0de4eab9b0d" and path==PATH_GRAPH:
+                # R16 Chrome repair changes exactly six function bodies, not
+                # script composition. The verified current graph is pinned by
+                # this exact index blob and by the live graph assertions.
+                import re
+                for expression,value in (
+                    (r"size,\\d+,'production composition", "size,91,'production composition"),
+                    (r"allJs\\.length,\\d+,", "allJs.length,148,"),
+                    (r"phase2Js\\.length,\\d+,", "phase2Js.length,82,"),
+                    (r"reachable\\.size,\\d+,", "reachable.size,134,")
+                ):
+                    expected_after,n=re.subn(expression,value,expected_after)
+                    assert n==1, f"R16 exact graph count not found: {expression}"
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

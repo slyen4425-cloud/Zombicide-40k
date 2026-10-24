@@ -18,6 +18,15 @@
 - **Portée de la conclusion** : les tests écartent une boucle évidente lors du démarrage et de cette navigation limitée ; ils ne reproduisent ni Chrome Android physique, ni une partie active ou longue, ni le crash rapporté. Ne pas déclarer la panne résolue et ne pas publier une correction présumée.
 - **Prochain diagnostic utile** : reproduire le chemin utilisateur précis qui déclenche le crash (écran, interaction, délai), profiler CPU/mémoire/rendu GPU pendant une session réelle et comparer Chrome Android / Firefox avant de corriger un seul propriétaire. Ne pas effacer les données de jeu.
 
+### Complément Chrome Android / essais tactiles et limites (24 octobre 2026)
+
+- Incident critique créé : [#161 — PWA Chrome Android : gel/crash au premier clic](https://github.com/slyen4425-cloud/Zombicide-40k/issues/161). Symptôme utilisateur : écran d'accueil rendu puis crash Chrome/possible gel du téléphone au premier clic. Firefox fonctionne. Avant R16.
+- [CI touch Chromium/Firefox 40080659307](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/40080659307), SUCCESS : huit vrais touchers sur les cartes principales et retours, avec et sans SW, zéro crash / zéro rafale d'événements dans Chromium Linux ; mémoire JS ~8-10 Mo. Ne représente pas Android 17 ni le stockage Chrome de l'utilisateur.
+- **Trois essais d'émulateur Android 15 créés et inspectés : aucun valide pour reproduire le bug GenSrpG.** [40081036667](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/40081036667) Chrome bloqué sur onboarding. [40081409428](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/40081409428) onboarding franchi mais émulateur sans Internet : page hors ligne. [40081746834](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/40081746834) serveur local/adb reverse actif, mais capture Pixel Launcher isn't responding superposée à l'onboarding Chrome : instabilité du système émulateur avant tout chargement vérifié du jeu. **Ne jamais en conclure que GenSrpG crashe ou ne crashe pas sur Android.**
+- **Pistes à trier** : Chrome Android/Android 17 vs Firefox, PWA SW (116 téléchargements séquentiels lors installation), éventuel coût GPU et écran réel, différence de stockage persistant Chrome utilisateur vs profils vierges des tests. Bug Android 17 Pixel rapporté publiquement : https://issuetracker.google.com/issues/571186734 (non attribué à GenSrpG).
+- **Priorité** : obtenir reproduction fiable sur Android réel avec données préservées / traces de Chrome, puis isoler propriétaire et correctif soustractif, sentinelles et test mobile. Aucun changement de runtime ni `main` tant que la cause n'est pas prouvée. Ne pas vider le stockage Chrome de l'utilisateur sans sauvegarde.
+
+
 
 ## Phase 12 — R16 : migration propriétaire Dungeon combat/IA (extraction Core303, CI à vérifier)
 

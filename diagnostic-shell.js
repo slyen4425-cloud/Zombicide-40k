@@ -62,7 +62,7 @@ function scriptTagEnd(html,start){
 function instrumentHeroStartup(html){
   // Test-page-only breadcrumbs. Does NOT read, change, skip or overwrite
   // personalized heroes, their saved data, or any game decision.
-  const mark=kind=>'window.__gensMobileDiagV1&&window.__gensMobileDiagV1.log("'+kind+'",{},true);';
+  const mark=kind=>'window.__gensMobileDiagV1&&window.__gensMobileDiagV1.logBounded("'+kind+'");';
   const targets=[
     ['z40kApplyCustomHeroes();','hero-call-before','hero-call-after'],
     ['const a=gensrpgHydrateAssets(JSON.parse(localStorage.getItem(Z40K_CUSTOM_HEROES_KEY)||"[]"));','hero-hydrate-before','hero-hydrate-after']

@@ -133,8 +133,15 @@ assert.equal(exists(r13BuildersEnemyOwner),true,
   'R13 physical Builders enemy editor module must exist');
 assert.equal(composition.index.split(r13BuildersEnemyOwner).length-1,1,
   'R13 Builders enemy editor must load exactly once in the source index');
-assert.equal(Object.keys(ownerManifest.files||{}).length,115+captureR06OwnerPaths.length,
-  'R15 adds one more Builders character/entity editor owner, preserving R13, R14 and Capture');
+const r16DungeonTimelineOwner='assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js';
+assert.equal(ownerManifest.files?.[r16DungeonTimelineOwner]?.domain,'dungeon',
+  'R16 Core303 must be registered as an exclusive Dungeon timeline owner');
+assert.equal(exists(r16DungeonTimelineOwner),true,
+  'R16 external Dungeon timeline owner must physically exist');
+assert.equal(composition.index.split('<script id="dungeonCore303TimelineRootFix" src="'+r16DungeonTimelineOwner+'"></script>').length-1,1,
+  'R16 Core303 must load exactly once at the original synchronous parser slot');
+assert.equal(Object.keys(ownerManifest.files||{}).length,116+captureR06OwnerPaths.length,
+  'R16 adds exactly one Dungeon Core303 owner to the complete R15 owner registry');
 assert.equal(ownerManifest.files?.['assets/gensrpg/core/legacy-cloud-sync-backup-v1.js']?.domain,'core',
   'R05 cloud-sync/local-backup must have a sole Core owner');
 assert.equal(composition.index.split('assets/gensrpg/core/legacy-cloud-sync-backup-v1.js').length-1,1,

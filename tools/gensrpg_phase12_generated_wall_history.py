@@ -86,7 +86,19 @@ def historical_r05_view(data):
         "9f35eb833a6ede4b91399854f19bb9bef59f45ab":1729855,
     }
     current_sha=blob(data)
-    if current_sha=="260f00aa179c939f35188ca854f9875971ce8a7b":
+    if current_sha=="cc355585acab68958bd349ffcf8fa0de4eab9b0d":
+        # Test-only byte-exact pre-Chrome-fix source view. The physical index
+        # and the application storage are never modified.
+        from pathlib import Path
+        import subprocess
+        root=Path(__file__).resolve().parents[1]
+        data=subprocess.check_output([
+            "python3",str(root/"tests/gens_chrome_hero_recursion_patch_20261024.py"),
+            "--reverse-stdout"
+        ], input=data, cwd=root)
+        current_sha=blob(data)
+        assert len(data)==1720766 and current_sha=="260f00aa179c939f9875971ce8a7b", "R16 Chrome rollback not byte-exact"
+    if current_sha=="260f00aa179c939f9875971ce8a7b":
         from pathlib import Path
         root=Path(__file__).resolve().parents[1]
         owner=(root/"assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js").read_bytes()

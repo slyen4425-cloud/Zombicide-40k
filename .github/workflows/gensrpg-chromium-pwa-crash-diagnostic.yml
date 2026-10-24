@@ -1,0 +1,39 @@
+name: GenSrpG Chrome Android PWA crash diagnosis
+on:
+  push:
+    branches:
+      - 'work/gensrpg-chromium-pwa-crash-diagnostic-2026-10-24'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-app-chromium-firefox-pwa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact production-based diagnostic branch
+        uses: actions/checkout@v4
+      - name: Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install isolated Playwright and browsers
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --prefix /tmp/gensrpg-pwa-probe playwright@1.55.0
+          /tmp/gensrpg-pwa-probe/node_modules/.bin/playwright install --with-deps chromium firefox
+      - name: Compare real application and service worker under browser/mobile CPU profile
+        env:
+          NODE_PATH: /tmp/gensrpg-pwa-probe/node_modules
+        run: node tests/gens_chromium_pwa_crash_diagnostic_20261024.cjs
+      - name: Attach measurements (no real user saved data)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gensrpg-chromium-pwa-diagnostic
+          path: artifacts/chromium-pwa-diagnostic.json
+          if-no-files-found: warn
+          retention-days: 7

@@ -26,7 +26,18 @@ assert.match(sw,/gens-mobile-combat-performance-16781022\.js/);
 assert.doesNotMatch(sw,/gens-survival-mode-isolation-1678104\.js/,'service worker must not precache the retired Survival/Dungeon isolation guard');
 assert.match(sw,/gens-rpg-runtime-repair-1678106\.js/);
 assert.ok(html.lastIndexOf("gens-mobile-combat-performance-16781022.js")>html.lastIndexOf("dungeon-core-317.js"),"performance entry must load after the final Dungeon core");
-if(process.argv[2]){const body=html.lastIndexOf("</body>"),lastScript=html.lastIndexOf("<script",body);assert.match(html.slice(lastScript,body),/gens-mobile-combat-performance-16781022\.js/,"built performance entry must remain the final static runtime script during bootstrap extraction")}
+if(process.argv[2]){
+  const body=html.lastIndexOf("</body>");
+  const perf='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
+  const shell='<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>';
+  const perfPos=html.indexOf(perf),shellPos=html.indexOf(shell);
+  assert.ok(body>0&&perfPos>=0&&shellPos>perfPos&&shellPos<body,
+    "production build must preserve performance bridge directly before final Shell owner");
+  assert.equal(html.split(perf).length-1,1,"performance bridge must be loaded only once");
+  assert.equal(html.split(shell).length-1,1,"final Shell owner must be loaded only once");
+  assert.equal(html.slice(perfPos+perf.length,shellPos).trim(),"",
+    "no unauthorized script may insert between performance bridge and Shell authority");
+}
 const hookAll=(ui.match(/function hookAll\(\)\{[^\n]+/)||[""])[0];
 assert.ok(hookAll&&!hookAll.includes("renderDungeonHeroStats")&&!hookAll.includes("renderDungeonAttributes"),"combat stat renderers must not trigger full UI cleanup scans");
 assert.doesNotMatch(ui,/tries\+\+<30|setTimeout\(retry,100\)/,"UI cleanup must not poll every 100ms during combat startup");

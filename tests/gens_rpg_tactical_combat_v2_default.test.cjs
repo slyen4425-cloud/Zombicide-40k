@@ -33,12 +33,26 @@ require(path.join(root,'gens-rpg-tactical-combat-v2-rules.js'));
   assert.equal(out.ok,true);assert.equal(opened,1);assert.equal(legacy,0);assert.deepEqual(lastOpts.enemyIds,['e2']);assert.equal(lastOpts.reason,'detection');
 }
 
-// The already-loaded stable tail must bootstrap every V2 module in order.
+// Phase 8: the canonical Tactical entry owns bootstrap order, not the retired
+// mobile performance profile. Require exact, ordered production module references.
 {
-  const src=fs.readFileSync(path.join(root,'gens-mobile-combat-performance-16781022.js'),'utf8');
-  const names=['gens-rpg-tactical-combat-v2.js','gens-rpg-tactical-combat-v2-adapter.js','gens-rpg-tactical-combat-v2-rules.js','gens-rpg-tactical-combat-v2-integration.js','gens-rpg-tactical-combat-v2-ui.js','gens-rpg-tactical-combat-v2-bridge.js'];
-  let pos=-1;for(const n of names){const next=src.indexOf(n);assert.ok(next>pos,`loader order missing ${n}`);pos=next}
-  assert.ok(src.includes('GensRpgTacticalCombatV2Bridge?.install?.(R)'));
+  const bootstrap=fs.readFileSync(path.join(root,'core','runtime-bootstrap-v1.js'),'utf8');
+  const entry=fs.readFileSync(path.join(root,'tactical','entry-v1.js'),'utf8');
+  const perf=fs.readFileSync(path.join(root,'gens-mobile-combat-performance-16781022.js'),'utf8');
+  assert.ok(bootstrap.includes('assets/gensrpg/tactical/entry-v1.js'),
+    'Core must load canonical Tactical entry');
+  const names=['gens-rpg-tactical-combat-v2.js','gens-rpg-tactical-combat-v2-adapter.js','gens-rpg-tactical-combat-v2-rules.js','gens-rpg-tactical-combat-v2-integration.js','gens-rpg-tactical-combat-v2-ui.js'];
+  let pos=-1;
+  for(const n of names){
+    const next=entry.indexOf('assets/gensrpg/'+n);
+    assert.ok(next>pos,`canonical Tactical entry missing or misordered ${n}`);
+    pos=next;
+  }
+  assert.ok(entry.includes('gens-rpg-tactical-combat-v2-bridge.js'),'Tactical facade must load once');
+  assert.ok(entry.includes('GensRpgTacticalCombatV2Bridge?.install?.(R)'),
+    'Tactical entry must retain the actual facade install authority');
+  assert.ok(!perf.includes('gens-rpg-tactical-combat-v2-bridge.js'),
+    'mobile performance cannot become a second Tactical runtime bootstrap');
 }
 
 console.log('GenSrpG Tactical Combat V2 default bridge/cover/loader OK');

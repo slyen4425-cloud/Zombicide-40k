@@ -30,7 +30,7 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -91,7 +91,8 @@ jobs:
           npm install --no-save --no-package-lock playwright@1.55.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
           node tests/gens_v11411_native_ui_browser.test.cjs
-          node tests/gens_rpg_tactical_browser_v16781149.test.cjs
+          node tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs
+          node tests/gens_tactical_dock_browser_v11411.test.cjs
       - name: Exact adapter D100 scale and entered-hero boundary
         run: |
           node tests/gens_rpg_tactical_combat_v2.test.cjs
@@ -99,5 +100,7 @@ jobs:
           node tests/gens_rpg_tactical_combat_v2_default.test.cjs
       - name: Preserve Dungeon runtime
         run: node tests/dungeon_runtime_regression.test.cjs
-      - name: Preserve Survival isolation
-        run: node tests/gens_survival_mode_isolation_v1678104.test.cjs
+      - name: Preserve Phase6 Survival isolation after retired global guard
+        run: |
+          node tests/gens_phase6_survival_legacy_guard_retirement_v1.test.cjs
+          node tests/gens_phase6_survival_builtin_boundary_retirement_v1.test.cjs

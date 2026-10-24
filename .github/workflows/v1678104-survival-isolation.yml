@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Syntax V104 isolation and tactical modules
         run: |
-          node --check assets/gensrpg/gens-survival-mode-isolation-1678104.js
+          node tests/gens_phase6_survival_legacy_guard_retirement_v1.test.cjs
           node --check assets/gensrpg/gens-mobile-combat-performance-16781022.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-adapter.js
@@ -24,8 +24,10 @@ jobs:
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-ui.js
           node --check assets/gensrpg/gens-rpg-tactical-combat-v2-bridge.js
-      - name: Test Survival and RPG hard isolation
-        run: node tests/gens_survival_mode_isolation_v1678104.test.cjs
+      - name: Verify active Phase 6 Survival family boundaries after legacy guard retirement
+        run: |
+          node tests/gens_phase6_survival_builtin_boundary_retirement_v1.test.cjs
+          node tests/gens_phase6_survival_legacy_guard_retirement_v1.test.cjs
       - name: Test mode-aware dice renderer
         run: node tests/gens_mobile_combat_performance_v16781022.test.cjs
       - name: Test tactical grid engine

@@ -43,7 +43,13 @@ const context={console,Math,Date,document,localStorage,setTimeout(fn){fn();retur
  DungeonWorldRuntime167823:{saveConfig(cfg){if(cfg.enabled)legacyConfigEnabledWrites++;return cfg}},gensGameplayModules(){return {movement:true}},
  DungeonAuthoredFinalExit167875:{finish(){finalExitCalls++;return true}}
 };
-context.window=context;context.globalThis=context;vm.createContext(context);vm.runInContext(src,context,{filename:'dungeon-authored-runtime-167839.js'});
+context.window=context;context.globalThis=context;vm.createContext(context);
+// Use the production Dungeon movement owner; the old mock omitted this module
+// and incorrectly exercised the emergency fallback (3) instead of configured 4.
+const entry=fs.readFileSync(path.join(root,'assets','gensrpg','dungeon','entry-v1.js'),'utf8');
+vm.runInContext(entry,context,{filename:'assets/gensrpg/dungeon/entry-v1.js'});
+assert.equal(typeof context.GensDungeonV1?.movement?.resolveAuthoredHeroMoveAllowance,'function');
+vm.runInContext(src,context,{filename:'dungeon-authored-runtime-167839.js'});
 const api=context.DungeonAuthoredRuntime167839;assert.ok(api);assert.equal(api.APP_VERSION,'16.78.80');assert.equal(api.VERSION,'1.0.3');assert.equal(api.active(),true);
 assert.equal(api.heroMoveAllowance('hero'),4);
 assert.equal(api.movementForEntry({remaining:{}},'hero'),4);

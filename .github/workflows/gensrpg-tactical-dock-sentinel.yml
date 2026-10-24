@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   dock-contract:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
@@ -27,7 +27,7 @@ jobs:
 
   dock-chromium:
     needs: dock-contract
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
@@ -44,7 +44,7 @@ jobs:
 
   dock-firefox:
     needs: dock-contract
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4

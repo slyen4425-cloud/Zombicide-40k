@@ -6,10 +6,21 @@ const zlib = require("node:zlib");
 
 const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 
+// Production has physically extracted several Dungeon owners from index.html.
+// Execute the *real* classic-script source, never an empty src tag or a fake stub.
 function script(id) {
-  const match = html.match(new RegExp(`<script id=["']${id}["'][^>]*>([\\s\\S]*?)<\\/script>`));
-  assert.ok(match, `script ${id} introuvable`);
-  return match[1];
+  const matches=[...html.matchAll(new RegExp(`<script\\s+id=["']${id}["'][^>]*>([\\s\\S]*?)<\\/script>`, "g"))];
+  assert.equal(matches.length,1,`script ${id} must have one production owner`);
+  const tag=matches[0][0],inline=matches[0][1];
+  const src=tag.match(/\bsrc="([^"]+)"/)?.[1];
+  if(!src)return inline;
+  assert.equal(inline,"",`script ${id}: no duplicate inline implementation`);
+  assert.ok(src.startsWith("assets/") && src.split("?")[0].endsWith(".js"),`script ${id}: local JS owner only`);
+  const rel=src.split("?")[0];
+  assert.ok(!rel.split("/").includes(".."),`script ${id}: path traversal forbidden`);
+  const full=path.join(__dirname,"..",rel);
+  assert.ok(fs.existsSync(full),`script ${id}: owner file missing ${rel}`);
+  return fs.readFileSync(full,"utf8");
 }
 
 function storage(initial = {}) {
@@ -730,7 +741,7 @@ function testEquipmentSetsAndZipCatalogue() {
   assert.equal(heroStore.brom.itemCooldowns[`${guardian.id}:guardian_group_heal`], 2, "le cooldown d'objet doit diminuer avec le moteur de tours existant");
 
   assert.match(html, /assets\/dungeon\/dungeon-core-316\.js/);
-  assert.match(html, /dungeonCombatUseItemAbility316/, "les compétences d'objet doivent rejoindre la timeline finale");
+  assert.match(script("dungeonCore303TimelineRootFix"), /dungeonCombatUseItemAbility316/, "les compétences d'objet doivent rejoindre le propriétaire actif Core303");
   assert.match(html, /GenSrpG V16\.78\.11/);
 }
 

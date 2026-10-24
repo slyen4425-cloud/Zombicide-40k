@@ -55,6 +55,11 @@ const context={
 context.window=context;
 
 vm.runInNewContext(baseUi,context,{filename:"dungeon-equipment-ui.js"});
+// The production hotfix now delegates slot resolution to the extracted Core owner.
+// Exercise that real contract rather than an absent historical dependency.
+const equippedOwner=fs.readFileSync(require("node:path").join(__dirname,"..","assets","gensrpg","core","inventory-equipped-view-v1.js"),"utf8");
+vm.runInNewContext(equippedOwner,context,{filename:"inventory-equipped-view-v1.js"});
+assert.equal(typeof context.GensInventoryEquippedViewV1?.equippedItems,"function");
 vm.runInNewContext(hotfix,context,{filename:"dungeon-equipment-hotfix-167817.js"});
 
 const equipped=context.dungeonEquippedItems();

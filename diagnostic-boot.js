@@ -109,5 +109,10 @@ function markScript(phase,index,source){
     }));
   }catch(_){}
 }
-window.__gensMobileDiagV1={version:2,log:rec,markScript,read:()=>JSON.parse(JSON.stringify(state))};
+const diagEventCounts=Object.create(null);
+function logBounded(type){
+  const count=(diagEventCounts[type]||0)+1;diagEventCounts[type]=count;
+  if(count<=3||count===10||count===50||count===100||count===500||count===1000)rec(type,{count},true);
+}
+window.__gensMobileDiagV1={version:3,log:rec,logBounded,markScript,read:()=>JSON.parse(JSON.stringify(state))};
 })();

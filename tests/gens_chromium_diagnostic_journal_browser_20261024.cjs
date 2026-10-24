@@ -40,9 +40,11 @@ async function run(browserType,name,port){
    assert.ok(stage&&stage.script>0,'parser stage index must be persisted synchronously');
    assert.match(stage.source,/inline|\/|data:/,'stage records source identifier');
    let log=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
+   console.log('HERO_TRACE_DEBUG '+JSON.stringify({browser:name,eventCount:log.events.length,types:log.events.slice(0,15).map(e=>e.type),lastTypes:log.events.slice(-15).map(e=>e.type)}));
    assert.ok(log.events.some(e=>e.type==='start'),'logger must launch before gameplay');
    assert.ok(log.events.some(e=>e.type==='pointer'),'real pointer must be recorded');
    assert.ok(log.events.some(e=>e.type==='click'),'real click must be recorded');
+   for(const type of ['hero-call-before','hero-call-after','hero-apply-enter','hero-hydrate-before','hero-hydrate-after']) assert.ok(log.events.some(e=>e.type===type),'Expected startup trace '+type);
    assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg_diag_test_savemarker')),'preserve-me','game storage must survive diagnostic');
    // Simulate normal in-app navigation reload; diagnostic log must survive.
    await page.reload({waitUntil:'domcontentloaded'});
@@ -61,7 +63,7 @@ async function run(browserType,name,port){
    await page.locator('#download').click();
    assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg_diag_test_savemarker')),'preserve-me','export should not affect saves');
    await page.locator('#start').click();
-   await page.waitForFunction(()=>window.__gensMobileDiagV1&&window.__gensMobileDiagV1.version===2,{timeout:25000});
+   await page.waitForFunction(()=>window.__gensMobileDiagV1&&window.__gensMobileDiagV1.version>=2,{timeout:25000});
    await page.goto('http://127.0.0.1:'+port+'/diagnostic.html',{waitUntil:'domcontentloaded'});
    const archive=await page.evaluate(()=>JSON.parse(localStorage.getItem('gensrpg_mobile_diag_history_v2')||'[]'));
    assert.ok(archive.length>=1,'new manual run must archive previous session');

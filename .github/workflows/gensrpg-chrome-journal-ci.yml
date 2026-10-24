@@ -2,7 +2,7 @@ name: GenSrpG opt-in mobile diagnostic journal CI
 on:
   push:
     branches:
-      - 'work/gensrpg-chrome-early-loader-logs-2026-10-24'
+      - 'work/gensrpg-chrome-script29-investigation-2026-10-24'
     paths:
       - 'diagnostic.html'
       - 'diagnostic-shell.js'

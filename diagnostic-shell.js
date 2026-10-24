@@ -2,7 +2,7 @@
 (function(){
 "use strict";
 const KEY="gensrpg_mobile_diag_v1";
-const HISTORY_KEY="gensrpg_mobile_diag_history_v2",STAGE_KEY="gensrpg_mobile_diag_script_stage_v2";
+const HISTORY_KEY="gensrpg_mobile_diag_history_v2",STAGE_KEY="gensrpg_mobile_diag_script_stage_v2",LAUNCH_KEY="gensrpg_mobile_diag_launch_stage_v2";
 const $=id=>document.getElementById(id);
 let last=null;
 function getLog(){
@@ -17,7 +17,7 @@ function getStage(session){
 function getHistory(){
  try{const a=JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");return Array.isArray(a)?a.slice(0,3):[]}catch(_){return []}
 }
-function snapshot(){const current=getLog();return {format:"gensrpg-chrome-diag-v2",current,scriptStage:current?getStage(current.id):null,previous:getHistory()}}
+function snapshot(){const current=getLog();let launcherStage=null;try{launcherStage=JSON.parse(localStorage.getItem(LAUNCH_KEY)||"null")}catch(_){}return {format:"gensrpg-chrome-diag-v2",current,scriptStage:current?getStage(current.id):null,launcherStage,previous:getHistory()}}
 function stageLine(s){return s?"Dernier script : n°"+s.script+" · "+s.source+" · "+(s.phase==="before"?"juste avant son exécution":"après son exécution"):"Pas de jalon de script enregistré"}
 function show(){
  last=getLog();
@@ -31,7 +31,7 @@ function show(){
  });
  const snap=snapshot();
  const archive=snap.previous.map((p,i)=>"ESSAI PRECEDENT "+(i+1)+": "+(p.log?.startedAt||"?")+"\n"+stageLine(p.stage)+"\n"+(p.log?.events||[]).map(e=>e.at+" "+e.type).join("\n")).join("\n\n");
- out.textContent="APPAREIL : "+(last.agent||"inconnu")+"\nSESSION : "+last.id+"\nDERNIER SIGNAL : "+p+"\n"+stageLine(snap.scriptStage)+"\nANCIENS ESSAIS SAUVEGARDES : "+snap.previous.length+"\n\n"+events.join("\n")+(archive?"\n\n"+archive:"");
+ out.textContent="APPAREIL : "+(last.agent||"inconnu")+"\nSESSION : "+last.id+"\nDERNIER SIGNAL : "+p+"\n"+stageLine(snap.scriptStage)+"\nPHASE LANCEUR : "+(snap.launcherStage?.phase||"inconnue")+"\nANCIENS ESSAIS SAUVEGARDES : "+snap.previous.length+"\n\n"+events.join("\n")+(archive?"\n\n"+archive:"");
 }
 function payload(){return JSON.stringify(snapshot(),null,2)}
 $("refresh").addEventListener("click",show);
@@ -43,7 +43,7 @@ $("download").addEventListener("click",()=>{
 });
 $("clear").addEventListener("click",()=>{
  if(!confirm("Effacer seulement le journal de diagnostic ? Les sauvegardes du jeu ne seront pas touchées."))return;
- try{localStorage.removeItem(KEY);localStorage.removeItem(HISTORY_KEY);localStorage.removeItem(STAGE_KEY)}catch(_){}show()
+ try{localStorage.removeItem(KEY);localStorage.removeItem(HISTORY_KEY);localStorage.removeItem(STAGE_KEY);localStorage.removeItem(LAUNCH_KEY)}catch(_){}show()
 });
 $("start").addEventListener("click",()=>{try{sessionStorage.setItem("__gensDiagManualStart","1")}catch(_){}location.href="diagnostic.html?run=1"});
 show();
@@ -87,7 +87,7 @@ function instrumentScripts(html){
  return {html:out+html.slice(cursor),count:index};
 }
 function launchStep(type,detail){
- try{localStorage.setItem(STAGE_KEY,JSON.stringify({session:"launcher",at:new Date().toISOString(),phase:type,source:String(detail||"").slice(0,100)}))}catch(_){}
+ try{localStorage.setItem(LAUNCH_KEY,JSON.stringify({session:"launcher",at:new Date().toISOString(),phase:type,source:String(detail||"").slice(0,100)}))}catch(_){}
 }
 
 $("loading").style.display="grid";

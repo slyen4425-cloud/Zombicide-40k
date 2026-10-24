@@ -1,6 +1,14 @@
 # GenSrpG — CURRENT_WORK officiel (23 octobre 2026)
 
 
+## Urgence Chrome Android — script 29 identifié (24 octobre 2026)
+
+- Preuve physique : rapport utilisateur `gensrpg-diagnostic-chrome-2026-10-24 (1).json` à 10:38 UTC. 181 balises instrumentées, dernier jalon `script=29`, `phase=before`, `source=inline`, à 10:38:03.599Z. `lastPulse=null`, aucun `dom-ready`/`loaded`/`click`. Ancien essai du 10:24 archivé. **Le jalon avant sans jalon après suggère l'arrêt pendant ce bloc, mais n'en démontre pas la cause.**
+- Comparaison faite **sur la source GitHub et la version réelle GitHub Pages par CI** : 152 scripts dans le `index.html` brut, 181 scripts sur Pages, conforme au téléphone. Malgré les modules injectés au build, le script #29 est identique byte pour byte (SHA-256 `034dfb12c5007ab0c26cce7d152ad45e8c7b612277686081bc1e415901aa0320`), lignes 15891–16914, 51 892 octets. [CI vérifiée 40087029800](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/40087029800).
+- Analyse AST top-level du script #29 : 79 instructions dont 18 autres que des déclarations de fonction; seul appel métier synchrone significatif au chargement : `z40kApplyCustomHeroes()` ligne 16901, après initialisations légères et avant enregistrement du `DOMContentLoaded`; les autres fonctions ne sont pas toutes exécutées au chargement. [CI vérifiée 40087134213](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/40087134213).
+- START §25 au SHA `34f80040d381b02cd2ee3d24bf13217004533467` : `checkpoint/gensrpg-start-chrome-script29-investigation-2026-10-24`; branche dédiée `work/gensrpg-chrome-script29-investigation-2026-10-24`. Investigation en **lecture et tests CI uniquement**; `main` et runtime, service worker, sauvegardes inchangés.
+- Étape : inspecter la chaîne d'exécution de `z40kApplyCustomHeroes()` et les opérations sur données persistées, puis concevoir un test reproductible/une isolation non destructive si nécessaire. Ne pas attribuer le crash avant preuve de causalité et ne jamais supprimer les données Chrome de l'utilisateur. Ticket [#161](https://github.com/slyen4425-cloud/Zombicide-40k/issues/161).
+
 ## Priorité P0 — Chrome Android : tracer le gel avant DOMContentLoaded (24 octobre 2026)
 
 - Rapport réel transmis par l'utilisateur : fichier `gensrpg-diagnostic-chrome-2026-10-24.json` du 24 octobre 2026, session `mvm953le` : 2 événements à 10:24:32.883 et 10:24:32.892 UTC (`start`, `service-worker`), `lastPulse=null`, `ended=false`, **aucun `dom-ready`, `loaded`, clic ni pulse**. `previousUnfinished=true`, sans trace détaillée de l'essai précédent. Rien ne démontre qu'un service worker soit la cause ; une session précédente peut avoir été remplacée par un lancement manuel.

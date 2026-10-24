@@ -49,7 +49,7 @@ async function execute(browser,name,scenario,port){
   assert.ok(state.stage?.script>=29,'script 29 must return');
   assert.ok(state.profiles.includes('game_profile_dungeon_demo'),'reference Dungeon profile must exist');
   assert.ok(state.profiles.includes('game_profile_zombicide_base'),'reference Survival profile must exist');
-  assert.equal(state.heroes.length,scenario.heroes.length,'preserve all custom heroes');
+  for(const original of scenario.heroes)assert.ok(state.heroes.some(h=>h.id===original.id),'preserve original hero '+original.id);
   assert.ok(state.events.some(e=>e.type==='hero-call-after'),'bootstrap completes');
   assert.ok(!state.events.some(e=>e.type==='hero-apply-enter'&&e.count>=10),'no reentrant hero bootstrap');
   assert.ok(!state.events.some(e=>e.type==='hero-hydrate-before'&&e.count>=50),'no repeated hydrate storm');

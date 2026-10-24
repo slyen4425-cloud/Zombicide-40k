@@ -1,6 +1,16 @@
 # GenSrpG — CURRENT_WORK officiel (23 octobre 2026)
 
 
+## P0 Chrome Android — boucle confirmée à l'amorçage des héros (24 octobre 2026)
+
+- **Fichier utilisateur réel** `gensrpg-diagnostic-chrome-2026-10-24 (2).json`, 11:57:02 UTC, session `mvmcg1eo` : `scriptStage = before script 29 inline`, 181 scripts; `lastPulse=null`, `ended=false`, pas de `dom-ready`. 27 événements du troisième essai, plus 2 essais antérieurs conservés.
+- **Anomalie mesurée** : `hero-call-before=1`, puis `hero-apply-enter=1000` à 11:57:04.063 UTC; `hero-hydrate-before=1000` et `hero-hydrate-after=1000` à 11:57:03.004 UTC. Les couples before/after attestent que la réhydratation **revient** ; ce sont des invocations répétées de la chaîne applicative, et non un blocage prouvé dans un seul appel à hydrate. Tous ces événements se produisent avant la sortie du script 29 et avant le premier pulse.
+- Conclusion : **réentrance ou répétition de la chaîne héros au chargement précoce**, vraisemblable source du gel Chrome; la cause exacte des répétitions reste à établir. Ne pas conclure que `gensrpgHydrateAssets` est intrinsèquement lent ou que le service worker est responsable.
+- **Checkpoint de départ §25** `checkpoint/gensrpg-start-chrome-hero-recursion-2026-10-24` sur SHA `3f197edeccd10d7f103126a6eb8c3f5db92bf609`. Branche unilot `work/gensrpg-chrome-hero-recursion-2026-10-24` issue du SHA. Dernier checkpoint GREEN diagnostic : `checkpoint/gensrpg-chrome-script29-diagnostic-green-2026-10-24`.
+- **Périmètre** : reproduire et localiser l'origine des appels répétés, inspecter la chaîne de lecture/migration des héros et la compatibilité univers; corriger **à la source**, sans garde de boucle artificielle ni deuxième autorité. Protéger les sauvegardes, avatars, univers, les 4 modes, la PWA et l'offline. Pas de suppression de données Chrome.
+- **Règle §26** : pour consulter/modifier `index.html` lui-même, fournir à l'utilisateur son lien GitHub permalink au SHA fixé et demander le fichier/ZIP vérifié; ne pas multiplier les lectures du fichier volumineux par les connecteurs.
+- Étape suivante : instrumentation de pile d'appels non intrusive ou tests synthétiques reproductibles, diagnostic fonctionnel puis correctif unipropriétaire, CI et checkpoint GREEN avant fusion.
+
 ## Urgence Chrome Android — script 29 identifié (24 octobre 2026)
 
 - Preuve physique : rapport utilisateur `gensrpg-diagnostic-chrome-2026-10-24 (1).json` à 10:38 UTC. 181 balises instrumentées, dernier jalon `script=29`, `phase=before`, `source=inline`, à 10:38:03.599Z. `lastPulse=null`, aucun `dom-ready`/`loaded`/`click`. Ancien essai du 10:24 archivé. **Le jalon avant sans jalon après suggère l'arrêt pendant ce bloc, mais n'en démontre pas la cause.**

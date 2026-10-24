@@ -13,6 +13,8 @@ on:
       - 'tests/gens_phase5_resume_single_owner_retirement_v1.test.cjs'
       - 'tests/gens_phase4_storage_inline_audit_v1.test.cjs'
       - 'tests/gens_phase4_storage_capture_progress_owner_v1.test.cjs'
+      - 'tests/gens_phase4_storage_capture_progress_parity_v1.test.cjs'
+      - 'tests/helpers/gens_phase12_r06_capture_source_view_v1.cjs'
       - 'tools/gensrpg_phase12_generated_wall_history.py'
       - 'tests/helpers/gens_chrome_historical_subprocess_view_20261024.cjs'
       - 'tests/helpers/gens_phase12_r09_wave_source_view_v1.cjs'
@@ -56,6 +58,7 @@ jobs:
         run: |
           node tests/gens_phase4_storage_inline_audit_v1.test.cjs
           node tests/gens_phase4_storage_capture_progress_owner_v1.test.cjs
+          node tests/gens_phase4_storage_capture_progress_parity_v1.test.cjs
       - name: Confirm Dungeon extraction rollback remains byte-exact
         run: node tests/gens_phase12_dungeon_core01_extraction_v1.test.cjs
       - name: Confirm R05 historical Core ownership and byte-exact rollback

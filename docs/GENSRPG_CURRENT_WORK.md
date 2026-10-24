@@ -1,5 +1,12 @@
 # GenSrpG — CURRENT_WORK officiel (23 octobre 2026)
 
+## P0 Chrome Android — validation de la PR #165 (24 octobre, NON GREEN)
+
+- Branche `work/gensrpg-chrome-hero-recursion-2026-10-24`, checkpoint START `checkpoint/gensrpg-start-chrome-hero-recursion-2026-10-24` à `3f197edeccd10d7f103126a6eb8c3f5db92bf609`, PR #165. `main` inchangée à ce SHA ; ne pas confondre le déploiement Pages de branche avec une publication stable.
+- Sur `f11069b3aba7f030819a6555e358b89b9def1694` : Chrome Historical Guards, Firefox, Tactical et V114.11 SUCCESS ; architecture+browser **FAILURE** sur le test statique `gens_phase4_storage_capture_progress_parity_v1.test.cjs` (étape 331, runs `40109768021` / `40109763651`) ; job navigateur non exécuté. **NON GREEN**, pas de merge ni de checkpoint final.
+- Diagnostic vérifié : le test de parité appelle le rollback R06 sur le `index.html` courant Chrome, sans d'abord inverser le patch Chrome SHA-verrouillé. L'ancien contrôle cherchait donc dans une vue trop récente un code Capture historiquement inline ; le test d'audit et le test de propriété avaient déjà reçu une adaptation locale et passaient. Correction uniquement dans l'adaptateur de source historique R06 **test-only**, qui applique d'abord l'inversion Chrome SHA-verrouillée puis le rollback R07→R06. Aucun runtime, sauvegarde, cache ni règle de gameplay modifié.
+- Gate de sortie : vérifier sur un SHA unique architecture **et navigateur complet**, Historical Guards, Firefox, Tactical, V114.11 ; revue des fichiers et non-interférence ; checkpoint GREEN puis documentation et fusion PR uniquement si toute la matrice SUCCESS. Après fusion, revérifier les CI sur `main`, le déploiement Pages réel et fournir le lien Chrome Android pour essai utilisateur. Le gel réel Android reste non validé sans essai utilisateur.
+
 
 ## P0 Chrome Android — boucle confirmée à l'amorçage des héros (24 octobre 2026)
 

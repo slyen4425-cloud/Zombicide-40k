@@ -102,7 +102,7 @@ jobs:
           repair = '<script src="assets/gensrpg/core/dungeon-profile-auto-repair-v1.js?v=20261025"></script>'
           assert html.count(marker) == 1, 'Storage script marker missing or ambiguous'
           assert repair not in html, 'Duplicate auto repair script'
-          index.write_text(html.replace(marker, repair + '\\n' + marker, 1), encoding='utf-8')
+          index.write_text(html.replace(marker, repair + '\n' + marker, 1), encoding='utf-8')
           PY
 
           # Opt-in Chrome Android diagnostic is a separate URL, never injected

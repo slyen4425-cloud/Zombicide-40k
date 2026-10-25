@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-20261025-pwa-auto-update-v1";
+const CACHE_NAME = "gensrpg-cache-16.78.115-pwa-auto-update-v1";
 // gensrpg-cache-16.78.114.11-native-ui-authority
 // gensrpg-cache-16.78.114.11-armor-melee-damage
 // gensrpg-cache-16.78.114.10-hit-entry-compositor-walls

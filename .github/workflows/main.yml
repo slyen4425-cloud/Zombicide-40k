@@ -31,6 +31,9 @@ jobs:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
 
+      - name: Tester la réparation automatique des profils Dungeon
+        run: node tests/dungeon_profile_auto_repair.test.cjs
+
       - name: Tester la batterie Dungeon runtime complète
         run: node tests/dungeon_runtime_regression.test.cjs
 

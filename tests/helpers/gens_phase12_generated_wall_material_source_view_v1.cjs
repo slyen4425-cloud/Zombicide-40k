@@ -10,8 +10,8 @@ const hash=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0'
 // This one audited test-only inverse is gated on the exact new index blob.
 function restorePreWallMaterialIndex(index){
   // Test-only reverse of the Dungeon profile save change, before historical R16 checks.
-  const start=Buffer.from('function saveGameProfiles(a){\\n');
-  const finish=Buffer.from('\\n}\\nfunction activeGameProfileId(){');
+  const start=Buffer.from('function saveGameProfiles(a){\n');
+  const finish=Buffer.from('\n}\nfunction activeGameProfileId(){');
   const at=index.indexOf(start);
   if(at>=0){
     const end=index.indexOf(finish,at+start.length);

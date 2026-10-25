@@ -20,6 +20,19 @@ const END=[
 // root-family edits before reconstructing pre-extraction historical fixtures.
 // The immutable pre-extraction fingerprints below remain unchanged.
 function restoreHistoricalHubSnapshot(index,root){
+ // Restore the exact pre-profile-integrity source for historical hash fixtures.
+ // Test-only inverse: the production save guard remains intact.
+ const saveStart=Buffer.from('function saveGameProfiles(a){\\n');
+ const saveEnd=Buffer.from('\\n}\\nfunction activeGameProfileId(){');
+ const at=index.indexOf(saveStart);
+ if(at>=0){
+  const end=index.indexOf(saveEnd,at+saveStart.length);
+  assert.ok(end>at,'profile save function end');
+  const current=index.subarray(at+saveStart.length,end).toString('utf8');
+  if(current.includes('const profiles=Array.isArray(a)?a:[];') && current.includes('duplicate_backup_20261024')){
+   index=Buffer.concat([index.subarray(0,at+saveStart.length),Buffer.from('  localStorage.setItem(GAME_PROFILES_KEY,JSON.stringify(a||[]));'),index.subarray(end)]);
+  }
+ }
  // Read-only inverse of the exact Chrome hero-loop patch for historical fixtures.
  index=require('./gens_chrome_hero_recursion_source_view_20261024.cjs')(index);
  index=require('./gens_phase12_generated_wall_material_source_view_v1.cjs')(index);

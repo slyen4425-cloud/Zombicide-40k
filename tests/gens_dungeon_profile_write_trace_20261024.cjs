@@ -76,8 +76,14 @@ async function inspect(page,step,openMenu){
   await boot(page,port);
   const third=await inspect(page,'five equal IDs after reload',true);
   console.log('DUNGEON_PROFILE_ROOT_CAUSE_TRACE '+JSON.stringify({seed,first,second,third,errors}));
-  assert.equal(second.storedDungeon,5,'investigative fixture should preserve seeded duplicates');
-  assert.equal(third.storedDungeon,5,'measure current repeated start behavior');
+  assert.equal(seed.seedCount,5,'synthetic fixture contains five identical Dungeon IDs');
+  assert.equal(second.storedDungeon,1,'startup must repair identical Dungeon IDs');
+  assert.equal(third.storedDungeon,1,'reload must not recreate Dungeon duplicates');
+  assert.equal(second.visibleDungeon,1,'only one Dungeon card should render');
+  assert.equal(third.visibleDungeon,1,'only one Dungeon card after reload');
+  const backup=await page.evaluate(()=>localStorage.getItem('gensrpg_game_profiles_v1_duplicate_backup_20261024'));
+  assert.ok(backup,'raw duplicate profile backup must be preserved');
+  assert.equal(JSON.parse(backup).filter(p=>p.id==='game_profile_dungeon_demo').length,5,'backup retains all five original Dungeon entries');
   await context.close();
  } finally{await browser.close();server.closeAllConnections?.();await new Promise(r=>server.close(r))}
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -9,6 +9,18 @@ const hash=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0'
 // historical fingerprints to today's unrelated wall-material correction.
 // This one audited test-only inverse is gated on the exact new index blob.
 function restorePreWallMaterialIndex(index){
+  // Test-only reverse of the Dungeon profile save change, before historical R16 checks.
+  const start=Buffer.from('function saveGameProfiles(a){\\n');
+  const finish=Buffer.from('\\n}\\nfunction activeGameProfileId(){');
+  const at=index.indexOf(start);
+  if(at>=0){
+    const end=index.indexOf(finish,at+start.length);
+    assert.ok(end>at,'profile save boundary');
+    const body=index.subarray(at+start.length,end).toString('utf8');
+    if(body.includes('const profiles=Array.isArray(a)?a:[];')&&body.includes('duplicate_backup_20261024')){
+      index=Buffer.concat([index.subarray(0,at+start.length),Buffer.from('  localStorage.setItem(GAME_PROFILES_KEY,JSON.stringify(a||[]));'),index.subarray(end)]);
+    }
+  }
   // Strict test-only inverse for the independent Chrome startup repair.
   // Restore known old bytes before passing to the existing historical chain.
   index=require('./gens_chrome_hero_recursion_source_view_20261024.cjs')(index);

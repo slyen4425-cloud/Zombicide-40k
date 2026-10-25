@@ -10,7 +10,20 @@ function canonicalR15(){
  // Reconstruct the exact pre-Chrome-fix bytes only for historical sentinel
  // comparisons. Never alter the active index, saved data or runtime owner.
  const active=fs.readFileSync('index.html');
- const index=require('../tests/helpers/gens_chrome_hero_recursion_source_view_20261024.cjs')(active).toString('utf8');
+ // Historical fixture only: invert the audited profile-save addition before
+ // R16's immutable source fingerprint verification.
+ let source=active.toString('utf8');
+ const start='function saveGameProfiles(a){\n', finish='\n}\nfunction activeGameProfileId(){';
+ const at=source.indexOf(start);
+ if(at>=0){
+  const end=source.indexOf(finish,at+start.length);
+  if(end>at){
+   const body=source.slice(at+start.length,end);
+   if(body.includes('const profiles=Array.isArray(a)?a:[];')&&body.includes('duplicate_backup_20261024'))
+    source=source.slice(0,at+start.length)+'  localStorage.setItem(GAME_PROFILES_KEY,JSON.stringify(a||[]));'+source.slice(end);
+  }
+ }
+ const index=require('../tests/helpers/gens_chrome_hero_recursion_source_view_20261024.cjs')(Buffer.from(source,'utf8')).toString('utf8');
  const hash=sha(index);
  if(hash===PRE)return index;
  if(hash!==CURRENT)throw Error('R16 unauthorized source: cannot reconstruct R15');

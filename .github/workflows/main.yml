@@ -93,6 +93,18 @@ jobs:
 
           cp -f index.html _site/index.html
 
+          # Execute safe Dungeon profile reconciliation before any game scripts.
+          python3 - <<'PY'
+          from pathlib import Path
+          index = Path('_site/index.html')
+          html = index.read_text(encoding='utf-8')
+          marker = '<script src="assets/gensrpg/core/storage-v1.js"></script>'
+          repair = '<script src="assets/gensrpg/core/dungeon-profile-auto-repair-v1.js?v=20261025"></script>'
+          assert html.count(marker) == 1, 'Storage script marker missing or ambiguous'
+          assert repair not in html, 'Duplicate auto repair script'
+          index.write_text(html.replace(marker, repair + '\\n' + marker, 1), encoding='utf-8')
+          PY
+
           # Opt-in Chrome Android diagnostic is a separate URL, never injected
           # into normal index.html, with all three pieces installed atomically.
           if [ -f "diagnostic.html" ]; then

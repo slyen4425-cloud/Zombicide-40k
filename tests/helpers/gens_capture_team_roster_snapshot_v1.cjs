@@ -22,8 +22,8 @@ const END=[
 function restoreHistoricalHubSnapshot(index,root){
  // Restore the exact pre-profile-integrity source for historical hash fixtures.
  // Test-only inverse: the production save guard remains intact.
- const saveStart=Buffer.from('function saveGameProfiles(a){\\n');
- const saveEnd=Buffer.from('\\n}\\nfunction activeGameProfileId(){');
+ const saveStart=Buffer.from('function saveGameProfiles(a){\n');
+ const saveEnd=Buffer.from('\n}\nfunction activeGameProfileId(){');
  const at=index.indexOf(saveStart);
  if(at>=0){
   const end=index.indexOf(saveEnd,at+saveStart.length);

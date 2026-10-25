@@ -472,3 +472,28 @@ Une lecture légère de métadonnées GitHub reste autorisée pour :
 Mais si le **contenu exact** du fichier est nécessaire, la demande du fichier à l'utilisateur devient la voie normale, pas une solution de dernier recours.
 
 Cette procédure est un mécanisme d'accès contrôlé au gros fichier ; elle ne remplace pas GitHub comme source de vérité du projet.
+
+
+## 27. Publication proportionnée au risque et diagnostic des sentinelles historiques (25 octobre 2026)
+
+Cette règle précise les sections 15, 20 et 21 : une CI rouge **pertinente** bloque toujours la publication ; un échec historique sans lien causal avec le changement doit être diagnostiqué, documenté et traité sans bloquer indéfiniment un correctif indépendant. Aucun contrôle n'est supprimé ou déclaré vert artificiellement.
+
+### Trois classes de changement
+
+- **C1 — Correctif localisé** : propriétaire unique, petite modification réversible, aucune modification de contrat, stockage, migration, calcul partagé ou API publique. Exécuter tests du propriétaire, test de reproduction, non-régression ciblée et contrôle du diff. Le déploiement reste soumis à la sécurité des données.
+- **C2 — Modification fonctionnelle ou transversale** : contrat, shell, cache PWA, sauvegarde, migration, chargement, navigation, ou interaction de plusieurs modules. Exécuter tests ciblés, vrais parcours utilisateurs, compatibilité des données, tests navigateur et sentinelles des frontières concernées. Un correctif PWA est C2, même s'il modifie un seul fichier.
+- **C3 — Restructuration/autorité critique** : extraction de propriétaire, refactor multi-modules, règles Core, réécriture d'architecture. Exécuter la matrice d'architecture et d'intégration complète et checkpoint GREEN.
+
+### Traitement obligatoire d'une CI rouge
+
+1. Identifier le premier échec et le reproduire sur le SHA de base **inchangé** avec le même environnement et la même suite.
+2. Classer avec preuve : **régression introduite**, **échec préexistant**, **sentinelle historique couplée aux octets**, ou **infrastructure instable**.
+3. Une régression introduite dans un invariant protégé, un risque de perte de données, ou un test pertinent en échec bloque toujours.
+4. Un échec préexistant démontré peut être isolé par une exception explicite et temporaire : nom du test, SHA de base, logs, propriétaire, ticket de réparation et date de réévaluation. Les tests pertinents doivent rester verts. Ne jamais masquer l'échec ni changer les valeurs attendues sans preuve.
+5. Pour une sentinelle historique qui compare un blob exact, vérifier si elle teste une propriété fonctionnelle ou uniquement une empreinte obsolète. Conserver la protection du comportement ; mettre à jour le mécanisme de reconstruction historique dans un lot distinct si nécessaire. Ne pas modifier le runtime pour satisfaire une empreinte de test.
+
+### Publication et rollback
+
+La PR indique sa classe, ses fichiers, ses tests requis et les exceptions justifiées. Les changements C2/C3 ne sont pas fusionnés si les tests pertinents échouent. Garder un point de retour identifiable et valider la version réellement servie après déploiement. Une mise à jour PWA doit être testée sur application déjà installée, avec et sans réseau, sans suppression des sauvegardes.
+
+La règle « une branche/un lot » et l'autorité unique restent applicables. Cette procédure ne permet jamais de contourner une vraie régression.

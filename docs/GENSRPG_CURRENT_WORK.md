@@ -1,5 +1,18 @@
 # GenSrpG — CURRENT_WORK officiel (23 octobre 2026)
 
+## Incident isolé — intégrité des identifiants des profils Dungeon (24 octobre 2026)
+
+- **Demande expresse utilisateur** : correction à la source, sans masquage, rustine, double propriétaire ni reprise de la restructuration. PR #168 **fermée, non fusionnée** car elle ne masquait que le problème. Issue #166 ouverte.
+- **Rapport réel Chrome Android** : sept entrées de profils dans `gensrpg_game_profiles_v1`, dont **cinq occurrences de l’ID exact `game_profile_dungeon_demo`** ; une seule entrée 40K et une seule Capture.
+- **Trace Chromium contrôlée** : CI [40126325731](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/40126325731) SUCCESS, tête `2ecedda9035ef2828cff8e8bca4554da5b320783`. Fresh bootstrap = 1 Dungeon ; 5 clones expérimentaux sont réenregistrés tels quels par les chemins init/Stats, non créés durant les rechargements testés. Le chemin historique qui a introduit les clones n’est pas encore prouvé.
+- **Source de vérité** : tableau `gensrpg_game_profiles_v1`. Écrivain `saveGameProfiles` historiquement dans `index.html`, appelé par plusieurs modules, notamment Stats et les seeds. Le correctif doit rendre l’invariant « 1 ID = 1 profil enregistré » obligatoire **au point propriétaire d’enregistrement**, sans masquer dans le Shell.
+- **Base/checkpoint** : main `42c81ddc0d445b7bbcc5d03e1d7a1fca2a5a63ed` ; START `checkpoint/gensrpg-start-dungeon-profile-duplicate-rootcause-2026-10-24` sur ce SHA ; branche `work/gensrpg-dungeon-profile-duplicate-rootcause-2026-10-24`. Garder la restructuration interrompue.
+- **Charte §26** : pour l’édition du code exact de `index.html` source de l'écrivain, demander le fichier du commit main `42c81ddc0d445b7bbcc5d03e1d7a1fca2a5a63ed` en ZIP, vérifier le blob Git avant toute édition. Ne pas utiliser la copie antérieure du crash Chrome.
+- **Protection des données** : inspecter si les cinq profils sont intégralement identiques avant toute déduplication ; si variantes différentes, **ne jamais éliminer les différences silencieusement**. Export sauvegarde et restauration vérifiables avant migration. Aucun changement de profils, sauvegardes, Cache/SW, runtime ou UI tant que les cas de conflit et rollback n’ont pas des tests ciblés.
+- **20:40 UTC — inventaire CI** : le prototype d’intégrité pur a d'abord été mis sous `assets/gensrpg/core/`, faisant monter l’inventaire physique 148→149 sans aucun raccord de production ; échec CI non fonctionnel. Le prototype est déplacé sous `tests/helpers/gens_profile_id_integrity_v1.cjs` uniquement (non livré au runtime) et le test pur est conservé. Ne pas modifier les sentinelles ni masquer la déviation du runtime.
+- **Prochaines étapes** : tests purs d’intégrité du tableau (copies identiques et divergentes, conservation des univers distincts), inspection de toutes les opérations d’ajout et de sauvegarde, implémentation dans le propriétaire unique de l’enregistrement après réception du fichier exact, CI navigateur + architecture sur même SHA, checkpoint GREEN, publication et confirmation réelle des profils sans perte.
+
+
 ## Incident isolé — Dungeon dupliqué dans la liste Univers RPG (24 octobre, diagnostic en cours)
 
 - **Restructuration mise en pause à la demande de l'utilisateur.** Aucune reprise de Phase 12 ou modification du runtime dans ce lot.

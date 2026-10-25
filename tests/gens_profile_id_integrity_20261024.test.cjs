@@ -1,0 +1,32 @@
+"use strict";
+const assert=require("node:assert/strict");
+const check=require("./helpers/gens_profile_id_integrity_v1.cjs");
+const dungeon={id:"game_profile_dungeon_demo",name:"Dungeon",builtIn:true,rpgUniverse:{gameplay:{modules:{items:true}},stats:{base:3}}};
+const forty={id:"game_profile_zombicide_base",name:"40K",builtIn:true};
+const capture={id:"gp_mt7ker7t_m2iw9",name:"Monster Capture",builtIn:true};
+const fresh=[forty,dungeon,capture];
+const same=[forty,dungeon,...Array.from({length:4},()=>structuredClone(dungeon)),capture];
+const original=JSON.stringify(same);
+const result=check.inspect(same);
+assert.equal(result.status,"exact-duplicates");
+assert.deepEqual(result.duplicateIds,["game_profile_dungeon_demo"]);
+assert.deepEqual(result.conflictingIds,[]);
+assert.deepEqual(result.proposed,[forty,dungeon,capture]);
+assert.equal(JSON.stringify(same),original,"planning cannot mutate original data");
+assert.equal(check.inspect(fresh).status,"unique");
+assert.equal(check.inspect(fresh).proposed.length,3);
+const alternative=structuredClone(dungeon);
+alternative.rpgUniverse.gameplay.modules.items=false;
+const conflict=check.inspect([forty,dungeon,alternative,capture]);
+assert.equal(conflict.status,"conflict");
+assert.deepEqual(conflict.conflictingIds,["game_profile_dungeon_demo"]);
+assert.equal(conflict.proposed,null,"never discard non-identical profiles");
+const reordered=structuredClone(dungeon);
+reordered.rpgUniverse={stats:{base:3},gameplay:{modules:{items:true}}};
+assert.equal(check.inspect([dungeon,reordered]).status,"exact-duplicates","object key order alone not a conflict");
+assert.deepEqual(check.inspect([{id:"a",name:"Dungeon"},{id:"b",name:"Dungeon"}]).duplicateIds,[],
+  "two genuinely different universes with same display name are not duplicates");
+assert.equal(check.inspect({id:"a"}).status,"invalid");
+assert.equal(check.inspect([{name:"no id"},{name:"no id"}]).proposed.length,2,
+  "do not drop entries with absent identity");
+console.log("GREEN profile-ID integrity: five exact copies versus divergent values, no mutation or silent data loss");

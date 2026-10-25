@@ -1,0 +1,53 @@
+name: Dungeon profile source correction (isolated)
+on:
+  push:
+    branches:
+      - work/gensrpg-dungeon-profile-duplicate-rootcause-2026-10-24
+    paths:
+      - .github/workflows/dungeon-profile-apply-source.yml
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Apply verified minimal source edit
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+          old='  localStorage.setItem(GAME_PROFILES_KEY,JSON.stringify(a||[]));'
+          new='''  const profiles=Array.isArray(a)?a:[];
+          const seen=new Map(), unique=[];
+          for(const profile of profiles){
+            const id=String(profile?.id??"");
+            if(!id){unique.push(profile);continue}
+            if(!seen.has(id)){seen.set(id,profile);unique.push(profile);continue}
+            if(JSON.stringify(seen.get(id))!==JSON.stringify(profile)){
+              console.error("GenS RPG: conflicting duplicate profile ID; save blocked",id);
+              return false;
+            }
+          }
+          if(unique.length!==profiles.length){
+            const previous=localStorage.getItem(GAME_PROFILES_KEY);
+            if(previous!==null){
+              const backupKey=GAME_PROFILES_KEY+"_duplicate_backup_20261024";
+              if(localStorage.getItem(backupKey)===null)localStorage.setItem(backupKey,previous);
+            }
+          }
+          localStorage.setItem(GAME_PROFILES_KEY,JSON.stringify(unique));
+          return true;'''
+          assert s.count(old)==1, "source anchor missing or ambiguous"
+          assert 'function saveGameProfiles(a){' in s
+          s=s.replace(old,new,1)
+          p.write_text(s,encoding="utf-8")
+      - name: Check source and commit only index
+        run: |
+          git diff --check
+          git add index.html
+          git -c user.name=github-actions -c user.email=41898282+github-actions[bot]@users.noreply.github.com commit -m "fix(profiles): reconcile identical duplicate IDs at save source with backup"
+          git push

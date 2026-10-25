@@ -5981,7 +5981,28 @@ function loadGameProfilesRaw(){
   }catch(e){return []}
 }
 function saveGameProfiles(a){
-  localStorage.setItem(GAME_PROFILES_KEY,JSON.stringify(a||[]));
+  const profiles=Array.isArray(a)?a:[];
+  const seen=new Map(), unique=[];
+  for(const profile of profiles){
+    const id=String(profile?.id??"");
+    if(!id){unique.push(profile);continue}
+    if(!seen.has(id)){seen.set(id,profile);unique.push(profile);continue}
+    // Never silently discard a conflicting profile or its settings.
+    if(JSON.stringify(seen.get(id))!==JSON.stringify(profile)){
+      console.error("GenS RPG: conflicting duplicate profile ID; save blocked",id);
+      return false;
+    }
+  }
+  if(unique.length!==profiles.length){
+    // Preserve the exact original data before reconciling byte-identical copies.
+    const previous=localStorage.getItem(GAME_PROFILES_KEY);
+    if(previous!==null){
+      const backupKey=GAME_PROFILES_KEY+"_duplicate_backup_20261024";
+      if(localStorage.getItem(backupKey)===null)localStorage.setItem(backupKey,previous);
+    }
+  }
+  localStorage.setItem(GAME_PROFILES_KEY,JSON.stringify(unique));
+  return true;
 }
 function activeGameProfileId(){
   return localStorage.getItem(GAME_PROFILE_ACTIVE_KEY)||"";

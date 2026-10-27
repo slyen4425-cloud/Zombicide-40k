@@ -5,6 +5,8 @@ on:
       - 'work/gensrpg-capture-lab-bridge-*'
   pull_request:
     paths:
+      - 'assets/gensrpg/capture/temporary-encounter-source-v1.js'
+      - 'tests/gens_capture_temporary_encounter_source_v1.test.cjs'
       - 'assets/gensrpg/capture/manual-battle-trigger-v1.js'
       - 'tests/gens_capture_manual_battle_trigger_v1.test.cjs'
       - 'assets/gensrpg/integrations/lab-sync-coordinator-v1.js'
@@ -34,3 +36,5 @@ jobs:
         run: node tests/gens_lab_sync_coordinator_v1.test.cjs
       - name: Validate exploration-free manual combat trigger
         run: node tests/gens_capture_manual_battle_trigger_v1.test.cjs
+      - name: Validate replaceable temporary encounter source
+        run: node tests/gens_capture_temporary_encounter_source_v1.test.cjs

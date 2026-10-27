@@ -16,6 +16,9 @@ on:
       - 'tests/gens_capture_lab_authored_browser_v1.test.cjs'
       - 'tests/gens_capture_lab_saved_hub_browser_v1.test.cjs'
       - 'tests/gens_capture_lab_saved_hub_exact_index_v1.test.cjs'
+      - 'tests/gens_capture_r10_certified_owner_snapshot_v1.test.cjs'
+      - 'tests/fixtures/gensrpg-phase12-r10-capture-original-owner-20261018.js.txt'
+      - 'tools/gensrpg_phase12_r10_capture_extract_apply.cjs'
       - 'capture-lab-saved-hub-preview.html'
       - 'assets/gensrpg/capture/preview/saved-hub-*'
       - 'tests/gens_capture_world_lab_wild_transaction_v1.test.cjs'
@@ -92,6 +95,7 @@ jobs:
         run: |
           node --test tests/gens_capture_history_upload_20261027.test.cjs
           node tests/gens_capture_lab_saved_hub_exact_index_v1.test.cjs
+          node tests/gens_capture_r10_certified_owner_snapshot_v1.test.cjs
       - name: Verify production graph and explicit opt-in Capture boundaries
         run: |
           node tests/gens_phase2_runtime_load_graph_v11411.test.cjs

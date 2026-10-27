@@ -107,8 +107,11 @@ test('official authored transfers yield native playable 1v1, five authored skill
  const engine=await loadCombatLabEngineV1(pathToFileURL(path.resolve(lab)+path.sep));
  const session=engine.createCombatSession({fighters:source.fighters,
    battleFormat:source.battleFormat,skillSpeedMultiplier:source.skillSpeedMultiplier});
- assert.equal(session.snapshot().fighters.player.hp,source.fighters.find(x=>x.id==='player').initialHp);
- assert.equal(session.snapshot().fighters.opponent.hp,source.fighters.find(x=>x.id==='opponent').initialHp);
+ const actualPlayer=source.fighters.find(x=>x.id==='player');
+ const actualOpponent=source.fighters.find(x=>x.id==='opponent');
+ assert.equal(session.snapshot().fighters.player.hp,actualPlayer.initialHp??actualPlayer.maxHp,
+   'native Core initializes authored HP from maxHp when initialHp is omitted');
+ assert.equal(session.snapshot().fighters.opponent.hp,actualOpponent.initialHp??actualOpponent.maxHp);
 });
 
 test('source is keyed by real authored creature ID and not an implicit fixed demo opponent',async()=>{

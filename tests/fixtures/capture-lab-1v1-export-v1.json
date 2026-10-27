@@ -1,0 +1,22 @@
+{
+  "schema": "capture-combat-export-v1",
+  "battle": {"id":"temporary-zone-preview","localActorId":"player"},
+  "teams": {"players":["player"],"enemies":["opponent"]},
+  "actors": [
+    {"actorId":"player","teamId":"players","creatureId":"preview-player","displayName":"Compagnon","controllerId":"human-local"},
+    {"actorId":"opponent","teamId":"enemies","creatureId":"preview-enemy","displayName":"Créature sauvage","controllerId":"ai-enemy"}
+  ],
+  "creatures": [
+    {"id":"preview-player","displayName":"Compagnon","combat":{"maxHp":24,"initialHp":24,"maxEnergy":10,"initialEnergy":10,"energyChargeAmount":1,"energyChargeIntervalMs":2000,"movementEnergyPerStep":1,"chargeTimeModifierPct":0},"skillIds":["preview-strike"]},
+    {"id":"preview-enemy","displayName":"Créature sauvage","combat":{"maxHp":24,"initialHp":24,"maxEnergy":10,"initialEnergy":10,"energyChargeAmount":1,"energyChargeIntervalMs":2000,"movementEnergyPerStep":1,"chargeTimeModifierPct":0},"skillIds":["preview-enemy-strike"]}
+  ],
+  "skills": [
+    {"id":"preview-strike","definition":{"id":"preview-strike","name":"Impact","category":"offensive","form":"contact","element":null,"energyCost":1,"preparationMs":200,"travelMs":200,"recoveryMs":100,"allowedDistances":["short","medium","long"],"targetRelations":["enemy"],"approachMode":"ground","effect":{"damage":12}}},
+    {"id":"preview-enemy-strike","definition":{"id":"preview-enemy-strike","name":"Riposte sauvage","category":"offensive","form":"contact","element":null,"energyCost":1,"preparationMs":1400,"travelMs":350,"recoveryMs":500,"allowedDistances":["short","medium","long"],"targetRelations":["enemy"],"approachMode":"ground","effect":{"damage":4}}}
+  ],
+  "rosters": [
+    {"slotId":"player","activeMemberId":"player-instance","members":[{"id":"player-instance","creatureId":"preview-player","displayName":"Compagnon"}]},
+    {"slotId":"opponent","activeMemberId":"enemy-instance","members":[{"id":"enemy-instance","creatureId":"preview-enemy","displayName":"Créature sauvage"}]}
+  ],
+  "presentation": {"skills":{}}
+}

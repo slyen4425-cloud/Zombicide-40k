@@ -34,13 +34,14 @@ assert.equal(rawDirect.filter(x=>x===CORE_STORAGE).length,1,'Core storage must b
 assert.equal(injected[0],CORE_STORAGE,'Pages fallback must keep Core storage first');
 assert.equal(previewInjected.includes(CORE_STORAGE),false,'Preview must inherit Core storage from source index instead of injecting a duplicate');
 assert.deepEqual(previewInjected,injected.filter(x=>x!==CORE_STORAGE),'Preview and Pages must otherwise share the same external module order');
-const productionDirect=[
+const buildPrelude=require('./helpers/gens_profile_repair_build_prelude_20261027.cjs');
+const productionDirect=buildPrelude.includeBuildPrelude([
   ...rawDirect.filter(x=>![
     'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
     'assets/gensrpg/shell/module-launch-final-authority-v1.js'
   ].includes(x)),
   ...injected
-];
+],workflow);
 const assetRefs=source=>[...source.matchAll(/assets\/(?:gensrpg|dungeon)\/[^"'\s)]+\.js(?:\?[^"'\s)]*)?/g)]
   .map(m=>stripQuery(m[0])).filter(exists);
 const reachable=new Set(),queue=[...productionDirect];
@@ -65,8 +66,9 @@ assert.equal(rawDirect.filter(x=>x===R09_SURVIVAL_WAVE).length,1,
 assert.equal(reachable.has(R09_SURVIVAL_WAVE),true,
   'R09 Survival wave owner must remain reachable in the real production graph');
 const R13_BUILDERS_ENEMY='assets/gensrpg/builders/legacy-enemy-editor-v1.js';
-assert.equal(reachable.size,116+captureR06Files.length,
-  'R16 graph must retain R13–R15 Builders owners and add the single physical Core303 Dungeon owner');
+assert.equal(reachable.size,117+captureR06Files.length,
+  'R16 graph retains its owners and includes the explicit Core profile repair build prelude');
+assert.equal(reachable.has(buildPrelude.MODULE),true,'the shipped profile repair must be classified as production');
 assert.equal(reachable.has('assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js'),true,
   'R16 live Dungeon Core303 timeline must not be classified as a non-production file');
 assert.equal(rawDirect.filter(x=>x===R13_BUILDERS_ENEMY).length,1,

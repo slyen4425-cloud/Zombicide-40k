@@ -14,7 +14,16 @@
       if(!resolved||typeof resolved.encounterId!=="string"||!resolved.encounterId||!resolved.snapshot)throw new TypeError("Invalid Capture encounter");
       const launched=trigger.launch(resolved.encounterId,resolved.snapshot);
       if(!launched.ready)return launched;
-      pending={key,encounterId:resolved.encounterId};
+      const current={key,encounterId:resolved.encounterId,session:launched.session};
+      pending=current;
+      // A real provider completes asynchronously. Keep the same validated return
+      // owner as manual completion, and ignore results from a closed encounter.
+      if(launched.session.completion&&typeof launched.session.completion.then==="function"){
+        Promise.resolve(launched.session.completion).then(rawResult=>{
+          if(pending!==current)return;
+          try{complete(rawResult)}catch(error){abort(error)}
+        },error=>{if(pending===current)abort(error)});
+      }
       return Object.freeze({ready:true,session:launched.session});
     }
     function complete(rawResult){
@@ -29,6 +38,15 @@
       const previous=pending;
       try{trigger.cancel()}finally{pending=null;}
       onReturn(Object.freeze({encounterId:previous.encounterId,mode:"temporary-zone",persist:false,cancelled:true}));
+      return true;
+    }
+    function abort(error){
+      if(!pending)return false;
+      const previous=pending;pending=null;
+      try{trigger.cancel()}finally{
+        onReturn(Object.freeze({encounterId:previous.encounterId,mode:"temporary-zone",persist:false,
+          cancelled:true,error:String(error?.message||error)}));
+      }
       return true;
     }
     function status(){return Object.freeze({pending:!!pending});}

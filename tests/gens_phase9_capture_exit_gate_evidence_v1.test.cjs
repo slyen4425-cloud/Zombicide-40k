@@ -67,7 +67,20 @@ assert.match(browserVictory,/await startDungeonAndLeaveSavedRuntime\(page\);/);
 assert.match(browserVictory,/captureBattleUseAbility\('capture_basic_attack'\)/);
 assert.match(browserVictory,/resumed\.dungeonRuntime\?\.participants/);
 const existing=fs.readdirSync(path.join(root,'assets/gensrpg/capture')).sort();
-const expected=['builtin-seed-v1.js','combat-core-v1.js','entry-v1.js','hub-entry-v1.js','legacy-monolith-functions-v1.js','legacy-patches','module-contract-v1.json','screen-return-v1.js','session-start-v1.js','team-roster-v1.js','world-exploration-v1.js'];
+const staged=JSON.parse(read('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'));
+assert.equal(staged.schemaVersion,1);assert.equal(staged.productionActivated,false);
+const stagedCaptureScripts=staged.classicScripts.filter(file=>file.startsWith('assets/gensrpg/capture/'));
+assert.equal(stagedCaptureScripts.length,8,'every opt-in Capture script must be audited');
+assert.equal(staged.captureEsmAdapters.length,2,'two explicit adapters consume the external Lab Core');
+for(const file of [...staged.classicScripts,...staged.captureEsmAdapters]){
+  assert.ok(fs.statSync(path.join(root,file)).isFile(),file+' must exist');
+  assert.equal(read('index.html').includes('src="'+file),false,file+' must not silently load in the saved game');
+}
+assert.deepEqual(fs.readdirSync(path.join(root,staged.capturePreviewDirectory)).sort(),staged.capturePreviewFiles);
+assert.ok(read(staged.previewEntry).includes('assets/gensrpg/capture/preview/zone.mjs'));
+const historicalEntries=['builtin-seed-v1.js','combat-core-v1.js','entry-v1.js','hub-entry-v1.js','legacy-monolith-functions-v1.js','legacy-patches','module-contract-v1.json','screen-return-v1.js','session-start-v1.js','team-roster-v1.js','world-exploration-v1.js'];
+const expected=[...historicalEntries,...stagedCaptureScripts.map(file=>path.basename(file)),
+ ...staged.captureEsmAdapters.map(file=>path.basename(file)),path.basename(staged.capturePreviewDirectory)].sort();
 assert.deepEqual(existing,expected,'Capture folder has new owner files; re-audit the exit matrix on any expansion');
 
 const r06Source=require('./helpers/gens_phase12_r06_capture_source_view_v1.cjs');
@@ -82,7 +95,8 @@ const expectedPatches=moduleNames.map(name=>name.replace(/([A-Z])/g,'-$1').toLow
 assert.deepEqual(actualPatches,expectedPatches,'R06 Capture patches must contain only the 18 historical active bodies, no new autonomous engine');
 assert.equal(blob(r06Source(originalChromeIndex(fs.readFileSync(path.join(root,'index.html'))))),'b33542b033c5afa8a1643d99c56c21dbd4be266c',
   'R06 physical extraction must byte-restore the prior Phase9-approved source');
-const exportedOwnerFile=existing.filter(x=>x.endsWith('.js'));
+const stagedClassicNames=new Set(stagedCaptureScripts.map(file=>path.basename(file)));
+const exportedOwnerFile=existing.filter(x=>x.endsWith('.js')&&!stagedClassicNames.has(x));
 assert.equal(exportedOwnerFile.length,9,'Capture retains its eight proven owners plus the original R10 legacy-function extraction, not a second engine');
 assert.match(read('assets/gensrpg/capture/legacy-monolith-functions-v1.js'),/function captureAwardBattleXp\(/,'Capture legacy XP has an explicit physical owner after R10');
 assert.equal(JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json')).files['assets/gensrpg/capture/legacy-monolith-functions-v1.js'].domain,'capture');

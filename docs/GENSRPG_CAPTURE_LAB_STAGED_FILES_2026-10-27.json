@@ -18,11 +18,26 @@
   ],
   "captureEsmAdapters": [
     "assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs",
-    "assets/gensrpg/capture/combat-lab-provider-v1.mjs"
+    "assets/gensrpg/capture/combat-lab-provider-v1.mjs",
+    "assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs"
   ],
   "capturePreviewDirectory": "assets/gensrpg/capture/preview",
-  "capturePreviewFiles": ["zone.css", "zone.mjs"],
+  "capturePreviewFiles": [
+    "zone.css",
+    "zone.mjs"
+  ],
   "previewEntry": "capture-lab-preview.html",
-  "coverage": ["tests/gens_capture_lab_runtime_v1.test.cjs", "tests/gens_capture_lab_runtime_browser_v1.test.cjs"],
-  "remaining": ["saved-profile mapping", "persistent result application", "official animations and FX", "creature editor", "reserves"]
+  "coverage": [
+    "tests/gens_capture_lab_runtime_v1.test.cjs",
+    "tests/gens_capture_lab_runtime_browser_v1.test.cjs",
+    "tests/gens_capture_saved_profile_bridge_v1.test.cjs"
+  ],
+  "remaining": [
+    "saved-profile runtime mounting in real game",
+    "persistent result application",
+    "official animations and FX",
+    "creature editor",
+    "reserves"
+  ],
+  "stagedSavedProfileMapping": true
 }

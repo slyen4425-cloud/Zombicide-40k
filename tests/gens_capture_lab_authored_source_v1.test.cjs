@@ -3,6 +3,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
+const vm=require('node:vm');
 const {pathToFileURL}=require('node:url');
 const {execFileSync}=require('node:child_process');
 const lab=process.env.COMBAT_LAB_ROOT;
@@ -147,4 +148,58 @@ test('producer transfers remain unmodified before and after export',async()=>{
  const f=await factory();
  f.buildEncounter(battle);
  assert.equal(JSON.stringify(v.transfers),original);
+});
+
+test('native authored source, existing saved-profile seam and sole Core provider agree on identity and HP',async()=>{
+ const v=await source(),f=await factory(),built=f.buildEncounter(battle);
+ const profile={creatureTeam:[{
+  uid:battle.player.instanceId,entityId:battle.player.creatureId,
+  hp:built.nativeCombatSource.fighterConfigs[battle.player.creatureId].maxHp,
+  maxHp:built.nativeCombatSource.fighterConfigs[battle.player.creatureId].maxHp,
+  activeAbilityIds:[...built.nativeCombatSource.skillIdsByActor.player],
+  xp:37,customUserValue:'retain-me'
+ }],creatureReserve:[],gold:31};
+ let stored=structuredClone(profile),writes=0;
+ const context={};vm.runInNewContext(fs.readFileSync(
+  path.resolve(__dirname,'../assets/gensrpg/capture/battle-bridge-contract-v1.js'),'utf8'),context);
+ const {createCaptureSavedProfileBattleBridgeV1}=await import(
+  '../assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs');
+ const savedBridge=createCaptureSavedProfileBattleBridgeV1({
+  activeHeroId:()=> 'real-capture-hero',
+  loadHeroState:()=>structuredClone(stored),
+  saveHeroState:(_id,next)=>{stored=structuredClone(next);writes++;},
+  readEncounter:()=>({type:'wild',encounterId:battle.encounterId,creatureId:battle.opponent.creatureId}),
+  exported:built.exported,adaptCombatExport:v.adapter.adaptCaptureCombatExportStackV1,
+  validateBattleResult:context.GensCaptureBattleBridgeContractV1.result
+ });
+ const ticket=savedBridge.prepareEncounter();
+ assert.equal(ticket.snapshot.sides[0].creatures[0].instanceId,battle.player.instanceId);
+ assert.equal(ticket.snapshot.sides[0].creatures[0].maxHp,profile.creatureTeam[0].maxHp);
+ const {loadCombatLabEngineV1}=await import('../assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs');
+ const {createCombatLabProviderV1}=await import('../assets/gensrpg/capture/combat-lab-provider-v1.mjs');
+ const engine=await loadCombatLabEngineV1(pathToFileURL(path.resolve(lab)+path.sep));
+ let nextTimer=0;const timers=new Map();
+ const clock={
+  now:()=>0,
+  setTimer(fn,ms){const k=++nextTimer;timers.set(k,{fn,ms});return k;},
+  clearTimer(k){timers.delete(k);}
+ };
+ const provider=createCombatLabProviderV1({
+  engine,clock,
+  resolveBattle:ctx=>({...ticket.resolveBattle(ctx),aiEnabled:false}),
+  mountBattle:()=>({dispose(){}})
+ });
+ const handle=provider.createBattle({encounterId:ticket.encounterId,snapshot:ticket.snapshot});
+ provider.startBattle(handle);
+ assert.equal(handle.state().fighters.player.hp,profile.creatureTeam[0].hp);
+ assert.equal(handle.flee(),true);
+ const result=await handle.completion;
+ provider.disposeBattle(handle);
+ assert.equal(ticket.applyResult(result).applied,true);
+ assert.equal(ticket.applyResult(result),false);
+ assert.equal(writes,1);
+ assert.equal(stored.creatureTeam[0].uid,battle.player.instanceId);
+ assert.equal(stored.creatureTeam[0].customUserValue,'retain-me');
+ assert.equal(stored.gold,31);
+ assert.equal(timers.size,0,'official Combat runtime timers released');
 });

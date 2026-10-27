@@ -1,6 +1,6 @@
 # GenS RPG — premier combat jouable depuis Monster Capture (27-10-2026)
 
-Statut : **non raccordé / non jouable**. Travail isolé sur la branche du pont Capture. Aucun changement de `main`.
+Statut actualisé : **pont moteur 1v1 validé en preview ; profil de partie persistante encore non raccordé**. La PR #176 consomme les véritables Core du labo à `main@65e21792ff74aea9862e528c8dbfdb22797b6693` et teste rencontre → combat → résultat → retour en Chromium et Firefox. Voir `GENSRPG_CAPTURE_LAB_RUNTIME_2026-10-27.md`. L'audit ci-dessous décrit l'état de préparation antérieur ; le manifeste rc1 reste bloqué et aucune activation dans `main` n'a eu lieu.
 
 ## Audit réel du fournisseur Combat
 - Le dépôt Combat `main` contient `releases/combat-main-pilot-2026-10-27-rc1.json`.

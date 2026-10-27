@@ -18,6 +18,7 @@ let apiPromise;
 async function api(){
  if(!apiPromise)apiPromise=Promise.all([
   import('../assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs'),
+  import('../assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs'),
   import('../assets/gensrpg/capture/combat-lab-authored-source-v1.mjs'),
   import('../assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs'),
   import('../assets/gensrpg/capture/combat-lab-provider-v1.mjs'),
@@ -30,7 +31,7 @@ async function api(){
   fromLab('src/catalogs/capture-portable-native-skill-catalog-v1.js'),
   fromLab('src/catalogs/capture-complex-native-skill-catalog-v1.js'),
   fromLab('src/catalogs/capture-showcase-skill-presets-v1.js')
- ]).then(async ([world,author,loader,provider,creature,skill,skillDraft,rules,exporter,adapter,portable,complex,presets])=>{
+ ]).then(async ([world,hub,author,loader,provider,creature,skill,skillDraft,rules,exporter,adapter,portable,complex,presets])=>{
   const byId=new Map();
   for(const row of read('data/combat/skills/catalog.v1.json').entries){
    const draft=skillDraft.normalizeCaptureSkillEditorDraftV1({
@@ -62,7 +63,7 @@ async function api(){
   });
   const context={};
   vm.runInNewContext(fs.readFileSync(path.join(root,'assets/gensrpg/capture/battle-bridge-contract-v1.js'),'utf8'),context);
-  return {make:world.createCaptureWorldLabWildTransactionV1,source,
+  return {make:world.createCaptureWorldLabWildTransactionV1,makeHubCommand:hub.createCaptureLabHubBattleCommandV1,source,
    adapt:adapter.adaptCaptureCombatExportStackV1,
    validate:context.GensCaptureBattleBridgeContractV1.result,
    engine:await loader.loadCombatLabEngineV1(pathToFileURL(path.resolve(lab)+path.sep)),
@@ -323,4 +324,158 @@ test('a World owner render error after successful consume is not masked and cann
  assert.equal(transaction.status().pending,false);
  assert.equal(t.applyResult(raw),false);
  assert.equal(owner.writes().hero,1);
+});
+
+function clockHub(){
+ let time=0,seq=0;
+ const tasks=new Map();
+ return {
+  now:()=>time,
+  setTimer(fn,ms){const id=++seq;tasks.set(id,{fn,time:time+ms});return id},
+  clearTimer(id){tasks.delete(id)},
+  advance(ms){const stop=time+ms;let budget=5000;
+   for(;;){const first=[...tasks].sort((a,b)=>a[1].time-b[1].time)[0];
+    if(!first||first[1].time>stop)break;
+    assert.ok(--budget>0,'Lab timer cannot loop forever');
+    tasks.delete(first[0]);time=first[1].time;first[1].fn();
+   }time=stop;
+  },
+  count:()=>tasks.size
+ };
+}
+async function hubSetup({transactionOverrides={},legacy={},mountBattle=()=>({dispose(){}}),factory}={}){
+ const s=await setup(transactionOverrides,legacy),context={};
+ vm.runInNewContext(fs.readFileSync(path.join(root,'assets/gensrpg/capture/lab-ownership-port-v1.js'),'utf8'),context);
+ const port=context.GensCaptureLabOwnershipPortV1,clock=clockHub();
+ const returns=[],errors=[];
+ const command=s.a.makeHubCommand({
+  transaction:s.transaction,combatPort:port,engine:s.a.engine,
+  createProvider:factory??s.a.provider,clock,mountBattle,
+  onReturn:event=>returns.push(event),
+  onError:event=>errors.push(event)
+ });
+ return {...s,port,clock,returns,errors,command};
+}
+test('Hub command: the original World encounter → single official Combat Core port → flee → hero save → World resolved → new encounter',async()=>{
+ const s=await hubSetup();
+ const before=s.owner.profile();
+ const launched=s.command.startWildBattle('crea_voltik');
+ assert.equal(launched.ready,true);
+ assert.equal(s.port.status().battleActive,true);
+ assert.equal(s.command.status().phase,'running');
+ assert.equal(s.owner.writes().hero,0);
+ assert.throws(()=>s.command.startWildBattle('crea_voltik'),/active|pending/);
+ assert.equal(launched.session.state().fighters.player.hp,150);
+ assert.equal(launched.session.state().fighters.opponent.maxHp,120);
+ assert.equal(launched.session.flee(),true);
+ await settle();
+ assert.equal(s.returns.length,1);
+ assert.equal(s.returns[0].outcome,'flee');
+ assert.equal(s.returns[0].applied,true);
+ assert.equal(s.returns[0].worldResolved,true);
+ assert.equal(s.owner.world().last.type,'resolved');
+ assert.equal(s.owner.writes().hero,1);
+ assert.equal(s.port.status().installed,false);
+ assert.equal(s.clock.count(),0);
+ assert.deepEqual(s.owner.profile().inventory,before.inventory);
+ assert.deepEqual(s.owner.profile().profileCustom,before.profileCustom);
+ assert.equal(s.command.status().phase,'idle');
+ s.owner.replaceWorld({...s.owner.world(),last:{type:'wild',creatureId:'crea_voltik',text:'Another authored forest wild'}});
+ const second=s.command.startWildBattle('crea_voltik');
+ assert.equal(second.ready,true);
+ second.session.flee();await settle();
+ assert.equal(s.returns.length,2);
+ assert.equal(s.owner.writes().hero,2);
+ assert.equal(s.port.status().installed,false);
+ assert.equal(s.command.dispose(),true);
+});
+test('Hub command: historical profile and externally installed provider are rejected before any world/hero write',async()=>{
+ const old=await hubSetup({legacy:{hp:17,maxHp:17}});
+ assert.throws(()=>old.command.startWildBattle('crea_voltik'),/HP|authored|incompatible/i);
+ assert.equal(old.owner.writes().world,old.owner.baseline);
+ assert.equal(old.owner.writes().hero,0);
+ assert.equal(old.port.status().installed,false);
+ assert.equal(old.command.dispose(),true);
+ const separate=await hubSetup();
+ const occupier=separate.a.provider({engine:separate.a.engine,
+  resolveBattle:()=>{throw Error('unused')},mountBattle:()=>({dispose(){}})});
+ separate.port.install(occupier);
+ assert.throws(()=>separate.command.startWildBattle('crea_voltik'),/installed|port|owner/i);
+ assert.equal(separate.owner.writes().world,separate.owner.baseline);
+ assert.equal(separate.owner.writes().hero,0);
+ separate.port.uninstall(occupier);separate.command.dispose();
+});
+test('Hub command: exit during official cast releases one battle view, clocks and port without consuming the wild',async()=>{
+ let views=0;
+ const s=await hubSetup({mountBattle:()=>({dispose(){views++}})});
+ const launched=s.command.startWildBattle('crea_voltik');
+ launched.session.useSkill('fireball');
+ s.clock.advance(70);
+ assert.equal(s.command.cancel(),true);
+ assert.equal(s.command.cancel(),false);
+ await settle();
+ s.clock.advance(10000);
+ assert.equal(views,1);
+ assert.equal(s.owner.writes().hero,0);
+ assert.equal(s.owner.world().last.type,'wild');
+ assert.equal(s.owner.world().last.encounterId,launched.encounterId,'world identity survives browser reentry');
+ assert.equal(s.port.status().installed,false);
+ assert.equal(s.clock.count(),0);
+ assert.equal(s.returns.length,1);
+ assert.equal(s.returns[0].cancelled,true);
+ assert.equal(s.command.dispose(),true);
+});
+test('Hub command: a failing official view mount cannot leave an installed provider or mutate saved hero',async()=>{
+ const s=await hubSetup({mountBattle:()=>{throw Error('view unable to mount')}});
+ assert.throws(()=>s.command.startWildBattle('crea_voltik'),/view unable to mount/);
+ assert.equal(s.port.status().installed,false);
+ assert.equal(s.owner.writes().hero,0);
+ assert.equal(s.owner.world().last.type,'wild');
+ assert.equal(s.clock.count(),0);
+ assert.equal(s.command.status().phase,'idle');
+});
+test('Hub command: failed World consumption preserves the single hero commit and offers explicit retry without replaying Combat',async()=>{
+ let fail=true;
+ const s=await hubSetup({transactionOverrides:{
+  consumeWildEncounter:reason=>{
+   if(fail){fail=false;throw Error('World commit deferred');}
+   return s.owner.ctx.captureConsumeWildEncounter(reason);
+  }
+ }});
+ const b=s.command.startWildBattle('crea_voltik');
+ b.session.flee();await settle();
+ assert.equal(s.errors.length,1);
+ assert.match(s.errors[0].error.message,/World commit deferred/);
+ assert.equal(s.command.status().phase,'commit-pending');
+ assert.equal(s.port.status().installed,false);
+ assert.equal(s.clock.count(),0);
+ assert.equal(s.owner.writes().hero,1);
+ assert.equal(s.owner.world().last.type,'wild');
+ assert.throws(()=>s.command.startWildBattle('crea_voltik'),/pending/);
+ assert.throws(()=>s.command.dispose(),/pending|commit/);
+ const result=s.command.retryCommit();
+ assert.equal(result.applied,true);
+ assert.equal(result.worldResolved,true);
+ assert.equal(s.owner.writes().hero,1);
+ assert.equal(s.owner.world().last.type,'resolved');
+ assert.equal(s.returns.length,1);
+ assert.equal(s.errors.length,1);
+ assert.equal(s.command.dispose(),true);
+});
+test('Hub command: a stale Capture hero blocks result persistence; no forged victory or overwrite is reported',async()=>{
+ const s=await hubSetup();
+ const b=s.command.startWildBattle('crea_voltik');
+ const changed=s.owner.profile();changed.creatureTeam[0].hp=34;
+ s.owner.replaceHero(changed);
+ b.session.flee();await settle();
+ assert.equal(s.owner.writes().hero,0);
+ assert.equal(s.owner.profile().creatureTeam[0].hp,34);
+ assert.equal(s.owner.world().last.type,'wild');
+ assert.equal(s.returns.length,0);
+ assert.equal(s.errors.length,1);
+ assert.match(s.errors[0].error.message,/Stale Capture profile/);
+ assert.equal(s.port.status().installed,false);
+ assert.equal(s.clock.count(),0);
+ assert.equal(s.command.status().phase,'commit-pending');
+ assert.throws(()=>s.command.retryCommit(),/Stale Capture profile/);
 });

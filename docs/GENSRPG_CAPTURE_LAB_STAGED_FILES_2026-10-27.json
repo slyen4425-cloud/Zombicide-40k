@@ -21,7 +21,8 @@
     "assets/gensrpg/capture/combat-lab-provider-v1.mjs",
     "assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs",
     "assets/gensrpg/capture/combat-lab-authored-source-v1.mjs",
-    "assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs"
+    "assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs",
+    "assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs"
   ],
   "capturePreviewDirectory": "assets/gensrpg/capture/preview",
   "capturePreviewFiles": [
@@ -48,5 +49,6 @@
   "authoredSourceLabPin": "65e21792ff74aea9862e528c8dbfdb22797b6693",
   "authoredAssetsPin": "b3d46ce6f2639ebb59a2984aeff17f97cbcd7377",
   "authoredAssetsRepository": "slyen4425-cloud/GenSrpg_labo_combat_dynamique",
-  "stagedWorldWildTransaction": true
+  "stagedWorldWildTransaction": true,
+  "stagedHubBattleCommand": true
 }

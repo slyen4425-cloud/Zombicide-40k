@@ -25,3 +25,11 @@ Le prototype concurrent `battle-provider-slot-v1.js` a été retiré avant activ
 ## Décision propriétaire validée le 27 octobre
 
 Le Labo Combat doit être l'autorité du déclenchement et de l'exécution des combats Monster Capture, et de l'édition des créatures. Capture conserve le contexte de rencontre dans l'exploration, l'identité des créatures, les sauvegardes et l'application des résultats; il délègue les commandes de combat et d'édition via un port versionné. Le port `lab-ownership-port-v1.js` formalise `startEncounter`, `stopEncounter`, `editCreature`, `closeEditor` et le cycle de vie du fournisseur. Il est inerte tant qu'aucun adaptateur n'est branché. Une mise à jour du laboratoire doit être validée par protocole, version, capacités, tests et preview avant remplacement de l'adaptateur. **Aucun branchement réel ni basculement du gameplay n'a encore été réalisé.**
+
+## Politique d'évolution sans rustine
+
+- Un seul port Capture possède la liaison. Le laboratoire expose un fournisseur, jamais un second runtime Capture.
+- `protocol` identifie le contrat majeur; `version` est une version sémantique valide; `capabilities` est une liste sans doublon. Les fonctions sont validées avant installation.
+- Une fonctionnalité nouvelle du laboratoire est optionnelle et annoncée par une capacité explicite. Capture ne l'appelle que si elle est disponible.
+- Une version incompatible ne s'installe pas. Aucun remplacement à chaud pendant une session de combat ou d'éditeur. Pour évoluer: terminer la session, désinstaller le fournisseur, puis installer le nouveau fournisseur validé.
+- La validation CI spécifique est verte; les suites générales architecture et armure V114.11 échouent sur cette branche. Aucun GREEN global, aucune fusion tant que les causes ne sont pas identifiées et corrigées à la source.

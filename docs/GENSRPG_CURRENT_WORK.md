@@ -1,3 +1,13 @@
+# Lot C3 — profil Capture persistant (en cours, NON GREEN)
+
+- Base immuable : checkpoint/gensrpg-capture-lab-runtime-c2-green-2026-10-27 (C2 ciblé GREEN, CI globale historique NON GREEN).
+- START : checkpoint/gensrpg-start-capture-persistence-20261027 ; branche : work/gensrpg-capture-persistence-20261027.
+- Objectif : mapping des instances du profil réel vers le pont 1v1, application des résultats par l'unique propriétaire Capture Team, sauvegarde/reprise et tests d'isolation multi-profils.
+- Interdits : aucune écriture directe concurrente, aucune modification de index.html, aucune altération du labo épinglé, aucune publication avant tests et CI.
+- Étape : caractériser le propriétaire de persistance et écrire les tests RED avant l'implémentation. Aucun GREEN C3 déclaré.
+
+---
+
 # Reprise — raccord réel au runtime Combat, 27 octobre 2026
 
 - Lot C2 : premier raccord 1v1 au moteur officiel, résultat asynchrone validé une seule fois et retour à la zone provisoire. Pas de nouvelle règle de combat.

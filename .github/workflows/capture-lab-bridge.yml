@@ -5,6 +5,8 @@ on:
       - 'work/gensrpg-capture-lab-bridge-*'
   pull_request:
     paths:
+      - 'assets/gensrpg/capture/hub-entry-v1.js'
+      - 'tests/gens_capture_hub_temporary_play_owner_v1.test.cjs'
       - 'assets/gensrpg/capture/temporary-zone-play-v1.js'
       - 'assets/gensrpg/capture/temporary-zone-view-v1.js'
       - 'assets/gensrpg/capture/temporary-zone-session-v1.js'
@@ -55,3 +57,5 @@ jobs:
         run: node --check assets/gensrpg/capture/temporary-zone-view-v1.js
       - name: Syntax-check Capture temporary play entry
         run: node --check assets/gensrpg/capture/temporary-zone-play-v1.js
+      - name: Validate Capture Hub temporary gameplay ownership
+        run: node tests/gens_capture_hub_temporary_play_owner_v1.test.cjs

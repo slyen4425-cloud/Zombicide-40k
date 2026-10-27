@@ -56,6 +56,23 @@ for(const [name,browserType] of [['Chromium',chromium],['Firefox',firefox]]){
       assert.deepEqual(external,[],'modules must come from the pinned local build');
       assert.deepEqual(errors,[]);
       if(process.env.CAPTURE_LAB_SCREENSHOT&&name==='Chromium')await page.screenshot({path:process.env.CAPTURE_LAB_SCREENSHOT,fullPage:true});
+      // A cached navigation preserves the SAME live session; it must not be torn down.
+      // Drive page transition events on the actual browser DOM in both engines.
+      const zoneButtons=await page.locator('#zone-host button').count();
+      assert.ok(zoneButtons>0);
+      await page.evaluate(()=>dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true})));
+      assert.equal(await page.locator('#zone-host button').count(),zoneButtons,'BFCache may not remove the zone controls');
+      await page.evaluate(()=>dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));
+      await right.tap();
+      await page.getByRole('button',{name:'Déplacement ←',exact:true}).tap();
+      await page.locator('#battle-host:not([hidden])').waitFor();
+      await page.getByRole('button',{name:'Fuir',exact:true}).tap();
+      await page.locator('#zone-host[data-last-outcome="flee"]:not([hidden])').waitFor();
+      // A final navigation must dispose the view AND its only Combat port owner.
+      await page.evaluate(()=>dispatchEvent(new PageTransitionEvent('pagehide',{persisted:false})));
+      assert.equal(await page.locator('#zone-host button').count(),0,'final exit must dispose the view');
+      assert.equal(await page.evaluate(()=>globalThis.GensCaptureLabOwnershipPortV1.status().installed),false);
+      assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg_game_profiles_v1')),'{"existing-save":"preserved"}');
       await context.close();
     }catch(error){
       if(page)t.diagnostic(await page.locator('body').innerText().catch(()=>''));

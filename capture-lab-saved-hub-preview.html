@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <title>Monster Capture · Vrai monde sauvegardé / Combat Labo</title>
+ <link rel="stylesheet" href="assets/gensrpg/capture/preview/zone.css">
+ <style>
+ body{margin:0;background:#101913;color:#f4f7f3;font-family:system-ui,sans-serif}
+ main{max-width:1150px;margin:auto;padding:12px}
+ .hub-card{background:#213327;border:1px solid #54765d;border-radius:12px;margin:8px 0;padding:12px}
+ .hub-actions,.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:8px 0}
+ .hub-actions button,.actions button{min-height:44px;min-width:120px;padding:8px 12px;border-radius:8px;background:#386848;color:white;border:1px solid #7eb38a}
+ .hub-actions button:disabled{opacity:.45}
+ .hub-fighters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .hub-fighter{min-width:0;text-align:center;display:flex;flex-direction:column;align-items:center}
+ .hub-fighter img{width:clamp(70px,18vw,142px);height:clamp(70px,18vw,142px);object-fit:contain}
+ .hub-fighter h2{font-size:clamp(15px,2.2vw,21px);margin:5px 0}
+ .hub-fighter progress{width:90%}
+ .hub-fighter p{margin:4px}
+ #hub-status{font-weight:600}
+ #hub-status[data-error=true],#hub-status[data-incompatible=true]{color:#ffc5b8}
+ .small{color:#c9d9c9;font-size:14px}
+ [hidden]{display:none!important}
+ @media(max-width:620px){.hub-card{padding:8px}.hub-fighters{gap:5px}.hub-actions button,.actions button{flex:1 1 120px}}
+ </style>
+</head>
+<body>
+<main>
+ <header><h1>Monster Capture · véritable rencontre sauvegardée</h1>
+  <p class="small">Essai indépendant du jeu public. Monde et héros utilisent les fonctions Capture officielles ; moteur, capacités et sprites viennent du Labo épinglé.</p>
+ </header>
+ <section id="saved-preview-hub" class="hub-card" aria-label="Rencontre sauvegardée Capture">
+  <h2>Rencontre sauvegardée Capture</h2>
+  <p id="hub-location" aria-live="polite">Lecture du monde…</p>
+  <p id="hub-profile"></p>
+  <div id="hub-status" role="status" aria-live="polite">Lecture du profil et du Core Combat officiels…</div>
+  <div class="hub-actions">
+   <button id="hub-battle" type="button">COMBATTRE · Labo officiel</button>
+   <button id="hub-new" type="button">Nouvelle rencontre</button>
+   <button id="hub-abort" type="button" hidden>Annuler le combat</button>
+  </div>
+ </section>
+ <section id="live-battle" class="hub-card" aria-label="Véritable combat Labo" hidden></section>
+ <p class="small">Les données de test utilisent exclusivement les clés de profil « gensrpg_capture_lab_saved_preview_* ». Tes vrais profils et leurs sauvegardes ne sont pas ouverts ni migrés. Les anciens PV/compétences incompatibles sont refusés, jamais modifiés automatiquement.</p>
+</main>
+<script src="assets/gensrpg/core/asset-resolver-v1.js"></script>
+<script src="assets/gensrpg/capture/battle-bridge-contract-v1.js"></script>
+<script src="assets/gensrpg/capture/lab-ownership-port-v1.js"></script>
+<script src="assets/gensrpg/capture/preview/saved-hub-owners.js"></script>
+<script src="assets/gensrpg/capture/world-exploration-v1.js"></script>
+<script src="assets/gensrpg/capture/team-roster-v1.js"></script>
+<script type="module" src="assets/gensrpg/capture/preview/saved-hub.mjs"></script>
+</body>
+</html>

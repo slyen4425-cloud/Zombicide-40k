@@ -76,7 +76,7 @@ const rules={schema:'capture-combat-rules-editor-draft-v1',maxEnergy:10,initialE
  energyChargeAmount:1,energyChargeIntervalMs:2000,movementEnergyPerStep:1,chargeTimeModifierPct:0};
 const battle={arenaId:'forest',skillSpeedMultiplier:0.5,combatRules:rules};
 function realWorldAndRoster({hp,enemy='crea_voltik',reserve=false,abilities,maxHp}={}){
- const worldId='my_saved_world',heroId='my_real_trainer';
+ let worldId='my_saved_world';const heroId='my_real_trainer';
  const store=new Map();let worldWrites=0,heroWrites=0,renderCalls=0;
  const entityCatalog=new Map([['crea-loup',{id:'crea-loup',name:'Loup volcanique',hp:150,
   abilityIds:['claw','fireball','cap_fire_special_1','lib_flame_bite','cap_fire_atk_6']}],
@@ -120,7 +120,8 @@ function realWorldAndRoster({hp,enemy='crea_voltik',reserve=false,abilities,maxH
   profile:()=>JSON.parse(store.get('realhero:'+heroId)),world:()=>clone(ctx.captureWorldState()),
   writes:()=>({world:worldWrites,hero:heroWrites}),renders:()=>renderCalls,
   replaceHero:x=>store.set('realhero:'+heroId,JSON.stringify(x)),
-  replaceWorld:x=>ctx.saveCaptureWorldState(x)
+  replaceWorld:x=>ctx.saveCaptureWorldState(x),
+  changeWorld:id=>{worldId=id;}
  };
 }
 let sequence=0;
@@ -133,6 +134,7 @@ async function setup(extra={},legacy={}){
   readWorldState:()=>owner.ctx.captureWorldState(),
   saveWorldState:state=>owner.ctx.saveCaptureWorldState(state),
   consumeWildEncounter:reason=>owner.ctx.captureConsumeWildEncounter(reason),
+  worldStorageKey:()=>owner.ctx.captureWorldKey(),
   nextEncounterId:()=> 'wc-real-'+(++sequence),
   authoredSource:a.source,adaptCombatExport:a.adapt,
   validateBattleResult:a.validate,
@@ -288,4 +290,37 @@ test('world owner preserves creator-specific profile worlds with a stable ID sco
  assert.ok(a);
  assert.equal([...owner.store.keys()].filter(k=>k.startsWith('gensrpg_capture_world_v1_')).length,1);
  assert.deepEqual(owner.world().last.text,'Une vraie rencontre sauvage');
+});
+
+test('switching active World profile before result never consumes another save with identical encounter details',async()=>{
+ const {owner,transaction}=await setup();
+ const t=transaction.prepareWild('crea_voltik');
+ const savedWorld=owner.world();
+ owner.changeWorld('another_profile_owner');
+ owner.replaceWorld(savedWorld); // deliberately same encounter token, species and location
+ const raw={outcome:'flee',creatures:t.snapshot.sides.flatMap(s=>s.creatures.map(c=>({instanceId:c.instanceId,hp:c.hp})))};
+ assert.throws(()=>t.applyResult(raw),/world|encounter|stale/i);
+ assert.equal(owner.writes().hero,0);
+ assert.equal(owner.world().last.type,'wild');
+ assert.equal(owner.world().last.encounterId,t.encounterId);
+ owner.changeWorld('my_saved_world');
+ assert.equal(t.cancel(),true);
+ assert.equal(owner.world().last.type,'wild');
+});
+
+test('a World owner render error after successful consume is not masked and cannot cause double hero save',async()=>{
+ const {owner,transaction}=await setup({
+  consumeWildEncounter:reason=>{
+   owner.ctx.captureConsumeWildEncounter(reason);
+   throw Error('World renderer failed after owned commit');
+  }
+ });
+ const t=transaction.prepareWild('crea_voltik');
+ const raw={outcome:'flee',creatures:t.snapshot.sides.flatMap(s=>s.creatures.map(c=>({instanceId:c.instanceId,hp:c.hp})))};
+ assert.throws(()=>t.applyResult(raw),/World renderer failed/);
+ assert.equal(owner.world().last.type,'resolved');
+ assert.equal(owner.writes().hero,1);
+ assert.equal(transaction.status().pending,false);
+ assert.equal(t.applyResult(raw),false);
+ assert.equal(owner.writes().hero,1);
 });

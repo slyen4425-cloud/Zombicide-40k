@@ -5,6 +5,7 @@
   const REQUIRED=["closeTurnPopup","renderMenuStatuses","renderCaptureWorldHub"];
   let bindings=null;
   let installed=false;
+  let temporaryPlay=null;
   const pending=new Set();
   const EXIT_ID="gensCaptureExitButtonV1";
   const MODALS=[
@@ -68,6 +69,12 @@
     try{bindings.renderCaptureWorldHub()}catch(e){}
     const hub=root.document.getElementById("captureGameHub");
     if(hub){
+      // Capture Hub remains the sole UI owner; gameplay is opt-in via its binding.
+      if(typeof bindings.mountTemporaryPlay==="function"&&!temporaryPlay){
+        const owner=bindings.mountTemporaryPlay(hub);
+        if(owner&&typeof owner.dispose!=="function")throw new TypeError("Temporary gameplay owner requires dispose()");
+        temporaryPlay=owner||null;
+      }
       hub.style.setProperty("display","block","important");
       const raf=root.requestAnimationFrame(()=>{
         pending.delete(raf);
@@ -82,6 +89,7 @@
   function leaveWorld(){
     if(!installed)return false;
     cancelPendingScrolls();
+    if(temporaryPlay){const owner=temporaryPlay;temporaryPlay=null;owner.dispose();}
     try{bindings?.closeTurnPopup?.()}catch(e){}
     // The historical Capture skin forces display:block!important on the Hub.
     // Release that owner-local skin before applying the terminal hide.
@@ -99,6 +107,7 @@
 
   function dispose(){
     if(inWorld())leaveWorld();
+    if(temporaryPlay){const owner=temporaryPlay;temporaryPlay=null;owner.dispose();}
     const button=root.document.getElementById(EXIT_ID);
     if(button){button.onclick=null;button.remove()}
     installed=false;
@@ -107,7 +116,7 @@
     return true;
   }
 
-  function status(){return Object.freeze({installed,inWorld:inWorld(),pendingScrolls:pending.size})}
+  function status(){return Object.freeze({installed,inWorld:inWorld(),pendingScrolls:pending.size,temporaryPlayActive:!!temporaryPlay})}
 
   root.GensCaptureHubEntryV1=Object.freeze({VERSION,install,enterWorld,leaveWorld,dispose,status});
 })(typeof window!=="undefined"?window:globalThis);

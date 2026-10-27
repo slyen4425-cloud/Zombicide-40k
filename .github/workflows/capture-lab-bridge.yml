@@ -5,6 +5,7 @@ on:
       - 'work/gensrpg-capture-lab-bridge-*'
   pull_request:
     paths:
+      - 'assets/gensrpg/capture/temporary-zone-view-v1.js'
       - 'assets/gensrpg/capture/temporary-zone-session-v1.js'
       - 'tests/gens_capture_temporary_zone_session_v1.test.cjs'
       - 'assets/gensrpg/capture/temporary-zone-controller-v1.js'
@@ -46,3 +47,5 @@ jobs:
         run: node tests/gens_capture_temporary_zone_controller_v1.test.cjs
       - name: Validate temporary playable session flow
         run: node tests/gens_capture_temporary_zone_session_v1.test.cjs
+      - name: Syntax-check temporary zone view
+        run: node --check assets/gensrpg/capture/temporary-zone-view-v1.js

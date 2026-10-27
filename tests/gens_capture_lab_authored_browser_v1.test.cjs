@@ -48,6 +48,14 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    const playerBar=page.getByRole('progressbar',{name:'PV de Loup volcanique'});
    assert.equal(await playerBar.getAttribute('max'),'150','real authored Lab HP, never historical 18/24');
    assert.equal(await playerBar.evaluate(n=>n.value),150);
+   const playerEnergy=page.locator('.fighter').first().locator('p').last();
+   assert.match(await playerEnergy.textContent(),/Énergie 10 \/ 10/);
+   await page.getByRole('button',{name:'Boule de feu',exact:true}).tap();
+   await page.getByText('Action en préparation…').waitFor();
+   await page.waitForFunction(()=>{
+     const p=document.querySelector('.fighter p:last-child');
+     return p&&/Énergie ([0-9]+) \/ 10/.test(p.textContent)&&Number(p.textContent.match(/Énergie ([0-9]+)/)[1])<10;
+   },null,{timeout:8000});
    await page.getByRole('button',{name:'Fuir',exact:true}).tap();
    await page.locator('#zone-host[data-last-outcome="flee"]:not([hidden])').waitFor();
    assert.equal(await right.isEnabled(),true);

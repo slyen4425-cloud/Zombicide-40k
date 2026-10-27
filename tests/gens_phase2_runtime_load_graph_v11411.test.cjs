@@ -227,11 +227,24 @@ for(const rel of captureLabOptInServices){
   assert.equal(allJs.includes(rel),true,'staged Capture/Lab service must exist: '+rel);
   assert.equal(reachable.has(rel),false,'staged Capture/Lab service must not enter production implicitly: '+rel);
 }
-const captureLabOptInSet=new Set(captureLabOptInServices);
+// Preview-only owner scaffolding is a new, explicit isolated JS file.
+// Keep the production reachable set exactly identical; do not accidentally
+// put preview-owned profile/storage declarations into the game entry graph.
+const savedHubPreviewScripts=captureLabInventory.capturePreviewFiles
+  .filter(file=>file.endsWith('.js'))
+  .map(file=>captureLabInventory.capturePreviewDirectory+'/'+file);
+assert.deepEqual(savedHubPreviewScripts,[
+  'assets/gensrpg/capture/preview/saved-hub-owners.js'
+],'only the reviewed isolated preview owner context may be added as classic JS');
+for(const rel of savedHubPreviewScripts){
+  assert.equal(allJs.includes(rel),true,'preview-only owner context must physically exist');
+  assert.equal(reachable.has(rel),false,'preview-only fake identity cannot load in production');
+}
+const captureLabOptInSet=new Set([...captureLabOptInServices,...savedHubPreviewScripts]);
 const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel)&&!phase10Set.has(rel)&&!phase12Set.has(rel)&&!captureLabOptInSet.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,159,'physical inventory includes the ten explicit Capture/Lab services and the Core profile repair prelude');
+assert.equal(allJs.length,160,'physical inventory includes ten Capture/Lab opt-in services, isolated preview owner and Core profile repair prelude');
 assert.equal(phase2Js.length,82,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
 assert.equal(reachable.size,135,'production graph must include the profile repair prelude and existing Capture owners');
 const connectedPhaseEntrypoints=new Set([

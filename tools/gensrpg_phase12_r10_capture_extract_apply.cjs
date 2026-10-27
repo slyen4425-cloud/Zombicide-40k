@@ -56,8 +56,8 @@ function forward(source){
   assert(Buffer.byteLength(extracted,'utf8')===61943&&blob(extracted)===NEW_MODULE,'expected Capture owner mismatched');
   return {html,extracted};
 }
-function restoreR09(){
-  const current=fs.readFileSync('index.html','utf8');
+function restoreR09(inputIndex=null){
+  const current=inputIndex===null?fs.readFileSync('index.html','utf8'):inputIndex;
   const html=['f257bd9e193648dc62cd8a40d510831debfe045a','b0d0c73292e4374fc4f23e86edffad5c1b39a7b6','b5a39705baf83e9782695c14bede8b9dde6ddf52','dab5be5dedfa56c49d76d40a4cb824a0098903f0','9f35eb833a6ede4b91399854f19bb9bef59f45ab','260f00aa179c939f35188ca854f9875971ce8a7b'].includes(blob(current))
     ? cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{maxBuffer:10*1024*1024}).toString('utf8')
     : current;
@@ -109,6 +109,22 @@ else if(mode==='--apply'){
   fs.writeFileSync(ownerp,JSON.stringify(owners,null,2)+'\n','utf8');
   assert(blob(restoreR09())===OLD_INDEX,'rollback mismatch after applying');
   process.stdout.write('R10 applied: 90 functions Capture, R09 rollback exact\n');
+}
+else if(mode==='--verify-certified-history'){
+  // Run against the source extraction's own immutable parent, NOT the modern
+  // product index that has gone through multiple later certified extractions.
+  // This proves full bidirectional R09↔R10 bytes without freezing gameplay.
+  const source=cp.execFileSync('git',['show',ORIGINAL_SHA+':index.html'],{maxBuffer:10*1024*1024}).toString('utf8');
+  const prepared=forward(source);
+  assert(certifiedHistoricalOwner()===prepared.extracted,'R10 archive must be byte-identical to the original extraction');
+  assert(restoreR09(prepared.html)===source,'historical rollback R10→R09 is not byte-identical');
+  const active=fs.readFileSync(MODULE,'utf8');
+  new vm.Script(active,{filename:MODULE});
+  const currentFunctions=[...active.matchAll(/^function (capture[A-Za-z0-9_$]+)\\s*\\(/gm)].map(m=>m[1]);
+  const originalFunctions=[...prepared.extracted.matchAll(/^function (capture[A-Za-z0-9_$]+)\\s*\\(/gm)].map(m=>m[1]);
+  assert(currentFunctions.join('|')===originalFunctions.join('|')&&currentFunctions.length===90,
+   'active button owner must keep all 90 historical Capture declarations under one owner');
+  process.stdout.write('R10 historic source and exact rollback verified; modern active owner independently parsed\\n');
 }
 else if(mode==='--verify'){
   const source=cp.execFileSync('git',['show',ORIGINAL_SHA+':index.html'],{maxBuffer:10*1024*1024}).toString('utf8');

@@ -73,8 +73,14 @@ try {
     }
   });
   notice.textContent='Rejoins les hautes herbes pour rencontrer une créature sauvage.';
-  // Page-local lifecycle; it owns no persistent game data or global handler.
-  addEventListener('pagehide',()=>play?.dispose(),{once:true});
+  // Keep the sole active Capture/Combat session when the browser suspends this
+  // document in BFCache. It resumes without rerunning this module on pageshow.
+  // A real exit releases the port, timers and view, even after several restores.
+  addEventListener('pagehide',event=>{
+    if(event.persisted)return;
+    play?.dispose();
+    play=null;
+  });
 }catch(error){
   play?.dispose();notice.textContent='La clairière ne peut pas démarrer : '+error.message;
   notice.dataset.error='true';

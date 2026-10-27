@@ -7,8 +7,10 @@ on:
     paths:
       - 'assets/gensrpg/capture/battle-bridge-contract-v1.js'
       - 'assets/gensrpg/capture/battle-provider-slot-v1.js'
+      - 'assets/gensrpg/capture/lab-ownership-port-v1.js'
       - 'tests/gens_capture_*bridge*.test.cjs'
       - 'tests/gens_capture_battle_provider_slot.test.cjs'
+      - 'tests/gens_capture_lab_ownership_port.test.cjs'
 jobs:
   contract:
     runs-on: ubuntu-latest
@@ -21,3 +23,5 @@ jobs:
         run: node tests/gens_capture_lab_bridge_contract.test.cjs
       - name: Validate provider lifecycle and capabilities
         run: node tests/gens_capture_battle_provider_slot.test.cjs
+      - name: Validate lab battle trigger and creature editor ownership
+        run: node tests/gens_capture_lab_ownership_port.test.cjs

@@ -6,6 +6,7 @@ import {COMBAT_LAB_SOURCE_V1} from '../assets/gensrpg/capture/combat-lab-engine-
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const lab=process.argv[2] && resolve(process.argv[2]);
+const media=process.argv[4]&&resolve(process.argv[4]);
 const output=resolve(process.argv[3] || join(root,'_site/capture-lab-preview'));
 if(!lab)throw new Error('Usage: node tools/build_capture_lab_preview.mjs <official-lab-checkout> [output]');
 const actual=execFileSync('git',['-C',lab,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
@@ -28,4 +29,11 @@ for(const path of ['capture-lab-preview.html','tests/fixtures/capture-lab-1v1-ex
   copy(join(root,path),join(output,path));
 }
 writeFileSync(join(output,'vendor/combat-lab/source.json'),JSON.stringify(COMBAT_LAB_SOURCE_V1,null,2)+'\n');
+if(media){
+  copy(join(root,'assets/gensrpg/core/asset-resolver-v1.js'),join(output,'assets/gensrpg/core/asset-resolver-v1.js'));
+  copy(join(root,'capture-lab-authored-preview.html'),join(output,'capture-lab-authored-preview.html'));
+  execFileSync(process.execPath,[join(root,'tools/prepare_capture_lab_authored_preview.mjs'),lab,media,output],{
+    stdio:'inherit'
+  });
+}
 console.log('Capture preview built with official Combat '+actual+' at '+output);

@@ -12,7 +12,6 @@ const labRoot = process.env.COMBAT_LAB_ROOT;
 assert.ok(labRoot, 'The official pinned Combat Lab checkout is mandatory');
 assert.equal(execFileSync('git', ['-C', labRoot, 'rev-parse', 'HEAD'], {encoding:'utf8'}).trim(), LAB_PIN);
 const bridgeUrl = pathToFileURL(path.join(root, 'assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs')).href;
-const {loadCombatLabEngineV1} = require('node:module').createRequire(__filename) ? {} : {};
 const fixture = JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/capture-lab-1v1-export-v1.json'),'utf8'));
 let enginePromise;
 async function lab(){
@@ -170,8 +169,9 @@ test('a concurrent external save must never be overwritten by a stale combat res
   const s=await setup({hp:20});s.session.move(1,0);
   const changed=s.owner.get();changed.creatureTeam[0].hp=13;changed.unrelated.gold=95;
   s.owner.replace(changed);
-  s.battle().flee();
-  await assert.rejects(async()=>{await flush();},/./).catch(()=>{});
+  const untouched=s.ticket.snapshot.sides.flatMap(side=>side.creatures)
+    .map(creature=>({instanceId:creature.instanceId,hp:creature.hp}));
+  assert.throws(()=>s.ticket.applyResult({outcome:'flee',creatures:untouched}),/Stale Capture profile/);
   assert.equal(s.owner.get().creatureTeam[0].hp,13);
   assert.equal(s.owner.get().unrelated.gold,95);
   assert.equal(s.owner.writes(),0);

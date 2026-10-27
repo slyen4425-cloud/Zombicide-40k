@@ -4,7 +4,7 @@
  function mount({host,provider,resolveEncounter,encounterAt,width=9,height=7,onBattleReturn=()=>{}}){
   if(!root.GensCaptureLabOwnershipPortV1||!root.GensCaptureBattleBridgeContractV1||!root.GensCaptureManualBattleTriggerV1||!root.GensCaptureTemporaryZoneSessionV1||!root.GensCaptureTemporaryZoneViewV1)throw new Error("Capture gameplay dependencies missing");
   const port=root.GensCaptureLabOwnershipPortV1;
-  if(!port.has()&&provider)port.install(provider);
+  if(!port.status().installed&&provider)port.install(provider);
   if(!port.compatible(["battle-trigger"]))throw new Error("Official Labo Combat provider unavailable");
   const trigger=root.GensCaptureManualBattleTriggerV1.create(port,root.GensCaptureBattleBridgeContractV1);
   let view=null,disposed=false;

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "scope": "capture-lab-staged-files",
+  "sourceBase": "6ad672e72ddd6765bcad6e5062aad40dcb09d451",
+  "productionActivated": false,
+  "authority": "Capture owns integration and persistence; imported Lab Core owns battle rules and time only when explicitly mounted",
+  "classicScripts": [
+    "assets/gensrpg/capture/battle-bridge-contract-v1.js",
+    "assets/gensrpg/capture/lab-ownership-port-v1.js",
+    "assets/gensrpg/capture/manual-battle-trigger-v1.js",
+    "assets/gensrpg/capture/temporary-encounter-source-v1.js",
+    "assets/gensrpg/capture/temporary-zone-controller-v1.js",
+    "assets/gensrpg/capture/temporary-zone-play-v1.js",
+    "assets/gensrpg/capture/temporary-zone-session-v1.js",
+    "assets/gensrpg/capture/temporary-zone-view-v1.js",
+    "assets/gensrpg/integrations/lab-sync-coordinator-v1.js",
+    "assets/gensrpg/integrations/lab-version-sync-v1.js"
+  ],
+  "captureEsmAdapters": [
+    "assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs",
+    "assets/gensrpg/capture/combat-lab-provider-v1.mjs"
+  ],
+  "capturePreviewDirectory": "assets/gensrpg/capture/preview",
+  "capturePreviewFiles": ["zone.css", "zone.mjs"],
+  "previewEntry": "capture-lab-preview.html",
+  "coverage": ["tests/gens_capture_lab_runtime_v1.test.cjs", "tests/gens_capture_lab_runtime_browser_v1.test.cjs"],
+  "remaining": ["saved-profile mapping", "persistent result application", "official animations and FX", "creature editor", "reserves"]
+}

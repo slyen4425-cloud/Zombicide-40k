@@ -218,18 +218,10 @@ const phase10ConnectedServices=[
 ];
 const phase10InertServices=['assets/gensrpg/pvp/setup-ui-v1.js'];
 const phase10Set=new Set([...phase10ConnectedServices,...phase10InertServices]);
-const captureLabOptInServices=[
-  'assets/gensrpg/capture/battle-bridge-contract-v1.js',
-  'assets/gensrpg/capture/lab-ownership-port-v1.js',
-  'assets/gensrpg/capture/manual-battle-trigger-v1.js',
-  'assets/gensrpg/capture/temporary-encounter-source-v1.js',
-  'assets/gensrpg/capture/temporary-zone-controller-v1.js',
-  'assets/gensrpg/capture/temporary-zone-play-v1.js',
-  'assets/gensrpg/capture/temporary-zone-session-v1.js',
-  'assets/gensrpg/capture/temporary-zone-view-v1.js',
-  'assets/gensrpg/integrations/lab-sync-coordinator-v1.js',
-  'assets/gensrpg/integrations/lab-version-sync-v1.js'
-];
+const captureLabInventory=JSON.parse(read('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'));
+assert.equal(captureLabInventory.schemaVersion,1);
+assert.equal(captureLabInventory.productionActivated,false);
+const captureLabOptInServices=captureLabInventory.classicScripts;
 assert.equal(new Set(captureLabOptInServices).size,10,'every staged Capture/Lab service is explicitly classified');
 for(const rel of captureLabOptInServices){
   assert.equal(allJs.includes(rel),true,'staged Capture/Lab service must exist: '+rel);

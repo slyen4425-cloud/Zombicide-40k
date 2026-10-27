@@ -18,7 +18,7 @@ export function createCaptureLabHubBattleCommandV1({
    throw new TypeError('Existing Capture Combat ownership port missing '+name);
   }
  }
- if (!engine || typeof engine.createCombatSession !== 'function') {
+ if (!engine || typeof engine.createRosterSession !== 'function') {
   throw new TypeError('Pinned official Combat Lab engine required');
  }
  let current = null, disposed = false, lastError = null;

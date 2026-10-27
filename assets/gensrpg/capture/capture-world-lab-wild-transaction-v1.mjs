@@ -7,13 +7,13 @@ import {createCaptureSavedProfileBattleBridgeV1} from './saved-profile-battle-br
 // this port stamps the missing encounter identity via that owner's save API.
 export function createCaptureWorldLabWildTransactionV1({
  activeHeroId,loadHeroState,saveHeroState,
- readWorldState,saveWorldState,consumeWildEncounter,
+ readWorldState,saveWorldState,consumeWildEncounter,worldStorageKey,
  nextEncounterId,authoredSource,readBattleSettings,
  adaptCombatExport,validateBattleResult
 }) {
  for(const [key,fn] of Object.entries({
   activeHeroId,loadHeroState,saveHeroState,
-  readWorldState,saveWorldState,consumeWildEncounter,
+  readWorldState,saveWorldState,consumeWildEncounter,worldStorageKey,
   nextEncounterId,readBattleSettings,adaptCombatExport,validateBattleResult
  })) {
   if(typeof fn!=='function')throw new TypeError('Capture owner requires '+key);
@@ -36,6 +36,8 @@ export function createCaptureWorldLabWildTransactionV1({
 
  function prepareWild(creatureId){
   if(pending)throw new Error('Capture wild encounter already pending');
+  const key=name(worldStorageKey());
+  if(!key)throw new TypeError('Capture World owner storage key is required');
   const requested=name(creatureId),world=readWorldState(),last=world?.last;
   if(!requested||last?.type!=='wild'||name(last.creatureId)!==requested){
    throw new TypeError('Capture World has no matching live wild encounter');
@@ -58,6 +60,7 @@ export function createCaptureWorldLabWildTransactionV1({
   });
   let identityCommitted=!!name(last.encounterId);
   const readEncounter=()=>{
+   if(name(worldStorageKey())!==key)return null;
    const live=readWorldState();
    const encounter=live?.last;
    if(!identityCommitted && encounter?.type==='wild' &&
@@ -75,7 +78,7 @@ export function createCaptureWorldLabWildTransactionV1({
   });
   const ticket=bridge.prepareEncounter();
   const latest=readWorldState();
-  if(worldIdentity(latest,latest?.last)!==originalIdentity){
+  if(name(worldStorageKey())!==key||worldIdentity(latest,latest?.last)!==originalIdentity){
    throw new Error('Stale Capture world: wild encounter changed during preparation');
   }
   if(!identityCommitted){
@@ -85,7 +88,7 @@ export function createCaptureWorldLabWildTransactionV1({
    identityCommitted=true;
   }
   const live=readWorldState();
-  if(live?.last?.type!=='wild'||name(live.last.creatureId)!==requested ||
+  if(name(worldStorageKey())!==key||live?.last?.type!=='wild'||name(live.last.creatureId)!==requested ||
      live.last.encounterId!==encounterId ||
      name(live.locationId)!==name(world.locationId)){
    throw new Error('Capture World did not commit the original wild identity');
@@ -113,16 +116,24 @@ export function createCaptureWorldLabWildTransactionV1({
      throw new Error('A settled Capture battle cannot change its result during World commit retry');
     }
     const state=readWorldState();
-    if(state?.last?.type!=='wild'||state.last.encounterId!==encounterId||
+    if(name(worldStorageKey())!==key||state?.last?.type!=='wild'||state.last.encounterId!==encounterId||
        state.last.creatureId!==requested ||
        name(state.locationId)!==name(world.locationId)){
       throw new Error('Stale Capture World during result commit: refusing to consume another encounter');
     }
     // Only the original World owner can turn wild into resolved, refresh UI
     // and preserve the day, profile and creator-specific location.
-    consumeWildEncounter(entry.persisted.outcome==='victory'?'victory':'battle');
+    try{
+     consumeWildEncounter(entry.persisted.outcome==='victory'?'victory':'battle');
+    }catch(error){
+     // An owner can commit storage successfully and then fail during UI render.
+     // Never mask its error, but release this port if the World was consumed.
+     const afterError=readWorldState();
+     if(name(worldStorageKey())===key && afterError?.last?.type==='resolved')pending=null;
+     throw error;
+    }
     const resolved=readWorldState();
-    if(resolved?.last?.type==='wild'){
+    if(name(worldStorageKey())!==key||resolved?.last?.type!=='resolved'){
      throw new Error('Capture World owner did not consume the resolved wild encounter');
     }
     pending=null;

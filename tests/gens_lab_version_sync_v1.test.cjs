@@ -13,4 +13,8 @@ assert.throws(()=>gate.verify({...manifest,exploration:{...manifest.exploration,
 assert.throws(()=>gate.verify(manifest,{...req,combat:{protocol:2,capabilities:[]}}),/protocol/);
 assert.throws(()=>gate.verify(manifest,{...req,exploration:{protocol:1,capabilities:["unsupported"]}}),/capability/);
 assert.throws(()=>gate.verify({...manifest,combat:{...manifest.combat,capabilities:["battle-trigger","battle-trigger"]}},req),/capabilities/);
+assert.equal(gate.verifyAlignment(valid,{repository:gate.SOURCES.combat,sha,protocol:1}),true);
+assert.throws(()=>gate.verifyAlignment(valid,{repository:gate.SOURCES.combat,sha:"c".repeat(40),protocol:1}),/version drift/);
+assert.throws(()=>gate.verifyAlignment(valid,{repository:gate.SOURCES.combat,sha,protocol:2}),/protocol mismatch/);
+assert.throws(()=>gate.verifyAlignment(valid,{repository:gate.SOURCES.exploration,sha,protocol:1}),/source mismatch/);
 console.log("Lab version synchronization gate: PASS");

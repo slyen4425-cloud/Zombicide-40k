@@ -14,10 +14,10 @@
    if(!Number.isInteger(dx)||!Number.isInteger(dy)||Math.abs(dx)+Math.abs(dy)!==1)throw new TypeError("Move exactly one tile");
    const nx=x+dx,ny=y+dy;
    if(nx<0||ny<0||nx>=width||ny>=height)return Object.freeze({moved:false,reason:"boundary",state:state()});
+   const key=encounterAt(nx,ny);
+   if(key!==null&&key!==undefined&&(typeof key!=="string"||!key.trim()))throw new TypeError("Invalid encounter key");
    x=nx;y=ny;onMove(state());
-   const key=encounterAt(x,y);
    if(key!==null&&key!==undefined){
-    if(typeof key!=="string"||!key.trim())throw new TypeError("Invalid encounter key");
     const launched=encounterSource.encounter(key);
     if(launched.ready)locked=true;
     return Object.freeze({moved:true,encounter:launched,state:state()});

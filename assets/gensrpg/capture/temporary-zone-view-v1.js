@@ -21,7 +21,7 @@
   }
   function step(dx,dy){const result=session.move(dx,dy);paint();return result;}
   for(const [label,dx,dy] of [["↑",0,-1],["←",-1,0],["↓",0,1],["→",1,0]]){
-   const button=doc.createElement("button");button.type="button";button.textContent=label;button.setAttribute("aria-label","Déplacement "+label);button.style.cssText="min-width:54px;min-height:48px";button.addEventListener("click",()=>step(dx,dy));controls.appendChild(button);
+    const button=doc.createElement("button");button.type="button";button.textContent=label;button.setAttribute("aria-label","Déplacement "+label);button.style.cssText="min-width:54px;min-height:48px";button.addEventListener("click",()=>{try{step(dx,dy)}catch(error){paint();status.textContent=String(error?.message||error)}});controls.appendChild(button);
   }
   wrap.append(status,grid,controls);host.appendChild(wrap);paint();
   return Object.freeze({refresh:paint,step,dispose(){wrap.remove();}});

@@ -1,3 +1,18 @@
+# Reprise — raccord réel au runtime Combat, 27 octobre 2026
+
+- Lot C2 : premier raccord 1v1 au moteur officiel, résultat asynchrone validé une seule fois et retour à la zone provisoire. Pas de nouvelle règle de combat.
+- Base : `3738615068a87182e393360f007a8cfe1bfa4f3b` de la PR #175. START : `checkpoint/gensrpg-start-capture-lab-runtime-2026-10-27`. Branche : `work/gensrpg-capture-lab-bridge-runtime-2026-10-27`.
+- Source Combat : `main@65e21792ff74aea9862e528c8dbfdb22797b6693`, CI Laboratory `40477906275` SUCCESS. Le manifeste rc1 du dépôt est encore RED/gh-pages : ne pas le déclarer publié ni activer autoSync. Consommation des modules Core exportés à SHA fixe uniquement.
+- Propriétaires : Combat Session/Runtime/Roster/AI officiels pour les règles et le temps ; adaptateur Capture pour les identités et le cycle de vie ; Encounter Source existant pour le retour à la zone. Aucune dépendance inverse.
+- Périmètre : adaptateur et chargement de modules épinglés dans `assets/gensrpg/capture/`, retour asynchrone de `temporary-encounter-source-v1.js`, preview opt-in, tests réels Node/navigateur et workflow dédié, documentation. `index.html`, runtime historique, sauvegardes, PWA, autres modes et tous les réglages auteur restent protégés.
+- Tests prévus : chemin zone → port → véritables Core Combat → coûts/préparation/impact/KO → validation → retour automatique ; fuite, annulation, erreur, résultat tardif ou double, absence de timers après sortie, refus des formats non pris en charge ; navigateur paysage.
+- Base NON GREEN globale : Architecture `40517592344` et V114.11 `40517592320` échouent dans la reconstruction historique Capture (empreinte `17ba8e…` au lieu de `613b4a…`). Les tests ciblés du pont passent (`40517592126`). Aucun contournement ni GREEN global.
+- Implémentation : `combat-lab-provider-v1.mjs` utilise les vrais exports Combat Session/Runtime/Roster/AI, sans import Demo UI ni copie du moteur dans Git. `completion` est consommée par l'Encounter Source existant, validée par le contrat Capture puis nettoyée ; les résultats tardifs d'une session fermée sont ignorés. Le build refuse un autre SHA ou des sources Combat modifiées.
+- Tests locaux : 8 scénarios d'intégration réels PASS (préparation/impact/coût, IA, sortie, erreur de vue, refus de format, PV Capture et IDs distincts, temps zéro, résultat malformé), sentinelles existantes du pont et de la zone PASS. Preview isolée et workflow Chromium/Firefox ajoutés ; statut CI à vérifier sur le SHA final.
+- Fin du lot : diff relu, tests réels du raccord verts sur SHA exact, journal et PR de reprise. L'activation dans une partie persistante nécessite ensuite le mapping du profil et son test de sauvegarde ; la preview ne l'affirme pas. Voir `GENSRPG_CAPTURE_LAB_RUNTIME_2026-10-27.md` pour le protocole et la prochaine étape.
+
+---
+
 # CURRENT WORK — Capture / Labo Combat (27 octobre 2026)
 
 Base main: 1d8521c18374cf284303f873c1f3ae3bba91a68d. Checkpoint START: checkpoint/gensrpg-start-capture-lab-bridge-2026-10-27. Branche: work/gensrpg-capture-lab-bridge-2026-10-27.

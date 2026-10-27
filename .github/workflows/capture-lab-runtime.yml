@@ -1,0 +1,71 @@
+name: Capture official Combat runtime
+on:
+  push:
+    branches: ['work/gensrpg-capture-lab-bridge-runtime-*']
+  pull_request:
+    paths:
+      - 'assets/gensrpg/capture/combat-lab-*'
+      - 'assets/gensrpg/capture/temporary-*.js'
+      - 'assets/gensrpg/capture/preview/**'
+      - 'capture-lab-preview.html'
+      - 'tools/build_capture_lab_preview.mjs'
+      - 'tests/gens_capture_lab_runtime*.test.cjs'
+      - 'tests/fixtures/capture-lab-*'
+      - '.github/workflows/capture-lab-runtime.yml'
+permissions:
+  contents: read
+jobs:
+  real-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Resolve the single immutable Combat pin
+        id: combat
+        run: |
+          node --input-type=module - <<'JS' >> "$GITHUB_OUTPUT"
+          import {COMBAT_LAB_SOURCE_V1 as source} from './assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs';
+          console.log('sha='+source.sha);
+          JS
+      - uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
+          ref: ${{ steps.combat.outputs.sha }}
+          path: combat-lab
+          sparse-checkout: |
+            src/core
+            src/contracts
+            src/adapters/input/capture
+      - name: Test real Core, AI, result return and cleanup
+        env:
+          COMBAT_LAB_ROOT: ${{ github.workspace }}/combat-lab
+        run: node --test tests/gens_capture_lab_runtime_v1.test.cjs
+      - name: Preserve the existing boundary and zone tests
+        run: |
+          node tests/gens_capture_lab_bridge_contract.test.cjs
+          node tests/gens_capture_lab_ownership_port.test.cjs
+          node tests/gens_capture_manual_battle_trigger_v1.test.cjs
+          node tests/gens_capture_temporary_encounter_source_v1.test.cjs
+          node tests/gens_capture_temporary_zone_controller_v1.test.cjs
+          node tests/gens_capture_temporary_zone_invalid_destination_v1.test.cjs
+          node tests/gens_capture_temporary_zone_session_v1.test.cjs
+          node tests/gens_capture_hub_temporary_play_owner_v1.test.cjs
+      - name: Build isolated preview with unchanged pinned Core modules
+        run: node tools/build_capture_lab_preview.mjs combat-lab _site/capture-lab-preview
+      - name: Install browser verification
+        run: |
+          npm install --prefix /tmp/capture-lab-browser --no-save playwright@1.55.0
+          /tmp/capture-lab-browser/node_modules/.bin/playwright install --with-deps chromium firefox
+      - name: Test landscape touch in Chromium and Firefox
+        env:
+          NODE_PATH: /tmp/capture-lab-browser/node_modules
+        run: node --test tests/gens_capture_lab_runtime_browser_v1.test.cjs
+      - name: Upload reviewable standalone preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: capture-lab-preview
+          path: _site/capture-lab-preview
+          retention-days: 14

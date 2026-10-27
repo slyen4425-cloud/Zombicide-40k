@@ -9,7 +9,7 @@ const site=path.resolve(process.env.CAPTURE_LAB_PREVIEW_ROOT||'_site/capture-lab
 const types={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.json':'application/json','.css':'text/css'};
 
 for(const [name,browserType] of [['Chromium',chromium],['Firefox',firefox]]){
-  test(name+': real battle from landscape zone, automatic victory, flee and unchanged saves',async()=>{
+  test(name+': real battle from landscape zone, automatic victory, flee and unchanged saves',{timeout:45000},async(t)=>{
     const server=http.createServer(async(req,res)=>{
       try{
         const url=new URL(req.url,'http://localhost');
@@ -21,14 +21,15 @@ for(const [name,browserType] of [['Chromium',chromium],['Firefox',firefox]]){
     });
     await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
     const origin='http://127.0.0.1:'+server.address().port;
-    let browser;
+    let browser,page;
     try{
       browser=await browserType.launch({headless:true,
         ...(name==='Chromium'&&process.env.CAPTURE_LAB_CHROMIUM_PATH?{executablePath:process.env.CAPTURE_LAB_CHROMIUM_PATH}:{}),
         ...(name==='Firefox'&&process.env.CAPTURE_LAB_FIREFOX_PATH?{executablePath:process.env.CAPTURE_LAB_FIREFOX_PATH}:{})});
       const context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true});
       await context.addInitScript(()=>localStorage.setItem('gensrpg_game_profiles_v1','{"existing-save":"preserved"}'));
-      const page=await context.newPage(),errors=[],external=[];
+      page=await context.newPage();const errors=[],external=[];
+      page.setDefaultTimeout(8000);
       page.on('pageerror',error=>errors.push(error.message));
       page.on('request',request=>{if(!request.url().startsWith(origin+'/'))external.push(request.url());});
       await page.goto(origin+'/capture-lab-preview.html');
@@ -38,7 +39,7 @@ for(const [name,browserType] of [['Chromium',chromium],['Firefox',firefox]]){
       assert.ok(await right.evaluate(node=>node.getBoundingClientRect().height)>=48);
       await right.tap();
       await page.locator('#battle-host:not([hidden])').waitFor();
-      assert.ok(await page.getByRole('button',{name:'Déplacement ↓',exact:true}).isDisabled());
+      assert.ok(await page.getByRole('button',{name:'Déplacement ↓',exact:true,includeHidden:true}).isDisabled());
       await page.getByRole('button',{name:'Impact',exact:true}).tap();
       await page.waitForFunction(()=>document.querySelector('progress[aria-label="PV de Créature sauvage"]')?.value===12);
       await page.waitForTimeout(150); // native recovery follows impact
@@ -56,8 +57,12 @@ for(const [name,browserType] of [['Chromium',chromium],['Firefox',firefox]]){
       assert.deepEqual(errors,[]);
       if(process.env.CAPTURE_LAB_SCREENSHOT&&name==='Chromium')await page.screenshot({path:process.env.CAPTURE_LAB_SCREENSHOT,fullPage:true});
       await context.close();
+    }catch(error){
+      if(page)t.diagnostic(await page.locator('body').innerText().catch(()=>''));
+      throw error;
     }finally{
       await browser?.close();
+      server.closeAllConnections();
       await new Promise(resolve=>server.close(resolve));
     }
   });

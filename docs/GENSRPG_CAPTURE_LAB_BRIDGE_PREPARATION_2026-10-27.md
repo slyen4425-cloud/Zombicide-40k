@@ -23,3 +23,7 @@ Un emplacement Capture versionné (battle-provider-slot-v1.js) accueille un four
 Chaque nouvelle version du labo pourra être intégrée par un adaptateur de fournisseur séparé, avec matrice de capacités et tests. Les données de sauvegarde ne stockeront pas la version du moteur comme source de vérité. Avant activation : tests 1v1/2v2, états, ciblage, réserves, animations, export/import et smartphone paysage. Les mises à jour incompatibles devront passer par un nouveau protocole, jamais par une mutation silencieuse.
 
 Test supplémentaire : node tests/gens_capture_battle_provider_slot.test.cjs.
+
+## Décision propriétaire validée le 27 octobre
+
+Le Labo Combat doit être l'autorité du déclenchement et de l'exécution des combats Monster Capture, et de l'édition des créatures. Capture conserve le contexte de rencontre dans l'exploration, l'identité des créatures, les sauvegardes et l'application des résultats; il délègue les commandes de combat et d'édition via un port versionné. Le port `lab-ownership-port-v1.js` formalise `startEncounter`, `stopEncounter`, `editCreature`, `closeEditor` et le cycle de vie du fournisseur. Il est inerte tant qu'aucun adaptateur n'est branché. Une mise à jour du laboratoire doit être validée par protocole, version, capacités, tests et preview avant remplacement de l'adaptateur. **Aucun branchement réel ni basculement du gameplay n'a encore été réalisé.**

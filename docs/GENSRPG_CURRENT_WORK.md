@@ -1,3 +1,11 @@
+# CURRENT WORK — Capture / Labo Combat (27 octobre 2026)
+
+Base main: 1d8521c18374cf284303f873c1f3ae3bba91a68d. Checkpoint START: checkpoint/gensrpg-start-capture-lab-bridge-2026-10-27. Branche: work/gensrpg-capture-lab-bridge-2026-10-27.
+
+Lot 01: contrat inerte et tests; pas de chargement en production, pas de changement de gameplay ni de sauvegarde. Prochaine étape: CI, audit des APIs du labo, enrichissement du contrat. Voir docs/GENSRPG_CAPTURE_LAB_BRIDGE_PREPARATION_2026-10-27.md.
+
+---
+
 # GenSrpG — CURRENT_WORK officiel (23 octobre 2026)
 
 ## Incident isolé — Dungeon dupliqué dans la liste Univers RPG (24 octobre, diagnostic en cours)

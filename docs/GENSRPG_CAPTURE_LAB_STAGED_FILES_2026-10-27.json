@@ -19,7 +19,8 @@
   "captureEsmAdapters": [
     "assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs",
     "assets/gensrpg/capture/combat-lab-provider-v1.mjs",
-    "assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs"
+    "assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs",
+    "assets/gensrpg/capture/combat-lab-authored-source-v1.mjs"
   ],
   "capturePreviewDirectory": "assets/gensrpg/capture/preview",
   "capturePreviewFiles": [
@@ -30,7 +31,8 @@
   "coverage": [
     "tests/gens_capture_lab_runtime_v1.test.cjs",
     "tests/gens_capture_lab_runtime_browser_v1.test.cjs",
-    "tests/gens_capture_saved_profile_bridge_v1.test.cjs"
+    "tests/gens_capture_saved_profile_bridge_v1.test.cjs",
+    "tests/gens_capture_lab_authored_source_v1.test.cjs"
   ],
   "remaining": [
     "saved-profile runtime mounting in real game",
@@ -39,5 +41,6 @@
     "creature editor",
     "reserves"
   ],
-  "stagedSavedProfileMapping": true
+  "stagedSavedProfileMapping": true,
+  "authoredSourceLabPin": "65e21792ff74aea9862e528c8dbfdb22797b6693"
 }

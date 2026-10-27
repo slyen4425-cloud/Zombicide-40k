@@ -178,6 +178,24 @@ test('a concurrent external save must never be overwritten by a stale combat res
   s.stop();
 });
 
+test('official resolver refuses altered HP, abilities or opposing identity before Core starts',async()=>{
+  const s=await setup({hp:18});
+  const original=structuredClone(s.ticket.snapshot);
+  assert.deepEqual(s.ticket.resolveBattle({encounterId:s.ticket.encounterId,snapshot:original}).actorIds,
+    ['player','opponent']);
+  for(const change of [
+    x=>x.sides[0].creatures[0].hp=1,
+    x=>x.sides[0].creatures[0].abilityIds=['altered'],
+    x=>x.sides[1].creatures[0].instanceId='replacement',
+    x=>x.sides[1].creatures[0].maxHp=999
+  ]){
+    const forged=structuredClone(original);change(forged);
+    assert.throws(()=>s.ticket.resolveBattle({encounterId:s.ticket.encounterId,snapshot:forged}),/snapshot/);
+  }
+  assert.equal(s.owner.writes(),0);
+  s.stop();
+});
+
 test('profile or authored mismatches are rejected, never mapped by guesswork',async()=>{
   const {engine,makeBridge}=await lab();const owner=persistedCaptureOwner();
   const opts={activeHeroId:()=>owner.heroId,loadHeroState:owner.load,saveHeroState:owner.save,

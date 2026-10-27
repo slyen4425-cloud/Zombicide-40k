@@ -88,6 +88,22 @@ if(absentPack.length)throw new Error('Authored sprite absent from pinned visual 
 const folder=join(output,'assets/gensrpg/capture/preview/generated');
 mkdirSync(folder,{recursive:true});
 writeFileSync(join(folder,'authored-export.json'),JSON.stringify(author.exported,null,2)+'\n');
+// Review-only browser replay of the exact Lab author inputs. The browser
+// calls the official exporter again with the real saved Capture World ticket;
+// the prebuilt authored-export remains a separate deterministic cross-check.
+writeFileSync(join(folder,'author-inputs.json'),JSON.stringify({
+ schema:'gensrpg-capture-lab-author-inputs-v1',
+ sourceSha:COMBAT_LAB_SOURCE_V1.sha,
+ statRegistry:data('data/capture/monster-capture-stat-registry.v1.json'),
+ configuredSkillDrafts:[...byId.values()],
+ creatureTransfers:settings.authoredCreatureFiles.map(data),
+ battleSettings:{
+  arenaId:settings.battle.arenaId,
+  skillSpeedMultiplier:settings.battle.skillSpeedMultiplier,
+  combatRules:settings.battle.combatRules
+ }
+})+'\n');
+
 writeFileSync(join(folder,'global-visual-assets.json'),JSON.stringify(visualCatalog)+'\n');
 writeFileSync(join(folder,'source.json'),JSON.stringify({
  schema:'gensrpg-capture-lab-authored-preview-source-v1',

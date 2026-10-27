@@ -44,6 +44,10 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    assert.ok(imgs.some(x=>x.id==='pack:capture:creature-loup-volcanique-player-01'));
    assert.ok(imgs.some(x=>x.id==='pack:capture:creature-voltige-opponent-01'));
    for(const row of imgs)assert.match(row.src,/\/[0-9a-f]{40}\/assets\/library\/capture\/creatures\//);
+   await page.waitForFunction(()=>[...document.querySelectorAll('img[data-author-asset-id]')].every(img=>img.complete&&img.naturalWidth>0),null,{timeout:12000});
+   if(process.env.CAPTURE_LAB_SCREENSHOT_AUTHORED&&name==='Chromium'){
+    await page.screenshot({path:process.env.CAPTURE_LAB_SCREENSHOT_AUTHORED,fullPage:true});
+   }
    for(const button of ['Griffe','Boule de feu','Fuir'])assert.ok(await page.getByRole('button',{name:button,exact:true}).count()>=1,button);
    const playerBar=page.getByRole('progressbar',{name:'PV de Loup volcanique'});
    assert.equal(await playerBar.getAttribute('max'),'150','real authored Lab HP, never historical 18/24');

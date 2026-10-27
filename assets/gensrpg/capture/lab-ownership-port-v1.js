@@ -8,7 +8,7 @@
   let provider=null,session=null,editor=null;
   function validate(next){
     if(!next||next.protocol!==PROTOCOL)throw new TypeError("Unsupported Capture lab protocol");
-    if(typeof next.version!=="string"||!/^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z.-]+)?$/.test(next.version))throw new TypeError("Provider semantic version required");
+    if(typeof next.version!=="string"||!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$/.test(next.version))throw new TypeError("Provider semantic version required");
     if(!Array.isArray(next.capabilities)||next.capabilities.some(x=>typeof x!=="string"||!x)||new Set(next.capabilities).size!==next.capabilities.length)throw new TypeError("Provider capabilities must be unique strings");
     for(const method of REQUIRED)if(typeof next[method]!=="function")throw new TypeError("Provider missing "+method);
   }

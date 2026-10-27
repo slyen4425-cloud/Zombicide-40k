@@ -11,6 +11,7 @@ on:
       - 'tests/gens_capture_temporary_zone_session_v1.test.cjs'
       - 'assets/gensrpg/capture/temporary-zone-controller-v1.js'
       - 'tests/gens_capture_temporary_zone_controller_v1.test.cjs'
+      - 'tests/gens_capture_temporary_zone_invalid_destination_v1.test.cjs'
       - 'assets/gensrpg/capture/temporary-encounter-source-v1.js'
       - 'tests/gens_capture_temporary_encounter_source_v1.test.cjs'
       - 'assets/gensrpg/capture/manual-battle-trigger-v1.js'
@@ -46,6 +47,8 @@ jobs:
         run: node tests/gens_capture_temporary_encounter_source_v1.test.cjs
       - name: Validate temporary zone movement and encounter lock
         run: node tests/gens_capture_temporary_zone_controller_v1.test.cjs
+      - name: Validate invalid encounter destinations
+        run: node tests/gens_capture_temporary_zone_invalid_destination_v1.test.cjs
       - name: Validate temporary playable session flow
         run: node tests/gens_capture_temporary_zone_session_v1.test.cjs
       - name: Syntax-check temporary zone view

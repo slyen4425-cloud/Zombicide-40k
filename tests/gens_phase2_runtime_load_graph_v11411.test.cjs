@@ -100,14 +100,15 @@ assert.deepEqual(previewInjected,injected.filter(x=>x!=='assets/gensrpg/core/sto
 assert.equal(injected.at(-2),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap entry must stay immediately before final Shell authority');
 assert.equal(injected.at(-1),'assets/gensrpg/shell/module-launch-final-authority-v1.js','final Shell authority must stay final');
 
-const productionDirect=[
+const buildPrelude=require('./helpers/gens_profile_repair_build_prelude_20261027.cjs');
+const productionDirect=buildPrelude.includeBuildPrelude([
   ...rawDirect.filter(x=>![
     'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
     'assets/gensrpg/shell/module-launch-final-authority-v1.js'
   ].includes(x)),
   ...injected
-];
-assert.equal(new Set(productionDirect).size,91,'production composition includes the single synchronous Capture combat core owner; dynamic module-entry traversal unchanged');
+],workflow);
+assert.equal(new Set(productionDirect).size,92,'production composition includes the explicit profile repair prelude and the single Capture combat core owner');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,112,'R11 must retire exactly 17 previously disabled named script tags from 129');
@@ -154,6 +155,7 @@ const phase3Entrypoints=[
 ];
 const phase3Set=new Set(phase3Entrypoints);
 const phase4ConnectedServices=[
+  'assets/gensrpg/core/dungeon-profile-auto-repair-v1.js',
   'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/gensrpg/core/storage-v1.js',
   'assets/gensrpg/core/dice-v1.js',
@@ -216,12 +218,30 @@ const phase10ConnectedServices=[
 ];
 const phase10InertServices=['assets/gensrpg/pvp/setup-ui-v1.js'];
 const phase10Set=new Set([...phase10ConnectedServices,...phase10InertServices]);
-const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel)&&!phase10Set.has(rel)&&!phase12Set.has(rel));
+const captureLabOptInServices=[
+  'assets/gensrpg/capture/battle-bridge-contract-v1.js',
+  'assets/gensrpg/capture/lab-ownership-port-v1.js',
+  'assets/gensrpg/capture/manual-battle-trigger-v1.js',
+  'assets/gensrpg/capture/temporary-encounter-source-v1.js',
+  'assets/gensrpg/capture/temporary-zone-controller-v1.js',
+  'assets/gensrpg/capture/temporary-zone-play-v1.js',
+  'assets/gensrpg/capture/temporary-zone-session-v1.js',
+  'assets/gensrpg/capture/temporary-zone-view-v1.js',
+  'assets/gensrpg/integrations/lab-sync-coordinator-v1.js',
+  'assets/gensrpg/integrations/lab-version-sync-v1.js'
+];
+assert.equal(new Set(captureLabOptInServices).size,10,'every staged Capture/Lab service is explicitly classified');
+for(const rel of captureLabOptInServices){
+  assert.equal(allJs.includes(rel),true,'staged Capture/Lab service must exist: '+rel);
+  assert.equal(reachable.has(rel),false,'staged Capture/Lab service must not enter production implicitly: '+rel);
+}
+const captureLabOptInSet=new Set(captureLabOptInServices);
+const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel)&&!phase10Set.has(rel)&&!phase12Set.has(rel)&&!captureLabOptInSet.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,148,'physical JS inventory includes S3 inert PvP setup UI in addition to S2 services');
+assert.equal(allJs.length,159,'physical inventory includes the ten explicit Capture/Lab services and the Core profile repair prelude');
 assert.equal(phase2Js.length,82,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
-assert.equal(reachable.size,134,'production-reachable JS graph must include the physical Capture team, roster and combat core owners');
+assert.equal(reachable.size,135,'production graph must include the profile repair prelude and existing Capture owners');
 const connectedPhaseEntrypoints=new Set([
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',

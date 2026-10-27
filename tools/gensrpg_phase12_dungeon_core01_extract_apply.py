@@ -406,7 +406,8 @@ def verify():
                     expected_after=current_blob
                 elif path==PATH_GRAPH:
                     newer=((89,146,132) if current_blob.startswith("dab5") else
-                           (91,148,134) if current_blob in ("260f00aa179c939f35188ca854f9875971ce8a7b","cc355585acab68958bd349ffcf8fa0de4eab9b0d",profile_upload["toBlob"]) else (90,147,133))
+                           (92,159,135) if current_blob==profile_upload["toBlob"] else
+                           (91,148,134) if current_blob in ("260f00aa179c939f35188ca854f9875971ce8a7b","cc355585acab68958bd349ffcf8fa0de4eab9b0d") else (90,147,133))
                     for former,current in (
                         ("size,64,",f"size,{newer[0]},"),
                         ("allJs.length,121,",f"allJs.length,{newer[1]},"),
@@ -418,11 +419,12 @@ def verify():
                 # script composition. The verified current graph is pinned by
                 # this exact index blob and by the live graph assertions.
                 import re
+                physical_upload=current_blob==profile_upload["toBlob"]
                 for expression,value in (
-                    (r"size,\d+,'production composition", "size,91,'production composition"),
-                    (r"allJs\.length,\d+,", "allJs.length,148,"),
+                    (r"size,\d+,'production composition", "size,92,'production composition" if physical_upload else "size,91,'production composition"),
+                    (r"allJs\.length,\d+,", "allJs.length,159," if physical_upload else "allJs.length,148,"),
                     (r"phase2Js\.length,\d+,", "phase2Js.length,82,"),
-                    (r"reachable\.size,\d+,", "reachable.size,134,")
+                    (r"reachable\.size,\d+,", "reachable.size,135," if physical_upload else "reachable.size,134,")
                 ):
                     if re.search(expression,expected_after):
                         expected_after,n=re.subn(expression,value,expected_after)

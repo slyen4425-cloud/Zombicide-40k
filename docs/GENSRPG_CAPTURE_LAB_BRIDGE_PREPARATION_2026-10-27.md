@@ -16,13 +16,11 @@ Le fichier assets/gensrpg/capture/battle-bridge-contract-v1.js expose snapshot(i
 ## Test
 node tests/gens_capture_lab_bridge_contract.test.cjs
 
-## Mise à jour continue du labo
+## Mise à jour continue du labo — autorité unique
 
-Un emplacement Capture versionné (battle-provider-slot-v1.js) accueille un fournisseur externe uniquement par register(provider). Le fournisseur annonce protocol=1, sa version et ses capabilities. Capture refuse un protocole incompatible, une capacité absente ou un second fournisseur concurrent. begin(snapshot, requiredCapabilities) utilise le contrat de données, crée une session, puis start. end() garantit stop et dispose ; unregister() interdit le retrait d'un moteur encore actif. Aucun chargement automatique : l'ancien combat reste actif.
+Le seul point d'accueil est `lab-ownership-port-v1.js`. Un fournisseur annonce `protocol`, `version` et `capabilities`. Capture refuse un second fournisseur concurrent, interdit le remplacement pendant un combat ou une édition et exige le cycle de vie explicite. Les évolutions du laboratoire passent par un adaptateur unique, une matrice de compatibilité et des tests avant activation. Le contrat `battle-bridge-contract-v1.js` est uniquement un validateur de données, pas un second orchestrateur.
 
-Chaque nouvelle version du labo pourra être intégrée par un adaptateur de fournisseur séparé, avec matrice de capacités et tests. Les données de sauvegarde ne stockeront pas la version du moteur comme source de vérité. Avant activation : tests 1v1/2v2, états, ciblage, réserves, animations, export/import et smartphone paysage. Les mises à jour incompatibles devront passer par un nouveau protocole, jamais par une mutation silencieuse.
-
-Test supplémentaire : node tests/gens_capture_battle_provider_slot.test.cjs.
+Le prototype concurrent `battle-provider-slot-v1.js` a été retiré avant activation pour éliminer une double autorité potentielle. Aucun branchement réel, migration de sauvegarde ou basculement de combat n'est effectué dans ce lot.
 
 ## Décision propriétaire validée le 27 octobre
 

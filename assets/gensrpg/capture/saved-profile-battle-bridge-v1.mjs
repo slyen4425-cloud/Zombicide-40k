@@ -88,15 +88,28 @@ export function createCaptureSavedProfileBattleBridgeV1({
     return Object.freeze({
       encounterId:expected.encounterId,snapshot,
       resolveBattle(context) {
+        const sides=context?.snapshot?.sides;
         if (context?.encounterId !== expected.encounterId ||
-            context?.snapshot?.sides?.[0]?.active?.[0] !== uid ||
-            context?.snapshot?.sides?.[1]?.active?.[0] !== wildId) {
-          throw new TypeError('Official Combat resolver received a different Capture encounter');
+            !Array.isArray(sides) || sides.length !== 2 ||
+            sides.some((side,i)=>{
+              const canonical=snapshot.sides[i],creature=side?.creatures?.[0],reference=canonical.creatures[0];
+              return !Array.isArray(side?.creatures) || side.creatures.length !== 1 ||
+                !Array.isArray(side?.active) || side.active.length !== 1 ||
+                side.active[0] !== canonical.active[0] || !creature ||
+                creature.instanceId !== reference.instanceId ||
+                creature.creatureId !== reference.creatureId ||
+                creature.hp !== reference.hp || creature.maxHp !== reference.maxHp ||
+                !exactSkills(creature.abilityIds,reference.abilityIds);
+            })) {
+          throw new TypeError('Official Combat resolver received a different Capture encounter snapshot');
         }
         return Object.freeze({nativeCombatSource:nativeSource,actorIds});
       },
       applyResult(rawResult) {
         if (applied) return false;
+        if (text(activeHeroId()) !== heroId) {
+          throw new Error('Stale Capture active hero: refusing to persist a different session');
+        }
         const result=validateBattleResult(rawResult,snapshot);
         if (result.outcome === 'cancelled') return false;
         const live=readEncounter();

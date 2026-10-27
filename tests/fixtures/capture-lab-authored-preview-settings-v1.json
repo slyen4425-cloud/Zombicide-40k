@@ -1,0 +1,30 @@
+{
+  "schema": "gensrpg-capture-authored-preview-settings-v1",
+  "version": 1,
+  "battle": {
+    "encounterId": "preview-loup-voltige",
+    "player": {
+      "instanceId": "companion-instance",
+      "creatureId": "crea-loup"
+    },
+    "opponent": {
+      "instanceId": "wild-preview-instance",
+      "creatureId": "crea_voltik"
+    },
+    "arenaId": "forest",
+    "skillSpeedMultiplier": 0.5,
+    "combatRules": {
+      "schema": "capture-combat-rules-editor-draft-v1",
+      "maxEnergy": 10,
+      "initialEnergy": 10,
+      "energyChargeAmount": 1,
+      "energyChargeIntervalMs": 2000,
+      "movementEnergyPerStep": 1,
+      "chargeTimeModifierPct": 0
+    }
+  },
+  "authoredCreatureFiles": [
+    "data/capture/showcase/crea-loup.capture-creature-transfer-v1.json",
+    "data/capture/showcase/crea_voltik.capture-creature-transfer-v1.json"
+  ]
+}

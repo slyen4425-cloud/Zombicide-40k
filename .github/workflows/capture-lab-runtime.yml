@@ -13,6 +13,10 @@ on:
       - 'tests/gens_capture_saved_profile_bridge_v1.test.cjs'
       - 'tests/gens_capture_lab_authored_source_v1.test.cjs'
       - 'tests/gens_capture_lab_pinned_assets_v1.test.cjs'
+      - 'tests/gens_capture_lab_authored_browser_v1.test.cjs'
+      - 'capture-lab-authored-preview.html'
+      - 'tools/prepare_capture_lab_authored_preview.mjs'
+      - 'tests/fixtures/capture-lab-authored-preview-settings-v1.json'
       - 'assets/gensrpg/core/asset-resolver-v1.js'
       - 'docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'
       - 'tests/fixtures/capture-lab-*'
@@ -94,7 +98,7 @@ jobs:
           node tests/gens_capture_temporary_zone_session_v1.test.cjs
           node tests/gens_capture_hub_temporary_play_owner_v1.test.cjs
       - name: Build isolated preview with unchanged pinned Core modules
-        run: node tools/build_capture_lab_preview.mjs combat-lab _site/capture-lab-preview
+        run: node tools/build_capture_lab_preview.mjs combat-lab _site/capture-lab-preview combat-assets
       - name: Install browser verification
         run: |
           npm install --prefix /tmp/capture-lab-browser --no-save playwright@1.55.0
@@ -102,7 +106,10 @@ jobs:
       - name: Test landscape touch in Chromium and Firefox
         env:
           NODE_PATH: /tmp/capture-lab-browser/node_modules
-        run: node --test tests/gens_capture_lab_runtime_browser_v1.test.cjs
+          CAPTURE_LAB_SCREENSHOT_AUTHORED: _site/capture-lab-preview/authored-preview.png
+        run: |
+          node --test tests/gens_capture_lab_runtime_browser_v1.test.cjs
+          node --test tests/gens_capture_lab_authored_browser_v1.test.cjs
       - name: Upload reviewable standalone preview
         uses: actions/upload-artifact@v4
         with:

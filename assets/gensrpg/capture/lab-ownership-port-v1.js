@@ -13,7 +13,8 @@
     for(const method of REQUIRED)if(typeof next[method]!=="function")throw new TypeError("Provider missing "+method);
   }
   function install(next){validate(next);if(provider&&provider!==next)throw new Error("Provider already installed");provider=next;return true;}
-  function has(capability){return !!provider&&provider.capabilities.includes(capability);}\n  function compatible(requested){return !!provider&&Array.isArray(requested)&&requested.every(capability=>has(capability));}
+  function has(capability){return !!provider&&provider.capabilities.includes(capability);}
+  function compatible(requested){return !!provider&&Array.isArray(requested)&&requested.every(capability=>has(capability));}
   function startEncounter(context){
     if(!provider||!has("battle-trigger")||session||editor)return null;
     if(!context||typeof context!=="object"||typeof context.encounterId!=="string"||!context.encounterId)throw new TypeError("Encounter ID required");

@@ -71,13 +71,20 @@ const staged=JSON.parse(read('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.j
 assert.equal(staged.schemaVersion,1);assert.equal(staged.productionActivated,false);
 const stagedCaptureScripts=staged.classicScripts.filter(file=>file.startsWith('assets/gensrpg/capture/'));
 assert.equal(stagedCaptureScripts.length,8,'every opt-in Capture script must be audited');
-assert.equal(staged.captureEsmAdapters.length,5,'two Lab Combat adapters, one saved-profile mapper, one authored-source consumer and one live World port: all opt-in');
+assert.equal(staged.captureEsmAdapters.length,6,'Capture opt-in consumers: two Lab adapters, profile, authored source, World ticket and Hub command');
 assert.equal(staged.authoredSourceLabPin,'65e21792ff74aea9862e528c8dbfdb22797b6693');
 assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/combat-lab-authored-source-v1.mjs'));
 assert.ok(staged.coverage.includes('tests/gens_capture_lab_authored_source_v1.test.cjs'));
 const authored=read('assets/gensrpg/capture/combat-lab-authored-source-v1.mjs');
 assert.match(authored,/exportEditorDrafts\(/,'native Combat Lab exporter is the sole skill/creature projection');
 assert.doesNotMatch(authored,/localStorage|createCombatSession|createCombatRuntime|startSkill|location\.reload/,'catalog consumer owns neither storage nor combat execution');
+assert.equal(staged.stagedHubBattleCommand,true);
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs'));
+const hubCommand=read('assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs');
+assert.match(hubCommand,/combatPort\.startEncounter\(/,'Hub must use the existing single Combat owner');
+assert.match(hubCommand,/transaction\.prepareWild\(/,'Hub must read the original World ticket');
+assert.doesNotMatch(hubCommand,/localStorage|window\.|createCombatSession|createCombatRuntime|startSkill|location\.reload/,
+  'Hub cannot own another storage, global old combat override, clock or damage rules');
 assert.equal(staged.stagedWorldWildTransaction,true);
 assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs'));
 assert.ok(staged.coverage.includes('tests/gens_capture_world_lab_wild_transaction_v1.test.cjs'));

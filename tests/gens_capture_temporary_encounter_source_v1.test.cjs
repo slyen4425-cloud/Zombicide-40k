@@ -1,0 +1,17 @@
+"use strict";
+const assert=require("node:assert/strict"),fs=require("node:fs"),vm=require("node:vm"),ctx={};
+for(const f of ["battle-bridge-contract-v1.js","lab-ownership-port-v1.js","manual-battle-trigger-v1.js","temporary-encounter-source-v1.js"])vm.runInNewContext(fs.readFileSync("assets/gensrpg/capture/"+f,"utf8"),ctx);
+const port=ctx.GensCaptureLabOwnershipPortV1;
+const snapshot={sides:[{creatures:[{instanceId:"h",hp:10,maxHp:10}]},{creatures:[{instanceId:"e",hp:8,maxHp:8}]}]};
+let stopped=0,disposed=0;const provider={protocol:1,version:"1.0.0",capabilities:["battle-trigger"],createBattle:x=>({x}),startBattle:()=>{},stopBattle:()=>stopped++,disposeBattle:()=>disposed++,openCreatureEditor:()=>({}),closeCreatureEditor:()=>{}};
+const trigger=ctx.GensCaptureManualBattleTriggerV1.create(port,ctx.GensCaptureBattleBridgeContractV1);
+const returns=[],source=ctx.GensCaptureTemporaryEncounterSourceV1.create({trigger,resolveEncounter:key=>({encounterId:key,snapshot}),onReturn:value=>returns.push(value)});
+assert.equal(source.encounter("wild-1").ready,false);assert.equal(source.status().pending,false);
+port.install(provider);assert.equal(source.encounter("wild-1").ready,true);
+assert.throws(()=>source.encounter("wild-2"),/already pending/);
+const completed=source.complete({outcome:"victory",creatures:[{instanceId:"h",hp:10},{instanceId:"e",hp:0}]});
+assert.equal(completed.persist,false);assert.equal(returns.length,1);assert.equal(returns[0].encounterId,"wild-1");
+assert.equal(source.status().pending,false);assert.equal(source.encounter("wild-2").ready,true);
+assert.equal(source.leave(),true);assert.equal(returns[1].cancelled,true);
+assert.equal(stopped,2);assert.equal(disposed,2);port.uninstall(provider);
+console.log("Temporary encounter source: PASS");

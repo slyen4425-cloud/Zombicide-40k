@@ -120,8 +120,8 @@ else if(mode==='--verify-certified-history'){
   assert(restoreR09(prepared.html)===source,'historical rollback R10→R09 is not byte-identical');
   const active=fs.readFileSync(MODULE,'utf8');
   new vm.Script(active,{filename:MODULE});
-  const currentFunctions=[...active.matchAll(/^function (capture[A-Za-z0-9_$]+)\\s*\\(/gm)].map(m=>m[1]);
-  const originalFunctions=[...prepared.extracted.matchAll(/^function (capture[A-Za-z0-9_$]+)\\s*\\(/gm)].map(m=>m[1]);
+  const currentFunctions=[...active.matchAll(/^function (capture[A-Za-z0-9_$]+)\s*\(/gm)].map(m=>m[1]);
+  const originalFunctions=[...prepared.extracted.matchAll(/^function (capture[A-Za-z0-9_$]+)\s*\(/gm)].map(m=>m[1]);
   assert(currentFunctions.join('|')===originalFunctions.join('|')&&currentFunctions.length===90,
    'active button owner must keep all 90 historical Capture declarations under one owner');
   process.stdout.write('R10 historic source and exact rollback verified; modern active owner independently parsed\\n');
@@ -139,11 +139,11 @@ else if(mode==='--verify'){
   // preserve exactly one declaration of every Capture function in original order.
   const active=fs.readFileSync(MODULE,'utf8');
   new vm.Script(active,{filename:MODULE});
-  const origFunctions=[...expected.extracted.matchAll(/^function (capture[A-Za-z0-9_$]+)\\s*\\(/gm)].map(m=>m[1]);
-  const liveFunctions=[...active.matchAll(/^function (capture[A-Za-z0-9_$]+)\\s*\\(/gm)].map(m=>m[1]);
+  const origFunctions=[...expected.extracted.matchAll(/^function (capture[A-Za-z0-9_$]+)\s*\(/gm)].map(m=>m[1]);
+  const liveFunctions=[...active.matchAll(/^function (capture[A-Za-z0-9_$]+)\s*\(/gm)].map(m=>m[1]);
   assert(origFunctions.length===90&&origFunctions.join('|')===liveFunctions.join('|'),
     'active Capture owner has duplicate/missing/reordered methods');
-  assert(!/window\\.captureStartWildBattle\\s*=/.test(active),
+  assert(!/window\.captureStartWildBattle\s*=/.test(active),
     'active owner must not add a second global button override');
   assert(restoreR09()===source,'byte exact R09 rollback');
   const sw=fs.readFileSync('service-worker.js','utf8');

@@ -8,10 +8,18 @@ const OLD_INDEX='4dbe3314d5048f2def404ed674498c0670c04fc1', NEW_INDEX='b8ef8dcb4
 const NEW_MODULE='c6ea3c101a6861b99f8bc064d2d1fec874e7266b';
 const ORIGINAL_SHA='f2d5f954fc8e678bbf6819d2358964f47c61783f';
 const MODULE='assets/gensrpg/capture/legacy-monolith-functions-v1.js';
+// Historical R10 proof is a certified test fixture, never a second runtime.
+const R10_OWNER_SNAPSHOT='tests/fixtures/gensrpg-phase12-r10-capture-original-owner-20261018.js.txt';
 const HOOK='<script src="'+MODULE+'"></script>\n';
 const RANGES='150747,150871;150872,151262;151264,151662;151663,151792;151793,153454;153455,154580;154667,154860;154861,155224;155225,155641;155642,155934;155935,156432;156433,156635;156636,157238;157239,158014;158015,158386;158387,158591;158592,159106;159107,159501;159502,159802;159803,159980;159981,160175;160176,160376;160377,160603;160604,160734;160735,160927;160928,161142;161143,161704;161707,161862;161863,161980;161981,162814;162815,163226;163227,163509;163510,164227;164228,164657;164658,165131;165132,165545;165548,167494;167497,167908;167909,168579;168580,169518;169519,169642;169643,170293;170294,171052;171053,177824;177825,178671;178672,178809;178810,179588;179590,180059;180060,180485;180486,181077;181078,182452;182453,182956;182957,185238;185239,186676;186677,186883;186884,187460;187462,187883;187884,188013;188014,188117;188118,191514;191515,191692;191693,192969;192970,193227;193228,193663;193664,193934;193935,195301;195302,195821;195823,196652;196653,197580;197581,197914;197915,202583;202584,203702;203703,204606;204607,204680;204681,204985;204987,205147;205148,206043;206044,206260;206261,207292;207320,207627;207628,207769;207770,208565;208566,208650;210367,211304;211305,211571;211572,211664;213651,214601;214602,214667;214668,215111;245696,246434'.split(';').map(x=>x.split(',').map(Number));
 const HEADER='/* GenSrpG — Phase12 R10 : déclarations historiques Capture du grand script R09.\n * Propriétaire : Capture du dépôt principal ; aucune initialisation partagée déplacée.\n * Chargement classique synchrone avant le script historique ; fonctions inchangées.\n */\n';
 function assert(ok,msg){if(!ok)throw Error('R10 guard: '+msg)}
+function certifiedHistoricalOwner(){
+  const original=fs.readFileSync(R10_OWNER_SNAPSHOT,'utf8');
+  assert(blob(original)===NEW_MODULE,'R10 historical owner fixture has a different blob');
+  return original;
+}
+
 function blob(s){const b=Buffer.from(s,'utf8');return crypto.createHash('sha1').update('blob '+b.length+'\0').update(b).digest('hex')}
 function scripts(s){return [...s.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)]}
 function select(body){
@@ -48,12 +56,12 @@ function forward(source){
   assert(Buffer.byteLength(extracted,'utf8')===61943&&blob(extracted)===NEW_MODULE,'expected Capture owner mismatched');
   return {html,extracted};
 }
-function restoreR09(){
-  const current=fs.readFileSync('index.html','utf8');
+function restoreR09(inputIndex=null){
+  const current=inputIndex===null?fs.readFileSync('index.html','utf8'):inputIndex;
   const html=['f257bd9e193648dc62cd8a40d510831debfe045a','b0d0c73292e4374fc4f23e86edffad5c1b39a7b6','b5a39705baf83e9782695c14bede8b9dde6ddf52','dab5be5dedfa56c49d76d40a4cb824a0098903f0','9f35eb833a6ede4b91399854f19bb9bef59f45ab','260f00aa179c939f35188ca854f9875971ce8a7b'].includes(blob(current))
     ? cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{maxBuffer:10*1024*1024}).toString('utf8')
     : current;
-  const extracted=fs.readFileSync(MODULE,'utf8');
+  const extracted=certifiedHistoricalOwner();
   assert(blob(html)===NEW_INDEX&&blob(extracted)===NEW_MODULE,'not the R10 certified files');
   assert(html.includes(HOOK),'Capture loader missing');
   const sans=html.replace(HOOK,'');
@@ -102,6 +110,22 @@ else if(mode==='--apply'){
   assert(blob(restoreR09())===OLD_INDEX,'rollback mismatch after applying');
   process.stdout.write('R10 applied: 90 functions Capture, R09 rollback exact\n');
 }
+else if(mode==='--verify-certified-history'){
+  // Run against the source extraction's own immutable parent, NOT the modern
+  // product index that has gone through multiple later certified extractions.
+  // This proves full bidirectional R09↔R10 bytes without freezing gameplay.
+  const source=cp.execFileSync('git',['show',ORIGINAL_SHA+':index.html'],{maxBuffer:10*1024*1024}).toString('utf8');
+  const prepared=forward(source);
+  assert(certifiedHistoricalOwner()===prepared.extracted,'R10 archive must be byte-identical to the original extraction');
+  assert(restoreR09(prepared.html)===source,'historical rollback R10→R09 is not byte-identical');
+  const active=fs.readFileSync(MODULE,'utf8');
+  new vm.Script(active,{filename:MODULE});
+  const currentFunctions=[...active.matchAll(/^function (capture[A-Za-z0-9_$]+)\s*\(/gm)].map(m=>m[1]);
+  const originalFunctions=[...prepared.extracted.matchAll(/^function (capture[A-Za-z0-9_$]+)\s*\(/gm)].map(m=>m[1]);
+  assert(currentFunctions.join('|')===originalFunctions.join('|')&&currentFunctions.length===90,
+   'active button owner must keep all 90 historical Capture declarations under one owner');
+  process.stdout.write('R10 historic source and exact rollback verified; modern active owner independently parsed\\n');
+}
 else if(mode==='--verify'){
   const source=cp.execFileSync('git',['show',ORIGINAL_SHA+':index.html'],{maxBuffer:10*1024*1024}).toString('utf8');
   const expected=forward(source);
@@ -110,7 +134,17 @@ else if(mode==='--verify'){
     ? cp.execFileSync(process.execPath,['tools/gensrpg_phase12_r11_retired_scripts.cjs','--restore-r10'],{maxBuffer:10*1024*1024}).toString('utf8')
     : current;
   assert(currentR10===expected.html,'index differs from exactly expected R10 source');
-  assert(fs.readFileSync(MODULE,'utf8')===expected.extracted,'Capture module differs');
+  assert(certifiedHistoricalOwner()===expected.extracted,'R10 fixture differs from certified extraction');
+  // The live owner may evolve in a separately reviewed migration; it must
+  // preserve exactly one declaration of every Capture function in original order.
+  const active=fs.readFileSync(MODULE,'utf8');
+  new vm.Script(active,{filename:MODULE});
+  const origFunctions=[...expected.extracted.matchAll(/^function (capture[A-Za-z0-9_$]+)\s*\(/gm)].map(m=>m[1]);
+  const liveFunctions=[...active.matchAll(/^function (capture[A-Za-z0-9_$]+)\s*\(/gm)].map(m=>m[1]);
+  assert(origFunctions.length===90&&origFunctions.join('|')===liveFunctions.join('|'),
+    'active Capture owner has duplicate/missing/reordered methods');
+  assert(!/window\.captureStartWildBattle\s*=/.test(active),
+    'active owner must not add a second global button override');
   assert(restoreR09()===source,'byte exact R09 rollback');
   const sw=fs.readFileSync('service-worker.js','utf8');
   assert(sw.includes('./'+MODULE)&&sw.includes('-r10-capture-main-functions'),'PWA missing');

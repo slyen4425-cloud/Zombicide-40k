@@ -93,14 +93,18 @@ try {
       const encounterId='clairiere-'+(++encounterNumber);
       return {encounterId,snapshot:{sides:exported.actors.map((actor,i)=>{
         const creature=exported.creatures.find(c=>c.id===actor.creatureId);
-        const instanceId=i===0?'companion-instance':encounterId+'-wild';
+        const instanceId=authored?(i===0?metadata.playerInstanceId:metadata.opponentInstanceId):
+          (i===0?'companion-instance':encounterId+'-wild');
         return {name:actor.displayName,active:[instanceId],creatures:[{instanceId,creatureId:creature.id,
           hp:i===0?companionHp:(source.fighters[i].initialHp??source.fighters[i].maxHp),
           maxHp:creature.combat.maxHp,abilityIds:[...source.skillIdsByActor[actor.actorId]]}]};
       })}};
     },
     onBattleReturn(event){
-      if(event.result)companionHp=event.result.creatures.find(c=>c.instanceId==='companion-instance').hp;
+      if(event.result){
+        const localId=authored?metadata.playerInstanceId:'companion-instance';
+        companionHp=event.result.creatures.find(c=>c.instanceId===localId).hp;
+      }
       notice.textContent=event.error?'Combat interrompu. Tu peux reprendre tes déplacements.':
         event.cancelled?'Rencontre interrompue.':
         ({victory:'Victoire ! La clairière est de nouveau accessible.',defeat:'Ton compagnon est KO. Recharge la partie d’essai pour recommencer.',flee:'Tu as fui. Tu peux reprendre tes déplacements.'}[event.result.outcome]);

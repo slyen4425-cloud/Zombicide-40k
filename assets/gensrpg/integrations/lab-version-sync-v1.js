@@ -31,6 +31,15 @@
     }
     return Object.freeze({schema:1,combat,exploration});
   }
+  function verifyAlignment(verified,explorationDependency){
+    if(!verified||!verified.combat||!verified.exploration)throw new TypeError("Verified versions required");
+    if(!explorationDependency||typeof explorationDependency!=="object")throw new TypeError("Exploration combat dependency required");
+    if(explorationDependency.repository!==SOURCES.combat)throw new TypeError("Exploration combat source mismatch");
+    if(!SHA.test(explorationDependency.sha||""))throw new TypeError("Exploration combat SHA required");
+    if(explorationDependency.sha.toLowerCase()!==verified.combat.sha)throw new TypeError("Combat version drift between Exploration and GenS RPG");
+    if(explorationDependency.protocol!==verified.combat.protocol)throw new TypeError("Exploration combat protocol mismatch");
+    return true;
+  }
   function changed(current,next){return ["combat","exploration"].filter(kind=>current[kind].sha!==next[kind].sha);}
-  root.GensLabVersionSyncV1=Object.freeze({SOURCES,verify,changed});
+  root.GensLabVersionSyncV1=Object.freeze({SOURCES,verify,verifyAlignment,changed});
 })(typeof window!=="undefined"?window:globalThis);

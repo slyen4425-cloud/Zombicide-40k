@@ -71,7 +71,15 @@ const staged=JSON.parse(read('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.j
 assert.equal(staged.schemaVersion,1);assert.equal(staged.productionActivated,false);
 const stagedCaptureScripts=staged.classicScripts.filter(file=>file.startsWith('assets/gensrpg/capture/'));
 assert.equal(stagedCaptureScripts.length,8,'every opt-in Capture script must be audited');
-assert.equal(staged.captureEsmAdapters.length,2,'two explicit adapters consume the external Lab Core');
+assert.equal(staged.captureEsmAdapters.length,3,'two Combat adapters plus one Capture-owned, non-activated saved-profile mapper');
+assert.equal(staged.stagedSavedProfileMapping,true);
+assert.equal(staged.productionActivated,false,'the saved-profile adapter is not a second live combat owner');
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs'));
+assert.ok(staged.coverage.includes('tests/gens_capture_saved_profile_bridge_v1.test.cjs'));
+const savedBridge=read('assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs');
+assert.match(savedBridge,/function createCaptureSavedProfileBattleBridgeV1/);
+assert.match(savedBridge,/saveHeroState\(heroId,next\)/,'only the injected Capture owner writes the saved battle HP');
+assert.doesNotMatch(savedBridge,/localStorage|createCombatSession|createCombatRuntime|startSkill/,'mapping owns neither storage nor combat execution');
 for(const file of [...staged.classicScripts,...staged.captureEsmAdapters]){
   assert.ok(fs.statSync(path.join(root,file)).isFile(),file+' must exist');
   assert.equal(read('index.html').includes('src="'+file),false,file+' must not silently load in the saved game');

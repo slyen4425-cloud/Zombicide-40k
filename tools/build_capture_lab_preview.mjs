@@ -32,6 +32,20 @@ writeFileSync(join(output,'vendor/combat-lab/source.json'),JSON.stringify(COMBAT
 if(media){
   copy(join(root,'assets/gensrpg/core/asset-resolver-v1.js'),join(output,'assets/gensrpg/core/asset-resolver-v1.js'));
   copy(join(root,'capture-lab-authored-preview.html'),join(output,'capture-lab-authored-preview.html'));
+  // Isolated integration preview executes the unchanged physical Capture World
+  // and Team owners; all Core+author dependencies are copied from pinned Lab.
+  for(const name of [
+    'capture-lab-saved-hub-preview.html',
+    'assets/gensrpg/capture/preview/saved-hub-owners.js',
+    'assets/gensrpg/capture/preview/saved-hub.mjs',
+    'assets/gensrpg/capture/world-exploration-v1.js',
+    'assets/gensrpg/capture/team-roster-v1.js',
+    'assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs',
+    'assets/gensrpg/capture/combat-lab-authored-source-v1.mjs',
+    'assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs',
+    'assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs'
+  ])copy(join(root,name),join(output,name));
+
   execFileSync(process.execPath,[join(root,'tools/prepare_capture_lab_authored_preview.mjs'),lab,media,output],{
     stdio:'inherit'
   });

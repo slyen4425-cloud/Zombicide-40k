@@ -40,6 +40,21 @@
     if(explorationDependency.protocol!==verified.combat.protocol)throw new TypeError("Exploration combat protocol mismatch");
     return true;
   }
+  /* A pilot manifest is metadata, not an installable stable release. */
+  function verifyCombatRelease(release){
+    if(!release||release.schemaVersion!==1)throw new TypeError("Unsupported Combat release schema");
+    if(release.status!=="published-green")throw new TypeError("Combat release not published GREEN");
+    if(!release.validation||release.validation.ci!=="GREEN")throw new TypeError("Combat release CI not GREEN");
+    if(!release.code||release.code.repository!==SOURCES.combat||release.code.sourceBranch!=="main"||
+       !SHA.test(release.code.commit||""))throw new TypeError("Combat code must pin validated main SHA");
+    if(!release.assets||release.assets.repository!==SOURCES.combat||
+       !SHA.test(release.assets.commit||"")||
+       typeof release.assets.catalog!=="string"||!release.assets.catalog.trim())
+      throw new TypeError("Combat assets must pin catalog and SHA");
+    if(!release.consumer||release.consumer.autoSync!==true)throw new TypeError("Combat release sync not enabled");
+    return Object.freeze({codeSha:release.code.commit.toLowerCase(),assetsSha:release.assets.commit.toLowerCase(),
+      catalog:release.assets.catalog});
+  }
   function changed(current,next){return ["combat","exploration"].filter(kind=>current[kind].sha!==next[kind].sha);}
-  root.GensLabVersionSyncV1=Object.freeze({SOURCES,verify,verifyAlignment,changed});
+  root.GensLabVersionSyncV1=Object.freeze({SOURCES,verify,verifyAlignment,verifyCombatRelease,changed});
 })(typeof window!=="undefined"?window:globalThis);

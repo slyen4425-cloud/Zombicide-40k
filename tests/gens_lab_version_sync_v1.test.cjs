@@ -1,0 +1,16 @@
+"use strict";
+const assert=require("node:assert/strict"),fs=require("node:fs"),vm=require("node:vm");
+const ctx={};vm.runInNewContext(fs.readFileSync("assets/gensrpg/integrations/lab-version-sync-v1.js","utf8"),ctx);
+const gate=ctx.GensLabVersionSyncV1,sha="a".repeat(40);
+const manifest={schema:1,combat:{repository:gate.SOURCES.combat,sha,version:"1.0.0",protocol:1,capabilities:["battle-trigger","creature-editor"]},exploration:{repository:gate.SOURCES.exploration,sha:"b".repeat(40),version:"1.0.0",protocol:1,capabilities:["encounters"]}};
+const req={combat:{protocol:1,capabilities:["battle-trigger"]},exploration:{protocol:1,capabilities:["encounters"]}};
+const valid=gate.verify(manifest,req);
+assert.equal(valid.combat.sha,sha);
+assert.equal(gate.changed(valid,valid).length,0);
+assert.equal(gate.changed(valid,gate.verify({...manifest,combat:{...manifest.combat,sha:"c".repeat(40)}},req)).join(","),"combat");
+assert.throws(()=>gate.verify({...manifest,combat:{...manifest.combat,sha:"main"}},req),/SHA/);
+assert.throws(()=>gate.verify({...manifest,exploration:{...manifest.exploration,repository:gate.SOURCES.combat}},req),/repository/);
+assert.throws(()=>gate.verify(manifest,{...req,combat:{protocol:2,capabilities:[]}}),/protocol/);
+assert.throws(()=>gate.verify(manifest,{...req,exploration:{protocol:1,capabilities:["unsupported"]}}),/capability/);
+assert.throws(()=>gate.verify({...manifest,combat:{...manifest.combat,capabilities:["battle-trigger","battle-trigger"]}},req),/capabilities/);
+console.log("Lab version synchronization gate: PASS");

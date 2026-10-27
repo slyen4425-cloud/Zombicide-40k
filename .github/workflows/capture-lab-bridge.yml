@@ -5,6 +5,8 @@ on:
       - 'work/gensrpg-capture-lab-bridge-*'
   pull_request:
     paths:
+      - 'assets/gensrpg/integrations/lab-sync-coordinator-v1.js'
+      - 'tests/gens_lab_sync_coordinator_v1.test.cjs'
       - 'assets/gensrpg/integrations/lab-version-sync-v1.js'
       - 'tests/gens_lab_version_sync_v1.test.cjs'
       - 'assets/gensrpg/capture/battle-bridge-contract-v1.js'
@@ -26,3 +28,5 @@ jobs:
 
       - name: Validate pinned Combat and Exploration versions
         run: node tests/gens_lab_version_sync_v1.test.cjs
+      - name: Validate two-lab update coordinator
+        run: node tests/gens_lab_sync_coordinator_v1.test.cjs

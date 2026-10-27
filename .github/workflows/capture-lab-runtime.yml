@@ -106,6 +106,7 @@ jobs:
       - name: Test landscape touch in Chromium and Firefox
         env:
           NODE_PATH: /tmp/capture-lab-browser/node_modules
+          CAPTURE_LAB_SCREENSHOT_AUTHORED: _site/capture-lab-preview/authored-preview.png
         run: |
           node --test tests/gens_capture_lab_runtime_browser_v1.test.cjs
           node --test tests/gens_capture_lab_authored_browser_v1.test.cjs

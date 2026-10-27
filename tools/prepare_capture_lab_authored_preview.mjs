@@ -96,6 +96,8 @@ writeFileSync(join(folder,'source.json'),JSON.stringify({
  assetsRepository:ref.authoredAssetsRepository,
  encounter:settings.battle.encounterId,
  expectedPlayer:settings.battle.player.creatureId,
- expectedOpponent:settings.battle.opponent.creatureId
+ expectedOpponent:settings.battle.opponent.creatureId,
+ playerInstanceId:settings.battle.player.instanceId,
+ opponentInstanceId:settings.battle.opponent.instanceId
 },null,2)+'\n');
 console.log(JSON.stringify({authored:author.exported.actors.map(x=>x.creatureId),assets:referenced.size,source:COMBAT_LAB_SOURCE_V1.sha,visuals:ref.authoredAssetsPin}));

@@ -4,7 +4,10 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const {execFileSync}=require('node:child_process');
-const PIN=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'),'utf8')).authoredAssetsPin;
+const authority=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'),'utf8'));
+const PIN=authority.authoredAssetsPin;
+const APPROVED_REPO=authority.authoredAssetsRepository;
+const opts=(catalog,assetId,commit=PIN,usage='capture')=>({catalog,assetId,commit,approvedCommit:PIN,approvedRepository:APPROVED_REPO,usage});
 assert.match(PIN,/^[a-f0-9]{40}$/);
 const labRoot=process.env.COMBAT_ASSETS_ROOT;
 assert.ok(labRoot,'Pinned Lab visual catalog checkout required');
@@ -24,7 +27,7 @@ const cases=[
  ash.cast.assetId,ash.travel.assetId,ash.impact.assetId
 ];
 for(const id of cases){
- const a=api.resolveCaptureLabAsset({catalog,assetId:id,commit:PIN});
+ const a=api.resolveCaptureLabAsset(opts(catalog,id));
  const original=catalog.assets.find(x=>x.id===id);
  assert.ok(original,id+' must exist in pinned official catalog');
  assert.equal(a.assetId,id);
@@ -36,24 +39,24 @@ for(const id of cases){
  assert.ok(a.url.includes('/'+PIN+'/'),'always immutable SHA, never a moving branch');
  assert.equal(a.url.includes('/global-assets/'),false);
 }
-const atlas=api.resolveCaptureLabAsset({catalog,assetId:loup.movement.assetId,commit:PIN});
+const atlas=api.resolveCaptureLabAsset(opts(catalog,loup.movement.assetId));
 assert.equal(atlas.frameCount,12);
 assert.equal(atlas.frameMs,80);
 assert.equal(atlas.format,'sprite-strip');
 const before=JSON.stringify(catalog);
-api.resolveCaptureLabAsset({catalog,assetId:loup.back.assetId,commit:PIN});
+api.resolveCaptureLabAsset(opts(catalog,loup.back.assetId));
 assert.equal(JSON.stringify(catalog),before,'Core must never change author catalog');
 assert.equal(api.dungeonHeroPath('dungeon_aldren'),'assets/dungeon/creatures/dng_aldren.png');
 assert.equal(api.resolve({module:'dungeon',kind:'item',id:'dng_bow'}),'assets/dungeon/creatures/dng_bow.png');
 
-const valid=(id)=>api.resolveCaptureLabAsset({catalog,assetId:id,commit:PIN});
+const valid=(id)=>api.resolveCaptureLabAsset(opts(catalog,id));
 assert.throws(()=>valid('pack:capture:missing'),/unknown|missing/i);
-assert.throws(()=>api.resolveCaptureLabAsset({catalog,assetId:cases[0],commit:'global-assets'}),/commit|sha/i);
-assert.throws(()=>api.resolveCaptureLabAsset({catalog,assetId:cases[0],commit:'f'.repeat(40)}),/approved|pinned|commit|sha/i);
-assert.throws(()=>api.resolveCaptureLabAsset({catalog,assetId:'core:arena-forest-01',commit:PIN,usage:'dungeon'}),/usage|Capture|compatible/i);
-assert.throws(()=>api.resolveCaptureLabAsset({catalog:{...catalog,storage:{...catalog.storage,repository:'other/fork'}},assetId:cases[0],commit:PIN}),/repository/i);
-assert.throws(()=>api.resolveCaptureLabAsset({catalog:{...catalog,assets:[...catalog.assets,catalog.assets.find(x=>x.id===cases[0])]},assetId:cases[0],commit:PIN}),/duplicate/i);
-assert.throws(()=>api.resolveCaptureLabAsset({catalog:{...catalog,assets:catalog.assets.map(x=>x.id===cases[0]?{...x,resource:{...x.resource,file:'../secrets'}}:x)},assetId:cases[0],commit:PIN}),/path|file|unsafe/i);
-assert.throws(()=>api.resolveCaptureLabAsset({catalog:{...catalog,assets:catalog.assets.map(x=>x.id===cases[0]?{...x,resource:{...x.resource,file:'capture/nope.svg'}}:x)},assetId:cases[0],commit:PIN}),/mime|format|extension/i);
-assert.throws(()=>api.resolveCaptureLabAsset({catalog:{...catalog,assets:catalog.assets.map(x=>x.id===cases[0]?{...x,compatibility:{uses:['editor']}}:x)},assetId:cases[0],commit:PIN}),/compatible|capture|usage/i);
+assert.throws(()=>api.resolveCaptureLabAsset(opts(catalog,cases[0],'global-assets')),/commit|sha/i);
+assert.throws(()=>api.resolveCaptureLabAsset(opts(catalog,cases[0],'f'.repeat(40))),/approved|pinned|commit|sha/i);
+assert.throws(()=>api.resolveCaptureLabAsset(opts(catalog,'core:arena-forest-01',PIN,'dungeon')),/usage|Capture|compatible/i);
+assert.throws(()=>api.resolveCaptureLabAsset(opts({...catalog,storage:{...catalog.storage,repository:'other/fork'}},cases[0])),/repository/i);
+assert.throws(()=>api.resolveCaptureLabAsset(opts({...catalog,assets:[...catalog.assets,catalog.assets.find(x=>x.id===cases[0])]},cases[0])),/duplicate/i);
+assert.throws(()=>api.resolveCaptureLabAsset(opts({...catalog,assets:catalog.assets.map(x=>x.id===cases[0]?{...x,resource:{...x.resource,file:'../secrets'}}:x)},cases[0])),/path|file|unsafe/i);
+assert.throws(()=>api.resolveCaptureLabAsset(opts({...catalog,assets:catalog.assets.map(x=>x.id===cases[0]?{...x,resource:{...x.resource,file:'capture/nope.svg'}}:x)},cases[0])),/mime|format|extension/i);
+assert.throws(()=>api.resolveCaptureLabAsset(opts({...catalog,assets:catalog.assets.map(x=>x.id===cases[0]?{...x,compatibility:{uses:['editor']}}:x)},cases[0])),/compatible|capture|usage/i);
 console.log(JSON.stringify({scenario:'Pinned Lab author visuals via sole Core asset resolver',assetsVerified:cases.length,commit:PIN,atlasFrames:atlas.frameCount,unchangedDungeon:true}));

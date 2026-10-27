@@ -1,3 +1,13 @@
+# Capture → vrai profil sauvegardé : pont vers Combat officiel (27 octobre 2026)
+
+- **BASE** : `2bc5efbf9e75ce2d1c4b6b08eb14ca4e3c28d29a` (intégration #176 dans #175). **START préalable** : `checkpoint/gensrpg-start-capture-profile-combat-2026-10-27`. **Branche de lot** : `work/gensrpg-capture-lab-bridge-runtime-profile-2026-10-27`. Dernier checkpoint ciblé : `checkpoint/gensrpg-capture-bfcache-green-2026-10-27`, sans promesse de GREEN global.
+- **But fonctionnel** : construire l'entrée/sortie 1v1 depuis le véritable état Capture `creatureTeam` enregistré avec `uid`, `entityId`, `hp`, `maxHp` et `activeAbilityIds`, en utilisant les exports authentiques du Labo Combat épinglés et les propriétaires Capture existants de lecture et de sauvegarde. Préserver identité d'instance et toutes les données non concernées, appliquer les PV une seule fois après validation, refuser les formats non pris en charge et les modifications concurrentes.
+- **Autorité** : Capture owns le profil, le ticket de rencontre et l'application de résultat via `saveHeroCreatureState` ; Core Combat importé seul calcule combat/énergie/temps/IA. Adaptateur de données pur, explicite et injecté, aucun nouveau moteur ni stockage. Les PV courants viennent du profil. Ne pas reproduire le constructeur des règles et ne pas inventer de correspondances catalogue.
+- **Périmètre** : nouveau module `assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs`, tests de vrai parcours avec le moteur Lab épinglé et vraies fonctions de sauvegarde Capture, workflow ciblé et documentation. **Protégés** : `index.html`, producteurs historiques des profils, monde Capture, Combat Core, profils utilisateurs existants, `service-worker.js`, Shell, autres trois modes.
+- **RED/GREEN** : test initial de l'absence du raccord ; puis conversion fiable → native Core (combat réel) → résultat → commit `saveHeroCreatureState` → reload, fuite/défaite, KO, altération en cours de combat, résultat tardif/double, IDs incompatibles, équipe avec réserve non prise en charge. CI officielle et non-interférence à SHA final ; le **montage dans la vraie partie persistante reste interdit** avant validation du catalogue auteur et du slot Shell approprié (§26 si `index.html` nécessaire).
+
+---
+
 # Capture — cycle de vie BFCache de la preview (27 octobre 2026)
 
 - BASE et START : `26fe94831e9b294c4b480d3d35d019db5cf9c918`, `checkpoint/gensrpg-start-capture-bfcache-lifecycle-2026-10-27` ; branche `work/gensrpg-capture-lab-bridge-runtime-bfcache-2026-10-27`, intégration cible PR #176. Dernier checkpoint validé du moteur 1v1 : `checkpoint/gensrpg-capture-lab-runtime-c2-green-2026-10-27` (limité à C2).

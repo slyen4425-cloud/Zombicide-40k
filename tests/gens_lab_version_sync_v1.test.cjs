@@ -17,4 +17,10 @@ assert.equal(gate.verifyAlignment(valid,{repository:gate.SOURCES.combat,sha,prot
 assert.throws(()=>gate.verifyAlignment(valid,{repository:gate.SOURCES.combat,sha:"c".repeat(40),protocol:1}),/version drift/);
 assert.throws(()=>gate.verifyAlignment(valid,{repository:gate.SOURCES.combat,sha,protocol:2}),/protocol mismatch/);
 assert.throws(()=>gate.verifyAlignment(valid,{repository:gate.SOURCES.exploration,sha,protocol:1}),/source mismatch/);
+const release={schemaVersion:1,status:"published-green",code:{repository:gate.SOURCES.combat,sourceBranch:"main",commit:sha},assets:{repository:gate.SOURCES.combat,commit:"d".repeat(40),catalog:"catalog.json"},consumer:{autoSync:true},validation:{ci:"GREEN"}};
+assert.equal(gate.verifyCombatRelease(release).codeSha,sha);
+assert.throws(()=>gate.verifyCombatRelease({...release,status:"blocked-ci-not-published"}),/not published/);
+assert.throws(()=>gate.verifyCombatRelease({...release,validation:{ci:"RED"}}),/not GREEN/);
+assert.throws(()=>gate.verifyCombatRelease({...release,code:{...release.code,sourceBranch:"gh-pages"}}),/main SHA/);
+assert.throws(()=>gate.verifyCombatRelease({...release,consumer:{autoSync:false}}),/not enabled/);
 console.log("Lab version synchronization gate: PASS");

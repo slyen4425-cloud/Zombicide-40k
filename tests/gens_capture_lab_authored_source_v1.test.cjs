@@ -90,10 +90,15 @@ test('official authored transfers yield native playable 1v1, five authored skill
  ]);
  assert.ok(source.fighterConfigs['crea-loup'].maxHp>0);
  assert.ok(source.fighterConfigs.crea_voltik.maxHp>0);
- assert.equal(source.skillPresentations.cap_fire_special_1.visual.travel.assetId,
-   'pack:capture:sprite-projectile-earth-01');
- assert.equal(source.skillPresentations.lib_flame_bite.visual.impact.assetId,
-   'pack:capture:sprite-impact-physical-01');
+ const authoredTravel=read('data/capture/showcase/cap_fire_special_1.capture-skill-transfer-v1.json')
+   .draft.presentation.visual.travel.assetId;
+ const authoredImpact=read('data/capture/showcase/lib_flame_bite.capture-skill-transfer-v1.json')
+   .draft.presentation.visual.impact.assetId;
+ assert.equal(source.skillPresentations.cap_fire_special_1.visual.travel.assetId,authoredTravel,
+   'the player projectile must be the unmodified authored skill asset');
+ assert.equal(source.skillPresentations.lib_flame_bite.visual.impact.assetId,authoredImpact,
+   'the impact must not silently revert to an older test-specific animation');
+ assert.match(authoredTravel,/^pack:capture:/);
  assert.equal(source.roster.teams.player.activeMemberId,'ci_player_original');
  assert.equal(source.roster.teams.opponent.activeMemberId,'wild:42');
  assert.equal(out.exported.schema,'capture-combat-export-v1');

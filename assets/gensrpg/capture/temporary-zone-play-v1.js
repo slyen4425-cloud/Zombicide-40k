@@ -6,7 +6,10 @@
   const port=root.GensCaptureLabOwnershipPortV1;
   const installedHere=!port.status().installed&&!!provider;
   if(installedHere)port.install(provider);
-  if(!port.compatible(["battle-trigger"]))throw new Error("Official Labo Combat provider unavailable");
+  if(!port.compatible(["battle-trigger"])){
+    if(installedHere)port.uninstall(provider);
+    throw new Error("Official Labo Combat provider unavailable");
+  }
   const trigger=root.GensCaptureManualBattleTriggerV1.create(port,root.GensCaptureBattleBridgeContractV1);
   let view=null,disposed=false;
   let session;

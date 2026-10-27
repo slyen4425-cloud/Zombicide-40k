@@ -512,3 +512,20 @@ La règle « une branche/un lot » et l'autorité unique restent applicables. Ce
 **Matrice de compatibilité :** enregistrer pour chaque version GenS RPG les SHA validés du Labo Combat et du Labo Exploration, les versions de leurs contrats et les tests/preview correspondants. Vérifier la compatibilité croisée lorsqu'une évolution Combat affecte Exploration et Monster Capture. Si l'un des contrôles échoue, conserver la dernière combinaison GREEN sans masquer les erreurs ni modifier artificiellement les sentinelles. Prévoir une preview sur smartphone paysage et le retour arrière avant promotion.
 
 **État au 27 octobre 2026 :** cette section fixe la politique cible; elle ne signifie ni que les deux branches directrices sont déjà fusionnées sur `main`, ni que les mécanismes de synchronisation sont implémentés ou activés. La mise en œuvre reste soumise aux validations et aux PR propres à chaque dépôt.
+
+
+## Mode développement continu — directive permanente
+
+Reprends le dernier chantier et respecte toutes les chartes du projet.
+
+Travaille de manière autonome jusqu'à atteindre l'objectif fonctionnel demandé.
+
+- Enchaîne les opérations : lecture, développement, tests, corrections, CI et checkpoints.
+- Ne t'arrête pas après une simple création de branche, un commit ou un test.
+- En cas d'échec, recherche la cause et tente une correction conforme à la charte.
+- Aucun masquage, aucune rustine, aucune double autorité.
+- Ne produis pas de micro-rapports ni de demandes de confirmation inutiles.
+- Fais un retour uniquement lorsque le résultat est vérifié ou lorsqu'un obstacle réel exige mon intervention.
+- Ne déclare jamais GREEN sans preuve des tests requis.
+
+**Une étape technique n'est pas une fin de mission.**

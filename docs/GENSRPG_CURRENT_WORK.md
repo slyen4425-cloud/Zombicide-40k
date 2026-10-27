@@ -1,3 +1,17 @@
+# Correction CI — reconstruction du HTML fourni le 25 octobre (27 octobre 2026)
+
+- Base : `6ad672e72ddd6765bcad6e5062aad40dcb09d451`, START `checkpoint/gensrpg-start-capture-history-upload-2026-10-27`, branche `work/gensrpg-capture-lab-bridge-history-2026-10-27` ; suivi #177.
+- Défaut reproduit en CI : Architecture `40524108599`, `restoreHistoricalHubSnapshot` reçoit le blob actuel `17ba8e6f1faf6f8a0be8cdec68c4515d538ff646` (1 722 603 octets), introduit par le remplacement manuel `9691784`. Le helper Chrome ne reconnaît que le prédécesseur `cc355585acab68958bd349ffcf8fa0de4eab9b0d` (1 721 700 octets) et laisse passer la nouvelle source sans inversion.
+- Lot test-only : établir la différence et sa provenance, projeter uniquement la source actuelle certifiée vers la source historique certifiée avant le rollback Chrome. Préserver toutes les empreintes historiques et les assertions fonctionnelles ; inconnu ou altération = refus.
+- Fichiers permis : adaptateur historique de source, fixture d'inversion bornée si nécessaire, test RED/GREEN du chemin, workflow de vérification et journal. `index.html`, runtime, règles de combat, PWA et sauvegardes protégés. Pas de chargement de cette projection en production.
+- Tests : échec initial, inversion exacte et aller-retour, refus d'altération, Architecture entière + navigateurs, Armor V114.11 lorsque déclenchée, Tactical, Firefox et raccord Combat sur le même SHA. Aucun GREEN global avant réussite des contrôles.
+- Sources utilisateur retrouvées : `index.html(2)(1).txt` (25/10, 1 722 603 octets, blob `17ba8e6f1faf6f8a0be8cdec68c4515d538ff646`) et `f4.zip` / `index.html(1).txt` (24/10, 1 721 700 octets, blob `cc355585acab68958bd349ffcf8fa0de4eab9b0d`). Les deux correspondent exactement aux états Git. Aucun transfert du grand HTML depuis le connecteur GitHub.
+- Diff démontré : seul le corps de `saveGameProfiles` change (+903 octets) pour préserver une sauvegarde des doublons identiques et refuser les IDs conflictuels. L'inversion de test doit précéder le rollback Chrome. La fixture garde les corps exacts, tailles et empreintes ; le roundtrip reproduit tous les octets du runtime actuel.
+- Périmètre de vérification précisé avant publication : les deux sentinelles Phase 2 de source physique épinglent désormais le blob utilisateur actuel ; leurs tables historiques restent immuables. Le vérificateur Core01 conserve ses comptes et ajoute seulement la taille/empreinte du même upload certifié. Les chemins Node et Python réutilisent un seul propriétaire de projection.
+- RED reproduit au START : test Hub et nouveau test de projection refusent `17ba8e…`. GREEN local : quatre nouveaux scénarios (roundtrip exact, sous-processus, refus de projection d'une altération, sauvegarde profils préservée), Hub Capture, frontière Survie et Core Combat historiques. Validation globale en cours sur la branche dédiée.
+
+---
+
 # Reprise — raccord réel au runtime Combat, 27 octobre 2026
 
 - Lot C2 : premier raccord 1v1 au moteur officiel, résultat asynchrone validé une seule fois et retour à la zone provisoire. Pas de nouvelle règle de combat.

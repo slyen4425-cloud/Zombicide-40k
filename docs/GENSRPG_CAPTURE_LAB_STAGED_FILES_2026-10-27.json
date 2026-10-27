@@ -20,7 +20,8 @@
     "assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs",
     "assets/gensrpg/capture/combat-lab-provider-v1.mjs",
     "assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs",
-    "assets/gensrpg/capture/combat-lab-authored-source-v1.mjs"
+    "assets/gensrpg/capture/combat-lab-authored-source-v1.mjs",
+    "assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs"
   ],
   "capturePreviewDirectory": "assets/gensrpg/capture/preview",
   "capturePreviewFiles": [
@@ -33,7 +34,8 @@
     "tests/gens_capture_lab_runtime_browser_v1.test.cjs",
     "tests/gens_capture_saved_profile_bridge_v1.test.cjs",
     "tests/gens_capture_lab_authored_source_v1.test.cjs",
-    "tests/gens_capture_lab_pinned_assets_v1.test.cjs"
+    "tests/gens_capture_lab_pinned_assets_v1.test.cjs",
+    "tests/gens_capture_world_lab_wild_transaction_v1.test.cjs"
   ],
   "remaining": [
     "saved-profile runtime mounting in real game",
@@ -45,5 +47,6 @@
   "stagedSavedProfileMapping": true,
   "authoredSourceLabPin": "65e21792ff74aea9862e528c8dbfdb22797b6693",
   "authoredAssetsPin": "b3d46ce6f2639ebb59a2984aeff17f97cbcd7377",
-  "authoredAssetsRepository": "slyen4425-cloud/GenSrpg_labo_combat_dynamique"
+  "authoredAssetsRepository": "slyen4425-cloud/GenSrpg_labo_combat_dynamique",
+  "stagedWorldWildTransaction": true
 }

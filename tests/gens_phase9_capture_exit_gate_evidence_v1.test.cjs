@@ -71,13 +71,22 @@ const staged=JSON.parse(read('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.j
 assert.equal(staged.schemaVersion,1);assert.equal(staged.productionActivated,false);
 const stagedCaptureScripts=staged.classicScripts.filter(file=>file.startsWith('assets/gensrpg/capture/'));
 assert.equal(stagedCaptureScripts.length,8,'every opt-in Capture script must be audited');
-assert.equal(staged.captureEsmAdapters.length,4,'two Lab Combat adapters, one saved-profile mapper and one authored-source consumer: all opt-in');
+assert.equal(staged.captureEsmAdapters.length,5,'two Lab Combat adapters, one saved-profile mapper, one authored-source consumer and one live World port: all opt-in');
 assert.equal(staged.authoredSourceLabPin,'65e21792ff74aea9862e528c8dbfdb22797b6693');
 assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/combat-lab-authored-source-v1.mjs'));
 assert.ok(staged.coverage.includes('tests/gens_capture_lab_authored_source_v1.test.cjs'));
 const authored=read('assets/gensrpg/capture/combat-lab-authored-source-v1.mjs');
 assert.match(authored,/exportEditorDrafts\(/,'native Combat Lab exporter is the sole skill/creature projection');
 assert.doesNotMatch(authored,/localStorage|createCombatSession|createCombatRuntime|startSkill|location\.reload/,'catalog consumer owns neither storage nor combat execution');
+assert.equal(staged.stagedWorldWildTransaction,true);
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs'));
+assert.ok(staged.coverage.includes('tests/gens_capture_world_lab_wild_transaction_v1.test.cjs'));
+const wildPort=read('assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs');
+assert.match(wildPort,/saveWorldState\(/,'only the original Capture world owner persists the stamped wild identity');
+assert.match(wildPort,/consumeWildEncounter\(/,'only the original Capture world owner consumes the encounter after battle');
+assert.match(wildPort,/createCaptureSavedProfileBattleBridgeV1\(/,'hero saving delegated to existing Capture saved-profile owner');
+assert.doesNotMatch(wildPort,/localStorage|createCombatRuntime|createCombatSession|startSkill|location\.reload|window\./,
+  'Wild port cannot own another storage, clock, rules engine or globally replace the old combat');
 assert.equal(staged.stagedSavedProfileMapping,true);
 assert.equal(staged.productionActivated,false,'the saved-profile adapter is not a second live combat owner');
 assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs'));

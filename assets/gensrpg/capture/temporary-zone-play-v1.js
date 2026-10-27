@@ -9,7 +9,9 @@
   if(!port.compatible(["battle-trigger"]))throw new Error("Official Labo Combat provider unavailable");
   const trigger=root.GensCaptureManualBattleTriggerV1.create(port,root.GensCaptureBattleBridgeContractV1);
   let view=null,disposed=false;
-  const session=root.GensCaptureTemporaryZoneSessionV1.create({trigger,resolveEncounter,encounterAt,width,height,onBattleReturn:event=>{view?.refresh();onBattleReturn(event);}});
+  let session;
+  try{session=root.GensCaptureTemporaryZoneSessionV1.create({trigger,resolveEncounter,encounterAt,width,height,onBattleReturn:event=>{view?.refresh();onBattleReturn(event);}});}
+  catch(error){if(installedHere)port.uninstall(provider);throw error;}
   try{view=root.GensCaptureTemporaryZoneViewV1.mount({host,session,encounterAt,width,height});}
   catch(error){session.stop();if(installedHere)port.uninstall(provider);throw error;}
   return Object.freeze({

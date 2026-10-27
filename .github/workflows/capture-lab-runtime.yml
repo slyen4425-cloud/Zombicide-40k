@@ -14,6 +14,8 @@ on:
       - 'tests/gens_capture_lab_authored_source_v1.test.cjs'
       - 'tests/gens_capture_lab_pinned_assets_v1.test.cjs'
       - 'tests/gens_capture_lab_authored_browser_v1.test.cjs'
+      - 'tests/gens_capture_world_lab_wild_transaction_v1.test.cjs'
+      - 'assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs'
       - 'capture-lab-authored-preview.html'
       - 'tools/prepare_capture_lab_authored_preview.mjs'
       - 'tests/fixtures/capture-lab-authored-preview-settings-v1.json'
@@ -78,6 +80,7 @@ jobs:
           node --test tests/gens_capture_lab_runtime_v1.test.cjs
           node --test tests/gens_capture_saved_profile_bridge_v1.test.cjs
           node --test tests/gens_capture_lab_authored_source_v1.test.cjs
+          node --test tests/gens_capture_world_lab_wild_transaction_v1.test.cjs
           node tests/gens_core_asset_resolver_v1.test.cjs
           node --test tests/gens_capture_lab_pinned_assets_v1.test.cjs
       - name: Verify exact historical source projection and preserved profile saves

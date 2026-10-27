@@ -1,3 +1,17 @@
+# Capture — cycle de vie BFCache de la preview (27 octobre 2026)
+
+- BASE et START : `26fe94831e9b294c4b480d3d35d019db5cf9c918`, `checkpoint/gensrpg-start-capture-bfcache-lifecycle-2026-10-27` ; branche `work/gensrpg-capture-lab-bridge-runtime-bfcache-2026-10-27`, intégration cible PR #176. Dernier checkpoint validé du moteur 1v1 : `checkpoint/gensrpg-capture-lab-runtime-c2-green-2026-10-27` (limité à C2).
+- Constat : revue de la PR #176, fil `PRRT_kwDOT6cZoc6wvLX3` : `pagehide` détruit la session même si le navigateur la conserve en BFCache ; le retour navigateur restaure une vue vide sans réexécuter le module. Risque de perte d'interactivité, pas de perte de sauvegarde.
+- Périmètre : propriétaire preview `assets/gensrpg/capture/preview/zone.mjs` et son test navigateur réel uniquement. Conserver l'instance et les ressources lors de `pagehide.persisted`, libérer lorsque la page quitte définitivement ; pas de second listener propriétaire, de reload, de heartbeat ou de moteur Combat alternatif.
+- Protégés : `index.html`, profils/sauvegardes, Core Combat, port Capture, PWA et autres modes. Tests : RED navigateur BFCache reproduit, reprise de la session avec gestes tactiles, destruction hors BFCache, vrai parcours Combat et non-régression CI runtime/contrat/global pertinents. CI GREEN au SHA final obligatoire avant checkpoint et fusion.
+- **RED prouvé** : run [40559402485](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/40559402485), sur `80a07c88f5151467132fca18e38e4683ce380928` : Chromium et Firefox échouent tous deux sur `0 !== 4` contrôles de déplacement après `pagehide.persisted=true`. Les étapes Core, sentinelles statiques, contrats et build passent.
+- **Correctif cause racine** : sur `6d671418a22611438ba2b41002434e3f02b757c4`, seul le gestionnaire `pagehide` conserve la session si le navigateur met la page en BFCache ; lors d'une sortie réelle, `dispose` libère la zone et désinstalle le fournisseur officiel. Le listener reste actif après plusieurs restaurations.
+- **GREEN ciblé prouvé** : run [40559668938](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/40559668938) SUCCESS : Core réel, projection historique, graphe/EXIT, contrat/zone, build épinglé, Chromium+Firefox paysage et sauvegarde témoin inchangée. Revalidation du SHA documentaire final requise avant checkpoint et fusion. PR [#179](https://github.com/slyen4425-cloud/Zombicide-40k/pull/179) vers #176.
+- **Validation documentaire intermédiaire** : run [40560000912](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/40560000912) SUCCESS sur `ceac70785f225c0ea59d9228cb15fd0cea5cff01`, après mise à jour CURRENT_WORK. Les deux navigateurs continuent de passer la reprise et la sortie finale. Checkpoint final prévu : `checkpoint/gensrpg-capture-bfcache-green-2026-10-27`, créé uniquement après succès de la même matrice au SHA de clôture documentaire. Suite : fusion #179 vers #176, résolution de la revue, puis chantier distinct de raccord persistant avec nouveau START.
+
+
+---
+
 # Correction CI — reconstruction du HTML fourni le 25 octobre (27 octobre 2026)
 
 - Base : `6ad672e72ddd6765bcad6e5062aad40dcb09d451`, START `checkpoint/gensrpg-start-capture-history-upload-2026-10-27`, branche `work/gensrpg-capture-lab-bridge-history-2026-10-27` ; suivi #177.

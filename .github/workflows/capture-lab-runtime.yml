@@ -11,6 +11,7 @@ on:
       - 'tools/build_capture_lab_preview.mjs'
       - 'tests/gens_capture_lab_runtime*.test.cjs'
       - 'tests/gens_capture_saved_profile_bridge_v1.test.cjs'
+      - 'tests/gens_capture_lab_authored_source_v1.test.cjs'
       - 'tests/fixtures/capture-lab-*'
       - '.github/workflows/capture-lab-runtime.yml'
       - 'tests/helpers/gens_chrome_*20261024.cjs'
@@ -43,12 +44,16 @@ jobs:
             src/core
             src/contracts
             src/adapters/input/capture
+            src/catalogs
+            data/capture
+            data/combat
       - name: Test real Core, AI, result return and cleanup
         env:
           COMBAT_LAB_ROOT: ${{ github.workspace }}/combat-lab
         run: |
           node --test tests/gens_capture_lab_runtime_v1.test.cjs
           node --test tests/gens_capture_saved_profile_bridge_v1.test.cjs
+          node --test tests/gens_capture_lab_authored_source_v1.test.cjs
       - name: Verify exact historical source projection and preserved profile saves
         run: node --test tests/gens_capture_history_upload_20261027.test.cjs
       - name: Verify production graph and explicit opt-in Capture boundaries

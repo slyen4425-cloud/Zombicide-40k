@@ -3,11 +3,11 @@
 // the sole writer: this module has no storage, UI, gameplay or global hooks.
 // Never run this from loading, from combat start, or without user consent.
 export function createCaptureSavedProfileLabMigrationV1({
- activeHeroId, loadHeroState, saveHeroState, readEncounter,
+ activeHeroId, loadHeroState, saveHeroState, readEncounter, worldStorageKey,
  authoredSource, readBattleSettings, combatSha
 }) {
  for (const [name,fn] of Object.entries({
-  activeHeroId,loadHeroState,saveHeroState,readEncounter,readBattleSettings
+  activeHeroId,loadHeroState,saveHeroState,readEncounter,worldStorageKey,readBattleSettings
  })) {
   if (typeof fn !== 'function') throw new TypeError('Capture migration needs '+name+' owner');
  }
@@ -21,6 +21,11 @@ export function createCaptureSavedProfileLabMigrationV1({
  const schema='gensrpg-capture-lab-profile-migration-v1',version=1;
  const plans=new WeakMap();
  const text=value=>typeof value==='string'?value.trim():'';
+ function selectedWorldKey(){
+  const key=text(worldStorageKey());
+  if(!key)throw new TypeError('Active Capture World storage key required for migration');
+  return key;
+ }
  const clone=value=>JSON.parse(JSON.stringify(value));
  const encode=value=>JSON.stringify(value);
  const identical=(a,b)=>encode(a)===encode(b);
@@ -63,6 +68,13 @@ export function createCaptureSavedProfileLabMigrationV1({
   if (member.hp===0) {
    throw new TypeError('KO creature cannot be migrated into an active Combat 1v1');
   }
+  if ((member.activeAbilityIds!=null&&!Array.isArray(member.activeAbilityIds))||
+      (member.knownAbilityIds!=null&&!Array.isArray(member.knownAbilityIds))) {
+   throw new TypeError('Historical Capture ability lists must be arrays; no inferred conversion');
+  }
+  if (member.statAlloc!=null && (typeof member.statAlloc!=='object'||Array.isArray(member.statAlloc))) {
+   throw new TypeError('Invalid custom Capture stat allocation format');
+  }
   if (Object.values(member.statAlloc??{}).some(value=>!Number.isFinite(Number(value))||Number(value)!==0)||
       (Array.isArray(member.talents)&&member.talents.length>0)) {
    throw new TypeError('Allocated custom stats or talents are unsupported by this Combat migration');
@@ -98,7 +110,7 @@ export function createCaptureSavedProfileLabMigrationV1({
  }
  function prepare() {
   const {heroId,hero}=owner();
-  const member=validateMember(hero),wild=encounter();
+  const member=validateMember(hero),wild=encounter(),worldKey=selectedWorldKey();
   if (hero.captureLabProfileMigrationV1!=null) {
    throw new Error('Capture profile has an existing versioned Lab migration; no overwrite');
   }
@@ -124,7 +136,7 @@ export function createCaptureSavedProfileLabMigrationV1({
    explanation:'Conserver le pourcentage de PV et remplacer les capacités actives par les capacités réellement exportées du Labo officiel. Aucun changement avant accord.'
   });
   plans.set(plan,{
-   saved:encode(hero),wild:encode(wild),member:clone(member),
+   saved:encode(hero),wild:encode(wild),worldKey,member:clone(member),
    official:projected,committed:false
   });
   return plan;
@@ -138,7 +150,7 @@ export function createCaptureSavedProfileLabMigrationV1({
   }
   const {heroId,hero}=owner(),wild=encounter();
   if (heroId!==plan.heroId||encode(hero)!==prepared.saved||
-      encode(wild)!==prepared.wild) {
+      encode(wild)!==prepared.wild||selectedWorldKey()!==prepared.worldKey) {
    throw new Error('Stale Capture profile or encounter changed before migration');
   }
   const member=validateMember(hero);
@@ -156,7 +168,7 @@ export function createCaptureSavedProfileLabMigrationV1({
    captureLabProfileMigrationV1:{
     schema,version,combatSha,
     heroId,uid:member.uid,entityId:member.entityId,
-    encounterSnapshot:prepared.wild,
+    encounterSnapshot:prepared.wild,worldKey:prepared.worldKey,
     originalMember:clone(member),
     migratedMember:clone(nextMember)
    }
@@ -174,7 +186,8 @@ export function createCaptureSavedProfileLabMigrationV1({
   if (!record) return null;
   if (record.schema!==schema||record.version!==version||
       record.combatSha!==combatSha||record.heroId!==heroId||
-      record.uid!==hero.creatureTeam?.[0]?.uid) {
+      record.uid!==hero.creatureTeam?.[0]?.uid||
+      typeof record.worldKey!=='string') {
    throw new TypeError('Unknown or mismatched Capture migration version; refusing rollback');
   }
   if (hero.creatureTeam?.length!==1 ||(hero.creatureReserve?.length??0)!==0) {
@@ -204,7 +217,8 @@ export function createCaptureSavedProfileLabMigrationV1({
   if (!identical(hero.creatureTeam[0],record.migratedMember)) {
    throw new Error('Capture creature changed since migration; refusing rollback');
   }
-  if (encode(encounter())!==record.encounterSnapshot) {
+  if (selectedWorldKey()!==record.worldKey||
+      encode(encounter())!==record.encounterSnapshot) {
    throw new Error('Capture wild encounter changed or battle completed since migration');
   }
   const next=clone(hero);

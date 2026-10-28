@@ -99,7 +99,7 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
     const arena=document.getElementById('arena');
     const status=document.getElementById('status');
     const command=await createCaptureOfficialHubCompositionV1({
-     siteBaseUrl:document.baseURI,
+     siteBaseUrl:new URL('/',document.baseURI),
      owners,combatPort:GensCaptureLabOwnershipPortV1,
      validateBattleResult:GensCaptureBattleBridgeContractV1.result,
      mountBattle:(handle,ctx,refs)=>{

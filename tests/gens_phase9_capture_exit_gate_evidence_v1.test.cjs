@@ -82,7 +82,7 @@ assert.equal(staged.stagedHubBattleCommand,true);
 assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs'));
 assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs'));
 const readOnlyProfile=read('assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs');
-assert.ok(!/localStorage\\.|window\\.captureStartWildBattle\\s*=|saveHeroState\\(heroId/.test(readOnlyProfile),'readiness must not create storage or global battle authority');
+assert.ok(!/localStorage\.|window\.captureStartWildBattle\s*=|saveHeroState\(heroId/.test(readOnlyProfile),'readiness must not create storage or global battle authority');
 const hubCommand=read('assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs');
 assert.match(hubCommand,/combatPort\.startEncounter\(/,'Hub must use the existing single Combat owner');
 assert.match(hubCommand,/transaction\.prepareWild\(/,'Hub must read the original World ticket');

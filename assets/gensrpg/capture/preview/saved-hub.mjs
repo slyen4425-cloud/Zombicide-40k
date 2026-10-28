@@ -3,6 +3,8 @@ import {createCombatLabProviderV1} from '../combat-lab-provider-v1.mjs';
 import {createCaptureLabAuthoredSourceV1} from '../combat-lab-authored-source-v1.mjs';
 import {createCaptureWorldLabWildTransactionV1} from '../capture-world-lab-wild-transaction-v1.mjs';
 import {createCaptureLabHubBattleCommandV1} from '../capture-lab-hub-battle-command-v1.mjs';
+import {createCaptureLabProfileReadinessV1} from '../capture-lab-profile-readiness-v1.mjs';
+import {createCaptureSavedProfileLabMigrationV1} from '../saved-profile-lab-migration-v1.mjs';
 
 // Opt-in isolated visual preview. The original, byte-identical World and
 // team-roster scripts are loaded by the HTML and do ALL persistent writes.
@@ -10,10 +12,15 @@ import {createCaptureLabHubBattleCommandV1} from '../capture-lab-hub-battle-comm
 const status=document.getElementById('hub-status');
 const worldLabel=document.getElementById('hub-location');
 const profileLabel=document.getElementById('hub-profile');
+const compatibilityLabel=document.getElementById('hub-compatibility');
 const battleButton=document.getElementById('hub-battle');
 const newButton=document.getElementById('hub-new');
 const abortButton=document.getElementById('hub-abort');
 const battleHost=document.getElementById('live-battle');
+const prepareMigrationButton=document.getElementById('hub-prepare-migration');
+const confirmMigrationButton=document.getElementById('hub-migrate');
+const rollbackMigrationButton=document.getElementById('hub-rollback');
+const migrationDetails=document.getElementById('hub-migration-detail');
 const root=new URL('../../../..',import.meta.url); // never used as a media/version authority
 const generated=new URL('./assets/gensrpg/capture/preview/generated/',document.baseURI);
 const vendor=new URL('./vendor/combat-lab/',document.baseURI);
@@ -22,7 +29,7 @@ const getJson=async(relative)=>{
  if(!response.ok)throw new Error('Source Lab indisponible : '+relative);
  return response.json();
 };
-let command=null,settings=null;
+let command=null,readiness=null,settings=null,migration=null,migrationPlan=null;
 function setStatus(message,{ready, outcome, incompatible, error}={}){
  status.textContent=message;
  if(ready!==undefined)status.dataset.ready=String(ready);
@@ -36,10 +43,24 @@ function refresh(){
  worldLabel.textContent='📍 '+world.locationName+' · Jour '+world.day+' · Tour '+world.turnIndex+
   ' · Rencontre '+(world.last?.type==='wild'?world.last.creatureId:'terminée');
  profileLabel.textContent='Loup volcanique · PV '+(member?.hp??'—')+' / '+(member?.maxHp??'—');
+ if(readiness){
+  const report=readiness.inspect();
+  compatibilityLabel.dataset.status=report.status;
+  compatibilityLabel.textContent=report.status==='ready'?
+   'Profil compatible avec le moteur officiel 1v1.':
+   report.status==='review-required'?
+    'Migration à confirmer, aucune donnée modifiée : '+report.changes.map(change=>
+     change.field==='maxHp'?'PV max '+change.saved+' → '+change.official:
+      'Capacités anciennes → capacités auteur officielles').join(' · '):
+   report.reason;
+ }
  const running=command?.status().phase==='running';
  battleButton.disabled=running||world.last?.type!=='wild';
  newButton.disabled=running;
  abortButton.hidden=!running;
+ prepareMigrationButton.disabled=running;
+ confirmMigrationButton.disabled=running;
+ rollbackMigrationButton.disabled=running;
 }
 function portrait(actor,exported,catalog,metadata,source){
  const creature=exported.creatures.find(c=>c.id===actor.creatureId);
@@ -128,6 +149,19 @@ try{
   configuredSkillDrafts:inputs.configuredSkillDrafts,
   creatureTransfers:inputs.creatureTransfers
  });
+ migration=createCaptureSavedProfileLabMigrationV1({
+  activeHeroId:()=>captureActiveHeroId(),
+  loadHeroState:id=>loadState(id),
+  saveHeroState:(id,next)=>{
+   // Preview counts the *same* real roster owner call as Combat result saves.
+   saveHeroCreatureState(id,next);
+   globalThis.capturePreviewHeroWrites++;
+  },
+  readEncounter:()=>captureWorldState().last,
+  worldStorageKey:()=>captureWorldKey(),
+  authoredSource:author,readBattleSettings:()=>inputs.battleSettings,
+  combatSha:COMBAT_LAB_SOURCE_V1.sha
+ });
  const previewCreatureId=metadata.expectedPlayer,previewWildId=metadata.expectedOpponent;
  const official=author.buildEncounter({
   ...inputs.battleSettings,encounterId:metadata.encounter,
@@ -161,6 +195,15 @@ try{
    last:{type:'wild',creatureId:previewWildId,text:'Rencontre sauvage dans ma forêt du créateur'}
   });
  }
+ readiness=createCaptureLabProfileReadinessV1({
+  activeHeroId:()=>captureActiveHeroId(),
+  loadHeroState:id=>loadState(id),
+  readWorldState:()=>captureWorldState(),
+  worldStorageKey:()=>captureWorldKey(),
+  authoredSource:author,readBattleSettings:()=>inputs.battleSettings,
+  adaptCombatExport:adapter.adaptCaptureCombatExportStackV1,
+  validateBattleResult:globalThis.GensCaptureBattleBridgeContractV1.result
+ });
  const transaction=createCaptureWorldLabWildTransactionV1({
   activeHeroId:()=>captureActiveHeroId(),
   loadHeroState:id=>loadState(id),
@@ -205,6 +248,60 @@ try{
    refresh();
    setStatus('Le résultat n’a pas été effacé : '+String(event.error?.message||event.error),
     {ready:true,error:true,incompatible:false});
+  }
+ });
+ prepareMigrationButton.addEventListener('click',()=>{
+  try{
+   migrationPlan=migration.prepare();
+   const plan=migrationPlan;
+   if(plan.status==='compatible'){
+    migrationDetails.textContent='Ce profil est déjà compatible avec le Labo officiel. Aucune sauvegarde modifiée.';
+    migrationDetails.dataset.status='compatible';
+    confirmMigrationButton.hidden=true;
+   }else{
+    migrationDetails.textContent=plan.explanation+' '+plan.consentText;
+    migrationDetails.dataset.status='migration-required';
+    confirmMigrationButton.hidden=false;
+   }
+   refresh();
+  }catch(error){
+   migrationPlan=null;
+   confirmMigrationButton.hidden=true;
+   migrationDetails.textContent='Migration refusée : '+String(error.message||error);
+   migrationDetails.dataset.status='refused';
+  }
+ });
+ confirmMigrationButton.addEventListener('click',()=>{
+  try{
+   if(!migrationPlan)throw new Error('Inspection du profil requise avant confirmation.');
+   const plan=migrationPlan;
+   migration.commit(plan,{acknowledged:plan.consentText});
+   migrationPlan=null;
+   confirmMigrationButton.hidden=true;
+   const offer=migration.inspectRollback();
+   rollbackMigrationButton.hidden=!offer.available;
+   migrationDetails.textContent='Migration confirmée et sauvegardée via le propriétaire Capture. '+
+    (offer.available?'Retour possible avant combat : '+offer.consentText:'');
+   migrationDetails.dataset.status='migrated';
+   setStatus('Profil compatible avec le Labo officiel.',{ready:true,error:false,incompatible:false});
+   refresh();
+  }catch(error){
+   migrationDetails.textContent='Migration non appliquée : '+String(error.message||error);
+   migrationDetails.dataset.status='refused';
+  }
+ });
+ rollbackMigrationButton.addEventListener('click',()=>{
+  try{
+   const offer=migration.inspectRollback();
+   if(!offer.available)throw new Error('Retour arrière non disponible');
+   migration.rollback({acknowledged:offer.consentText});
+   rollbackMigrationButton.hidden=true;
+   migrationDetails.textContent='Ancienne créature restaurée sans toucher à l’inventaire ou au monde.';
+   migrationDetails.dataset.status='restored';
+   refresh();
+  }catch(error){
+   migrationDetails.textContent='Retour interdit : '+String(error.message||error);
+   migrationDetails.dataset.status='revert-blocked';
   }
  });
  battleButton.addEventListener('click',()=>{

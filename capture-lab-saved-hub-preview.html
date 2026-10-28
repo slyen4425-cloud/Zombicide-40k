@@ -39,6 +39,16 @@
    <button id="hub-new" type="button">Nouvelle rencontre</button>
    <button id="hub-abort" type="button" hidden>Annuler le combat</button>
   </div>
+  <section aria-label="Migration volontaire du profil de démonstration">
+   <h3>Compatibilité des anciennes sauvegardes</h3>
+   <p class="small">Aucune conversion automatique. Consulte les différences avant de confirmer ; ton ancienne créature est conservée pour revenir en arrière tant qu’aucun combat n’a été enregistré.</p>
+   <div class="hub-actions">
+    <button id="hub-prepare-migration" type="button">Préparer la migration du profil</button>
+    <button id="hub-migrate" type="button" hidden>Confirmer la migration</button>
+    <button id="hub-rollback" type="button" hidden>Revenir au profil initial</button>
+   </div>
+   <p id="hub-migration-detail" role="status" aria-live="polite"></p>
+  </section>
  </section>
  <section id="live-battle" class="hub-card" aria-label="Véritable combat Labo" hidden></section>
  <p class="small">Les données de test utilisent exclusivement les clés de profil « gensrpg_capture_lab_saved_preview_* ». Tes vrais profils et leurs sauvegardes ne sont pas ouverts ni migrés. Les anciens PV/compétences incompatibles sont refusés, jamais modifiés automatiquement.</p>

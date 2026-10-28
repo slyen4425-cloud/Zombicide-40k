@@ -30,8 +30,8 @@ test('Capture production-shaped static transport: real official pins and every b
  assert.equal(manifest.assetsSha,gitsha(assets));
  assert.equal(manifest.assetsSha,pins.authoredAssetsPin);
  assert.equal(manifest.combatRepository,'slyen4425-cloud/GenSrpg_labo_combat_dynamique');
- assert.deepEqual(manifest.supportedCreatureIds,['crea-loup','crea_voltik'],
-  'only the two actual authored transfers are supported; not a fake complete catalog');
+ assert.deepEqual(manifest.supportedCreatureIds,["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik"],
+  'only the eleven media-complete SHA-pinned official author transfers may be published');
  assert.equal(manifest.vendorDirectory,'vendor/combat-lab/');
  assert.equal(manifest.dataDirectory,data);
  const paths=manifest.transport.map(x=>x.path);

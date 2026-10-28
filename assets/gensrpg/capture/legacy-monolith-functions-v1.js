@@ -878,23 +878,43 @@ function captureRenderBattleLive(battle=window.gensCurrentCaptureBattle){
 }
 
 function captureStartWildBattle(creatureId){
-  const primary=loadSharedEntities().find(x=>String(x.id)===String(creatureId));if(!primary){alert("Créature introuvable.");return}
-  const playerRoster=captureTeamEntityRoster();if(!playerRoster.length){alert("Aucune créature dans l'équipe.");return}
-  const enemyRoster=captureWildEnemyRoster(primary),w=captureWildBattleRules();
-  const matchSlots=Math.max(1,Math.min(3,enemyRoster.length));
-  const activeSlots=w.playerSlots==="match"?matchSlots:Math.max(1,Math.min(3,Number(w.playerSlots)||1));
-  const rules={
-    type:"wild",captureAllowed:true,activeSlots,
-    teamSize:Math.max(playerRoster.length,enemyRoster.length),
-    minBattleTeam:1,maxBattleTeam:Math.max(6,playerRoster.length),
-    recallCost:w.recallCost||"turn",controller:"auto"
+  // This is the original, unique public callback called by Capture World.
+  // Do not replace it on window or route wild fights to the old simulator.
+  const world=captureWorldState(),id=String(creatureId||"");
+  if(world?.last?.type!=="wild"||String(world.last.creatureId)!==id){
+    alert("La rencontre sauvage a changé. Retourne dans le monde Capture.");return;
+  }
+  if(window.gensCurrentCaptureBattle){
+    alert("Un autre combat Capture est encore actif.");return;
+  }
+  const owners={
+    activeHeroId:()=>captureActiveHeroId(),
+    loadHeroState:heroId=>loadState(heroId),
+    saveHeroState:(heroId,next)=>saveHeroCreatureState(heroId,next),
+    readWorldState:()=>captureWorldState(),
+    saveWorldState:next=>saveCaptureWorldState(next),
+    consumeWildEncounter:reason=>captureConsumeWildEncounter(reason),
+    worldStorageKey:()=>captureWorldKey(),
+    nextEncounterId:()=>{
+      if(typeof crypto?.randomUUID!=="function")throw new Error("Identifiant sécurisé de rencontre indisponible");
+      return "capture"+crypto.randomUUID().replaceAll("-","");
+    }
   };
-  captureCloseModal("captureEncounterModal");
-  captureStartBattleAutomatic(
-    {name:(CHARS[captureActiveHeroId()]?.name||"Dresseur"),roster:playerRoster,controller:"human"},
-    {name:enemyRoster.length>1?"Créatures sauvages":(primary.name||"Créature sauvage"),roster:enemyRoster,controller:"auto"},
-    rules
-  );
+  const moduleUrl=new URL("assets/gensrpg/capture/capture-official-public-wild-v1.mjs",document.baseURI);
+  import(moduleUrl.href).then(async({startCaptureOfficialPublicWildV1})=>{
+    const result=await startCaptureOfficialPublicWildV1({
+      creatureId:id,owners,
+      confirmConsent:line=>Promise.resolve(window.confirm(
+        "Migration Monster Capture vers le Labo officiel :\n\n"+line+
+        "\n\nConfirmer pour enregistrer la conversion réversible du profil avant ce combat ?"
+      ))
+    });
+    if(result.started)captureCloseModal("captureEncounterModal");
+  }).catch(error=>{
+    console.error("Combat Capture officiel — propriétaire sauvage",error);
+    alert("Combat officiel indisponible : "+String(error?.message||error)+
+      "\nLa rencontre n'a pas été remplacée par l'ancien moteur.");
+  });
 }
 
 function captureOpenTrainerBattle(){

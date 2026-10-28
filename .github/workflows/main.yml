@@ -285,6 +285,7 @@ jobs:
         run: |
           node --test tests/gens_capture_lab_pages_pipeline_v1.test.cjs
           node --test tests/gens_capture_lab_delivery_v1.test.cjs
+          node --test tests/gens_capture_lab_pages_site_v1.test.cjs
           node --test tests/gens_capture_official_hub_composition_v1.test.cjs
           node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs
 

@@ -84,8 +84,8 @@ assert.ok(staged.coverage.includes('tests/gens_capture_public_wild_button_browse
 const publicWild=read('assets/gensrpg/capture/capture-official-public-wild-v1.mjs');
 const wildEntry=read('assets/gensrpg/capture/legacy-monolith-functions-v1.js');
 assert.match(publicWild,/createCaptureOfficialHubCompositionV1/);
-assert.match(wildEntry,/capture-official-public-wild-v1\\.mjs/);
-assert.doesNotMatch(publicWild,/window\\.captureStartWildBattle\\s*=|gensCreateCaptureBattle\\(/);
+assert.match(wildEntry,/capture-official-public-wild-v1\.mjs/);
+assert.doesNotMatch(publicWild,/window\.captureStartWildBattle\s*=|gensCreateCaptureBattle\(/);
 assert.ok(staged.coverage.includes('tests/gens_capture_official_hub_composition_v1.test.cjs'));
 const officialComposer=read('assets/gensrpg/capture/capture-official-hub-composition-v1.mjs');
 assert.match(officialComposer,/createCaptureWorldLabWildTransactionV1/,'Hub must reuse the original World owner transaction');

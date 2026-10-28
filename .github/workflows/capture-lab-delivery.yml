@@ -4,9 +4,13 @@ on:
     branches:
       - 'work/gensrpg-capture-official-delivery-package-*'
       - 'work/gensrpg-capture-official-hub-composition-*'
+      - 'work/gensrpg-capture-pages-pinned-delivery-*'
   pull_request:
     paths:
       - 'tools/stage_capture_lab_delivery.mjs'
+      - '.github/workflows/main.yml'
+      - 'tests/gens_capture_lab_pages_pipeline_v1.test.cjs'
+      - 'tests/gens_capture_lab_pages_site_v1.test.cjs'
       - 'tests/gens_capture_lab_delivery_v1.test.cjs'
       - 'tests/gens_capture_official_hub_composition_v1.test.cjs'
       - 'tests/gens_capture_official_hub_composition_browser_v1.test.cjs'
@@ -26,6 +30,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Check official payload wiring in the real Pages pipeline (RED before implementation)
+        run: node --test tests/gens_capture_lab_pages_pipeline_v1.test.cjs
       - name: Resolve immutable official author and asset SHA from the existing owners
         id: pins
         run: |

@@ -20,6 +20,8 @@ const html=`<!doctype html><html lang="fr"><head><meta charset="utf-8">
 var current='trainer-real-hub',state=null;
 function activeGameProfileId(){return 'ci_original_capture_world_public_button'}
 function normalizeGameParticipants(){return [current]}
+// Real Shell provides this hook. This focused harness has no active Dungeon session.
+function hasActiveSession(){return false}
 function key(id){return 'ci_real_capture_hero_'+id}
 function loadState(id){return JSON.parse(localStorage.getItem(key(id))||'{}')}
 function loadSharedEntities(){return [

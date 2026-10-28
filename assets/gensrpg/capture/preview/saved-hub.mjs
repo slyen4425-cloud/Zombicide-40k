@@ -145,6 +145,7 @@ try{
    globalThis.capturePreviewHeroWrites++;
   },
   readEncounter:()=>captureWorldState().last,
+  worldStorageKey:()=>captureWorldKey(),
   authoredSource:author,readBattleSettings:()=>inputs.battleSettings,
   combatSha:COMBAT_LAB_SOURCE_V1.sha
  });

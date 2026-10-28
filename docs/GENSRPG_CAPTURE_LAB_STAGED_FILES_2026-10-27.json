@@ -23,6 +23,7 @@
     "assets/gensrpg/capture/combat-lab-authored-source-v1.mjs",
     "assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs",
     "assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs",
+    "assets/gensrpg/capture/capture-official-hub-composition-v1.mjs",
     "assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs"
   ],
   "capturePreviewDirectory": "assets/gensrpg/capture/preview",
@@ -40,7 +41,9 @@
     "tests/gens_capture_lab_authored_source_v1.test.cjs",
     "tests/gens_capture_lab_pinned_assets_v1.test.cjs",
     "tests/gens_capture_world_lab_wild_transaction_v1.test.cjs",
-    "tests/gens_capture_lab_saved_hub_browser_v1.test.cjs"
+    "tests/gens_capture_lab_saved_hub_browser_v1.test.cjs",
+    "tests/gens_capture_official_hub_composition_v1.test.cjs",
+    "tests/gens_capture_official_hub_composition_browser_v1.test.cjs"
   ],
   "remaining": [
     "saved-profile runtime mounting in real game",
@@ -60,6 +63,12 @@
     "sourceIndexBlob": "17ba8e6f1faf6f8a0be8cdec68c4515d538ff646",
     "productionActivated": false,
     "notes": "Exact persisted Capture World/team owners executed, official authored Core provider, no public Hub override"
+  },
+  "officialHubComposition": {
+    "module": "assets/gensrpg/capture/capture-official-hub-composition-v1.mjs",
+    "packager": "tools/stage_capture_lab_delivery.mjs",
+    "schema": "gensrpg-capture-official-delivery-v1",
+    "productionActivated": false
   },
   "stagedExplicitProfileMigration": {
     "schema": "gensrpg-capture-lab-profile-migration-v1",

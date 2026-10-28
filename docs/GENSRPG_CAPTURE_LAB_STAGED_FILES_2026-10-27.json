@@ -116,9 +116,14 @@
       "crea_ombre_2",
       "crea_scar_2",
       "crea_tox_2",
-      "crea_voltik",
-      "kitsune_lunaire"
+      "crea_voltik"
     ],
-    "noLegacyEngineFallback": true
+    "noLegacyEngineFallback": true,
+    "unpublishedOfficialTransfer": {
+      "creatureId": "kitsune_lunaire",
+      "reason": "pack:capture:creature-lunaire-attack-player-7-v1 is not present in pinned official visual catalog",
+      "combatSourceSha": "65e21792ff74aea9862e528c8dbfdb22797b6693",
+      "visualCatalogSha": "b3d46ce6f2639ebb59a2984aeff17f97cbcd7377"
+    }
   }
 }

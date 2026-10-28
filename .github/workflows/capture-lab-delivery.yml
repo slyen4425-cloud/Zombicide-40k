@@ -7,6 +7,7 @@ on:
       - 'work/gensrpg-capture-pages-pinned-delivery-*'
       - 'work/gensrpg-capture-official-battle-view-*'
       - 'work/gensrpg-capture-real-wild-button-*'
+      - 'work/gensrpg-capture-offline-verified-media-cache-*'
   pull_request:
     paths:
       - 'tools/stage_capture_lab_delivery.mjs'
@@ -24,6 +25,8 @@ on:
       - 'tests/gens_capture_real_wild_button_v1.test.cjs'
       - 'tests/gens_capture_real_wild_button_browser_v1.test.cjs'
       - '.github/workflows/capture-lab-delivery.yml'
+      - 'service-worker.js'
+      - 'tests/gens_capture_pwa_offline_pinned_media_v1.test.cjs'
       - 'tools/build_capture_lab_preview.mjs'
       - 'tools/prepare_capture_lab_authored_preview.mjs'
       - 'docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'
@@ -38,6 +41,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify real PWA worker guards approved immutable creature images and warm-offline resume
+        run: node --test tests/gens_capture_pwa_offline_pinned_media_v1.test.cjs
       - name: TDD check true original Capture COMBATTRE owner (RED before implementation)
         run: node --test tests/gens_capture_real_wild_button_v1.test.cjs
       - name: Check official payload wiring in the real Pages pipeline (RED before implementation)

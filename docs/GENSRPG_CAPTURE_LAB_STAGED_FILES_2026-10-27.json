@@ -25,7 +25,8 @@
     "assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs",
     "assets/gensrpg/capture/capture-official-hub-composition-v1.mjs",
     "assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs",
-    "assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs"
+    "assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs",
+    "assets/gensrpg/capture/capture-official-public-wild-v1.mjs"
   ],
   "capturePreviewDirectory": "assets/gensrpg/capture/preview",
   "capturePreviewFiles": [
@@ -44,14 +45,17 @@
     "tests/gens_capture_world_lab_wild_transaction_v1.test.cjs",
     "tests/gens_capture_lab_saved_hub_browser_v1.test.cjs",
     "tests/gens_capture_official_hub_composition_v1.test.cjs",
-    "tests/gens_capture_official_hub_composition_browser_v1.test.cjs"
+    "tests/gens_capture_official_hub_composition_browser_v1.test.cjs",
+    "tests/gens_capture_public_wild_button_v1.test.cjs",
+    "tests/gens_capture_public_wild_button_browser_v1.test.cjs"
   ],
   "remaining": [
-    "saved-profile runtime mounting in real game",
-    "persistent result application",
     "official animations and FX",
     "creature editor",
-    "reserves"
+    "reserves",
+    "full catalog/multi-creature and reserve",
+    "official FX/animations complete public renderer",
+    "public installed-PWA validation before promotion"
   ],
   "stagedSavedProfileMapping": true,
   "authoredSourceLabPin": "65e21792ff74aea9862e528c8dbfdb22797b6693",
@@ -85,5 +89,17 @@
     "requiresConsent": true,
     "oneOwner": "assets/gensrpg/capture/team-roster-v1.js",
     "fullCatalogMigration": false
+  },
+  "publicWildButton": {
+    "owner": "assets/gensrpg/capture/legacy-monolith-functions-v1.js",
+    "publicClickConnected": true,
+    "composition": "assets/gensrpg/capture/capture-official-public-wild-v1.mjs",
+    "world": "assets/gensrpg/capture/world-exploration-v1.js",
+    "roster": "assets/gensrpg/capture/team-roster-v1.js",
+    "engineSha": "65e21792ff74aea9862e528c8dbfdb22797b6693",
+    "explicitMigrationConsent": true,
+    "supportedMode": "wild-1v1",
+    "unavailableSpecies": "explicit-refusal",
+    "productionActivatedByDefault": false
   }
 }

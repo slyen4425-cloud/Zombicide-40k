@@ -177,6 +177,49 @@ jobs:
           echo "========================================="
           ls -lh _site/sound_*.mp3 2>/dev/null || true
 
+      # The original Capture World COMBATTRE handler now calls the signed
+      # official Core. Stage those *exact* Lab bytes on this Pages origin,
+      # never a moving network runtime or a duplicated implementation.
+      - name: Résoudre les SHA officiels de Monster Capture
+        id: capture-pins
+        run: |
+          node --input-type=module - <<'JS' >> "$GITHUB_OUTPUT"
+          import {COMBAT_LAB_SOURCE_V1} from './assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs';
+          import fs from 'node:fs';
+          const pin=JSON.parse(fs.readFileSync('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json','utf8'));
+          if(pin.authoredSourceLabPin!==COMBAT_LAB_SOURCE_V1.sha || !/^[a-f0-9]{40}$/.test(pin.authoredAssetsPin)) throw Error('Uncertified Combat/visual SHA');
+          console.log('combat='+pin.authoredSourceLabPin);
+          console.log('visuals='+pin.authoredAssetsPin);
+          JS
+
+      - uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
+          ref: ${{ steps.capture-pins.outputs.combat }}
+          path: combat-lab
+          sparse-checkout: |
+            src/core
+            src/contracts
+            src/adapters/input/capture
+            src/catalogs
+            data/capture
+            data/combat
+
+      - uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
+          ref: ${{ steps.capture-pins.outputs.visuals }}
+          path: combat-assets
+          sparse-checkout: |
+            data/assets/catalog
+
+      - name: Livrer le vrai moteur officiel avec SHA exact dans GitHub Pages
+        run: |
+          node tools/stage_capture_lab_delivery.mjs combat-lab combat-assets _site
+          test -s _site/assets/gensrpg/capture/runtime-data/delivery-manifest.json
+          test -s _site/vendor/combat-lab/src/core/combat/combat-session.js
+          node --test tests/gens_capture_public_wild_button_v1.test.cjs
+
       - name: Charger les modules Dungeon externes
         run: |
           python3 - <<'PY'

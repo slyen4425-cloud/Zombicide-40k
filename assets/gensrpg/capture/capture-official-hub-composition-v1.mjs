@@ -2,7 +2,7 @@
 // Combat port. Opt-in: the original public Hub owner will call this only after
 // migration, UI and PWA gates. No window hooks, storage, fallback or new clock.
 import {COMBAT_LAB_SOURCE_V1,loadCombatLabEngineV1} from './combat-lab-engine-loader-v1.mjs';
-import {createCombatLabAuthoredSourceV1} from './combat-lab-authored-source-v1.mjs';
+import {createCaptureLabAuthoredSourceV1} from './combat-lab-authored-source-v1.mjs';
 import {createCombatLabProviderV1} from './combat-lab-provider-v1.mjs';
 import {createCaptureWorldLabWildTransactionV1} from './capture-world-lab-wild-transaction-v1.mjs';
 import {createCaptureLabHubBattleCommandV1} from './capture-lab-hub-battle-command-v1.mjs';
@@ -129,7 +129,7 @@ export async function createCaptureOfficialHubCompositionV1({
  ]);
  if(engine.source?.sha!==packageData.manifest.combatSha)throw new Error('Combat Core version changed from the author package');
  const [creature,draft,rules,exporter,adapter]=authorModules;
- const authoredSource=createCombatLabAuthoredSourceV1({
+ const authoredSource=createCaptureLabAuthoredSourceV1({
   normalizeCreatureTransfer:creature.normalizeCaptureCreatureTransferV1,
   normalizeSkillDraft:draft.normalizeCaptureSkillEditorDraftV1,
   overlayCombatRules:rules.applyCaptureCombatRulesToCreatureDraftV1,

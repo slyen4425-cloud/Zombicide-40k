@@ -22,8 +22,24 @@ const positions=[world,roster,original].map(file=>{
 });
 assert.ok(positions[0]<positions[1]&&positions[1]<positions[2],
  'browser must load World and roster before the legacy Capture battle-button owner');
-assert.equal(blob(read(original)),'c6ea3c101a6861b99f8bc064d2d1fec874e7266b',
- 'historical R10 owner must be preserved until its separate checkpointed migration');
+// The PR #187 R10 archive remains a byte-exact historical certificate;
+// ONLY its one active original public callback is changed in this C3 lot.
+const r10Snapshot=read('tests/fixtures/gensrpg-phase12-r10-capture-original-owner-20261018.js.txt');
+assert.equal(r10Snapshot.length,61943,'R10 archive size is still certified');
+assert.equal(blob(r10Snapshot),'c6ea3c101a6861b99f8bc064d2d1fec874e7266b',
+ 'historical R10 bytes are never rewritten for the new public handler');
+const active=read(original).toString('utf8'),historical=r10Snapshot.toString('utf8');
+const names=body=>[...body.matchAll(/^function (capture[A-Za-z0-9_$]+)\s*\(/gm)].map(m=>m[1]);
+assert.equal(names(historical).length,90,'R10 still certifies all 90 owners');
+assert.deepEqual(names(active),names(historical),'active Capture preserves all 90 declarations in order');
+assert.equal(names(active).filter(name=>name==='captureStartWildBattle').length,1);
+assert.match(active,/capture-official-public-wild-v1\.mjs/);
+const wildBody=active.slice(active.indexOf('function captureStartWildBattle('),
+ active.indexOf('\nfunction captureOpenTrainerBattle('));
+assert.doesNotMatch(wildBody,/captureStartBattleAutomatic\(/,
+ 'original wild button cannot launch the historical simulator');
+assert.doesNotMatch(active,/window\.captureStartWildBattle\s*=/,
+ 'no parallel public wild handler may be installed');
 assert.ok(!html.includes('capture-lab-saved-hub-preview.html'));
 assert.ok(!html.includes('saved-hub.mjs'));
 assert.ok(!html.includes('capture-lab-hub-battle-command-v1.mjs'));
@@ -38,5 +54,5 @@ assert.doesNotMatch(context,/saveCaptureWorldState\s*=|window\.captureStartWildB
 console.log(JSON.stringify({
  scenario:'uploaded index1.zip matched exact staging index and three unique physical owners',
  htmlGitBlob:blob(indexBytes),historicalR10Retained:true,
- liveOptInOnly:true,productionGraphUnchanged:true
+ originalPublicWildOwnerUsesLab:true,previewIsolated:true,productionGraphUnchanged:true
 }));

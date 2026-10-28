@@ -50,6 +50,9 @@ export function createCaptureOfficialBattleViewV1({host,assetResolver}) {
    throw new TypeError('Official Capture visual release is not pinned');
   }
   const arena=element('div','hub-fighters');
+  arena.style.display='grid';
+  arena.style.gridTemplateColumns='repeat(2,minmax(0,1fr))';
+  arena.style.gap='clamp(6px,1.8vw,16px)';
   const cards=[];
   for(const actor of actors) {
    const creature=authored.exported.creatures.find(c=>c.id===actor.creatureId);
@@ -63,6 +66,8 @@ export function createCaptureOfficialBattleViewV1({host,assetResolver}) {
    });
    if(!name(media?.url))throw new Error('Approved Capture sprite URL missing');
    const card=element('article','hub-fighter');
+   card.style.display='flex';card.style.flexDirection='column';
+   card.style.alignItems='center';card.style.minWidth='0';card.style.textAlign='center';
    const title=element('h2'),image=element('img');
    const hp=element('p'),meter=element('progress'),energy=element('p');
    title.textContent=actor.displayName;
@@ -82,10 +87,13 @@ export function createCaptureOfficialBattleViewV1({host,assetResolver}) {
   }
   const message=element('p');message.setAttribute('role','status');
   const actions=element('div','actions');
+  actions.style.display='flex';actions.style.flexWrap='wrap';
+  actions.style.gap='8px';actions.style.justifyContent='center';
   let active=true;
   for(const skill of battle.skills()) {
    if(!name(skill?.id)||!name(skill?.name))throw new TypeError('Official Combat skill descriptor incomplete');
    const button=element('button');button.type='button';button.textContent=skill.name;
+   button.style.minHeight='44px';button.style.flex='0 1 auto';
    button.dataset.combatSkill=skill.id;
    button.addEventListener('click',()=>{
     if(!active)return;
@@ -99,7 +107,7 @@ export function createCaptureOfficialBattleViewV1({host,assetResolver}) {
    actions.append(button);
   }
   const flee=element('button');flee.id='capture-official-flee';flee.type='button';
-  flee.textContent='Fuir';
+  flee.textContent='Fuir';flee.style.minHeight='44px';
   flee.addEventListener('click',()=>{
    if(!active)return;
    try {battle.flee();}

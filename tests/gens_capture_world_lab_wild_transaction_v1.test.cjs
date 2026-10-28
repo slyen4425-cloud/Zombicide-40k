@@ -479,3 +479,285 @@ test('Hub command: a stale Capture hero blocks result persistence; no forged vic
  assert.equal(s.command.status().phase,'commit-pending');
  assert.throws(()=>s.command.retryCommit(),/Stale Capture profile/);
 });
+
+
+// Consent-driven migration contract: always execute against the ACTUAL
+// Capture World and roster owner functions and the immutable official Lab
+// author exporter, never a synthetic combat calculation or parallel save.
+async function migrationSetup(legacy={}){
+ const s=await setup({},legacy);
+ const {createCaptureSavedProfileLabMigrationV1}=await import(
+  '../assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs');
+ const make=()=>createCaptureSavedProfileLabMigrationV1({
+  activeHeroId:()=>s.owner.ctx.captureActiveHeroId(),
+  loadHeroState:id=>s.owner.ctx.loadState(id),
+  saveHeroState:(id,state)=>s.owner.ctx.saveHeroCreatureState(id,state),
+  readEncounter:()=>s.owner.ctx.captureWorldState().last,
+  worldStorageKey:()=>s.owner.ctx.captureWorldKey(),
+  authoredSource:s.a.source,readBattleSettings:()=>battle,combatSha:PIN
+ });
+ return {...s,migration:make(),makeMigration:make};
+}
+
+test('migration: real historical 17 HP Capture save is READ ONLY until exact informed consent; Lab result and World then work',async()=>{
+ const s=await migrationSetup({hp:17,maxHp:17,abilities:['old-leaf']});
+ const before=s.owner.profile(),worldBefore=s.owner.world(),writes=s.owner.writes();
+ assert.throws(()=>s.transaction.prepareWild('crea_voltik'),/HP|skill|loadout/i);
+ const plan=s.migration.prepare();
+ assert.equal(plan.status,'migration-required');
+ assert.equal(plan.previous.hp,17);
+ assert.equal(plan.previous.maxHp,17);
+ assert.equal(plan.next.maxHp,150);
+ assert.equal(plan.next.hp,150);
+ assert.ok(plan.consentText.includes('17'));
+ assert.ok(plan.consentText.includes('150'));
+ assert.ok(plan.previous.activeAbilityIds.includes('old-leaf'));
+ assert.ok(plan.next.activeAbilityIds.includes('fireball'));
+ assert.deepEqual(s.owner.profile(),before);
+ assert.deepEqual(s.owner.world(),worldBefore);
+ assert.deepEqual(s.owner.writes(),writes);
+ assert.throws(()=>s.migration.commit(plan,{}),/consent|confirmation|accord/i);
+ assert.throws(()=>s.migration.commit(plan,{acknowledged:'Oui'}),/consent|confirmation|accord/i);
+ assert.deepEqual(s.owner.profile(),before);
+ const accepted=s.migration.commit(plan,{acknowledged:plan.consentText});
+ assert.equal(accepted.migrated,true);
+ assert.equal(s.owner.writes().hero,1,'exactly one write by canonical roster');
+ assert.equal(s.owner.writes().world,writes.world,'migration never creates a World event');
+ const after=s.owner.profile();
+ assert.equal(after.creatureTeam[0].uid,before.creatureTeam[0].uid);
+ assert.equal(after.creatureTeam[0].entityId,before.creatureTeam[0].entityId);
+ assert.equal(after.creatureTeam[0].hp,150);
+ assert.equal(after.creatureTeam[0].maxHp,150);
+ assert.deepEqual(after.creatureTeam[0].activeAbilityIds,plan.next.activeAbilityIds);
+ assert.deepEqual(after.creatureTeam[0].knownAbilityIds,plan.next.activeAbilityIds);
+ assert.deepEqual(after.inventory,before.inventory);
+ assert.deepEqual(after.profileCustom,before.profileCustom);
+ assert.equal(after.gold,before.gold);
+ assert.equal(after.captureLabProfileMigrationV1.version,1);
+ assert.equal(after.captureLabProfileMigrationV1.combatSha,PIN);
+ assert.deepEqual(after.captureLabProfileMigrationV1.originalMember,before.creatureTeam[0]);
+ assert.equal(s.transaction.prepareWild('crea_voltik').snapshot.sides[0].creatures[0].hp,150);
+ const ticket=s.transaction.status();
+ assert.equal(ticket.pending,true);
+ // No second migration or write can happen after the original consent.
+ assert.throws(()=>s.migration.commit(plan,{acknowledged:plan.consentText}),/used|stale|already|plan/i);
+ assert.equal(s.owner.writes().hero,1);
+});
+
+test('migration: current canonical save or outside user changes abort before either owner writes',async()=>{
+ const s=await migrationSetup({hp:17,maxHp:17});
+ const plan=s.migration.prepare();
+ const stale=s.owner.profile();stale.gold+=10;s.owner.replaceHero(stale);
+ assert.throws(()=>s.migration.commit(plan,{acknowledged:plan.consentText}),/stale|changed|modified/i);
+ assert.equal(s.owner.writes().hero,0);
+ assert.equal(s.owner.profile().gold,stale.gold);
+ const fresh=s.migration.prepare();
+ s.owner.replaceWorld({...s.owner.world(),last:{type:'wild',creatureId:'crea-loup',text:'Different encounter'}});
+ assert.throws(()=>s.migration.commit(fresh,{acknowledged:fresh.consentText}),/stale|encounter|changed/i);
+ assert.equal(s.owner.writes().hero,0);
+});
+
+test('migration: never silently alter unknown official creatures, reserves, teams or allocated custom stats',async()=>{
+ for(const legacy of [{reserve:true},{hp:0,maxHp:17}]){
+  const s=await migrationSetup(legacy);
+  assert.throws(()=>s.migration.prepare(),/1v1|team|reserve|KO|HP|health/i);
+  assert.equal(s.owner.writes().hero,0);
+  assert.equal(s.owner.writes().world,s.owner.baseline);
+ }
+ const s=await migrationSetup({hp:17,maxHp:17});
+ const x=s.owner.profile();x.creatureTeam[0].entityId='user-custom-not-in-author-export';
+ s.owner.replaceHero(x);
+ assert.throws(()=>s.migration.prepare(),/unknown|authored|catalog|creature/i);
+ assert.equal(s.owner.writes().hero,0);
+ const y=await migrationSetup({hp:17,maxHp:17});
+ const modified=y.owner.profile();modified.creatureTeam[0].statAlloc.power=5;
+ y.owner.replaceHero(modified);
+ assert.throws(()=>y.migration.prepare(),/allocation|stat|unsupported|personal/i);
+ assert.equal(y.owner.writes().hero,0);
+});
+
+test('migration: proportional HP is documented and the exact authored loadout replaces stale active skills only after consent',async()=>{
+ const s=await migrationSetup({hp:9,maxHp:18,abilities:['legacy-skill']});
+ const plan=s.migration.prepare();
+ assert.equal(plan.previous.hp,9);
+ assert.equal(plan.previous.maxHp,18);
+ assert.equal(plan.next.hp,75);
+ assert.equal(plan.next.maxHp,150);
+ assert.notDeepEqual(plan.previous.activeAbilityIds,plan.next.activeAbilityIds);
+ assert.equal(s.owner.writes().hero,0);
+ s.migration.commit(plan,{acknowledged:plan.consentText});
+ assert.equal(s.owner.profile().creatureTeam[0].hp,75);
+ assert.deepEqual(s.owner.profile().creatureTeam[0].activeAbilityIds,plan.next.activeAbilityIds);
+ assert.equal(s.transaction.prepareWild('crea_voltik').snapshot.sides[0].creatures[0].hp,75);
+});
+
+test('migration: exact single-owner rollback is available before combat, refuses changed creature or world and preserves newer inventory',async()=>{
+ const s=await migrationSetup({hp:17,maxHp:17,abilities:['old-leaf']});
+ const before=s.owner.profile(),plan=s.migration.prepare();
+ s.migration.commit(plan,{acknowledged:plan.consentText});
+ const restoredSession=s.makeMigration(),offer=restoredSession.inspectRollback();
+ assert.equal(offer.available,true);
+ assert.equal(s.owner.writes().hero,1);
+ const changed=s.owner.profile();changed.inventory.push({itemId:'berries',qty:2});
+ s.owner.replaceHero(changed);
+ assert.throws(()=>restoredSession.rollback({acknowledged:'not-approved'}),/consent|confirmation/i);
+ const done=restoredSession.rollback({acknowledged:offer.consentText});
+ assert.equal(done.restored,true);
+ assert.equal(s.owner.writes().hero,2);
+ const hero=s.owner.profile();
+ assert.deepEqual(hero.creatureTeam[0],before.creatureTeam[0]);
+ assert.equal(hero.captureLabProfileMigrationV1,undefined);
+ assert.equal(hero.inventory.length,before.inventory.length+1);
+ assert.equal(restoredSession.inspectRollback().available,false);
+ assert.throws(()=>restoredSession.rollback({acknowledged:offer.consentText}),/rollback|migration|available/i);
+});
+
+test('migration: a subsequent real wild result forbids reverting the creature to a pre-combat snapshot',async()=>{
+ const s=await migrationSetup({hp:17,maxHp:17});
+ const plan=s.migration.prepare();
+ s.migration.commit(plan,{acknowledged:plan.consentText});
+ const offer=s.makeMigration().inspectRollback();
+ const ticket=s.transaction.prepareWild('crea_voltik');
+ const before=s.owner.writes().hero;
+ const raw={outcome:'flee',creatures:ticket.snapshot.sides.flatMap(side=>side.creatures.map(c=>({instanceId:c.instanceId,hp:c.hp})))};
+ assert.equal(ticket.applyResult(raw).worldResolved,true);
+ assert.equal(s.owner.writes().hero,before+1);
+ assert.equal(s.owner.world().last.type,'resolved');
+ assert.throws(()=>s.makeMigration().rollback({acknowledged:offer.consentText}),/battle|encounter|stale|changed/i);
+ assert.equal(s.owner.profile().creatureTeam[0].maxHp,150);
+ assert.equal(s.owner.world().last.type,'resolved');
+ assert.equal(s.owner.writes().hero,before+1);
+});
+
+test('migration: compatible official saved member requires zero writes and no consent modal',async()=>{
+ const s=await migrationSetup();
+ const plan=s.migration.prepare();
+ assert.equal(plan.status,'compatible');
+ assert.equal(s.owner.writes().hero,0);
+ assert.throws(()=>s.migration.commit(plan,{acknowledged:plan.consentText}),/compatible|migration|required/i);
+ assert.equal(s.owner.writes().hero,0);
+});
+
+
+test('migration: switching World ownership with identical wild data cannot migrate or roll back another world save',async()=>{
+ const s=await migrationSetup({hp:17,maxHp:17});
+ const plan=s.migration.prepare();
+ const originalWorld=s.owner.world();
+ s.owner.changeWorld('other-save-profile');
+ s.owner.replaceWorld(originalWorld); // identical content, different canonical storage key
+ assert.throws(()=>s.migration.commit(plan,{acknowledged:plan.consentText}),/stale|world|changed/i);
+ assert.equal(s.owner.writes().hero,0);
+ s.owner.changeWorld('my_saved_world');
+ const fresh=s.migration.prepare();
+ s.migration.commit(fresh,{acknowledged:fresh.consentText});
+ assert.equal(s.owner.writes().hero,1);
+ const consent=s.makeMigration().inspectRollback().consentText;
+ s.owner.changeWorld('other-save-profile');
+ assert.throws(()=>s.makeMigration().rollback({acknowledged:consent}),/world|encounter|changed/i);
+ assert.equal(s.owner.writes().hero,1);
+ s.owner.changeWorld('my_saved_world');
+ const rollback=s.makeMigration().rollback({acknowledged:consent});
+ assert.equal(rollback.restored,true);
+ assert.equal(s.owner.writes().hero,2);
+ assert.equal(s.owner.profile().creatureTeam[0].hp,17);
+});
+
+test('migration: malformed historic ability lists are rejected rather than guessed',async()=>{
+ const s=await migrationSetup({hp:17,maxHp:17});
+ const state=s.owner.profile();
+ state.creatureTeam[0].activeAbilityIds='legacy-skill-as-string';
+ s.owner.replaceHero(state);
+ assert.throws(()=>s.migration.prepare(),/ability|array|list/i);
+ assert.equal(s.owner.writes().hero,0);
+});
+
+async function inspectRealCaptureProfile(legacy={},configure=()=>{}) {
+ const s=await setup({},legacy);
+ const module=await import('../assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs');
+ const bindings={
+  activeHeroId:()=>s.owner.ctx.captureActiveHeroId(),
+  loadHeroState:id=>s.owner.ctx.loadState(id),
+  readWorldState:()=>s.owner.ctx.captureWorldState(),
+  worldStorageKey:()=>s.owner.ctx.captureWorldKey(),
+  authoredSource:s.a.source,readBattleSettings:()=>battle,
+  adaptCombatExport:s.a.adapt,validateBattleResult:s.a.validate
+ };
+ configure(s,bindings);
+ const inspector=module.createCaptureLabProfileReadinessV1(bindings);
+ return {...s,inspector};
+}
+test('read-only Hub readiness uses real World, saved roster and official authored exporter without any save',async()=>{
+ const {owner,inspector}=await inspectRealCaptureProfile();
+ const before=owner.writes(),raw=owner.store.get('realhero:'+owner.heroId),world=JSON.stringify(owner.world());
+ const report=inspector.inspect();
+ assert.equal(report.status,'ready');
+ assert.equal(report.battleReady,true);
+ assert.equal(report.official.player.maxHp,150);
+ assert.equal(report.official.opponent.creatureId,'crea_voltik');
+ assert.deepEqual(report.changes,[]);
+ assert.deepEqual(owner.writes(),before);
+ assert.equal(owner.store.get('realhero:'+owner.heroId),raw);
+ assert.equal(JSON.stringify(owner.world()),world);
+ assert.equal(owner.world().last.encounterId,undefined,'diagnostic must NOT stamp a World identity');
+});
+test('legacy 17/17 HP receives an explicit review-only comparison, never silent 120/150 conversion',async()=>{
+ const {owner,inspector}=await inspectRealCaptureProfile({hp:17,maxHp:17});
+ const before=owner.writes(),raw=owner.store.get('realhero:'+owner.heroId);
+ const report=inspector.inspect();
+ assert.equal(report.status,'review-required');
+ assert.equal(report.battleReady,false);
+ assert.ok(report.changes.some(x=>x.field==='maxHp'&&x.saved===17&&x.official===150));
+ assert.equal(report.canApplyAutomatically,false);
+ assert.equal(owner.store.get('realhero:'+owner.heroId),raw);
+ assert.deepEqual(owner.writes(),before);
+});
+test('old Capture moves require review; no authored skill is force-added to user saved team',async()=>{
+ const {owner,inspector}=await inspectRealCaptureProfile({abilities:['legacy-special-move']});
+ const original=owner.store.get('realhero:'+owner.heroId),before=owner.writes();
+ const report=inspector.inspect();
+ assert.equal(report.status,'review-required');
+ assert.ok(report.changes.some(x=>x.field==='activeAbilityIds'&&x.saved.includes('legacy-special-move')&&x.official.includes('fireball')));
+ assert.equal(report.canApplyAutomatically,false);
+ assert.equal(owner.store.get('realhero:'+owner.heroId),original);
+ assert.deepEqual(owner.writes(),before);
+});
+test('reserve, multiple local companions, unknown authored creature and empty World fail closed without mutations',async()=>{
+ const variants=[
+  {legacy:{reserve:true},expected:'unsupported'},
+  {legacy:{enemy:'species-not-in-official-catalog'},expected:'unsupported'}
+ ];
+ for(const {legacy,expected} of variants){
+  const {owner,inspector}=await inspectRealCaptureProfile(legacy);
+  const before=owner.writes(),raw=owner.store.get('realhero:'+owner.heroId);
+  const report=inspector.inspect();
+  assert.equal(report.status,expected);
+  assert.equal(report.battleReady,false);
+  assert.equal(report.canApplyAutomatically,false);
+  assert.equal(owner.store.get('realhero:'+owner.heroId),raw);
+  assert.deepEqual(owner.writes(),before);
+ }
+ const multi=await inspectRealCaptureProfile();
+ const changed=multi.owner.profile();changed.creatureTeam.push({...changed.creatureTeam[0],uid:'extra-player'});
+ multi.owner.replaceHero(changed);
+ const mark=multi.owner.writes();
+ assert.equal(multi.inspector.inspect().status,'unsupported');
+ assert.deepEqual(multi.owner.writes(),mark);
+ const empty=await inspectRealCaptureProfile();
+ empty.owner.replaceWorld({...empty.owner.world(),last:null});
+ const writes=empty.owner.writes();
+ assert.equal(empty.inspector.inspect().status,'no-wild');
+ assert.deepEqual(empty.owner.writes(),writes);
+});
+test('a changed World identity while diagnosing is rejected; never authorizes replay or migration',async()=>{
+ let reads=0;
+ const {owner,inspector}=await inspectRealCaptureProfile({},(s,binding)=>{
+  const reader=binding.readWorldState;
+  binding.readWorldState=()=>{reads++;const value=reader();return reads===1?value:{...value,last:{type:'wild',creatureId:'other',text:'changed'}}};
+ });
+ const before=owner.writes();
+ const report=inspector.inspect();
+ assert.equal(report.battleReady,false);
+ assert.equal(report.status,'stale');
+ assert.deepEqual(owner.writes(),before);
+ assert.equal(owner.world().last.creatureId,'crea_voltik');
+});

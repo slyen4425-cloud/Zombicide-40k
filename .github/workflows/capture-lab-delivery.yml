@@ -98,6 +98,11 @@ jobs:
           CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
           CAPTURE_OFFICIAL_HUB_SCREENSHOT: _site/capture-official-hub-landscape.png
         run: node --test tests/gens_capture_official_hub_composition_browser_v1.test.cjs
+      - name: Verify ORIGINAL World-rendered COMBATTRE, migration consent and native Combat in Chromium and Firefox
+        env:
+          NODE_PATH: /tmp/capture-lab-browser/node_modules
+          CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
+        run: node --test tests/gens_capture_real_wild_button_browser_v1.test.cjs
       - name: Upload version-locked payload (not deployed, no public game entry)
         uses: actions/upload-artifact@v4
         with:

@@ -47,7 +47,8 @@
     "persistent result application",
     "official animations and FX",
     "creature editor",
-    "reserves"
+    "reserves",
+    "explicit versioned and user-approved legacy profile migration"
   ],
   "stagedSavedProfileMapping": true,
   "authoredSourceLabPin": "65e21792ff74aea9862e528c8dbfdb22797b6693",
@@ -60,5 +61,12 @@
     "sourceIndexBlob": "17ba8e6f1faf6f8a0be8cdec68c4515d538ff646",
     "productionActivated": false,
     "notes": "Exact persisted Capture World/team owners executed, official authored Core provider, no public Hub override"
+  },
+  "readOnlyProfileReadiness": {
+    "source": "assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs",
+    "usesCanonicalBridge": "assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs",
+    "hasWriter": false,
+    "productionActivated": false,
+    "migrationApplied": false
   }
 }

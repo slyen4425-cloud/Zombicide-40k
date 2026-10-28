@@ -26,7 +26,8 @@
     "assets/gensrpg/capture/capture-official-hub-composition-v1.mjs",
     "assets/gensrpg/capture/capture-official-battle-view-v1.mjs",
     "assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs",
-    "assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs"
+    "assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs",
+    "assets/gensrpg/capture/capture-official-wild-entry-v1.mjs"
   ],
   "capturePreviewDirectory": "assets/gensrpg/capture/preview",
   "capturePreviewFiles": [
@@ -46,11 +47,12 @@
     "tests/gens_capture_lab_saved_hub_browser_v1.test.cjs",
     "tests/gens_capture_official_hub_composition_v1.test.cjs",
     "tests/gens_capture_official_hub_composition_browser_v1.test.cjs",
-    "tests/gens_capture_official_battle_view_v1.test.cjs"
+    "tests/gens_capture_official_battle_view_v1.test.cjs",
+    "tests/gens_capture_real_wild_button_v1.test.cjs",
+    "tests/gens_capture_real_wild_button_browser_v1.test.cjs"
   ],
   "remaining": [
-    "saved-profile runtime mounting in real game",
-    "persistent result application",
+    "the real public button now wired on stage; promotion gated by complete release/compatibility tests",
     "official animations and FX",
     "creature editor",
     "reserves"
@@ -95,5 +97,18 @@
     "usesNativeSkills": true,
     "ownsStorage": false,
     "ownsCombatRules": false
+  },
+  "originalWildBattleButton": {
+    "owner": "assets/gensrpg/capture/legacy-monolith-functions-v1.js",
+    "entry": "assets/gensrpg/capture/capture-official-wild-entry-v1.mjs",
+    "officialSourceSha": "65e21792ff74aea9862e528c8dbfdb22797b6693",
+    "stageWired": true,
+    "productionActivated": false,
+    "requiresExplicitMigrationConsent": true,
+    "supportedSpecies": [
+      "crea-loup",
+      "crea_voltik"
+    ],
+    "noLegacyEngineFallback": true
   }
 }

@@ -493,6 +493,7 @@ async function migrationSetup(legacy={}){
   loadHeroState:id=>s.owner.ctx.loadState(id),
   saveHeroState:(id,state)=>s.owner.ctx.saveHeroCreatureState(id,state),
   readEncounter:()=>s.owner.ctx.captureWorldState().last,
+  worldStorageKey:()=>s.owner.ctx.captureWorldKey(),
   authoredSource:s.a.source,readBattleSettings:()=>battle,combatSha:PIN
  });
  return {...s,migration:make(),makeMigration:make};

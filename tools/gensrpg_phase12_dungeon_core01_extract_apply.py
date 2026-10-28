@@ -435,7 +435,7 @@ def verify():
             # runtime authority. R01's original extraction remains byte-pinned;
             # its historical test projection must track the current approved
             # inventory rather than continue asserting the pre-preview count.
-            if path==PATH_GRAPH and current_blob==profile_upload["toBlob"]:
+            if path==PATH_GRAPH and current_blob==profile_upload["toBlob"] and "allJs.length" in expected_after:
                 manifest=json.loads((ROOT/"docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json").read_text())
                 preview_owner="assets/gensrpg/capture/preview/saved-hub-owners.js"
                 assert manifest["productionActivated"] is False, "preview cannot activate production"

@@ -203,3 +203,30 @@ test('native authored source, existing saved-profile seam and sole Core provider
  assert.equal(stored.gold,31);
  assert.equal(timers.size,0,'official Combat runtime timers released');
 });
+
+// Data-owned author matrix: verify every published species, not merely a
+// static list or a preview dummy. All definitions come from the same pinned Lab.
+test('all twelve pinned Lab author creature transfers export a genuine native 1v1 with their own skills', async()=>{
+ const official=["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"];
+ const settings=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/capture-lab-authored-preview-settings-v1.json'),'utf8'));
+ const transfers=settings.authoredCreatureFiles.map(read);
+ assert.equal(transfers.length,12,'the delivery must expose all 12 official species, not just two');
+ assert.deepEqual(transfers.map(x=>x.draft.id),official,'exact author order and IDs, no aliases or invented entries');
+ const author=await factory({creatureTransfers:transfers});
+ for(const creatureId of official){
+  const opponent=creatureId==='crea-loup'?'crea_voltik':creatureId;
+  const built=author.buildEncounter({...battle,
+   encounterId:'real-author-'+creatureId,
+   opponent:{instanceId:'wild-'+creatureId,creatureId:opponent}
+  });
+  const source=built.nativeCombatSource;
+  const exported=built.exported.creatures.find(x=>x.id===opponent);
+  assert.ok(exported,opponent+' official author missing');
+  assert.ok(source.fighterConfigs[opponent]?.maxHp>0,opponent+' native HP missing');
+  assert.equal(source.battleFormat.actors.find(x=>x.actorId==='opponent').creatureId,opponent);
+  assert.equal(source.skillIdsByActor.opponent.length,5,opponent+' five authored abilities required');
+  assert.ok(source.skillIdsByActor.opponent.every(id=>source.skills[id]),opponent+' official skills not imported');
+  assert.ok(exported.presentationId&&built.exported.presentation.creatures[exported.presentationId]?.visual?.front?.assetId,
+   opponent+' official face sprite missing');
+ }
+});

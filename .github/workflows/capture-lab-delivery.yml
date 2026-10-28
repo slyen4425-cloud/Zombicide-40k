@@ -5,6 +5,7 @@ on:
       - 'work/gensrpg-capture-official-delivery-package-*'
       - 'work/gensrpg-capture-official-hub-composition-*'
       - 'work/gensrpg-capture-pages-pinned-delivery-*'
+      - 'work/gensrpg-capture-official-battle-view-*'
   pull_request:
     paths:
       - 'tools/stage_capture_lab_delivery.mjs'
@@ -14,6 +15,8 @@ on:
       - 'tests/gens_capture_lab_delivery_v1.test.cjs'
       - 'tests/gens_capture_official_hub_composition_v1.test.cjs'
       - 'tests/gens_capture_official_hub_composition_browser_v1.test.cjs'
+      - 'tests/gens_capture_official_battle_view_v1.test.cjs'
+      - 'assets/gensrpg/capture/capture-official-battle-view-v1.mjs'
       - 'assets/gensrpg/capture/capture-official-hub-composition-v1.mjs'
       - '.github/workflows/capture-lab-delivery.yml'
       - 'tools/build_capture_lab_preview.mjs'
@@ -75,6 +78,7 @@ jobs:
         run: |
           node --test tests/gens_capture_lab_delivery_v1.test.cjs
           node --test tests/gens_capture_official_hub_composition_v1.test.cjs
+          node --test tests/gens_capture_official_battle_view_v1.test.cjs
           node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs
           node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
       - name: Install browsers for real official Hub landscape touch tests

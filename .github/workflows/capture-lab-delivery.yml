@@ -14,6 +14,7 @@ on:
       - 'assets/gensrpg/capture/capture-official-public-wild-v1.mjs'
       - 'assets/gensrpg/capture/legacy-monolith-functions-v1.js'
       - 'tests/gens_capture_public_wild_button_v1.test.cjs'
+      - 'tests/gens_capture_public_wild_button_browser_v1.test.cjs'
       - '.github/workflows/capture-lab-delivery.yml'
       - 'tools/build_capture_lab_preview.mjs'
       - 'tools/prepare_capture_lab_authored_preview.mjs'
@@ -84,6 +85,11 @@ jobs:
           NODE_PATH: /tmp/capture-lab-browser/node_modules
           CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
         run: node --test tests/gens_capture_official_hub_composition_browser_v1.test.cjs
+      - name: Browser gate — actual public Capture World COMBATTRE via pinned Lab, legacy migration consent
+        env:
+          NODE_PATH: /tmp/capture-lab-browser/node_modules
+          CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
+        run: node --test tests/gens_capture_public_wild_button_browser_v1.test.cjs
       - name: Upload version-locked payload (not deployed, no public game entry)
         uses: actions/upload-artifact@v4
         with:

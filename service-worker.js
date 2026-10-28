@@ -1,4 +1,5 @@
-const CACHE_NAME = "gensrpg-cache-16.78.116-capture-official-wild-v1";\n// V116: public wild Combat owner uses an immutable on-site Lab payload; preserve user saves.
+const CACHE_NAME = "gensrpg-cache-16.78.116-capture-official-wild-v1";
+// V116: public wild Combat owner uses an immutable on-site Lab payload; preserve user saves.
 // gensrpg-cache-16.78.114.11-native-ui-authority
 // gensrpg-cache-16.78.114.11-armor-melee-damage
 // gensrpg-cache-16.78.114.10-hit-entry-compositor-walls

@@ -637,3 +637,36 @@ test('migration: compatible official saved member requires zero writes and no co
  assert.throws(()=>s.migration.commit(plan,{acknowledged:plan.consentText}),/compatible|migration|required/i);
  assert.equal(s.owner.writes().hero,0);
 });
+
+
+test('migration: switching World ownership with identical wild data cannot migrate or roll back another world save',async()=>{
+ const s=await migrationSetup({hp:17,maxHp:17});
+ const plan=s.migration.prepare();
+ const originalWorld=s.owner.world();
+ s.owner.changeWorld('other-save-profile');
+ s.owner.replaceWorld(originalWorld); // identical content, different canonical storage key
+ assert.throws(()=>s.migration.commit(plan,{acknowledged:plan.consentText}),/stale|world|changed/i);
+ assert.equal(s.owner.writes().hero,0);
+ s.owner.changeWorld('my_saved_world');
+ const fresh=s.migration.prepare();
+ s.migration.commit(fresh,{acknowledged:fresh.consentText});
+ assert.equal(s.owner.writes().hero,1);
+ const consent=s.makeMigration().inspectRollback().consentText;
+ s.owner.changeWorld('other-save-profile');
+ assert.throws(()=>s.makeMigration().rollback({acknowledged:consent}),/world|encounter|changed/i);
+ assert.equal(s.owner.writes().hero,1);
+ s.owner.changeWorld('my_saved_world');
+ const rollback=s.makeMigration().rollback({acknowledged:consent});
+ assert.equal(rollback.restored,true);
+ assert.equal(s.owner.writes().hero,2);
+ assert.equal(s.owner.profile().creatureTeam[0].hp,17);
+});
+
+test('migration: malformed historic ability lists are rejected rather than guessed',async()=>{
+ const s=await migrationSetup({hp:17,maxHp:17});
+ const state=s.owner.profile();
+ state.creatureTeam[0].activeAbilityIds='legacy-skill-as-string';
+ s.owner.replaceHero(state);
+ assert.throws(()=>s.migration.prepare(),/ability|array|list/i);
+ assert.equal(s.owner.writes().hero,0);
+});

@@ -28,14 +28,14 @@ const snapshot=read('tests/fixtures/gensrpg-phase12-r10-capture-original-owner-2
 assert.equal(snapshot.length,61943,'historical R10 owner archive original bytes');
 assert.equal(blob(snapshot),'c6ea3c101a6861b99f8bc064d2d1fec874e7266b','R10 certified rollback remains immutable');
 const canonical=read(original).toString('utf8'),originalR10=snapshot.toString('utf8');
-const functionNames=s=>[...s.matchAll(/^function (capture[A-Za-z0-9_$]+)\\s*\\(/gm)].map(m=>m[1]);
+const functionNames=s=>[...s.matchAll(/^function (capture[A-Za-z0-9_$]+)\s*\(/gm)].map(m=>m[1]);
 assert.equal(functionNames(originalR10).length,90);
 assert.deepEqual(functionNames(canonical),functionNames(originalR10),'90 original Capture declarations exactly once, in original order');
 assert.equal(functionNames(canonical).filter(n=>n==='captureStartWildBattle').length,1);
 const wildSection=canonical.slice(canonical.indexOf('function captureStartWildBattle('),canonical.indexOf('function captureOpenTrainerBattle('));
-assert.match(wildSection,/capture-official-wild-entry-v1\\.mjs/,'true original public World click calls the official entry');
-assert.doesNotMatch(wildSection,/captureStartBattleAutomatic\\(/,'wild must never fall back to old Core');
-assert.doesNotMatch(canonical,/window\\.captureStartWildBattle\\s*=/,'no parallel override');
+assert.match(wildSection,/capture-official-wild-entry-v1\.mjs/,'true original public World click calls the official entry');
+assert.doesNotMatch(wildSection,/captureStartBattleAutomatic\(/,'wild must never fall back to old Core');
+assert.doesNotMatch(canonical,/window\.captureStartWildBattle\s*=/,'no parallel override');
 assert.ok(!html.includes('capture-lab-saved-hub-preview.html'));
 assert.ok(!html.includes('saved-hub.mjs'));
 assert.ok(!html.includes('capture-lab-hub-battle-command-v1.mjs'));

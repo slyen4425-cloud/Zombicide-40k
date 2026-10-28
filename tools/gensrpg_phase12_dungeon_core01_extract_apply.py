@@ -430,6 +430,22 @@ def verify():
                         expected_after,n=re.subn(expression,value,expected_after)
                         assert n==1, f"R16 current graph match count changed: {expression}"
                         break
+            # The saved-Hub preview adds one explicit, unreachable classic JS
+            # file to physical inventory (159 -> 160), with NO new loaded
+            # runtime authority. R01's original extraction remains byte-pinned;
+            # its historical test projection must track the current approved
+            # inventory rather than continue asserting the pre-preview count.
+            if path==PATH_GRAPH and current_blob==profile_upload["toBlob"] and "allJs.length" in expected_after:
+                manifest=json.loads((ROOT/"docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json").read_text())
+                preview_owner="assets/gensrpg/capture/preview/saved-hub-owners.js"
+                assert manifest["productionActivated"] is False, "preview cannot activate production"
+                assert manifest["capturePreviewDirectory"]=="assets/gensrpg/capture/preview"
+                assert manifest["capturePreviewFiles"].count("saved-hub-owners.js")==1, "preview owner not explicitly inventoried"
+                assert (ROOT/preview_owner).is_file(), "preview-only owner file missing"
+                assert "assert.equal(allJs.length,160," in updated, "live graph changed without approved inventory"
+                assert "assert.equal(reachable.size,135," in updated, "preview must not increase production reachability"
+                assert expected_after.count("allJs.length,159,")==1, "R01 historical 159 baseline changed"
+                expected_after=expected_after.replace("allJs.length,159,","allJs.length,160,",1)
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

@@ -51,6 +51,16 @@ class ExitInventoryTests(unittest.TestCase):
             (historical / "index.html").write_bytes(original)
             for name in ("tools", "assets", "docs"):
                 os.symlink(root / name, historical / name, target_is_directory=True)
+            # R09 restoration traverses R10: its certified historical owner is
+            # now archived (never loaded at runtime) under tests/fixtures.
+            # The isolated historical workspace must expose that real archive
+            # without altering rollback source, expected hashes or game data.
+            (historical / "tests").mkdir()
+            os.symlink(
+                root / "tests" / "fixtures",
+                historical / "tests" / "fixtures",
+                target_is_directory=True,
+            )
             r08_index = subprocess.check_output(
                 ["node", str(root / "tools/gensrpg_phase12_r09_wave_extract_apply.cjs"), "--restore-r08"],
                 cwd=historical,

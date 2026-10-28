@@ -94,6 +94,10 @@ async function seed(page,{oldHp=false,unsupported=false,wild=null}={}){
    last:{type:'wild',creatureId:unsupported?'crea_unsupported':(wild||'crea_voltik'),
     text:'Rencontre sauvage réelle'}});
   renderCaptureEncounterPage();
+  // The real Capture owner closes this modal when entering combat. A second
+  // wild encounter must reopen the same original UI through its canonical
+  // owner before the user can tap COMBATTRE again; never force a hidden tap.
+  captureOpenModal('captureEncounterModal');
  },{oldHp,unsupported,wild});
  await page.locator('#captureEncounterModalBody button[onclick^="captureStartWildBattle"]').waitFor();
 }

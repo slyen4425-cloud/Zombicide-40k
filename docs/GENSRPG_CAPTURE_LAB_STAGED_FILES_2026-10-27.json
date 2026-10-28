@@ -22,7 +22,8 @@
     "assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs",
     "assets/gensrpg/capture/combat-lab-authored-source-v1.mjs",
     "assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs",
-    "assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs"
+    "assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs",
+    "assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs"
   ],
   "capturePreviewDirectory": "assets/gensrpg/capture/preview",
   "capturePreviewFiles": [
@@ -59,5 +60,13 @@
     "sourceIndexBlob": "17ba8e6f1faf6f8a0be8cdec68c4515d538ff646",
     "productionActivated": false,
     "notes": "Exact persisted Capture World/team owners executed, official authored Core provider, no public Hub override"
+  },
+  "stagedExplicitProfileMigration": {
+    "schema": "gensrpg-capture-lab-profile-migration-v1",
+    "version": 1,
+    "productionActivated": false,
+    "requiresConsent": true,
+    "oneOwner": "assets/gensrpg/capture/team-roster-v1.js",
+    "fullCatalogMigration": false
   }
 }

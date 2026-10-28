@@ -30,6 +30,7 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    page.on('request',req=>{if(!req.url().startsWith(origin+'/'))outbound.push(req.url());});
    await page.goto(origin+'/capture-lab-saved-hub-preview.html');
    await page.locator('#hub-status[data-ready="true"]').waitFor();
+   await page.locator('#hub-compatibility[data-status="ready"]').waitFor();
    assert.ok(await page.getByRole('heading',{name:'Rencontre sauvegardée Capture'}).isVisible());
    assert.ok(await page.getByText('Ma forêt du créateur').isVisible());
    const before=await page.evaluate(()=>({
@@ -86,6 +87,8 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    });
    await page.getByRole('button',{name:'COMBATTRE · Labo officiel'}).tap();
    await page.locator('#hub-status[data-incompatible="true"]').waitFor();
+   await page.locator('#hub-compatibility[data-status="review-required"]').waitFor();
+   assert.match(await page.locator('#hub-compatibility').innerText(),/migration|PV max|aucune donnée modifiée/i);
    const refused=await page.evaluate(()=>({
     heroRaw:localStorage.getItem('gensrpg_capture_lab_saved_preview_hero_trainer-preview'),
     worldRaw:localStorage.getItem(captureWorldKey()),

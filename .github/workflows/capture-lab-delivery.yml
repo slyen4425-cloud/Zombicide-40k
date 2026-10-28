@@ -27,6 +27,7 @@ on:
       - '.github/workflows/capture-lab-delivery.yml'
       - 'service-worker.js'
       - 'tests/gens_capture_pwa_offline_pinned_media_v1.test.cjs'
+      - 'tests/gens_capture_pwa_offline_pinned_media_browser_v1.test.cjs'
       - 'tools/build_capture_lab_preview.mjs'
       - 'tools/prepare_capture_lab_authored_preview.mjs'
       - 'docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'
@@ -108,6 +109,11 @@ jobs:
           NODE_PATH: /tmp/capture-lab-browser/node_modules
           CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
         run: node --test tests/gens_capture_real_wild_button_browser_v1.test.cjs
+      - name: Verify actual service worker and immutable official sprite warm/offline in landscape Chromium + Firefox
+        env:
+          NODE_PATH: /tmp/capture-lab-browser/node_modules
+          CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
+        run: node --test tests/gens_capture_pwa_offline_pinned_media_browser_v1.test.cjs
       - name: Upload version-locked payload (not deployed, no public game entry)
         uses: actions/upload-artifact@v4
         with:

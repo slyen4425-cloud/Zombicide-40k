@@ -66,7 +66,7 @@ function isPinnedCaptureLabImage(request,url){
   const prefix="/slyen4425-cloud/GenSrpg_labo_combat_dynamique/";
   if(!url.pathname.startsWith(prefix))return false;
   const remaining=url.pathname.slice(prefix.length);
-  return /^[0-9a-f]{40}\\/assets\\/library\\/.+\\.(?:png|jpe?g|webp|gif)$/i.test(remaining);
+  return /^[0-9a-f]{40}[/]assets[/]library[/].+[.](?:png|jpe?g|webp|gif)$/i.test(remaining);
 }
 async function officialCaptureImageNetworkFirst(request){
   try{

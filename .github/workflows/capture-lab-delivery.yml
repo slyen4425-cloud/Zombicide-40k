@@ -10,6 +10,7 @@ on:
       - 'tools/stage_capture_lab_delivery.mjs'
       - '.github/workflows/main.yml'
       - 'tests/gens_capture_lab_pages_pipeline_v1.test.cjs'
+      - 'tests/gens_capture_lab_pages_site_v1.test.cjs'
       - 'tests/gens_capture_lab_delivery_v1.test.cjs'
       - 'tests/gens_capture_official_hub_composition_v1.test.cjs'
       - 'tests/gens_capture_official_hub_composition_browser_v1.test.cjs'

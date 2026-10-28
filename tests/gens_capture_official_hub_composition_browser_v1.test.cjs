@@ -129,6 +129,11 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    await page.locator('#arena:not([hidden]) #capture-official-flee').waitFor();
    assert.equal(await page.locator('#arena .hub-fighter').count(),2,'one official player and one official opponent');
    assert.equal(await page.locator('#arena img[data-author-asset-id]').count(),2,'authoritative front/back media');
+   await page.waitForFunction(()=>[...document.querySelectorAll('#arena img[data-author-asset-id]')]
+     .every(img=>img.complete&&img.naturalWidth>0),null,{timeout:14000});
+   if(process.env.CAPTURE_OFFICIAL_HUB_SCREENSHOT&&name==='Chromium'){
+    await page.screenshot({path:process.env.CAPTURE_OFFICIAL_HUB_SCREENSHOT,fullPage:true});
+   }
    assert.ok(await page.getByRole('button',{name:'Griffe',exact:true}).isVisible());
    assert.ok(await page.getByRole('button',{name:'Boule de feu',exact:true}).isVisible());
    assert.match(await page.locator('#arena').innerText(),/Énergie/,'real Core energy visible');

@@ -71,7 +71,7 @@ const staged=JSON.parse(read('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.j
 assert.equal(staged.schemaVersion,1);assert.equal(staged.productionActivated,false);
 const stagedCaptureScripts=staged.classicScripts.filter(file=>file.startsWith('assets/gensrpg/capture/'));
 assert.equal(stagedCaptureScripts.length,8,'every opt-in Capture script must be audited');
-assert.equal(staged.captureEsmAdapters.length,7,'Capture opt-in consumers: two Lab adapters, profile, authored source, World ticket, Hub command and one packaged composer');
+assert.equal(staged.captureEsmAdapters.length,9,'Capture opt-in consumers include one official composer, read-only profile diagnosis and consented migration');
 assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-official-hub-composition-v1.mjs'));
 assert.ok(staged.coverage.includes('tests/gens_capture_official_hub_composition_v1.test.cjs'));
 const officialComposer=read('assets/gensrpg/capture/capture-official-hub-composition-v1.mjs');
@@ -87,6 +87,16 @@ assert.match(authored,/exportEditorDrafts\(/,'native Combat Lab exporter is the 
 assert.doesNotMatch(authored,/localStorage|createCombatSession|createCombatRuntime|startSkill|location\.reload/,'catalog consumer owns neither storage nor combat execution');
 assert.equal(staged.stagedHubBattleCommand,true);
 assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs'));
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs'));
+const readOnlyProfile=read('assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs');
+assert.doesNotMatch(readOnlyProfile,/localStorage\.|window\.captureStartWildBattle\s*=|saveHeroState\(heroId/,'readiness cannot own storage or globally override Combat');
+assert.equal(staged.readOnlyProfileReadiness?.hasWriter,false);
+assert.equal(staged.readOnlyProfileReadiness?.productionActivated,false);
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs'));
+assert.equal(staged.stagedExplicitProfileMigration?.schema,'gensrpg-capture-lab-profile-migration-v1');
+assert.equal(staged.stagedExplicitProfileMigration?.requiresConsent,true);
+assert.equal(staged.stagedExplicitProfileMigration?.productionActivated,false);
+assert.equal(staged.stagedExplicitProfileMigration?.oneOwner,'assets/gensrpg/capture/team-roster-v1.js');
 const hubCommand=read('assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs');
 assert.match(hubCommand,/combatPort\.startEncounter\(/,'Hub must use the existing single Combat owner');
 assert.match(hubCommand,/transaction\.prepareWild\(/,'Hub must read the original World ticket');

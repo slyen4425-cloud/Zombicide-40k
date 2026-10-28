@@ -88,7 +88,7 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    await page.getByRole('button',{name:'COMBATTRE · Labo officiel'}).tap();
    await page.locator('#hub-status[data-incompatible="true"]').waitFor();
    await page.locator('#hub-compatibility[data-status="review-required"]').waitFor();
-   assert.match(await page.locator('#hub-compatibility').innerText(),/migration|PV max|aucune donnée modifiée/i);
+   assert.match(await page.locator('#hub-compatibility').innerText(),/profil|PV max|aucune donnée modifiée/i);
    const refused=await page.evaluate(()=>({
     heroRaw:localStorage.getItem('gensrpg_capture_lab_saved_preview_hero_trainer-preview'),
     worldRaw:localStorage.getItem(captureWorldKey()),
@@ -99,6 +99,57 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    assert.equal(refused.worldRaw,old.worldRaw,'incompatible profile must not stamp the real wild encounter');
    assert.equal(refused.writes,old.writes);
    assert.equal(refused.port.installed,false);
+
+   // The preview now exposes a genuine user-consent path for the historical
+   // HP 17 profile: inspect first (zero writes), then confirm once through
+   // the original roster owner, retry the official Combat and block a stale
+   // rollback after the World owner consumed the finished encounter.
+   await page.getByRole('button',{name:'Préparer la migration du profil'}).tap();
+   await page.locator('#hub-migration-detail[data-status="migration-required"]').waitFor();
+   const details=await page.locator('#hub-migration-detail').innerText();
+   assert.match(details,/17\/17/);
+   assert.match(details,/150\/150/);
+   const inspection=await page.evaluate(()=>({
+    heroRaw:localStorage.getItem('gensrpg_capture_lab_saved_preview_hero_trainer-preview'),
+    worldRaw:localStorage.getItem(captureWorldKey()),
+    writes:globalThis.capturePreviewHeroWrites
+   }));
+   assert.deepEqual(inspection,{heroRaw:old.heroRaw,worldRaw:old.worldRaw,writes:old.writes},
+    'read-only official author inspection must not mutate the persisted owner');
+   await page.getByRole('button',{name:'Confirmer la migration'}).tap();
+   await page.locator('#hub-migration-detail[data-status="migrated"]').waitFor();
+   const migrated=await page.evaluate(()=>({
+    hero:loadState('trainer-preview'),
+    worldRaw:localStorage.getItem(captureWorldKey()),
+    writes:globalThis.capturePreviewHeroWrites
+   }));
+   assert.equal(migrated.hero.creatureTeam[0].hp,150);
+   assert.equal(migrated.hero.creatureTeam[0].maxHp,150);
+   assert.equal(migrated.hero.captureLabProfileMigrationV1.version,1);
+   assert.equal(migrated.hero.captureLabProfileMigrationV1.originalMember.hp,17);
+   assert.equal(migrated.writes,old.writes+1,'exactly one canonical save for explicit consent');
+   assert.equal(migrated.worldRaw,old.worldRaw);
+   await page.getByRole('button',{name:'COMBATTRE · Labo officiel'}).tap();
+   await page.locator('#live-battle:not([hidden])').waitFor();
+   await page.getByRole('button',{name:'Fuir',exact:true}).tap();
+   await page.locator('#hub-status[data-outcome="flee"]').waitFor();
+   const afterMigrationBattle=await page.evaluate(()=>({
+    hero:loadState('trainer-preview'),
+    world:captureWorldState(),
+    writes:globalThis.capturePreviewHeroWrites
+   }));
+   assert.equal(afterMigrationBattle.writes,old.writes+2,
+    'the subsequent actual Core result saves the hero only once');
+   assert.equal(afterMigrationBattle.world.last.type,'resolved');
+   await page.getByRole('button',{name:'Revenir au profil initial'}).tap();
+   await page.locator('#hub-migration-detail[data-status="revert-blocked"]').waitFor();
+   const blocked=await page.evaluate(()=>({
+    hero:loadState('trainer-preview'),
+    world:captureWorldState(),
+    writes:globalThis.capturePreviewHeroWrites
+   }));
+   assert.deepEqual(blocked,afterMigrationBattle,
+    'the original 17HP member must not be restored after official Combat');
    assert.deepEqual(pageErrors,[]);
    assert.ok(outbound.every(url=>/^https:\/\/raw\.githubusercontent\.com\/slyen4425-cloud\/GenSrpg_labo_combat_dynamique\/[0-9a-f]{40}\/assets\/library\//.test(url)),
     'external media must be official immutable SHA only');

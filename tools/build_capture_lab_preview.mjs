@@ -44,6 +44,7 @@ if(media){
     'assets/gensrpg/capture/combat-lab-authored-source-v1.mjs',
     'assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs',
     'assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs',
+    'assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs',
     'assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs'
   ])copy(join(root,name),join(output,name));
 

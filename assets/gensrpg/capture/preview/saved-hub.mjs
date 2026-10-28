@@ -139,7 +139,11 @@ try{
  migration=createCaptureSavedProfileLabMigrationV1({
   activeHeroId:()=>captureActiveHeroId(),
   loadHeroState:id=>loadState(id),
-  saveHeroState:(id,next)=>saveHeroCreatureState(id,next),
+  saveHeroState:(id,next)=>{
+   // Preview counts the *same* real roster owner call as Combat result saves.
+   saveHeroCreatureState(id,next);
+   globalThis.capturePreviewHeroWrites++;
+  },
   readEncounter:()=>captureWorldState().last,
   authoredSource:author,readBattleSettings:()=>inputs.battleSettings,
   combatSha:COMBAT_LAB_SOURCE_V1.sha

@@ -1,7 +1,7 @@
 name: Capture official Combat runtime
 on:
   push:
-    branches: ['work/gensrpg-capture-lab-bridge-runtime-*', 'work/gensrpg-capture-lab-bridge-history-*']
+    branches: ['work/gensrpg-capture-lab-bridge-runtime-*', 'work/gensrpg-capture-lab-bridge-history-*', 'work/gensrpg-capture-explicit-profile-migration-*']
   pull_request:
     paths:
       - 'assets/gensrpg/capture/combat-lab-*'
@@ -24,6 +24,8 @@ on:
       - 'tests/gens_capture_world_lab_wild_transaction_v1.test.cjs'
       - 'assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs'
       - 'assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs'
+      - 'assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs'
+      - 'assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs'
       - 'capture-lab-authored-preview.html'
       - 'tools/prepare_capture_lab_authored_preview.mjs'
       - 'tests/fixtures/capture-lab-authored-preview-settings-v1.json'

@@ -29,6 +29,7 @@ const html=[
  'function loadState(id){return JSON.parse(localStorage.getItem(key(id))||"{}")}',
  'function loadSharedEntities(){return [{id:"crea-loup",name:"Loup volcanique",hp:150},{id:"crea_voltik",name:"Voltige",hp:120}]}',
  '</script>',
+ '<script src="/assets/gensrpg/core/asset-resolver-v1.js"></script>',
  '<script src="/assets/gensrpg/capture/battle-bridge-contract-v1.js"></script>',
  '<script src="/assets/gensrpg/capture/lab-ownership-port-v1.js"></script>',
  '<script src="/assets/gensrpg/capture/world-exploration-v1.js"></script>',
@@ -70,6 +71,7 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    await page.goto(origin+'/browser-case');
    await page.evaluate(async()=>{
     const {createCaptureOfficialHubCompositionV1}=await import('/assets/gensrpg/capture/capture-official-hub-composition-v1.mjs');
+    const {createCaptureOfficialBattleViewV1}=await import('/assets/gensrpg/capture/capture-official-battle-view-v1.mjs');
     const inputs=await (await fetch('/assets/gensrpg/capture/runtime-data/author-inputs.json')).json();
     const heroId=captureActiveHeroId(),player=inputs.creatureTransfers.find(x=>x.draft.id==='crea-loup');
     const loadout=player.loadout.slots.map(x=>x.skillId).filter(Boolean);
@@ -98,17 +100,14 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
     };
     const arena=document.getElementById('arena');
     const status=document.getElementById('status');
+    const officialView=createCaptureOfficialBattleViewV1({host:arena,assetResolver:GensAssetResolverV1});
     const command=await createCaptureOfficialHubCompositionV1({
      siteBaseUrl:new URL('/',document.baseURI),
      owners,combatPort:GensCaptureLabOwnershipPortV1,
      validateBattleResult:GensCaptureBattleBridgeContractV1.result,
      mountBattle:(handle,ctx,refs)=>{
       if(!refs.publishedSpecies.includes('crea_voltik'))throw Error('real author missing');
-      arena.hidden=false;
-      const flee=document.createElement('button');flee.id='flee';flee.textContent='Fuir';
-      flee.onclick=()=>handle.flee();arena.replaceChildren(flee);
-      return {render(state){status.dataset.hp=String(state.fighters.player.hp)},
-       dispose(){arena.hidden=true;arena.replaceChildren();}};
+      return officialView(handle,ctx,refs);
      },
      onReturn:e=>{window.capturedEvents.push(e);status.dataset.outcome=e.outcome||'cancelled';},
      onError:e=>{window.captureStartError=e.error?.message||String(e.error);status.dataset.outcome='error';}
@@ -127,9 +126,18 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    }));
    assert.equal(first.port.installed,false);
    await page.getByRole('button',{name:'COMBATTRE'}).tap();
-   await page.locator('#arena:not([hidden]) #flee').waitFor();
-   assert.equal(await page.locator('#arena button').count(),1);
-   await page.locator('#flee').tap();
+   await page.locator('#arena:not([hidden]) #capture-official-flee').waitFor();
+   assert.equal(await page.locator('#arena .hub-fighter').count(),2,'one official player and one official opponent');
+   assert.equal(await page.locator('#arena img[data-author-asset-id]').count(),2,'authoritative front/back media');
+   await page.waitForFunction(()=>[...document.querySelectorAll('#arena img[data-author-asset-id]')]
+     .every(img=>img.complete&&img.naturalWidth>0),null,{timeout:14000});
+   if(process.env.CAPTURE_OFFICIAL_HUB_SCREENSHOT&&name==='Chromium'){
+    await page.screenshot({path:process.env.CAPTURE_OFFICIAL_HUB_SCREENSHOT,fullPage:true});
+   }
+   assert.ok(await page.getByRole('button',{name:'Griffe',exact:true}).isVisible());
+   assert.ok(await page.getByRole('button',{name:'Boule de feu',exact:true}).isVisible());
+   assert.match(await page.locator('#arena').innerText(),/Énergie/,'real Core energy visible');
+   await page.locator('#capture-official-flee').tap();
    await page.locator('#status[data-outcome="flee"]').waitFor();
    const after=await page.evaluate(()=>({
     hero:loadState('trainer-preview'),world:captureWorldState(),

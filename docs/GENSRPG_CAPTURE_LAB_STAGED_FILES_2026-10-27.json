@@ -24,6 +24,7 @@
     "assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs",
     "assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs",
     "assets/gensrpg/capture/capture-official-hub-composition-v1.mjs",
+    "assets/gensrpg/capture/capture-official-battle-view-v1.mjs",
     "assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs",
     "assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs"
   ],
@@ -44,7 +45,8 @@
     "tests/gens_capture_world_lab_wild_transaction_v1.test.cjs",
     "tests/gens_capture_lab_saved_hub_browser_v1.test.cjs",
     "tests/gens_capture_official_hub_composition_v1.test.cjs",
-    "tests/gens_capture_official_hub_composition_browser_v1.test.cjs"
+    "tests/gens_capture_official_hub_composition_browser_v1.test.cjs",
+    "tests/gens_capture_official_battle_view_v1.test.cjs"
   ],
   "remaining": [
     "saved-profile runtime mounting in real game",
@@ -85,5 +87,13 @@
     "requiresConsent": true,
     "oneOwner": "assets/gensrpg/capture/team-roster-v1.js",
     "fullCatalogMigration": false
+  },
+  "stagedOfficialBattleView": {
+    "productionActivated": false,
+    "source": "official authored Lab Core and original Capture World/roster",
+    "visuals": "GensAssetResolverV1",
+    "usesNativeSkills": true,
+    "ownsStorage": false,
+    "ownsCombatRules": false
   }
 }

@@ -71,7 +71,16 @@ const staged=JSON.parse(read('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.j
 assert.equal(staged.schemaVersion,1);assert.equal(staged.productionActivated,false);
 const stagedCaptureScripts=staged.classicScripts.filter(file=>file.startsWith('assets/gensrpg/capture/'));
 assert.equal(stagedCaptureScripts.length,8,'every opt-in Capture script must be audited');
-assert.equal(staged.captureEsmAdapters.length,9,'Capture opt-in consumers include one official composer, read-only profile diagnosis and consented migration');
+assert.equal(staged.captureEsmAdapters.length,10,'Capture opt-in consumers include one official composer, native battle view, read-only diagnosis and consented migration');
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-official-battle-view-v1.mjs'));
+assert.equal(staged.stagedOfficialBattleView?.productionActivated,false);
+assert.equal(staged.stagedOfficialBattleView?.ownsStorage,false);
+assert.equal(staged.stagedOfficialBattleView?.ownsCombatRules,false);
+assert.ok(staged.coverage.includes('tests/gens_capture_official_battle_view_v1.test.cjs'));
+const officialBattleView=read('assets/gensrpg/capture/capture-official-battle-view-v1.mjs');
+assert.match(officialBattleView,/resolveCaptureLabAsset/,'author sprites only through the central resolver');
+assert.match(officialBattleView,/battle.useSkill\(/,'buttons must call native Core');
+assert.doesNotMatch(officialBattleView,/localStorage|setInterval|window\.captureStartWildBattle\s*=/,'no second combat/storage/global authority');
 assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-official-hub-composition-v1.mjs'));
 assert.ok(staged.coverage.includes('tests/gens_capture_official_hub_composition_v1.test.cjs'));
 const officialComposer=read('assets/gensrpg/capture/capture-official-hub-composition-v1.mjs');

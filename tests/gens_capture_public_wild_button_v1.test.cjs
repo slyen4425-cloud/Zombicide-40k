@@ -1,0 +1,50 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const vm=require('node:vm');
+const root=path.resolve(__dirname,'..');
+const source=rel=>fs.readFileSync(path.join(root,rel),'utf8');
+const owner=source('assets/gensrpg/capture/legacy-monolith-functions-v1.js');
+const view=source('assets/gensrpg/capture/capture-official-public-wild-v1.mjs');
+const composer=source('assets/gensrpg/capture/capture-official-hub-composition-v1.mjs');
+test('original World onclick has exactly one official public wild function owner, never the historical auto combat engine',()=>{
+ const declarations=[...owner.matchAll(/^function captureStartWildBattle\(creatureId\)\{/gm)];
+ assert.equal(declarations.length,1,'one original active declaration; no global override');
+ const start=owner.indexOf('function captureStartWildBattle(creatureId){');
+ const end=owner.indexOf('\nfunction captureOpenTrainerBattle()',start);
+ assert.ok(end>start);
+ const body=owner.slice(start,end);
+ assert.match(body,/capture-official-public-wild-v1\.mjs/);
+ assert.doesNotMatch(body,/captureStartBattleAutomatic|gensCreateCaptureBattle|captureWildEnemyRoster/,'wild button cannot run old battle engine');
+ assert.doesNotMatch(owner,/window\.captureStartWildBattle\s*=/,'no second global wild callback authority');
+ new vm.Script(owner);
+});
+test('public entry reuses existing Lab composer, canonical owners and explicit migration; never rewrites saves on load',()=>{
+ assert.match(view,/createCaptureOfficialHubCompositionV1/);
+ assert.match(view,/createCaptureSavedProfileLabMigrationV1/);
+ assert.match(view,/\.prepare\(\)/);
+ assert.match(view,/\.commit\(/);
+ assert.match(view,/consent/i);
+ assert.match(view,/\.startWildBattle\(/);
+ assert.match(view,/saveHeroCreatureState|saveHeroState/);
+ assert.match(view,/captureWorldState|readWorldState/);
+ assert.doesNotMatch(view,/gensCreateCaptureBattle|captureStartBattleAutomatic|window\.captureStartWildBattle\s*=|localStorage\.setItem/);
+ assert.match(composer,/createCaptureLabHubBattleCommandV1/);
+});
+test('public battle view provides its own disposable UI and explicit manual recovery for commit conflicts',()=>{
+ assert.match(view,/\.useSkill\(/);
+ assert.match(view,/\.flee\(/);
+ assert.match(view,/\.retryCommit\(/);
+ assert.match(view,/\.dispose\(/);
+ assert.match(view,/pagehide/);
+ assert.match(view,/data-capture-official/);
+});
+test('the source index remains the user verified exact HTML; no accidental modification of other modes',()=>{
+ const bytes=fs.readFileSync(path.join(root,'index.html'));
+ const gitBlob=require('node:crypto').createHash('sha1').update('blob '+bytes.length+'\\0').update(bytes).digest('hex');
+ assert.equal(gitBlob,'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646');
+ const world=source('assets/gensrpg/capture/world-exploration-v1.js');
+ assert.match(world,/captureStartWildBattle/);
+});

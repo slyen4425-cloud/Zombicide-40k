@@ -43,7 +43,8 @@ if(media){
     'assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs',
     'assets/gensrpg/capture/combat-lab-authored-source-v1.mjs',
     'assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs',
-    'assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs'
+    'assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs',
+    'assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs'
   ])copy(join(root,name),join(output,name));
 
   execFileSync(process.execPath,[join(root,'tools/prepare_capture_lab_authored_preview.mjs'),lab,media,output],{

@@ -33,9 +33,21 @@ test('real public Shell unchanged, no alternate Combat runtime or premature PWA 
  const source=rel(root,'index.html').toString('utf8');
  const sw=rel(site,'service-worker.js');
  assert.deepEqual(sw,rel(root,'service-worker.js'),'never rewrite the PWA cache during dormant delivery');
- assert.ok(html.includes('src="assets/gensrpg/capture/legacy-monolith-functions-v1.js"'));
- assert.ok(html.includes('src="assets/gensrpg/capture/world-exploration-v1.js"'));
- assert.ok(html.includes('src="assets/gensrpg/capture/team-roster-v1.js"'));
+ // Exact script tags from the user-certified index (Git blob
+ // 17ba8e6f1faf6f8a0be8cdec68c4515d538ff646). World and roster are
+ // deliberately versioned ?v=1; the live Pages output must preserve both
+ // source and order, without injecting a second Capture owner.
+ const ownerTags=[
+  'src="assets/gensrpg/capture/world-exploration-v1.js?v=1"',
+  'src="assets/gensrpg/capture/team-roster-v1.js?v=1"',
+  'src="assets/gensrpg/capture/legacy-monolith-functions-v1.js"'
+ ];
+ for(const tag of ownerTags){
+  assert.equal(source.split(tag).length-1,1,'certified index must have one '+tag);
+  assert.equal(html.split(tag).length-1,1,'Pages output must preserve one '+tag);
+ }
+ assert.ok(ownerTags.every((tag,i)=>i===0||html.indexOf(ownerTags[i-1])<html.indexOf(tag)),
+  'Pages output must preserve Capture World → roster → unique historic owner order');
  assert.ok(!html.includes('src="vendor/combat-lab/'),'no silent engine load');
  assert.ok(!html.includes('src="assets/gensrpg/capture/runtime-data/'));
  assert.ok(!source.includes('vendor/combat-lab/'),'historical source remains pinned');

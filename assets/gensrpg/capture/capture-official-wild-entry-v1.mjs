@@ -109,6 +109,7 @@ function close(entry,{render=true}={}){
  entry.closed=true;
  try{entry.controller?.dispose();}finally{
   globalThis.removeEventListener?.('pagehide',entry.onPageHide);
+  globalThis.removeEventListener?.('beforeunload',entry.onBeforeUnload);
   entry.ui.shell.remove();active=null;
   if(render)redrawCaptureWorld();
  }
@@ -129,7 +130,7 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
  if(active)throw new Error('Un combat officiel Capture est déjà en cours.');
  const requested=text(creatureId);
  if(!requested)throw new TypeError('Créature sauvage manquante');
- const entry={closed:false,controller:null,ui:createDialog(),onPageHide:null};
+ const entry={closed:false,controller:null,ui:createDialog(),onPageHide:null,onBeforeUnload:null};
  active=entry;
  entry.ui.back.addEventListener('click',()=>{
   try{
@@ -147,8 +148,20 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
   catch(error){visibleFailure(entry,error,{commitPending:true});}
  };
  globalThis.addEventListener?.('pagehide',entry.onPageHide);
+ entry.onBeforeUnload=event=>{
+  if(entry.controller?.status().phase==='commit-pending'){
+   event.preventDefault();
+   event.returnValue='Une sauvegarde du combat est encore en attente.';
+  }
+ };
+ globalThis.addEventListener?.('beforeunload',entry.onBeforeUnload);
  try{
   const owners=worldOwners(),world=owners.readWorldState();
+  if(globalThis.gensCurrentCaptureBattle){
+   throw new Error('Un autre combat Capture est toujours actif.');
+  }
+  const initialHero=owners.activeHeroId(),initialWorldKey=owners.worldStorageKey();
+  const initialWorld=JSON.stringify(world),initialProfile=JSON.stringify(owners.loadHeroState(initialHero));
   if(world?.last?.type!=='wild'||text(world.last.creatureId)!==requested){
    throw new Error('Cette rencontre sauvage n’est plus active dans le monde.');
   }
@@ -181,6 +194,14 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
    controller.dispose();return false;
   }
   entry.controller=controller;
+  if(owners.activeHeroId()!==initialHero||owners.worldStorageKey()!==initialWorldKey||
+     JSON.stringify(owners.readWorldState())!==initialWorld||
+     JSON.stringify(owners.loadHeroState(initialHero))!==initialProfile){
+   throw new Error('Le profil ou la rencontre sauvage a changé pendant le chargement du Labo.');
+  }
+  if(!controller.resources.publishedSpecies.includes(requested)){
+   throw new Error('Cette espèce ne possède pas encore de transfert officiel : '+requested);
+  }
   const migration=createCaptureSavedProfileLabMigrationV1({
    activeHeroId:owners.activeHeroId,
    loadHeroState:owners.loadHeroState,saveHeroState:owners.saveHeroState,

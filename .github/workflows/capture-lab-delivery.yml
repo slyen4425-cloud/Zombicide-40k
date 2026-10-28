@@ -89,6 +89,7 @@ jobs:
         env:
           NODE_PATH: /tmp/capture-lab-browser/node_modules
           CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
+          CAPTURE_OFFICIAL_HUB_SCREENSHOT: _site/capture-official-hub-landscape.png
         run: node --test tests/gens_capture_official_hub_composition_browser_v1.test.cjs
       - name: Upload version-locked payload (not deployed, no public game entry)
         uses: actions/upload-artifact@v4
@@ -97,4 +98,5 @@ jobs:
           path: |
             _site/vendor/combat-lab/
             _site/assets/gensrpg/capture/runtime-data/
+            _site/capture-official-hub-landscape.png
           retention-days: 14

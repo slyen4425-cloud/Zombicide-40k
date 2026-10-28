@@ -197,8 +197,16 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
     await page.locator('#capture-official-entry-arena:not([hidden]) #capture-official-flee').waitFor();
     assert.equal(await page.locator('#capture-official-entry-arena .hub-fighter').count(),2);
     const actual=await page.locator('#capture-official-entry-arena .hub-fighter h2').allTextContents();
-    assert.ok(actual.some(x=>x.includes(creatureId==='crea_tox_2'?'Venombre':'Golem')),
-     creatureId+' must display the native author species, not Voltige fallback');
+    const expected=await page.evaluate(async id=>{
+     const response=await fetch('/assets/gensrpg/capture/runtime-data/author-inputs.json');
+     if(!response.ok)throw new Error('Signed Combat author payload unavailable');
+     const authored=await response.json();
+     return authored.creatureTransfers.find(x=>x.draft.id===id)?.draft.displayName;
+    },creatureId);
+    assert.ok(expected&&expected!=='Voltige','official opponent must have its own authored name');
+    assert.ok(actual.includes(expected),
+     creatureId+' must display the EXACT signed author name '+expected+', never a guessed asset nickname or Voltige fallback');
+    assert.ok(!actual.includes('Voltige'),'new authored encounter must never fall back to Voltige');
     await page.waitForFunction(()=>[...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')]
      .length===2&&[...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')]
       .every(image=>image.complete&&image.naturalWidth>0),null,{timeout:18000});

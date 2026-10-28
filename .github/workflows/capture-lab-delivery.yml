@@ -6,6 +6,7 @@ on:
       - 'work/gensrpg-capture-official-hub-composition-*'
       - 'work/gensrpg-capture-pages-pinned-delivery-*'
       - 'work/gensrpg-capture-official-battle-view-*'
+      - 'work/gensrpg-capture-real-wild-button-*'
   pull_request:
     paths:
       - 'tools/stage_capture_lab_delivery.mjs'
@@ -18,6 +19,10 @@ on:
       - 'tests/gens_capture_official_battle_view_v1.test.cjs'
       - 'assets/gensrpg/capture/capture-official-battle-view-v1.mjs'
       - 'assets/gensrpg/capture/capture-official-hub-composition-v1.mjs'
+      - 'assets/gensrpg/capture/capture-official-wild-entry-v1.mjs'
+      - 'assets/gensrpg/capture/legacy-monolith-functions-v1.js'
+      - 'tests/gens_capture_real_wild_button_v1.test.cjs'
+      - 'tests/gens_capture_real_wild_button_browser_v1.test.cjs'
       - '.github/workflows/capture-lab-delivery.yml'
       - 'tools/build_capture_lab_preview.mjs'
       - 'tools/prepare_capture_lab_authored_preview.mjs'
@@ -33,6 +38,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: TDD check true original Capture COMBATTRE owner (RED before implementation)
+        run: node --test tests/gens_capture_real_wild_button_v1.test.cjs
       - name: Check official payload wiring in the real Pages pipeline (RED before implementation)
         run: node --test tests/gens_capture_lab_pages_pipeline_v1.test.cjs
       - name: Resolve immutable official author and asset SHA from the existing owners

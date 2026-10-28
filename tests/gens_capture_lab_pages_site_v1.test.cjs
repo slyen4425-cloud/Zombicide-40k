@@ -17,8 +17,8 @@ test('final Pages build contains pinned official modules and exact signed author
  assert.equal(manifest.productionActivated,false,'release must remain dormant');
  assert.equal(manifest.combatSha,'65e21792ff74aea9862e528c8dbfdb22797b6693');
  assert.equal(manifest.assetsSha,'b3d46ce6f2639ebb59a2984aeff17f97cbcd7377');
- assert.deepEqual(manifest.supportedCreatureIds,["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"],
-  'all twelve exact pinned author species must be published, none invented');
+ assert.deepEqual(manifest.supportedCreatureIds,["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik"],
+  'all eleven exact pinned author species must be published, none invented');
  assert.ok(manifest.transport.length>15);
  assert.equal(new Set(manifest.transport.map(f=>f.path)).size,manifest.transport.length);
  for(const entry of manifest.transport){

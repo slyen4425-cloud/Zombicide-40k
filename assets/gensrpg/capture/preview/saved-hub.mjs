@@ -3,6 +3,7 @@ import {createCombatLabProviderV1} from '../combat-lab-provider-v1.mjs';
 import {createCaptureLabAuthoredSourceV1} from '../combat-lab-authored-source-v1.mjs';
 import {createCaptureWorldLabWildTransactionV1} from '../capture-world-lab-wild-transaction-v1.mjs';
 import {createCaptureLabHubBattleCommandV1} from '../capture-lab-hub-battle-command-v1.mjs';
+import {createCaptureLabProfileReadinessV1} from '../capture-lab-profile-readiness-v1.mjs';
 
 // Opt-in isolated visual preview. The original, byte-identical World and
 // team-roster scripts are loaded by the HTML and do ALL persistent writes.
@@ -10,6 +11,7 @@ import {createCaptureLabHubBattleCommandV1} from '../capture-lab-hub-battle-comm
 const status=document.getElementById('hub-status');
 const worldLabel=document.getElementById('hub-location');
 const profileLabel=document.getElementById('hub-profile');
+const compatibilityLabel=document.getElementById('hub-compatibility');
 const battleButton=document.getElementById('hub-battle');
 const newButton=document.getElementById('hub-new');
 const abortButton=document.getElementById('hub-abort');
@@ -22,7 +24,7 @@ const getJson=async(relative)=>{
  if(!response.ok)throw new Error('Source Lab indisponible : '+relative);
  return response.json();
 };
-let command=null,settings=null;
+let command=null,readiness=null,settings=null;
 function setStatus(message,{ready, outcome, incompatible, error}={}){
  status.textContent=message;
  if(ready!==undefined)status.dataset.ready=String(ready);
@@ -36,6 +38,17 @@ function refresh(){
  worldLabel.textContent='📍 '+world.locationName+' · Jour '+world.day+' · Tour '+world.turnIndex+
   ' · Rencontre '+(world.last?.type==='wild'?world.last.creatureId:'terminée');
  profileLabel.textContent='Loup volcanique · PV '+(member?.hp??'—')+' / '+(member?.maxHp??'—');
+ if(readiness){
+  const report=readiness.inspect();
+  compatibilityLabel.dataset.status=report.status;
+  compatibilityLabel.textContent=report.status==='ready'?
+   'Profil compatible avec le moteur officiel 1v1.':
+   report.status==='review-required'?
+    'Migration à confirmer, aucune donnée modifiée : '+report.changes.map(change=>
+     change.field==='maxHp'?'PV max '+change.saved+' → '+change.official:
+      'Capacités anciennes → capacités auteur officielles').join(' · '):
+   report.reason;
+ }
  const running=command?.status().phase==='running';
  battleButton.disabled=running||world.last?.type!=='wild';
  newButton.disabled=running;
@@ -161,6 +174,15 @@ try{
    last:{type:'wild',creatureId:previewWildId,text:'Rencontre sauvage dans ma forêt du créateur'}
   });
  }
+ readiness=createCaptureLabProfileReadinessV1({
+  activeHeroId:()=>captureActiveHeroId(),
+  loadHeroState:id=>loadState(id),
+  readWorldState:()=>captureWorldState(),
+  worldStorageKey:()=>captureWorldKey(),
+  authoredSource:author,readBattleSettings:()=>inputs.battleSettings,
+  adaptCombatExport:adapter.adaptCaptureCombatExportStackV1,
+  validateBattleResult:globalThis.GensCaptureBattleBridgeContractV1.result
+ });
  const transaction=createCaptureWorldLabWildTransactionV1({
   activeHeroId:()=>captureActiveHeroId(),
   loadHeroState:id=>loadState(id),

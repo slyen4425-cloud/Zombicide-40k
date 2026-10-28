@@ -43,7 +43,7 @@ test('public battle view provides its own disposable UI and explicit manual reco
 });
 test('the source index remains the user verified exact HTML; no accidental modification of other modes',()=>{
  const bytes=fs.readFileSync(path.join(root,'index.html'));
- const gitBlob=require('node:crypto').createHash('sha1').update('blob '+bytes.length+'\\0').update(bytes).digest('hex');
+ const gitBlob=require('node:crypto').createHash('sha1').update('blob '+bytes.length+'\0').update(bytes).digest('hex');
  assert.equal(gitBlob,'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646');
  const world=source('assets/gensrpg/capture/world-exploration-v1.js');
  assert.match(world,/captureStartWildBattle/);

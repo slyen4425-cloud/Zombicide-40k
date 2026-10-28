@@ -27,7 +27,8 @@ function loadState(id){return JSON.parse(localStorage.getItem(key(id))||'{}')}
 function loadSharedEntities(){return [
  {id:'crea-loup',category:'creature',name:'Loup volcanique',hp:150,desc:'Loup auteur'},
  {id:'crea_voltik',category:'creature',name:'Voltige',hp:120,desc:'Voltige auteur'},
- {id:'crea_unsupported',category:'creature',name:'Créature non publiée',hp:90,desc:'Non publiée'}
+ {id:'crea_unsupported',category:'creature',name:'Créature non publiée',hp:90,desc:'Non publiée'},
+ ...(globalThis.ciOfficialAuthorEntities||[])
 ]}
 function z40kEscHtml(x){return String(x??'')}
 function z40kEscAttr(x){return String(x??'')}
@@ -69,9 +70,13 @@ async function withPage(browserEngine,cb){
   server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
  }
 }
-async function seed(page,{oldHp=false,unsupported=false}={}){
- await page.evaluate(async({oldHp,unsupported})=>{
+async function seed(page,{oldHp=false,unsupported=false,wild=null}={}){
+ await page.evaluate(async({oldHp,unsupported,wild})=>{
   const inputs=await (await fetch('/assets/gensrpg/capture/runtime-data/author-inputs.json')).json();
+  globalThis.ciOfficialAuthorEntities=inputs.creatureTransfers
+   .filter(x=>!['crea-loup','crea_voltik'].includes(x.draft.id))
+   .map(x=>({id:x.draft.id,category:'creature',name:x.draft.displayName,
+    desc:x.draft.description})); // World rendering only: Lab still owns HP/skills.
   const player=inputs.creatureTransfers.find(x=>x.draft.id==='crea-loup');
   const abilities=player.loadout.slots.map(x=>x.skillId).filter(Boolean);
   saveHeroCreatureState('trainer-real-hub',{
@@ -86,10 +91,10 @@ async function seed(page,{oldHp=false,unsupported=false}={}){
   const ws=captureWorldState();
   saveCaptureWorldState({...ws,locationId:'cap_forest',locationName:'Forêt créée',
    day:8,turnIndex:3,playMode:'turns',
-   last:{type:'wild',creatureId:unsupported?'crea_unsupported':'crea_voltik',
+   last:{type:'wild',creatureId:unsupported?'crea_unsupported':(wild||'crea_voltik'),
     text:'Rencontre sauvage réelle'}});
   renderCaptureEncounterPage();
- },{oldHp,unsupported});
+ },{oldHp,unsupported,wild});
  await page.locator('#captureEncounterModalBody button[onclick^="captureStartWildBattle"]').waitFor();
 }
 for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
@@ -172,6 +177,36 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    assert.equal(after.world,before.world);
    assert.equal(after.port.installed,false);
    await page.getByRole('button',{name:'Retour au monde'}).tap();
+   assert.deepEqual(errors,[]);
+  });
+ });
+}
+
+for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
+ test(name+': the ORIGINAL public World COMBATTRE handles Venombre and Golem from the real authored eleven-species package',{timeout:120000},async()=>{
+  await withPage(engine,async(page,errors)=>{
+   for(const creatureId of ['crea_tox_2','crea_mossback']){
+    await seed(page,{wild:creatureId});
+    const before=await page.evaluate(()=>({world:captureWorldState(),profile:loadState('trainer-real-hub')}));
+    assert.equal(before.world.last.creatureId,creatureId);
+    await page.locator('#captureEncounterModalBody button[onclick^="captureStartWildBattle"]').tap();
+    await page.locator('#capture-official-entry-arena:not([hidden]) #capture-official-flee').waitFor();
+    assert.equal(await page.locator('#capture-official-entry-arena .hub-fighter').count(),2);
+    const actual=await page.locator('#capture-official-entry-arena .hub-fighter h2').allTextContents();
+    assert.ok(actual.some(x=>x.includes(creatureId==='crea_tox_2'?'Venombre':'Golem')),
+     creatureId+' must display the native author species, not Voltige fallback');
+    await page.waitForFunction(()=>[...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')]
+     .length===2&&[...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')]
+      .every(image=>image.complete&&image.naturalWidth>0),null,{timeout:18000});
+    await page.locator('#capture-official-flee').tap();
+    await page.locator('#gens-capture-official-battle-v1').waitFor({state:'detached'});
+    const after=await page.evaluate(()=>({world:captureWorldState(),profile:loadState('trainer-real-hub')}));
+    assert.equal(after.world.last.type,'resolved');
+    assert.equal(after.world.locationName,before.world.locationName);
+    assert.equal(after.profile.creatureTeam[0].uid,before.profile.creatureTeam[0].uid);
+    assert.deepEqual(after.profile.inventory,before.profile.inventory);
+    assert.equal(after.profile.gold,before.profile.gold);
+   }
    assert.deepEqual(errors,[]);
   });
  });

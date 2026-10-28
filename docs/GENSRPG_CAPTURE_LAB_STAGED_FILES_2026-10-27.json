@@ -41,7 +41,8 @@
     "tests/gens_capture_lab_pinned_assets_v1.test.cjs",
     "tests/gens_capture_world_lab_wild_transaction_v1.test.cjs",
     "tests/gens_capture_lab_saved_hub_browser_v1.test.cjs",
-    "tests/gens_capture_official_hub_composition_v1.test.cjs"
+    "tests/gens_capture_official_hub_composition_v1.test.cjs",
+    "tests/gens_capture_official_hub_composition_browser_v1.test.cjs"
   ],
   "remaining": [
     "saved-profile runtime mounting in real game",

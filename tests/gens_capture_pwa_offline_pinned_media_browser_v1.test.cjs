@@ -25,7 +25,7 @@ async function serve(){
    if(pathname==='/pwa-offline-probe'){
     res.writeHead(200,{'Content-Type':type['.html'],'Cache-Control':'no-store'}).end(html);return;
    }
-   const rel=pathname.replace(/^\\/+/,'');
+   const rel=pathname.replace(/^[/]+/,'');
    if(!rel||rel.split('/').includes('..')){res.writeHead(403).end();return;}
    for(const dir of [site,root]){
     const name=path.resolve(dir,rel);

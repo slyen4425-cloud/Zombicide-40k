@@ -1,0 +1,76 @@
+name: Capture official release payload (not public activation)
+on:
+  push:
+    branches:
+      - 'work/gensrpg-capture-official-delivery-package-*'
+  pull_request:
+    paths:
+      - 'tools/stage_capture_lab_delivery.mjs'
+      - 'tests/gens_capture_lab_delivery_v1.test.cjs'
+      - '.github/workflows/capture-lab-delivery.yml'
+      - 'tools/build_capture_lab_preview.mjs'
+      - 'tools/prepare_capture_lab_authored_preview.mjs'
+      - 'docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'
+permissions:
+  contents: read
+jobs:
+  official-static-delivery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Resolve immutable official author and asset SHA from the existing owners
+        id: pins
+        run: |
+          node --input-type=module - <<'JS' >> "$GITHUB_OUTPUT"
+          import {COMBAT_LAB_SOURCE_V1} from './assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs';
+          import fs from 'node:fs';
+          const manifest=JSON.parse(fs.readFileSync('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json','utf8'));
+          if(COMBAT_LAB_SOURCE_V1.sha!==manifest.authoredSourceLabPin)throw Error('Conflicting pinned Combat authority');
+          if(!/^[0-9a-f]{40}$/.test(manifest.authoredAssetsPin))throw Error('Unpinned visual catalog');
+          console.log('combat='+COMBAT_LAB_SOURCE_V1.sha);
+          console.log('visuals='+manifest.authoredAssetsPin);
+          JS
+      - uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
+          ref: ${{ steps.pins.outputs.combat }}
+          path: combat-lab
+          sparse-checkout: |
+            src/core
+            src/contracts
+            src/adapters/input/capture
+            src/catalogs
+            data/capture
+            data/combat
+      - uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
+          ref: ${{ steps.pins.outputs.visuals }}
+          path: combat-assets
+          sparse-checkout: |
+            data/assets/catalog
+      - name: Build official static release payload without installing it in the game
+        run: |
+          mkdir -p _site
+          node tools/stage_capture_lab_delivery.mjs combat-lab combat-assets _site
+      - name: Verify packaged bytes, official ESM imports, species limits and no public/PWA changes
+        env:
+          COMBAT_LAB_ROOT: ${{ github.workspace }}/combat-lab
+          COMBAT_ASSETS_ROOT: ${{ github.workspace }}/combat-assets
+          CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
+        run: |
+          node --test tests/gens_capture_lab_delivery_v1.test.cjs
+          node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs
+          node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
+      - name: Upload version-locked payload (not deployed, no public game entry)
+        uses: actions/upload-artifact@v4
+        with:
+          name: capture-official-release-payload
+          path: |
+            _site/vendor/combat-lab/
+            _site/assets/gensrpg/capture/runtime-data/
+          retention-days: 14

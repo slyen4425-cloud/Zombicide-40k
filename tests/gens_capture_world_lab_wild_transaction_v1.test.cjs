@@ -479,3 +479,94 @@ test('Hub command: a stale Capture hero blocks result persistence; no forged vic
  assert.equal(s.command.status().phase,'commit-pending');
  assert.throws(()=>s.command.retryCommit(),/Stale Capture profile/);
 });
+
+async function inspectRealCaptureProfile(legacy={},configure=()=>{}) {
+ const s=await setup({},legacy);
+ const module=await import('../assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs');
+ const bindings={
+  activeHeroId:()=>s.owner.ctx.captureActiveHeroId(),
+  loadHeroState:id=>s.owner.ctx.loadState(id),
+  readWorldState:()=>s.owner.ctx.captureWorldState(),
+  worldStorageKey:()=>s.owner.ctx.captureWorldKey(),
+  authoredSource:s.a.source,readBattleSettings:()=>battle,
+  adaptCombatExport:s.a.adapt,validateBattleResult:s.a.validate
+ };
+ configure(s,bindings);
+ const inspector=module.createCaptureLabProfileReadinessV1(bindings);
+ return {...s,inspector};
+}
+test('read-only Hub readiness uses real World, saved roster and official authored exporter without any save',async()=>{
+ const {owner,inspector}=await inspectRealCaptureProfile();
+ const before=owner.writes(),raw=owner.store.get('realhero:'+owner.heroId),world=JSON.stringify(owner.world());
+ const report=inspector.inspect();
+ assert.equal(report.status,'ready');
+ assert.equal(report.battleReady,true);
+ assert.equal(report.official.player.maxHp,150);
+ assert.equal(report.official.opponent.creatureId,'crea_voltik');
+ assert.deepEqual(report.changes,[]);
+ assert.deepEqual(owner.writes(),before);
+ assert.equal(owner.store.get('realhero:'+owner.heroId),raw);
+ assert.equal(JSON.stringify(owner.world()),world);
+ assert.equal(owner.world().last.encounterId,undefined,'diagnostic must NOT stamp a World identity');
+});
+test('legacy 17/17 HP receives an explicit review-only comparison, never silent 120/150 conversion',async()=>{
+ const {owner,inspector}=await inspectRealCaptureProfile({hp:17,maxHp:17});
+ const before=owner.writes(),raw=owner.store.get('realhero:'+owner.heroId);
+ const report=inspector.inspect();
+ assert.equal(report.status,'review-required');
+ assert.equal(report.battleReady,false);
+ assert.ok(report.changes.some(x=>x.field==='maxHp'&&x.saved===17&&x.official===150));
+ assert.equal(report.canApplyAutomatically,false);
+ assert.equal(owner.store.get('realhero:'+owner.heroId),raw);
+ assert.deepEqual(owner.writes(),before);
+});
+test('old Capture moves require review; no authored skill is force-added to user saved team',async()=>{
+ const {owner,inspector}=await inspectRealCaptureProfile({abilities:['legacy-special-move']});
+ const original=owner.store.get('realhero:'+owner.heroId),before=owner.writes();
+ const report=inspector.inspect();
+ assert.equal(report.status,'review-required');
+ assert.ok(report.changes.some(x=>x.field==='activeAbilityIds'&&x.saved.includes('legacy-special-move')&&x.official.includes('fireball')));
+ assert.equal(report.canApplyAutomatically,false);
+ assert.equal(owner.store.get('realhero:'+owner.heroId),original);
+ assert.deepEqual(owner.writes(),before);
+});
+test('reserve, multiple local companions, unknown authored creature and empty World fail closed without mutations',async()=>{
+ const variants=[
+  {legacy:{reserve:true},expected:'unsupported'},
+  {legacy:{enemy:'species-not-in-official-catalog'},expected:'unsupported'}
+ ];
+ for(const {legacy,expected} of variants){
+  const {owner,inspector}=await inspectRealCaptureProfile(legacy);
+  const before=owner.writes(),raw=owner.store.get('realhero:'+owner.heroId);
+  const report=inspector.inspect();
+  assert.equal(report.status,expected);
+  assert.equal(report.battleReady,false);
+  assert.equal(report.canApplyAutomatically,false);
+  assert.equal(owner.store.get('realhero:'+owner.heroId),raw);
+  assert.deepEqual(owner.writes(),before);
+ }
+ const multi=await inspectRealCaptureProfile();
+ const changed=multi.owner.profile();changed.creatureTeam.push({...changed.creatureTeam[0],uid:'extra-player'});
+ multi.owner.replaceHero(changed);
+ const mark=multi.owner.writes();
+ assert.equal(multi.inspector.inspect().status,'unsupported');
+ assert.deepEqual(multi.owner.writes(),mark);
+ const empty=await inspectRealCaptureProfile();
+ empty.owner.replaceWorld({...empty.owner.world(),last:null});
+ const writes=empty.owner.writes();
+ assert.equal(empty.inspector.inspect().status,'no-wild');
+ assert.deepEqual(empty.owner.writes(),writes);
+});
+test('a changed World identity while diagnosing is rejected; never authorizes replay or migration',async()=>{
+ let reads=0;
+ const {owner,inspector}=await inspectRealCaptureProfile({},(s,binding)=>{
+  const reader=binding.readWorldState;
+  binding.readWorldState=()=>{reads++;const value=reader();return reads===1?value:{...value,last:{type:'wild',creatureId:'other',text:'changed'}}};
+ });
+ const before=owner.writes();
+ const report=inspector.inspect();
+ assert.equal(report.battleReady,false);
+ assert.equal(report.status,'stale');
+ assert.deepEqual(owner.writes(),before);
+ assert.equal(owner.world().last.creatureId,'crea_voltik');
+});

@@ -85,6 +85,47 @@ jobs:
       - name: Tester le profil mobile et la latence des combats V16.78.102.2
         run: node tests/gens_mobile_combat_performance_v16781022.test.cjs
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Résoudre la version officielle immuable Capture / visuels (aucune synchronisation mouvante)
+        id: capture_pages_pins
+        run: |
+          node --input-type=module - <<'JS' >> "$GITHUB_OUTPUT"
+          import {COMBAT_LAB_SOURCE_V1} from './assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs';
+          import fs from 'node:fs';
+          const manifest=JSON.parse(fs.readFileSync('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json','utf8'));
+          if(COMBAT_LAB_SOURCE_V1.sha!==manifest.authoredSourceLabPin)throw Error('Conflicting pinned Combat authority');
+          if(!/^[0-9a-f]{40}$/.test(manifest.authoredAssetsPin))throw Error('Unpinned official visuals');
+          if(manifest.productionActivated!==false)throw Error('Capture Hub must remain dormant');
+          console.log('combat='+COMBAT_LAB_SOURCE_V1.sha);
+          console.log('visuals='+manifest.authoredAssetsPin);
+          JS
+
+      - name: Charger uniquement les modules officiels Capture au SHA épinglé
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
+          ref: ${{ steps.capture_pages_pins.outputs.combat }}
+          path: combat-lab
+          sparse-checkout: |
+            src/core
+            src/contracts
+            src/adapters/input/capture
+            src/catalogs
+            data/capture
+            data/combat
+
+      - name: Charger uniquement le catalogue visuel officiel au SHA épinglé
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
+          ref: ${{ steps.capture_pages_pins.outputs.visuals }}
+          path: combat-assets
+          sparse-checkout: |
+            data/assets/catalog
+
       - name: Préparer le site
         run: |
           rm -rf _site
@@ -232,6 +273,20 @@ jobs:
                   html = html.replace("</body>", tag + "\n</body>")
           index.write_text(html, encoding="utf-8")
           PY
+
+      - name: Construire la livraison Capture officielle passive depuis le publisher unique
+        run: node tools/stage_capture_lab_delivery.mjs combat-lab combat-assets _site
+
+      - name: Vérifier les bytes, SHA, propriétaire et non-activation de la livraison Pages
+        env:
+          COMBAT_LAB_ROOT: ${{ github.workspace }}/combat-lab
+          COMBAT_ASSETS_ROOT: ${{ github.workspace }}/combat-assets
+          CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
+        run: |
+          node --test tests/gens_capture_lab_pages_pipeline_v1.test.cjs
+          node --test tests/gens_capture_lab_delivery_v1.test.cjs
+          node --test tests/gens_capture_official_hub_composition_v1.test.cjs
+          node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs
 
       - name: Tester le chargement réel mur HD et pions adaptatifs Dungeon
         run: node tests/dungeon_wall_visual_v167866.test.cjs _site/index.html

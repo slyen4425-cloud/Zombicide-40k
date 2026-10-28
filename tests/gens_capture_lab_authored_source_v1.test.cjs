@@ -206,12 +206,31 @@ test('native authored source, existing saved-profile seam and sole Core provider
 
 // Data-owned author matrix: verify every published species, not merely a
 // static list or a preview dummy. All definitions come from the same pinned Lab.
-test('all twelve pinned Lab author creature transfers export a genuine native 1v1 with their own skills', async()=>{
- const official=["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"];
+test('all eleven media-complete pinned Lab author creature transfers export genuine native 1v1 with their own skills', async()=>{
+ const official=["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik"];
  const settings=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/capture-lab-authored-preview-settings-v1.json'),'utf8'));
  const transfers=settings.authoredCreatureFiles.map(read);
- assert.equal(transfers.length,12,'the delivery must expose all 12 official species, not just two');
+ assert.equal(transfers.length,11,'only the eleven media-complete official species are deliverable');
  assert.deepEqual(transfers.map(x=>x.draft.id),official,'exact author order and IDs, no aliases or invented entries');
+ const visualRoot=process.env.COMBAT_ASSETS_ROOT;
+ assert.ok(visualRoot,'Official pinned visual catalog checkout required');
+ const visualCatalog=JSON.parse(fs.readFileSync(path.join(visualRoot,'data/assets/catalog/global-visual-assets.v1.json'),'utf8'));
+ const ids=new Set(visualCatalog.assets.map(x=>x.id));
+ const allRefs=[];
+ const visit=value=>{
+  if(!value||typeof value!=='object')return;
+  for(const [key,child] of Object.entries(value)){
+   if(key==='assetId'&&typeof child==='string'&&child.startsWith('pack:capture:'))allRefs.push(child);
+   else if(typeof child==='object')visit(child);
+  }
+ };
+ for(const transfer of transfers)visit(transfer.draft.presentation);
+ assert.equal(allRefs.filter(id=>!ids.has(id)).length,0,'every published creature visual must exist at the pinned SHA');
+ const excluded=read('data/capture/showcase/kitsune_lunaire.capture-creature-transfer-v1.json');
+ assert.equal(excluded.draft.id,'kitsune_lunaire');
+ assert.equal(excluded.draft.presentation.visual.rangedAttackBack.assetId,'pack:capture:creature-lunaire-attack-player-7-v1');
+ assert.equal(ids.has(excluded.draft.presentation.visual.rangedAttackBack.assetId),false,
+  'Kitsune author transfer is not safely deliverable until the original missing animation is published');
  const author=await factory({creatureTransfers:transfers});
  for(const creatureId of official){
   const opponent=creatureId==='crea-loup'?'crea_voltik':creatureId;

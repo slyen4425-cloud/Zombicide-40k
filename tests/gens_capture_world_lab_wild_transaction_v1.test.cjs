@@ -670,3 +670,52 @@ test('migration: malformed historic ability lists are rejected rather than guess
  assert.throws(()=>s.migration.prepare(),/ability|array|list/i);
  assert.equal(s.owner.writes().hero,0);
 });
+
+
+test('migration rollback: official battle invalidates archive in SAME hero result write, even if an identical World encounter is recreated',async()=>{
+ const s=await migrationSetup({hp:17,maxHp:17,abilities:['old-leaf']});
+ const unchangedWild=s.owner.world().last,plan=s.migration.prepare();
+ s.migration.commit(plan,{acknowledged:plan.consentText});
+ assert.equal(s.makeMigration().inspectRollback().available,true);
+ const heroWrites=s.owner.writes().hero;
+ const ticket=s.transaction.prepareWild('crea_voltik');
+ const raw={outcome:'flee',creatures:ticket.snapshot.sides.flatMap(side=>side.creatures.map(c=>({instanceId:c.instanceId,hp:c.hp})))};
+ assert.equal(ticket.applyResult(raw).worldResolved,true);
+ assert.equal(s.owner.writes().hero,heroWrites+1,'no extra write for rollback invalidation');
+ const migrated=s.owner.profile(),record=migrated.captureLabProfileMigrationV1;
+ assert.equal(migrated.creatureTeam[0].hp,150,'flee must not need to change HP to invalidate rollback');
+ assert.equal(record.rollbackEligible,false);
+ assert.equal(record.combatCommittedEncounterId,ticket.encounterId);
+ // A normal World owner is allowed to start an indistinguishable future wild,
+ // but an already played migration can never recover its old creature.
+ s.owner.replaceWorld({...s.owner.world(),last:unchangedWild});
+ assert.equal(s.owner.world().last.type,'wild');
+ assert.equal(s.owner.world().last.creatureId,unchangedWild.creatureId);
+ assert.equal(s.makeMigration().inspectRollback().available,false);
+ const heroBefore=s.owner.profile(),writes=s.owner.writes().hero;
+ assert.throws(()=>s.makeMigration().rollback({
+  acknowledged:'Je confirme le retour de crea-loup au profil Capture original, seulement avant le combat.'
+ }),/combat|battle|rollback|consum|already/i);
+ assert.deepEqual(s.owner.profile(),heroBefore);
+ assert.equal(s.owner.writes().hero,writes,'restoration must never save after any official battle');
+});
+
+test('migration rollback: archived profiles without a durable combat guard fail closed after reopening',async()=>{
+ const s=await migrationSetup({hp:17,maxHp:17});
+ const plan=s.migration.prepare();s.migration.commit(plan,{acknowledged:plan.consentText});
+ const saved=s.owner.profile();
+ assert.equal(saved.captureLabProfileMigrationV1.rollbackEligible,true);
+ assert.equal(saved.captureLabProfileMigrationV1.combatCommittedEncounterId,null);
+ const old=clone(saved);
+ delete old.captureLabProfileMigrationV1.rollbackEligible;
+ delete old.captureLabProfileMigrationV1.combatCommittedEncounterId;
+ s.owner.replaceHero(old);
+ const resumed=s.makeMigration();
+ assert.equal(resumed.inspectRollback().available,false,'an older archive must not be assumed unplayed');
+ const writes=s.owner.writes().hero;
+ assert.throws(()=>resumed.rollback({acknowledged:
+  'Je confirme le retour de crea-loup au profil Capture original, seulement avant le combat.'
+ }),/combat|rollback|guard|archive|version/i);
+ assert.equal(s.owner.writes().hero,writes);
+ assert.deepEqual(s.owner.profile(),old);
+});

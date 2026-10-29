@@ -21,11 +21,6 @@ export function createCaptureNativeLabSceneV1({
   return new URL('assets/library/'+file,
    'https://raw.githubusercontent.com/'+source.assetsRepository+'/'+source.assetsSha+'/').href;
  };
- // The Lab owns metadata normalization (headingRad, stretch, native cadence
- // and scale). A second GenSrpg projection would silently reverse projectiles.
- const mediaForId=globalAsset.createGlobalPresentationAssetResolverV1({
-  assetCatalog:catalog,assetUrlForFile:mediaUrl
- });
  const actorTranslation=Object.freeze({
   'local-1':'player','local-2':'ally',
   'opponent-1':'opponent','opponent-2':'opponent-b'
@@ -55,6 +50,11 @@ export function createCaptureNativeLabSceneV1({
      if(!r.ok)throw Error('Lab profile missing: '+name);return r.json();
     }))
   ]);
+  // Resolve metadata only AFTER importing its canonical Lab module.
+  // Keep the normalized catalog scoped to this single mounted scene.
+  const mediaForId=globalAsset.createGlobalPresentationAssetResolverV1({
+   assetCatalog:catalog,assetUrlForFile:mediaUrl
+  });
   const document=host.ownerDocument;
   const parsed=new DOMParser().parseFromString(page,'text/html');
   const template=parsed.querySelector('template[data-capture-preview-template]');

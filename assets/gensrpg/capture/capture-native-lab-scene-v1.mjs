@@ -44,13 +44,16 @@ export function createCaptureNativeLabSceneV1({
   if(used)throw new Error('Official Lab arena cannot be mounted twice');
   used=true;
   const shell=host.attachShadow({mode:'open'});
-  const [page,visual,preview,present,...profiles]=await Promise.all([
+  const [page,visual,preview,present,privateAudio,soundtrack,demo,...profiles]=await Promise.all([
    fetch(uri('examples/dom-demo/capture-editor-v2.html'),{cache:'no-store'}).then(r=>{
     if(!r.ok)throw Error('Lab combat HTML missing');return r.text();
    }),
    import(uri('src/adapters/input/capture/capture-export-to-native-visual-source-v1.js')),
    import(uri('src/ui/capture-combat-preview-v1.js')),
    import(uri('src/adapters/renderer/capture-skill-presentation-assets-v2.js')),
+   import(uri('src/assets/private-audio-runtime-library-v1.js')),
+   import(uri('src/assets/soundtrack-runtime-library-v1.js')),
+   import(uri('examples/dom-demo/demo-assets.js')),
    ...['biped','quadruped','serpentine','flying','massive'].map(name=>
     fetch(uri('data/profiles/'+name+'.profile.json'),{cache:'no-store'}).then(r=>{
      if(!r.ok)throw Error('Lab profile missing: '+name);return r.json();
@@ -92,15 +95,34 @@ export function createCaptureNativeLabSceneV1({
    exported:resolved.exported,assetCatalog:catalog,profiles,
    assetUrlForFile:mediaUrl
   });
+  // The same official Lab SFX / soundtrack resolver as the author editor.
+  // Each audio URL is pinned to the exact signed Lab source revision: no
+  // moving branch, second sound library, or custom combat audio engine.
+  const resolveAudio=id=>{
+   const original=privateAudio.privateAudioRuntimeAssetV1(id) ??
+     soundtrack.soundtrackRuntimeAssetV1(id) ??
+     demo.demoPresentationAssets.audioAsset(id);
+   if(!original?.url)return null;
+   const url=new URL(original.url);
+   const vendorAudioRoot=new URL('assets/',lab);
+   if(url.href.startsWith(vendorAudioRoot.href)){
+    const relative=url.href.slice(vendorAudioRoot.href.length);
+    const exact=new URL('assets/'+relative,
+      'https://raw.githubusercontent.com/'+source.combatRepository+'/'+source.combatSha+'/');
+    return Object.freeze({...original,url:exact.href});
+   }
+   return original;
+  };
   const nativeAssets=present.createCaptureSkillPresentationAssetsV2({
    skillPresentations:resolved.nativeCombatSource.skillPresentations??{},
-   assetForId:mediaForId
+   assetForId:id=>mediaForId(id)??demo.demoPresentationAssets.asset(id),
+   audioAssetForId:resolveAudio
   });
   const presentationAssets=Object.freeze({
    presentationForSkill:(id,context)=>nativeAssets.presentationForSkill(id,context),
    statusPresentationFor:(id,context)=>nativeAssets.statusPresentationFor(id,context),
-   audioAsset:id=>nativeAssets.audioAsset(id),
-   asset:mediaForId
+   audioAsset:id=>nativeAssets.audioAsset(id)??resolveAudio(id),
+   asset:id=>mediaForId(id)??demo.demoPresentationAssets.asset(id)
   });
   const links=['examples/dom-demo/demo.css','examples/dom-demo/capture-editor-v2.css'];
   await Promise.all(links.map(file=>new Promise((resolve,reject)=>{

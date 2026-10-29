@@ -42,22 +42,45 @@ export function createCaptureWorldLabWildTransactionV1({
   if(!requested||last?.type!=='wild'||name(last.creatureId)!==requested){
    throw new TypeError('Capture World has no matching live wild encounter');
   }
+  // Only the existing World owner can declare a paired wild encounter.
+  // No implicit second enemy, fallback or 2v2 conversion of a legacy 1v1.
+  const declared=last.creatureIds;
+  if(declared!==undefined&&(!Array.isArray(declared)||
+     ![1,2].includes(declared.length)||declared.some(id=>!name(id)||id!==name(id))||
+     name(declared[0])!==requested)){
+   throw new TypeError('Invalid canonical Capture World wild creatureIds');
+  }
+  const species=declared===undefined?[requested]:[...declared];
   const originalIdentity=worldIdentity(world,last);
   const encounterId=encounterKey(last.encounterId||nextEncounterId());
   const heroId=name(activeHeroId()),saved=heroId?loadHeroState(heroId):null;
-  const player=saved?.creatureTeam?.[0];
+  const players=saved?.creatureTeam;
   const config=readBattleSettings();
-  if(!heroId||!name(player?.uid)||!name(player?.entityId)){
-   throw new TypeError('Capture saved local creature and trainer identity required');
+  if(!heroId||!Array.isArray(players)||players.length!==species.length||
+     players.some(member=>!name(member?.uid)||!name(member?.entityId))){
+   throw new TypeError('Capture saved local creature and trainer identity required for active team');
   }
   if(!config||typeof config!=='object'||Array.isArray(config)) {
    throw new TypeError('Explicit Capture battle configuration required');
   }
+  const asPlayer=member=>({instanceId:name(member.uid),creatureId:name(member.entityId)});
+  const opponents=species.map((creatureId,i)=>({
+   instanceId:'wild:'+encounterId+(i?':'+(i+1):''),creatureId
+  }));
   const authored=authoredSource.buildEncounter({
    ...config,encounterId,
-   player:{instanceId:name(player.uid),creatureId:name(player.entityId)},
-   opponent:{instanceId:'wild:'+encounterId,creatureId:requested}
+   ...(species.length===1?{
+    player:asPlayer(players[0]),opponent:opponents[0]
+   }:{
+    playerTeam:players.map(asPlayer),opponentTeam:opponents
+   })
   });
+  const matchesWild=encounter=>encounter?.type==='wild'&&
+   name(encounter.creatureId)===requested&&
+   (declared===undefined?encounter.creatureIds===undefined:
+    Array.isArray(encounter.creatureIds)&&
+    encounter.creatureIds.length===species.length&&
+    encounter.creatureIds.every((id,i)=>id===species[i]));
   let identityCommitted=!!name(last.encounterId);
   const readEncounter=()=>{
    if(name(worldStorageKey())!==key)return null;
@@ -88,7 +111,7 @@ export function createCaptureWorldLabWildTransactionV1({
    identityCommitted=true;
   }
   const live=readWorldState();
-  if(name(worldStorageKey())!==key||live?.last?.type!=='wild'||name(live.last.creatureId)!==requested ||
+  if(name(worldStorageKey())!==key||!matchesWild(live?.last)||
      live.last.encounterId!==encounterId ||
      name(live.locationId)!==name(world.locationId)){
    throw new Error('Capture World did not commit the original wild identity');
@@ -116,8 +139,8 @@ export function createCaptureWorldLabWildTransactionV1({
      throw new Error('A settled Capture battle cannot change its result during World commit retry');
     }
     const state=readWorldState();
-    if(name(worldStorageKey())!==key||state?.last?.type!=='wild'||state.last.encounterId!==encounterId||
-       state.last.creatureId!==requested ||
+    if(name(worldStorageKey())!==key||!matchesWild(state?.last)||
+       state.last.encounterId!==encounterId||
        name(state.locationId)!==name(world.locationId)){
       throw new Error('Stale Capture World during result commit: refusing to consume another encounter');
     }

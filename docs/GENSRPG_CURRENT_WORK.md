@@ -1,3 +1,10 @@
+## 2026-10-29 — Intégration non destructive du chantier réserve #213 et scène Lab publiée
+- Source indépendante PR #213 `0e2bd927da1b3b74f5de280fb4abe5fda717bcf2` : reprendre fidèlement la conservation de réserve hors combat en 2v2, sans cinquième acteur ni rappel. Tests RED/GREEN de réserve et garde de modification concurrente préservés ; 1v1 refuse toujours la réserve. Les fichiers du nouveau rendu natif de PR #216 restent propriétaires de la scène ; aucune fusion aveugle des anciens écrans de cartes.
+- Lab #142 : checkpoint `checkpoint/lab-capture-native-scene-host-green-2026-10-29` au SHA `8318220b6a9b883aeced1d4bf693f906b0f36d3d`, CI #40950339573 5/5 SUCCESS ; fusion sur `gh-pages@4fd0821545eaa41ce1d3115e56f3574db6273426`, comparaison sans différence de fichiers avec le SHA source épinglé. CI/Pages post-fusion encore à confirmer.
+- GenS #216 : réparation de l'inventaire strict Phase 9 (2 modules de scène), transport complet du graphe auteur `examples/dom-demo` et sentinelle navigateur CSS/ShadowRoot + capture PNG. CI #40959547895 a vérifié le bouton World natif Chromium/Firefox et la sauvegarde une fois sur le précédent SHA ; **le nouveau lot combiné réserve + scène doit être recertifié au HEAD exact avant tout GREEN/merge**. Index/SW/profils historiques inchangés.
+
+---
+
 # Capture — raccord de la vraie scène du Labo Combat (29 octobre 2026)
 
 - Défaut Android prouvé : capture-official-battle-view-v1.mjs affiche quatre cartes statiques, pas l'arène officielle animée du Lab. Les anciens contrôles CI n'étaient pas des tests de rendu natif.

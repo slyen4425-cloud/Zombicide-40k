@@ -27,7 +27,7 @@
  <section class="panel" id="captureEncounterModal"><div id="captureEncounterModalBody"></div></section>
  <div id="captureExploreResult" aria-live="polite"></div>
  <div id="captureCurrentEncounterCard"></div>
- <p class="small">Version de test hors PWA. Les réserves et la migration automatique de profils historiques 2v2 ne sont pas activées ici.</p>
+ <p class="small">Version de test hors PWA. Une troisième créature est conservée en réserve, hors combat : aucun rappel ou remplacement n'est encore disponible. La migration des profils historiques 2v2 reste désactivée.</p>
 </main>
 <script>
 var current='capture-preview-2v2-trainer',state=null;
@@ -91,8 +91,11 @@ window.prepareCapture2v2Preview=async function(){
    id:x.draft.id,category:'creature',name:x.draft.displayName,
    desc:x.draft.description
   }));
+  // Off-field reserve is owned by the original Capture save. No fifth
+  // Combat actor or invented ability: reuse the exact authored Loup data.
+  const reserve=[{...roster[0],uid:'demo-reserve-loup',testReserveOnly:true}];
   saveHeroCreatureState(current,{
-   creatureTeam:roster,creatureReserve:[],inventory:[],gold:0,
+   creatureTeam:roster,creatureReserve:reserve,inventory:[],gold:0,
    previewOnly:true
   });
   const ws=captureWorldState();

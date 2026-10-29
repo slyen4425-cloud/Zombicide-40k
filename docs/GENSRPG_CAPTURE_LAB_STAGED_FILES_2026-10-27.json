@@ -59,7 +59,7 @@
     "the real public button now wired on stage; promotion gated by complete release/compatibility tests",
     "native Lab scene staged, awaiting integrated Chromium/Firefox visual/FX/audio and saved-profile certification",
     "creature editor",
-    "reserves"
+    "reserve recall/forced substitution not yet enabled (off-field 2v2 reserve persistence supported)"
   ],
   "stagedSavedProfileMapping": true,
   "authoredSourceLabPin": "8318220b6a9b883aeced1d4bf693f906b0f36d3d",
@@ -133,6 +133,7 @@
     "ownsStorage": false,
     "ownsCombatRules": false,
     "ownsClock": false,
-    "staticBattleViewReplacedInOriginalWorldEntry": true
+    "staticBattleViewReplacedInOriginalWorldEntry": true,
+    "offFieldReservePreserved": true
   }
 }

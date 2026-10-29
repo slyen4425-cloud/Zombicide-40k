@@ -147,6 +147,15 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    assert.equal(nativeCss.position,'relative','real Lab CSS must apply inside the ShadowRoot');
    assert.equal(nativeCss.background,'rgb(23, 52, 66)','author Lab arena background must render, not bare HTML cards');
    assert.notEqual(nativeCss.radius,'0px','author Lab landscape CSS must style the arena');
+   const overlapsEnemyHp=await page.evaluate(()=>{
+    const host=document.getElementById('capture-official-entry-arena').shadowRoot;
+    const enemy=host.querySelector('.squad-card--opponent-b');
+    const flee=document.getElementById('capture-official-flee');
+    if(!enemy||!flee)throw Error('Official Lab enemy HUD or flee button missing');
+    const a=enemy.getBoundingClientRect(),b=flee.getBoundingClientRect();
+    return a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
+   });
+   assert.equal(overlapsEnemyHp,false,'flee must not cover the native Lab enemy HP card');
    if(name==='Chromium'&&process.env.CAPTURE_NATIVE_LAB_SCREENSHOT){
     await page.screenshot({path:process.env.CAPTURE_NATIVE_LAB_SCREENSHOT,fullPage:true});
    }

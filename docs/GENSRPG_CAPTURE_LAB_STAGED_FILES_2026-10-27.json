@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "scope": "capture-lab-staged-files",
+  "sourceBase": "6ad672e72ddd6765bcad6e5062aad40dcb09d451",
+  "productionActivated": false,
+  "authority": "Capture owns integration and persistence; imported Lab Core owns battle rules and time only when explicitly mounted",
+  "classicScripts": [
+    "assets/gensrpg/capture/battle-bridge-contract-v1.js",
+    "assets/gensrpg/capture/lab-ownership-port-v1.js",
+    "assets/gensrpg/capture/manual-battle-trigger-v1.js",
+    "assets/gensrpg/capture/temporary-encounter-source-v1.js",
+    "assets/gensrpg/capture/temporary-zone-controller-v1.js",
+    "assets/gensrpg/capture/temporary-zone-play-v1.js",
+    "assets/gensrpg/capture/temporary-zone-session-v1.js",
+    "assets/gensrpg/capture/temporary-zone-view-v1.js",
+    "assets/gensrpg/integrations/lab-sync-coordinator-v1.js",
+    "assets/gensrpg/integrations/lab-version-sync-v1.js"
+  ],
+  "captureEsmAdapters": [
+    "assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs",
+    "assets/gensrpg/capture/combat-lab-provider-v1.mjs",
+    "assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs",
+    "assets/gensrpg/capture/combat-lab-authored-source-v1.mjs",
+    "assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs",
+    "assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs",
+    "assets/gensrpg/capture/capture-official-hub-composition-v1.mjs",
+    "assets/gensrpg/capture/capture-official-battle-view-v1.mjs",
+    "assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs",
+    "assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs",
+    "assets/gensrpg/capture/capture-official-wild-entry-v1.mjs"
+  ],
+  "capturePreviewDirectory": "assets/gensrpg/capture/preview",
+  "capturePreviewFiles": [
+    "saved-hub-owners.js",
+    "saved-hub.mjs",
+    "zone.css",
+    "zone.mjs"
+  ],
+  "previewEntry": "capture-lab-preview.html",
+  "coverage": [
+    "tests/gens_capture_lab_runtime_v1.test.cjs",
+    "tests/gens_capture_lab_runtime_browser_v1.test.cjs",
+    "tests/gens_capture_saved_profile_bridge_v1.test.cjs",
+    "tests/gens_capture_lab_authored_source_v1.test.cjs",
+    "tests/gens_capture_lab_pinned_assets_v1.test.cjs",
+    "tests/gens_capture_world_lab_wild_transaction_v1.test.cjs",
+    "tests/gens_capture_lab_saved_hub_browser_v1.test.cjs",
+    "tests/gens_capture_official_hub_composition_v1.test.cjs",
+    "tests/gens_capture_official_hub_composition_browser_v1.test.cjs",
+    "tests/gens_capture_official_battle_view_v1.test.cjs",
+    "tests/gens_capture_real_wild_button_v1.test.cjs",
+    "tests/gens_capture_real_wild_button_browser_v1.test.cjs"
+  ],
+  "remaining": [
+    "the real public button now wired on stage; promotion gated by complete release/compatibility tests",
+    "official animations and FX",
+    "creature editor",
+    "reserves"
+  ],
+  "stagedSavedProfileMapping": true,
+  "authoredSourceLabPin": "92e2f75ff6e9b3e03d460115d53b5604adf0e718",
+  "authoredAssetsPin": "b3d46ce6f2639ebb59a2984aeff17f97cbcd7377",
+  "authoredAssetsRepository": "slyen4425-cloud/GenSrpg_labo_combat_dynamique",
+  "stagedWorldWildTransaction": true,
+  "stagedHubBattleCommand": true,
+  "savedHubPreview": {
+    "entry": "capture-lab-saved-hub-preview.html",
+    "sourceIndexBlob": "17ba8e6f1faf6f8a0be8cdec68c4515d538ff646",
+    "productionActivated": false,
+    "notes": "Exact persisted Capture World/team owners executed, official authored Core provider, no public Hub override"
+  },
+  "officialHubComposition": {
+    "module": "assets/gensrpg/capture/capture-official-hub-composition-v1.mjs",
+    "packager": "tools/stage_capture_lab_delivery.mjs",
+    "schema": "gensrpg-capture-official-delivery-v1",
+    "productionActivated": false
+  },
+  "readOnlyProfileReadiness": {
+    "source": "assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs",
+    "usesCanonicalBridge": "assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs",
+    "hasWriter": false,
+    "productionActivated": false,
+    "migrationApplied": false
+  },
+  "stagedExplicitProfileMigration": {
+    "schema": "gensrpg-capture-lab-profile-migration-v1",
+    "version": 1,
+    "productionActivated": false,
+    "requiresConsent": true,
+    "oneOwner": "assets/gensrpg/capture/team-roster-v1.js",
+    "fullCatalogMigration": false
+  },
+  "stagedOfficialBattleView": {
+    "productionActivated": false,
+    "source": "official authored Lab Core and original Capture World/roster",
+    "visuals": "GensAssetResolverV1",
+    "usesNativeSkills": true,
+    "ownsStorage": false,
+    "ownsCombatRules": false
+  },
+  "originalWildBattleButton": {
+    "owner": "assets/gensrpg/capture/legacy-monolith-functions-v1.js",
+    "entry": "assets/gensrpg/capture/capture-official-wild-entry-v1.mjs",
+    "officialSourceSha": "92e2f75ff6e9b3e03d460115d53b5604adf0e718",
+    "stageWired": true,
+    "productionActivated": false,
+    "requiresExplicitMigrationConsent": true,
+    "supportedSpecies": [
+      "crea-loup",
+      "crea_ailevent",
+      "crea_dracendre",
+      "crea_foudrillon",
+      "crea_lumilo",
+      "crea_maraileron",
+      "crea_mossback",
+      "crea_ombre_2",
+      "crea_scar_2",
+      "crea_tox_2",
+      "crea_voltik",
+      "kitsune_lunaire"
+    ],
+    "noLegacyEngineFallback": true
+  }
+}

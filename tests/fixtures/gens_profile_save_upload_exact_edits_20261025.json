@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "fromBlob": "cc355585acab68958bd349ffcf8fa0de4eab9b0d",
+  "toBlob": "17ba8e6f1faf6f8a0be8cdec68c4515d538ff646",
+  "fromBytes": 1721700,
+  "toBytes": 1722603,
+  "edits": [
+    [
+      "function saveGameProfiles(a){\n  localStorage.setItem(GAME_PROFILES_KEY,JSON.stringify(a||[]));\n}",
+      "function saveGameProfiles(a){\n  const profiles=Array.isArray(a)?a:[];\n  const seen=new Map(), unique=[];\n  for(const profile of profiles){\n    const id=String(profile?.id??\"\");\n    if(!id){unique.push(profile);continue}\n    if(!seen.has(id)){seen.set(id,profile);unique.push(profile);continue}\n    // Never silently discard a conflicting profile or its settings.\n    if(JSON.stringify(seen.get(id))!==JSON.stringify(profile)){\n      console.error(\"GenS RPG: conflicting duplicate profile ID; save blocked\",id);\n      return false;\n    }\n  }\n  if(unique.length!==profiles.length){\n    // Preserve the exact original data before reconciling byte-identical copies.\n    const previous=localStorage.getItem(GAME_PROFILES_KEY);\n    if(previous!==null){\n      const backupKey=GAME_PROFILES_KEY+\"_duplicate_backup_20261024\";\n      if(localStorage.getItem(backupKey)===null)localStorage.setItem(backupKey,previous);\n    }\n  }\n  localStorage.setItem(GAME_PROFILES_KEY,JSON.stringify(unique));\n  return true;\n}"
+    ]
+  ]
+}

@@ -1,0 +1,16 @@
+"use strict";
+const assert=require("node:assert/strict"),fs=require("node:fs"),vm=require("node:vm");
+const ctx={};
+for(const p of ["lab-version-sync-v1.js","lab-sync-coordinator-v1.js"])vm.runInNewContext(fs.readFileSync("assets/gensrpg/integrations/"+p,"utf8"),ctx);
+const gate=ctx.GensLabVersionSyncV1,coordinator=ctx.GensLabSyncCoordinatorV1,sha="a".repeat(40);
+const manifest={schema:1,combat:{repository:gate.SOURCES.combat,sha,version:"1.0.0",protocol:1,capabilities:["battle-trigger"]},exploration:{repository:gate.SOURCES.exploration,sha:"b".repeat(40),version:"1.0.0",protocol:1,capabilities:["encounters"]}};
+const req={combat:{protocol:1,capabilities:["battle-trigger"]},exploration:{protocol:1,capabilities:["encounters"]}};
+const dependency={repository:gate.SOURCES.combat,sha,protocol:1};
+const release={schemaVersion:1,status:"published-green",code:{repository:gate.SOURCES.combat,sourceBranch:"main",commit:sha},assets:{repository:gate.SOURCES.combat,commit:"c".repeat(40),catalog:"catalog.json"},consumer:{autoSync:true},validation:{ci:"GREEN"}};
+const result=coordinator.plan(null,manifest,req,dependency,release);
+assert.equal(result.ready,true);assert.equal(result.changed.join(","),"combat,exploration");
+assert.equal(coordinator.plan(manifest,manifest,req,dependency,release).changed.length,0);
+assert.throws(()=>coordinator.plan(null,manifest,req,{...dependency,sha:"d".repeat(40)},release),/drift/);
+assert.throws(()=>coordinator.plan(null,manifest,req,dependency,{...release,status:"blocked-ci-not-published"}),/not published/);
+assert.throws(()=>coordinator.plan(null,manifest,req,dependency,{...release,code:{...release.code,commit:"d".repeat(40)}}),/differs/);
+console.log("Two-lab sync coordinator: PASS");

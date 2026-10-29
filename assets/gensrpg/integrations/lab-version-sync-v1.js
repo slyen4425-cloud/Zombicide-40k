@@ -1,0 +1,60 @@
+"use strict";
+/* Pure, inert compatibility gate. No network, runtime switch, or save writes. */
+(function(root){
+  const SHA=/^[a-f0-9]{40}$/i;
+  const SEMVER=/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$/;
+  const SOURCES=Object.freeze({
+    combat:"slyen4425-cloud/GenSrpg_labo_combat_dynamique",
+    exploration:"slyen4425-cloud/laboratoire_dynamique_exploration-"
+  });
+  function validate(entry,kind){
+    if(!entry||typeof entry!=="object"||Array.isArray(entry))throw new TypeError(kind+" entry required");
+    if(entry.repository!==SOURCES[kind])throw new TypeError(kind+" repository mismatch");
+    if(!SHA.test(entry.sha||""))throw new TypeError(kind+" immutable commit SHA required");
+    if(!SEMVER.test(entry.version||""))throw new TypeError(kind+" semantic version required");
+    if(!Number.isInteger(entry.protocol)||entry.protocol<1)throw new TypeError(kind+" protocol required");
+    if(!Array.isArray(entry.capabilities)||new Set(entry.capabilities).size!==entry.capabilities.length||
+      entry.capabilities.some(x=>typeof x!=="string"||!x.trim()))throw new TypeError(kind+" capabilities invalid");
+    return Object.freeze({repository:entry.repository,sha:entry.sha.toLowerCase(),version:entry.version,
+      protocol:entry.protocol,capabilities:Object.freeze([...entry.capabilities])});
+  }
+  function verify(manifest,requirements){
+    if(!manifest||manifest.schema!==1)throw new TypeError("Unsupported sync manifest");
+    const combat=validate(manifest.combat,"combat");
+    const exploration=validate(manifest.exploration,"exploration");
+    if(!requirements||typeof requirements!=="object")throw new TypeError("Consumer requirements required");
+    for(const kind of ["combat","exploration"]){
+      const req=requirements[kind];
+      if(!req||req.protocol!==({combat,exploration})[kind].protocol)throw new TypeError(kind+" incompatible protocol");
+      if(!Array.isArray(req.capabilities)||!req.capabilities.every(x=>({combat,exploration})[kind].capabilities.includes(x)))
+        throw new TypeError(kind+" missing required capability");
+    }
+    return Object.freeze({schema:1,combat,exploration});
+  }
+  function verifyAlignment(verified,explorationDependency){
+    if(!verified||!verified.combat||!verified.exploration)throw new TypeError("Verified versions required");
+    if(!explorationDependency||typeof explorationDependency!=="object")throw new TypeError("Exploration combat dependency required");
+    if(explorationDependency.repository!==SOURCES.combat)throw new TypeError("Exploration combat source mismatch");
+    if(!SHA.test(explorationDependency.sha||""))throw new TypeError("Exploration combat SHA required");
+    if(explorationDependency.sha.toLowerCase()!==verified.combat.sha)throw new TypeError("Combat version drift between Exploration and GenS RPG");
+    if(explorationDependency.protocol!==verified.combat.protocol)throw new TypeError("Exploration combat protocol mismatch");
+    return true;
+  }
+  /* A pilot manifest is metadata, not an installable stable release. */
+  function verifyCombatRelease(release){
+    if(!release||release.schemaVersion!==1)throw new TypeError("Unsupported Combat release schema");
+    if(release.status!=="published-green")throw new TypeError("Combat release not published GREEN");
+    if(!release.validation||release.validation.ci!=="GREEN")throw new TypeError("Combat release CI not GREEN");
+    if(!release.code||release.code.repository!==SOURCES.combat||release.code.sourceBranch!=="main"||
+       !SHA.test(release.code.commit||""))throw new TypeError("Combat code must pin validated main SHA");
+    if(!release.assets||release.assets.repository!==SOURCES.combat||
+       !SHA.test(release.assets.commit||"")||
+       typeof release.assets.catalog!=="string"||!release.assets.catalog.trim())
+      throw new TypeError("Combat assets must pin catalog and SHA");
+    if(!release.consumer||release.consumer.autoSync!==true)throw new TypeError("Combat release sync not enabled");
+    return Object.freeze({codeSha:release.code.commit.toLowerCase(),assetsSha:release.assets.commit.toLowerCase(),
+      catalog:release.assets.catalog});
+  }
+  function changed(current,next){return ["combat","exploration"].filter(kind=>current[kind].sha!==next[kind].sha);}
+  root.GensLabVersionSyncV1=Object.freeze({SOURCES,verify,verifyAlignment,verifyCombatRelease,changed});
+})(typeof window!=="undefined"?window:globalThis);

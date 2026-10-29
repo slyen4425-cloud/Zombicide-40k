@@ -11,15 +11,8 @@ def _blob(data):
 def read_d9_index_view(index_file, root):
     """Current physical D9/R01 index -> byte-exact D9 view solely for legacy --verify."""
     data=Path(index_file).read_bytes()
-    # Byte-verified Chrome startup fix is unrelated to the immutable D9
-    # history. Reconstruct only this strict pre-fix view in memory.
-    if _blob(data)=="cc355585acab68958bd349ffcf8fa0de4eab9b0d":
-        import subprocess
-        data=subprocess.check_output([
-            "python3",str(Path(root)/"tests/gens_chrome_hero_recursion_patch_20261024.py"),
-            "--reverse-stdout"
-        ],input=data,cwd=root)
-        assert len(data)==1720766 and _blob(data)=="260f00aa179c939f35188ca854f9875971ce8a7b", "Chrome historical projection not exact"
+    from gensrpg_phase12_generated_wall_history import project_active_source_for_history
+    data=project_active_source_for_history(data)
     # A later owner extraction must first reverse to exact R15 for historical D9 tests.
     if _blob(data)=="260f00aa179c939f35188ca854f9875971ce8a7b":
         owner=(Path(root)/"assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js").read_bytes()

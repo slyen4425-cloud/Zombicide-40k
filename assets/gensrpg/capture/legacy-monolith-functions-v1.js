@@ -878,23 +878,19 @@ function captureRenderBattleLive(battle=window.gensCurrentCaptureBattle){
 }
 
 function captureStartWildBattle(creatureId){
-  const primary=loadSharedEntities().find(x=>String(x.id)===String(creatureId));if(!primary){alert("Créature introuvable.");return}
-  const playerRoster=captureTeamEntityRoster();if(!playerRoster.length){alert("Aucune créature dans l'équipe.");return}
-  const enemyRoster=captureWildEnemyRoster(primary),w=captureWildBattleRules();
-  const matchSlots=Math.max(1,Math.min(3,enemyRoster.length));
-  const activeSlots=w.playerSlots==="match"?matchSlots:Math.max(1,Math.min(3,Number(w.playerSlots)||1));
-  const rules={
-    type:"wild",captureAllowed:true,activeSlots,
-    teamSize:Math.max(playerRoster.length,enemyRoster.length),
-    minBattleTeam:1,maxBattleTeam:Math.max(6,playerRoster.length),
-    recallCost:w.recallCost||"turn",controller:"auto"
-  };
-  captureCloseModal("captureEncounterModal");
-  captureStartBattleAutomatic(
-    {name:(CHARS[captureActiveHeroId()]?.name||"Dresseur"),roster:playerRoster,controller:"human"},
-    {name:enemyRoster.length>1?"Créatures sauvages":(primary.name||"Créature sauvage"),roster:enemyRoster,controller:"auto"},
-    rules
-  );
+  // This is the ORIGINAL World/Hub button owner. It delegates to the sole
+  // official Combat Lab entry; there is no second global handler or fallback.
+  // The saved World/roster owners, explicit migration and pinned Lab Core
+  // perform all state changes. The historical R10 source remains in its
+  // immutable, non-executable test fixture for exact rollback certification.
+  const moduleUrl=new URL('assets/gensrpg/capture/capture-official-wild-entry-v1.mjs',document.baseURI);
+  return import(moduleUrl.href)
+    .then(({startCaptureOfficialWildEntryV1})=>startCaptureOfficialWildEntryV1(creatureId))
+    .catch(error=>{
+      console.error('Capture official wild battle entry',error);
+      alert('Combat officiel indisponible : '+String(error?.message||error));
+      return false;
+    });
 }
 
 function captureOpenTrainerBattle(){

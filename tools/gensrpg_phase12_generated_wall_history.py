@@ -72,17 +72,22 @@ def _exact_r10_to_r09():
     assert len(data)==2093066 and blob(data)=="4dbe3314d5048f2def404ed674498c0670c04fc1", "R10 -> R09 exact rollback required"
     return data
 
+def project_active_source_for_history(data):
+    # One receipt and one Node projector own the two exact supported inputs.
+    # Unknown bytes remain unchanged and fail the existing historical guards.
+    import json, subprocess
+    from pathlib import Path
+    root=Path(__file__).resolve().parents[1]
+    receipt=json.loads((root/"tests/fixtures/gens_profile_save_upload_exact_edits_20261025.json").read_text())
+    if blob(data) in (receipt["fromBlob"],receipt["toBlob"]):
+        data=subprocess.check_output([
+            "node",str(root/"tests/helpers/gens_chrome_hero_recursion_source_view_20261024.cjs")
+        ],input=data,cwd=root)
+        assert len(data)==1720766 and blob(data)=="260f00aa179c939f35188ca854f9875971ce8a7b", "historical source projection not exact"
+    return data
+
 def historical_r05_view(data):
-    # A source-only Chrome bootstrap repair cannot alter immutable Phase12
-    # historical snapshots. Invert only its exact SHA-pinned active blob.
-    if blob(data)=="cc355585acab68958bd349ffcf8fa0de4eab9b0d":
-        from pathlib import Path
-        import subprocess
-        root=Path(__file__).resolve().parents[1]
-        data=subprocess.check_output(
-            ["python3",str(root/"tests/gens_chrome_hero_recursion_patch_20261024.py"),"--reverse-stdout"],
-            input=data,cwd=root)
-        assert len(data)==1720766 and blob(data)=="260f00aa179c939f35188ca854f9875971ce8a7b", "historical Chrome rollback mismatched old blob"
+    data=project_active_source_for_history(data)
     # New R11 source is strictly reconstructed via R11→R10→R09 before old snapshot checks.
     # Validate only known, exact subsequent physical index snapshots. In
     # particular R14/R15 must replay to R09 before D9's strict historical

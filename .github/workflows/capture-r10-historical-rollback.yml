@@ -1,0 +1,30 @@
+name: Capture historical R10 owner and rollback certificate
+on:
+  pull_request:
+    paths:
+      - 'tests/fixtures/gensrpg-phase12-r10-capture-original-owner-20261018.js.txt'
+      - 'tests/gens_capture_r10_certified_owner_snapshot_v1.test.cjs'
+      - 'tools/gensrpg_phase12_r10_capture_extract_apply.cjs'
+      - '.github/workflows/capture-r10-historical-rollback.yml'
+  push:
+    branches:
+      - 'work/gensrpg-capture-r10-certified-rollback-evolution-*'
+permissions:
+  contents: read
+jobs:
+  historical-certificate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify historic R09/R10 source and reversible 90-function extraction
+        run: |
+          node tools/gensrpg_phase12_r10_capture_extract_apply.cjs --verify-certified-history
+          node tests/gens_capture_r10_certified_owner_snapshot_v1.test.cjs
+          test "$(git hash-object tests/fixtures/gensrpg-phase12-r10-capture-original-owner-20261018.js.txt)" = "c6ea3c101a6861b99f8bc064d2d1fec874e7266b"
+          test "$(git hash-object index.html)" = "17ba8e6f1faf6f8a0be8cdec68c4515d538ff646"

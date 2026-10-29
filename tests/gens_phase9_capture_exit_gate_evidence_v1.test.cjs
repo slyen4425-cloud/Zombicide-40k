@@ -67,7 +67,85 @@ assert.match(browserVictory,/await startDungeonAndLeaveSavedRuntime\(page\);/);
 assert.match(browserVictory,/captureBattleUseAbility\('capture_basic_attack'\)/);
 assert.match(browserVictory,/resumed\.dungeonRuntime\?\.participants/);
 const existing=fs.readdirSync(path.join(root,'assets/gensrpg/capture')).sort();
-const expected=['builtin-seed-v1.js','combat-core-v1.js','entry-v1.js','hub-entry-v1.js','legacy-monolith-functions-v1.js','legacy-patches','module-contract-v1.json','screen-return-v1.js','session-start-v1.js','team-roster-v1.js','world-exploration-v1.js'];
+const staged=JSON.parse(read('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'));
+assert.equal(staged.schemaVersion,1);assert.equal(staged.productionActivated,false);
+const stagedCaptureScripts=staged.classicScripts.filter(file=>file.startsWith('assets/gensrpg/capture/'));
+assert.equal(stagedCaptureScripts.length,8,'every opt-in Capture script must be audited');
+assert.equal(staged.captureEsmAdapters.length,11,'Capture opt-in consumers include the original World wild button ESM entry, official composer, native view, readiness and explicit migration');
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-official-battle-view-v1.mjs'));
+assert.equal(staged.stagedOfficialBattleView?.productionActivated,false);
+assert.equal(staged.stagedOfficialBattleView?.ownsStorage,false);
+assert.equal(staged.stagedOfficialBattleView?.ownsCombatRules,false);
+assert.ok(staged.coverage.includes('tests/gens_capture_official_battle_view_v1.test.cjs'));
+assert.equal(staged.originalWildBattleButton?.stageWired,true,'stage contains the actual original wild button owner transfer');
+assert.equal(staged.originalWildBattleButton?.productionActivated,false,'do not claim public main promotion on the staging branch');
+assert.equal(staged.originalWildBattleButton?.noLegacyEngineFallback,true);
+assert.equal(staged.originalWildBattleButton?.requiresExplicitMigrationConsent,true);
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-official-wild-entry-v1.mjs'));
+assert.ok(staged.coverage.includes('tests/gens_capture_real_wild_button_browser_v1.test.cjs'));
+const officialBattleView=read('assets/gensrpg/capture/capture-official-battle-view-v1.mjs');
+assert.match(officialBattleView,/resolveCaptureLabAsset/,'author sprites only through the central resolver');
+assert.match(officialBattleView,/battle.useSkill\(/,'buttons must call native Core');
+assert.doesNotMatch(officialBattleView,/localStorage|setInterval|window\.captureStartWildBattle\s*=/,'no second combat/storage/global authority');
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-official-hub-composition-v1.mjs'));
+assert.ok(staged.coverage.includes('tests/gens_capture_official_hub_composition_v1.test.cjs'));
+const officialComposer=read('assets/gensrpg/capture/capture-official-hub-composition-v1.mjs');
+assert.match(officialComposer,/createCaptureWorldLabWildTransactionV1/,'Hub must reuse the original World owner transaction');
+assert.match(officialComposer,/createCaptureLabHubBattleCommandV1/,'Hub must reuse the validated single command');
+assert.match(officialComposer,/delivery-manifest\.json/,'Hub must require the certified delivery manifest');
+assert.doesNotMatch(officialComposer,/window\.captureStartWildBattle\s*=|localStorage\./,'no second runtime or storage authority');
+assert.equal(staged.authoredSourceLabPin,'92e2f75ff6e9b3e03d460115d53b5604adf0e718',
+  'the approved official Combat Lab author source must be pinned to the certified Kitsune 8-frame release');
+assert.match(read('assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs'),
+  new RegExp(staged.authoredSourceLabPin),'one immutable Combat author SHA shared by the source loader and staged manifest');
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/combat-lab-authored-source-v1.mjs'));
+assert.ok(staged.coverage.includes('tests/gens_capture_lab_authored_source_v1.test.cjs'));
+const authored=read('assets/gensrpg/capture/combat-lab-authored-source-v1.mjs');
+assert.match(authored,/exportEditorDrafts\(/,'native Combat Lab exporter is the sole skill/creature projection');
+assert.doesNotMatch(authored,/localStorage|createCombatSession|createCombatRuntime|startSkill|location\.reload/,'catalog consumer owns neither storage nor combat execution');
+assert.equal(staged.stagedHubBattleCommand,true);
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs'));
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs'));
+const readOnlyProfile=read('assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs');
+assert.doesNotMatch(readOnlyProfile,/localStorage\.|window\.captureStartWildBattle\s*=|saveHeroState\(heroId/,'readiness cannot own storage or globally override Combat');
+assert.equal(staged.readOnlyProfileReadiness?.hasWriter,false);
+assert.equal(staged.readOnlyProfileReadiness?.productionActivated,false);
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs'));
+assert.equal(staged.stagedExplicitProfileMigration?.schema,'gensrpg-capture-lab-profile-migration-v1');
+assert.equal(staged.stagedExplicitProfileMigration?.requiresConsent,true);
+assert.equal(staged.stagedExplicitProfileMigration?.productionActivated,false);
+assert.equal(staged.stagedExplicitProfileMigration?.oneOwner,'assets/gensrpg/capture/team-roster-v1.js');
+const hubCommand=read('assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs');
+assert.match(hubCommand,/combatPort\.startEncounter\(/,'Hub must use the existing single Combat owner');
+assert.match(hubCommand,/transaction\.prepareWild\(/,'Hub must read the original World ticket');
+assert.doesNotMatch(hubCommand,/localStorage|window\.|createCombatSession|createCombatRuntime|startSkill|location\.reload/,
+  'Hub cannot own another storage, global old combat override, clock or damage rules');
+assert.equal(staged.stagedWorldWildTransaction,true);
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs'));
+assert.ok(staged.coverage.includes('tests/gens_capture_world_lab_wild_transaction_v1.test.cjs'));
+const wildPort=read('assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs');
+assert.match(wildPort,/saveWorldState\(/,'only the original Capture world owner persists the stamped wild identity');
+assert.match(wildPort,/consumeWildEncounter\(/,'only the original Capture world owner consumes the encounter after battle');
+assert.match(wildPort,/createCaptureSavedProfileBattleBridgeV1\(/,'hero saving delegated to existing Capture saved-profile owner');
+assert.doesNotMatch(wildPort,/localStorage|createCombatRuntime|createCombatSession|startSkill|location\.reload|window\./,
+  'Wild port cannot own another storage, clock, rules engine or globally replace the old combat');
+assert.equal(staged.stagedSavedProfileMapping,true);
+assert.equal(staged.productionActivated,false,'the saved-profile adapter is not a second live combat owner');
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs'));
+assert.ok(staged.coverage.includes('tests/gens_capture_saved_profile_bridge_v1.test.cjs'));
+const savedBridge=read('assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs');
+assert.match(savedBridge,/function createCaptureSavedProfileBattleBridgeV1/);
+assert.match(savedBridge,/saveHeroState\(heroId,next\)/,'only the injected Capture owner writes the saved battle HP');
+assert.doesNotMatch(savedBridge,/localStorage|createCombatSession|createCombatRuntime|startSkill/,'mapping owns neither storage nor combat execution');
+for(const file of [...staged.classicScripts,...staged.captureEsmAdapters]){
+  assert.ok(fs.statSync(path.join(root,file)).isFile(),file+' must exist');
+  assert.equal(read('index.html').includes('src="'+file),false,file+' must not silently load in the saved game');
+}
+assert.deepEqual(fs.readdirSync(path.join(root,staged.capturePreviewDirectory)).sort(),staged.capturePreviewFiles);
+assert.ok(read(staged.previewEntry).includes('assets/gensrpg/capture/preview/zone.mjs'));
+const historicalEntries=['builtin-seed-v1.js','combat-core-v1.js','entry-v1.js','hub-entry-v1.js','legacy-monolith-functions-v1.js','legacy-patches','module-contract-v1.json','screen-return-v1.js','session-start-v1.js','team-roster-v1.js','world-exploration-v1.js'];
+const expected=[...historicalEntries,...stagedCaptureScripts.map(file=>path.basename(file)),
+ ...staged.captureEsmAdapters.map(file=>path.basename(file)),path.basename(staged.capturePreviewDirectory)].sort();
 assert.deepEqual(existing,expected,'Capture folder has new owner files; re-audit the exit matrix on any expansion');
 
 const r06Source=require('./helpers/gens_phase12_r06_capture_source_view_v1.cjs');
@@ -82,7 +160,8 @@ const expectedPatches=moduleNames.map(name=>name.replace(/([A-Z])/g,'-$1').toLow
 assert.deepEqual(actualPatches,expectedPatches,'R06 Capture patches must contain only the 18 historical active bodies, no new autonomous engine');
 assert.equal(blob(r06Source(originalChromeIndex(fs.readFileSync(path.join(root,'index.html'))))),'b33542b033c5afa8a1643d99c56c21dbd4be266c',
   'R06 physical extraction must byte-restore the prior Phase9-approved source');
-const exportedOwnerFile=existing.filter(x=>x.endsWith('.js'));
+const stagedClassicNames=new Set(stagedCaptureScripts.map(file=>path.basename(file)));
+const exportedOwnerFile=existing.filter(x=>x.endsWith('.js')&&!stagedClassicNames.has(x));
 assert.equal(exportedOwnerFile.length,9,'Capture retains its eight proven owners plus the original R10 legacy-function extraction, not a second engine');
 assert.match(read('assets/gensrpg/capture/legacy-monolith-functions-v1.js'),/function captureAwardBattleXp\(/,'Capture legacy XP has an explicit physical owner after R10');
 assert.equal(JSON.parse(read('docs/GENSRPG_PHASE2_RUNTIME_OWNERS.json')).files['assets/gensrpg/capture/legacy-monolith-functions-v1.js'].domain,'capture');

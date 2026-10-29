@@ -1,0 +1,61 @@
+name: Capture Lab Bridge Contract
+on:
+  push:
+    branches:
+      - 'work/gensrpg-capture-lab-bridge-*'
+  pull_request:
+    paths:
+      - 'assets/gensrpg/capture/hub-entry-v1.js'
+      - 'tests/gens_capture_hub_temporary_play_owner_v1.test.cjs'
+      - 'assets/gensrpg/capture/temporary-zone-play-v1.js'
+      - 'assets/gensrpg/capture/temporary-zone-view-v1.js'
+      - 'assets/gensrpg/capture/temporary-zone-session-v1.js'
+      - 'tests/gens_capture_temporary_zone_session_v1.test.cjs'
+      - 'assets/gensrpg/capture/temporary-zone-controller-v1.js'
+      - 'tests/gens_capture_temporary_zone_controller_v1.test.cjs'
+      - 'tests/gens_capture_temporary_zone_invalid_destination_v1.test.cjs'
+      - 'assets/gensrpg/capture/temporary-encounter-source-v1.js'
+      - 'tests/gens_capture_temporary_encounter_source_v1.test.cjs'
+      - 'assets/gensrpg/capture/manual-battle-trigger-v1.js'
+      - 'tests/gens_capture_manual_battle_trigger_v1.test.cjs'
+      - 'assets/gensrpg/integrations/lab-sync-coordinator-v1.js'
+      - 'tests/gens_lab_sync_coordinator_v1.test.cjs'
+      - 'assets/gensrpg/integrations/lab-version-sync-v1.js'
+      - 'tests/gens_lab_version_sync_v1.test.cjs'
+      - 'assets/gensrpg/capture/battle-bridge-contract-v1.js'
+      - 'assets/gensrpg/capture/lab-ownership-port-v1.js'
+      - 'tests/gens_capture_*bridge*.test.cjs'
+      - 'tests/gens_capture_lab_ownership_port.test.cjs'
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate Capture battle DTO
+        run: node tests/gens_capture_lab_bridge_contract.test.cjs
+      - name: Validate lab battle trigger and creature editor ownership
+        run: node tests/gens_capture_lab_ownership_port.test.cjs
+
+      - name: Validate pinned Combat and Exploration versions
+        run: node tests/gens_lab_version_sync_v1.test.cjs
+      - name: Validate two-lab update coordinator
+        run: node tests/gens_lab_sync_coordinator_v1.test.cjs
+      - name: Validate exploration-free manual combat trigger
+        run: node tests/gens_capture_manual_battle_trigger_v1.test.cjs
+      - name: Validate replaceable temporary encounter source
+        run: node tests/gens_capture_temporary_encounter_source_v1.test.cjs
+      - name: Validate temporary zone movement and encounter lock
+        run: node tests/gens_capture_temporary_zone_controller_v1.test.cjs
+      - name: Validate invalid encounter destinations
+        run: node tests/gens_capture_temporary_zone_invalid_destination_v1.test.cjs
+      - name: Validate temporary playable session flow
+        run: node tests/gens_capture_temporary_zone_session_v1.test.cjs
+      - name: Syntax-check temporary zone view
+        run: node --check assets/gensrpg/capture/temporary-zone-view-v1.js
+      - name: Syntax-check Capture temporary play entry
+        run: node --check assets/gensrpg/capture/temporary-zone-play-v1.js
+      - name: Validate Capture Hub temporary gameplay ownership
+        run: node tests/gens_capture_hub_temporary_play_owner_v1.test.cjs

@@ -497,3 +497,18 @@ Cette règle précise les sections 15, 20 et 21 : une CI rouge **pertinente** bl
 La PR indique sa classe, ses fichiers, ses tests requis et les exceptions justifiées. Les changements C2/C3 ne sont pas fusionnés si les tests pertinents échouent. Garder un point de retour identifiable et valider la version réellement servie après déploiement. Une mise à jour PWA doit être testée sur application déjà installée, avec et sans réseau, sans suppression des sauvegardes.
 
 La règle « une branche/un lot » et l'autorité unique restent applicables. Cette procédure ne permet jamais de contourner une vraie régression.
+
+
+## Synchronisation tripartite — Labo Combat / Labo Exploration / GenS RPG (27 octobre 2026)
+
+**Architecture obligatoire :** Labo Combat est la source officielle du moteur de combat, des capacités, de l'IA, des animations et de l'éditeur de créatures. Labo Exploration est propriétaire du moteur d'exploration 2.5D, de ses rencontres et de ses scènes. GenS RPG est propriétaire de l'intégration Monster Capture, de la progression, des identités, des sauvegardes et des résultats persistants. Aucun projet ne duplique l'autorité ou le moteur d'un autre.
+
+**Trois dépôts, un contrat de liaison versionné :** le Labo Combat publie sur son `main` une version validée (commit SHA immuable ou tag) avec son contrat d'intégration public. Labo Exploration et GenS RPG consomment le même contrat et la même version de référence via des adaptateurs distincts, sans copie concurrente du moteur. Les évolutions du contrat doivent être compatibles ou explicitement versionnées; les capacités optionnelles sont annoncées et testées.
+
+**Chaîne de synchronisation :** (1) chaque lot est développé sur une branche isolée avec checkpoint START, tests RED/GREEN et revue ; (2) les deux branches directrices du Labo Combat sont intégrées dans son `main` uniquement après validation et résolution des conflits à la source ; (3) une nouvelle version officielle est identifiée ; (4) une procédure commune propose la mise à jour à Labo Exploration et GenS RPG, vérifie le protocole, les capacités, les dépendances et les tests d'intégration de chaque consommateur ; (5) chaque consommateur adopte explicitement le SHA validé et conserve son rollback. Aucune mise à jour aveugle ou automatique du runtime depuis la pointe mouvante de `main`.
+
+**Synchronisation Exploration ↔ GenS RPG :** Labo Exploration doit également publier des versions stables de son `main`, identifiées par SHA ou tag. GenS RPG récupère les versions validées du moteur d'exploration via un contrat d'exploration versionné, indépendant du contrat Combat, afin d'intégrer les cartes, rencontres, déplacements, intérieurs et leurs futures évolutions. Le lien des rencontres vers le combat emprunte le contrat Combat commun; aucune dépendance circulaire ni autorité multiple. Une mise à jour d'Exploration ne remplace pas les sauvegardes ou règles propriétaires de GenS RPG.
+
+**Matrice de compatibilité :** enregistrer pour chaque version GenS RPG les SHA validés du Labo Combat et du Labo Exploration, les versions de leurs contrats et les tests/preview correspondants. Vérifier la compatibilité croisée lorsqu'une évolution Combat affecte Exploration et Monster Capture. Si l'un des contrôles échoue, conserver la dernière combinaison GREEN sans masquer les erreurs ni modifier artificiellement les sentinelles. Prévoir une preview sur smartphone paysage et le retour arrière avant promotion.
+
+**État au 27 octobre 2026 :** cette section fixe la politique cible; elle ne signifie ni que les deux branches directrices sont déjà fusionnées sur `main`, ni que les mécanismes de synchronisation sont implémentés ou activés. La mise en œuvre reste soumise aux validations et aux PR propres à chaque dépôt.

@@ -1,6 +1,8 @@
 'use strict';
-// Preserve byte-pinned historical sentinels while running the actual external module.
-// The dedicated physical extraction test checks the active external script path.
+// Historical reconstruction MUST use the byte-exact archived original World
+// module, never the evolving active World owner. This preserves the original
+// rollback certificate without conflating an old source fingerprint with the
+// separately tested live external script. No runtime is loaded from this file.
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
@@ -16,7 +18,7 @@ const SEAMS = [
 ];
 function seedEraIndexBytes(root=path.resolve(__dirname,'../..')){
   let index=require('./gens_capture_editor_boundary_snapshot_v1.cjs').worldExtractedIndexBytes(root);
-  const module=fs.readFileSync(path.join(root,'assets/gensrpg/capture/world-exploration-v1.js'));
+  const module=fs.readFileSync(path.join(root,'tests/fixtures/capture-world-legacy-extraction-v1.js.txt'));
   assert.equal(index.length,7958968);
   assert.equal(hash(index),'42583858f0df0f1b3bcd65ca6a282c8ba27b1c07');
   assert.equal(module.length,17511);

@@ -10,6 +10,7 @@ from gensrpg_phase12_r01_d9_source_view import read_d9_index_view
 from gensrpg_phase12_generated_wall_history import historical_r05_view
 import argparse
 import hashlib
+import json
 
 ROOT = Path(__file__).resolve().parents[1]
 INDEX = ROOT / "index.html"
@@ -96,6 +97,7 @@ def apply():
     verify()
 
 def verify():
+    profile_upload=json.loads((ROOT/"tests/fixtures/gens_profile_save_upload_exact_edits_20261025.json").read_text())
     # Historical byte-pinned graph checks use the exact R05 view. The live
     # corrected Dungeon 0.79 index is not modified or rolled back on disk.
     historic_bytes=INDEX.read_bytes()
@@ -392,10 +394,11 @@ def verify():
             # graph assertions (no skipping, no wildcard acceptance).
             if current_blob in ("dab5be5dedfa56c49d76d40a4cb824a0098903f0",
                                 "9f35eb833a6ede4b91399854f19bb9bef59f45ab","260f00aa179c939f35188ca854f9875971ce8a7b",
-                                 "cc355585acab68958bd349ffcf8fa0de4eab9b0d"):
+                                 "cc355585acab68958bd349ffcf8fa0de4eab9b0d",profile_upload["toBlob"]):
                 # R16's only current-runtime change is the SHA-pinned Chrome
                 # profile bootstrap fix. Graph module counts remain unchanged.
                 required_size=(1772759 if current_blob.startswith("dab5") else
+                               profile_upload["toBytes"] if current_blob==profile_upload["toBlob"] else
                                1721700 if current_blob=="cc355585acab68958bd349ffcf8fa0de4eab9b0d" else
                                1720766 if current_blob=="260f00aa179c939f35188ca854f9875971ce8a7b" else 1729855)
                 assert len(INDEX.read_bytes())==required_size, "unknown current index bytes"
@@ -403,6 +406,7 @@ def verify():
                     expected_after=current_blob
                 elif path==PATH_GRAPH:
                     newer=((89,146,132) if current_blob.startswith("dab5") else
+                           (92,159,135) if current_blob==profile_upload["toBlob"] else
                            (91,148,134) if current_blob in ("260f00aa179c939f35188ca854f9875971ce8a7b","cc355585acab68958bd349ffcf8fa0de4eab9b0d") else (90,147,133))
                     for former,current in (
                         ("size,64,",f"size,{newer[0]},"),
@@ -410,21 +414,38 @@ def verify():
                         ("reachable.size,107,",f"reachable.size,{newer[2]},"),
                     ):
                         expected_after=expected_after.replace(former,current)
-            if current_blob=="cc355585acab68958bd349ffcf8fa0de4eab9b0d" and path==PATH_GRAPH:
+            if current_blob in ("cc355585acab68958bd349ffcf8fa0de4eab9b0d",profile_upload["toBlob"]) and path==PATH_GRAPH:
                 # R16 Chrome repair changes exactly six function bodies, not
                 # script composition. The verified current graph is pinned by
                 # this exact index blob and by the live graph assertions.
                 import re
+                physical_upload=current_blob==profile_upload["toBlob"]
                 for expression,value in (
-                    (r"size,\d+,'production composition", "size,91,'production composition"),
-                    (r"allJs\.length,\d+,", "allJs.length,148,"),
+                    (r"size,\d+,'production composition", "size,92,'production composition" if physical_upload else "size,91,'production composition"),
+                    (r"allJs\.length,\d+,", "allJs.length,159," if physical_upload else "allJs.length,148,"),
                     (r"phase2Js\.length,\d+,", "phase2Js.length,82,"),
-                    (r"reachable\.size,\d+,", "reachable.size,134,")
+                    (r"reachable\.size,\d+,", "reachable.size,135," if physical_upload else "reachable.size,134,")
                 ):
                     if re.search(expression,expected_after):
                         expected_after,n=re.subn(expression,value,expected_after)
                         assert n==1, f"R16 current graph match count changed: {expression}"
                         break
+            # The saved-Hub preview adds one explicit, unreachable classic JS
+            # file to physical inventory (159 -> 160), with NO new loaded
+            # runtime authority. R01's original extraction remains byte-pinned;
+            # its historical test projection must track the current approved
+            # inventory rather than continue asserting the pre-preview count.
+            if path==PATH_GRAPH and current_blob==profile_upload["toBlob"] and "allJs.length" in expected_after:
+                manifest=json.loads((ROOT/"docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json").read_text())
+                preview_owner="assets/gensrpg/capture/preview/saved-hub-owners.js"
+                assert manifest["productionActivated"] is False, "preview cannot activate production"
+                assert manifest["capturePreviewDirectory"]=="assets/gensrpg/capture/preview"
+                assert manifest["capturePreviewFiles"].count("saved-hub-owners.js")==1, "preview owner not explicitly inventoried"
+                assert (ROOT/preview_owner).is_file(), "preview-only owner file missing"
+                assert "assert.equal(allJs.length,160," in updated, "live graph changed without approved inventory"
+                assert "assert.equal(reachable.size,135," in updated, "preview must not increase production reachability"
+                assert expected_after.count("allJs.length,159,")==1, "R01 historical 159 baseline changed"
+                expected_after=expected_after.replace("allJs.length,159,","allJs.length,160,",1)
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

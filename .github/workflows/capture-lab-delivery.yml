@@ -15,6 +15,7 @@ on:
       - 'tests/gens_capture_lab_pages_pipeline_v1.test.cjs'
       - 'tests/gens_capture_lab_pages_site_v1.test.cjs'
       - 'tests/gens_capture_lab_delivery_v1.test.cjs'
+      - 'tests/gens_capture_kitsune_author_12_gate_v1.test.cjs'
       - 'tests/gens_capture_official_hub_composition_v1.test.cjs'
       - 'tests/gens_capture_official_hub_composition_browser_v1.test.cjs'
       - 'tests/gens_capture_official_battle_view_v1.test.cjs'
@@ -44,6 +45,8 @@ jobs:
           node-version: '22'
       - name: Verify real PWA worker guards approved immutable creature images and warm-offline resume
         run: node --test tests/gens_capture_pwa_offline_pinned_media_v1.test.cjs
+      - name: TDD Kitsune official twelfth author provenance
+        run: node --test tests/gens_capture_kitsune_author_12_gate_v1.test.cjs
       - name: TDD check true original Capture COMBATTRE owner (RED before implementation)
         run: node --test tests/gens_capture_real_wild_button_v1.test.cjs
       - name: Check official payload wiring in the real Pages pipeline (RED before implementation)

@@ -260,3 +260,71 @@ test('all twelve media-complete pinned Lab author creature transfers export genu
    opponent+' official face sprite missing');
  }
 });
+
+
+// C2 native team author projection: the same pinned Lab exporter, never a new
+// combat engine or a substitute 2v2 simulation. No public team activation yet.
+const twoSideActors=Object.freeze({
+ playerTeam:Object.freeze([
+  Object.freeze({instanceId:'capture:first',creatureId:'crea-loup'}),
+  Object.freeze({instanceId:'capture:second',creatureId:'crea_mossback'})
+ ]),
+ opponentTeam:Object.freeze([
+  Object.freeze({instanceId:'wild:first',creatureId:'crea_voltik'}),
+  Object.freeze({instanceId:'wild:second',creatureId:'kitsune_lunaire'})
+ ])
+});
+const authorizedTeamCatalog=()=>JSON.parse(fs.readFileSync(
+ path.resolve(__dirname,'fixtures/capture-lab-authored-preview-settings-v1.json'),'utf8'
+)).authoredCreatureFiles.map(read);
+
+test('RED then GREEN: two authored active creatures per camp export through the actual pinned Lab 2v2 battle contract',async()=>{
+ const f=await factory({creatureTransfers:authorizedTeamCatalog()});
+ const before=JSON.stringify(twoSideActors);
+ const result=f.buildEncounter({encounterId:'native-authored-2v2',
+  ...battleSettings,...twoSideActors});
+ const src=result.nativeCombatSource;
+ assert.deepEqual(result.actorIds,['player','ally','opponent','opponent-b'],
+  'the only supported native slot order is local, allied, enemy 1 and enemy 2');
+ assert.deepEqual(src.battleFormat.teams['capture-team'],['player','ally']);
+ assert.deepEqual(src.battleFormat.teams['wild-team'],['opponent','opponent-b']);
+ assert.equal(src.battleFormat.localActorId,'player');
+ assert.equal(src.battleFormat.actors.length,4);
+ assert.equal(src.fighters.length,4);
+ for(const [id,creatureId,instanceId] of [
+  ['player','crea-loup','capture:first'],['ally','crea_mossback','capture:second'],
+  ['opponent','crea_voltik','wild:first'],['opponent-b','kitsune_lunaire','wild:second']
+ ]){
+  assert.equal(src.battleFormat.actors.find(a=>a.actorId===id)?.creatureId,creatureId);
+  assert.equal(src.roster.teams[id]?.activeMemberId,instanceId);
+  assert.equal(src.roster.teams[id]?.members.length,1);
+  assert.equal(src.roster.teams[id]?.members[0].creatureId,creatureId);
+  assert.equal(src.skillIdsByActor[id]?.length,5,'authored creature must retain its real five skills');
+  assert.ok(src.skillIdsByActor[id].every(skillId=>src.skills[skillId]),
+   'native Core must resolve every real authored skill');
+  assert.equal(src.fighters.find(x=>x.id===id)?.maxHp,src.fighterConfigs[creatureId]?.maxHp);
+ }
+ const {loadCombatLabEngineV1}=await import('../assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs');
+ const engine=await loadCombatLabEngineV1(pathToFileURL(path.resolve(lab)+path.sep));
+ const session=engine.createCombatSession({fighters:src.fighters,
+  battleFormat:src.battleFormat,skillSpeedMultiplier:src.skillSpeedMultiplier});
+ engine.createRosterSession({combatSession:session,roster:src.roster,
+  fighterConfigs:src.fighterConfigs,battleFormat:src.battleFormat});
+ for(const actorId of result.actorIds){
+  assert.ok(session.snapshot().fighters[actorId]?.hp>0,
+   'all four actors must be instantiated by the real pinned Combat Core');
+ }
+ assert.equal(JSON.stringify(twoSideActors),before,'source must never mutate team inputs');
+});
+
+test('2v2 author projection rejects incomplete, ambiguous, duplicate or reserve-unsafe teams without fallback',async()=>{
+ const f=await factory({creatureTransfers:authorizedTeamCatalog()});
+ const ok={encounterId:'native-authored-2v2',...battleSettings,...twoSideActors};
+ assert.throws(()=>f.buildEncounter({...ok,opponentTeam:[ok.opponentTeam[0]]}),/same|equal|two|2v2|team|slots/i);
+ assert.throws(()=>f.buildEncounter({...ok,player:battle.player}),/ambiguous|exclusive|both|team/i);
+ assert.throws(()=>f.buildEncounter({...ok,playerTeam:[ok.playerTeam[0],ok.playerTeam[0]]}),/duplicate|instance/i);
+ assert.throws(()=>f.buildEncounter({...ok,playerTeam:[ok.playerTeam[0],{...ok.playerTeam[1],instanceId:'wild:first'}]}),/duplicate|instance/i);
+ assert.throws(()=>f.buildEncounter({...ok,opponentTeam:[{...ok.opponentTeam[0],creatureId:'unknown'},ok.opponentTeam[1]]}),/unknown|creature|catalog/i);
+ assert.throws(()=>f.buildEncounter({...ok,playerTeam:[{...ok.playerTeam[0],reserve:[{instanceId:'hidden',creatureId:'crea-loup'}]},ok.playerTeam[1]]}),/reserve|unsupported/i);
+ assert.throws(()=>f.buildEncounter({...ok,playerTeam:[ok.playerTeam[0],ok.playerTeam[1],ok.playerTeam[0]]}),/team|slots|2v2/i);
+});

@@ -134,6 +134,17 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
     'No duplicate static GenSrpg battle UI may remain');
 
    await page.waitForFunction(()=>[...document.getElementById('capture-official-entry-arena').shadowRoot.querySelectorAll('[data-demo-image]')].every(img=>img.complete&&img.naturalWidth>0),null,{timeout:18000});
+   const nativeCss=await page.locator('#capture-official-entry-arena [data-combat-arena]').evaluate(node=>({
+    position:getComputedStyle(node).position,
+    background:getComputedStyle(node).backgroundColor,
+    radius:getComputedStyle(node).borderRadius
+   }));
+   assert.equal(nativeCss.position,'relative','real Lab CSS must apply inside the ShadowRoot');
+   assert.equal(nativeCss.background,'rgb(23, 52, 66)','author Lab arena background must render, not bare HTML cards');
+   assert.notEqual(nativeCss.radius,'0px','author Lab landscape CSS must style the arena');
+   if(name==='Chromium'&&process.env.CAPTURE_NATIVE_LAB_SCREENSHOT){
+    await page.screenshot({path:process.env.CAPTURE_NATIVE_LAB_SCREENSHOT,fullPage:true});
+   }
    await page.locator('#capture-official-entry-arena [data-demo-slot="opponent-b"]').tap();
    assert.equal(await page.locator('#capture-official-entry-arena [data-demo-slot="opponent-b"]').getAttribute('data-target-selected'),'true');
    await page.locator('#capture-official-flee').tap();

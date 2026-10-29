@@ -64,9 +64,14 @@ export function createCombatLabProviderV1({
         Object.values(source.roster?.teams??{}).find(team=>team.slotId===actorId);
       if(!config||!authored||!actor||actor.creatureId!==creature.creatureId||
          !roster||roster.members?.length!==1||
-         roster.activeMemberId!==creature.instanceId||
-         roster.members[0].id!==creature.instanceId||
-         roster.members[0].creatureId!==creature.creatureId) {
+         roster.members[0].creatureId!==creature.creatureId||
+         // The historical 1v1 preview contract accepts separate roster member
+         // keys, while the new 2v2 author boundary supplies exact instance IDs.
+         // Preserve the existing 1v1 runtime identity semantics without
+         // relaxing the strict two-active-author contract.
+         (activePerSide===2&&(
+           roster.activeMemberId!==creature.instanceId||
+           roster.members[0].id!==creature.instanceId))) {
         throw new TypeError('Native Combat roster identity mismatch or unsupported reserve');
       }
       if(!Number.isFinite(creature.hp)||creature.hp<=0||

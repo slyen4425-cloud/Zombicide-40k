@@ -123,12 +123,12 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    const before=await page.evaluate(()=>window.ciBefore);
    assert.deepEqual(before.world.last.creatureIds,['crea_voltik','crea_voltik']);
    await page.locator('#captureEncounterModalBody button[onclick^="captureStartWildBattle"]').tap();
-   await page.locator('#capture-official-entry-arena:not([hidden]) #capture-official-flee').waitFor();
-   assert.equal(await page.locator('#capture-official-entry-arena .hub-fighter').count(),4);
-   assert.equal(await page.locator('#capture-official-entry-arena img[data-author-asset-id]').count(),4);
-   await page.waitForFunction(()=>[...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')].every(img=>img.complete&&img.naturalWidth>0),null,{timeout:18000});
-   await page.locator('button[data-capture-target-instance="wild:paired-original-2v2:2"]').tap();
-   assert.equal(await page.locator('button[data-capture-target-instance="wild:paired-original-2v2:2"]').getAttribute('aria-pressed'),'true');
+   await page.locator('#capture-official-entry-arena:not([hidden]) [data-combat-demo] [data-combat-arena]').waitFor();
+   assert.equal(await page.locator('#capture-official-entry-arena [data-demo-slot]:not([hidden])').count(),4);
+   assert.equal(await page.locator('#capture-official-entry-arena [data-demo-image]').count(),4);
+   await page.waitForFunction(()=>[...document.getElementById('capture-official-entry-arena').shadowRoot.querySelectorAll('[data-demo-image]')].every(img=>img.complete&&img.naturalWidth>0),null,{timeout:18000});
+   await page.locator('#capture-official-entry-arena [data-demo-slot="opponent-b"]').tap();
+   assert.equal(await page.locator('#capture-official-entry-arena [data-demo-slot="opponent-b"]').getAttribute('data-target-selected'),'true');
    await page.locator('#capture-official-flee').tap();
    await page.locator('#gens-capture-official-battle-v1').waitFor({state:'detached'});
    const after=await page.evaluate(()=>({hero:loadState('trainer-real-hub'),world:captureWorldState(),writes:window.ciWrites,
@@ -165,10 +165,9 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    assert.deepEqual(before.world.last.creatureIds,['crea_voltik','kitsune_lunaire']);
    assert.deepEqual(before.hero.creatureTeam.map(x=>x.entityId),['crea-loup','crea_mossback']);
    await page.locator('#captureEncounterModalBody button[onclick^="captureStartWildBattle"]').tap();
-   await page.locator('#capture-official-entry-arena:not([hidden]) #capture-official-flee').waitFor();
-   assert.equal(await page.locator('#capture-official-entry-arena .hub-fighter').count(),4);
-   await page.waitForFunction(()=>[...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')].length===4&&
-    [...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')].every(x=>x.complete&&x.naturalWidth>0),null,{timeout:20000});
+   await page.locator('#capture-official-entry-arena:not([hidden]) [data-combat-demo] [data-combat-arena]').waitFor();
+   assert.equal(await page.locator('#capture-official-entry-arena [data-demo-slot]:not([hidden])').count(),4);
+   await page.waitForFunction(()=>{const imgs=[...document.getElementById('capture-official-entry-arena').shadowRoot.querySelectorAll('[data-demo-image]')];return imgs.length===4&&imgs.every(x=>x.complete&&x.naturalWidth>0)},null,{timeout:20000});
    await page.locator('#capture-official-flee').tap();
    await page.locator('#gens-capture-official-battle-v1').waitFor({state:'detached'});
    const after=await page.evaluate(()=>({

@@ -38,7 +38,7 @@ function z40kEscAttr(x){return String(x??'')}
 <script src="/assets/gensrpg/capture/team-roster-v1.js"></script>
 <script src="/assets/gensrpg/capture/legacy-monolith-functions-v1.js"></script>
 </body></html>`;
-async function withPage(browserEngine,cb){
+async function withPage(browserEngine,cb,{recordNativeVideo=false}={}){
  const server=http.createServer(async(req,res)=>{
   try{
    const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
@@ -59,7 +59,10 @@ async function withPage(browserEngine,cb){
  let browser,context,page;
  try{
   browser=await browserEngine.launch({headless:true});
-  context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true});
+  context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true,
+   ...(recordNativeVideo&&process.env.CAPTURE_NATIVE_LAB_VIDEO_DIR?{
+    recordVideo:{dir:process.env.CAPTURE_NATIVE_LAB_VIDEO_DIR,size:{width:932,height:430}}
+   }:{})});
   await context.addInitScript(()=>localStorage.setItem('gensrpg_game_profiles_v1','{"unrelated":"preserved"}'));
   page=await context.newPage();page.setDefaultTimeout(25000);
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(e.message));
@@ -167,7 +170,7 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    assert.equal(after.writes.filter(x=>x===after.worldKey).length,1);
    assert.equal(after.port.installed,false);
    assert.deepEqual(errors,[]);
-  });
+  },{recordNativeVideo:name==='Chromium'});
  });
 }
 

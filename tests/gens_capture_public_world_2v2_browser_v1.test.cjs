@@ -126,6 +126,13 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    await page.locator('#capture-official-entry-arena:not([hidden]) [data-combat-demo] [data-combat-arena]').waitFor();
    assert.equal(await page.locator('#capture-official-entry-arena [data-demo-slot]:not([hidden])').count(),4);
    assert.equal(await page.locator('#capture-official-entry-arena [data-demo-image]').count(),4);
+   assert.equal(await page.locator('#capture-official-entry-arena [data-combat-skills] button[data-combat-skill]').count(),5,
+    'The real Lab five-capacity HUD must be mounted');
+   assert.equal(await page.locator('#capture-official-entry-arena .capture-preview-shell').getAttribute('data-landscape-required'),'true');
+   assert.equal(await page.locator('#capture-official-entry-arena [data-demo-motion]').count(),4);
+   assert.equal(await page.locator('#capture-official-entry-arena .hub-fighter').count(),0,
+    'No duplicate static GenSrpg battle UI may remain');
+
    await page.waitForFunction(()=>[...document.getElementById('capture-official-entry-arena').shadowRoot.querySelectorAll('[data-demo-image]')].every(img=>img.complete&&img.naturalWidth>0),null,{timeout:18000});
    await page.locator('#capture-official-entry-arena [data-demo-slot="opponent-b"]').tap();
    assert.equal(await page.locator('#capture-official-entry-arena [data-demo-slot="opponent-b"]').getAttribute('data-target-selected'),'true');

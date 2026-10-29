@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.115-pwa-auto-update-v1";
+const CACHE_NAME = "gensrpg-cache-16.78.116-capture-offline-media-v1";
 // gensrpg-cache-16.78.114.11-native-ui-authority
 // gensrpg-cache-16.78.114.11-armor-melee-damage
 // gensrpg-cache-16.78.114.10-hit-entry-compositor-walls
@@ -56,9 +56,35 @@ const CORE_FILES = [
 ];
 async function cacheFresh(cache,file){try{const url=new URL(file,self.registration.scope);const request=new Request(url.href,{cache:"reload"});const response=await fetch(request);if(response&&response.ok)await cache.put(request,response.clone())}catch(error){console.warn("Impossible de mettre en cache :",file)}}
 async function networkFirst(request){try{const fresh=await fetch(request,{cache:"no-store"});if(fresh&&fresh.ok){const cache=await caches.open(CACHE_NAME);await cache.put(request,fresh.clone())}return fresh}catch(error){return (await caches.match(request))||Response.error()}}
+// The resolver is the only authority for choosing creature assets and their
+// immutable SHA. The PWA only caches a requested official image; it never
+// chooses/fallbacks to another sprite, requests a mutable branch or installs a
+// second media owner. Unrelated external requests stay browser-owned.
+function isPinnedCaptureLabImage(request,url){
+  if(request.destination!=="image"||url.protocol!=="https:"||
+     url.hostname!=="raw.githubusercontent.com"||url.port||url.search)return false;
+  const prefix="/slyen4425-cloud/GenSrpg_labo_combat_dynamique/";
+  if(!url.pathname.startsWith(prefix))return false;
+  const remaining=url.pathname.slice(prefix.length);
+  return /^[0-9a-f]{40}[/]assets[/]library[/].+[.](?:png|jpe?g|webp|gif)$/i.test(remaining);
+}
+async function officialCaptureImageNetworkFirst(request){
+  try{
+    const fresh=await fetch(request);
+    if(fresh&&(fresh.ok||fresh.type==="opaque")){
+      try{
+        const cache=await caches.open(CACHE_NAME);
+        await cache.put(request,fresh.clone());
+      }catch(error){console.warn("Impossible de mettre en cache le visuel Capture approuvé :",error)}
+    }
+    return fresh;
+  }catch(error){
+    return (await caches.match(request))||Response.error();
+  }
+}
 self.addEventListener("install",event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE_NAME).then(async cache=>{for(const file of CORE_FILES)await cacheFresh(cache,file)}))});
 self.addEventListener("activate",event=>{event.waitUntil((async()=>{const cacheNames=await caches.keys();await Promise.all(cacheNames.filter(name=>name!==CACHE_NAME).map(name=>caches.delete(name)));await self.clients.claim()})())});
 self.addEventListener("message",event=>{if(event.data&&event.data.type==="SKIP_WAITING")self.skipWaiting()});
 // A standalone PWA must check for a newer worker when launched from its icon.
 // This is independent of the browser tab and never clears user storage.
-self.addEventListener("fetch",event=>{const request=event.request;if(request.method!=="GET")return;const url=new URL(request.url);if(url.origin!==self.location.origin)return;if(request.mode==="navigate"||request.destination==="document"){event.waitUntil(self.registration.update().catch(()=>{}));event.respondWith((async()=>{try{const url=new URL(request.url);url.searchParams.set("_gens_pwa_refresh",String(Date.now()));const fresh=await fetch(url.href,{cache:"no-store",credentials:"same-origin",redirect:"follow"});if(fresh&&fresh.ok){const cache=await caches.open(CACHE_NAME);await cache.put(request,fresh.clone())}return fresh}catch(error){return (await caches.match(request))||(await caches.match("./index.html"))||Response.error()}})());return}if(request.destination==="script"||request.destination==="style"||/\.(?:js|css)$/i.test(url.pathname)){event.respondWith(networkFirst(request));return}if(request.destination==="manifest"||request.destination==="audio"||/\.(mp3|wav|ogg|m4a)$/i.test(url.pathname)||url.pathname.includes("/assets/dungeon/")||url.pathname.includes("/assets/gensrpg/")){event.respondWith(networkFirst(request));return}event.respondWith((async()=>{const cached=await caches.match(request);if(cached)return cached;try{const fresh=await fetch(request);if(fresh&&fresh.ok){const cache=await caches.open(CACHE_NAME);await cache.put(request,fresh.clone())}return fresh}catch(error){return Response.error()}})())});
+self.addEventListener("fetch",event=>{const request=event.request;if(request.method!=="GET")return;const url=new URL(request.url);if(isPinnedCaptureLabImage(request,url)){event.respondWith(officialCaptureImageNetworkFirst(request));return}if(url.origin!==self.location.origin)return;if(request.mode==="navigate"||request.destination==="document"){event.waitUntil(self.registration.update().catch(()=>{}));event.respondWith((async()=>{try{const url=new URL(request.url);url.searchParams.set("_gens_pwa_refresh",String(Date.now()));const fresh=await fetch(url.href,{cache:"no-store",credentials:"same-origin",redirect:"follow"});if(fresh&&fresh.ok){const cache=await caches.open(CACHE_NAME);await cache.put(request,fresh.clone())}return fresh}catch(error){return (await caches.match(request))||(await caches.match("./index.html"))||Response.error()}})());return}if(request.destination==="script"||request.destination==="style"||/\.(?:js|css)$/i.test(url.pathname)){event.respondWith(networkFirst(request));return}if(request.destination==="manifest"||request.destination==="audio"||/\.(mp3|wav|ogg|m4a)$/i.test(url.pathname)||url.pathname.includes("/assets/dungeon/")||url.pathname.includes("/assets/gensrpg/")){event.respondWith(networkFirst(request));return}event.respondWith((async()=>{const cached=await caches.match(request);if(cached)return cached;try{const fresh=await fetch(request);if(fresh&&fresh.ok){const cache=await caches.open(CACHE_NAME);await cache.put(request,fresh.clone())}return fresh}catch(error){return Response.error()}})())});

@@ -12,56 +12,84 @@ export function createCombatLabProviderV1({
 
   function createBattle(context) {
     const sides = context?.snapshot?.sides;
-    if (!Array.isArray(sides) || sides.length !== 2 || sides.some(side => side.creatures?.length !== 1)) {
-      throw new TypeError('This adapter supports 1v1 without reserves only');
+    const counts=Array.isArray(sides)&&sides.length===2
+      ? sides.map(side=>Array.isArray(side?.creatures)?side.creatures.length:0):[];
+    // Combat v1 is active-only: the owner must explicitly model any reserve
+    // before this boundary. Never silently drop a bench creature.
+    if(counts.length!==2||![1,2].includes(counts[0])||counts[0]!==counts[1]||
+       sides.some((side,i)=>!Array.isArray(side?.active)||
+        side.active.length!==counts[i]||
+        new Set(side.active).size!==counts[i]||
+        side.creatures.some(creature=>!creature||
+          !side.active.includes(creature.instanceId))||
+        new Set(side.creatures.map(creature=>creature.instanceId)).size!==counts[i])) {
+      throw new TypeError('This adapter supports balanced 1v1 or 2v2 active teams without reserves only');
     }
-    const creatures = sides.map(side => ({...side.creatures[0],abilityIds:[...(side.creatures[0].abilityIds ?? [])]}));
-    if (sides.some((side,i) => side.active?.length !== 1 || side.active[0] !== creatures[i].instanceId)) {
-      throw new TypeError('Each side requires exactly one active instance');
+    const activePerSide=counts[0];
+    const creatures=sides.flatMap(side=>side.creatures.map(c=>({
+      ...c,abilityIds:[...(c.abilityIds??[])]
+    })));
+    if(new Set(creatures.map(c=>c.instanceId)).size!==creatures.length) {
+      throw new TypeError('Duplicate instance identity across Combat sides');
     }
-    if (new Set(creatures.map(c=>c.instanceId)).size !== 2) throw new TypeError('Duplicate instance identity');
-    const resolved = resolveBattle(context);
-    const source = resolved?.nativeCombatSource;
-    const actorIds = Array.isArray(resolved?.actorIds) ? [...resolved.actorIds] : null;
-    if (!source || !Array.isArray(actorIds) || actorIds.length !== 2 || new Set(actorIds).size !== 2 ||
-        source.fighters?.length !== 2 || source.battleFormat?.localActorId !== actorIds[0]) {
-      throw new TypeError('Resolved native 1v1 actors must identify the local player');
+    const resolved=resolveBattle(context);
+    const source=resolved?.nativeCombatSource;
+    const actorIds=Array.isArray(resolved?.actorIds)?[...resolved.actorIds]:null;
+    if(!source||!Array.isArray(actorIds)||
+       actorIds.length!==creatures.length||new Set(actorIds).size!==actorIds.length||
+       source.fighters?.length!==creatures.length||
+       source.battleFormat?.localActorId!==actorIds[0]) {
+      throw new TypeError('Resolved native active Combat actors must identify the local player');
     }
-    const actors = source.battleFormat.actors;
-    const fighters = creatures.map((creature,i) => {
-      const actorId = actorIds[i];
-      const config = source.fighters.find(fighter=>fighter.id === actorId);
-      const authored = source.fighterConfigs?.[creature.creatureId];
-      const roster = source.roster?.teams?.[actorId];
-      // The native roster uses slot IDs as keys. Never silently drop a reserve.
-      const rosterTeam = roster ?? Object.values(source.roster?.teams ?? {}).find(team=>team.slotId === actorId);
-      if (!config || !authored || !actors.some(actor=>actor.actorId === actorId && actor.creatureId === creature.creatureId) ||
-          !rosterTeam || rosterTeam.members.length !== 1 ||
-          rosterTeam.members[0].creatureId !== creature.creatureId) {
-        throw new TypeError('Native roster identity mismatch or unsupported 1v1 roster');
+    const actors=source.battleFormat.actors;
+    if(!Array.isArray(actors)||actors.length!==creatures.length||
+       typeof source.battleFormat.teamOf!=='function') {
+      throw new TypeError('Official Combat battle format does not match the active roster');
+    }
+    const alliedIds=actorIds.slice(0,activePerSide);
+    const enemyIds=actorIds.slice(activePerSide);
+    const friendlyTeam=source.battleFormat.teamOf(alliedIds[0]);
+    const opponentTeam=source.battleFormat.teamOf(enemyIds[0]);
+    if(friendlyTeam===opponentTeam||
+       alliedIds.some(id=>source.battleFormat.teamOf(id)!==friendlyTeam)||
+       enemyIds.some(id=>source.battleFormat.teamOf(id)!==opponentTeam)) {
+      throw new TypeError('Native Combat active actors must belong to two opposing teams');
+    }
+    const fighters=creatures.map((creature,i)=>{
+      const actorId=actorIds[i];
+      const config=source.fighters.find(fighter=>fighter.id===actorId);
+      const authored=source.fighterConfigs?.[creature.creatureId];
+      const actor=actors.find(candidate=>candidate.actorId===actorId);
+      const roster=source.roster?.teams?.[actorId] ??
+        Object.values(source.roster?.teams??{}).find(team=>team.slotId===actorId);
+      if(!config||!authored||!actor||actor.creatureId!==creature.creatureId||
+         !roster||roster.members?.length!==1||
+         roster.activeMemberId!==creature.instanceId||
+         roster.members[0].id!==creature.instanceId||
+         roster.members[0].creatureId!==creature.creatureId) {
+        throw new TypeError('Native Combat roster identity mismatch or unsupported reserve');
       }
-      if (!Number.isFinite(creature.hp) || creature.hp <= 0 || creature.hp > creature.maxHp ||
-          creature.maxHp !== config.maxHp || creature.maxHp !== authored.maxHp) {
+      if(!Number.isFinite(creature.hp)||creature.hp<=0||
+         creature.hp>creature.maxHp||creature.maxHp!==config.maxHp||
+         creature.maxHp!==authored.maxHp) {
         throw new TypeError('Capture and Combat HP definitions must agree');
       }
-      const actual = source.skillIdsByActor?.[actorId];
-      if (!Array.isArray(actual) || !Array.isArray(creature.abilityIds) ||
-          actual.length !== creature.abilityIds.length || new Set(actual).size !== actual.length ||
-          !actual.every(id=>creature.abilityIds.includes(id) && source.skills?.[id])) {
+      const actual=source.skillIdsByActor?.[actorId];
+      if(!Array.isArray(actual)||!Array.isArray(creature.abilityIds)||
+         actual.length!==creature.abilityIds.length||
+         new Set(actual).size!==actual.length||
+         !actual.every(id=>creature.abilityIds.includes(id)&&source.skills?.[id])) {
         throw new TypeError('Capture and Combat skill loadouts must agree');
       }
-      return {...config, initialHp:creature.hp};
+      return {...config,initialHp:creature.hp};
     });
-    if (source.battleFormat.teamOf(actorIds[0]) === source.battleFormat.teamOf(actorIds[1])) {
-      throw new TypeError('Combat sides must be opponents');
-    }
     const session = engine.createCombatSession({fighters,
       battleFormat:source.battleFormat,skillSpeedMultiplier:source.skillSpeedMultiplier});
     // Reuse the native reserve-effect owner even though this milestone has no switch commands.
     engine.createRosterSession({combatSession:session,roster:source.roster,fighterConfigs:source.fighterConfigs,
       battleFormat:source.battleFormat,recallCooldownMs:source.gameOptions?.recallCooldownMs});
 
-    let phase='created', view=null, runtime=null, ai=null;
+    let phase='created', view=null, runtime=null, ais=[];
     let resolveCompletion, rejectCompletion;
     const completion = new Promise((resolve,reject)=>{resolveCompletion=resolve;rejectCompletion=reject;});
     function terminal() {return phase === 'settled' || phase === 'disposed';}
@@ -84,8 +112,8 @@ export function createCombatLabProviderV1({
       if (phase !== 'running') return;
       try {
         view?.render?.(state);
-        if (state.fighters[actorIds[0]].hp <= 0) finish('defeat');
-        else if (state.fighters[actorIds[1]].hp <= 0) finish('victory');
+        if(alliedIds.every(id=>state.fighters[id]?.hp<=0))finish('defeat');
+        else if(enemyIds.every(id=>state.fighters[id]?.hp<=0))finish('victory');
       } catch (error) {fail(error);}
     }
     const scheduler = {};
@@ -100,25 +128,38 @@ export function createCombatLabProviderV1({
       onClock(state) {
         observe(state);
         if (phase === 'running') {
-          try {ai?.takeTurn();} catch (error) {fail(error);}
+          try {for(const ai of ais)ai.takeTurn();} catch(error){fail(error);}
         }
       }
     });
-    if (resolved.aiEnabled !== false) {
-      ai=engine.createBattleActorAiController({session,runtime,actorId:actorIds[1],targetIds:[actorIds[0]],
-        skillIds:source.skillIdsByActor[actorIds[1]],skillsById:source.skills,tactics:resolved.aiTactics});
+    if(resolved.aiEnabled!==false) {
+      // Use only the Lab's controller for each nonhuman participant.
+      // The capture-team ally targets enemies; both wild actors target allies.
+      ais=actors.filter(actor=>actor.actorId!==actorIds[0]&&
+        typeof actor.controllerId==='string'&&actor.controllerId.startsWith('ai-')
+      ).map(actor=>engine.createBattleActorAiController({
+        session,runtime,actorId:actor.actorId,
+        targetIds:source.battleFormat.teamOf(actor.actorId)===friendlyTeam?enemyIds:alliedIds,
+        skillIds:source.skillIdsByActor[actor.actorId],skillsById:source.skills,
+        tactics:resolved.aiTactics
+      }));
     }
     const handle = Object.freeze({
       completion,
       state:()=>session.snapshot(),
       skills:()=>Object.freeze(source.skillIdsByActor[actorIds[0]].map(id=>Object.freeze({id,name:source.skills[id].name}))),
-      useSkill(id,targetInstanceId=creatures[1].instanceId) {
-        if (phase !== 'running') return Object.freeze({ok:false,outcome:'battle_inactive'});
-        if (!source.skillIdsByActor[actorIds[0]].includes(id)) throw new TypeError('Skill not in local loadout');
-        const index=creatures.findIndex(c=>c.instanceId === targetInstanceId);
-        if (index < 0) throw new TypeError('Unknown target instance');
-        try {return runtime.startSkill({actorId:actorIds[0],targetId:actorIds[index],skill:source.skills[id]});}
-        catch(error){fail(error);throw error;}
+      useSkill(id,targetInstanceId) {
+        if(phase!=='running')return Object.freeze({ok:false,outcome:'battle_inactive'});
+        if(!source.skillIdsByActor[actorIds[0]].includes(id))
+          throw new TypeError('Skill not in local loadout');
+        const target=targetInstanceId??creatures[actorIds.indexOf(
+          enemyIds.find(actorId=>session.snapshot().fighters[actorId]?.hp>0)??enemyIds[0]
+        )].instanceId;
+        const index=creatures.findIndex(c=>c.instanceId===target);
+        if(index<0)throw new TypeError('Unknown target instance');
+        try{return runtime.startSkill({
+          actorId:actorIds[0],targetId:actorIds[index],skill:source.skills[id]
+        });}catch(error){fail(error);throw error;}
       },
       flee:()=>phase === 'running' && finish('flee')
     });
@@ -143,7 +184,7 @@ export function createCombatLabProviderV1({
     return value;
   }
   return Object.freeze({
-    protocol:1,version:'1.0.0',capabilities:Object.freeze(['battle-trigger','battle-1v1']),
+    protocol:1,version:'1.0.0',capabilities:Object.freeze(['battle-trigger','battle-1v1','battle-2v2-active']),
     createBattle,
     startBattle:handle=>record(handle).start(),
     stopBattle:handle=>records.get(handle)?.stop(),

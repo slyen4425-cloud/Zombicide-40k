@@ -165,9 +165,23 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
   if(world?.last?.type!=='wild'||text(world.last.creatureId)!==requested){
    throw new Error('Cette rencontre sauvage n’est plus active dans le monde.');
   }
+  // The original World owner is the ONLY source of an actual two-wild event.
+  // Never infer a second enemy from a two-member trainer or turn a legacy
+  // single wild into an invented 2v2. Reserves remain unsupported by this port.
+  const declared=world.last.creatureIds;
+  if(declared!==undefined&&(!Array.isArray(declared)||
+     ![1,2].includes(declared.length)||
+     declared.some(id=>!text(id)||text(id)!==id)||
+     declared[0]!==requested)){
+   throw new TypeError('Rencontre sauvage du World invalide : créatures déclarées incompatibles.');
+  }
+  const wildIds=declared===undefined?[requested]:[...declared];
+  const activeCount=wildIds.length;
   const hero=owners.loadHeroState(owners.activeHeroId());
-  if(hero?.creatureTeam?.length!==1||(hero?.creatureReserve?.length??0)!==0){
-   throw new Error('Le moteur officiel ne prend pas encore en charge cette équipe ou ses réserves (1v1 uniquement).');
+  if(!Array.isArray(hero?.creatureTeam)||
+     hero.creatureTeam.length!==activeCount||
+     (hero?.creatureReserve?.length??0)!==0){
+   throw new Error('Le groupe sauvegardé ne correspond pas aux créatures actives de cette rencontre officielle (sans réserve).');
   }
   const {contract,port}=await existingPort();
   if(active!==entry||entry.closed)return false;
@@ -199,32 +213,39 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
      JSON.stringify(owners.loadHeroState(initialHero))!==initialProfile){
    throw new Error('Le profil ou la rencontre sauvage a changé pendant le chargement du Labo.');
   }
-  if(!controller.resources.publishedSpecies.includes(requested)){
-   throw new Error('Cette espèce ne possède pas encore de transfert officiel : '+requested);
+  for(const speciesId of wildIds){
+   if(!controller.resources.publishedSpecies.includes(speciesId)){
+    throw new Error('Cette espèce ne possède pas encore de transfert officiel : '+speciesId);
+   }
   }
-  const migration=createCaptureSavedProfileLabMigrationV1({
-   activeHeroId:owners.activeHeroId,
-   loadHeroState:owners.loadHeroState,saveHeroState:owners.saveHeroState,
-   readEncounter:()=>owners.readWorldState()?.last,
-   worldStorageKey:owners.worldStorageKey,
-   authoredSource:controller.resources.authoredSource,
-   readBattleSettings:()=>controller.resources.settings,
-   combatSha:controller.resources.source.combatSha
-  });
-  // Existing versioned migration stays the sole historical archive. Never
-  // overwrite it, and let the same strict Battle Bridge validate the result.
-  const saved=owners.loadHeroState(owners.activeHeroId());
-  if(!saved?.captureLabProfileMigrationV1){
-   const plan=migration.prepare();
-   if(plan.status==='migration-required'){
-    const granted=globalThis.confirm?.(plan.consentText+'\n\n'+plan.explanation)===true;
-    if(!granted){
-     entry.ui.status.textContent='Migration refusée. Les sauvegardes sont intactes.';
-     entry.ui.status.dataset.consent='declined';
-     return false;
+  // The historical consented V1 migration owns ONLY a single creature.
+  // Applying it to a pair would silently alter or overwrite saved members.
+  // A paired World encounter therefore requires two already-authored compatible
+  // members; the canonical saved-profile bridge validates both BEFORE writing
+  // any World identity. Future 2v2 migration must be separately versioned.
+  if(activeCount===1){
+   const migration=createCaptureSavedProfileLabMigrationV1({
+    activeHeroId:owners.activeHeroId,
+    loadHeroState:owners.loadHeroState,saveHeroState:owners.saveHeroState,
+    readEncounter:()=>owners.readWorldState()?.last,
+    worldStorageKey:owners.worldStorageKey,
+    authoredSource:controller.resources.authoredSource,
+    readBattleSettings:()=>controller.resources.settings,
+    combatSha:controller.resources.source.combatSha
+   });
+   const saved=owners.loadHeroState(owners.activeHeroId());
+   if(!saved?.captureLabProfileMigrationV1){
+    const plan=migration.prepare();
+    if(plan.status==='migration-required'){
+     const granted=globalThis.confirm?.(plan.consentText+'\n\n'+plan.explanation)===true;
+     if(!granted){
+      entry.ui.status.textContent='Migration refusée. Les sauvegardes sont intactes.';
+      entry.ui.status.dataset.consent='declined';
+      return false;
+     }
+     if(active!==entry||entry.closed)return false;
+     migration.commit(plan,{acknowledged:plan.consentText});
     }
-    if(active!==entry||entry.closed)return false;
-    migration.commit(plan,{acknowledged:plan.consentText});
    }
   }
   if(active!==entry||entry.closed)return false;

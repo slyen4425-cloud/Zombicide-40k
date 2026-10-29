@@ -72,12 +72,9 @@ jobs:
           ref: ${{ steps.pins.outputs.combat }}
           path: combat-lab
           sparse-checkout: |
-            src/core
-            src/contracts
-            src/adapters/input/capture
-            src/catalogs
-            data/capture
-            data/combat
+            src
+            data
+            examples/dom-demo
       - uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique

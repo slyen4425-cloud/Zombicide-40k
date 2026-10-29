@@ -353,7 +353,7 @@ test('RED then GREEN: two saved active members cross the genuine four-actor Comb
  assert.equal(ticket.applyResult(result),false,'a battle result cannot be saved twice');
  assert.equal(owner.writes(),1);
 });
-test('saved 2v2 rejects changed teammate, missing encounter, duplicate identity, reserve and incomplete results',async()=>{
+test('saved 2v2 rejects changed teammate, missing encounter, duplicate identity and incomplete results',async()=>{
  const input=await native2v2SavedBridge();
  const ticket=input.create().prepareEncounter();
  const result={outcome:'flee',creatures:ticket.snapshot.sides.flatMap(side=>
@@ -367,7 +367,8 @@ test('saved 2v2 rejects changed teammate, missing encounter, duplicate identity,
  const other=await native2v2SavedBridge();
  const reserve=other.owner.get();reserve.creatureReserve.push({...reserve.creatureTeam[1],uid:'ci-hidden'});
  other.owner.replace(reserve);
- assert.throws(()=>other.create().prepareEncounter(),/reserve/i);
+ assert.equal(other.create().prepareEncounter().snapshot.sides[0].creatures.length,2,
+  'reserve does not add a Combat actor');
  const duplicate=other.owner.get();duplicate.creatureReserve=[];
  duplicate.creatureTeam[1].uid=duplicate.creatureTeam[0].uid;other.owner.replace(duplicate);
  assert.throws(()=>other.create().prepareEncounter(),/duplicate|identity|instance/i);

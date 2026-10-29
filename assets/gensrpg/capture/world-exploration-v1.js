@@ -179,13 +179,26 @@ function captureExploreAt(id){
   captureGenerateEncounter();
   captureCloseModal("captureExploreModal");captureOpenModal("captureEncounterModal");
 }
+// Only the existing World presentation reads its persisted pair. Display text
+// is escaped here, never passed as an untrusted HTML attribute or species ID.
+function captureWildNamesEscaped(last,fallback="Créature sauvage"){
+  const declared=last?.creatureIds;
+  const ids=Array.isArray(declared)&&declared.length===2&&
+    String(declared[0])===String(last.creatureId)
+    ?declared:[last?.creatureId];
+  const catalog=loadSharedEntities();
+  return ids.map(id=>{
+    const creature=catalog.find(x=>String(x.id)===String(id));
+    return z40kEscHtml(creature?.name||fallback);
+  }).join(" et ");
+}
 function renderCaptureExploreResult(){
   const host=document.getElementById("captureExploreResult");if(!host)return;
   const ws=captureWorldState(),last=ws.last;
   if(!last){host.innerHTML="";return}
   if(last.type==="wild"){
     const c=loadSharedEntities().find(x=>String(x.id)===String(last.creatureId));
-    host.innerHTML=`<div class="captureEncounterCard"><strong>🐾 ${z40kEscHtml(c?.name||"Créature sauvage")}</strong>
+    host.innerHTML=`<div class="captureEncounterCard"><strong>🐾 ${captureWildNamesEscaped(last)}</strong>
       <div class="small" style="margin:5px 0">${z40kEscHtml(c?.desc||"Une créature sauvage vous fait face.")}</div>
       <div class="v2LibActions"><button onclick="captureStartWildBattle('${z40kEscAttr(last.creatureId)}')">⚔️ COMBATTRE</button><button onclick="captureIgnoreEncounter()">➡️ CONTINUER</button></div></div>`;
   }else host.innerHTML=`<div class="captureEncounterCard">${z40kEscHtml(last.text||"")}</div>`;
@@ -196,7 +209,7 @@ function renderCaptureCurrentEncounter(){
   if(last?.type!=="wild"){host.style.display="none";host.innerHTML="";return}
   const c=loadSharedEntities().find(x=>String(x.id)===String(last.creatureId));
   host.style.display="block";
-  host.innerHTML=`<strong>🐾 Rencontre sauvage : ${z40kEscHtml(c?.name||"Créature")}</strong>
+  host.innerHTML=`<strong>🐾 Rencontre sauvage : ${captureWildNamesEscaped(last,"Créature")}</strong>
     <div class="small">${z40kEscHtml(c?.desc||"")}</div>
     <div class="v2LibActions" style="margin-top:7px"><button onclick="captureStartWildBattle('${z40kEscAttr(last.creatureId)}')">⚔️ COMBATTRE</button><button onclick="captureIgnoreEncounter()">➡️ IGNORER</button></div>`;
 }
@@ -224,7 +237,7 @@ function renderCaptureEncounterPage(){
   const ws=captureWorldState(),last=ws.last;
   if(last?.type==="wild"){
     const c=loadSharedEntities().find(x=>String(x.id)===String(last.creatureId));
-    host.innerHTML=`<div class="captureEncounterCard"><h3>🐾 ${z40kEscHtml(c?.name||"Créature sauvage")}</h3><div class="small">${z40kEscHtml(c?.desc||"Une créature sauvage vous fait face.")}</div><div class="v2LibActions" style="margin-top:10px"><button onclick="captureStartWildBattle('${z40kEscAttr(last.creatureId)}')">⚔️ COMBATTRE</button><button onclick="captureIgnoreEncounter();captureCloseModal('captureEncounterModal')">🏃 PARTIR</button></div></div>`;return;
+    host.innerHTML=`<div class="captureEncounterCard"><h3>🐾 ${captureWildNamesEscaped(last)}</h3><div class="small">${z40kEscHtml(c?.desc||"Une créature sauvage vous fait face.")}</div><div class="v2LibActions" style="margin-top:10px"><button onclick="captureStartWildBattle('${z40kEscAttr(last.creatureId)}')">⚔️ COMBATTRE</button><button onclick="captureIgnoreEncounter();captureCloseModal('captureEncounterModal')">🏃 PARTIR</button></div></div>`;return;
   }
   if(last?.type==="item"){
     host.innerHTML=`<div class="captureEncounterCard"><h3>🎁 Découverte</h3><div>${z40kEscHtml(last.text||"Objet trouvé")}</div><div class="v2LibActions" style="margin-top:10px"><button onclick="captureTakeFoundItem('${z40kEscAttr(last.itemId||"")}')">🎒 RAMASSER</button><button onclick="captureGenerateEncounter()">➡️ CONTINUER</button></div></div>`;return;
@@ -246,9 +259,24 @@ function captureGenerateEncounter(){
   const roll=Math.random()*100;let result;
   if(roll<45){
     const wild=captureRollLocation(loc);
-    result=wild?.creature
-      ?{type:"wild",creatureId:String(wild.creature.id),text:"🐾 Une créature sauvage apparaît : "+wild.creature.name+" !"}
-      :{type:"empty",text:"🌿 Vous trouvez des traces, mais aucune créature ne se montre."};
+    // Two active saved creatures may meet two wilds. Both wilds come from the
+    // ORIGINAL location/rarity owner; no inferred roster, second picker or
+    // fallback to a fabricated opponent. Existing 1v1 remains unchanged.
+    const saved=captureActiveHeroState();
+    const pair=Array.isArray(saved?.creatureTeam)&&saved.creatureTeam.length===2&&
+      (saved.creatureReserve?.length??0)===0;
+    if(wild?.creature && pair){
+      const other=captureRollLocation(loc);
+      result=other?.creature
+        ?{type:"wild",creatureId:String(wild.creature.id),
+          creatureIds:[String(wild.creature.id),String(other.creature.id)],
+          text:"🐾 Deux créatures sauvages apparaissent : "+wild.creature.name+" et "+other.creature.name+" !"}
+        :{type:"empty",text:"🌿 Une seule créature se montre. La rencontre double n'a pas lieu."};
+    }else{
+      result=wild?.creature
+        ?{type:"wild",creatureId:String(wild.creature.id),text:"🐾 Une créature sauvage apparaît : "+wild.creature.name+" !"}
+        :{type:"empty",text:"🌿 Vous trouvez des traces, mais aucune créature ne se montre."};
+    }
   }else if(roll<60){
     const a=["Le secteur est calme.","Vous explorez sans rien trouver.","Un bruit attire votre attention puis disparaît.","Vous découvrez un ancien sentier, mais rien d'autre."];
     result={type:"empty",text:"🌿 "+a[Math.floor(Math.random()*a.length)]};

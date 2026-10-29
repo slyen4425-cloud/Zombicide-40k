@@ -21,17 +21,11 @@ export function createCaptureNativeLabSceneV1({
   return new URL('assets/library/'+file,
    'https://raw.githubusercontent.com/'+source.assetsRepository+'/'+source.assetsSha+'/').href;
  };
- const mediaForId=id=>{
-  const entry=catalog.assets.find(asset=>asset.id===id);
-  const resource=entry?.resource;
-  if(!resource?.file)return null;
-  return Object.freeze({
-   assetId:id,url:mediaUrl(resource.file),
-   frameCount:Math.max(1,Math.floor(Number(resource.frameCount)||1)),
-   ...(Number(resource.frameMs)>0?{frameMs:Number(resource.frameMs)}:{}),
-   playbackMode:resource.playbackMode==='loop'?'loop':'once'
-  });
- };
+ // The Lab owns metadata normalization (headingRad, stretch, native cadence
+ // and scale). A second GenSrpg projection would silently reverse projectiles.
+ const mediaForId=globalAsset.createGlobalPresentationAssetResolverV1({
+  assetCatalog:catalog,assetUrlForFile:mediaUrl
+ });
  const actorTranslation=Object.freeze({
   'local-1':'player','local-2':'ally',
   'opponent-1':'opponent','opponent-2':'opponent-b'
@@ -45,13 +39,14 @@ export function createCaptureNativeLabSceneV1({
   if(used)throw new Error('Official Lab arena cannot be mounted twice');
   used=true;
   const shell=host.attachShadow({mode:'open'});
-  const [page,visual,preview,present,privateAudio,soundtrack,demo,...profiles]=await Promise.all([
+  const [page,visual,preview,present,globalAsset,privateAudio,soundtrack,demo,...profiles]=await Promise.all([
    fetch(uri('examples/dom-demo/capture-editor-v2.html'),{cache:'no-store'}).then(r=>{
     if(!r.ok)throw Error('Lab combat HTML missing');return r.text();
    }),
    import(uri('src/adapters/input/capture/capture-export-to-native-visual-source-v1.js')),
    import(uri('src/ui/capture-combat-preview-v1.js')),
    import(uri('src/adapters/renderer/capture-skill-presentation-assets-v2.js')),
+   import(uri('src/assets/global-presentation-asset-resolver-v1.js')),
    import(uri('src/assets/private-audio-runtime-library-v1.js')),
    import(uri('src/assets/soundtrack-runtime-library-v1.js')),
    import(uri('examples/dom-demo/demo-assets.js')),

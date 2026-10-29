@@ -67,3 +67,29 @@ test('native FX metadata is resolved by the pinned Lab owner, never a GenSrpg co
  assert.doesNotMatch(scene,/const mediaForId=id=>\{/,
   'never duplicate the Lab metadata mapping in GenSrpg');
 });
+
+
+test('pinned Lab resolver preserves directed and neutral sprite metadata',async()=>{
+ const lab=process.env.COMBAT_LAB_ROOT;
+ assert.ok(lab,'the exact pinned Combat Lab checkout is required for FX provenance');
+ const moduleUrl=pathToFileURL(path.join(lab,'src/assets/global-presentation-asset-resolver-v1.js')).href;
+ const {createGlobalPresentationAssetResolverV1}=await import(moduleUrl);
+ const resolver=createGlobalPresentationAssetResolverV1({
+  assetCatalog:{assets:[
+   {id:'projectile',resource:{file:'projectile.webp',frameCount:8,frameMs:80,
+    playbackMode:'stretch',headingRad:0,displayScale:1.4,displayScaleX:1.2,displayScaleY:0.9}},
+   {id:'neutral',resource:{file:'neutral.webp',headingRad:null,frameCount:1}}
+  ]},
+  assetUrlForFile:file=>'https://assets.example.test/'+file
+ });
+ const projectile=resolver('projectile');
+ assert.equal(projectile.headingRad,0,'a declared native heading of zero is directional');
+ assert.equal(projectile.playbackMode,'stretch');
+ assert.equal(projectile.frameCount,8);
+ assert.equal(projectile.frameMs,80);
+ assert.equal(projectile.displayScale,1.4);
+ assert.equal(projectile.displayScaleX,1.2);
+ assert.equal(projectile.displayScaleY,0.9);
+ assert.equal(Object.hasOwn(resolver('neutral'),'headingRad'),false,
+  'a neutral FX must never inherit an invented heading');
+});

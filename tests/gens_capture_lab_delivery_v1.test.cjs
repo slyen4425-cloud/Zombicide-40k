@@ -36,6 +36,15 @@ test('Capture production-shaped static transport: real official pins and every b
  assert.equal(manifest.dataDirectory,data);
  const paths=manifest.transport.map(x=>x.path);
  assert.equal(new Set(paths).size,paths.length,'one deterministic authority per packaged path');
+ assert.ok(paths.includes('vendor/combat-lab/examples/dom-demo/demo-assets.js'),
+  'the native scene imports this official Lab module; never publish an incomplete DOM graph');
+ for(const name of ['capture-editor-v2.html','capture-editor-v2.css','demo.css']){
+  assert.ok(paths.includes('vendor/combat-lab/examples/dom-demo/'+name),
+   'native Lab scene requires the original author HTML/CSS: '+name);
+ }
+ assert.match(read('vendor/combat-lab/examples/dom-demo/capture-editor-v2.html').toString(),
+  /data-capture-preview-template/,'the pinned native scene must contain the author template');
+
  assert.ok(paths.length>15,'the package must contain official runtime, author modules and metadata');
  assert.ok(paths.every(p=>p.startsWith(manifest.vendorDirectory)||p.startsWith(data)),
   'no speculative public/game shell path');

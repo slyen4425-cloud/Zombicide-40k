@@ -94,7 +94,7 @@ function createDialog(){
  Object.assign(panel.style,{width:'100vw',height:'100dvh',maxHeight:'100dvh',
   overflow:'hidden',padding:'0',border:'none',borderRadius:'0',background:'#0b1420'});
  Object.assign(host.style,{flex:'1 1 auto',width:'100%',minHeight:'0'});
- Object.assign(row.style,{position:'absolute',top:'4px',right:'4px',zIndex:'5'});
+ Object.assign(row.style,{position:'absolute',top:'max(4px,env(safe-area-inset-top))',right:'max(4px,env(safe-area-inset-right))',zIndex:'250'});
  panel.append(title,status,host,row);shell.append(panel);doc.body.appendChild(shell);
  return Object.freeze({shell,status,host,back,retry});
 }

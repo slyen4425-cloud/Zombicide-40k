@@ -93,3 +93,14 @@ test('pinned Lab resolver preserves directed and neutral sprite metadata',async(
  assert.equal(Object.hasOwn(resolver('neutral'),'headingRad'),false,
   'a neutral FX must never inherit an invented heading');
 });
+
+test('pinned Lab resolver is initialized after async module import inside native mount',()=>{
+ const scene=fs.readFileSync(path.join(root,'assets/gensrpg/capture/capture-native-lab-scene-v1.mjs'),'utf8');
+ const start=scene.indexOf('return async function mountNativeLab(');
+ const imported=scene.indexOf("const [page,visual,preview,present,globalAsset",start);
+ const resolved=scene.indexOf('const mediaForId=globalAsset.createGlobalPresentationAssetResolverV1(',start);
+ assert.ok(start>=0&&imported>start&&resolved>imported,
+  'never access a scoped async Lab import before it is available');
+ assert.equal(scene.slice(0,start).includes('globalAsset.createGlobalPresentationAssetResolverV1'),false,
+  'the media owner must not be invoked outside the mounted Lab scene');
+});

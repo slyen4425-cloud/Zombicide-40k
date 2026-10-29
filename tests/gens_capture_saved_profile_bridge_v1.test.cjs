@@ -371,8 +371,7 @@ test('saved 2v2 rejects changed teammate, missing encounter, duplicate identity,
  const duplicate=other.owner.get();duplicate.creatureReserve=[];
  duplicate.creatureTeam[1].uid=duplicate.creatureTeam[0].uid;other.owner.replace(duplicate);
  assert.throws(()=>other.create().prepareEncounter(),/duplicate|identity|instance/i);
- const wrong=other.owner.get();wrong.creatureTeam[1].uid='ci-golem';
- other.owner.replace(wrong);
+ other.encounter.creatureIds[1]='crea-loup';
  const wrongBridge=other.create();
- assert.throws(()=>wrongBridge.prepareEncounter(),/reserve|encounter|creature/i);
+ assert.throws(()=>wrongBridge.prepareEncounter(),/encounter|opponent|creature|wild/i);
 });

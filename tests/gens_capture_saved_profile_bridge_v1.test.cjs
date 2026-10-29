@@ -353,7 +353,7 @@ test('RED then GREEN: two saved active members cross the genuine four-actor Comb
  assert.equal(ticket.applyResult(result),false,'a battle result cannot be saved twice');
  assert.equal(owner.writes(),1);
 });
-test('saved 2v2 rejects changed teammate, missing encounter, duplicate identity, reserve and incomplete results',async()=>{
+test('saved 2v2 rejects changed teammate, missing encounter, duplicate identity and incomplete results',async()=>{
  const input=await native2v2SavedBridge();
  const ticket=input.create().prepareEncounter();
  const result={outcome:'flee',creatures:ticket.snapshot.sides.flatMap(side=>
@@ -367,11 +367,61 @@ test('saved 2v2 rejects changed teammate, missing encounter, duplicate identity,
  const other=await native2v2SavedBridge();
  const reserve=other.owner.get();reserve.creatureReserve.push({...reserve.creatureTeam[1],uid:'ci-hidden'});
  other.owner.replace(reserve);
- assert.throws(()=>other.create().prepareEncounter(),/reserve/i);
+ assert.equal(other.create().prepareEncounter().snapshot.sides[0].creatures.length,2,
+  'reserve does not add a Combat actor');
  const duplicate=other.owner.get();duplicate.creatureReserve=[];
  duplicate.creatureTeam[1].uid=duplicate.creatureTeam[0].uid;other.owner.replace(duplicate);
  assert.throws(()=>other.create().prepareEncounter(),/duplicate|identity|instance/i);
  other.encounter.creatureIds[1]='crea-loup';
  const wrongBridge=other.create();
  assert.throws(()=>wrongBridge.prepareEncounter(),/encounter|opponent|creature|wild/i);
+});
+
+
+test('reserve preservation RED→GREEN: official 2v2 fights with two actives while owned reserve remains byte-for-byte unchanged',async()=>{
+ const {owner,create}=await native2v2SavedBridge();
+ const initial=owner.get();
+ const reserve=[
+  {...initial.creatureTeam[0],uid:'ci-reserve-1',hp:17,custom:{notes:'untouched',order:1}},
+  {uid:'ci-reserve-2',entityId:'unpublished-reserve-only',hp:9,maxHp:11,
+   activeAbilityIds:['reserve-only'],custom:{notes:'not a Combat actor',order:2}}
+ ];
+ initial.creatureReserve=structuredClone(reserve);
+ owner.replace(initial);
+ const ticket=create().prepareEncounter();
+ assert.equal(ticket.snapshot.sides[0].creatures.length,2,'reserve never enters the official active actor snapshot');
+ assert.deepEqual(ticket.snapshot.sides[0].active,['ci-wolf','ci-golem']);
+ const result={outcome:'flee',creatures:ticket.snapshot.sides.flatMap(side=>
+  side.creatures.map(c=>({instanceId:c.instanceId,
+   hp:c.instanceId==='ci-wolf'?c.hp-1:c.instanceId==='ci-golem'?c.hp-2:c.hp})))};
+ assert.equal(owner.writes(),0);
+ assert.equal(ticket.applyResult(result).applied,true);
+ assert.equal(owner.writes(),1,'only the canonical Capture owner writes once');
+ const after=owner.get();
+ assert.deepEqual(after.creatureReserve,reserve,'reserve order and every custom field are preserved');
+ assert.deepEqual(after.creatureTeam.map(x=>x.hp),initial.creatureTeam.map((x,i)=>x.hp-(i+1)));
+ assert.equal(ticket.applyResult(result),false,'no second write on duplicate outcome');
+ assert.equal(owner.writes(),1);
+});
+
+test('reserve preservation: concurrent reserve edit, duplicate UID or malformed reserve fails closed without a write',async()=>{
+ const {owner,create}=await native2v2SavedBridge();
+ const initial=owner.get();
+ initial.creatureReserve=[{...initial.creatureTeam[0],uid:'ci-reserve-safe',hp:12,custom:'original'}];
+ owner.replace(initial);
+ const ticket=create().prepareEncounter();
+ const raw={outcome:'flee',creatures:ticket.snapshot.sides.flatMap(side=>
+  side.creatures.map(c=>({instanceId:c.instanceId,hp:c.hp})))};
+ const edited=owner.get();edited.creatureReserve[0].custom='changed externally';
+ owner.replace(edited);
+ assert.throws(()=>ticket.applyResult(raw),/Stale Capture profile|reserve/i);
+ assert.equal(owner.writes(),0);
+ assert.equal(owner.get().creatureReserve[0].custom,'changed externally');
+ const duplicate=owner.get();duplicate.creatureReserve[0].uid=duplicate.creatureTeam[0].uid;
+ owner.replace(duplicate);
+ assert.throws(()=>create().prepareEncounter(),/duplicate|identity|reserve/i);
+ const malformed=owner.get();malformed.creatureReserve=[null];
+ owner.replace(malformed);
+ assert.throws(()=>create().prepareEncounter(),/reserve|invalid|identity/i);
+ assert.equal(owner.writes(),0);
 });

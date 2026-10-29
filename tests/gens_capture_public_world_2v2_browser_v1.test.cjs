@@ -109,6 +109,9 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    await page.evaluate(()=>{
     const hero=loadState('trainer-real-hub');
     hero.creatureTeam.push({...hero.creatureTeam[0],uid:'ci-second-loup',xp:18,userNote:'second-saved'});
+    // A third owned creature remains in reserve, never a fifth Combat actor.
+    hero.creatureReserve=[{uid:'ci-reserve-outside',entityId:'crea_unsupported',hp:9,maxHp:12,
+     activeAbilityIds:['user-owned-reserve-skill'],userNote:'do not migrate or battle'}];
     saveHeroCreatureState('trainer-real-hub',hero);
     const world=captureWorldState();
     saveCaptureWorldState({...world,last:{type:'wild',encounterId:'paired-original-2v2',
@@ -139,6 +142,7 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    assert.deepEqual(after.hero.creatureTeam.map(x=>x.uid),before.hero.creatureTeam.map(x=>x.uid));
    assert.deepEqual(after.hero.creatureTeam.map(x=>x.hp),before.hero.creatureTeam.map(x=>x.hp));
    assert.deepEqual(after.hero.creatureTeam.map(x=>x.userNote),before.hero.creatureTeam.map(x=>x.userNote));
+   assert.deepEqual(after.hero.creatureReserve,before.hero.creatureReserve,'real World button must preserve the entire saved reserve');
    assert.deepEqual(after.hero.inventory,before.hero.inventory);
    assert.equal(after.hero.gold,before.hero.gold);
    assert.equal(after.writes.filter(x=>x===after.heroKey).length,1);
@@ -164,6 +168,8 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    }));
    assert.deepEqual(before.world.last.creatureIds,['crea_voltik','kitsune_lunaire']);
    assert.deepEqual(before.hero.creatureTeam.map(x=>x.entityId),['crea-loup','crea_mossback']);
+   assert.deepEqual(before.hero.creatureReserve.map(x=>x.uid),['demo-reserve-loup'],
+    'isolated smartphone demo must contain a genuine saved off-field reserve');
    await page.locator('#captureEncounterModalBody button[onclick^="captureStartWildBattle"]').tap();
    await page.locator('#capture-official-entry-arena:not([hidden]) #capture-official-flee').waitFor();
    assert.equal(await page.locator('#capture-official-entry-arena .hub-fighter').count(),4);
@@ -180,6 +186,8 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    assert.equal(after.hero.creatureTeam.length,2);
    assert.deepEqual(after.hero.creatureTeam.map(x=>x.uid),before.hero.creatureTeam.map(x=>x.uid));
    assert.deepEqual(after.hero.creatureTeam.map(x=>x.hp),before.hero.creatureTeam.map(x=>x.hp));
+   assert.deepEqual(after.hero.creatureReserve,before.hero.creatureReserve,
+    'isolated preview must not move, damage or mutate the off-field reserve');
    assert.equal(after.other,before.other,'public-game profiles cannot be changed by preview');
    assert.deepEqual(errors,[]);
   });

@@ -167,7 +167,8 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
   }
   // The original World owner is the ONLY source of an actual two-wild event.
   // Never infer a second enemy from a two-member trainer or turn a legacy
-  // single wild into an invented 2v2. Reserves remain unsupported by this port.
+  // single wild into an invented 2v2. Off-field reserves may be preserved
+  // during a native 2v2, but recall/substitution is NOT available yet.
   const declared=world.last.creatureIds;
   if(declared!==undefined&&(!Array.isArray(declared)||
      ![1,2].includes(declared.length)||
@@ -180,8 +181,9 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
   const hero=owners.loadHeroState(owners.activeHeroId());
   if(!Array.isArray(hero?.creatureTeam)||
      hero.creatureTeam.length!==activeCount||
-     (hero?.creatureReserve?.length??0)!==0){
-   throw new Error('Le groupe sauvegardé ne correspond pas aux créatures actives de cette rencontre officielle (sans réserve).');
+     (activeCount===1&&(hero?.creatureReserve?.length??0)!==0)){
+   throw new Error('Le groupe sauvegardé ne correspond pas aux créatures actives de cette rencontre officielle'+
+    (activeCount===1?' (sans réserve).':'.'));
   }
   const {contract,port}=await existingPort();
   if(active!==entry||entry.closed)return false;

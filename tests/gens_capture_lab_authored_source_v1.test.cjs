@@ -328,3 +328,54 @@ test('2v2 author projection rejects incomplete, ambiguous, duplicate or reserve-
  assert.throws(()=>f.buildEncounter({...ok,playerTeam:[{...ok.playerTeam[0],reserve:[{instanceId:'hidden',creatureId:'crea-loup'}]},ok.playerTeam[1]]}),/reserve|unsupported/i);
  assert.throws(()=>f.buildEncounter({...ok,playerTeam:[ok.playerTeam[0],ok.playerTeam[1],ok.playerTeam[0]]}),/team|slots|2v2/i);
 });
+
+
+test('TDD native 2v2: the sole Combat provider starts four real authored Lab fighters and returns all HP',async()=>{
+ const f=await factory({creatureTransfers:authorizedTeamCatalog()});
+ const built=f.buildEncounter({encounterId:'author-two-vs-two',...battleSettings,...twoSideActors});
+ const src=built.nativeCombatSource;
+ const sides=[twoSideActors.playerTeam,twoSideActors.opponentTeam].map((members,side)=>({
+  name:side===0?'Joueurs':'Adversaires',active:members.map(m=>m.instanceId),
+  creatures:members.map(member=>{
+   const config=src.fighterConfigs[member.creatureId];
+   const actor=src.battleFormat.actors.find(a=>a.creatureId===member.creatureId);
+   return {instanceId:member.instanceId,creatureId:member.creatureId,
+    hp:config.maxHp,maxHp:config.maxHp,abilityIds:[...src.skillIdsByActor[actor.actorId]]};
+  })
+ }));
+ const ctx={encounterId:built.encounterId,snapshot:{sides}};
+ const {createCombatLabProviderV1}=await import('../assets/gensrpg/capture/combat-lab-provider-v1.mjs');
+ const {loadCombatLabEngineV1}=await import('../assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs');
+ const engine=await loadCombatLabEngineV1(pathToFileURL(path.resolve(lab)+path.sep));
+ let renders=0,disposed=0,created=0;
+ const timers=new Map(),clock={now:()=>0,
+  setTimer(fn,ms){const id=++created;timers.set(id,{fn,ms});return id},
+  clearTimer(id){timers.delete(id)}
+ };
+ const provider=createCombatLabProviderV1({engine,clock,resolveBattle:()=>({
+  nativeCombatSource:src,actorIds:built.actorIds
+ }),mountBattle:()=>({render(){renders++},dispose(){disposed++}})});
+ const handle=provider.createBattle(ctx);
+ assert.equal(handle.state().fighters.player.hp,src.fighterConfigs['crea-loup'].maxHp);
+ assert.equal(handle.state().fighters.ally.hp,src.fighterConfigs.crea_mossback.maxHp);
+ assert.equal(handle.state().fighters.opponent.hp,src.fighterConfigs.crea_voltik.maxHp);
+ assert.equal(handle.state().fighters['opponent-b'].hp,src.fighterConfigs.kitsune_lunaire.maxHp);
+ assert.equal(handle.skills().length,5);
+ const corrupted=structuredClone(ctx);
+ corrupted.snapshot.sides[1].creatures[1].instanceId='capture:first';
+ assert.throws(()=>provider.createBattle(corrupted),/identity|duplicate|instance/i);
+ const withReserve=structuredClone(ctx);
+ withReserve.snapshot.sides[0].creatures.push({...withReserve.snapshot.sides[0].creatures[0],instanceId:'reserve:x'});
+ assert.throws(()=>provider.createBattle(withReserve),/reserve|active|2v2/i);
+ provider.startBattle(handle);
+ assert.ok(renders>=1,'real native Combat runtime must render its initial four-actor state');
+ assert.equal(handle.flee(),true);
+ const result=await handle.completion;
+ assert.equal(result.outcome,'flee');
+ assert.deepEqual(result.creatures.map(x=>x.instanceId),
+  ['capture:first','capture:second','wild:first','wild:second']);
+ assert.ok(result.creatures.every(x=>Number.isFinite(x.hp)&&x.hp>0));
+ provider.disposeBattle(handle);
+ assert.equal(disposed,1);
+ assert.equal(timers.size,0,'no Combat Lab timers may survive the battle');
+});

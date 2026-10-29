@@ -14,6 +14,15 @@ export function createCombatLabProviderV1({
     const sides = context?.snapshot?.sides;
     const counts=Array.isArray(sides)&&sides.length===2
       ? sides.map(side=>Array.isArray(side?.creatures)?side.creatures.length:0):[];
+    // Diagnose cross-team identity collisions before checking active membership:
+    // a duplicate UID must never be misreported as a reserve or team-size error.
+    if(counts.length===2 && counts.every(n=>n>=1) &&
+       sides.every(side=>Array.isArray(side?.creatures))) {
+      const ids=sides.flatMap(side=>side.creatures.map(c=>c?.instanceId));
+      if(new Set(ids).size!==ids.length){
+        throw new TypeError('Duplicate instance identity across Combat sides');
+      }
+    }
     // Combat v1 is active-only: the owner must explicitly model any reserve
     // before this boundary. Never silently drop a bench creature.
     if(counts.length!==2||![1,2].includes(counts[0])||counts[0]!==counts[1]||

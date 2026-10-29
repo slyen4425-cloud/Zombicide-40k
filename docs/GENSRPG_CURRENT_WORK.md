@@ -1,3 +1,23 @@
+# Capture — intégration de la sauvegarde native 2v2 dans le staging (29 octobre 2026)
+
+- **Source certifiée** : PR #206 `159bd1c1acf9b3e00db4f32e4e17939d5b6ae495`, 5/5 GitHub Actions et 8/8 checks SUCCESS, checkpoint `checkpoint/gensrpg-capture-2v2-saved-battle-bridge-green-2026-10-29` ; TDD RED prouvé avant correctif.
+- **Staging parent certifié** : PR #175 `b32c049b1a9a6d4d814a0e9caf86f71aa59aab29`, 14/14 GitHub Actions SUCCESS et checkpoint `checkpoint/gensrpg-capture-native-2v2-battle-view-staging-green-2026-10-29` après fusion #205.
+- **Réconciliation sans écrasement** : merger les deux parents, conserver intégralement les journaux de la vue #205 et de la sauvegarde #206, reprendre exactement le bridge et ses tests validés, aucune modification de règles/IA/moteur, ni `main`.
+- **État de ce commit** : résolution de la divergence documentaire seulement ; **CI à recertifier sur le SHA de merge** avant de rendre #206 mergeable/ready et de la fusionner dans #175. 2v2 World, réserves, migration, FX et validation Android restent non certifiés.
+
+---
+
+# Capture — sauvegarde des résultats natifs 2v2 sans double propriétaire (29 octobre 2026)
+
+- **Classe C2, base GREEN exacte** : staging `work/gensrpg-capture-lab-bridge-2026-10-27@7304cec1d6c0b9163943bb42339e3b58d0604dd9`, checkpoint `checkpoint/gensrpg-capture-native-2v2-provider-staging-green-2026-10-29` ; source Lab Combat `92e2f75ff6e9b3e03d460115d53b5604adf0e718`. `main` demeure indépendant et inchangé. La PR #205 (vue 2v2) est un lot **distinct parallèle**, CI navigateur en cours, aucun chevauchement de fichiers runtime.
+- **START exact avant code** : `checkpoint/gensrpg-start-capture-2v2-saved-battle-bridge-2026-10-29`, branche `work/gensrpg-capture-2v2-saved-battle-bridge-2026-10-29` depuis le SHA certifié ci-dessus.
+- **Périmètre/autorité** : généraliser uniquement la frontière de persistance `assets/gensrpg/capture/saved-profile-battle-bridge-v1.mjs` et sa sentinelle réelle `tests/gens_capture_saved_profile_bridge_v1.test.cjs` (plus le journal) : deux créatures actives du profil Capture vs deux créatures sauvages identifiées, export du vrai Labo, résultat validé par le contrat Capture historique, conservation des deux UID/PV/compétences et attributs hors combat, refus d'une sauvegarde concurrente. **Le propriétaire Capture `saveHeroCreatureState` reste l'unique écrivain.** Un résultat ne peut être appliqué deux fois. L'ancien 1v1 reste strictement compatible et le port ne doit jamais deviner un roster, des réserves ou une créature.
+- **Contrat d'entrée du lot** : 1v1 historique conserve `last.creatureId` ; 2v2 requiert un événement canonique `last.creatureIds` d'exactement deux espèces, avec `last.creatureId === last.creatureIds[0]`, ainsi que deux membres actifs dans `creatureTeam` et aucune réserve ; le futur lot World sera seul propriétaire de la création de cet événement. Aucun nouveau générateur ou stockage World ici.
+- **TDD RED→GREEN** : ajouter avant code les tests d'exporteur réel Loup/Golem contre Voltige/Kitsune, du vrai Core/Combat provider, de quatre PV retournés puis sauvés une fois et relus ; contrôles stricts : identités/sorties uniques, profils mutés avant/après, compétences, PV, réserve, équipe, rencontre et refus des résultats invalides ou incomplets. Les workflows officiels Capture runtime/architecture/Firefox/Tactical doivent être GREEN au HEAD exact, puis checkpoint GREEN et fusion uniquement dans staging #175 après la PR vue #205 (résoudre proprement l'éventuel conflit du journal).
+- **Non-objectifs protégés** : ne modifier ni World/rencontres, ni bouton public, ni migration historique, ni vues/PR #205, ni provider/IA du Labo, ni index.html, SW, Survie/Dungeon/PvP, ni `main`. Ne pas annoncer 2v2 public fonctionnel tant que la commande World, migration, équipes/réserves, tests Android restent à raccorder.
+
+---
+
 # Capture — vue propriétaire 2v2 native (29 octobre 2026)
 
 - **Base GREEN staging exacte** : PR #175 `work/gensrpg-capture-lab-bridge-2026-10-27@7304cec1d6c0b9163943bb42339e3b58d0604dd9`, **14/14 GitHub Actions SUCCESS** (dernière architecture #40860333460 SUCCESS), checkpoint `checkpoint/gensrpg-capture-native-2v2-provider-staging-green-2026-10-29`. `main@1d8521c18374cf284303f873c1f3ae3bba91a68d` inchangé.

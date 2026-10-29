@@ -1,140 +1,200 @@
-// Capture-owned data seam. The existing Capture owner reads/saves the profile;
-// the pinned official Lab adapter owns definitions and the Combat Core owns rules.
-// This module never installs a runtime, writes storage or invents authored data.
+// Capture-owned data seam. Only the original Capture team owner persists HP.
+// The pinned Combat Lab export/adapter owns fighters, skills, teams and rules.
+// Both 1v1 and explicit two-active-per-side battles use this one boundary.
+// No storage, gameplay, view, fallback, clock or second roster authority here.
 export function createCaptureSavedProfileBattleBridgeV1({
-  activeHeroId, loadHeroState, saveHeroState, readEncounter,
-  exported, adaptCombatExport, validateBattleResult
+  activeHeroId,loadHeroState,saveHeroState,readEncounter,
+  exported,adaptCombatExport,validateBattleResult
 }) {
-  for (const [name,fn] of Object.entries({
+  for(const [key,fn] of Object.entries({
     activeHeroId,loadHeroState,saveHeroState,readEncounter,adaptCombatExport,validateBattleResult
   })) {
-    if (typeof fn !== 'function') throw new TypeError('Capture owner requires '+name);
+    if(typeof fn!=='function')throw new TypeError('Capture owner requires '+key);
   }
-  if (!exported || typeof exported !== 'object') throw new TypeError('Official authored Combat export required');
-  const nativeSource = adaptCombatExport(exported);
-  const actors = nativeSource?.battleFormat?.actors;
-  const localId = nativeSource?.battleFormat?.localActorId;
-  if (!Array.isArray(actors) || actors.length !== 2 || !localId) {
-    throw new TypeError('Only an official two-actor Combat export is supported');
+  if(!exported||typeof exported!=='object')throw new TypeError('Official authored Combat export required');
+  const nativeSource=adaptCombatExport(exported);
+  const format=nativeSource?.battleFormat;
+  const actors=format?.actors;
+  const localId=format?.localActorId;
+  if(!Array.isArray(actors)||![2,4].includes(actors.length)||
+    !localId||typeof format?.teamOf!=='function') {
+    throw new TypeError('Only official active 1v1 or 2v2 Combat exports are supported');
   }
-  const player = actors.find(actor=>actor.actorId === localId);
-  const opponent = actors.find(actor=>actor.actorId !== localId);
-  if (!player || !opponent ||
-      nativeSource.battleFormat.teamOf(player.actorId) === nativeSource.battleFormat.teamOf(opponent.actorId)) {
-    throw new TypeError('Official Combat export has no opposing local player');
+  const selected=actors.find(actor=>actor.actorId===localId);
+  if(!selected)throw new TypeError('Official Combat export has no local player actor');
+  const localTeam=format.teamOf(localId);
+  const localActors=actors.filter(actor=>format.teamOf(actor.actorId)===localTeam);
+  const enemyActors=actors.filter(actor=>format.teamOf(actor.actorId)!==localTeam);
+  const enemyTeam=enemyActors.length?format.teamOf(enemyActors[0].actorId):null;
+  const activeCount=actors.length/2;
+  if(!localTeam||!enemyTeam||enemyTeam===localTeam||
+    localActors.length!==activeCount||enemyActors.length!==activeCount||
+    localActors[0]?.actorId!==localId||
+    enemyActors.some(actor=>format.teamOf(actor.actorId)!==enemyTeam)||
+    new Set(actors.map(actor=>actor.actorId)).size!==actors.length) {
+    throw new TypeError('Official Combat export requires balanced opposing active teams');
   }
-  const actorIds = Object.freeze([player.actorId,opponent.actorId]);
-  const sourceSkills = nativeSource.skillIdsByActor?.[localId];
-  const authoredPlayer = nativeSource.fighterConfigs?.[player.creatureId];
-  const authoredWild = nativeSource.fighterConfigs?.[opponent.creatureId];
-  if (!Array.isArray(sourceSkills) || !authoredPlayer || !authoredWild) {
-    throw new TypeError('Incomplete official Combat creature catalog or skill loadout');
+  const actorIds=Object.freeze([...localActors,...enemyActors].map(actor=>actor.actorId));
+  const exactSkills=(a,b)=>Array.isArray(a)&&Array.isArray(b)&&
+    a.length===b.length&&a.every((id,i)=>id===b[i]);
+  const text=value=>typeof value==='string'?value.trim():'';
+  for(const actor of actors) {
+    const definition=nativeSource.fighterConfigs?.[actor.creatureId];
+    const skills=nativeSource.skillIdsByActor?.[actor.actorId];
+    if(!definition||!Number.isFinite(definition.maxHp)||definition.maxHp<=0||
+      !Array.isArray(skills)||new Set(skills).size!==skills.length||
+      skills.some(id=>typeof id!=='string'||!nativeSource.skills?.[id])) {
+      throw new TypeError('Incomplete official Combat creature catalog or skill loadout');
+    }
   }
-  const exactSkills = (a,b) => Array.isArray(a) && Array.isArray(b) &&
-    a.length === b.length && a.every((id,i)=>id === b[i]);
-  const text = value=>typeof value === 'string' ? value.trim() : '';
 
-  function prepareEncounter() {
-    const heroId = text(activeHeroId());
-    const encounter = readEncounter();
-    if (!heroId) throw new TypeError('Capture active hero identity required');
-    if (encounter?.type !== 'wild' || !text(encounter.encounterId) || !text(encounter.creatureId)) {
+  function encounterSpecies(encounter){
+    if(encounter?.type!=='wild'||!text(encounter.encounterId)||!text(encounter.creatureId)){
       throw new TypeError('A live Capture wild encounter is required');
     }
-    if (encounter.creatureId !== opponent.creatureId) {
-      throw new TypeError('Wild encounter is absent from the official authored creature catalog');
+    const ids=activeCount===1?[text(encounter.creatureId)]:encounter.creatureIds;
+    if(!Array.isArray(ids)||ids.length!==activeCount||
+      ids.some((id,i)=>!text(id)||id!==enemyActors[i].creatureId)||
+      ids[0]!==text(encounter.creatureId)) {
+      throw new TypeError('Wild encounter opponents do not match the official authored creatures');
     }
-    const hero = loadHeroState(heroId);
-    if (!hero || !Array.isArray(hero.creatureTeam) || hero.creatureTeam.length !== 1 ||
-        (Array.isArray(hero.creatureReserve) && hero.creatureReserve.length)) {
-      throw new TypeError('Persisted Capture 1v1 currently requires exactly one team member and no reserve');
+    // A 1v1 world event must not silently lose an explicitly declared second wild.
+    if(activeCount===1&&encounter.creatureIds!==undefined&&
+      (!Array.isArray(encounter.creatureIds)||encounter.creatureIds.length!==1||
+       encounter.creatureIds[0]!==ids[0])) {
+      throw new TypeError('Wild encounter has unsupported extra creature slots');
     }
-    const selected = hero.creatureTeam[0];
-    const uid = text(selected?.uid);
-    const entityId = text(selected?.entityId);
-    const hp = selected?.hp, maxHp=selected?.maxHp;
-    const abilityIds = selected?.activeAbilityIds;
-    if (!uid || !entityId || entityId !== player.creatureId) {
-      throw new TypeError('Saved Capture creature identity does not match the official authored catalog');
+    return [...ids];
+  }
+  function readActiveMembers(hero){
+    if(!hero||!Array.isArray(hero.creatureTeam)||
+      hero.creatureTeam.length!==activeCount||
+      (Array.isArray(hero.creatureReserve)&&hero.creatureReserve.length)) {
+      throw new TypeError('Persisted Capture active team requires '+activeCount+' members and no reserve');
     }
-    if (!Number.isFinite(maxHp) || maxHp !== authoredPlayer.maxHp ||
-        !Number.isFinite(hp) || hp <= 0 || hp > maxHp) {
-      throw new TypeError('Saved Capture HP are incompatible with the official Combat creature');
-    }
-    if (!exactSkills(abilityIds,sourceSkills)) {
-      throw new TypeError('Saved Capture ability loadout does not match the official Combat skills');
-    }
-    const wildId='wild:'+text(encounter.encounterId);
-    if (uid === wildId) throw new TypeError('Capture instance identity collision');
-    if (!Number.isFinite(authoredWild.maxHp) || authoredWild.maxHp <= 0) {
-      throw new TypeError('Invalid official wild creature HP');
-    }
-    const snapshot=Object.freeze({
-      sides:[
-        {name:player.displayName ?? '',active:[uid],creatures:[{
-          instanceId:uid,creatureId:entityId,hp,maxHp,abilityIds:[...abilityIds]
-        }]},
-        {name:opponent.displayName ?? '',active:[wildId],creatures:[{
-          instanceId:wildId,creatureId:opponent.creatureId,
-          hp:authoredWild.maxHp,maxHp:authoredWild.maxHp,
-          abilityIds:[...nativeSource.skillIdsByActor[opponent.actorId]]
-        }]}
-      ]
+    const used=new Set();
+    return hero.creatureTeam.map((member,i)=>{
+      const actor=localActors[i],uid=text(member?.uid),entityId=text(member?.entityId);
+      const maxHp=member?.maxHp,hp=member?.hp,abilityIds=member?.activeAbilityIds;
+      if(!uid||used.has(uid))throw new TypeError('Duplicate or missing Capture instance identity');
+      used.add(uid);
+      if(!entityId||entityId!==actor.creatureId) {
+        throw new TypeError('Saved Capture creature identity does not match the official authored catalog');
+      }
+      if(!Number.isFinite(maxHp)||maxHp!==nativeSource.fighterConfigs[entityId].maxHp||
+        !Number.isFinite(hp)||hp<=0||hp>maxHp) {
+        throw new TypeError('Saved Capture HP are incompatible with the official Combat creature');
+      }
+      if(!exactSkills(abilityIds,nativeSource.skillIdsByActor[actor.actorId])) {
+        throw new TypeError('Saved Capture ability loadout does not match the official Combat skills');
+      }
+      return Object.freeze({uid,entityId,hp,maxHp,abilityIds:Object.freeze([...abilityIds])});
     });
-    const expected={uid,entityId,hp,maxHp,abilityIds:[...abilityIds],
-      encounterId:text(encounter.encounterId)};
-    let applied=false;
+  }
+  function matchesExpected(state,expected){
+    if(!state||!Array.isArray(state.creatureTeam)||
+      state.creatureTeam.length!==expected.length||
+      (Array.isArray(state.creatureReserve)&&state.creatureReserve.length))return false;
+    return state.creatureTeam.every((item,i)=>{
+      const original=expected[i];
+      return item?.uid===original.uid&&item.entityId===original.entityId&&
+        item.hp===original.hp&&item.maxHp===original.maxHp&&
+        exactSkills(item.activeAbilityIds,original.abilityIds);
+    });
+  }
+  function equalSnapshots(current,reference){
+    const sides=current?.sides;
+    if(!Array.isArray(sides)||sides.length!==2)return false;
+    return sides.every((side,i)=>{
+      const original=reference.sides[i];
+      return Array.isArray(side?.creatures)&&side.creatures.length===activeCount&&
+        Array.isArray(side.active)&&side.active.length===activeCount&&
+        side.creatures.every((creature,j)=>{
+          const match=original.creatures[j];
+          return side.active[j]===original.active[j]&&
+            creature.instanceId===match.instanceId&&creature.creatureId===match.creatureId&&
+            creature.hp===match.hp&&creature.maxHp===match.maxHp&&
+            exactSkills(creature.abilityIds,match.abilityIds);
+        });
+    });
+  }
 
+  function prepareEncounter(){
+    const heroId=text(activeHeroId()),encounter=readEncounter();
+    if(!heroId)throw new TypeError('Capture active hero identity required');
+    const wildSpecies=encounterSpecies(encounter);
+    const player=readActiveMembers(loadHeroState(heroId));
+    const encounterId=text(encounter.encounterId);
+    const enemies=enemyActors.map((actor,i)=>{
+      const instanceId='wild:'+encounterId+(i?':'+(i+1):'');
+      return Object.freeze({
+        instanceId,creatureId:actor.creatureId,
+        hp:nativeSource.fighterConfigs[actor.creatureId].maxHp,
+        maxHp:nativeSource.fighterConfigs[actor.creatureId].maxHp,
+        abilityIds:Object.freeze([...nativeSource.skillIdsByActor[actor.actorId]])
+      });
+    });
+    const allIds=[...player.map(x=>x.uid),...enemies.map(x=>x.instanceId)];
+    if(new Set(allIds).size!==allIds.length){
+      throw new TypeError('Capture instance identity collision');
+    }
+    const asCreature=member=>({
+      instanceId:member.uid??member.instanceId,
+      creatureId:member.entityId??member.creatureId,
+      hp:member.hp,maxHp:member.maxHp,abilityIds:[...member.abilityIds]
+    });
+    const snapshot=Object.freeze({sides:[
+      {name:localActors[0].displayName??'',active:player.map(x=>x.uid),
+       creatures:player.map(asCreature)},
+      {name:enemyActors[0].displayName??'',active:enemies.map(x=>x.instanceId),
+       creatures:enemies.map(asCreature)}
+    ]});
+    let applied=false;
     return Object.freeze({
-      encounterId:expected.encounterId,snapshot,
-      resolveBattle(context) {
-        const sides=context?.snapshot?.sides;
-        if (context?.encounterId !== expected.encounterId ||
-            !Array.isArray(sides) || sides.length !== 2 ||
-            sides.some((side,i)=>{
-              const canonical=snapshot.sides[i],creature=side?.creatures?.[0],reference=canonical.creatures[0];
-              return !Array.isArray(side?.creatures) || side.creatures.length !== 1 ||
-                !Array.isArray(side?.active) || side.active.length !== 1 ||
-                side.active[0] !== canonical.active[0] || !creature ||
-                creature.instanceId !== reference.instanceId ||
-                creature.creatureId !== reference.creatureId ||
-                creature.hp !== reference.hp || creature.maxHp !== reference.maxHp ||
-                !exactSkills(creature.abilityIds,reference.abilityIds);
-            })) {
+      encounterId,snapshot,
+      resolveBattle(context){
+        if(context?.encounterId!==encounterId||
+          !equalSnapshots(context?.snapshot,snapshot)){
           throw new TypeError('Official Combat resolver received a different Capture encounter snapshot');
         }
         return Object.freeze({nativeCombatSource:nativeSource,actorIds});
       },
-      applyResult(rawResult) {
-        if (applied) return false;
-        if (text(activeHeroId()) !== heroId) {
+      applyResult(rawResult){
+        if(applied)return false;
+        if(text(activeHeroId())!==heroId){
           throw new Error('Stale Capture active hero: refusing to persist a different session');
         }
         const result=validateBattleResult(rawResult,snapshot);
-        if (result.outcome === 'cancelled') return false;
+        if(result.outcome==='cancelled')return false;
         const live=readEncounter();
-        if (live?.type !== 'wild' || live.encounterId !== expected.encounterId ||
-            live.creatureId !== opponent.creatureId) {
+        if(live?.encounterId!==encounterId){
           throw new Error('Stale Capture encounter: result cannot be persisted');
         }
+        const species=encounterSpecies(live);
+        if(species.length!==wildSpecies.length||
+          species.some((id,i)=>id!==wildSpecies[i])){
+          throw new Error('Stale Capture wild encounter species changed');
+        }
         const state=loadHeroState(heroId);
-        const member=state?.creatureTeam?.[0];
-        if (!Array.isArray(state?.creatureTeam) || state.creatureTeam.length !== 1 ||
-            (Array.isArray(state.creatureReserve) && state.creatureReserve.length) ||
-            !member || member.uid !== expected.uid || member.entityId !== expected.entityId ||
-            member.hp !== expected.hp || member.maxHp !== expected.maxHp ||
-            !exactSkills(member.activeAbilityIds,expected.abilityIds)) {
+        if(!matchesExpected(state,player)){
           throw new Error('Stale Capture profile: refusing to overwrite another save');
         }
-        const local=result.creatures.find(creature=>creature.instanceId===expected.uid);
-        if (!local) throw new TypeError('Incomplete validated local result');
-        const next={...state,creatureTeam:state.creatureTeam.map((item,i)=>
-          i===0 ? {...item,hp:local.hp} : item
-        )};
-        // The original Capture team owner is the ONLY writer of this profile.
+        const byId=new Map(result.creatures.map(creature=>[creature.instanceId,creature]));
+        const nextHp=player.map(item=>{
+          const local=byId.get(item.uid);
+          if(!local)throw new TypeError('Incomplete validated local result');
+          return local.hp;
+        });
+        const next={...state,creatureTeam:state.creatureTeam.map((item,i)=>({
+          ...item,hp:nextHp[i]
+        }))};
+        // One verified atomic write, only through the historical Capture owner.
         saveHeroState(heroId,next);
         applied=true;
-        return Object.freeze({applied:true,outcome:result.outcome,heroId,hp:local.hp});
+        return Object.freeze({
+          applied:true,outcome:result.outcome,heroId,hp:nextHp[0],
+          ...(activeCount===2?{teamHp:Object.freeze([...nextHp])}:{})
+        });
       }
     });
   }

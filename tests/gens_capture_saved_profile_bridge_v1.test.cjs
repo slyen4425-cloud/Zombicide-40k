@@ -213,3 +213,165 @@ test('profile or authored mismatches are rejected, never mapped by guesswork',as
   assert.throws(()=>bridge(structuredClone(fixture)).prepareEncounter(),/skill|loadout|ability/i);
   assert.equal(owner.writes(),0);
 });
+
+
+// Native 2v2 regression: real authored Lab exporter -> canonical Capture owner
+// -> only Combat Lab Core/provider -> validation -> one saved profile write.
+// This must fail RED while the saved-profile bridge remains 1v1-only.
+let officialTwoTeamFixturePromise;
+async function officialTwoTeamFixture(){
+ if(!officialTwoTeamFixturePromise) officialTwoTeamFixturePromise=(async()=>{
+  const read=rel=>JSON.parse(fs.readFileSync(path.join(labRoot,rel),'utf8'));
+  const fromLab=rel=>import(pathToFileURL(path.join(labRoot,rel)).href);
+  const [author,creature,skill,skillDraft,rules,exporter,adapter,portable,complex]=await Promise.all([
+   import('../assets/gensrpg/capture/combat-lab-authored-source-v1.mjs'),
+   fromLab('src/contracts/capture-creature-transfer-v1.js'),
+   fromLab('src/contracts/capture-skill-transfer-v1.js'),
+   fromLab('src/contracts/capture-skill-editor-draft-v1.js'),
+   fromLab('src/adapters/input/capture/capture-combat-rules-overlay-v1.js'),
+   fromLab('src/adapters/input/capture/capture-editor-exporter-v3.js'),
+   fromLab('src/adapters/input/capture/capture-export-adapter-stack-v1.js'),
+   fromLab('src/catalogs/capture-portable-native-skill-catalog-v1.js'),
+   fromLab('src/catalogs/capture-complex-native-skill-catalog-v1.js')
+  ]);
+  const data=read('data/combat/skills/catalog.v1.json');
+  const manifest=fs.readFileSync(path.join(labRoot,'src/catalogs/capture-showcase-skill-presets-v1.js'),'utf8');
+  const listed=[...manifest.matchAll(/"((?:data\/capture\/showcase\/)[^"]+\.capture-skill-transfer-v1\.json)"/g)]
+   .map(m=>m[1]);
+  assert.ok(listed.length>40,'real pinned official skill catalog needed');
+  const skills=new Map();
+  for(const row of data.entries){
+   const draft=skillDraft.normalizeCaptureSkillEditorDraftV1({
+    schema:'capture-skill-editor-draft-v1',id:row.id,
+    description:row.label||row.id,requiredLevel:1,
+    usageScopes:['capture','combat'],definition:row.definition,presentation:null
+   });
+   skills.set(draft.id,draft);
+  }
+  for(const draft of [...portable.capturePortableNativeSkillDraftsV1(),
+    ...complex.captureComplexNativeSkillDraftsV1()])skills.set(draft.id,draft);
+  for(const file of listed){
+   const record=skill.normalizeCaptureSkillTransferV1(read(file));
+   skills.set(record.draft.id,record.draft);
+  }
+  const ids=['crea-loup','crea_mossback','crea_voltik','kitsune_lunaire'];
+  const available=read('data/capture/monster-capture-stat-registry.v1.json');
+  const all=JSON.parse(fs.readFileSync(path.join(root,
+   'tests/fixtures/capture-lab-authored-preview-settings-v1.json'),'utf8')).authoredCreatureFiles;
+  const transfers=all.map(read).filter(x=>ids.includes(x.draft.id));
+  assert.deepEqual(transfers.map(x=>x.draft.id).sort(),[...ids].sort());
+  const factory=author.createCaptureLabAuthoredSourceV1({
+   normalizeCreatureTransfer:creature.normalizeCaptureCreatureTransferV1,
+   normalizeSkillDraft:skillDraft.normalizeCaptureSkillEditorDraftV1,
+   overlayCombatRules:rules.applyCaptureCombatRulesToCreatureDraftV1,
+   exportEditorDrafts:exporter.exportCaptureEditorDraftsToCombatExportV3,
+   adaptCombatExport:adapter.adaptCaptureCombatExportStackV1,
+   statRegistry:available,configuredSkillDrafts:[...skills.values()],
+   creatureTransfers:transfers
+  });
+  const actorInput={
+   encounterId:'ci-two-actor-wild-001',
+   playerTeam:[{instanceId:'ci-wolf',creatureId:'crea-loup'},
+    {instanceId:'ci-golem',creatureId:'crea_mossback'}],
+   opponentTeam:[{instanceId:'wild:ci-two-actor-wild-001',creatureId:'crea_voltik'},
+    {instanceId:'wild:ci-two-actor-wild-001:2',creatureId:'kitsune_lunaire'}],
+   arenaId:'forest',skillSpeedMultiplier:0.5,
+   combatRules:{schema:'capture-combat-rules-editor-draft-v1',
+    maxEnergy:10,initialEnergy:10,energyChargeAmount:1,
+    energyChargeIntervalMs:2000,movementEnergyPerStep:1,chargeTimeModifierPct:0}
+  };
+  const built=factory.buildEncounter(actorInput);
+  return {built};
+ })();
+ return officialTwoTeamFixturePromise;
+}
+function native2v2CaptureOwner(built){
+ const owner=persistedCaptureOwner();
+ const source=built.nativeCombatSource;
+ const player=source.battleFormat.actors.filter(a=>source.battleFormat.teamOf(a.actorId)==='capture-team');
+ assert.deepEqual(player.map(x=>x.actorId),['player','ally']);
+ const next=owner.get();
+ next.creatureTeam=player.map((actor,i)=>({
+  uid:built.instanceIds[actor.actorId],entityId:actor.creatureId,
+  hp:source.fighterConfigs[actor.creatureId].maxHp,
+  maxHp:source.fighterConfigs[actor.creatureId].maxHp,
+  activeAbilityIds:[...source.skillIdsByActor[actor.actorId]],
+  knownAbilityIds:[...source.skillIdsByActor[actor.actorId]],
+  xp:70+i,level:3+i,userMemo:'preserve member '+i
+ }));
+ owner.replace(next);
+ return owner;
+}
+function native2v2Encounter(){
+ return {type:'wild',encounterId:'ci-two-actor-wild-001',creatureId:'crea_voltik',
+  creatureIds:['crea_voltik','kitsune_lunaire'],locationId:'cap_forest'};
+}
+async function native2v2SavedBridge(){
+ const {engine,makeBridge}=await lab();
+ const {built}=await officialTwoTeamFixture();
+ const owner=native2v2CaptureOwner(built),encounter=native2v2Encounter();
+ const create=()=>makeBridge({
+  activeHeroId:()=>owner.ctx.captureActiveHeroId(),
+  loadHeroState:owner.load,saveHeroState:owner.save,
+  readEncounter:()=>encounter,exported:built.exported,
+  adaptCombatExport:engine.adaptCaptureCombatExportStackV1,
+  validateBattleResult:resultGuard()
+ });
+ return {engine,owner,encounter,built,create};
+}
+test('RED then GREEN: two saved active members cross the genuine four-actor Combat provider and persist HP once',async()=>{
+ const {engine,owner,built,create}=await native2v2SavedBridge();
+ const first=owner.get(),ticket=create().prepareEncounter();
+ assert.deepEqual(ticket.snapshot.sides.map(x=>x.creatures.length),[2,2]);
+ assert.deepEqual(ticket.snapshot.sides[0].active,['ci-wolf','ci-golem']);
+ assert.deepEqual(ticket.snapshot.sides[1].active,
+  ['wild:ci-two-actor-wild-001','wild:ci-two-actor-wild-001:2']);
+ assert.deepEqual(ticket.snapshot.sides[0].creatures.map(x=>x.abilityIds),
+  [first.creatureTeam[0].activeAbilityIds,first.creatureTeam[1].activeAbilityIds]);
+ const {makeProvider}=await lab();
+ const provider=makeProvider({engine,mountBattle:()=>({dispose(){}}),
+  resolveBattle:ctx=>({...ticket.resolveBattle(ctx),aiEnabled:false})});
+ const handle=provider.createBattle({encounterId:ticket.encounterId,snapshot:ticket.snapshot});
+ provider.startBattle(handle);
+ assert.deepEqual(built.actorIds,['player','ally','opponent','opponent-b']);
+ for(const actorId of built.actorIds)assert.ok(handle.state().fighters[actorId].hp>0);
+ assert.equal(handle.flee(),true);
+ const result=await handle.completion;
+ provider.disposeBattle(handle);
+ assert.equal(result.creatures.length,4);
+ const before=owner.get();
+ const persisted=ticket.applyResult(result);
+ assert.equal(persisted.applied,true);
+ assert.equal(persisted.outcome,'flee');
+ assert.equal(owner.writes(),1,'only the canonical Capture save owner writes');
+ const saved=owner.get();
+ for(const member of saved.creatureTeam){
+  assert.equal(member.hp,result.creatures.find(x=>x.instanceId===member.uid).hp);
+ }
+ assert.deepEqual(saved.creatureTeam.map(x=>x.userMemo),before.creatureTeam.map(x=>x.userMemo));
+ assert.deepEqual(saved.unrelated,before.unrelated);
+ assert.equal(ticket.applyResult(result),false,'a battle result cannot be saved twice');
+ assert.equal(owner.writes(),1);
+});
+test('saved 2v2 rejects changed teammate, missing encounter, duplicate identity, reserve and incomplete results',async()=>{
+ const input=await native2v2SavedBridge();
+ const ticket=input.create().prepareEncounter();
+ const result={outcome:'flee',creatures:ticket.snapshot.sides.flatMap(side=>
+  side.creatures.map(c=>({instanceId:c.instanceId,hp:c.hp})))};
+ const invalid={...result,creatures:result.creatures.slice(0,3)};
+ assert.throws(()=>ticket.applyResult(invalid),/incomplete|result/i);
+ const shifted=input.owner.get();shifted.creatureTeam[1].hp-=1;
+ input.owner.replace(shifted);
+ assert.throws(()=>ticket.applyResult(result),/stale|profile|save|member/i);
+ assert.equal(input.owner.writes(),0);
+ const other=await native2v2SavedBridge();
+ const reserve=other.owner.get();reserve.creatureReserve.push({...reserve.creatureTeam[1],uid:'ci-hidden'});
+ other.owner.replace(reserve);
+ assert.throws(()=>other.create().prepareEncounter(),/reserve/i);
+ const duplicate=other.owner.get();duplicate.creatureReserve=[];
+ duplicate.creatureTeam[1].uid=duplicate.creatureTeam[0].uid;other.owner.replace(duplicate);
+ assert.throws(()=>other.create().prepareEncounter(),/duplicate|identity|instance/i);
+ other.encounter.creatureIds[1]='crea-loup';
+ const wrongBridge=other.create();
+ assert.throws(()=>wrongBridge.prepareEncounter(),/encounter|opponent|creature|wild/i);
+});

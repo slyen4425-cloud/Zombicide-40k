@@ -2,7 +2,8 @@
 // captureStartWildBattle declaration. Never installs a replacement window
 // function, a second combat simulation, a duplicate storage writer or a timer.
 import {createCaptureOfficialHubCompositionV1} from './capture-official-hub-composition-v1.mjs';
-import {createCaptureOfficialBattleViewV1} from './capture-official-battle-view-v1.mjs';
+import {createCaptureNativeLabProviderV1} from './capture-native-lab-provider-v1.mjs';
+import {createCaptureNativeLabSceneV1} from './capture-native-lab-scene-v1.mjs';
 import {createCaptureSavedProfileLabMigrationV1} from './saved-profile-lab-migration-v1.mjs';
 
 let active = null;
@@ -130,11 +131,14 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
  if(active)throw new Error('Un combat officiel Capture est déjà en cours.');
  const requested=text(creatureId);
  if(!requested)throw new TypeError('Créature sauvage manquante');
- const entry={closed:false,controller:null,ui:createDialog(),onPageHide:null,onBeforeUnload:null};
+ const entry={closed:false,controller:null,session:null,ui:createDialog(),onPageHide:null,onBeforeUnload:null};
  active=entry;
  entry.ui.back.addEventListener('click',()=>{
   try{
-   if(entry.controller?.status().phase==='running')entry.controller.cancel();
+   if(entry.controller?.status().phase==='running'){
+    if(entry.session){entry.session.flee();return;}
+    entry.controller.cancel();
+   }
    close(entry);
   }catch(error){visibleFailure(entry,error,{commitPending:entry.controller?.status().phase==='commit-pending'});}
  });
@@ -186,13 +190,13 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
   const {contract,port}=await existingPort();
   if(active!==entry||entry.closed)return false;
   if(port.status().installed)throw new Error('Un autre combat officiel est déjà actif.');
-  const mountBattle=createCaptureOfficialBattleViewV1({
-   host:entry.ui.host,assetResolver:globalThis.GensAssetResolverV1
-  });
+  const mountBattle=(context,source,hp,resources)=>createCaptureNativeLabSceneV1({
+   host:entry.ui.host,siteBaseUrl:new URL('./',globalThis.document.baseURI),resources
+  })(context,source,hp);
   const controller=await createCaptureOfficialHubCompositionV1({
    siteBaseUrl:new URL('./',globalThis.document.baseURI),
    owners,combatPort:port,validateBattleResult:contract.result,
-   mountBattle,
+   createProvider:createCaptureNativeLabProviderV1,mountBattle,
    onReturn:event=>{
     if(active!==entry)return;
     entry.ui.status.textContent=event.cancelled?'Combat annulé.':({
@@ -255,6 +259,8 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
   entry.ui.status.textContent='Combat officiel du Labo en cours.';
   entry.ui.status.dataset.phase='running';
   const result=controller.startWildBattle(requested);
+  entry.session=result?.session??null;
+  entry.ui.back.textContent='Fuir';
   return !!result?.ready;
  }catch(error){
   visibleFailure(entry,error,{commitPending:entry.controller?.status().phase==='commit-pending'});

@@ -1,7 +1,7 @@
 name: Capture official Combat runtime
 on:
   push:
-    branches: ['work/gensrpg-capture-lab-bridge-runtime-*', 'work/gensrpg-capture-lab-bridge-history-*', 'work/gensrpg-capture-explicit-profile-migration-*']
+    branches: ['work/gensrpg-capture-lab-bridge-runtime-*', 'work/gensrpg-capture-lab-bridge-history-*', 'work/gensrpg-capture-explicit-profile-migration-*', 'work/gensrpg-capture-world-paired-encounters-*']
   pull_request:
     paths:
       - 'assets/gensrpg/capture/combat-lab-*'
@@ -22,6 +22,8 @@ on:
       - 'capture-lab-saved-hub-preview.html'
       - 'assets/gensrpg/capture/preview/saved-hub-*'
       - 'tests/gens_capture_world_lab_wild_transaction_v1.test.cjs'
+      - 'tests/gens_capture_world_double_encounter_v1.test.cjs'
+      - 'assets/gensrpg/capture/world-exploration-v1.js'
       - 'assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs'
       - 'assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs'
       - 'assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs'
@@ -91,6 +93,7 @@ jobs:
           node --test tests/gens_capture_saved_profile_bridge_v1.test.cjs
           node --test tests/gens_capture_lab_authored_source_v1.test.cjs
           node --test tests/gens_capture_world_lab_wild_transaction_v1.test.cjs
+          node --test tests/gens_capture_world_double_encounter_v1.test.cjs
           node tests/gens_core_asset_resolver_v1.test.cjs
           node --test tests/gens_capture_lab_pinned_assets_v1.test.cjs
       - name: Verify exact historical source projection and preserved profile saves

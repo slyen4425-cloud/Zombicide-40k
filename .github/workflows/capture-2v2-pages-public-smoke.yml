@@ -1,16 +1,10 @@
 name: Capture 2v2 public GitHub Pages URL smoke
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/capture-2v2-pages-public-smoke.yml'
-      - 'capture-world-2v2-test.html'
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/capture-2v2-pages-public-smoke.yml'
-      - 'capture-world-2v2-test.html'
+  workflow_run:
+    workflows: ['Deploy GenSrpG to GitHub Pages']
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -18,6 +12,7 @@ permissions:
 
 jobs:
   public-pages-http:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -40,11 +35,15 @@ jobs:
             'assets/gensrpg/capture/world-exploration-v1.js' \
             'assets/gensrpg/capture/capture-official-wild-entry-v1.mjs' \
             'assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs' \
-            'assets/gensrpg/capture/capture-official-battle-view-v1.mjs' \
+            'assets/gensrpg/capture/capture-native-lab-provider-v1.mjs' \
+            'assets/gensrpg/capture/capture-native-lab-scene-v1.mjs' \
             'assets/gensrpg/capture/runtime-data/source.json' \
             'assets/gensrpg/capture/runtime-data/author-inputs.json' \
             'assets/gensrpg/capture/runtime-data/global-visual-assets.json' \
-            'vendor/combat-lab/src/core/combat/combat-session.js'
+            'vendor/combat-lab/src/core/combat/combat-session.js' \
+            'vendor/combat-lab/examples/dom-demo/demo-assets.js' \
+            'vendor/combat-lab/examples/dom-demo/capture-editor-v2.html' \
+            'vendor/combat-lab/examples/dom-demo/capture-editor-v2.css'
           do
             curl --fail --location --silent --show-error --retry 6 \
               --retry-delay 3 --retry-all-errors \
@@ -52,10 +51,18 @@ jobs:
             test -s "$dir/resource"
             echo "HTTP OK: $file"
           done
+          curl --fail --location --silent --show-error --output "$dir/entry.mjs" \
+            "$root/assets/gensrpg/capture/capture-official-wild-entry-v1.mjs"
+          grep -Fq 'createCaptureNativeLabSceneV1' "$dir/entry.mjs"
+          grep -Fq 'createCaptureNativeLabProviderV1' "$dir/entry.mjs"
+          if grep -Fq 'createCaptureOfficialBattleViewV1' "$dir/entry.mjs"; then
+            echo "ERROR: deployed World still invokes static portrait cards" >&2
+            exit 1
+          fi
           node --input-type=module - "$dir" <<'JS'
           import fs from 'node:fs';
           const dir=process.argv[2];
           const contents=fs.readFileSync(dir+'/resource','utf8');
           if(!contents.trim()) throw new Error('Public Lab runtime is empty');
-          console.log('Public official Capture 2v2 demo route and eight dependencies verified');
+          console.log('Public native Combat Lab scene, World entry and pinned author dependencies verified');
           JS

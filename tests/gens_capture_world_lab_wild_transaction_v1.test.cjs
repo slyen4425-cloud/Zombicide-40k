@@ -8,7 +8,7 @@ const {pathToFileURL}=require('node:url');
 const {execFileSync}=require('node:child_process');
 const root=path.resolve(__dirname,'..');
 const lab=process.env.COMBAT_LAB_ROOT;
-const PIN='92e2f75ff6e9b3e03d460115d53b5604adf0e718';
+const PIN='8318220b6a9b883aeced1d4bf693f906b0f36d3d';
 assert.ok(lab,'Pinned official Combat Lab checkout is required');
 assert.equal(execFileSync('git',['-C',lab,'rev-parse','HEAD'],{encoding:'utf8'}).trim(),PIN);
 const read=rel=>JSON.parse(fs.readFileSync(path.join(lab,rel),'utf8'));
@@ -848,7 +848,7 @@ test('RED→GREEN real original World double-wild encounter -> four official Cor
  assert.equal(transaction.status().pending,false);
 });
 
-test('real double-wild World fails closed on missing or forged second wild, roster and reserve without a save or encounter stamp',async()=>{
+test('real double-wild World fails closed on missing or forged second wild, roster and duplicate reserve UID without a save or encounter stamp',async()=>{
  const {a,owner,transaction}=await setup();
  twoWildSetup(owner,a);
  const before=owner.writes(),saved=owner.profile(),live=owner.world();
@@ -868,9 +868,9 @@ test('real double-wild World fails closed on missing or forged second wild, rost
  assert.throws(()=>transaction.prepareWild('crea_voltik'),/team|member|2v2|active/i);
  assert.equal(owner.writes().hero,before.hero);
  owner.replaceHero({...saved,creatureReserve:[{
-  ...saved.creatureTeam[1],uid:'ci-foreign-reserve'
+  ...saved.creatureTeam[1],uid:saved.creatureTeam[0].uid
  }]});
- assert.throws(()=>transaction.prepareWild('crea_voltik'),/reserve/i);
+ assert.throws(()=>transaction.prepareWild('crea_voltik'),/reserve|duplicate|identity/i);
  assert.equal(owner.writes().hero,before.hero);
  owner.replaceHero(saved);
  const collided={...saved,creatureTeam:saved.creatureTeam.map((x,i)=>

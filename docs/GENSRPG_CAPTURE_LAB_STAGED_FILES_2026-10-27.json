@@ -27,7 +27,9 @@
     "assets/gensrpg/capture/capture-official-battle-view-v1.mjs",
     "assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs",
     "assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs",
-    "assets/gensrpg/capture/capture-official-wild-entry-v1.mjs"
+    "assets/gensrpg/capture/capture-official-wild-entry-v1.mjs",
+    "assets/gensrpg/capture/capture-native-lab-provider-v1.mjs",
+    "assets/gensrpg/capture/capture-native-lab-scene-v1.mjs"
   ],
   "capturePreviewDirectory": "assets/gensrpg/capture/preview",
   "capturePreviewFiles": [
@@ -49,16 +51,18 @@
     "tests/gens_capture_official_hub_composition_browser_v1.test.cjs",
     "tests/gens_capture_official_battle_view_v1.test.cjs",
     "tests/gens_capture_real_wild_button_v1.test.cjs",
-    "tests/gens_capture_real_wild_button_browser_v1.test.cjs"
+    "tests/gens_capture_real_wild_button_browser_v1.test.cjs",
+    "tests/gens_capture_native_lab_scene_v1.test.cjs",
+    "tests/gens_capture_public_world_2v2_browser_v1.test.cjs"
   ],
   "remaining": [
     "the real public button now wired on stage; promotion gated by complete release/compatibility tests",
-    "official animations and FX",
+    "native Lab scene staged, awaiting integrated Chromium/Firefox visual/FX/audio and saved-profile certification",
     "creature editor",
-    "reserves"
+    "reserve recall/forced substitution not yet enabled (off-field 2v2 reserve persistence supported)"
   ],
   "stagedSavedProfileMapping": true,
-  "authoredSourceLabPin": "92e2f75ff6e9b3e03d460115d53b5604adf0e718",
+  "authoredSourceLabPin": "8318220b6a9b883aeced1d4bf693f906b0f36d3d",
   "authoredAssetsPin": "b3d46ce6f2639ebb59a2984aeff17f97cbcd7377",
   "authoredAssetsRepository": "slyen4425-cloud/GenSrpg_labo_combat_dynamique",
   "stagedWorldWildTransaction": true,
@@ -101,7 +105,7 @@
   "originalWildBattleButton": {
     "owner": "assets/gensrpg/capture/legacy-monolith-functions-v1.js",
     "entry": "assets/gensrpg/capture/capture-official-wild-entry-v1.mjs",
-    "officialSourceSha": "92e2f75ff6e9b3e03d460115d53b5604adf0e718",
+    "officialSourceSha": "8318220b6a9b883aeced1d4bf693f906b0f36d3d",
     "stageWired": true,
     "productionActivated": false,
     "requiresExplicitMigrationConsent": true,
@@ -120,5 +124,16 @@
       "kitsune_lunaire"
     ],
     "noLegacyEngineFallback": true
+  },
+  "stagedNativeLabScene": {
+    "entry": "assets/gensrpg/capture/capture-native-lab-scene-v1.mjs",
+    "provider": "assets/gensrpg/capture/capture-native-lab-provider-v1.mjs",
+    "owner": "Combat Lab mountCaptureCombatPreviewV1 / mountCoop2v2Test",
+    "productionActivated": false,
+    "ownsStorage": false,
+    "ownsCombatRules": false,
+    "ownsClock": false,
+    "staticBattleViewReplacedInOriginalWorldEntry": true,
+    "offFieldReservePreserved": true
   }
 }

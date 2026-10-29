@@ -19,7 +19,8 @@ test('the canonical existing Capture COMBATTRE function transfers to the sole of
 test('exact one official entry owns native composer, view, migration, persistent World and no shadow runtime',()=>{
  const entry=read('assets/gensrpg/capture/capture-official-wild-entry-v1.mjs');
  assert.match(entry,/createCaptureOfficialHubCompositionV1/);
- assert.match(entry,/createCaptureOfficialBattleViewV1/);
+ assert.match(entry,/createCaptureNativeLabSceneV1/);
+ assert.match(entry,/createCaptureNativeLabProviderV1/);
  assert.match(entry,/createCaptureSavedProfileLabMigrationV1/);
  assert.match(entry,/captureConsumeWildEncounter/);
  assert.match(entry,/saveHeroCreatureState/);

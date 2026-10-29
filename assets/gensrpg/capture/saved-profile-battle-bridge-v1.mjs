@@ -69,8 +69,9 @@ export function createCaptureSavedProfileBattleBridgeV1({
   function readActiveMembers(hero){
     if(!hero||!Array.isArray(hero.creatureTeam)||
       hero.creatureTeam.length!==activeCount||
-      (Array.isArray(hero.creatureReserve)&&hero.creatureReserve.length)) {
-      throw new TypeError('Persisted Capture active team requires '+activeCount+' members and no reserve');
+      (activeCount===1&&Array.isArray(hero.creatureReserve)&&hero.creatureReserve.length)) {
+      throw new TypeError('Persisted Capture active team requires '+activeCount+' members'+
+        (activeCount===1?' and no reserve':''));
     }
     const used=new Set();
     return hero.creatureTeam.map((member,i)=>{
@@ -91,10 +92,37 @@ export function createCaptureSavedProfileBattleBridgeV1({
       return Object.freeze({uid,entityId,hp,maxHp,abilityIds:Object.freeze([...abilityIds])});
     });
   }
-  function matchesExpected(state,expected){
+  // The historical roster alone owns the off-field reserve. A 2v2 battle
+  // may carry it in the saved profile, but NEVER sends it to the Combat Lab.
+  // Snapshot all JSON fields and order so a concurrent reserve edit blocks
+  // the later active-HP write instead of silently overwriting another save.
+  function reserveFingerprint(hero,active){
+    const raw=hero?.creatureReserve;
+    if(raw!==undefined&&!Array.isArray(raw)){
+      throw new TypeError('Invalid Capture reserve: expected an array');
+    }
+    const reserve=raw??[];
+    if(activeCount===1&&reserve.length){
+      throw new TypeError('Capture 1v1 historical profile requires no reserve');
+    }
+    const used=new Set(active.map(item=>item.uid));
+    for(const member of reserve){
+      const uid=text(member?.uid),entityId=text(member?.entityId);
+      if(!uid||!entityId||used.has(uid)||
+        !Number.isFinite(member?.maxHp)||member.maxHp<=0||
+        !Number.isFinite(member?.hp)||member.hp<0||member.hp>member.maxHp||
+        (member.activeAbilityIds!=null&&!Array.isArray(member.activeAbilityIds))||
+        (member.knownAbilityIds!=null&&!Array.isArray(member.knownAbilityIds))){
+        throw new TypeError('Invalid or duplicate Capture reserve identity or data');
+      }
+      used.add(uid);
+    }
+    return JSON.stringify(raw);
+  }
+  function matchesExpected(state,expected,reserveAtStart){
     if(!state||!Array.isArray(state.creatureTeam)||
       state.creatureTeam.length!==expected.length||
-      (Array.isArray(state.creatureReserve)&&state.creatureReserve.length))return false;
+      JSON.stringify(state.creatureReserve)!==reserveAtStart)return false;
     return state.creatureTeam.every((item,i)=>{
       const original=expected[i];
       return item?.uid===original.uid&&item.entityId===original.entityId&&
@@ -123,7 +151,9 @@ export function createCaptureSavedProfileBattleBridgeV1({
     const heroId=text(activeHeroId()),encounter=readEncounter();
     if(!heroId)throw new TypeError('Capture active hero identity required');
     const wildSpecies=encounterSpecies(encounter);
-    const player=readActiveMembers(loadHeroState(heroId));
+    const saved=loadHeroState(heroId);
+    const player=readActiveMembers(saved);
+    const reserveAtStart=reserveFingerprint(saved,player);
     const encounterId=text(encounter.encounterId);
     const enemies=enemyActors.map((actor,i)=>{
       const instanceId='wild:'+encounterId+(i?':'+(i+1):'');
@@ -157,7 +187,7 @@ export function createCaptureSavedProfileBattleBridgeV1({
           !equalSnapshots(context?.snapshot,snapshot)){
           throw new TypeError('Official Combat resolver received a different Capture encounter snapshot');
         }
-        return Object.freeze({nativeCombatSource:nativeSource,actorIds});
+        return Object.freeze({nativeCombatSource:nativeSource,actorIds,exported});
       },
       applyResult(rawResult){
         if(applied)return false;
@@ -176,7 +206,7 @@ export function createCaptureSavedProfileBattleBridgeV1({
           throw new Error('Stale Capture wild encounter species changed');
         }
         const state=loadHeroState(heroId);
-        if(!matchesExpected(state,player)){
+        if(!matchesExpected(state,player,reserveAtStart)){
           throw new Error('Stale Capture profile: refusing to overwrite another save');
         }
         const byId=new Map(result.creatures.map(creature=>[creature.instanceId,creature]));

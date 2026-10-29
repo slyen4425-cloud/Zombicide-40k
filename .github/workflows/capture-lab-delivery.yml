@@ -28,6 +28,8 @@ on:
       - 'tests/gens_capture_real_wild_button_v1.test.cjs'
       - 'tests/gens_capture_real_wild_button_browser_v1.test.cjs'
       - 'tests/gens_capture_public_world_2v2_browser_v1.test.cjs'
+      - 'tests/gens_capture_native_lab_scene_v1.test.cjs'
+      - 'assets/gensrpg/capture/capture-native-lab-*.mjs'
       - '.github/workflows/capture-lab-delivery.yml'
       - 'service-worker.js'
       - 'tests/gens_capture_pwa_offline_pinned_media_v1.test.cjs'
@@ -72,12 +74,9 @@ jobs:
           ref: ${{ steps.pins.outputs.combat }}
           path: combat-lab
           sparse-checkout: |
-            src/core
-            src/contracts
-            src/adapters/input/capture
-            src/catalogs
-            data/capture
-            data/combat
+            src
+            data
+            examples/dom-demo
       - uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
@@ -95,6 +94,7 @@ jobs:
           COMBAT_ASSETS_ROOT: ${{ github.workspace }}/combat-assets
           CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
         run: |
+          node --test tests/gens_capture_native_lab_scene_v1.test.cjs
           node --test tests/gens_capture_lab_delivery_v1.test.cjs
           node --test tests/gens_capture_official_hub_composition_v1.test.cjs
           node --test tests/gens_capture_official_battle_view_v1.test.cjs
@@ -116,6 +116,8 @@ jobs:
         env:
           NODE_PATH: /tmp/capture-lab-browser/node_modules
           CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
+          CAPTURE_NATIVE_LAB_SCREENSHOT: _site/capture-native-lab-landscape.png
+          CAPTURE_NATIVE_LAB_VIDEO_DIR: _site/capture-native-lab-video
         run: |
           node --test tests/gens_capture_real_wild_button_browser_v1.test.cjs
           node --test tests/gens_capture_public_world_2v2_browser_v1.test.cjs
@@ -132,4 +134,6 @@ jobs:
             _site/vendor/combat-lab/
             _site/assets/gensrpg/capture/runtime-data/
             _site/capture-official-hub-landscape.png
+            _site/capture-native-lab-landscape.png
+            _site/capture-native-lab-video/
           retention-days: 14

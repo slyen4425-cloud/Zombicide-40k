@@ -38,7 +38,7 @@ function z40kEscAttr(x){return String(x??'')}
 <script src="/assets/gensrpg/capture/team-roster-v1.js"></script>
 <script src="/assets/gensrpg/capture/legacy-monolith-functions-v1.js"></script>
 </body></html>`;
-async function withPage(browserEngine,cb){
+async function withPage(browserEngine,cb,{recordNativeVideo=false}={}){
  const server=http.createServer(async(req,res)=>{
   try{
    const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
@@ -59,7 +59,10 @@ async function withPage(browserEngine,cb){
  let browser,context,page;
  try{
   browser=await browserEngine.launch({headless:true});
-  context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true});
+  context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true,
+   ...(recordNativeVideo&&process.env.CAPTURE_NATIVE_LAB_VIDEO_DIR?{
+    recordVideo:{dir:process.env.CAPTURE_NATIVE_LAB_VIDEO_DIR,size:{width:932,height:430}}
+   }:{})});
   await context.addInitScript(()=>localStorage.setItem('gensrpg_game_profiles_v1','{"unrelated":"preserved"}'));
   page=await context.newPage();page.setDefaultTimeout(25000);
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(e.message));
@@ -109,6 +112,8 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    await page.evaluate(()=>{
     const hero=loadState('trainer-real-hub');
     hero.creatureTeam.push({...hero.creatureTeam[0],uid:'ci-second-loup',xp:18,userNote:'second-saved'});
+    hero.creatureReserve=[{uid:'ci-reserve-outside',entityId:'crea_unsupported',hp:9,maxHp:12,
+     activeAbilityIds:['user-owned-reserve-skill'],userNote:'do not migrate or battle'}];
     saveHeroCreatureState('trainer-real-hub',hero);
     const world=captureWorldState();
     saveCaptureWorldState({...world,last:{type:'wild',encounterId:'paired-original-2v2',
@@ -123,12 +128,39 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    const before=await page.evaluate(()=>window.ciBefore);
    assert.deepEqual(before.world.last.creatureIds,['crea_voltik','crea_voltik']);
    await page.locator('#captureEncounterModalBody button[onclick^="captureStartWildBattle"]').tap();
-   await page.locator('#capture-official-entry-arena:not([hidden]) #capture-official-flee').waitFor();
-   assert.equal(await page.locator('#capture-official-entry-arena .hub-fighter').count(),4);
-   assert.equal(await page.locator('#capture-official-entry-arena img[data-author-asset-id]').count(),4);
-   await page.waitForFunction(()=>[...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')].every(img=>img.complete&&img.naturalWidth>0),null,{timeout:18000});
-   await page.locator('button[data-capture-target-instance="wild:paired-original-2v2:2"]').tap();
-   assert.equal(await page.locator('button[data-capture-target-instance="wild:paired-original-2v2:2"]').getAttribute('aria-pressed'),'true');
+   await page.locator('#capture-official-entry-arena:not([hidden]) [data-combat-demo] [data-combat-arena]').waitFor();
+   assert.equal(await page.locator('#capture-official-entry-arena [data-demo-slot]:not([hidden])').count(),4);
+   assert.equal(await page.locator('#capture-official-entry-arena [data-demo-image]').count(),4);
+   assert.equal(await page.locator('#capture-official-entry-arena [data-combat-skills] button[data-combat-skill]').count(),5,
+    'The real Lab five-capacity HUD must be mounted');
+   assert.equal(await page.locator('#capture-official-entry-arena .capture-preview-shell').getAttribute('data-landscape-required'),'true');
+   assert.equal(await page.locator('#capture-official-entry-arena [data-demo-motion]').count(),4);
+   assert.equal(await page.locator('#capture-official-entry-arena .hub-fighter').count(),0,
+    'No duplicate static GenSrpg battle UI may remain');
+
+   await page.waitForFunction(()=>[...document.getElementById('capture-official-entry-arena').shadowRoot.querySelectorAll('[data-demo-image]')].every(img=>img.complete&&img.naturalWidth>0),null,{timeout:18000});
+   const nativeCss=await page.locator('#capture-official-entry-arena [data-combat-arena]').evaluate(node=>({
+    position:getComputedStyle(node).position,
+    background:getComputedStyle(node).backgroundColor,
+    radius:getComputedStyle(node).borderRadius
+   }));
+   assert.equal(nativeCss.position,'relative','real Lab CSS must apply inside the ShadowRoot');
+   assert.equal(nativeCss.background,'rgb(23, 52, 66)','author Lab arena background must render, not bare HTML cards');
+   assert.notEqual(nativeCss.radius,'0px','author Lab landscape CSS must style the arena');
+   const overlapsEnemyHp=await page.evaluate(()=>{
+    const host=document.getElementById('capture-official-entry-arena').shadowRoot;
+    const enemy=host.querySelector('.squad-card--opponent-b');
+    const flee=document.getElementById('capture-official-flee');
+    if(!enemy||!flee)throw Error('Official Lab enemy HUD or flee button missing');
+    const a=enemy.getBoundingClientRect(),b=flee.getBoundingClientRect();
+    return a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
+   });
+   assert.equal(overlapsEnemyHp,false,'flee must not cover the native Lab enemy HP card');
+   if(name==='Chromium'&&process.env.CAPTURE_NATIVE_LAB_SCREENSHOT){
+    await page.screenshot({path:process.env.CAPTURE_NATIVE_LAB_SCREENSHOT,fullPage:true});
+   }
+   await page.locator('#capture-official-entry-arena [data-demo-slot="opponent-b"]').tap();
+   assert.equal(await page.locator('#capture-official-entry-arena [data-demo-slot="opponent-b"]').getAttribute('data-target-selected'),'true');
    await page.locator('#capture-official-flee').tap();
    await page.locator('#gens-capture-official-battle-v1').waitFor({state:'detached'});
    const after=await page.evaluate(()=>({hero:loadState('trainer-real-hub'),world:captureWorldState(),writes:window.ciWrites,
@@ -139,13 +171,15 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    assert.deepEqual(after.hero.creatureTeam.map(x=>x.uid),before.hero.creatureTeam.map(x=>x.uid));
    assert.deepEqual(after.hero.creatureTeam.map(x=>x.hp),before.hero.creatureTeam.map(x=>x.hp));
    assert.deepEqual(after.hero.creatureTeam.map(x=>x.userNote),before.hero.creatureTeam.map(x=>x.userNote));
+   assert.deepEqual(after.hero.creatureReserve,before.hero.creatureReserve,
+    'off-field reserve must remain byte-for-byte unchanged after native Lab flee');
    assert.deepEqual(after.hero.inventory,before.hero.inventory);
    assert.equal(after.hero.gold,before.hero.gold);
    assert.equal(after.writes.filter(x=>x===after.heroKey).length,1);
    assert.equal(after.writes.filter(x=>x===after.worldKey).length,1);
    assert.equal(after.port.installed,false);
    assert.deepEqual(errors,[]);
-  });
+  },{recordNativeVideo:name==='Chromium'});
  });
 }
 
@@ -164,11 +198,11 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    }));
    assert.deepEqual(before.world.last.creatureIds,['crea_voltik','kitsune_lunaire']);
    assert.deepEqual(before.hero.creatureTeam.map(x=>x.entityId),['crea-loup','crea_mossback']);
+   assert.deepEqual(before.hero.creatureReserve.map(x=>x.uid),['demo-reserve-loup']);
    await page.locator('#captureEncounterModalBody button[onclick^="captureStartWildBattle"]').tap();
-   await page.locator('#capture-official-entry-arena:not([hidden]) #capture-official-flee').waitFor();
-   assert.equal(await page.locator('#capture-official-entry-arena .hub-fighter').count(),4);
-   await page.waitForFunction(()=>[...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')].length===4&&
-    [...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')].every(x=>x.complete&&x.naturalWidth>0),null,{timeout:20000});
+   await page.locator('#capture-official-entry-arena:not([hidden]) [data-combat-demo] [data-combat-arena]').waitFor();
+   assert.equal(await page.locator('#capture-official-entry-arena [data-demo-slot]:not([hidden])').count(),4);
+   await page.waitForFunction(()=>{const imgs=[...document.getElementById('capture-official-entry-arena').shadowRoot.querySelectorAll('[data-demo-image]')];return imgs.length===4&&imgs.every(x=>x.complete&&x.naturalWidth>0)},null,{timeout:20000});
    await page.locator('#capture-official-flee').tap();
    await page.locator('#gens-capture-official-battle-v1').waitFor({state:'detached'});
    const after=await page.evaluate(()=>({
@@ -180,6 +214,8 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    assert.equal(after.hero.creatureTeam.length,2);
    assert.deepEqual(after.hero.creatureTeam.map(x=>x.uid),before.hero.creatureTeam.map(x=>x.uid));
    assert.deepEqual(after.hero.creatureTeam.map(x=>x.hp),before.hero.creatureTeam.map(x=>x.hp));
+   assert.deepEqual(after.hero.creatureReserve,before.hero.creatureReserve,
+    'off-field reserve cannot be touched by the Lab scene');
    assert.equal(after.other,before.other,'public-game profiles cannot be changed by preview');
    assert.deepEqual(errors,[]);
   });

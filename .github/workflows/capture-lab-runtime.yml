@@ -62,12 +62,9 @@ jobs:
           ref: ${{ steps.combat.outputs.sha }}
           path: combat-lab
           sparse-checkout: |
-            src/core
-            src/contracts
-            src/adapters/input/capture
-            src/catalogs
-            data/capture
-            data/combat
+            src
+            data
+            examples/dom-demo
       - name: Resolve the single immutable official asset pin
         id: assets
         run: |

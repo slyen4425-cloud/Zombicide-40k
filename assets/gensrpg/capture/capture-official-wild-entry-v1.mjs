@@ -2,7 +2,8 @@
 // captureStartWildBattle declaration. Never installs a replacement window
 // function, a second combat simulation, a duplicate storage writer or a timer.
 import {createCaptureOfficialHubCompositionV1} from './capture-official-hub-composition-v1.mjs';
-import {createCaptureOfficialBattleViewV1} from './capture-official-battle-view-v1.mjs';
+import {createCaptureNativeLabProviderV1} from './capture-native-lab-provider-v1.mjs';
+import {createCaptureNativeLabSceneV1} from './capture-native-lab-scene-v1.mjs';
 import {createCaptureSavedProfileLabMigrationV1} from './saved-profile-lab-migration-v1.mjs';
 
 let active = null;
@@ -80,7 +81,7 @@ function createDialog(){
  const host=doc.createElement('div');host.id='capture-official-entry-arena';host.hidden=true;
  const row=doc.createElement('div');row.style.display='flex';row.style.gap='8px';
  row.style.flexWrap='wrap';row.style.justifyContent='center';
- const back=doc.createElement('button');back.type='button';back.textContent='Retour au monde';
+ const back=doc.createElement('button');back.type='button';back.textContent='Retour au monde';back.id='capture-official-flee';
  const retry=doc.createElement('button');retry.type='button';
  retry.textContent='Réessayer la sauvegarde';retry.hidden=true;
  for(const button of [back,retry]){
@@ -89,6 +90,13 @@ function createDialog(){
   button.style.border='1px solid #b4d5bc';button.style.borderRadius='8px';
   row.appendChild(button);
  }
+ Object.assign(shell.style,{padding:'0',overflow:'hidden',background:'#0b1420'});
+ Object.assign(panel.style,{width:'100vw',height:'100dvh',maxHeight:'100dvh',
+  overflow:'hidden',padding:'0',border:'none',borderRadius:'0',background:'#0b1420'});
+ Object.assign(host.style,{flex:'1 1 auto',width:'100%',minHeight:'0'});
+ // The original Lab HUD owns the upper-right enemy HP card: do not cover it.
+ Object.assign(back.style,{minWidth:'76px',minHeight:'36px',padding:'6px 10px',fontSize:'12px'});
+ Object.assign(row.style,{position:'absolute',top:'max(4px,env(safe-area-inset-top))',right:'max(4px,env(safe-area-inset-right))',zIndex:'250'});
  panel.append(title,status,host,row);shell.append(panel);doc.body.appendChild(shell);
  return Object.freeze({shell,status,host,back,retry});
 }
@@ -130,11 +138,14 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
  if(active)throw new Error('Un combat officiel Capture est déjà en cours.');
  const requested=text(creatureId);
  if(!requested)throw new TypeError('Créature sauvage manquante');
- const entry={closed:false,controller:null,ui:createDialog(),onPageHide:null,onBeforeUnload:null};
+ const entry={closed:false,controller:null,session:null,ui:createDialog(),onPageHide:null,onBeforeUnload:null};
  active=entry;
  entry.ui.back.addEventListener('click',()=>{
   try{
-   if(entry.controller?.status().phase==='running')entry.controller.cancel();
+   if(entry.controller?.status().phase==='running'){
+    if(entry.session){entry.session.flee();return;}
+    entry.controller.cancel();
+   }
    close(entry);
   }catch(error){visibleFailure(entry,error,{commitPending:entry.controller?.status().phase==='commit-pending'});}
  });
@@ -167,7 +178,8 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
   }
   // The original World owner is the ONLY source of an actual two-wild event.
   // Never infer a second enemy from a two-member trainer or turn a legacy
-  // single wild into an invented 2v2. Reserves remain unsupported by this port.
+  // single wild into an invented 2v2. Off-field reserves are preserved
+  // in 2v2, but recall/substitution is not available yet.
   const declared=world.last.creatureIds;
   if(declared!==undefined&&(!Array.isArray(declared)||
      ![1,2].includes(declared.length)||
@@ -180,19 +192,20 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
   const hero=owners.loadHeroState(owners.activeHeroId());
   if(!Array.isArray(hero?.creatureTeam)||
      hero.creatureTeam.length!==activeCount||
-     (hero?.creatureReserve?.length??0)!==0){
-   throw new Error('Le groupe sauvegardé ne correspond pas aux créatures actives de cette rencontre officielle (sans réserve).');
+     (activeCount===1&&(hero?.creatureReserve?.length??0)!==0)){
+   throw new Error('Le groupe sauvegardé ne correspond pas aux créatures actives de cette rencontre officielle'+
+    (activeCount===1?' (sans réserve).':'.'));
   }
   const {contract,port}=await existingPort();
   if(active!==entry||entry.closed)return false;
   if(port.status().installed)throw new Error('Un autre combat officiel est déjà actif.');
-  const mountBattle=createCaptureOfficialBattleViewV1({
-   host:entry.ui.host,assetResolver:globalThis.GensAssetResolverV1
-  });
+  const mountBattle=(context,source,hp,resources)=>createCaptureNativeLabSceneV1({
+   host:entry.ui.host,siteBaseUrl:new URL('./',globalThis.document.baseURI),resources
+  })(context,source,hp);
   const controller=await createCaptureOfficialHubCompositionV1({
    siteBaseUrl:new URL('./',globalThis.document.baseURI),
    owners,combatPort:port,validateBattleResult:contract.result,
-   mountBattle,
+   createProvider:createCaptureNativeLabProviderV1,mountBattle,
    onReturn:event=>{
     if(active!==entry)return;
     entry.ui.status.textContent=event.cancelled?'Combat annulé.':({
@@ -255,6 +268,8 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
   entry.ui.status.textContent='Combat officiel du Labo en cours.';
   entry.ui.status.dataset.phase='running';
   const result=controller.startWildBattle(requested);
+  entry.session=result?.session??null;
+  entry.ui.back.textContent='Fuir';
   return !!result?.ready;
  }catch(error){
   visibleFailure(entry,error,{commitPending:entry.controller?.status().phase==='commit-pending'});

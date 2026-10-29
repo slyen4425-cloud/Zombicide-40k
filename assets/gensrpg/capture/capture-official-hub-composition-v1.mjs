@@ -99,6 +99,7 @@ async function loadPackage(site,readBytes){
 // the combat engine permission to write the user's saves by itself.
 export async function createCaptureOfficialHubCompositionV1({
  siteBaseUrl,owners,combatPort,mountBattle,validateBattleResult,
+ createProvider=createCombatLabProviderV1,
  nextClock,onReturn=()=>{},onError=()=>{},readBytes
 }) {
  const site=new URL(siteBaseUrl);
@@ -151,8 +152,8 @@ export async function createCaptureOfficialHubCompositionV1({
   publishedSpecies:Object.freeze([...packageData.manifest.supportedCreatureIds])
  });
  const command=createCaptureLabHubBattleCommandV1({
-  transaction,combatPort,engine,createProvider:createCombatLabProviderV1,
-  clock:nextClock,mountBattle:(battle,context)=>mountBattle(battle,context,resources),
+  transaction,combatPort,engine,createProvider,
+  clock:nextClock,mountBattle:(...args)=>mountBattle(...args,resources),
   onReturn,onError
  });
  return Object.freeze({

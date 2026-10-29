@@ -113,14 +113,13 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    assert.match(original.owner,/capture-official-wild-entry-v1\.mjs/);
    assert.doesNotMatch(original.owner,/captureStartBattleAutomatic\(/);
    await page.locator('#captureEncounterModalBody button[onclick^="captureStartWildBattle"]').tap();
-   await page.locator('#capture-official-entry-arena:not([hidden]) #capture-official-flee').waitFor();
-   assert.equal(await page.locator('#capture-official-entry-arena .hub-fighter').count(),2);
-   assert.equal(await page.locator('#capture-official-entry-arena img[data-author-asset-id]').count(),2);
-   await page.waitForFunction(()=>[...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')]
-    .every(im=>im.complete&&im.naturalWidth>0),null,{timeout:16000});
+   await page.locator('#capture-official-entry-arena:not([hidden]) [data-combat-demo] [data-combat-arena]').waitFor();
+   assert.equal(await page.locator('#capture-official-entry-arena [data-demo-slot]:not([hidden])').count(),2);
+   assert.equal(await page.locator('#capture-official-entry-arena [data-demo-image]').count(),4);
+   await page.waitForFunction(()=>[...document.getElementById('capture-official-entry-arena').shadowRoot.querySelectorAll('[data-demo-slot]:not([hidden]) [data-demo-image]')].every(im=>im.complete&&im.naturalWidth>0),null,{timeout:16000});
    assert.ok(await page.getByRole('button',{name:'Griffe',exact:true}).isVisible());
    assert.ok(await page.getByRole('button',{name:'Boule de feu',exact:true}).isVisible());
-   assert.match(await page.locator('#capture-official-entry-arena').innerText(),/Énergie/);
+   assert.ok(await page.locator('#capture-official-entry-arena [data-combat-energy-value="player"]').isVisible());
    await page.locator('#capture-official-flee').tap();
    await page.locator('#gens-capture-official-battle-v1').waitFor({state:'detached'});
    const result=await page.evaluate(()=>({
@@ -194,9 +193,9 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
     const before=await page.evaluate(()=>({world:captureWorldState(),profile:loadState('trainer-real-hub')}));
     assert.equal(before.world.last.creatureId,creatureId);
     await page.locator('#captureEncounterModalBody button[onclick^="captureStartWildBattle"]').tap();
-    await page.locator('#capture-official-entry-arena:not([hidden]) #capture-official-flee').waitFor();
-    assert.equal(await page.locator('#capture-official-entry-arena .hub-fighter').count(),2);
-    const actual=await page.locator('#capture-official-entry-arena .hub-fighter h2').allTextContents();
+    await page.locator('#capture-official-entry-arena:not([hidden]) [data-combat-demo] [data-combat-arena]').waitFor();
+    assert.equal(await page.locator('#capture-official-entry-arena [data-demo-slot]:not([hidden])').count(),2);
+    const actual=await page.locator('#capture-official-entry-arena [data-preview-actor-ui]:not([hidden]) strong').allTextContents();
     const expected=await page.evaluate(async id=>{
      const response=await fetch('/assets/gensrpg/capture/runtime-data/author-inputs.json');
      if(!response.ok)throw new Error('Signed Combat author payload unavailable');
@@ -213,12 +212,15 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
       return source.creatureTransfers.find(x=>x.draft.id==='kitsune_lunaire')?.draft.presentation.visual.front.assetId;
      });
      assert.equal(expectedVisual,'pack:capture:creature-renard-lunaire-opponent-01');
-     assert.equal(await page.locator('#capture-official-entry-arena img[data-author-asset-id="'+expectedVisual+'"]').count(),1,
-      'Kitsune must render its own exact approved opponent sprite, never a fallback');
+     const assetFile=await page.evaluate(async assetId=>{
+      const data=await (await fetch('/assets/gensrpg/capture/runtime-data/global-visual-assets.json')).json();
+      return data.assets.find(x=>x.id===assetId)?.resource?.file;
+     },expectedVisual);
+     const actualSrc=await page.locator('#capture-official-entry-arena [data-demo-slot="opponent"] [data-demo-image]').getAttribute('src');
+     assert.ok(assetFile&&actualSrc?.includes(assetFile),
+      'Kitsune must render its own pinned authored opponent sprite');
     }
-    await page.waitForFunction(()=>[...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')]
-     .length===2&&[...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')]
-      .every(image=>image.complete&&image.naturalWidth>0),null,{timeout:18000});
+    await page.waitForFunction(()=>{const images=[...document.getElementById('capture-official-entry-arena').shadowRoot.querySelectorAll('[data-demo-slot]:not([hidden]) [data-demo-image]')];return images.length===2&&images.every(image=>image.complete&&image.naturalWidth>0)},null,{timeout:18000});
     await page.locator('#capture-official-flee').tap();
     await page.locator('#gens-capture-official-battle-v1').waitFor({state:'detached'});
     const after=await page.evaluate(()=>({world:captureWorldState(),profile:loadState('trainer-real-hub')}));

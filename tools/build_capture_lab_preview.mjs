@@ -12,11 +12,13 @@ if(!lab)throw new Error('Usage: node tools/build_capture_lab_preview.mjs <offici
 const actual=execFileSync('git',['-C',lab,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
 if(actual!==COMBAT_LAB_SOURCE_V1.sha)throw new Error('Combat source SHA mismatch; build refused');
 const dirty=execFileSync('git',['-C',lab,'status','--porcelain','--untracked-files=all','--',
-  'src/core','src/contracts','src/adapters/input/capture'],{encoding:'utf8'}).trim();
+  'src','data','examples/dom-demo'],{encoding:'utf8'}).trim();
 if(dirty)throw new Error('Combat source has local modifications; build refused');
 // Build transport only. No copied engine implementation is committed to GenSrpG.
 const copy=(from,to)=>{mkdirSync(dirname(to),{recursive:true});cpSync(from,to,{recursive:true});};
-for(const path of ['src/core','src/contracts','src/adapters/input/capture']){
+// The native embedded scene imports demo-assets.js and the Lab's own CSS/HTML.
+// Transport the complete pinned demo module graph, not a hand-picked shell.
+for(const path of ['src','data','examples/dom-demo']){
   copy(join(lab,path),join(output,'vendor/combat-lab',path));
 }
 for(const file of ['battle-bridge-contract-v1.js','lab-ownership-port-v1.js','manual-battle-trigger-v1.js',

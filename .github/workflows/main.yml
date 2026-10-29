@@ -110,12 +110,9 @@ jobs:
           ref: ${{ steps.capture_pages_pins.outputs.combat }}
           path: combat-lab
           sparse-checkout: |
-            src/core
-            src/contracts
-            src/adapters/input/capture
-            src/catalogs
-            data/capture
-            data/combat
+            src
+            data
+            examples/dom-demo
 
       - name: Charger uniquement le catalogue visuel officiel au SHA épinglé
         uses: actions/checkout@v4

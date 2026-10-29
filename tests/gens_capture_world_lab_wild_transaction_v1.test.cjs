@@ -50,7 +50,9 @@ async function api(){
   }
   const transfers=[
    read('data/capture/showcase/crea-loup.capture-creature-transfer-v1.json'),
-   read('data/capture/showcase/crea_voltik.capture-creature-transfer-v1.json')
+   read('data/capture/showcase/crea_voltik.capture-creature-transfer-v1.json'),
+   read('data/capture/showcase/crea_mossback.capture-creature-transfer-v1.json'),
+   read('data/capture/showcase/kitsune_lunaire.capture-creature-transfer-v1.json')
   ];
   const source=author.createCaptureLabAuthoredSourceV1({
    normalizeCreatureTransfer:creature.normalizeCaptureCreatureTransferV1,
@@ -760,4 +762,136 @@ test('a changed World identity while diagnosing is rejected; never authorizes re
  assert.equal(report.status,'stale');
  assert.deepEqual(owner.writes(),before);
  assert.equal(owner.world().last.creatureId,'crea_voltik');
+});
+
+
+// Genuine opt-in World 2v2 transaction regression. It intentionally fails RED
+// against the 1v1-only World port; the new test never simulates Combat Core.
+function twoWildSetup(owner,a){
+ const hero=owner.profile();
+ const encounterId='native-pair-001';
+ const allyId='ci-forest-golem';
+ const enemies=['crea_voltik','kitsune_lunaire'];
+ const request={
+  ...battle,encounterId,
+  playerTeam:[
+   {instanceId:hero.creatureTeam[0].uid,creatureId:'crea-loup'},
+   {instanceId:allyId,creatureId:'crea_mossback'}
+  ],
+  opponentTeam:[
+   {instanceId:'wild:'+encounterId,creatureId:enemies[0]},
+   {instanceId:'wild:'+encounterId+':2',creatureId:enemies[1]}
+  ]
+ };
+ const official=a.source.buildEncounter(request);
+ const native=official.nativeCombatSource;
+ const second=native.fighterConfigs.crea_mossback;
+ hero.creatureTeam.push({
+  uid:allyId,entityId:'crea_mossback',hp:second.maxHp,
+  maxHp:second.maxHp,activeAbilityIds:[...native.skillIdsByActor.ally],
+  knownAbilityIds:[...native.skillIdsByActor.ally],level:4,xp:9,
+  label:'a second saved companion',ownerExtras:{preserve:true}
+ });
+ owner.replaceHero(hero);
+ const world=owner.world();
+ world.last={
+  type:'wild',encounterId,creatureId:enemies[0],creatureIds:[...enemies],
+  text:'Rencontre réelle double enregistrée'
+ };
+ owner.replaceWorld(world);
+ return {official,request,encounterId,allyId,enemies};
+}
+
+test('RED→GREEN real original World double-wild encounter -> four official Core actors -> four validated HP -> one owner save and one World consume',async()=>{
+ const {a,owner,transaction}=await setup();
+ const pair=twoWildSetup(owner,a);
+ const before=owner.profile(),live=owner.world(),writes=owner.writes();
+ const t=transaction.prepareWild('crea_voltik');
+ assert.equal(t.encounterId,pair.encounterId);
+ assert.deepEqual(t.snapshot.sides.map(side=>side.creatures.length),[2,2]);
+ assert.deepEqual(t.snapshot.sides[0].creatures.map(c=>c.instanceId),
+  before.creatureTeam.map(c=>c.uid));
+ assert.deepEqual(t.snapshot.sides[1].creatures.map(c=>c.creatureId),pair.enemies);
+ assert.equal(owner.writes().world,writes.world,
+  'World has already persisted stable encounterId, no extra write');
+ assert.deepEqual(owner.world().last,live.last,'never rewrite original canonical 2v2 encounter');
+ const provider=a.provider({
+  engine:a.engine,resolveBattle:t.resolveBattle,
+  mountBattle:()=>({dispose(){}}),
+  clock:{now:()=>0,setTimer:()=>123,clearTimer:()=>{}}
+ });
+ const native=provider.createBattle({encounterId:t.encounterId,snapshot:t.snapshot});
+ provider.startBattle(native);
+ assert.deepEqual(pair.official.actorIds,['player','ally','opponent','opponent-b']);
+ for(const id of pair.official.actorIds)assert.ok(native.state().fighters[id].hp>0);
+ assert.equal(native.flee(),true);
+ const result=await native.completion;
+ provider.disposeBattle(native);
+ assert.equal(result.creatures.length,4);
+ assert.equal(result.outcome,'flee');
+ const completed=t.applyResult(result);
+ assert.equal(completed.outcome,'flee');
+ assert.equal(completed.worldResolved,true);
+ assert.equal(t.applyResult(result),false);
+ const stored=owner.profile();
+ assert.equal(owner.writes().hero,writes.hero+1);
+ assert.equal(owner.writes().world,writes.world+1);
+ assert.equal(owner.world().last.type,'resolved');
+ assert.equal(owner.world().locationName,live.locationName);
+ assert.equal(owner.world().day,live.day);
+ assert.deepEqual(stored.creatureTeam.map(c=>c.uid),before.creatureTeam.map(c=>c.uid));
+ assert.deepEqual(stored.creatureTeam.map(c=>c.ownerExtras),before.creatureTeam.map(c=>c.ownerExtras));
+ for(const member of stored.creatureTeam){
+  assert.equal(member.hp,result.creatures.find(x=>x.instanceId===member.uid).hp);
+ }
+ assert.deepEqual(stored.inventory,before.inventory);
+ assert.equal(transaction.status().pending,false);
+});
+
+test('real double-wild World fails closed on missing or forged second wild, roster and reserve without a save or encounter stamp',async()=>{
+ const {a,owner,transaction}=await setup();
+ twoWildSetup(owner,a);
+ const before=owner.writes(),saved=owner.profile(),live=owner.world();
+ const worldWithoutPair=owner.world();
+ delete worldWithoutPair.last.creatureIds;
+ owner.replaceWorld(worldWithoutPair);
+ assert.throws(()=>transaction.prepareWild('crea_voltik'),/two|2v2|wild|encounter|active/i);
+ assert.equal(owner.writes().hero,before.hero);
+ const worldForged=owner.world();
+ worldForged.last.creatureIds=['crea_voltik','ci-unpublished-creature'];
+ owner.replaceWorld(worldForged);
+ assert.throws(()=>transaction.prepareWild('crea_voltik'),/wild|encounter|opponent|creature/i);
+ assert.equal(owner.writes().hero,before.hero);
+ owner.replaceWorld(live);
+ const removed={...saved,creatureTeam:saved.creatureTeam.slice(0,1)};
+ owner.replaceHero(removed);
+ assert.throws(()=>transaction.prepareWild('crea_voltik'),/team|member|2v2|active/i);
+ assert.equal(owner.writes().hero,before.hero);
+ owner.replaceHero({...saved,creatureReserve:[{
+  ...saved.creatureTeam[1],uid:'ci-foreign-reserve'
+ }]});
+ assert.throws(()=>transaction.prepareWild('crea_voltik'),/reserve/i);
+ assert.equal(owner.writes().hero,before.hero);
+ owner.replaceHero(saved);
+ const collided={...saved,creatureTeam:saved.creatureTeam.map((x,i)=>
+  i===1?{...x,uid:'wild:'+live.last.encounterId+':2'}:x)};
+ owner.replaceHero(collided);
+ assert.throws(()=>transaction.prepareWild('crea_voltik'),/collision|identity|instance/i);
+ assert.equal(owner.writes().hero,before.hero);
+});
+
+test('original World second enemy changed during live 2v2 cannot save another profile or consume its event',async()=>{
+ const {a,owner,transaction}=await setup();
+ twoWildSetup(owner,a);
+ const ticket=transaction.prepareWild('crea_voltik');
+ const world=owner.world();world.last.creatureIds[1]='crea-loup';
+ owner.replaceWorld(world);
+ const fake={outcome:'flee',creatures:ticket.snapshot.sides.flatMap(s=>
+  s.creatures.map(c=>({instanceId:c.instanceId,hp:c.hp})))};
+ const writes=owner.writes();
+ assert.throws(()=>ticket.applyResult(fake),/wild|encounter|stale/i);
+ assert.equal(owner.writes().hero,writes.hero);
+ assert.equal(owner.writes().world,writes.world);
+ assert.equal(owner.world().last.type,'wild');
+ ticket.cancel();
 });

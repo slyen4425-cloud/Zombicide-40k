@@ -8,7 +8,7 @@ const {pathToFileURL}=require('node:url');
 const {execFileSync}=require('node:child_process');
 const root=path.resolve(__dirname,'..');
 const lab=process.env.COMBAT_LAB_ROOT;
-const PIN='65e21792ff74aea9862e528c8dbfdb22797b6693';
+const PIN='92e2f75ff6e9b3e03d460115d53b5604adf0e718';
 assert.ok(lab,'Pinned official Combat Lab checkout is required');
 assert.equal(execFileSync('git',['-C',lab,'rev-parse','HEAD'],{encoding:'utf8'}).trim(),PIN);
 const read=rel=>JSON.parse(fs.readFileSync(path.join(lab,rel),'utf8'));

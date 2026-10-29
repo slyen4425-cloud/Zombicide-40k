@@ -25,13 +25,13 @@ test('Capture production-shaped static transport: real official pins and every b
  assert.equal(manifest.schema,'gensrpg-capture-official-delivery-v1');
  assert.equal(manifest.version,1);
  assert.equal(manifest.productionActivated,false);
- assert.equal(manifest.combatSha,'65e21792ff74aea9862e528c8dbfdb22797b6693');
+ assert.equal(manifest.combatSha,'92e2f75ff6e9b3e03d460115d53b5604adf0e718');
  assert.equal(manifest.combatSha,gitsha(lab));
  assert.equal(manifest.assetsSha,gitsha(assets));
  assert.equal(manifest.assetsSha,pins.authoredAssetsPin);
  assert.equal(manifest.combatRepository,'slyen4425-cloud/GenSrpg_labo_combat_dynamique');
- assert.deepEqual(manifest.supportedCreatureIds,["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik"],
-  'only the eleven media-complete SHA-pinned official author transfers may be published');
+ assert.deepEqual(manifest.supportedCreatureIds,["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"],
+  'only the twelve media-complete SHA-pinned official author transfers may be published');
  assert.equal(manifest.vendorDirectory,'vendor/combat-lab/');
  assert.equal(manifest.dataDirectory,data);
  const paths=manifest.transport.map(x=>x.path);

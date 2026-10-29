@@ -118,14 +118,14 @@ async function ready(extra={},user={}){
 }
 test('official static payload + exact Capture owners start one real native fight, flee and commit once',async()=>{
  const s=await ready();
- assert.equal(s.controller.resources.publishedSpecies.length,11);
- assert.deepEqual([...s.controller.resources.publishedSpecies],["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik"]);
+ assert.equal(s.controller.resources.publishedSpecies.length,12);
+ assert.deepEqual([...s.controller.resources.publishedSpecies],["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"]);
  assert.equal(s.writes().hero,0);
  const start=s.controller.startWildBattle('crea_voltik');
  assert.equal(start.ready,true);
  assert.equal(s.session().state().fighters.player.maxHp,150);
  assert.equal(s.session().state().fighters.opponent.maxHp,120);
- assert.equal(s.resources().source.combatSha,'65e21792ff74aea9862e528c8dbfdb22797b6693');
+ assert.equal(s.resources().source.combatSha,'92e2f75ff6e9b3e03d460115d53b5604adf0e718');
  assert.equal(s.combatPort.status().battleActive,true);
  assert.equal(s.world().last.encounterId,start.encounterId);
  assert.equal(s.writes().world,s.baseline+1);

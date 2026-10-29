@@ -187,9 +187,9 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
 }
 
 for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
- test(name+': the ORIGINAL public World COMBATTRE handles Venombre and Golem from the real authored eleven-species package',{timeout:120000},async()=>{
+ test(name+': the ORIGINAL public World COMBATTRE handles Venombre, Golem and Kitsune from the real authored twelve-species package',{timeout:120000},async()=>{
   await withPage(engine,async(page,errors)=>{
-   for(const creatureId of ['crea_tox_2','crea_mossback']){
+   for(const creatureId of ['crea_tox_2','crea_mossback','kitsune_lunaire']){
     await seed(page,{wild:creatureId});
     const before=await page.evaluate(()=>({world:captureWorldState(),profile:loadState('trainer-real-hub')}));
     assert.equal(before.world.last.creatureId,creatureId);
@@ -207,6 +207,15 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
     assert.ok(actual.includes(expected),
      creatureId+' must display the EXACT signed author name '+expected+', never a guessed asset nickname or Voltige fallback');
     assert.ok(!actual.includes('Voltige'),'new authored encounter must never fall back to Voltige');
+    if(creatureId==='kitsune_lunaire'){
+     const expectedVisual=await page.evaluate(async()=>{
+      const source=await (await fetch('/assets/gensrpg/capture/runtime-data/author-inputs.json')).json();
+      return source.creatureTransfers.find(x=>x.draft.id==='kitsune_lunaire')?.draft.presentation.visual.front.assetId;
+     });
+     assert.equal(expectedVisual,'pack:capture:creature-renard-lunaire-opponent-01');
+     assert.equal(await page.locator('#capture-official-entry-arena img[data-author-asset-id="'+expectedVisual+'"]').count(),1,
+      'Kitsune must render its own exact approved opponent sprite, never a fallback');
+    }
     await page.waitForFunction(()=>[...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')]
      .length===2&&[...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')]
       .every(image=>image.complete&&image.naturalWidth>0),null,{timeout:18000});

@@ -7,7 +7,7 @@ const vm=require('node:vm');
 const {pathToFileURL}=require('node:url');
 const {execFileSync}=require('node:child_process');
 const lab=process.env.COMBAT_LAB_ROOT;
-const PIN='65e21792ff74aea9862e528c8dbfdb22797b6693';
+const PIN='92e2f75ff6e9b3e03d460115d53b5604adf0e718';
 assert.ok(lab,'Official pinned Combat Lab checkout required');
 assert.equal(execFileSync('git',['-C',lab,'rev-parse','HEAD'],{encoding:'utf8'}).trim(),PIN);
 const read=rel=>JSON.parse(fs.readFileSync(path.join(lab,rel),'utf8'));
@@ -206,11 +206,11 @@ test('native authored source, existing saved-profile seam and sole Core provider
 
 // Data-owned author matrix: verify every published species, not merely a
 // static list or a preview dummy. All definitions come from the same pinned Lab.
-test('all eleven media-complete pinned Lab author creature transfers export genuine native 1v1 with their own skills', async()=>{
- const official=["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik"];
+test('all twelve media-complete pinned Lab author creature transfers export genuine native 1v1 with their own skills', async()=>{
+ const official=["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"];
  const settings=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/capture-lab-authored-preview-settings-v1.json'),'utf8'));
  const transfers=settings.authoredCreatureFiles.map(read);
- assert.equal(transfers.length,11,'only the eleven media-complete official species are deliverable');
+ assert.equal(transfers.length,12,'only the twelve media-complete official species are deliverable');
  assert.deepEqual(transfers.map(x=>x.draft.id),official,'exact author order and IDs, no aliases or invented entries');
  const visualRoot=process.env.COMBAT_ASSETS_ROOT;
  assert.ok(visualRoot,'Official pinned visual catalog checkout required');
@@ -226,11 +226,22 @@ test('all eleven media-complete pinned Lab author creature transfers export genu
  };
  for(const transfer of transfers)visit(transfer.draft.presentation);
  assert.equal(allRefs.filter(id=>!ids.has(id)).length,0,'every published creature visual must exist at the pinned SHA');
- const excluded=read('data/capture/showcase/kitsune_lunaire.capture-creature-transfer-v1.json');
- assert.equal(excluded.draft.id,'kitsune_lunaire');
- assert.equal(excluded.draft.presentation.visual.rangedAttackBack.assetId,'pack:capture:creature-lunaire-attack-player-7-v1');
- assert.equal(ids.has(excluded.draft.presentation.visual.rangedAttackBack.assetId),false,
-  'Kitsune author transfer is not safely deliverable until the original missing animation is published');
+ const kitsune=transfers.find(x=>x.draft.id==='kitsune_lunaire');
+ assert.ok(kitsune,'the approved Kitsune must be present in the exact official source');
+ const attackBackId=kitsune.draft.presentation.visual.rangedAttackBack.assetId;
+ assert.equal(attackBackId,'pack:capture:creature-lunaire-attack-player-8-v1');
+ const atlas=visualCatalog.assets.find(x=>x.id===attackBackId);
+ assert.ok(atlas,'approved Kitsune 8-frame atlas must exist at the pinned visual SHA');
+ assert.equal(atlas.resource.frameCount,8,'never silently downgrade the approved 8-frame author atlas');
+ const expectedSkills=['teleport-strike','Onde Spirituel','fleche_spirituel','aura-lunaire','Sacrifice_kitsune'];
+ assert.deepEqual(kitsune.loadout.slots.map(slot=>slot.skillId),expectedSkills);
+ for(const skillId of expectedSkills){
+  const authoredSkill=read('data/capture/showcase/'+skillId+'.capture-skill-transfer-v1.json');
+  assert.equal(authoredSkill.draft.id,skillId,'native skill ID must be the real Labo author ID');
+  visit(authoredSkill.draft.presentation);
+ }
+ assert.deepEqual(allRefs.filter(id=>!ids.has(id)),[],
+  'all approved Kitsune skill visuals must resolve at the same pinned catalog SHA');
  const author=await factory({creatureTransfers:transfers});
  for(const creatureId of official){
   const opponent=creatureId==='crea-loup'?'crea_voltik':creatureId;

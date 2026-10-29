@@ -60,7 +60,7 @@ test('World original entry uses only native Lab scene, not the static portrait a
 
 test('native FX metadata is resolved by the pinned Lab owner, never a GenSrpg copy',()=>{
  const scene=fs.readFileSync(path.join(root,'assets/gensrpg/capture/capture-native-lab-scene-v1.mjs'),'utf8');
- assert.match(scene,/import\(uri\('src\/assets\/global-presentation-asset-resolver-v1\\.js'\)\)/,
+ assert.ok(scene.includes("import(uri('src/assets/global-presentation-asset-resolver-v1.js'))"),
   'the Lab canonical media resolver must be loaded with the pinned author modules');
  assert.match(scene,/createGlobalPresentationAssetResolverV1\(\{/,
   'Lab alone must preserve headingRad, frame timing, stretch and display scales');

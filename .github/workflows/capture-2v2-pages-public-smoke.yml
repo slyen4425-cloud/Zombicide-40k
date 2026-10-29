@@ -1,0 +1,61 @@
+name: Capture 2v2 public GitHub Pages URL smoke
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/capture-2v2-pages-public-smoke.yml'
+      - 'capture-world-2v2-test.html'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/capture-2v2-pages-public-smoke.yml'
+      - 'capture-world-2v2-test.html'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-pages-http:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Confirm live GitHub Pages route, same-origin official runtime, and isolated demo
+        shell: bash
+        run: |
+          set -euo pipefail
+          root='https://slyen4425-cloud.github.io/Zombicide-40k'
+          dir="$(mktemp -d)"
+          trap 'rm -rf "$dir"' EXIT
+          # Compare actual public HTTP bytes, not a Pages artifact or Github source blob.
+          curl --fail --location --silent --show-error --retry 6 \
+            --retry-delay 3 --retry-all-errors \
+            --output "$dir/demo.html" \
+            "$root/capture-world-2v2-test.html"
+          grep -Fq 'Monster Capture — essai du combat 2v2' "$dir/demo.html"
+          grep -Fq 'capture-preview-2v2-isolated-20261029' "$dir/demo.html"
+          grep -Fq 'startCaptureOfficialWildEntryV1' "$dir/demo.html"
+          for file in \
+            'assets/gensrpg/capture/world-exploration-v1.js' \
+            'assets/gensrpg/capture/capture-official-wild-entry-v1.mjs' \
+            'assets/gensrpg/capture/capture-world-lab-wild-transaction-v1.mjs' \
+            'assets/gensrpg/capture/capture-official-battle-view-v1.mjs' \
+            'assets/gensrpg/capture/runtime-data/source.json' \
+            'assets/gensrpg/capture/runtime-data/author-inputs.json' \
+            'assets/gensrpg/capture/runtime-data/global-visual-assets.json' \
+            'vendor/combat-lab/src/core/index.js'
+          do
+            curl --fail --location --silent --show-error --retry 6 \
+              --retry-delay 3 --retry-all-errors \
+              --output "$dir/resource" "$root/$file"
+            test -s "$dir/resource"
+            echo "HTTP OK: $file"
+          done
+          node --input-type=module - "$dir" <<'JS'
+          import fs from 'node:fs';
+          const dir=process.argv[2];
+          const contents=fs.readFileSync(dir+'/resource','utf8');
+          if(!contents.trim()) throw new Error('Public Lab runtime is empty');
+          console.log('Public official Capture 2v2 demo route and eight dependencies verified');
+          JS

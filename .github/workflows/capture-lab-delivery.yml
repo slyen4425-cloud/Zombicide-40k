@@ -117,6 +117,7 @@ jobs:
           NODE_PATH: /tmp/capture-lab-browser/node_modules
           CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
           CAPTURE_NATIVE_LAB_SCREENSHOT: _site/capture-native-lab-landscape.png
+          CAPTURE_NATIVE_LAB_VIDEO_DIR: _site/capture-native-lab-video
         run: |
           node --test tests/gens_capture_real_wild_button_browser_v1.test.cjs
           node --test tests/gens_capture_public_world_2v2_browser_v1.test.cjs
@@ -134,4 +135,5 @@ jobs:
             _site/assets/gensrpg/capture/runtime-data/
             _site/capture-official-hub-landscape.png
             _site/capture-native-lab-landscape.png
+            _site/capture-native-lab-video/
           retention-days: 14

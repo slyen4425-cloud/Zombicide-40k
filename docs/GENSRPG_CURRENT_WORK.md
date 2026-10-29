@@ -1,3 +1,14 @@
+# Capture — provider Combat Lab natif 1v1 + 2v2 actif (29 octobre 2026)
+
+- **Base certifiée avant tout code** : checkpoint `checkpoint/gensrpg-capture-native-dual-teams-green-2026-10-29` au SHA `05652859392524b6e1ab59c42dd8726d8d62d681` (4/4 workflows SUCCESS, vrai exporteur 2v2 et 7/7 checks). Ce code a été fusionné sans modification d'arbre dans staging #175 au merge `36b3003dbae8f8bc11e9d066446045b34394e81b`; la recertification staging de 14 runs est en cours indépendamment. `main` non modifié.
+- **START exact** : `checkpoint/gensrpg-start-capture-native-2v2-provider-2026-10-29` sur `05652859392524b6e1ab59c42dd8726d8d62d681` ; branche dédiée `work/gensrpg-capture-native-2v2-provider-2026-10-29`.
+- **Responsabilité de ce lot C2** : uniquement l'adaptateur du runtime `assets/gensrpg/capture/combat-lab-provider-v1.mjs` + tests natifs `tests/gens_capture_lab_authored_source_v1.test.cjs` + présent journal. Le provider reçoit deux camps de 1 ou 2 créatures réellement **actives**, valide sans substitution leurs IDs/HP/compétences face à l'export officiel, délègue règles/résolution/horloge et IA alliée/adverse au Core épinglé, et restitue les PV de chaque combattant. Le 1v1 actuel ne change pas. Refuser formats déséquilibrés, doublons, réserves, identités incohérentes. Aucune simulation/IA personnelle GenSrpg.
+- **TDD réel** : sentinelles RED avant code en exportant le 2v2 auteur Loup/Golem vs Voltige/Kitsune et en lançant via le provider une CombatSession et une RosterSession natives, avec horloge isolée déterministe et contrôle du rendu/lifecycle. Vérifier 1v1 déjà couvert ; intégrer aux vrais tests CI Combat et sentinelles d'architecture.
+- **Périmètre explicitement interdit** : pas de changements World, bouton public, sauvegardes, migration, view, `index.html`, SW, moteur, Labo, Survie/Dungeon/PvP ou `main`. Le vrai bouton World ne publie toujours que le 1v1 ; 2v2 en jeu, réserves/rappel, HUD responsive et persistance demandent validation intégrée ultérieure sans passer en douce par un fallback.
+- **GREEN** : 4 contrôles requis (Combat natif, architecture, Tactical, Firefox), checkpoint sur HEAD validé, merge dans staging #175 exclusivement avec expected SHA, puis CI post-merge. Aucun GREEN de staging anticipé. Le rollback est le checkpoint de départ, aucun état utilisateur écrit dans ce lot.
+
+---
+
 # Capture — export canonique des équipes actives 2v2 (29 octobre 2026)
 
 - **Base GREEN réelle** : `work/gensrpg-capture-lab-bridge-2026-10-27@736cf1f4a00e6733db77835bc9189fc5e3933541`, `checkpoint/gensrpg-capture-kitsune-12-staging-green-2026-10-29`, **14/14 workflows GitHub Actions SUCCESS**, checks navigateur compris ; `main` intact.

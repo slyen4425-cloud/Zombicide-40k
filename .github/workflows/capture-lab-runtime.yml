@@ -1,7 +1,7 @@
 name: Capture official Combat runtime
 on:
   push:
-    branches: ['work/gensrpg-capture-lab-bridge-runtime-*', 'work/gensrpg-capture-lab-bridge-history-*', 'work/gensrpg-capture-explicit-profile-migration-*']
+    branches: ['work/gensrpg-capture-lab-bridge-runtime-*', 'work/gensrpg-capture-lab-bridge-history-*', 'work/gensrpg-capture-explicit-profile-migration-*', 'work/gensrpg-capture-world-2v2-transaction-*']
   pull_request:
     paths:
       - 'assets/gensrpg/capture/combat-lab-*'

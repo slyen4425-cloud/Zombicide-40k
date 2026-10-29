@@ -858,7 +858,7 @@ test('real double-wild World fails closed on missing or forged second wild, rost
  assert.throws(()=>transaction.prepareWild('crea_voltik'),/two|2v2|wild|encounter|active/i);
  assert.equal(owner.writes().hero,before.hero);
  const worldForged=owner.world();
- worldForged.last.creatureIds=['crea_voltik','crea-loup'];
+ worldForged.last.creatureIds=['crea_voltik','ci-unpublished-creature'];
  owner.replaceWorld(worldForged);
  assert.throws(()=>transaction.prepareWild('crea_voltik'),/wild|encounter|opponent|creature/i);
  assert.equal(owner.writes().hero,before.hero);

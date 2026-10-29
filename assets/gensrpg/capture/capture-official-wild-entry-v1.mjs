@@ -81,7 +81,7 @@ function createDialog(){
  const host=doc.createElement('div');host.id='capture-official-entry-arena';host.hidden=true;
  const row=doc.createElement('div');row.style.display='flex';row.style.gap='8px';
  row.style.flexWrap='wrap';row.style.justifyContent='center';
- const back=doc.createElement('button');back.type='button';back.textContent='Retour au monde';
+ const back=doc.createElement('button');back.type='button';back.textContent='Retour au monde';back.id='capture-official-flee';
  const retry=doc.createElement('button');retry.type='button';
  retry.textContent='Réessayer la sauvegarde';retry.hidden=true;
  for(const button of [back,retry]){
@@ -90,6 +90,11 @@ function createDialog(){
   button.style.border='1px solid #b4d5bc';button.style.borderRadius='8px';
   row.appendChild(button);
  }
+ Object.assign(shell.style,{padding:'0',overflow:'hidden',background:'#0b1420'});
+ Object.assign(panel.style,{width:'100vw',height:'100dvh',maxHeight:'100dvh',
+  overflow:'hidden',padding:'0',border:'none',borderRadius:'0',background:'#0b1420'});
+ Object.assign(host.style,{flex:'1 1 auto',width:'100%',minHeight:'0'});
+ Object.assign(row.style,{position:'absolute',top:'4px',right:'4px',zIndex:'5'});
  panel.append(title,status,host,row);shell.append(panel);doc.body.appendChild(shell);
  return Object.freeze({shell,status,host,back,retry});
 }

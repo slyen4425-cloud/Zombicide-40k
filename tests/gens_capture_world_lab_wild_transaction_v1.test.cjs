@@ -848,7 +848,7 @@ test('RED→GREEN real original World double-wild encounter -> four official Cor
  assert.equal(transaction.status().pending,false);
 });
 
-test('real double-wild World fails closed on missing or forged second wild, roster and reserve without a save or encounter stamp',async()=>{
+test('real double-wild World fails closed on missing or forged second wild, roster and duplicate reserve UID without a save or encounter stamp',async()=>{
  const {a,owner,transaction}=await setup();
  twoWildSetup(owner,a);
  const before=owner.writes(),saved=owner.profile(),live=owner.world();
@@ -868,9 +868,9 @@ test('real double-wild World fails closed on missing or forged second wild, rost
  assert.throws(()=>transaction.prepareWild('crea_voltik'),/team|member|2v2|active/i);
  assert.equal(owner.writes().hero,before.hero);
  owner.replaceHero({...saved,creatureReserve:[{
-  ...saved.creatureTeam[1],uid:'ci-foreign-reserve'
+  ...saved.creatureTeam[1],uid:saved.creatureTeam[0].uid
  }]});
- assert.throws(()=>transaction.prepareWild('crea_voltik'),/reserve/i);
+ assert.throws(()=>transaction.prepareWild('crea_voltik'),/reserve|duplicate|identity/i);
  assert.equal(owner.writes().hero,before.hero);
  owner.replaceHero(saved);
  const collided={...saved,creatureTeam:saved.creatureTeam.map((x,i)=>

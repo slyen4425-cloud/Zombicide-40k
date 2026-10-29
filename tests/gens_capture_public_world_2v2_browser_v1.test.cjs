@@ -148,3 +148,40 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
   });
  });
 }
+
+
+for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
+ test(name+': user-facing isolated 2v2 preview page actually runs canonical World button and returns after Lab flee',{timeout:140000},async()=>{
+  await withPage(engine,async(page,errors)=>{
+   const origin=new URL(page.url()).origin;
+   await page.goto(origin+'/capture-world-2v2-test.html');
+   await page.locator('#prepare').tap();
+   await page.waitForFunction(()=>window.capture2v2PreviewReady===true,null,{timeout:30000});
+   assert.equal(await page.locator('#status[data-error="true"]').count(),0);
+   const before=await page.evaluate(()=>({
+    world:captureWorldState(),hero:loadState(current),
+    other:localStorage.getItem('gensrpg_game_profiles_v1')
+   }));
+   assert.deepEqual(before.world.last.creatureIds,['crea_voltik','kitsune_lunaire']);
+   assert.deepEqual(before.hero.creatureTeam.map(x=>x.entityId),['crea-loup','crea_mossback']);
+   await page.locator('#captureEncounterModalBody button[onclick^="captureStartWildBattle"]').tap();
+   await page.locator('#capture-official-entry-arena:not([hidden]) #capture-official-flee').waitFor();
+   assert.equal(await page.locator('#capture-official-entry-arena .hub-fighter').count(),4);
+   await page.waitForFunction(()=>[...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')].length===4&&
+    [...document.querySelectorAll('#capture-official-entry-arena img[data-author-asset-id]')].every(x=>x.complete&&x.naturalWidth>0),null,{timeout:20000});
+   await page.locator('#capture-official-flee').tap();
+   await page.locator('#gens-capture-official-battle-v1').waitFor({state:'detached'});
+   const after=await page.evaluate(()=>({
+    world:captureWorldState(),hero:loadState(current),
+    other:localStorage.getItem('gensrpg_game_profiles_v1')
+   }));
+   assert.equal(after.world.last.type,'resolved');
+   assert.equal(after.world.locationId,before.world.locationId);
+   assert.equal(after.hero.creatureTeam.length,2);
+   assert.deepEqual(after.hero.creatureTeam.map(x=>x.uid),before.hero.creatureTeam.map(x=>x.uid));
+   assert.deepEqual(after.hero.creatureTeam.map(x=>x.hp),before.hero.creatureTeam.map(x=>x.hp));
+   assert.equal(after.other,before.other,'public-game profiles cannot be changed by preview');
+   assert.deepEqual(errors,[]);
+  });
+ });
+}

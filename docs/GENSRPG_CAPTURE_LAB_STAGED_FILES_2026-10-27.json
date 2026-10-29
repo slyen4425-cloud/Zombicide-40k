@@ -27,7 +27,9 @@
     "assets/gensrpg/capture/capture-official-battle-view-v1.mjs",
     "assets/gensrpg/capture/capture-lab-profile-readiness-v1.mjs",
     "assets/gensrpg/capture/saved-profile-lab-migration-v1.mjs",
-    "assets/gensrpg/capture/capture-official-wild-entry-v1.mjs"
+    "assets/gensrpg/capture/capture-official-wild-entry-v1.mjs",
+    "assets/gensrpg/capture/capture-native-lab-provider-v1.mjs",
+    "assets/gensrpg/capture/capture-native-lab-scene-v1.mjs"
   ],
   "capturePreviewDirectory": "assets/gensrpg/capture/preview",
   "capturePreviewFiles": [
@@ -49,11 +51,13 @@
     "tests/gens_capture_official_hub_composition_browser_v1.test.cjs",
     "tests/gens_capture_official_battle_view_v1.test.cjs",
     "tests/gens_capture_real_wild_button_v1.test.cjs",
-    "tests/gens_capture_real_wild_button_browser_v1.test.cjs"
+    "tests/gens_capture_real_wild_button_browser_v1.test.cjs",
+    "tests/gens_capture_native_lab_scene_v1.test.cjs",
+    "tests/gens_capture_public_world_2v2_browser_v1.test.cjs"
   ],
   "remaining": [
     "the real public button now wired on stage; promotion gated by complete release/compatibility tests",
-    "native Lab renderer and FX via capture-native-lab-scene-v1",
+    "native Lab scene staged, awaiting integrated Chromium/Firefox visual/FX/audio and saved-profile certification",
     "creature editor",
     "reserves"
   ],
@@ -120,5 +124,15 @@
       "kitsune_lunaire"
     ],
     "noLegacyEngineFallback": true
+  },
+  "stagedNativeLabScene": {
+    "entry": "assets/gensrpg/capture/capture-native-lab-scene-v1.mjs",
+    "provider": "assets/gensrpg/capture/capture-native-lab-provider-v1.mjs",
+    "owner": "Combat Lab mountCaptureCombatPreviewV1 / mountCoop2v2Test",
+    "productionActivated": false,
+    "ownsStorage": false,
+    "ownsCombatRules": false,
+    "ownsClock": false,
+    "staticBattleViewReplacedInOriginalWorldEntry": true
   }
 }

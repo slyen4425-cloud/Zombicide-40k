@@ -60,9 +60,16 @@ export function createCaptureNativeLabSceneV1({
   const parsed=new DOMParser().parseFromString(page,'text/html');
   const template=parsed.querySelector('template[data-capture-preview-template]');
   if(!template)throw new Error('Signed Lab battle DOM template missing');
-  const container=document.createElement('div');container.className='capture-native-scene-host';
-  container.append(template.content.cloneNode(true));
-  const root=container.querySelector('[data-combat-demo]');
+  // Preserve the EXACT selectors used by the Lab's official landscape HUD.
+  // Omitting this authored shell collapses its mobile layout to a generic demo.
+  const container=document.createElement('section');
+  container.className='capture-preview-shell';
+  container.dataset.landscapeRequired='true';
+  const previewHost=document.createElement('div');
+  previewHost.className='capture-preview-host';
+  previewHost.append(template.content.cloneNode(true));
+  container.append(previewHost);
+  const root=previewHost.querySelector('[data-combat-demo]');
   if(!root||!root.querySelector('[data-combat-arena]'))
    throw new Error('Signed Lab native battle arena missing');
   for(const node of root.querySelectorAll('*')){

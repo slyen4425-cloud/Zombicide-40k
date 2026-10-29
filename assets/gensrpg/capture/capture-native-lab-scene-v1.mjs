@@ -1,3 +1,4 @@
+import {COMBAT_LAB_SOURCE_V1} from './combat-lab-engine-loader-v1.mjs';
 // Mount the ACTUAL pinned Laboratory Capture editor battle presentation.
 // Its HTML/CSS/visual adapter, Combat UI, FX, AI and Runtime are Lab files.
 // GenSrpg only maps stable actor IDs and supplies authoritative authored data.
@@ -108,7 +109,7 @@ export function createCaptureNativeLabSceneV1({
    if(url.href.startsWith(vendorAudioRoot.href)){
     const relative=url.href.slice(vendorAudioRoot.href.length);
     const exact=new URL('assets/'+relative,
-      'https://raw.githubusercontent.com/'+source.combatRepository+'/'+source.combatSha+'/');
+      'https://raw.githubusercontent.com/'+COMBAT_LAB_SOURCE_V1.repository+'/'+source.combatSha+'/');
     return Object.freeze({...original,url:exact.href});
    }
    return original;

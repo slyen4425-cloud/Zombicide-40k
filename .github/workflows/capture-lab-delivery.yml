@@ -19,6 +19,7 @@ on:
       - 'tests/gens_capture_official_hub_composition_v1.test.cjs'
       - 'tests/gens_capture_official_hub_composition_browser_v1.test.cjs'
       - 'tests/gens_capture_official_battle_view_v1.test.cjs'
+      - 'tests/gens_capture_official_battle_view_2v2_browser_v1.test.cjs'
       - 'assets/gensrpg/capture/capture-official-battle-view-v1.mjs'
       - 'assets/gensrpg/capture/capture-official-hub-composition-v1.mjs'
       - 'assets/gensrpg/capture/capture-official-wild-entry-v1.mjs'
@@ -106,7 +107,9 @@ jobs:
           NODE_PATH: /tmp/capture-lab-browser/node_modules
           CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
           CAPTURE_OFFICIAL_HUB_SCREENSHOT: _site/capture-official-hub-landscape.png
-        run: node --test tests/gens_capture_official_hub_composition_browser_v1.test.cjs
+        run: |
+          node --test tests/gens_capture_official_hub_composition_browser_v1.test.cjs
+          node --test tests/gens_capture_official_battle_view_2v2_browser_v1.test.cjs
       - name: Verify ORIGINAL World-rendered COMBATTRE, migration consent and native Combat in Chromium and Firefox
         env:
           NODE_PATH: /tmp/capture-lab-browser/node_modules

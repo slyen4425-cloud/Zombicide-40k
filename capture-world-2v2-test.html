@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="fr">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <title>GenS RPG · Test Monster Capture 2v2 officiel</title>
+ <style>
+ :root{color-scheme:dark}body{margin:0;background:#12251b;color:#eef8ee;font:15px/1.45 system-ui,sans-serif}
+ main{max-width:960px;margin:0 auto;padding:12px}.panel{border:1px solid #59846a;background:#1b3325;border-radius:12px;padding:12px;margin:8px 0}
+ h1{font-size:clamp(19px,4vw,26px);margin:4px 0}h2{font-size:18px;margin:4px 0}
+ button{min-height:44px;border-radius:8px;background:#40774d;border:1px solid #91c09a;color:#fff;padding:8px 14px;cursor:pointer}
+ button:disabled{opacity:.5}#status{min-height:24px;font-weight:600}#status[data-error=true]{color:#ffc6b8}
+ .v2LibActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+ .captureEncounterCard{padding:12px;background:#254330;border-radius:10px}
+ .small{font-size:13px;color:#c6d9ca}#captureEncounterModal{display:none}
+ </style>
+</head>
+<body>
+<main>
+ <h1>Monster Capture — essai du combat 2v2</h1>
+ <section class="panel">
+ <p><strong>Démonstration isolée :</strong> utilise les propriétaires World et Capture ainsi que le véritable moteur du Labo Combat épinglé. Elle ne modifie pas les parties sauvegardées du jeu normal.</p>
+ <p class="small">Préparation : Loup volcanique et Golem moussu contre Voltige et Kitsune lunaire. Teste une capacité ou la sélection d'une cible puis « Fuir ». Les PV et le retour au monde passent par la sauvegarde Capture propriétaire.</p>
+ <button id="prepare" type="button">Préparer la rencontre 2v2</button>
+ <p role="status" id="status">Aucune sauvegarde de démonstration initialisée.</p>
+ </section>
+ <section class="panel" id="captureEncounterModal"><div id="captureEncounterModalBody"></div></section>
+ <div id="captureExploreResult" aria-live="polite"></div>
+ <div id="captureCurrentEncounterCard"></div>
+ <p class="small">Version de test hors PWA. Les réserves et la migration automatique de profils historiques 2v2 ne sont pas activées ici.</p>
+</main>
+<script>
+var current='capture-preview-2v2-trainer',state=null;
+var ciOfficialAuthorEntities=[];
+function activeGameProfileId(){return 'capture-preview-2v2-isolated-20261029'}
+function normalizeGameParticipants(){return [current]}
+function hasActiveSession(){return false}
+function key(id){return 'ci_capture_preview_2v2_hero_'+String(id)}
+function loadState(id){return JSON.parse(localStorage.getItem(key(id))||'{}')}
+function loadSharedEntities(){return ciOfficialAuthorEntities}
+function z40kEscHtml(value){return String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;")}
+function z40kEscAttr(value){return z40kEscHtml(value)}
+</script>
+<script src="assets/gensrpg/core/asset-resolver-v1.js"></script>
+<script src="assets/gensrpg/capture/world-exploration-v1.js"></script>
+<script src="assets/gensrpg/capture/team-roster-v1.js"></script>
+<script src="assets/gensrpg/capture/legacy-monolith-functions-v1.js"></script>
+<script>
+window.prepareCapture2v2Preview=async function(){
+ const start=document.getElementById('prepare'),status=document.getElementById('status');
+ if(start.disabled)return false;
+ start.disabled=true;status.textContent='Chargement et validation du Labo officiel…';delete status.dataset.error;
+ try{
+  const base='assets/gensrpg/capture/',vendor='vendor/combat-lab/';
+  const [author,creature,draft,rules,exporter,adapter,inputs]=await Promise.all([
+   import('./'+base+'combat-lab-authored-source-v1.mjs'),
+   import('./'+vendor+'src/contracts/capture-creature-transfer-v1.js'),
+   import('./'+vendor+'src/contracts/capture-skill-editor-draft-v1.js'),
+   import('./'+vendor+'src/adapters/input/capture/capture-combat-rules-overlay-v1.js'),
+   import('./'+vendor+'src/adapters/input/capture/capture-editor-exporter-v3.js'),
+   import('./'+vendor+'src/adapters/input/capture/capture-export-adapter-stack-v1.js'),
+   fetch(base+'runtime-data/author-inputs.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Paquet auteur indisponible');return r.json()})
+  ]);
+  const factory=author.createCaptureLabAuthoredSourceV1({
+   normalizeCreatureTransfer:creature.normalizeCaptureCreatureTransferV1,
+   normalizeSkillDraft:draft.normalizeCaptureSkillEditorDraftV1,
+   overlayCombatRules:rules.applyCaptureCombatRulesToCreatureDraftV1,
+   exportEditorDrafts:exporter.exportCaptureEditorDraftsToCombatExportV3,
+   adaptCombatExport:adapter.adaptCaptureCombatExportStackV1,
+   statRegistry:inputs.statRegistry,configuredSkillDrafts:inputs.configuredSkillDrafts,
+   creatureTransfers:inputs.creatureTransfers
+  });
+  const eid='preview2v2-'+crypto.randomUUID().replaceAll('-','');
+  const source=factory.buildEncounter({
+   ...inputs.battleSettings,encounterId:eid,
+   playerTeam:[{instanceId:'demo-loup',creatureId:'crea-loup'},
+    {instanceId:'demo-golem',creatureId:'crea_mossback'}],
+   opponentTeam:[{instanceId:'wild:'+eid,creatureId:'crea_voltik'},
+    {instanceId:'wild:'+eid+':2',creatureId:'kitsune_lunaire'}]
+  });
+  const native=source.nativeCombatSource;
+  const roster=source.actorIds.slice(0,2).map((actorId,i)=>{
+   const actor=native.battleFormat.actors.find(a=>a.actorId===actorId);
+   const hp=native.fighterConfigs[actor.creatureId].maxHp;
+   const moves=[...native.skillIdsByActor[actorId]];
+   return {uid:source.instanceIds[actorId],entityId:actor.creatureId,
+    hp,maxHp:hp,activeAbilityIds:moves,knownAbilityIds:moves,
+    level:i+2,xp:0,testDemo:true};
+  });
+  ciOfficialAuthorEntities=inputs.creatureTransfers.map(x=>({
+   id:x.draft.id,category:'creature',name:x.draft.displayName,
+   desc:x.draft.description
+  }));
+  saveHeroCreatureState(current,{
+   creatureTeam:roster,creatureReserve:[],inventory:[],gold:0,
+   previewOnly:true
+  });
+  const ws=captureWorldState();
+  saveCaptureWorldState({...ws,locationId:'cap_forest',locationName:'Forêt de démonstration',
+   day:1,turnIndex:0,playMode:'turns',
+   last:{type:'wild',encounterId:eid,creatureId:'crea_voltik',
+    creatureIds:['crea_voltik','kitsune_lunaire'],
+    text:'Rencontre double du World propriétaire'}});
+  renderCaptureEncounterPage();
+  captureOpenModal('captureEncounterModal');
+  status.textContent='Rencontre 2v2 prête. Appuie sur COMBATTRE puis teste le moteur du Labo.';
+  window.capture2v2PreviewReady=true;
+  return true;
+ }catch(error){
+  status.textContent='Préparation refusée : '+String(error?.message||error);
+  status.dataset.error='true';console.error(error);
+  return false;
+ }finally{start.disabled=false}
+};
+document.getElementById('prepare').addEventListener('click',()=>window.prepareCapture2v2Preview());
+</script>
+</body>
+</html>

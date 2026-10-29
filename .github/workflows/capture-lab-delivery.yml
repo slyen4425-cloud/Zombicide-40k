@@ -7,6 +7,7 @@ on:
       - 'work/gensrpg-capture-pages-pinned-delivery-*'
       - 'work/gensrpg-capture-official-battle-view-*'
       - 'work/gensrpg-capture-real-wild-button-*'
+      - 'work/gensrpg-capture-world-paired-encounters-playable-*'
       - 'work/gensrpg-capture-offline-verified-media-cache-*'
   pull_request:
     paths:
@@ -26,6 +27,7 @@ on:
       - 'assets/gensrpg/capture/legacy-monolith-functions-v1.js'
       - 'tests/gens_capture_real_wild_button_v1.test.cjs'
       - 'tests/gens_capture_real_wild_button_browser_v1.test.cjs'
+      - 'tests/gens_capture_public_world_2v2_browser_v1.test.cjs'
       - '.github/workflows/capture-lab-delivery.yml'
       - 'service-worker.js'
       - 'tests/gens_capture_pwa_offline_pinned_media_v1.test.cjs'
@@ -114,7 +116,9 @@ jobs:
         env:
           NODE_PATH: /tmp/capture-lab-browser/node_modules
           CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
-        run: node --test tests/gens_capture_real_wild_button_browser_v1.test.cjs
+        run: |
+          node --test tests/gens_capture_real_wild_button_browser_v1.test.cjs
+          node --test tests/gens_capture_public_world_2v2_browser_v1.test.cjs
       - name: Verify actual service worker and immutable official sprite warm/offline in landscape Chromium + Firefox
         env:
           NODE_PATH: /tmp/capture-lab-browser/node_modules

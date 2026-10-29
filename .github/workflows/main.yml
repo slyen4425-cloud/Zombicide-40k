@@ -167,6 +167,12 @@ jobs:
             cp -f dungeon-profiles-safe-repair.html _site/dungeon-profiles-safe-repair.html
           fi
 
+          # Standalone opt-in Capture 2v2 demonstration. Never injected in
+          # index.html, never registered in the PWA and owns separate demo saves.
+          if [ -f "capture-world-2v2-test.html" ]; then
+            cp -f capture-world-2v2-test.html _site/capture-world-2v2-test.html
+          fi
+
           if [ -f "manifest.webmanifest" ]; then
             cp -f manifest.webmanifest _site/manifest.webmanifest
           fi

@@ -1,3 +1,10 @@
+## 2026-10-29 — Scène native : métadonnées FX directionnelles, autorité unique Lab
+- Audit de `capture-native-lab-scene-v1.mjs` : l'adaptateur GenSrpg recopiait partiellement le catalogue média et perdait `resource.headingRad`, `displayScale*` et `playbackMode:stretch`. Cause racine identique au défaut d'orientation déjà traité dans le Lab : un deuxième normaliseur écrasait le contrat auteur. Aucun média ni moteur ne doit être retouché pour le masquer.
+- TDD RED authentique sur `152bf064b33aa1142ed22010714058cb8c34de86` : GitHub Actions Capture release `40966952249` a échoué uniquement sur la sentinelle « native FX metadata is resolved by the pinned Lab owner ». Correction : importer le `createGlobalPresentationAssetResolverV1` du Lab épinglé et lui déléguer intégralement les propriétés d'animation/direction/échelle, sans nouvelle autorité. Test supplémentaire : heading nul vs déclaré zéro, stretch, cadence, échelles.
+- Le contrôle final exige toutes les CI sur le HEAD exact, navigateur Chromium/Firefox, vrai World, FX/audio/KO à vérifier et publication Pages après fusion. `main`, `index.html`, SW et profils restent protégés. Aucun GREEN ni activation publique revendiqués avant preuves. L'ancienne vue à cartes n'est plus invoquée par l'entrée World de cette branche.
+
+---
+
 ## 2026-10-29 — Intégration non destructive du chantier réserve #213 et scène Lab publiée
 - Source indépendante PR #213 `0e2bd927da1b3b74f5de280fb4abe5fda717bcf2` : reprendre fidèlement la conservation de réserve hors combat en 2v2, sans cinquième acteur ni rappel. Tests RED/GREEN de réserve et garde de modification concurrente préservés ; 1v1 refuse toujours la réserve. Les fichiers du nouveau rendu natif de PR #216 restent propriétaires de la scène ; aucune fusion aveugle des anciens écrans de cartes.
 - Lab #142 : checkpoint `checkpoint/lab-capture-native-scene-host-green-2026-10-29` au SHA `8318220b6a9b883aeced1d4bf693f906b0f36d3d`, CI #40950339573 5/5 SUCCESS ; fusion sur `gh-pages@4fd0821545eaa41ce1d3115e56f3574db6273426`, comparaison sans différence de fichiers avec le SHA source épinglé. CI/Pages post-fusion encore à confirmer.

@@ -1,3 +1,13 @@
+# Capture — raccord de la vraie scène du Labo Combat (29 octobre 2026)
+
+- Défaut Android prouvé : capture-official-battle-view-v1.mjs affiche quatre cartes statiques, pas l'arène officielle animée du Lab. Les anciens contrôles CI n'étaient pas des tests de rendu natif.
+- BASE main@781e937321ad50dd0c666f116ec1d09d566a0d48 ; START checkpoint/gensrpg-start-capture-real-lab-scene-2026-10-29 ; branche unique work/gensrpg-capture-real-lab-scene-2026-10-29.
+- Aucun changement sur main, index.html, SW, Survie, Dungeon, PWA, profils. PR #213 sur réserve parallèle, aucune collision permise.
+- Propriétaires : Lab seul moteur/horloge/IA/renderer/animations/FX/audio ; World seul générateur/consommateur de rencontres ; Capture seul écrivain des sauvegardes. Remplacer la vue statique par la vraie scène Lab et ne jamais laisser tourner deux CombatSession. Appui Lab #142 sur gh-pages@a32ac3e54dd6616f3fa1653e8aaecca5effde494.
+- TDD RED sur bouton World ouvrant autre chose que vraie arène Lab, puis tests paysage navigateur 1v1/2v2, graphiques, ciblage, fuite/KO, persistance unitaire, CI et Pages exacts, preuve Android. Publication seulement après validation ; rollback checkpoint START.
+
+---
+
 # Capture — parcours World réel → 2v2 Lab → PV sauvegardés → World (29 octobre 2026)
 
 - **Base GREEN vérifiée** : PR #175 staging `8b69a7dbee3bed3c24eb3d0d4856726923356312`, 14/14 CI SUCCESS et 19 checks success (dont architecture et navigateur). Combat Lab source `92e2f75ff6e9b3e03d460115d53b5604adf0e718`, sprites `b3d46ce6f2639ebb59a2984aeff17f97cbcd7377`; `main` inchangé.

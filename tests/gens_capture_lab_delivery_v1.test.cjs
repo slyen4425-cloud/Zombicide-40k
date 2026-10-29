@@ -25,7 +25,7 @@ test('Capture production-shaped static transport: real official pins and every b
  assert.equal(manifest.schema,'gensrpg-capture-official-delivery-v1');
  assert.equal(manifest.version,1);
  assert.equal(manifest.productionActivated,false);
- assert.equal(manifest.combatSha,'92e2f75ff6e9b3e03d460115d53b5604adf0e718');
+ assert.equal(manifest.combatSha,'8318220b6a9b883aeced1d4bf693f906b0f36d3d');
  assert.equal(manifest.combatSha,gitsha(lab));
  assert.equal(manifest.assetsSha,gitsha(assets));
  assert.equal(manifest.assetsSha,pins.authoredAssetsPin);

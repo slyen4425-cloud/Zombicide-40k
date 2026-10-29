@@ -153,7 +153,7 @@ export async function createCaptureOfficialHubCompositionV1({
  });
  const command=createCaptureLabHubBattleCommandV1({
   transaction,combatPort,engine,createProvider,
-  clock:nextClock,mountBattle:(context,source,hp)=>mountBattle(context,source,hp,resources),
+  clock:nextClock,mountBattle:(...args)=>mountBattle(...args,resources),
   onReturn,onError
  });
  return Object.freeze({

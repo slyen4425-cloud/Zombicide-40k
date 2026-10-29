@@ -35,7 +35,7 @@ jobs:
             "$root/capture-world-2v2-test.html"
           grep -Fq 'Monster Capture — essai du combat 2v2' "$dir/demo.html"
           grep -Fq 'capture-preview-2v2-isolated-20261029' "$dir/demo.html"
-          grep -Fq 'startCaptureOfficialWildEntryV1' "$dir/demo.html"
+          grep -Fq 'prepareCapture2v2Preview' "$dir/demo.html"
           for file in \
             'assets/gensrpg/capture/world-exploration-v1.js' \
             'assets/gensrpg/capture/capture-official-wild-entry-v1.mjs' \
@@ -44,7 +44,7 @@ jobs:
             'assets/gensrpg/capture/runtime-data/source.json' \
             'assets/gensrpg/capture/runtime-data/author-inputs.json' \
             'assets/gensrpg/capture/runtime-data/global-visual-assets.json' \
-            'vendor/combat-lab/src/core/index.js'
+            'vendor/combat-lab/src/core/combat/combat-session.js'
           do
             curl --fail --location --silent --show-error --retry 6 \
               --retry-delay 3 --retry-all-errors \

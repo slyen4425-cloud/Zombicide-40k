@@ -16,7 +16,9 @@ const dirty=execFileSync('git',['-C',lab,'status','--porcelain','--untracked-fil
 if(dirty)throw new Error('Combat source has local modifications; build refused');
 // Build transport only. No copied engine implementation is committed to GenSrpG.
 const copy=(from,to)=>{mkdirSync(dirname(to),{recursive:true});cpSync(from,to,{recursive:true});};
-for(const path of ['src','data','examples/dom-demo/capture-editor-v2.html','examples/dom-demo/capture-editor-v2.css','examples/dom-demo/demo.css']){
+// The native embedded scene imports demo-assets.js and the Lab's own CSS/HTML.
+// Transport the complete pinned demo module graph, not a hand-picked shell.
+for(const path of ['src','data','examples/dom-demo']){
   copy(join(lab,path),join(output,'vendor/combat-lab',path));
 }
 for(const file of ['battle-bridge-contract-v1.js','lab-ownership-port-v1.js','manual-battle-trigger-v1.js',

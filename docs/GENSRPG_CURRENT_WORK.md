@@ -1,3 +1,12 @@
+# Capture — intégration de la sauvegarde native 2v2 dans le staging (29 octobre 2026)
+
+- **Source certifiée** : PR #206 `159bd1c1acf9b3e00db4f32e4e17939d5b6ae495`, 5/5 GitHub Actions et 8/8 checks SUCCESS, checkpoint `checkpoint/gensrpg-capture-2v2-saved-battle-bridge-green-2026-10-29` ; TDD RED prouvé avant correctif.
+- **Staging parent certifié** : PR #175 `b32c049b1a9a6d4d814a0e9caf86f71aa59aab29`, 14/14 GitHub Actions SUCCESS et checkpoint `checkpoint/gensrpg-capture-native-2v2-battle-view-staging-green-2026-10-29` après fusion #205.
+- **Réconciliation sans écrasement** : merger les deux parents, conserver intégralement les journaux de la vue #205 et de la sauvegarde #206, reprendre exactement le bridge et ses tests validés, aucune modification de règles/IA/moteur, ni `main`.
+- **État de ce commit** : résolution de la divergence documentaire seulement ; **CI à recertifier sur le SHA de merge** avant de rendre #206 mergeable/ready et de la fusionner dans #175. 2v2 World, réserves, migration, FX et validation Android restent non certifiés.
+
+---
+
 # Capture — sauvegarde des résultats natifs 2v2 sans double propriétaire (29 octobre 2026)
 
 - **Classe C2, base GREEN exacte** : staging `work/gensrpg-capture-lab-bridge-2026-10-27@7304cec1d6c0b9163943bb42339e3b58d0604dd9`, checkpoint `checkpoint/gensrpg-capture-native-2v2-provider-staging-green-2026-10-29` ; source Lab Combat `92e2f75ff6e9b3e03d460115d53b5604adf0e718`. `main` demeure indépendant et inchangé. La PR #205 (vue 2v2) est un lot **distinct parallèle**, CI navigateur en cours, aucun chevauchement de fichiers runtime.
@@ -6,6 +15,17 @@
 - **Contrat d'entrée du lot** : 1v1 historique conserve `last.creatureId` ; 2v2 requiert un événement canonique `last.creatureIds` d'exactement deux espèces, avec `last.creatureId === last.creatureIds[0]`, ainsi que deux membres actifs dans `creatureTeam` et aucune réserve ; le futur lot World sera seul propriétaire de la création de cet événement. Aucun nouveau générateur ou stockage World ici.
 - **TDD RED→GREEN** : ajouter avant code les tests d'exporteur réel Loup/Golem contre Voltige/Kitsune, du vrai Core/Combat provider, de quatre PV retournés puis sauvés une fois et relus ; contrôles stricts : identités/sorties uniques, profils mutés avant/après, compétences, PV, réserve, équipe, rencontre et refus des résultats invalides ou incomplets. Les workflows officiels Capture runtime/architecture/Firefox/Tactical doivent être GREEN au HEAD exact, puis checkpoint GREEN et fusion uniquement dans staging #175 après la PR vue #205 (résoudre proprement l'éventuel conflit du journal).
 - **Non-objectifs protégés** : ne modifier ni World/rencontres, ni bouton public, ni migration historique, ni vues/PR #205, ni provider/IA du Labo, ni index.html, SW, Survie/Dungeon/PvP, ni `main`. Ne pas annoncer 2v2 public fonctionnel tant que la commande World, migration, équipes/réserves, tests Android restent à raccorder.
+
+---
+
+# Capture — vue propriétaire 2v2 native (29 octobre 2026)
+
+- **Base GREEN staging exacte** : PR #175 `work/gensrpg-capture-lab-bridge-2026-10-27@7304cec1d6c0b9163943bb42339e3b58d0604dd9`, **14/14 GitHub Actions SUCCESS** (dernière architecture #40860333460 SUCCESS), checkpoint `checkpoint/gensrpg-capture-native-2v2-provider-staging-green-2026-10-29`. `main@1d8521c18374cf284303f873c1f3ae3bba91a68d` inchangé.
+- **START avant code** : `checkpoint/gensrpg-start-capture-native-2v2-battle-view-2026-10-29` sur SHA exact `7304cec1d6c0b9163943bb42339e3b58d0604dd9` ; branche unique `work/gensrpg-capture-native-2v2-battle-view-2026-10-29`.
+- **Périmètre C2 / propriétaire** : uniquement la **vue DOM Capture officielle** `assets/gensrpg/capture/capture-official-battle-view-v1.mjs` ; ses tests navigateur natifs en paysage `tests/gens_capture_official_battle_view_2v2_browser_v1.test.cjs`, workflow `.github/workflows/capture-lab-delivery.yml` pour exécuter la vraie sentinelle, et ce journal. Afficher les **quatre vrais acteurs** 2v2 du Labo, sprites approuvés face/dos, PV/énergie Core, cibles explicites accessibles au toucher, 5 compétences de l'acteur local, fuite et libération DOM. Aucun moteur, stats, calcul, timer, storage ou deuxième propriétaire.
+- **Garde stricte** : 1v1 World existant et son bouton inchangés ; 2v2 affiché uniquement lorsqu'une transaction autorisée fournit deux actifs/camp, sans inférer les réserves. Source autoritaire : `main` Labo Combat épinglé `92e2f75ff6e9b3e03d460115d53b5604adf0e718`, visuels `b3d46ce6f2639ebb59a2984aeff17f97cbcd7377`. Aucune modification du World, sauvegardes, migration, index.html, service-worker, Core, autres modules ou dépôts, ni `main`.
+- **TDD RED/GREEN** : sentinelle Chromium + Firefox charge le véritable exporteur/roster/Core épinglé et quatre sprites approuvés en HTTP, clique une cible ennemie et une capacité avec le vrai handle du provider, contrôle l'identité transmise à l'API Combat et le démontage ; 1v1 original reste protégé. Exécuter la CI officielle payload/Pages, architecture, Tactical, Firefox et les tests Capture sur SHA exact ; checkpoint GREEN puis fusion avec expected SHA exclusivement vers staging #175 et recertification post-merge. Ne pas déclarer 2v2 public tant que World/persistance/équipe/rappel/migration/Android ne sont pas certifiés.
+- **Prochaine étape** : écrire la sentinelle navigateur et constater son RED sur le code 1v1, puis implémenter la vue unique et vérifier les CI sans relances artificielles.
 
 ---
 

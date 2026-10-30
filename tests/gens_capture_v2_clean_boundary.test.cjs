@@ -57,7 +57,8 @@ test('Pages pipeline stages the UNMODIFIED Exploration main owner, not its gh-pa
  assert.match(workflow,/repository: slyen4425-cloud\/laboratoire_dynamique_exploration-/);
  assert.match(workflow,/ref: \$\{\{ steps\.capture_pages_pins\.outputs\.exploration \}\}/,
   'Exploration must resolve from the one canonical pin rather than a second hardcoded SHA');
- assert.match(workflow,/git ls-remote[^\n]+refs\/heads\/main/);
+ assert.match(workflow,/refs\/heads\/main/);
+ assert.match(workflow,/actual!==entry\.sha/,'refuse upstream SHA drift before shipping');
  assert.match(workflow,/cp -a exploration-lab\/src exploration-lab\/assets _site\/vendor\/exploration-lab\//);
  assert.match(workflow,/node tools\/stage_capture_v2_labs\.mjs combat-lab exploration-lab _site/);
  assert.match(workflow,/rsync -a --exclude='\/gensrpg\/capture\/'/,

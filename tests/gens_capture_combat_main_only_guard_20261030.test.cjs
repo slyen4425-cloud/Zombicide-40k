@@ -41,6 +41,10 @@ test('archive remains immutable while clean Capture V2 uses one Combat main SHA'
  assert.match(legacy.authoredSourceLabPin,/^[a-f0-9]{40}$/);
  assert.ok(loader.includes(legacy.authoredSourceLabPin));
  assert.equal(legacy.originalWildBattleButton.officialSourceSha,legacy.authoredSourceLabPin);
- assert.equal(pins.combat.sha,legacy.authoredSourceLabPin);
+ assert.equal(pins.combat.ref,'main');
+ assert.equal(pins.legacyCaptureRuntime,false);
+ const active=read('assets/gensrpg/capture-v2/shell-entry-v1.js');
+ assert.doesNotMatch(active,/combat-lab-engine-loader|GENSRPG_CAPTURE_LAB_STAGED_FILES|captureStartBattleAutomatic/,
+  'retired author loader must not be reintroduced into V2');
  assert.doesNotMatch(loader,/8318220b6a9b883aeced1d4bf693f906b0f36d3d/);
 });

@@ -1,5 +1,6 @@
 name: Capture v2 clean ownership boundary
 on:
+  workflow_dispatch:
   push:
     branches:
       - 'work/gensrpg-capture-clean-replacement-*'
@@ -34,11 +35,27 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Resolve and certify both published main pins
+        id: pins
+        run: |
+          node --input-type=module - <<'JS' >> "$GITHUB_OUTPUT"
+          import fs from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          const sources=JSON.parse(fs.readFileSync('assets/gensrpg/capture-v2/source-pins-v1.json','utf8'));
+          if(sources.legacyCaptureRuntime!==false)throw Error('Legacy Capture is forbidden');
+          for(const name of ['combat','exploration']){
+            const owner=sources[name];
+            if(owner.ref!=='main'||!/^[a-f0-9]{40}$/.test(owner.sha))throw Error('Missing main-only pin');
+            const current=execFileSync('git',['ls-remote','https://github.com/'+owner.repository+'.git','refs/heads/main'],{encoding:'utf8'}).trim().split(/\s+/)[0];
+            if(current!==owner.sha)throw Error('Uncertified '+name+' main drift');
+            console.log(name+'='+owner.sha);
+          }
+          JS
       - name: Read official Combat from main at its certified SHA
         uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
-          ref: 248f718ec924106d16999d59e5dc8310f8450180
+          ref: ${{ steps.pins.outputs.combat }}
           path: combat-lab
           sparse-checkout: |
             src
@@ -48,7 +65,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/laboratoire_dynamique_exploration-
-          ref: 474aa42674c9bd976a8a5a8af684d65cbe848b61
+          ref: ${{ steps.pins.outputs.exploration }}
           path: exploration-lab
           sparse-checkout: |
             src
@@ -59,8 +76,8 @@ jobs:
             sculpt-lab.html
       - name: Assemble original Lab modules without any GenSrpg engine copy
         run: |
-          test "$(git -C combat-lab rev-parse HEAD)" = "248f718ec924106d16999d59e5dc8310f8450180"
-          test "$(git -C exploration-lab rev-parse HEAD)" = "474aa42674c9bd976a8a5a8af684d65cbe848b61"
+          test "$(git -C combat-lab rev-parse HEAD)" = "${{ steps.pins.outputs.combat }}"
+          test "$(git -C exploration-lab rev-parse HEAD)" = "${{ steps.pins.outputs.exploration }}"
           mkdir -p _site/vendor/combat-lab _site/vendor/exploration-lab
           cp -a combat-lab/src combat-lab/data combat-lab/examples _site/vendor/combat-lab/
           cp -a exploration-lab/src exploration-lab/assets _site/vendor/exploration-lab/

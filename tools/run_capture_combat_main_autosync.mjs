@@ -3,7 +3,7 @@
 // An unsuccessful or incompatible update leaves main and public Pages unchanged.
 import fs from 'node:fs';
 import {execFileSync} from 'node:child_process';
-import {COMBAT_LAB_SOURCE_V1} from '../assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs';
+// Capture V2 official main pin is the only active author catalog/engine reference.
 const combat='slyen4425-cloud/GenSrpg_labo_combat_dynamique';
 const own=process.env.GITHUB_REPOSITORY;
 const token=process.env.GH_TOKEN;
@@ -16,7 +16,7 @@ function shaRef(repo,branch){return api('repos/'+repo+'/git/ref/heads/'+branch).
 function ensure(condition,message){if(!condition)fail(message)}
 function delay(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
 const workflows=[
- 'capture-lab-runtime.yml',
+ 'capture-v2-clean-base.yml',
  'capture-lab-delivery.yml',
  'main.yml',
  'gensrpg-architecture-sentinels.yml',
@@ -48,10 +48,11 @@ async function run(){
  ensure(shaRef(own,'main')===initial,'GenSrpg main advanced before synchronization');
  const official=shaRef(combat,'main');
  ensure(/^[a-f0-9]{40}$/.test(official),'Malformed Combat main HEAD');
- const pins=JSON.parse(fs.readFileSync('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json','utf8'));
- ensure(pins.authoredSourceLabPin===COMBAT_LAB_SOURCE_V1.sha &&
-   pins.originalWildBattleButton?.officialSourceSha===COMBAT_LAB_SOURCE_V1.sha,'Source manifest and engine pin disagree');
- if(official===COMBAT_LAB_SOURCE_V1.sha){console.log('NOOP: GenSrpg already uses official Combat main '+official);return}
+ const pins=JSON.parse(fs.readFileSync('assets/gensrpg/capture-v2/source-pins-v1.json','utf8'));
+ ensure(pins.combat?.ref==='main' && pins.combat?.repository===combat &&
+   pins.exploration?.ref==='main' && pins.legacyCaptureRuntime===false,
+   'Capture V2 main-only sources or legacy retirement drifted');
+ if(official===pins.combat.sha){console.log('NOOP: GenSrpg V2 already uses official Combat main '+official);return}
  const labRuns=api('repos/'+combat+'/actions/runs?branch=main&per_page=100').workflow_runs;
  const certified=labRuns.find(x=>x.head_sha===official && x.name==='Laboratory CI' &&
    x.status==='completed' && x.conclusion==='success');
@@ -71,8 +72,8 @@ async function run(){
  for(const args of [
   ['--test','tests/gens_capture_combat_main_autosync_20261030.test.mjs'],
   ['--test','tests/gens_capture_combat_main_only_guard_20261030.test.cjs'],
-  ['--test','tests/gens_capture_kitsune_author_12_gate_v1.test.cjs'],
-  ['tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs']
+  ['--test','tests/gens_capture_v2_clean_boundary.test.cjs'],
+  ['--test','tests/gens_capture_v2_generic_profile_owner.test.cjs']
  ])cmd('node',...args);
  const {FILES}=await import('./sync_capture_combat_main_pin.mjs');
  cmd('git','add','--',...FILES);
@@ -97,8 +98,8 @@ async function run(){
  // explicitly dispatch main build/deploy and verify production green.
  gh('workflow','run','main.yml','--repo',own,'--ref','main');
  await waitForRuns('main',merged,['main.yml'],105,15000);
- gh('workflow','run','capture-2v2-pages-public-smoke.yml','--repo',own,'--ref','main');
- await waitForRuns('main',merged,['capture-2v2-pages-public-smoke.yml'],55,15000);
+ gh('workflow','run','capture-lab-delivery.yml','--repo',own,'--ref','main');
+ await waitForRuns('main',merged,['capture-lab-delivery.yml'],55,15000);
  console.log('PUBLISHED: GenSrpg main '+merged+
   ' uses approved Combat main '+official+
   '. https://slyen4425-cloud.github.io/Zombicide-40k/');

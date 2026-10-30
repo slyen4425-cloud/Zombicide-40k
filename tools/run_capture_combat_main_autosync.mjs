@@ -61,7 +61,7 @@ async function run(){
  const branch='work/gensrpg-combat-main-sync-'+short;
  const checkpoint='checkpoint/gensrpg-start-combat-main-sync-'+short;
  // Never force-update a previous candidate or overwrite an already-open review.
- const branches=gh('ls-remote','--heads','origin',branch);
+ const branches=cmd('git','ls-remote','--heads','origin',branch);
  ensure(!branches,'Existing candidate '+branch+' requires review; no overwrite');
  cmd('git','config','user.name','github-actions[bot]');
  cmd('git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com');

@@ -25,12 +25,17 @@ test('the active Pages pipeline admits only two EXACT main pins, without the old
  assert.doesNotMatch(y,/stage_capture_lab_delivery\.mjs|combat-assets|ref:\s*gh-pages/,
   'retired or moving Capture authority must not be shipped');
 });
-test('historical Capture release workflow remains pinned until retired, never silently ships a moving Combat version',()=>{
+test('the new Capture V2 delivery refuses moving branches and checks BOTH main SHA pins',()=>{
  const y=read('.github/workflows/capture-lab-delivery.yml');
  assert.match(y,/refs\/heads\/main/);
- assert.match(y,/COMBAT_LAB_SOURCE_V1\.sha!==combatMain/);
- assert.match(y,/throw Error\('Combat pin differs from approved main/);
- assert.doesNotMatch(y,/ref:\s*gh-pages/);
+ assert.match(y,/sha!==entry\.sha/);
+ assert.match(y,/stage_capture_v2_labs\.mjs/);
+ assert.match(y,/gens_capture_v2_pages_delivery_v1\.test\.cjs/);
+ assert.match(y,/gens_capture_v2_root_browser\.test\.cjs/);
+ assert.match(y,/steps\.pins\.outputs\.combat/);
+ assert.match(y,/steps\.pins\.outputs\.exploration/);
+ assert.doesNotMatch(y,/stage_capture_lab_delivery\.mjs|combat-assets|ref:\s*gh-pages|gens_capture_real_wild_button/,
+  'retired V1 native gameplay gate must not be a second release owner');
 });
 test('archive remains immutable while clean Capture V2 uses one Combat main SHA',()=>{
  assert.match(legacy.authoredSourceLabPin,/^[a-f0-9]{40}$/);

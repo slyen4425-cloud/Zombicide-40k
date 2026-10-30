@@ -15,7 +15,8 @@ assert.doesNotMatch(bridge,/MutationObserver|\.observe\s*\(/,'always-loaded brid
 assert.match(bridge,/dungeon-grid-display-recovery-167856\.js\?v=1678100/,'always-loaded bridge must restore tactical grid recovery');
 assert.match(bridge,/gens-hero-editor-dynamic-167897\.js\?v=1678101/,'always-loaded bridge must load canonical hero/stat consolidation layer');
 assert.match(bridge,/gens-dungeon-hero-ingame-art-167898\.js\?v=1678100/,'always-loaded bridge must repair hero art in game');
-assert.match(bridge,/gens-dungeon-sheet-art-stability-167899\.js\?v=1678100/,'always-loaded bridge must repair built-in hero art on the sheet');
+assert.match(bridge,/function repairSheet\(\)\{return 0\}/,'compatibility seam is inert, native sheet stays sole owner');
+assert.doesNotMatch(bridge,/SHEET_ART_SRC|GensDungeonSheetArtStability167899/,'retired sheet owner must not be reinstalled');
 assert.match(bridge,/gens-stat-upgrade-policy-167898\.js\?v=1678100/,'always-loaded bridge must load stat upgrade policy');
 assert.match(bridge,/gens-dungeon-ui-cleanup-1678100\.js\?v=1678100/,'always-loaded bridge must load targeted UI cleanup');
 assert.match(bridge,/gens-equipment-stat-cleanup-1678102\.js\?v=1678102/,'always-loaded bridge must load equipment stat cleanup');
@@ -25,7 +26,7 @@ for(const critical of ['dungeon-grid-display-recovery-167856.js','dungeon-random
 require('./dungeon_grid_display_recovery_v167856.test.cjs');
 require('./gens_dungeon_hero_art_repair_v167874.test.cjs');
 require('./gens_v167898_guard.test.cjs');
-require('./gens_v167899_ui_sheet_guard.test.cjs');
+require('./gens_single_hero_sheet_art_authority_v11411.test.cjs');
 require('./gens_v1678100_ui_cleanup_guard.test.cjs');
 require('./dungeon_world_runtime_v167823.test.cjs');
 console.log('V16.78.102 stability guard: grids + canonical stats + equipment cleanup + hero art + cleaned summary OK');

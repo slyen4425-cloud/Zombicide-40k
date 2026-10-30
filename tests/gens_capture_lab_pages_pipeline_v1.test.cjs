@@ -47,9 +47,13 @@ test('Pages uses same verified payload publisher AFTER site preparation and BEFO
 test('staged payload stays dormant; historic public index, SW and real profiles unchanged',()=>{
  const index=fs.readFileSync(path.join(root,'index.html'));
  const sw=read('service-worker.js');
- assert.equal(gitblob(index),'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646');
+ assert.equal(gitblob(index),'c53d234fca05e49a33650a61776fae1c1985613e');
  assert.ok(!index.includes(Buffer.from('vendor/combat-lab/')),'no automatic Combat install');
  assert.ok(!index.includes(Buffer.from('runtime-data/')),'no extra public UI owner');
+ assert.ok(index.includes(Buffer.from('capture-lab-author-entry-v1.mjs')),'the product index must load the sole author host instead of a second editor');
+ assert.ok(index.includes(Buffer.from("GensCaptureLabAuthorUiV1.open('creature')")),'creature hub links to official Lab only in Monster Capture');
+ assert.ok(index.includes(Buffer.from("GensCaptureLabAuthorUiV1.open('skill')")),'skill hub links to official Lab only in Monster Capture');
+ assert.ok(index.includes(Buffer.from("openControllableCreatureLibrary()")),'Dungeon editor branch preserved');
  assert.ok(!sw.includes('vendor/combat-lab/'),'no premature PWA precache');
  assert.ok(!sw.includes('runtime-data/'),'no orphan author cache keys');
  assert.equal(fs.existsSync(path.join(root,'vendor/combat-lab')),false,'no vendored duplicate engine in git');

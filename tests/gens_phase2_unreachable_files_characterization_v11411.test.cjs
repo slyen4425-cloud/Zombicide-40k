@@ -66,8 +66,17 @@ assert.equal(rawDirect.filter(x=>x===R09_SURVIVAL_WAVE).length,1,
 assert.equal(reachable.has(R09_SURVIVAL_WAVE),true,
   'R09 Survival wave owner must remain reachable in the real production graph');
 const R13_BUILDERS_ENEMY='assets/gensrpg/builders/legacy-enemy-editor-v1.js';
-assert.equal(reachable.size,117+captureR06Files.length,
-  'R16 graph retains its owners and includes the explicit Core profile repair build prelude');
+// The reviewed product index adds precisely the ONE Capture Lab ownership port
+// and the ONE official author page entry. Both are real production-reachable
+// owners, not non-production artifacts; preserve every previous R16 owner.
+const LAB_PORT='assets/gensrpg/capture/lab-ownership-port-v1.js';
+const LAB_AUTHOR='assets/gensrpg/capture/capture-lab-author-entry-v1.mjs';
+for(const rel of [LAB_PORT,LAB_AUTHOR]){
+  assert.equal(rawDirect.filter(x=>x===rel).length,1,'exactly one author seam script: '+rel);
+  assert.equal(reachable.has(rel),true,'author seam must be production-reachable: '+rel);
+}
+assert.equal(reachable.size,117+captureR06Files.length+2,
+  'R16 owners plus exactly the two reviewed native Lab author seam scripts');
 assert.equal(reachable.has(buildPrelude.MODULE),true,'the shipped profile repair must be classified as production');
 assert.equal(reachable.has('assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js'),true,
   'R16 live Dungeon Core303 timeline must not be classified as a non-production file');

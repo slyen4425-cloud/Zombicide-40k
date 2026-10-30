@@ -10,8 +10,8 @@ const pins=()=>JSON.parse(text('assets/gensrpg/capture-v2/source-pins-v1.json'))
 
 test('real four-mode GenSrpg entry physically unloads ALL original Capture scripts',()=>{
  const html=index();
- const src=[...html.matchAll(/<script\\b[^>]*\\bsrc=["']([^"']+)["'][^>]*>/g)].map(x=>x[1]);
- assert.equal(src.filter(x=>/^assets\\/gensrpg\\/capture\\//.test(x)).length,0,
+ const src=[...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/g)].map(x=>x[1]);
+ assert.equal(src.filter(x=>/^assets\/gensrpg\/capture\//.test(x)).length,0,
    'Old Capture engine/world/roster/editor/fix scripts MUST be removed, not hidden');
  assert.equal(src.filter(x=>x==='assets/gensrpg/capture-v2/identity-v1.js').length,1);
  assert.equal(src.filter(x=>x==='assets/gensrpg/capture-v2/shell-entry-v1.js').length,1);
@@ -40,10 +40,10 @@ test('new Capture shell delegates to two pinned mains; never loads the historic 
  const identity=text('assets/gensrpg/capture-v2/identity-v1.js');
  const p=pins();
  assert.equal(p.legacyCaptureRuntime,false);
- assert.match(entry,/shell\\.register\\("capture",start\\)/);
- assert.match(entry,/vendor\\/exploration-lab\\/index\\.html/);
- assert.match(entry,/vendor\\/combat-lab\\/examples\\/dom-demo\\/capture-editor-v2\\.html/);
- assert.match(entry,/vendor\\/combat-lab\\/examples\\/dom-demo\\/bestiary\\.html/);
+ assert.match(entry,/shell\.register\("capture",start\)/);
+ assert.match(entry,/vendor\/exploration-lab\/index\.html/);
+ assert.match(entry,/vendor\/combat-lab\/examples\/dom-demo\/capture-editor-v2\.html/);
+ assert.match(entry,/vendor\/combat-lab\/examples\/dom-demo\/bestiary\.html/);
  assert.doesNotMatch(entry+identity, /captureStartBattleAutomatic|monster-capture-creatures|captureWorldState|gensrpg_capture_world/);
  assert.equal(p.combat.ref,'main');
  assert.equal(p.exploration.ref,'main');
@@ -54,11 +54,11 @@ test('new Capture shell delegates to two pinned mains; never loads the historic 
 test('Pages pipeline stages the UNMODIFIED Exploration main owner, not its gh-pages version',()=>{
  const workflow=text('.github/workflows/main.yml');
  const p=pins();
- assert.match(workflow,/repository: slyen4425-cloud\\/laboratoire_dynamique_exploration-/);
+ assert.match(workflow,/repository: slyen4425-cloud\/laboratoire_dynamique_exploration-/);
  assert.ok(workflow.includes('ref: '+p.exploration.sha));
- assert.match(workflow,/git ls-remote[^\\n]+refs\\/heads\\/main/);
- assert.match(workflow,/cp -a exploration-lab\\/src exploration-lab\\/assets _site\\/vendor\\/exploration-lab\\//);
- assert.match(workflow,/stage_capture_lab_delivery\\.mjs/);
+ assert.match(workflow,/git ls-remote[^\n]+refs\/heads\/main/);
+ assert.match(workflow,/cp -a exploration-lab\/src exploration-lab\/assets _site\/vendor\/exploration-lab\//);
+ assert.match(workflow,/stage_capture_lab_delivery\.mjs/);
 });
 
 test('packaged native Exploration and Combat are present when Pages build is supplied',()=>{

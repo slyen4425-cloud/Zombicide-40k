@@ -6,9 +6,9 @@ const root=require('node:path').resolve(__dirname,'..');
 const read=name=>fs.readFileSync(require('node:path').join(root,name));
 const blob=value=>crypto.createHash('sha1').update('blob '+value.length+'\0').update(value).digest('hex');
 const indexBytes=read('index.html');
-assert.equal(indexBytes.length,1722603,'uploaded index from the exact staging SHA must match');
-assert.equal(blob(indexBytes),'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646',
- 'uploaded index1.zip/index.html(1).txt has the same blob as staging PR #175');
+assert.equal(indexBytes.length,1723177,'exact user-uploaded index with only the reviewed Lab authoring routes');
+assert.equal(blob(indexBytes),'c53d234fca05e49a33650a61776fae1c1985613e',
+ 'only four verified Lab authoring routes amend the user-supplied index');
 const html=indexBytes.toString('utf8');
 const original='assets/gensrpg/capture/legacy-monolith-functions-v1.js';
 const world='assets/gensrpg/capture/world-exploration-v1.js';

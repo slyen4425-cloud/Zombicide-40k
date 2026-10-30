@@ -1,79 +1,57 @@
-name: Capture official release payload (not public activation)
+name: Capture V2 official native release gate
 on:
   workflow_dispatch:
   push:
     branches:
-      - 'work/gensrpg-capture-official-delivery-package-*'
-      - 'work/gensrpg-capture-official-hub-composition-*'
-      - 'work/gensrpg-capture-pages-pinned-delivery-*'
-      - 'work/gensrpg-capture-official-battle-view-*'
-      - 'work/gensrpg-capture-real-wild-button-*'
-      - 'work/gensrpg-capture-world-paired-encounters-playable-*'
-      - 'work/gensrpg-capture-offline-verified-media-cache-*'
+      - 'work/gensrpg-capture-clean-replacement-*'
   pull_request:
     paths:
-      - 'tools/stage_capture_lab_delivery.mjs'
+      - 'index.html'
+      - 'assets/gensrpg/capture-v2/**'
+      - 'tools/stage_capture_v2_labs.mjs'
+      - 'tests/gens_capture_v2_*.test.cjs'
       - '.github/workflows/main.yml'
-      - 'tests/gens_capture_lab_pages_pipeline_v1.test.cjs'
-      - 'tests/gens_capture_lab_pages_site_v1.test.cjs'
-      - 'tests/gens_capture_lab_delivery_v1.test.cjs'
-      - 'tests/gens_capture_kitsune_author_12_gate_v1.test.cjs'
-      - 'tests/gens_capture_official_hub_composition_v1.test.cjs'
-      - 'tests/gens_capture_official_hub_composition_browser_v1.test.cjs'
-      - 'tests/gens_capture_official_battle_view_v1.test.cjs'
-      - 'tests/gens_capture_official_battle_view_2v2_browser_v1.test.cjs'
-      - 'assets/gensrpg/capture/capture-official-battle-view-v1.mjs'
-      - 'assets/gensrpg/capture/capture-official-hub-composition-v1.mjs'
-      - 'assets/gensrpg/capture/capture-official-wild-entry-v1.mjs'
-      - 'assets/gensrpg/capture/legacy-monolith-functions-v1.js'
-      - 'tests/gens_capture_real_wild_button_v1.test.cjs'
-      - 'tests/gens_capture_real_wild_button_browser_v1.test.cjs'
-      - 'tests/gens_capture_public_world_2v2_browser_v1.test.cjs'
-      - 'tests/gens_capture_native_lab_scene_v1.test.cjs'
-      - 'assets/gensrpg/capture/capture-native-lab-*.mjs'
       - '.github/workflows/capture-lab-delivery.yml'
-      - 'service-worker.js'
-      - 'tests/gens_capture_pwa_offline_pinned_media_v1.test.cjs'
-      - 'tests/gens_capture_pwa_offline_pinned_media_browser_v1.test.cjs'
-      - 'tools/build_capture_lab_preview.mjs'
-      - 'tools/prepare_capture_lab_authored_preview.mjs'
-      - 'docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'
 permissions:
   contents: read
+concurrency:
+  group: capture-v2-native-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   official-static-delivery:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify real PWA worker guards approved immutable creature images and warm-offline resume
-        run: node --test tests/gens_capture_pwa_offline_pinned_media_v1.test.cjs
-      - name: TDD Kitsune official twelfth author provenance
-        run: node --test tests/gens_capture_kitsune_author_12_gate_v1.test.cjs
-      - name: TDD check true original Capture COMBATTRE owner (RED before implementation)
-        run: node --test tests/gens_capture_real_wild_button_v1.test.cjs
-      - name: Check official payload wiring in the real Pages pipeline (RED before implementation)
-        run: node --test tests/gens_capture_lab_pages_pipeline_v1.test.cjs
-      - name: Resolve immutable official author and asset SHA from the existing owners
+      - name: TDD clean ownership, profile isolation and real Pages gate
+        run: |
+          node --check assets/gensrpg/capture-v2/identity-v1.js
+          node --check assets/gensrpg/capture-v2/shell-entry-v1.js
+          node --check tools/stage_capture_v2_labs.mjs
+          node --test tests/gens_capture_v2_clean_boundary.test.cjs
+          node --test tests/gens_capture_v2_generic_profile_owner.test.cjs
+          node --test tests/gens_capture_combat_main_only_guard_20261030.test.cjs
+      - name: Resolve the TWO exact, immutable Lab main SHAs
         id: pins
         run: |
           node --input-type=module - <<'JS' >> "$GITHUB_OUTPUT"
-          import {COMBAT_LAB_SOURCE_V1} from './assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs';
           import fs from 'node:fs';
           import {execFileSync} from 'node:child_process';
-          const manifest=JSON.parse(fs.readFileSync('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json','utf8'));
-          if(COMBAT_LAB_SOURCE_V1.sha!==manifest.authoredSourceLabPin)throw Error('Conflicting pinned Combat authority');
-          // Only an approved Combat main HEAD may enter GenSrpg. No gh-pages SHA.
-          const combatMain=execFileSync('git',['ls-remote','https://github.com/slyen4425-cloud/GenSrpg_labo_combat_dynamique.git','refs/heads/main'],{encoding:'utf8'}).trim().split(/\s+/)[0];
-          if(!combatMain||COMBAT_LAB_SOURCE_V1.sha!==combatMain)throw Error('Combat pin differs from approved main; repin and recertify');
-          if(!/^[0-9a-f]{40}$/.test(manifest.authoredAssetsPin))throw Error('Unpinned visual catalog');
-          console.log('combat='+COMBAT_LAB_SOURCE_V1.sha);
-          console.log('visuals='+manifest.authoredAssetsPin);
+          const pins=JSON.parse(fs.readFileSync('assets/gensrpg/capture-v2/source-pins-v1.json','utf8'));
+          if(pins.legacyCaptureRuntime!==false)throw Error('Historical Capture is forbidden');
+          for(const owner of ['combat','exploration']){
+            const entry=pins[owner];
+            if(entry.ref!=='main'||!/^[0-9a-f]{40}$/.test(entry.sha))throw Error('Invalid Lab main-only source pin');
+            const sha=execFileSync('git',['ls-remote','https://github.com/'+entry.repository+'.git','refs/heads/main'],{encoding:'utf8'}).trim().split(/\\s+/)[0];
+            if(sha!==entry.sha)throw Error(owner+' main moved: approved consumer release must be recertified');
+            console.log(owner+'='+entry.sha);
+          }
           JS
-      - uses: actions/checkout@v4
+      - name: Checkout Combat only from approved main
+        uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
           ref: ${{ steps.pins.outputs.combat }}
@@ -82,73 +60,42 @@ jobs:
             src
             data
             examples/dom-demo
-      - uses: actions/checkout@v4
+      - name: Checkout Exploration only from approved main
+        uses: actions/checkout@v4
         with:
-          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
-          ref: ${{ steps.pins.outputs.visuals }}
-          path: combat-assets
+          repository: slyen4425-cloud/laboratoire_dynamique_exploration-
+          ref: ${{ steps.pins.outputs.exploration }}
+          path: exploration-lab
           sparse-checkout: |
-            data/assets/catalog
-      - name: Refuser Combat main sans le contrat de scène native déjà validé
-        run: |
-          node - <<'JS'
-          const fs = require('node:fs');
-          const scene = fs.readFileSync('combat-lab/src/ui/capture-combat-preview-v1.js','utf8');
-          const combat = fs.readFileSync('combat-lab/src/ui/combat-2v2-test-ui.js','utf8');
-          if (!scene.includes('embeddedBattle') || !combat.includes('embeddedBattle')) {
-            throw new Error('Combat main lacks embeddedBattle native scene ownership; cannot ship GenSrpg without an unapproved gh-pages fallback');
-          }
-          JS
-      - name: Build official static release payload without installing it in the game
-        run: |
-          mkdir -p _site
-          node tools/stage_capture_lab_delivery.mjs combat-lab combat-assets _site
-      - name: Verify packaged bytes, official ESM imports, species limits and no public/PWA changes
+            src
+            assets
+            index.html
+            builder.html
+            world-assembler.html
+            sculpt-lab.html
+      - name: Assemble exact Lab source files and refuse any historical Capture payload
         env:
+          CAPTURE_V2_SITE: ${{ github.workspace }}/_site
           COMBAT_LAB_ROOT: ${{ github.workspace }}/combat-lab
-          COMBAT_ASSETS_ROOT: ${{ github.workspace }}/combat-assets
-          CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
+          EXPLORATION_LAB_ROOT: ${{ github.workspace }}/exploration-lab
         run: |
-          node --test tests/gens_capture_native_lab_scene_v1.test.cjs
-          node --test tests/gens_capture_lab_delivery_v1.test.cjs
-          node --test tests/gens_capture_official_hub_composition_v1.test.cjs
-          node --test tests/gens_capture_official_battle_view_v1.test.cjs
-          node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs
-          node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
-      - name: Install browsers for real official Hub landscape touch tests
+          mkdir -p _site/vendor/exploration-lab
+          cp index.html _site/index.html
+          cp -a exploration-lab/src exploration-lab/assets _site/vendor/exploration-lab/
+          cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html _site/vendor/exploration-lab/
+          node tools/stage_capture_v2_labs.mjs combat-lab exploration-lab _site
+          node --test tests/gens_capture_v2_pages_delivery_v1.test.cjs
+      - name: Install real Chromium for the actual four-mode app, landscape touch
         run: |
-          npm install --prefix /tmp/capture-lab-browser --no-save playwright@1.55.0
-          /tmp/capture-lab-browser/node_modules/.bin/playwright install --with-deps chromium firefox
-      - name: Verify real saved-Hub composition in Chromium and Firefox landscape
+          npm install --no-save --no-package-lock playwright@1.57.0
+          npx playwright install --with-deps chromium
+      - name: Test real GenSrpg root, native Combat and Exploration, without old Capture
         env:
-          NODE_PATH: /tmp/capture-lab-browser/node_modules
-          CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
-          CAPTURE_OFFICIAL_HUB_SCREENSHOT: _site/capture-official-hub-landscape.png
-        run: |
-          node --test tests/gens_capture_official_hub_composition_browser_v1.test.cjs
-          node --test tests/gens_capture_official_battle_view_2v2_browser_v1.test.cjs
-      - name: Verify ORIGINAL World-rendered COMBATTRE, migration consent and native Combat in Chromium and Firefox
-        env:
-          NODE_PATH: /tmp/capture-lab-browser/node_modules
-          CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
-          CAPTURE_NATIVE_LAB_SCREENSHOT: _site/capture-native-lab-landscape.png
-          CAPTURE_NATIVE_LAB_VIDEO_DIR: _site/capture-native-lab-video
-        run: |
-          node --test tests/gens_capture_real_wild_button_browser_v1.test.cjs
-          node --test tests/gens_capture_public_world_2v2_browser_v1.test.cjs
-      - name: Verify actual service worker and immutable official sprite warm/offline in landscape Chromium + Firefox
-        env:
-          NODE_PATH: /tmp/capture-lab-browser/node_modules
-          CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
-        run: node --test tests/gens_capture_pwa_offline_pinned_media_browser_v1.test.cjs
-      - name: Upload version-locked payload (not deployed, no public game entry)
+          CAPTURE_V2_SITE: ${{ github.workspace }}/_site
+        run: node --test tests/gens_capture_v2_root_browser.test.cjs
+      - name: Preserve the exact consumer source manifest as CI evidence (not deployed)
         uses: actions/upload-artifact@v4
         with:
-          name: capture-official-release-payload
-          path: |
-            _site/vendor/combat-lab/
-            _site/assets/gensrpg/capture/runtime-data/
-            _site/capture-official-hub-landscape.png
-            _site/capture-native-lab-landscape.png
-            _site/capture-native-lab-video/
+          name: capture-v2-main-only-source-manifest
+          path: _site/assets/gensrpg/capture-v2/delivery-manifest.json
           retention-days: 14

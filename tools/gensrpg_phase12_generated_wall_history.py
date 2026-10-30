@@ -79,7 +79,11 @@ def project_active_source_for_history(data):
     from pathlib import Path
     root=Path(__file__).resolve().parents[1]
     receipt=json.loads((root/"tests/fixtures/gens_profile_save_upload_exact_edits_20261025.json").read_text())
-    if blob(data) in (receipt["fromBlob"],receipt["toBlob"]):
+    # The only newer accepted input is the exact four-link Lab author index.
+    # The existing Node projector verifies its SHA and reverses those four
+    # changes byte-for-byte before the old Chrome/Phase12 certificates run.
+    reviewed_author_blob="c53d234fca05e49a33650a61776fae1c1985613e"
+    if blob(data) in (receipt["fromBlob"],receipt["toBlob"],reviewed_author_blob):
         data=subprocess.check_output([
             "node",str(root/"tests/helpers/gens_chrome_hero_recursion_source_view_20261024.cjs")
         ],input=data,cwd=root)

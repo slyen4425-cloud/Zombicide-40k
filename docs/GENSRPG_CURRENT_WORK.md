@@ -1,3 +1,11 @@
+# 2026-10-30 — Combat MAIN-ONLY réconcilié sur la PR #219, produit NON GREEN
+- Source Lab officielle `main@248f718ec924106d16999d59e5dc8310f8450180` et CI Lab main [41037930250](https://github.com/slyen4425-cloud/GenSrpg_labo_combat_dynamique/actions/runs/41037930250) GREEN. Cette branche Capture réutilise les garde-fous PR #220 sans merger dans `main` GenSrpg.
+- Manifeste, loader, tests, livraison et Pages utilisent un seul SHA main ; les workflows exigent `refs/heads/main` et une vraie scène `embeddedBattle`, sans pin gh-pages ou moteur de secours. L'ancien SHA `8318220` est retiré des sources actives.
+- Le run [41037488220](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/41037488220) confirme Architecture statique GREEN, navigateur Survie RED pour un module servi en octet-stream. Instrumentation à la source du vrai test (commit `23365b3`) pour identifier l'URL exacte, sans affaiblir les assertions. Attendre CI de la présente mise à jour.
+- Blocages métier conservés : 100 créatures historiques spawnables sans transfert auteur signé dont `crea_son_1`, règle appliquée de difficulté trainer absente. Acceptation livraison doit rester RED et aucun déploiement public du chantier n'est permis.
+
+---
+
 # 2026-10-30 — World dresseur typé raccordé en PR #219, PRODUIT NON GREEN
 - Base main inchangée `0e2605d663aecfbe1a0d12d01935d6817826d51b` ; branche `work/gensrpg-capture-lab-single-authority-2026-10-30`, checkpoint START conservé. Aucun merge ni publication de cette branche.
 - Le World produit désormais des rencontres PNJ avec `trainerId`, difficulté MJ, espèces choisies par le propriétaire de localisation/rareté et capture interdite. Le World seul consomme la rencontre. Le handler original `captureOpenTrainerBattle` appelle l'entrée native du Lab ; l'ancien remplacement global `capture-fix134` et les appels à `captureStartBattleAutomatic` depuis les dresseurs sont retirés. Un seul contrôleur Combat Lab reçoit la transaction typée `trainer` et conserve les PV via le writer Capture existant.

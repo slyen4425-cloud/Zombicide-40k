@@ -95,8 +95,12 @@ jobs:
           node --input-type=module - <<'JS' >> "$GITHUB_OUTPUT"
           import {COMBAT_LAB_SOURCE_V1} from './assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs';
           import fs from 'node:fs';
+          import {execFileSync} from 'node:child_process';
           const manifest=JSON.parse(fs.readFileSync('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json','utf8'));
           if(COMBAT_LAB_SOURCE_V1.sha!==manifest.authoredSourceLabPin)throw Error('Conflicting pinned Combat authority');
+          // Only an approved Combat main HEAD may enter GenSrpg. No gh-pages SHA.
+          const combatMain=execFileSync('git',['ls-remote','https://github.com/slyen4425-cloud/GenSrpg_labo_combat_dynamique.git','refs/heads/main'],{encoding:'utf8'}).trim().split(/\s+/)[0];
+          if(!combatMain||COMBAT_LAB_SOURCE_V1.sha!==combatMain)throw Error('Combat pin differs from approved main; repin and recertify');
           if(!/^[0-9a-f]{40}$/.test(manifest.authoredAssetsPin))throw Error('Unpinned official visuals');
           if(manifest.productionActivated!==false)throw Error('Capture Hub must remain dormant');
           console.log('combat='+COMBAT_LAB_SOURCE_V1.sha);
@@ -114,6 +118,16 @@ jobs:
             data
             examples/dom-demo
 
+      - name: Refuser Combat main sans le contrat de scène native déjà validé
+        run: |
+          node - <<'JS'
+          const fs = require('node:fs');
+          const scene = fs.readFileSync('combat-lab/src/ui/capture-combat-preview-v1.js','utf8');
+          const combat = fs.readFileSync('combat-lab/src/ui/combat-2v2-test-ui.js','utf8');
+          if (!scene.includes('embeddedBattle') || !combat.includes('embeddedBattle')) {
+            throw new Error('Combat main lacks embeddedBattle native scene ownership; cannot ship GenSrpg without an unapproved gh-pages fallback');
+          }
+          JS
       - name: Charger uniquement le catalogue visuel officiel au SHA épinglé
         uses: actions/checkout@v4
         with:

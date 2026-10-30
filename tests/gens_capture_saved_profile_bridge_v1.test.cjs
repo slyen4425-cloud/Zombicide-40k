@@ -7,7 +7,7 @@ const {pathToFileURL} = require('node:url');
 const {execFileSync} = require('node:child_process');
 
 const root = path.resolve(__dirname, '..');
-const LAB_PIN = '8318220b6a9b883aeced1d4bf693f906b0f36d3d';
+const LAB_PIN = '248f718ec924106d16999d59e5dc8310f8450180';
 const labRoot = process.env.COMBAT_LAB_ROOT;
 assert.ok(labRoot, 'The official pinned Combat Lab checkout is mandatory');
 assert.equal(execFileSync('git', ['-C', labRoot, 'rev-parse', 'HEAD'], {encoding:'utf8'}).trim(), LAB_PIN);

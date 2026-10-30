@@ -128,6 +128,11 @@ jobs:
           node --test tests/gens_capture_lab_runtime_browser_v1.test.cjs
           node --test tests/gens_capture_lab_authored_browser_v1.test.cjs
           node --test tests/gens_capture_lab_saved_hub_browser_v1.test.cjs
+      - name: Verify original World trainer button in Chromium and Firefox (no legacy engine)
+        env:
+          NODE_PATH: /tmp/capture-lab-browser/node_modules
+          CAPTURE_LAB_DELIVERY_SITE: _site/capture-lab-preview
+        run: node --test --test-name-pattern="real World trainer button" tests/gens_capture_real_wild_button_browser_v1.test.cjs
       - name: Upload reviewable standalone preview
         uses: actions/upload-artifact@v4
         with:

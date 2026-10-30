@@ -125,9 +125,9 @@ jobs:
           node --test tests/gens_capture_lab_authoring_port_v1.test.cjs
           node --test tests/gens_capture_lab_author_ui_provider_v1.test.cjs
           node --test tests/gens_capture_lab_world_settings_owner_v1.test.cjs
-          node --test tests/gens_capture_lab_single_authority_acceptance_v1.test.cjs
           node --test tests/gens_capture_native_lab_scene_v1.test.cjs
           node --test tests/gens_capture_lab_delivery_v1.test.cjs
+          node --test tests/gens_capture_lab_single_authority_acceptance_v1.test.cjs
           node --test tests/gens_capture_official_hub_composition_v1.test.cjs
           node --test tests/gens_capture_official_battle_view_v1.test.cjs
           node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs

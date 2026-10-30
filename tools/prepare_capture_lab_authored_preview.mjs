@@ -23,7 +23,7 @@ if(commit(visuals)!==ref.authoredAssetsPin||
 }
 const data=relative=>JSON.parse(readFileSync(join(lab,relative),'utf8'));
 const src=relative=>import(pathToFileURL(join(lab,relative)).href);
-const [creature,skill,skillDraft,rules,exporter,adapter,portable,complex,presets]=await Promise.all([
+const [creature,skill,skillDraft,rules,exporter,adapter,portable,complex,skillPresets,creaturePresets]=await Promise.all([
  src('src/contracts/capture-creature-transfer-v1.js'),
  src('src/contracts/capture-skill-transfer-v1.js'),
  src('src/contracts/capture-skill-editor-draft-v1.js'),
@@ -32,7 +32,8 @@ const [creature,skill,skillDraft,rules,exporter,adapter,portable,complex,presets
  src('src/adapters/input/capture/capture-export-adapter-stack-v1.js'),
  src('src/catalogs/capture-portable-native-skill-catalog-v1.js'),
  src('src/catalogs/capture-complex-native-skill-catalog-v1.js'),
- src('src/catalogs/capture-showcase-skill-presets-v1.js')
+ src('src/catalogs/capture-showcase-skill-presets-v1.js'),
+ src('src/catalogs/capture-showcase-creature-presets-v1.js')
 ]);
 const makeSkill=skillDraft.normalizeCaptureSkillEditorDraftV1;
 const byId=new Map();
@@ -45,7 +46,7 @@ for(const row of data('data/combat/skills/catalog.v1.json').entries){
 for(const item of [...portable.capturePortableNativeSkillDraftsV1(),...complex.captureComplexNativeSkillDraftsV1()]){
  byId.set(item.id,item);
 }
-for(const file of presets.CAPTURE_SHOWCASE_SKILL_PRESET_FILES_V1){
+for(const file of skillPresets.CAPTURE_SHOWCASE_SKILL_PRESET_FILES_V1){
  const authored=skill.normalizeCaptureSkillTransferV1(data(file));
  byId.set(authored.draft.id,authored.draft);
 }
@@ -53,6 +54,24 @@ const settings=JSON.parse(readFileSync(join(project,'tests/fixtures/capture-lab-
 if(settings.schema!=='gensrpg-capture-authored-preview-settings-v1'||settings.version!==1){
  throw new TypeError('Unsupported author preview settings schema');
 }
+// The only creature author registry is published by the exact pinned Combat
+// main SHA. The GenSrpg preview fixture defines a demonstration encounter,
+// never which species are shipped when Combat main is promoted.
+const officialFiles=creaturePresets.CAPTURE_SHOWCASE_CREATURE_PRESET_FILES_V1;
+if(!Array.isArray(officialFiles)||officialFiles.length<2||
+   new Set(officialFiles).size!==officialFiles.length||
+   officialFiles.some(file=>typeof file!=='string'||
+     !/^data\\/capture\\/showcase\\/[^/]+\\.capture-creature-transfer-v1\\.json$/.test(file))){
+ throw new Error('Official Combat Lab creature author manifest is missing, duplicate or unsafe');
+}
+const officialCreatureTransfers=officialFiles.map(file=>data(file));
+const officialIds=officialCreatureTransfers.map(transfer=>transfer?.draft?.id);
+if(officialIds.some(id=>typeof id!=='string'||!id)||
+   new Set(officialIds).size!==officialIds.length){
+ throw new Error('Official Lab creature IDs are incomplete or duplicated');
+}
+officialCreatureTransfers.sort((a,b)=>a.draft.id<b.draft.id?-1:a.draft.id>b.draft.id?1:0);
+
 const producer=createCaptureLabAuthoredSourceV1({
  normalizeCreatureTransfer:creature.normalizeCaptureCreatureTransferV1,
  normalizeSkillDraft:makeSkill,
@@ -61,7 +80,7 @@ const producer=createCaptureLabAuthoredSourceV1({
  adaptCombatExport:adapter.adaptCaptureCombatExportStackV1,
  statRegistry:data('data/capture/monster-capture-stat-registry.v1.json'),
  configuredSkillDrafts:[...byId.values()],
- creatureTransfers:settings.authoredCreatureFiles.map(data)
+ creatureTransfers:officialCreatureTransfers
 });
 const author=producer.buildEncounter(settings.battle);
 const visualCatalog=JSON.parse(readFileSync(join(visuals,'data/assets/catalog/global-visual-assets.v1.json'),'utf8'));
@@ -96,7 +115,7 @@ writeFileSync(join(folder,'author-inputs.json'),JSON.stringify({
  sourceSha:COMBAT_LAB_SOURCE_V1.sha,
  statRegistry:data('data/capture/monster-capture-stat-registry.v1.json'),
  configuredSkillDrafts:[...byId.values()],
- creatureTransfers:settings.authoredCreatureFiles.map(data),
+ creatureTransfers:officialCreatureTransfers,
  battleSettings:{
   arenaId:settings.battle.arenaId,
   skillSpeedMultiplier:settings.battle.skillSpeedMultiplier,

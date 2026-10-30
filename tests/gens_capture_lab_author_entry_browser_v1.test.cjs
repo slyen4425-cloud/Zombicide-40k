@@ -4,7 +4,10 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs/promises');
-const http=require('node:http');
+const https=require('node:https');
+const {mkdtempSync,readFileSync,rmSync}=require('node:fs');
+const {tmpdir}=require('node:os');
+const {execFileSync}=require('node:child_process');
 const path=require('node:path');
 const {chromium,firefox}=require('playwright');
 
@@ -24,7 +27,14 @@ window.getActiveGameProfile=()=>({mode:'capture'});</script>
 
 async function withBrowser(engine,run){
  const requests=[],missing=[];
- const server=http.createServer(async(req,res)=>{
+ // Production enforces HTTPS. Serve an isolated locally signed HTTPS origin,
+ // not an HTTP test exception that would weaken the real author contract.
+ const sslDir=mkdtempSync(path.join(tmpdir(),'capture-lab-author-https-'));
+ const keyFile=path.join(sslDir,'key.pem'),certFile=path.join(sslDir,'cert.pem');
+ execFileSync('openssl',['req','-x509','-newkey','rsa:2048','-nodes',
+  '-keyout',keyFile,'-out',certFile,'-days','1','-subj','/CN=127.0.0.1'],
+  {stdio:'ignore'});
+ const server=https.createServer({key:readFileSync(keyFile),cert:readFileSync(certFile)},async(req,res)=>{
   const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
   if(pathname===prefix+'ci-author-entry'){
    res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'}).end(entry);return;
@@ -47,19 +57,20 @@ async function withBrowser(engine,run){
  });
  await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
  let browser,context;
- const origin='http://127.0.0.1:'+server.address().port;
+ const origin='https://127.0.0.1:'+server.address().port;
  try{
   browser=await engine.launch({headless:true});
-  context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true});
+  context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true,ignoreHTTPSErrors:true});
   const page=await context.newPage();
   page.setDefaultTimeout(25000);
   page.on('request',request=>requests.push(request.url()));
   await page.goto(origin+prefix+'ci-author-entry');
-  await page.waitForFunction(()=>typeof GensCaptureLabAuthorUiV1?.open==='function');
+  await page.waitForFunction(()=>typeof globalThis.GensCaptureLabAuthorUiV1?.open==='function');
   await run({page,origin,requests,missing});
  }finally{
   await context?.close();await browser?.close();
   server.closeAllConnections();await new Promise(ok=>server.close(ok));
+  rmSync(sslDir,{recursive:true,force:true});
  }
 }
 

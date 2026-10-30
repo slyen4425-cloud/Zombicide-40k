@@ -30,10 +30,15 @@ test('provided source upload reverses before Chrome and every historical byte gu
 });
 
 test('subprocess historical view uses the same source projector',()=>{
-  // The historical projector is pinned to the preserved original byte stream,
-  // not the new live HTML (which is intentionally not a legacy snapshot).
-  const projected=history(active);
-  assert.equal(hash(projected),'260f00aa179c939f35188ca854f9875971ce8a7b');
+  // Run the original subprocess projector against the strictly recovered,
+  // byte-checked historical HTML without mutating the live product index.
+  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'gens-index-subprocess-'));
+  try{
+    fs.writeFileSync(path.join(temp,'index.html'),active);
+    const projected=execFileSync(process.execPath,['--require',path.join(root,'tests/helpers/gens_chrome_historical_subprocess_view_20261024.cjs'),
+      '-e',"process.stdout.write(require('node:fs').readFileSync('index.html'))"],{cwd:temp,maxBuffer:12*1024*1024});
+    assert.equal(hash(projected),'260f00aa179c939f35188ca854f9875971ce8a7b');
+  }finally{fs.rmSync(temp,{recursive:true,force:true});}
 });
 
 test('unknown or altered runtime bytes are never projected to an approved historical blob',()=>{

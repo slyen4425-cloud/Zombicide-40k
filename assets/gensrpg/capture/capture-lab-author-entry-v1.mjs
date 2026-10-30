@@ -59,7 +59,7 @@ function open(kind){
  const port=owners();
  if(port.status().installed)throw new Error('Une session Labo est déjà active; termine-la avant de changer de domaine');
  const provider=createCaptureLabAuthorUiProviderV1({
-  labBaseUrl:new URL('/Zombicide-40k/vendor/combat-lab/',root.location.origin).href,
+  labBaseUrl:new URL('vendor/combat-lab/',new URL('./',root.document?.baseURI||root.location.href)).href,
   hostOrigin:root.location.origin,mountLabPage:makeHost
  });
  let handle;

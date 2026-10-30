@@ -118,6 +118,16 @@ jobs:
             data
             examples/dom-demo
 
+      - name: Refuser Combat main sans le contrat de scène native déjà validé
+        run: |
+          node - <<'JS'
+          const fs = require('node:fs');
+          const scene = fs.readFileSync('combat-lab/src/ui/capture-combat-preview-v1.js','utf8');
+          const combat = fs.readFileSync('combat-lab/src/ui/combat-2v2-test-ui.js','utf8');
+          if (!scene.includes('embeddedBattle') || !combat.includes('embeddedBattle')) {
+            throw new Error('Combat main lacks embeddedBattle native scene ownership; cannot ship GenSrpg without an unapproved gh-pages fallback');
+          }
+          JS
       - name: Charger uniquement le catalogue visuel officiel au SHA épinglé
         uses: actions/checkout@v4
         with:

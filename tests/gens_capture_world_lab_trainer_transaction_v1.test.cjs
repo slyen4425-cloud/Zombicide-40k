@@ -146,3 +146,93 @@ test('one existing Combat Lab command dispatches trainer to typed ticket and com
  assert.equal(command.status().phase,'idle');assert.equal(installed,false);
  assert.equal(command.dispose(),true);
 });
+
+
+test('trainer author policy and selected World level reach the native ticket without a consumer multiplier',async()=>{
+ const {createCaptureWorldLabTrainerTransactionV1}=await import(moduleUrl);
+ const f=fixture(),originalSettings=f.options.readBattleSettings;
+ const policy=Object.freeze({schema:'capture-trainer-difficulty-policy-v1',version:1,
+  levels:[1,2,3,4].map(level=>({level,hpMultiplier:level,outgoingDamagePctBonus:level-1}))});
+ let authoredInput;
+ f.options.readBattleSettings=()=>({...originalSettings(),trainerDifficultyPolicy:policy});
+ f.options.authoredSource={buildEncounter:input=>{
+  authoredInput=input;
+  return {exported:{schema:'signed-lab-export'},nativeCombatSource:{...source,trainerDifficultyPolicy:policy}};
+ }};
+ const tx=createCaptureWorldLabTrainerTransactionV1(f.options);
+ const ticket=tx.prepareTrainer();
+ assert.equal(authoredInput.trainerDifficultyPolicy,policy,
+  'the original signed author policy must be passed intact');
+ const resolved=ticket.resolveBattle({encounterId:ticket.encounterId,snapshot:ticket.snapshot});
+ assert.equal(resolved.trainerDifficulty,3,'the World selects only the authored difficulty level');
+ assert.equal(f.saves(),0,'no HP persistence before the Lab outcome');
+ assert.equal(f.world().last.trainerDifficulty,3);
+});
+
+test('author exports an optional trainer policy unchanged, never invents it for wild battles',async()=>{
+ const {createCaptureLabAuthoredSourceV1}=await import(
+  '../assets/gensrpg/capture/combat-lab-authored-source-v1.mjs');
+ const policy=Object.freeze({schema:'capture-trainer-difficulty-policy-v1',version:1,
+  levels:[1,2,3,4].map(level=>({level,hpMultiplier:level,outgoingDamagePctBonus:level-1}))});
+ const calls=[];
+ const author=createCaptureLabAuthoredSourceV1({
+  normalizeCreatureTransfer:value=>value,normalizeSkillDraft:value=>value,
+  overlayCombatRules:({creatureDraft})=>creatureDraft,
+  exportEditorDrafts:input=>{
+   calls.push(input);
+   return {battle:input.trainerDifficultyPolicy===undefined?{}:
+    {trainerDifficultyPolicy:input.trainerDifficultyPolicy}};
+  },
+  adaptCombatExport:exported=>({
+   trainerDifficultyPolicy:exported.battle.trainerDifficultyPolicy,
+   battleFormat:{actors:[
+    {actorId:'player',creatureId:'species-p'},
+    {actorId:'opponent',creatureId:'species-e'}
+   ],localActorId:'player',teamOf:id=>id==='player'?'capture-team':'wild-team'},
+   roster:{teams:{
+    player:{activeMemberId:'member-p',members:[{creatureId:'species-p'}]},
+    opponent:{activeMemberId:'member-e',members:[{creatureId:'species-e'}]}
+   }},
+   skillIdsByActor:{player:['skill-p'],opponent:['skill-e']},
+   fighterConfigs:{'species-p':{maxHp:30},'species-e':{maxHp:40}}
+  }),
+  statRegistry:{stats:[]},
+  configuredSkillDrafts:[{id:'skill-p'},{id:'skill-e'}],
+  creatureTransfers:[
+   {draft:{id:'species-p',displayName:'Player'},loadout:{slots:[{skillId:'skill-p'}]},statValues:{}},
+   {draft:{id:'species-e',displayName:'Enemy'},loadout:{slots:[{skillId:'skill-e'}]},statValues:{}}
+  ]
+ });
+ const base={encounterId:'trainer-policy-test',arenaId:'forest',skillSpeedMultiplier:0.5,
+  combatRules:{schema:'signed-combat-rules'},
+  player:{instanceId:'member-p',creatureId:'species-p'},
+  opponent:{instanceId:'member-e',creatureId:'species-e'}};
+ const wild=author.buildEncounter(base);
+ assert.equal(Object.hasOwn(calls[0],'trainerDifficultyPolicy'),false);
+ assert.equal(Object.hasOwn(wild.nativeCombatSource,'trainerDifficultyPolicy'),true);
+ assert.equal(wild.nativeCombatSource.trainerDifficultyPolicy,undefined);
+ const trainer=author.buildEncounter({...base,trainerDifficultyPolicy:policy});
+ assert.equal(calls[1].trainerDifficultyPolicy,policy);
+ assert.equal(trainer.nativeCombatSource.trainerDifficultyPolicy,policy);
+});
+
+test('native provider refuses a trainer level without a signed Lab policy',async()=>{
+ const {createCaptureNativeLabProviderV1}=await import(
+  '../assets/gensrpg/capture/capture-native-lab-provider-v1.mjs');
+ const native={...source,
+  fighters:[{id:'player',maxHp:150},{id:'opponent',maxHp:120}],
+  roster:{teams:{
+   player:{activeMemberId:'wolf-1',members:[{creatureId:'crea-loup'}]},
+   opponent:{activeMemberId:'trainer:trainer-7',members:[{creatureId:'crea_voltik'}]}
+  }}};
+ const snapshot={sides:[
+  {active:['wolf-1'],creatures:[{instanceId:'wolf-1',creatureId:'crea-loup',hp:113,maxHp:150}]},
+  {active:['trainer:trainer-7'],creatures:[{instanceId:'trainer:trainer-7',creatureId:'crea_voltik',hp:120,maxHp:120}]}
+ ]};
+ const provider=createCaptureNativeLabProviderV1({
+  resolveBattle:()=>({actorIds:['player','opponent'],nativeCombatSource:native,
+   exported:{schema:'signed-lab-export'},trainerDifficulty:3}),
+  mountBattle:()=>{throw Error('must never mount an unsigned trainer');}
+ });
+ assert.throws(()=>provider.createBattle({snapshot}),/trainer.*policy|policy.*trainer/i);
+});

@@ -125,7 +125,7 @@ test('official static payload + exact Capture owners start one real native fight
  assert.equal(start.ready,true);
  assert.equal(s.session().state().fighters.player.maxHp,150);
  assert.equal(s.session().state().fighters.opponent.maxHp,120);
- assert.equal(s.resources().source.combatSha,'8318220b6a9b883aeced1d4bf693f906b0f36d3d');
+ assert.equal(s.resources().source.combatSha,'248f718ec924106d16999d59e5dc8310f8450180');
  assert.equal(s.combatPort.status().battleActive,true);
  assert.equal(s.world().last.encounterId,start.encounterId);
  assert.equal(s.writes().world,s.baseline+1);

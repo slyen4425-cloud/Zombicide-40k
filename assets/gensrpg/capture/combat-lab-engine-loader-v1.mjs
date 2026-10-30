@@ -1,8 +1,8 @@
 // Transported unchanged at build time. Never resolve a moving branch in the browser.
 export const COMBAT_LAB_SOURCE_V1 = Object.freeze({
   repository: 'slyen4425-cloud/GenSrpg_labo_combat_dynamique',
-  sha: '8318220b6a9b883aeced1d4bf693f906b0f36d3d',
-  ciRun: 40950339573
+  sha: '248f718ec924106d16999d59e5dc8310f8450180',
+  ciRun: 41037930250
 });
 
 export async function loadCombatLabEngineV1(baseUrl) {

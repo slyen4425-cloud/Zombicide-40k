@@ -258,7 +258,12 @@ test('all thirteen media-complete pinned Lab author creature transfers export ge
   assert.ok(exported,opponent+' official author missing');
   assert.ok(source.fighterConfigs[opponent]?.maxHp>0,opponent+' native HP missing');
   assert.equal(source.battleFormat.actors.find(x=>x.actorId==='opponent').creatureId,opponent);
-  assert.equal(source.skillIdsByActor.opponent.length,5,opponent+' five authored abilities required');
+  const authorLoadout=transfers.find(x=>x.draft.id===opponent)?.loadout?.slots
+   .map(slot=>slot.skillId).filter(Boolean);
+  assert.ok(Array.isArray(authorLoadout)&&authorLoadout.length>0&&authorLoadout.length<=5,
+   opponent+' must have one to five authored active abilities');
+  assert.deepEqual(source.skillIdsByActor.opponent,authorLoadout,
+   opponent+' native skills must exactly equal the official authored loadout, never padded or guessed');
   assert.ok(source.skillIdsByActor.opponent.every(id=>source.skills[id]),opponent+' official skills not imported');
   assert.ok(exported.presentationId&&built.exported.presentation.creatures[exported.presentationId]?.visual?.front?.assetId,
    opponent+' official face sprite missing');

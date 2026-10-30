@@ -298,6 +298,30 @@ jobs:
           index.write_text(html, encoding="utf-8")
           PY
 
+      - name: Charger Exploration depuis son main officiellement epingle
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/laboratoire_dynamique_exploration-
+          ref: 474aa42674c9bd976a8a5a8af684d65cbe848b61
+          path: exploration-lab
+          sparse-checkout: |
+            src
+            assets
+            index.html
+            builder.html
+            world-assembler.html
+            sculpt-lab.html
+            manifest.webmanifest
+
+      - name: Assembler le World 2.5D original sans moteur copie
+        run: |
+          test "$(git -C exploration-lab rev-parse HEAD)" = "474aa42674c9bd976a8a5a8af684d65cbe848b61"
+          test "$(git ls-remote https://github.com/slyen4425-cloud/laboratoire_dynamique_exploration-.git refs/heads/main | cut -f1)" = "474aa42674c9bd976a8a5a8af684d65cbe848b61"
+          mkdir -p _site/vendor/exploration-lab
+          cp -a exploration-lab/src exploration-lab/assets _site/vendor/exploration-lab/
+          cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html exploration-lab/sculpt-lab.html exploration-lab/manifest.webmanifest _site/vendor/exploration-lab/
+          cp assets/gensrpg/capture-v2/source-pins-v1.json _site/vendor/exploration-lab/consumer-pins.json
+
       - name: Construire la livraison Capture officielle passive depuis le publisher unique
         run: node tools/stage_capture_lab_delivery.mjs combat-lab combat-assets _site
 

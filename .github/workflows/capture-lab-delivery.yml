@@ -9,6 +9,7 @@ on:
       - 'work/gensrpg-capture-real-wild-button-*'
       - 'work/gensrpg-capture-world-paired-encounters-playable-*'
       - 'work/gensrpg-capture-offline-verified-media-cache-*'
+      - 'work/gensrpg-capture-lab-single-authority-*'
   pull_request:
     paths:
       - 'tools/stage_capture_lab_delivery.mjs'

@@ -72,3 +72,15 @@ test('World emits a typed trainer NPC from its original location and consumes on
  ctx.captureConsumeTrainerEncounter('victory');
  assert.equal(ctx.captureWorldState().last.type,'resolved');
 });
+
+test('trainer World button enters the same native Lab scene and has no global override',()=>{
+ const owner=read('assets/gensrpg/capture/legacy-monolith-functions-v1.js');
+ const a=owner.indexOf('function captureOpenTrainerBattle(){'),b=owner.indexOf('function captureLaunchTrainerBattle(',a);
+ assert.match(owner.slice(a,b),/startCaptureOfficialTrainerEntryV1/);
+ const entry=read('assets/gensrpg/capture/capture-official-wild-entry-v1.mjs');
+ assert.match(entry,/export async function startCaptureOfficialTrainerEntryV1/);
+ assert.match(entry,/controller\.startTrainerBattle\(\)/);
+ const composition=read('assets/gensrpg/capture/capture-official-hub-composition-v1.mjs');
+ assert.match(composition,/createCaptureWorldLabTrainerTransactionV1/);
+ assert.match(composition,/trainerDifficultyLevels/);
+});

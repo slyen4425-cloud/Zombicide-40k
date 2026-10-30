@@ -76,26 +76,8 @@ const rp134=window.renderParticipantSelector;
 window.renderParticipantSelector=function(){const r=rp134.apply(this,arguments);try{capPregameButton134()}catch(e){}return r};
 setTimeout(capPregameButton134,120);
 
-/* ---------- dresseur hostile : aucun choix de difficulté côté joueur ---------- */
-window.captureOpenTrainerBattle=function(){
-  const playerRoster=captureTeamEntityRoster(),pool=loadSharedEntities().filter(x=>x.category==="creature");
-  if(!playerRoster.length){alert("Aucune créature disponible dans ton équipe.");return}
-  if(!playerRoster.some(c=>Number(c._instance?.hp??c.hp??0)>0)){alert("Toutes tes créatures sont K.O.");return}
-  if(!pool.length){alert("Aucune créature disponible pour créer le dresseur adverse.");return}
-  const diff=captureTrainerDifficulty134(),delta=[-3,0,3,6][diff-1];
-  const avg=Math.max(1,Math.round(playerRoster.reduce((n,c)=>n+(Number(c.level)||1),0)/playerRoster.length));
-  const auto=captureAutoTrainerRules(playerRoster),enemy=[];
-  for(let i=0;i<auto.teamSize;i++){
-    const base=pool[Math.floor(Math.random()*pool.length)],lvl=Math.max(1,avg+delta+Math.floor(Math.random()*3)-1);
-    enemy.push({...base,level:lvl,hp:Math.max(1,Number(base.hp)||10)+Math.max(0,lvl-(Number(base.level)||1))*2});
-  }
-  const names=["Dresseur novice","Dresseur rival","Dresseur confirmé","Dresseur expert"];
-  captureStartBattleAutomatic(
-    {name:CHARS[captureActiveHeroId()]?.name||"Dresseur",roster:playerRoster,controller:"human"},
-    {name:names[diff-1],roster:enemy,controller:"auto"},
-    {type:"trainer",captureAllowed:false,activeSlots:auto.activeSlots,teamSize:auto.teamSize,minBattleTeam:1,maxBattleTeam:6,recallCost:"turn",controller:"auto"}
-  );
-};
+/* Dresseurs : le World Capture possède le seul handler de combat.
+   La difficulté MJ ci-dessus reste une donnée World, sans surcharge globale. */
 
 /* ---------- fiche créature : vrai overlay au-dessus de tout ---------- */
 window.captureOpenCreatureOverlay134=function(instanceId){

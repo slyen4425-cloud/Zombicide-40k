@@ -3,7 +3,7 @@
 // owns the Lab provider; the pinned Lab Core alone owns combat rules/AI/time.
 // No global handler replacement, storage, UI DOM scanning or alternate engine.
 export function createCaptureLabHubBattleCommandV1({
- transaction, combatPort, engine, createProvider, clock, mountBattle,
+ transaction, trainerTransaction=null, combatPort, engine, createProvider, clock, mountBattle,
  onReturn = () => {}, onError = () => {}
 }) {
  if (!transaction || typeof transaction.prepareWild !== 'function' ||
@@ -21,6 +21,8 @@ export function createCaptureLabHubBattleCommandV1({
  if (!engine || typeof engine.createRosterSession !== 'function') {
   throw new TypeError('Pinned official Combat Lab engine required');
  }
+ if (trainerTransaction && (typeof trainerTransaction.prepareTrainer!=='function'||
+     typeof trainerTransaction.status!=='function')) throw new TypeError('Typed trainer transaction required');
  let current = null, disposed = false, lastError = null;
 
  function notify(which,event) {
@@ -67,7 +69,7 @@ export function createCaptureLabHubBattleCommandV1({
    applied=entry.ticket.applyResult(result);
   } catch(error) {
    lastError=error;
-   const ticketStillPending=transaction.status().pending;
+   const ticketStillPending=entry.transaction.status().pending;
    entry.phase=ticketStillPending?'commit-pending':'closed';
    try {release(entry);} catch(releaseError) {lastError=releaseError;}
    if (!ticketStillPending) current=null;
@@ -89,12 +91,14 @@ export function createCaptureLabHubBattleCommandV1({
     {encounterId:entry.encounterId,cancelled:true,applied:false});
   return applied;
  }
- function startWildBattle(creatureId) {
+ function startBattle(kind,creatureId) {
+  const isTrainer=kind==='trainer',owner=isTrainer?trainerTransaction:transaction;
+  if(!owner)throw new Error('Official Capture trainer transaction is not connected');
   if (disposed) throw new Error('Capture Hub command disposed');
   if (current) throw new Error('Capture Hub encounter already active or commit pending');
   if (combatPort.status().installed) throw new Error('Another Capture Combat provider is already installed');
-  const ticket=transaction.prepareWild(creatureId);
-  const entry={encounterId:ticket.encounterId,ticket,provider:null,phase:'starting',rawResult:null};
+  const ticket=isTrainer?owner.prepareTrainer():owner.prepareWild(creatureId);
+  const entry={encounterId:ticket.encounterId,ticket,transaction:owner,provider:null,phase:'starting',rawResult:null};
   try {
    entry.provider=createProvider({
     engine,clock,resolveBattle:context=>ticket.resolveBattle(context),mountBattle
@@ -102,7 +106,7 @@ export function createCaptureLabHubBattleCommandV1({
    combatPort.install(entry.provider);
    const handle=combatPort.startEncounter({
     encounterId:ticket.encounterId,snapshot:ticket.snapshot,
-    mode:'capture-world-wild',persist:true
+    mode:isTrainer?'capture-world-trainer':'capture-world-wild',persist:true
    });
    if (!handle || typeof handle.completion?.then !== 'function') {
     throw new TypeError('Official Capture Combat provider returned no completion');
@@ -123,6 +127,8 @@ export function createCaptureLabHubBattleCommandV1({
    throw error;
   }
  }
+ function startWildBattle(creatureId){return startBattle('wild',creatureId);}
+ function startTrainerBattle(){return startBattle('trainer');}
  function cancel() {
   const entry=current;
   if (!entry || entry.phase!=='running') return false;
@@ -158,5 +164,5 @@ export function createCaptureLabHubBattleCommandV1({
    lastError:lastError?.message??null
   });
  }
- return Object.freeze({startWildBattle,cancel,retryCommit,dispose,status});
+ return Object.freeze({startWildBattle,startTrainerBattle,cancel,retryCommit,dispose,status});
 }

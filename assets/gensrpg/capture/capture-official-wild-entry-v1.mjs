@@ -28,6 +28,9 @@ function worldOwners() {
   readWorldState:()=>root.captureWorldState(),
   saveWorldState:next=>root.saveCaptureWorldState(next),
   consumeWildEncounter:reason=>root.captureConsumeWildEncounter(reason),
+  ...(typeof root.captureConsumeTrainerEncounter==='function'?{
+   consumeTrainerEncounter:reason=>root.captureConsumeTrainerEncounter(reason)
+  }:{}),
   worldStorageKey:()=>root.captureWorldKey(),
   nextEncounterId:()=>{
    if(typeof root.crypto?.randomUUID!=='function'){
@@ -135,9 +138,15 @@ function visibleFailure(entry,error,{commitPending=false}={}){
 // The same original button can be tapped repeatedly while ESM and author
 // data load. One owner-level active token serializes every asynchronous step.
 export async function startCaptureOfficialWildEntryV1(creatureId){
+ return startCaptureOfficialEntryV1({kind:'wild',creatureId});
+}
+export async function startCaptureOfficialTrainerEntryV1(){
+ return startCaptureOfficialEntryV1({kind:'trainer'});
+}
+async function startCaptureOfficialEntryV1({kind,creatureId}){
  if(active)throw new Error('Un combat officiel Capture est déjà en cours.');
- const requested=text(creatureId);
- if(!requested)throw new TypeError('Créature sauvage manquante');
+ const isTrainer=kind==='trainer',requested=text(creatureId);
+ if(!isTrainer&&!requested)throw new TypeError('Créature sauvage manquante');
  const entry={closed:false,controller:null,session:null,ui:createDialog(),onPageHide:null,onBeforeUnload:null};
  active=entry;
  entry.ui.back.addEventListener('click',()=>{
@@ -173,7 +182,16 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
   }
   const initialHero=owners.activeHeroId(),initialWorldKey=owners.worldStorageKey();
   const initialWorld=JSON.stringify(world),initialProfile=JSON.stringify(owners.loadHeroState(initialHero));
-  if(world?.last?.type!=='wild'||text(world.last.creatureId)!==requested){
+  if(isTrainer){
+   const npc=world?.last;
+   if(!['friendly_trainer','hostile_trainer'].includes(npc?.type)||
+      !text(npc.trainerId)||!text(npc.trainerName)||
+      !Number.isInteger(npc.trainerDifficulty)||npc.trainerDifficulty<1||npc.trainerDifficulty>4||
+      npc.captureAllowed!==false||!Array.isArray(npc.creatureIds)||
+      ![1,2].includes(npc.creatureIds.length)){
+     throw new Error('Rencontre de dresseur World non signée ou incomplète.');
+   }
+  }else if(world?.last?.type!=='wild'||text(world.last.creatureId)!==requested){
    throw new Error('Cette rencontre sauvage n’est plus active dans le monde.');
   }
   // The original World owner is the ONLY source of an actual two-wild event.
@@ -184,15 +202,15 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
   if(declared!==undefined&&(!Array.isArray(declared)||
      ![1,2].includes(declared.length)||
      declared.some(id=>!text(id)||text(id)!==id)||
-     declared[0]!==requested)){
+     (!isTrainer&&declared[0]!==requested))){
    throw new TypeError('Rencontre sauvage du World invalide : créatures déclarées incompatibles.');
   }
-  const wildIds=declared===undefined?[requested]:[...declared];
-  const activeCount=wildIds.length;
+  const opponentIds=isTrainer?[...declared]:(declared===undefined?[requested]:[...declared]);
+  const activeCount=opponentIds.length;
   const hero=owners.loadHeroState(owners.activeHeroId());
   if(!Array.isArray(hero?.creatureTeam)||
      hero.creatureTeam.length!==activeCount||
-     (activeCount===1&&(hero?.creatureReserve?.length??0)!==0)){
+     (!isTrainer&&activeCount===1&&(hero?.creatureReserve?.length??0)!==0)){
    throw new Error('Le groupe sauvegardé ne correspond pas aux créatures actives de cette rencontre officielle'+
     (activeCount===1?' (sans réserve).':'.'));
   }
@@ -226,7 +244,7 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
      JSON.stringify(owners.loadHeroState(initialHero))!==initialProfile){
    throw new Error('Le profil ou la rencontre sauvage a changé pendant le chargement du Labo.');
   }
-  for(const speciesId of wildIds){
+  for(const speciesId of opponentIds){
    if(!controller.resources.publishedSpecies.includes(speciesId)){
     throw new Error('Cette espèce ne possède pas encore de transfert officiel : '+speciesId);
    }
@@ -236,7 +254,7 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
   // A paired World encounter therefore requires two already-authored compatible
   // members; the canonical saved-profile bridge validates both BEFORE writing
   // any World identity. Future 2v2 migration must be separately versioned.
-  if(activeCount===1){
+  if(!isTrainer&&activeCount===1){
    const migration=createCaptureSavedProfileLabMigrationV1({
     activeHeroId:owners.activeHeroId,
     loadHeroState:owners.loadHeroState,saveHeroState:owners.saveHeroState,
@@ -261,13 +279,16 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
     }
    }
   }
+  if(isTrainer&&!owners.loadHeroState(owners.activeHeroId())?.captureLabProfileMigrationV1){
+   throw new Error('Migration du profil vers le Labo requise avant le combat de dresseur.');
+  }
   if(active!==entry||entry.closed)return false;
   if(typeof globalThis.captureCloseModal==='function'){
    globalThis.captureCloseModal('captureEncounterModal');
   }
-  entry.ui.status.textContent='Combat officiel du Labo en cours.';
+  entry.ui.status.textContent=isTrainer?'Combat de dresseur du Labo en cours.':'Combat officiel du Labo en cours.';
   entry.ui.status.dataset.phase='running';
-  const result=controller.startWildBattle(requested);
+  const result=isTrainer?controller.startTrainerBattle():controller.startWildBattle(requested);
   entry.session=result?.session??null;
   entry.ui.back.textContent='Fuir';
   return !!result?.ready;

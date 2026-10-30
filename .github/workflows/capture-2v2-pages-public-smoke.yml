@@ -41,6 +41,9 @@ jobs:
             'assets/gensrpg/capture/runtime-data/author-inputs.json' \
             'assets/gensrpg/capture/runtime-data/global-visual-assets.json' \
             'vendor/combat-lab/src/core/combat/combat-session.js' \
+            'vendor/combat-lab/src/contracts/projectile-power-v1.js' \
+            'vendor/combat-lab/examples/dom-demo/bestiary.html' \
+            'vendor/combat-lab/examples/dom-demo/bestiary.js' \
             'vendor/combat-lab/examples/dom-demo/demo-assets.js' \
             'vendor/combat-lab/examples/dom-demo/capture-editor-v2.html' \
             'vendor/combat-lab/examples/dom-demo/capture-editor-v2.css'
@@ -51,6 +54,16 @@ jobs:
             test -s "$dir/resource"
             echo "HTTP OK: $file"
           done
+          # Reproduce Android's dynamic ESM URL before declaring a public Pages release healthy.
+          curl --fail --location --silent --show-error \
+            --output "$dir/projectile-power.js" \
+            "$root/vendor/combat-lab/src/contracts/projectile-power-v1.js"
+          grep -Fq 'normalizeProjectilePowerV1' "$dir/projectile-power.js"
+          # GitHub Pages may return HTML: refuse it as an executable JS module.
+          if grep -Eiq '<!doctype html|<html' "$dir/projectile-power.js"; then
+            echo 'ERROR: official projectile-power module returns HTML instead of ESM' >&2
+            exit 1
+          fi
           curl --fail --location --silent --show-error --output "$dir/entry.mjs" \
             "$root/assets/gensrpg/capture/capture-official-wild-entry-v1.mjs"
           grep -Fq 'createCaptureNativeLabSceneV1' "$dir/entry.mjs"

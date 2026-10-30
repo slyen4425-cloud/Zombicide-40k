@@ -16,7 +16,7 @@ permissions:
 jobs:
   public-pages-http:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
       - name: Confirm live GitHub Pages route, same-origin official runtime, and isolated demo

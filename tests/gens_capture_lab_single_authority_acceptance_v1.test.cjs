@@ -42,8 +42,14 @@ test('official Combat Lab provider owns the creature editor contract, not an uni
   'The real Lab editor is not connected; do not hide the old Capture editor instead');
 });
 
-test('Capture combat rules must no longer be authored by the historical GenSrpg RPG editor',()=>{
+test('combat RULES must be authored in Lab, but Capture World may retain economy/healing and team options',()=>{
  const editor=read('assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js');
- assert.doesNotMatch(editor,/p\.rpgUniverse\.captureCombat\s*=\s*\{/,
-  'Old RPG universe editor is still an independent writer of Capture combat rules; transfer authoring to Lab source');
+ const begin=editor.indexOf('p.rpgUniverse.captureCombat={');
+ const stop=editor.indexOf('p.rpgUniverse.trainerCombat=',begin);
+ assert.ok(begin>=0 && stop>begin,'Inspect actual RPG editor write authority');
+ const writer=editor.slice(begin,stop);
+ // Do not outlaw all Capture world configuration: healing, trainer rewards
+ // and saved-profile slots have a separate owner from combat rules.
+ assert.doesNotMatch(writer,/\b(?:recallCost|autoReplaceKo|itemsAllowed|allowBattleOverride|defendAllowed|initiativeMode|victoryMode|itemSlots|itemsPerTurn)\s*:/,
+  'Legacy RPG editor still writes combat-engine rules; Lab must own these definitions');
 });

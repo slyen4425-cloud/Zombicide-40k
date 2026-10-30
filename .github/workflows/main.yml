@@ -89,6 +89,11 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Vérifier la synchronisation atomique du Combat main
+        run: |
+          node --test tests/gens_capture_combat_main_autosync_20261030.test.mjs
+          node --test tests/gens_capture_combat_main_only_guard_20261030.test.cjs
+
       - name: Résoudre la version officielle immuable Capture / visuels (aucune synchronisation mouvante)
         id: capture_pages_pins
         run: |
@@ -379,7 +384,7 @@ jobs:
           path: _site
 
   deploy:
-    if: github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

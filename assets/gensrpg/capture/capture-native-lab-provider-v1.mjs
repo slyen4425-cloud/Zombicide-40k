@@ -115,8 +115,8 @@ export function createCaptureNativeLabProviderV1({resolveBattle,mountBattle}) {
   protocol:1,version:'1.1.0',capabilities:Object.freeze(['battle-trigger','battle-1v1','battle-2v2-active']),
   createBattle,startBattle:handle=>record(handle).start(),
   stopBattle:handle=>sessions.get(handle)?.stop(),
-  disposeBattle:handle=>sessions.get(handle)?.dispose(),
-  openCreatureEditor(){throw new Error('Lab editor is separate from the battle runtime');},
-  closeCreatureEditor(){return false;}
+  disposeBattle:handle=>sessions.get(handle)?.dispose()
+  // Authoring belongs exclusively to capture-lab-author-ui-provider-v1.mjs.
+  // No misleading editor API is exposed by the battle-only provider.
  });
 }

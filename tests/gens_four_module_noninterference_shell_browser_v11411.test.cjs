@@ -81,7 +81,7 @@ const ownerScripts=ownerIds.map(exactScript);
 for(let i=1;i<ownerScripts.length;i++)assert.ok(ownerScripts[i].start>ownerScripts[i-1].start,'owner scripts must keep production order');
 
 const mime={
-  '.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8',
+  '.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8',
   '.css':'text/css; charset=utf-8','.json':'application/json',
   '.webmanifest':'application/manifest+json','.png':'image/png',
   '.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.mp3':'audio/mpeg'

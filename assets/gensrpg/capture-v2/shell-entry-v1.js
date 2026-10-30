@@ -7,9 +7,10 @@
     explore:{label:"Exploration 2.5D",path:"vendor/exploration-lab/index.html",family:"exploration"},
     builder:{label:"World Builder",path:"vendor/exploration-lab/builder.html",family:"exploration"},
     world:{label:"Carte du monde",path:"vendor/exploration-lab/world-assembler.html",family:"exploration"},
-    creature:{label:"Créatures · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=creature",family:"combat"},
-    skill:{label:"Capacités · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=skills",family:"combat"},
-    rules:{label:"Règles · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=combat",family:"combat"},
+    // ONE official editor with native Creature, Skills and Combat tabs.
+    // Combat main does not yet support ?tab= direct links (PR #156 unpromoted).
+    // Never advertise separate menus that silently open the wrong tab.
+    creature:{label:"Éditeur Combat · Créatures, capacités, règles",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html",family:"combat"},
     bestiary:{label:"Bestiaire · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/bestiary.html",family:"combat"}
   });
   const shell=root.GensShellModuleLaunchV1;

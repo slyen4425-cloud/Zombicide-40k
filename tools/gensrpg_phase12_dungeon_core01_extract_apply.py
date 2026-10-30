@@ -459,13 +459,18 @@ def verify():
                     # extraction-specific counts above. Assert the exact three
                     # current graph fields once, not a guessed intermediate.
                     import re
+                    replacements=0
                     for pattern,replacement in (
                         (r"size,\d+,'production composition","size,94,'production composition"),
                         (r"allJs\.length,\d+,","allJs.length,160,"),
                         (r"reachable\.size,\d+,","reachable.size,137,"),
                     ):
                         expected_after,count=re.subn(pattern,replacement,expected_after)
-                        assert count==1, f"{path}: expected exactly one historical graph field {pattern}"
+                        assert count<=1, f"{path}: duplicate historical graph field {pattern}"
+                        replacements+=count
+                    # Each test_replacements pair is a SINGLE old assertion
+                    # fragment, or a script-path addition, never all 3 fields.
+                    assert replacements<=1, f"{path}: ambiguous graph assertion fragment"
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

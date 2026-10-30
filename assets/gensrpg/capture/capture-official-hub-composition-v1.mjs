@@ -178,11 +178,16 @@ export async function createCaptureOfficialHubCompositionV1({
       encounter.creatureIds.some(id=>!resources.publishedSpecies.includes(id))){
     throw new RangeError('Trainer NPC requires official signed Combat Lab creature transfers');
    }
-   // The World difficulty is not a Lab combat algorithm. Fail closed until
-   // the signed author explicitly publishes the policy for this level.
-   if(!Array.isArray(settings.trainerDifficultyLevels)||
-      !settings.trainerDifficultyLevels.includes(encounter.trainerDifficulty)){
-    throw new Error('Combat Lab has not published the trainer difficulty rule for this encounter');
+   // A list of level labels is not an executable difficulty rule.
+   // Only the signed Lab author may publish its complete native policy.
+   // The Lab exporter and CombatSession remain the sole validators and
+   // executors of HP/damage coefficients; World supplies only the level.
+   const policy=settings.trainerDifficultyPolicy;
+   if(policy?.schema!=='capture-trainer-difficulty-policy-v1'||
+      policy.version!==1||!Array.isArray(policy.levels)||
+      policy.levels.length!==4||
+      policy.levels[encounter.trainerDifficulty-1]?.level!==encounter.trainerDifficulty){
+    throw new Error('Signed Combat Lab trainer difficulty policy is required before an NPC battle');
    }
    return command.startTrainerBattle();
   },

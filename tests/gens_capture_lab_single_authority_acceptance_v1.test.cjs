@@ -53,3 +53,22 @@ test('combat RULES must be authored in Lab, but Capture World may retain economy
  assert.doesNotMatch(writer,/\b(?:recallCost|autoReplaceKo|itemsAllowed|allowBattleOverride|defendAllowed|initiativeMode|victoryMode|itemSlots|itemsPerTurn)\s*:/,
   'Legacy RPG editor still writes combat-engine rules; Lab must own these definitions');
 });
+
+test('World emits a typed trainer NPC from its original location and consumes once',()=>{
+ const vm=require('node:vm'),store=new Map(),math=Object.create(Math);math.random=()=>0.88;
+ const ctx={Math:math,crypto:{randomUUID:()=> 'c4f3-7b2a'},activeGameProfileId:()=> 'profile-7',
+  localStorage:{getItem:k=>store.get(k)??null,setItem:(k,v)=>store.set(k,String(v))}};
+ vm.createContext(ctx);vm.runInContext(read('assets/gensrpg/capture/world-exploration-v1.js'),ctx);
+ ctx.captureProfileLocations=()=>[{id:'route',name:'Route'}];
+ ctx.captureRollLocation=()=>({creature:{id:'crea_voltik',name:'Voltige'}});
+ ctx.captureTrainerDifficulty134=()=>3;
+ ctx.renderCaptureWorldHub=()=>{};ctx.renderCaptureEncounterPage=()=>{};ctx.renderCaptureExploreResult=()=>{};
+ ctx.captureGenerateEncounter();
+ const e=ctx.captureWorldState().last;
+ assert.equal(e.type,'friendly_trainer');assert.equal(e.trainerId,'npc-c4f37b2a');
+ assert.equal(e.trainerDifficulty,3);assert.equal(e.captureAllowed,false);
+ assert.deepEqual(Array.from(e.creatureIds),['crea_voltik']);
+ ctx.saveCaptureWorldState({...ctx.captureWorldState(),last:{...e,encounterId:'signed-npc-7'}});
+ ctx.captureConsumeTrainerEncounter('victory');
+ assert.equal(ctx.captureWorldState().last.type,'resolved');
+});

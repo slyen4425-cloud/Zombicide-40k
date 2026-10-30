@@ -51,8 +51,18 @@ while(queue.length){
 }
 
 const mapped=new Set(Object.keys(manifest.files||{}));
-assert.equal(reachable.size,134,'R16 adds the exact Core303 Dungeon timeline module to R15');
-assert.equal(mapped.size,134,'R16 manifest must classify all 134 reachable production files');
+// Historical R16 had 134 owners. The two reviewed Capture author routes are
+// additional production owners, not replacements for Dungeon or Survival.
+const captureAuthorRoutes=[
+  'assets/gensrpg/capture/lab-ownership-port-v1.js',
+  'assets/gensrpg/capture/capture-lab-author-entry-v1.mjs'
+];
+assert.equal(reachable.size,136,'R16 134 production owners plus exactly two official Capture author routes');
+assert.equal(mapped.size,136,'owner manifest must classify all 136 production-reachable files');
+assert.deepEqual(captureAuthorRoutes.filter(rel=>!reachable.has(rel)),[],
+  'both official Capture author routes must be production-reachable');
+assert.deepEqual(captureAuthorRoutes.filter(rel=>manifest.files[rel]?.domain!=='capture'),[],
+  'both new routes must belong to the existing Capture domain');
 assert.equal(manifest.files['assets/gensrpg/capture/legacy-monolith-functions-v1.js']?.domain,'capture','R10 must be owned exclusively by Capture');
 assert.equal(manifest.files['assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js']?.domain,'dungeon','R12 must be exclusively owned by Dungeon');
 assert.equal(manifest.files['assets/gensrpg/builders/legacy-enemy-editor-v1.js']?.domain,'builders','R13 is exclusively owned by Builders');

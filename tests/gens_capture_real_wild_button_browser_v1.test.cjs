@@ -234,3 +234,39 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
   });
  });
 }
+
+for(const [name,browserEngine] of [['Chromium',chromium],['Firefox',firefox]]){
+ test(name+': real World trainer button never falls back to old combat when Lab profile consent is absent',
+  {timeout:90000},async()=>{
+  await withPage(browserEngine,async(page,pageErrors)=>{
+   await seed(page);
+   await page.evaluate(()=>{
+    const ws=captureWorldState();
+    saveCaptureWorldState({...ws,last:{
+     type:'hostile_trainer',trainerId:'npc-ci-native-7',trainerName:'Dresseur hostile',
+     trainerDifficulty:3,creatureIds:['crea_voltik'],captureAllowed:false,
+     text:'Rencontre de dresseur déclarée par le World'
+    }});
+    renderCaptureEncounterPage();
+   });
+   const before=await page.evaluate(()=>({
+    world:localStorage.getItem(captureWorldKey()),
+    hero:localStorage.getItem(key('trainer-real-hub'))
+   }));
+   await page.locator('#captureEncounterModalBody button[onclick*="captureOpenTrainerBattle"]').tap();
+   await page.locator('#capture-official-entry-status[data-error="true"]').waitFor();
+   const message=await page.locator('#capture-official-entry-status').textContent();
+   assert.match(message,/Migration du profil vers le Labo requise/);
+   const after=await page.evaluate(()=>({
+    world:localStorage.getItem(captureWorldKey()),
+    hero:localStorage.getItem(key('trainer-real-hub')),
+    legacyBattle:!!window.gensCurrentCaptureBattle
+   }));
+   assert.equal(after.world,before.world,'failed consent gate cannot consume NPC');
+   assert.equal(after.hero,before.hero,'failed consent gate cannot write HP');
+   assert.equal(after.legacyBattle,false,'trainer never opens the old engine');
+   assert.deepEqual(pageErrors,[],'no JavaScript runtime errors in the original World button');
+   await page.getByRole('button',{name:'Retour au monde'}).tap();
+  });
+ });
+}

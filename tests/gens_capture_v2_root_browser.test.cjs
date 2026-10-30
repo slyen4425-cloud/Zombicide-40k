@@ -52,6 +52,15 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.locator('#captureGameHub').count(),0);
   assert.equal(await page.evaluate(()=>window.GensCaptureV1.VERSION),'2.0.0');
   assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().active),false);
+  // Each other original module keeps its independent Shell navigation.
+  for(const other of ['survival','adventure','pvp']){
+    await page.locator('button.gensRootModeCard.'+other).tap();
+    await page.locator('#gensFamilyHome').waitFor({state:'visible'});
+    assert.equal(await page.locator('#gensCaptureV2Root').count(),0,
+     other+' must never start the Capture runtime');
+    await page.locator('#gensFamilyHome button[onclick="showGensRootHome()"]').tap();
+    await page.locator('#gensRootHome').waitFor({state:'visible'});
+  }
   // The original four-mode Capture card must start the NEW module directly.
   // There is deliberately no old RPG Universe profile / pregame / starter flow.
   await page.locator('button.gensRootModeCard.capture').tap();

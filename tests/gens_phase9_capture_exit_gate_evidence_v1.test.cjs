@@ -71,7 +71,17 @@ const staged=JSON.parse(read('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.j
 assert.equal(staged.schemaVersion,1);assert.equal(staged.productionActivated,false);
 const stagedCaptureScripts=staged.classicScripts.filter(file=>file.startsWith('assets/gensrpg/capture/'));
 assert.equal(stagedCaptureScripts.length,8,'every opt-in Capture script must be audited');
-assert.equal(staged.captureEsmAdapters.length,13,'Capture opt-in inventory includes the single Lab scene and transport provider without hiding historical adapters');
+assert.equal(staged.captureEsmAdapters.length,14,'Capture opt-in inventory adds exactly one typed trainer World port to the thirteen certified adapters');
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-world-lab-trainer-transaction-v1.mjs'),
+  'trainer has its own typed transaction, never a fake wild event');
+assert.ok(staged.coverage.includes('tests/gens_capture_world_lab_trainer_transaction_v1.test.cjs'));
+const officialTrainerPort=read('assets/gensrpg/capture/capture-world-lab-trainer-transaction-v1.mjs');
+assert.match(officialTrainerPort,/createCaptureSavedProfileBattleBridgeV1/,
+  'trainer HP must be persisted by the existing Capture saved-profile owner');
+assert.match(officialTrainerPort,/encounterKind:'trainer'/,
+  'trainer transaction must never masquerade as wild');
+assert.doesNotMatch(officialTrainerPort,/localStorage|createCombatSession|createCombatRuntime|window\\.|startSkill|location\\.reload/,
+  'trainer port cannot invent a storage owner, second engine, global override or Combat clock');
 assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-official-battle-view-v1.mjs'));
 assert.equal(staged.stagedOfficialBattleView?.productionActivated,false);
 assert.equal(staged.stagedOfficialBattleView?.ownsStorage,false);

@@ -80,9 +80,19 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await official.locator('[data-capture-editor-human]').waitFor({timeout:25000});
   // No alternate skill/rule editor: exercise the REAL author UI's tabs.
   await official.locator('[data-editor-tab="skills"]').tap();
-  await official.locator('[data-editor-panel="skills"]:visible').waitFor({timeout:20000});
+  try{
+    await official.locator('[data-editor-panel="skills"]:visible').waitFor({timeout:3500});
+  }catch(error){
+    const diagnostic=await official.locator('[data-capture-editor-human]').evaluate(root=>({
+      status:root.querySelector('[data-editor-status]')?.textContent,
+      tone:root.querySelector('[data-editor-status]')?.dataset?.tone,
+      tab:[...root.querySelectorAll('[data-editor-tab]')].map(x=>({id:x.dataset.editorTab,active:x.dataset.active})),
+      panels:[...root.querySelectorAll('[data-editor-panel]')].map(x=>({id:x.dataset.editorPanel,hidden:x.hidden}))
+    }));
+    throw new Error('Native Combat main editor failed to activate Skills: '+JSON.stringify(diagnostic)+' / '+errors.join(' | '),{cause:error});
+  }
   await official.locator('[data-editor-tab="combat"]').tap();
-  await official.locator('[data-editor-panel="combat"]:visible').waitFor({timeout:20000});
+  await official.locator('[data-editor-panel="combat"]:visible').waitFor({timeout:3500});
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="bestiary"]').tap();
   await page.frameLocator('#gensCaptureV2Root iframe').locator('[data-bestiary]').waitFor({timeout:25000});
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').tap();

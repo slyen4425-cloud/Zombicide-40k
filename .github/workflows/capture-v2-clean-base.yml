@@ -1,0 +1,26 @@
+name: Capture v2 clean ownership boundary
+on:
+  push:
+    branches:
+      - 'work/gensrpg-capture-clean-replacement-*'
+  pull_request:
+    paths:
+      - 'assets/gensrpg/capture-v2/**'
+      - 'index.html'
+      - 'tests/gens_capture_v2_clean_boundary.test.cjs'
+      - '.github/workflows/main.yml'
+      - '.github/workflows/capture-v2-clean-base.yml'
+permissions:
+  contents: read
+jobs:
+  clean-authority:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse the two new Capture-only modules
+        run: |
+          node --check assets/gensrpg/capture-v2/identity-v1.js
+          node --check assets/gensrpg/capture-v2/shell-entry-v1.js
+      - name: Verify real GenSrpg root and both official sources (TDD RED first)
+        run: node --test tests/gens_capture_v2_clean_boundary.test.cjs

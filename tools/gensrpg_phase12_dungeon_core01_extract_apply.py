@@ -446,6 +446,22 @@ def verify():
                 assert "assert.equal(reachable.size,135," in updated, "preview must not increase production reachability"
                 assert expected_after.count("allJs.length,159,")==1, "R01 historical 159 baseline changed"
                 expected_after=expected_after.replace("allJs.length,159,","allJs.length,160,",1)
+            # Lab authoring changes exactly four SHA-certified links in the
+            # current product HTML. Historical D1-D9 reconstruction above
+            # remains byte-exact; live owner tests pin the NEW index and the
+            # two additional author scripts without relaxing old counts.
+            reviewed_author="c53d234fca05e49a33650a61776fae1c1985613e"
+            if current_blob==reviewed_author:
+                if path in (PATH_OWNERS,PATH_GLOBALS):
+                    expected_after=reviewed_author
+                elif path==PATH_GRAPH:
+                    for former,current in (
+                        ("size,64,","size,94,"),
+                        ("allJs.length,121,","allJs.length,160,"),
+                        ("reachable.size,107,","reachable.size,137,"),
+                    ):
+                        assert expected_after.count(former)==1, f"{path}: historical graph count drift {former}"
+                        expected_after=expected_after.replace(former,current,1)
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

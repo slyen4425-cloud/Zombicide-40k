@@ -100,6 +100,41 @@ test('changed trainer, profile or reserve rejects result before any save',async(
   assert.equal(f.writes(),0);
  }
 });
+test('trainer 1v1 preserves a real off-field reserve without giving it to the battle engine',async()=>{
+ const {createCaptureSavedProfileBattleBridgeV1}=await import(url);
+ const f=fixture();
+ const reserve={uid:'reserve-voltige',entityId:'crea_voltik',hp:95,maxHp:120,
+  activeAbilityIds:['zap'],knownAbilityIds:['zap'],xp:18};
+ f.setHero({...f.hero(),creatureReserve:[reserve]});
+ const before=structuredClone(f.hero());
+ const ticket=createCaptureSavedProfileBattleBridgeV1(f.config).prepareEncounter();
+ assert.equal(ticket.snapshot.sides[0].creatures.length,1);
+ assert.equal(ticket.snapshot.sides[0].creatures[0].instanceId,'hero-wolf');
+ assert.equal(ticket.snapshot.sides[0].active.length,1);
+ assert.equal(f.writes(),0);
+ const applied=ticket.applyResult({outcome:'flee',creatures:[
+  {instanceId:'hero-wolf',hp:64},{instanceId:'trainer:enc-42',hp:52}
+ ]});
+ assert.equal(applied.outcome,'flee');
+ assert.equal(f.writes(),1);
+ assert.deepEqual(f.hero().creatureReserve,before.creatureReserve,
+  'Off-field roster belongs only to saved Capture profile and must not be mutated by Lab 1v1');
+ assert.deepEqual(f.hero().inventory,before.inventory);
+ assert.equal(f.hero().gold,before.gold);
+ assert.equal(f.hero().creatureTeam[0].hp,64);
+});
+
+test('wild 1v1 still forbids an undeclared active reserve from silently entering combat',async()=>{
+ const {createCaptureSavedProfileBattleBridgeV1}=await import(url);
+ const f=fixture({type:'wild',creatureId:'crea_voltik'});
+ f.setHero({...f.hero(),creatureReserve:[{
+  uid:'reserve-monster',entityId:'crea_voltik',hp:95,maxHp:120
+ }]});
+ assert.throws(()=>createCaptureSavedProfileBattleBridgeV1({...f.config,encounterKind:'wild'}).prepareEncounter(),
+  /reserve|1v1|active/i);
+ assert.equal(f.writes(),0);
+});
+
 test('wild contract remains the default; trainer event cannot be disguised as wild',async()=>{
  const {createCaptureSavedProfileBattleBridgeV1}=await import(url);
  const f=fixture();

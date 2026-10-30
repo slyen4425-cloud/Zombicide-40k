@@ -92,6 +92,8 @@ jobs:
       - name: Vérifier la synchronisation atomique du Combat main
         run: |
           node --test tests/gens_capture_combat_main_autosync_20261030.test.mjs
+          node --test tests/gens_capture_combat_autosync_workflow_20261030.test.cjs
+          node --check tools/run_capture_combat_main_autosync.mjs
           node --test tests/gens_capture_combat_main_only_guard_20261030.test.cjs
 
       - name: Résoudre la version officielle immuable Capture / visuels (aucune synchronisation mouvante)

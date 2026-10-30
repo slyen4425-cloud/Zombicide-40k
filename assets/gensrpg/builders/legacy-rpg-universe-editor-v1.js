@@ -138,32 +138,9 @@ function saveRpgTrainerPvpSettings(){
   const ctx=lockedRpgEditingProfile();if(!ctx)return;
   const p=ctx.profile;ensureRpgProfileData(p);
 
-  p.rpgUniverse.captureCombat={
-    activeSlots:Math.max(1,Math.min(3,Number(document.getElementById("rpgCaptureActiveSlots")?.value)||1)),
-    teamSize:Math.max(1,Math.min(20,Number(document.getElementById("rpgCaptureTeamSize")?.value)||6)),
-    minBattleTeam:Math.max(1,Math.min(20,Number(document.getElementById("rpgCaptureMinBattleTeam")?.value)||3)),
-    maxBattleTeam:Math.max(1,Math.min(20,Number(document.getElementById("rpgCaptureMaxBattleTeam")?.value)||6)),
-    recallCost:document.getElementById("rpgCaptureRecallCost")?.value||"turn",
-    autoReplaceKo:document.getElementById("rpgCaptureAutoReplaceKo")?.checked!==false,
-    itemsAllowed:document.getElementById("rpgCaptureItemsAllowed")?.checked!==false,
-    captureAllowed:true,
-    controller:document.getElementById("rpgCaptureController")?.value||"auto",
-    allowBattleOverride:document.getElementById("rpgCaptureAllowBattleOverride")?.checked!==false,
-    itemSlots:Math.max(0,Math.min(20,Number(document.getElementById("rpgCaptureItemSlots")?.value)||0)),
-    itemsPerTurn:Math.max(0,Math.min(10,Number(document.getElementById("rpgCaptureItemsPerTurn")?.value)||0)),
-    defendAllowed:document.getElementById("rpgCaptureDefendAllowed")?.checked!==false,
-    initiativeMode:"dynamic",
-    victoryMode:document.getElementById("rpgCaptureVictoryMode")?.value||"all_ko",
-    saveBattle:document.getElementById("rpgCaptureSaveBattle")?.checked!==false,
-    healMode:document.getElementById("rpgCaptureHealMode")?.value||"free",
-    healCost:Math.max(0,Number(document.getElementById("rpgCaptureHealCost")?.value)||0)
-  };
-
-  p.rpgUniverse.trainerCombat={
-    enabled:!!document.getElementById("rpgTrainerBattlesEnabled")?.checked,
-    captureOpponent:!!document.getElementById("rpgTrainerCaptureAllowed")?.checked,
-    goldReward:Math.max(0,Number(document.getElementById("rpgTrainerGoldReward")?.value)||0)
-  };
+  // Capture V2 owns no Combat rules here: all creatures/skills/combat rules
+  // are authored exclusively by official Combat Lab main. This editor
+  // retains only its independent PvP profile settings.
   p.rpgUniverse.pvp={
     enabled:!!document.getElementById("rpgPvpEnabled")?.checked,
     rewards:!!document.getElementById("rpgPvpRewards")?.checked,
@@ -174,7 +151,7 @@ function saveRpgTrainerPvpSettings(){
 
   ctx.profiles[ctx.index]=p;
   saveGameProfiles(ctx.profiles);
-  alert("Combat Capture / Dresseurs / PvP enregistrés ✅");
+  alert("Paramètres PvP enregistrés ✅");
 }
 
 function renderRpgGameplayUi(){
@@ -235,25 +212,10 @@ function renderRpgUniverseEditor(){
   set("rpgMovementUnit",mv.unit||"case");set("rpgMovementCustomUnit",mv.customUnit||"");set("rpgMovementMode",mv.mode||"narrative");set("rpgMovementRefreshMode",mv.refreshMode||"turn");set("rpgCombatParticipationRange",Number.isFinite(Number(mv.combatParticipationRange))?Math.max(0,Number(mv.combatParticipationRange)):3);
   [["rpgMoveHeroes","heroes"],["rpgMoveCreatures","creatures"],["rpgMoveEnemies","enemies"],["rpgMoveCompanions","companions"]].forEach(([id,k])=>{const e=document.getElementById(id);if(e)e.checked=mv.entities?.[k]!==false});
   set("rpgMoveHeroValue",mv.defaults?.hero??3);set("rpgMoveCreatureValue",mv.defaults?.creature??1);set("rpgMoveEnemyValue",mv.defaults?.enemy??1);set("rpgMoveCompanionValue",mv.defaults?.companion??3);
-  const cc=cfg.captureCombat||gensBlankRpgSettings().captureCombat,tc=cfg.trainerCombat||{},pv=cfg.pvp||{};
-  set("rpgCaptureActiveSlots",Math.max(1,Math.min(3,Number(cc.activeSlots)||1)));
-  set("rpgCaptureTeamSize",Math.max(1,Number(cc.teamSize)||6));
-  set("rpgCaptureRecallCost",cc.recallCost||"turn");
-  set("rpgCaptureMinBattleTeam",Math.max(1,Number(cc.minBattleTeam)||3));
-  set("rpgCaptureMaxBattleTeam",Math.max(1,Number(cc.maxBattleTeam)||6));
-  set("rpgCaptureController",cc.controller||"auto");
-  set("rpgCaptureItemSlots",Math.max(0,Number(cc.itemSlots)??4));
-  set("rpgCaptureItemsPerTurn",Math.max(0,Number(cc.itemsPerTurn)??1));
-  set("rpgCaptureVictoryMode",cc.victoryMode||"all_ko");
-  set("rpgCaptureHealMode",cc.healMode||"free");
-  set("rpgCaptureHealCost",Math.max(0,Number(cc.healCost)||20));
-  const arko=document.getElementById("rpgCaptureAutoReplaceKo");if(arko)arko.checked=cc.autoReplaceKo!==false;
-  const abo=document.getElementById("rpgCaptureAllowBattleOverride");if(abo)abo.checked=cc.allowBattleOverride!==false;
-  const ia=document.getElementById("rpgCaptureItemsAllowed");if(ia)ia.checked=cc.itemsAllowed!==false;
-  const da=document.getElementById("rpgCaptureDefendAllowed");if(da)da.checked=cc.defendAllowed!==false;
-  const sb=document.getElementById("rpgCaptureSaveBattle");if(sb)sb.checked=cc.saveBattle!==false;
-  [["rpgTrainerBattlesEnabled",!!tc.enabled],["rpgTrainerCaptureAllowed",!!tc.captureOpponent],["rpgPvpEnabled",!!pv.enabled],["rpgPvpRewards",!!pv.rewards],["rpgPvpItemLoss",!!pv.itemLoss],["rpgPvpPermadeath",!!pv.permadeath]].forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.checked=v});
-  set("rpgTrainerGoldReward",tc.goldReward??0);
+  const pv=cfg.pvp||{};
+  [["rpgPvpEnabled",!!pv.enabled],["rpgPvpRewards",!!pv.rewards],
+   ["rpgPvpItemLoss",!!pv.itemLoss],["rpgPvpPermadeath",!!pv.permadeath]]
+    .forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.checked=v});
   renderRpgMovementCustomUnit();renderRpgEncounterLocations();
   renderRpgElementsEditor();
   set("rpgTalentSlots",cfg.talents.slots);set("rpgTalentRequired",String(cfg.talents.required!==false));

@@ -17,7 +17,7 @@ export function createCaptureLabAuthorUiProviderV1({labBaseUrl,hostOrigin,mountL
  const base=new URL(labBaseUrl);
  const host=new URL(hostOrigin);
  if(base.protocol!=="https:"||base.origin!==host.origin||
-    base.pathname!=="/Zombicide-40k/vendor/combat-lab/"||
+    !base.pathname.endsWith("/vendor/combat-lab/")||
     base.search||base.hash) {
   throw new TypeError("Only the same-origin GenSrpg pinned Combat main vendor author is supported");
  }

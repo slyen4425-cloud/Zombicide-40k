@@ -140,8 +140,24 @@ assert.equal(exists(r16DungeonTimelineOwner),true,
   'R16 external Dungeon timeline owner must physically exist');
 assert.equal(composition.index.split('<script id="dungeonCore303TimelineRootFix" src="'+r16DungeonTimelineOwner+'"></script>').length-1,1,
   'R16 Core303 must load exactly once at the original synchronous parser slot');
-assert.equal(Object.keys(ownerManifest.files||{}).length,116+captureR06OwnerPaths.length,
-  'R16 adds exactly one Dungeon Core303 owner to the complete R15 owner registry');
+// The R16 historical count stays fixed. Capture has added exactly two
+// independently documented authoring ports, not a second Battle/Core owner.
+// Reject any other owner growth and certify their sole parser load.
+const captureAuthorOwners=[
+  'assets/gensrpg/capture/lab-ownership-port-v1.js',
+  'assets/gensrpg/capture/capture-lab-author-entry-v1.mjs'
+];
+const legacyOwnerCount=116+captureR06OwnerPaths.length;
+assert.equal(Object.keys(ownerManifest.files||{}).length,
+  legacyOwnerCount+captureAuthorOwners.length,
+  'R16 historical owner count plus exactly two Capture Lab-authoring owners');
+for(const rel of captureAuthorOwners){
+  assert.equal(ownerManifest.files?.[rel]?.domain,'capture',
+    'Native Lab authoring port must be exclusively Capture-owned: '+rel);
+  assert.equal(exists(rel),true,'Lab authoring owner must exist: '+rel);
+  assert.equal(composition.index.split(rel).length-1,1,
+    'Lab authoring owner must load exactly once from the real application: '+rel);
+}
 assert.equal(ownerManifest.files?.['assets/gensrpg/core/legacy-cloud-sync-backup-v1.js']?.domain,'core',
   'R05 cloud-sync/local-backup must have a sole Core owner');
 assert.equal(composition.index.split('assets/gensrpg/core/legacy-cloud-sync-backup-v1.js').length-1,1,

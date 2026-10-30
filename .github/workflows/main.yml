@@ -288,13 +288,21 @@ jobs:
           # Remove both source tail tags first so Pages rebuilds the same canonical order.
           perf_tag = '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>'
           final_shell_tag = '<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>'
+          capture_v2_tag = '<script src="assets/gensrpg/capture-v2/shell-entry-v1.js"></script>'
           html = html.replace(perf_tag + "\n", "").replace(perf_tag, "")
           html = html.replace(final_shell_tag + "\n", "").replace(final_shell_tag, "")
+          # Preserve the single Shell owner: the clean Capture entry MUST come after it.
+          if html.count(capture_v2_tag) != 1:
+              raise SystemExit("Clean Capture V2 entry missing or duplicated")
+          html = html.replace(capture_v2_tag + "\n", "").replace(capture_v2_tag, "")
           for module, tag, error in modules:
               if not module.exists():
                   raise SystemExit(error)
               if tag not in html:
                   html = html.replace("</body>", tag + "\n</body>")
+          html = html.replace("</body>", capture_v2_tag + "\n</body>")
+          if html.index(final_shell_tag) > html.index(capture_v2_tag):
+              raise SystemExit("GenSrpG Capture V2 loaded before the Shell owner")
           index.write_text(html, encoding="utf-8")
           PY
 

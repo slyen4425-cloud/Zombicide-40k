@@ -9,7 +9,7 @@ const {execFileSync} = require('node:child_process');
 const root = path.resolve(__dirname, '..');
 const labRoot = process.env.COMBAT_LAB_ROOT;
 assert.ok(labRoot, 'COMBAT_LAB_ROOT must identify the pinned official checkout');
-const PIN = '8318220b6a9b883aeced1d4bf693f906b0f36d3d';
+const PIN = '29b57811b5510686bbdc7efbbc58d8657862e841';
 assert.equal(execFileSync('git', ['-C', labRoot, 'rev-parse', 'HEAD'], {encoding:'utf8'}).trim(), PIN);
 
 function clock() {

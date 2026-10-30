@@ -62,8 +62,12 @@ jobs:
           node --input-type=module - <<'JS' >> "$GITHUB_OUTPUT"
           import {COMBAT_LAB_SOURCE_V1} from './assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs';
           import fs from 'node:fs';
+          import {execFileSync} from 'node:child_process';
           const manifest=JSON.parse(fs.readFileSync('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json','utf8'));
           if(COMBAT_LAB_SOURCE_V1.sha!==manifest.authoredSourceLabPin)throw Error('Conflicting pinned Combat authority');
+          // Only an approved Combat main HEAD may enter GenSrpg. No gh-pages SHA.
+          const combatMain=execFileSync('git',['ls-remote','https://github.com/slyen4425-cloud/GenSrpg_labo_combat_dynamique.git','refs/heads/main'],{encoding:'utf8'}).trim().split(/\s+/)[0];
+          if(!combatMain||COMBAT_LAB_SOURCE_V1.sha!==combatMain)throw Error('Combat pin differs from approved main; repin and recertify');
           if(!/^[0-9a-f]{40}$/.test(manifest.authoredAssetsPin))throw Error('Unpinned visual catalog');
           console.log('combat='+COMBAT_LAB_SOURCE_V1.sha);
           console.log('visuals='+manifest.authoredAssetsPin);

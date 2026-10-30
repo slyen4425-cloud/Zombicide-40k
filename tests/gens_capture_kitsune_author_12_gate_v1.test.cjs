@@ -9,7 +9,7 @@ const root=path.resolve(__dirname,'..');
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const pins=JSON.parse(read('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'));
 const settings=JSON.parse(read('tests/fixtures/capture-lab-authored-preview-settings-v1.json'));
-const officialSha='8318220b6a9b883aeced1d4bf693f906b0f36d3d';
+const officialSha='29b57811b5510686bbdc7efbbc58d8657862e841';
 const visualSha='b3d46ce6f2639ebb59a2984aeff17f97cbcd7377';
 const ids=['crea-loup','crea_ailevent','crea_dracendre','crea_foudrillon','crea_lumilo','crea_maraileron','crea_mossback','crea_ombre_2','crea_scar_2','crea_tox_2','crea_voltik','kitsune_lunaire'];
 test('official Combat source pin is the validated Kitsune 8-frame author SHA',()=>{

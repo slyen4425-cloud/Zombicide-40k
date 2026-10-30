@@ -61,7 +61,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
    null,{timeout:20000});
   assert.equal(await page.evaluate(()=>window.GensShellModuleLaunchV1.startModuleSession('capture')),true);
   await page.locator('#gensCaptureV2Root').waitFor({state:'visible'});
-  assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').count(),0);
+  assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   const buttons=page.locator('#gensCaptureV2Root [data-capture-v2-view]');
   assert.equal(await buttons.count(),7);
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="creature"]').tap();

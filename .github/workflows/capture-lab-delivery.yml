@@ -37,6 +37,7 @@ on:
       - 'tests/gens_capture_lab_world_settings_owner_v1.test.cjs'
       - 'tests/gens_capture_lab_authoring_port_v1.test.cjs'
       - 'tests/gens_capture_lab_author_ui_provider_v1.test.cjs'
+      - 'tests/gens_capture_lab_author_entry_browser_v1.test.cjs'
       - 'assets/gensrpg/capture/capture-lab-author-ui-provider-v1.mjs'
       - 'assets/gensrpg/capture/lab-ownership-port-v1.js'
       - 'assets/gensrpg/capture/capture-native-lab-*.mjs'
@@ -127,7 +128,6 @@ jobs:
           node --test tests/gens_capture_lab_world_settings_owner_v1.test.cjs
           node --test tests/gens_capture_native_lab_scene_v1.test.cjs
           node --test tests/gens_capture_lab_delivery_v1.test.cjs
-          node --test tests/gens_capture_lab_single_authority_acceptance_v1.test.cjs
           node --test tests/gens_capture_official_hub_composition_v1.test.cjs
           node --test tests/gens_capture_official_battle_view_v1.test.cjs
           node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs
@@ -136,6 +136,11 @@ jobs:
         run: |
           npm install --prefix /tmp/capture-lab-browser --no-save playwright@1.55.0
           /tmp/capture-lab-browser/node_modules/.bin/playwright install --with-deps chromium firefox
+      - name: Verify real official Lab author editor and Bestiary in Chromium and Firefox landscape
+        env:
+          NODE_PATH: /tmp/capture-lab-browser/node_modules
+          CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
+        run: node --test tests/gens_capture_lab_author_entry_browser_v1.test.cjs
       - name: Verify real saved-Hub composition in Chromium and Firefox landscape
         env:
           NODE_PATH: /tmp/capture-lab-browser/node_modules
@@ -158,6 +163,11 @@ jobs:
           NODE_PATH: /tmp/capture-lab-browser/node_modules
           CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
         run: node --test tests/gens_capture_pwa_offline_pinned_media_browser_v1.test.cjs
+      - name: Final RED acceptance gate — all World species and trainer authoring must be real
+        env:
+          COMBAT_LAB_ROOT: ${{ github.workspace }}/combat-lab
+          CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
+        run: node --test tests/gens_capture_lab_single_authority_acceptance_v1.test.cjs
       - name: Upload version-locked payload (not deployed, no public game entry)
         uses: actions/upload-artifact@v4
         with:

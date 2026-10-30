@@ -7,9 +7,9 @@ const vm=require('node:vm');
 const fs=require('node:fs');
 const source=fs.readFileSync(path.resolve(__dirname,'../assets/gensrpg/capture/lab-ownership-port-v1.js'),'utf8');
 const providerPath=path.resolve(__dirname,'../assets/gensrpg/capture/capture-lab-author-ui-provider-v1.mjs');
-const base='https://slyen4425-cloud.github.io/GenSrpg_labo_combat_dynamique/';
+const base='https://slyen4425-cloud.github.io/Zombicide-40k/vendor/combat-lab/';
 function port(){let root={};vm.runInNewContext(source,{globalThis:root});return root.GensCaptureLabOwnershipPortV1;}
-test('canonical Lab author adapter uses its ONE published editor/bestiary, no copied UI or storage',async()=>{
+test('canonical Lab author adapter uses the SAME pinned Combat main release shipped with GenSrpg, no sibling Pages',async()=>{
  const {createCaptureLabAuthorUiProviderV1}=await import(pathToFileURL(providerPath).href);
  const recorded=[],disposed=[];
  const mountLabPage=info=>{recorded.push(info);return {dispose(){disposed.push(info.kind);}}};
@@ -28,6 +28,8 @@ test('canonical Lab author adapter uses its ONE published editor/bestiary, no co
   const entry=recorded.at(-1);
   assert.equal(new URL(entry.url).pathname.endsWith('/'+ending),true);
   assert.equal(new URL(entry.url).searchParams.get('tab'),tab);
+  assert.ok(new URL(entry.url).pathname.startsWith('/Zombicide-40k/vendor/combat-lab/'),
+   'The author page must be shipped from pinned Combat main, not a sibling gh-pages app');
   assert.equal(entry.context.profileId,'profile-123');
  }
  assert.deepEqual(disposed,['creature','skill','rules','bestiary']);
@@ -35,7 +37,7 @@ test('canonical Lab author adapter uses its ONE published editor/bestiary, no co
 });
 test('canonical author adapter refuses any cross-origin or alternative editor URL',async()=>{
  const {createCaptureLabAuthorUiProviderV1}=await import(pathToFileURL(providerPath).href);
- for(const url of ['https://evil.example/GenSrpg_labo_combat_dynamique/','http://slyen4425-cloud.github.io/GenSrpg_labo_combat_dynamique/','https://slyen4425-cloud.github.io/other-lab/']){
+ for(const url of ['https://evil.example/Zombicide-40k/vendor/combat-lab/','http://slyen4425-cloud.github.io/Zombicide-40k/vendor/combat-lab/','https://slyen4425-cloud.github.io/GenSrpg_labo_combat_dynamique/','https://slyen4425-cloud.github.io/Zombicide-40k/other-lab/','https://slyen4425-cloud.github.io/Zombicide-40k/vendor/combat-lab/../../other/']){
   assert.throws(()=>createCaptureLabAuthorUiProviderV1({labBaseUrl:url,hostOrigin:'https://slyen4425-cloud.github.io',mountLabPage(){}}),/same-origin/);
  }
 });

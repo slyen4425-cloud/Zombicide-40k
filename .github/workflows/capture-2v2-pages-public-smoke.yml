@@ -82,16 +82,17 @@ jobs:
           if(!contents.trim()) throw new Error('Public Lab runtime is empty');
           console.log('Public native Combat Lab scene, World entry and pinned author dependencies verified');
           JS
-      - name: Load the reported failing ESM in real Chromium from deployed GitHub Pages
+      - name: Load the reported failing ESM in Chromium and Firefox from public GitHub Pages
         shell: bash
         run: |
           set -euo pipefail
           npm install --prefix /tmp/gens-capture-pages-browser --no-save playwright@1.55.0
-          /tmp/gens-capture-pages-browser/node_modules/.bin/playwright install --with-deps chromium
+          /tmp/gens-capture-pages-browser/node_modules/.bin/playwright install --with-deps chromium firefox
           node <<'JS'
-          const {chromium}=require('/tmp/gens-capture-pages-browser/node_modules/playwright');
+          const {chromium,firefox}=require('/tmp/gens-capture-pages-browser/node_modules/playwright');
           (async()=>{
-            const browser=await chromium.launch({headless:true});
+            for(const [name,launcher] of [['Chromium',chromium],['Firefox',firefox]]){
+            const browser=await launcher.launch({headless:true});
             try{
               const page=await browser.newPage({viewport:{width:932,height:430},isMobile:true,hasTouch:true});
               await page.goto('https://slyen4425-cloud.github.io/Zombicide-40k/capture-world-2v2-test.html',
@@ -103,7 +104,8 @@ jobs:
                 return {name:typeof mod.normalizeProjectilePowerV1,url:url.href};
               });
               if(result.name!=='function')throw new Error('Android projectile ESM export unavailable: '+result.url);
-              console.log('Live landscape Chromium dynamic ESM import OK:',result.url);
+              console.log('Live landscape '+name+' dynamic ESM import OK:',result.url);
             }finally{await browser.close();}
+            }
           })().catch(error=>{console.error(error);process.exitCode=1;});
           JS

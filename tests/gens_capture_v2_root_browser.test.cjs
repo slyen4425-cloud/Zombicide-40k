@@ -78,6 +78,9 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.match(await iframe.getAttribute('src'),/vendor\/combat-lab\/examples\/dom-demo\/capture-editor-v2\.html/);
   const official=page.frameLocator('#gensCaptureV2Root iframe');
   await official.locator('[data-capture-editor-human]').waitFor({timeout:25000});
+  // Static HTML appears before its real JS owner has attached listeners:
+  // wait for native setTab() to populate the other tab states.
+  await official.locator('[data-editor-tab="skills"][data-active="false"]').waitFor({timeout:25000});
   // No alternate skill/rule editor: exercise the REAL author UI's tabs.
   await official.locator('[data-editor-tab="skills"]').tap();
   try{

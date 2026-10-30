@@ -55,10 +55,15 @@ test('Pages pipeline stages the UNMODIFIED Exploration main owner, not its gh-pa
  const workflow=text('.github/workflows/main.yml');
  const p=pins();
  assert.match(workflow,/repository: slyen4425-cloud\/laboratoire_dynamique_exploration-/);
- assert.ok(workflow.includes('ref: '+p.exploration.sha));
+ assert.match(workflow,/ref: \$\{\{ steps\.capture_pages_pins\.outputs\.exploration \}\}/,
+  'Exploration must resolve from the one canonical pin rather than a second hardcoded SHA');
  assert.match(workflow,/git ls-remote[^\n]+refs\/heads\/main/);
  assert.match(workflow,/cp -a exploration-lab\/src exploration-lab\/assets _site\/vendor\/exploration-lab\//);
- assert.match(workflow,/stage_capture_lab_delivery\.mjs/);
+ assert.match(workflow,/node tools\/stage_capture_v2_labs\.mjs combat-lab exploration-lab _site/);
+ assert.match(workflow,/rsync -a --exclude='\/gensrpg\/capture\/'/,
+  'old Capture scripts must not be in the actual Pages release');
+ assert.doesNotMatch(workflow,/stage_capture_lab_delivery\.mjs|combat-assets/,
+  'do not publish dormant/alternate Capture V1 alongside V2');
 });
 
 test('packaged native Exploration and Combat are present when Pages build is supplied',()=>{

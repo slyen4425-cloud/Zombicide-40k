@@ -81,6 +81,18 @@ test('official vendor imports under final URL-shaped directory; never rely on a 
  }
  assert.equal(engine.source.sha,gitsha(lab));
 });
+test('native projectile-power contract is transported and executable at the actual published ESM path',async()=>{
+ const relative='vendor/combat-lab/src/contracts/projectile-power-v1.js';
+ const delivery=JSON.parse(read(data+'delivery-manifest.json').toString());
+ assert.ok(delivery.transport.some(x=>x.path===relative),
+  'The exact JS module from the Android error must exist in the official Pages manifest');
+ const bytes=read(relative);
+ assert.deepEqual(bytes,fs.readFileSync(path.join(lab,'src/contracts/projectile-power-v1.js')),
+  'No rewritten/doubled projectile power rule may be shipped by GenSrpg');
+ const contract=await import(pathToFileURL(path.join(site,relative)).href);
+ assert.equal(typeof contract.normalizeProjectilePowerV1,'function',
+  'The mobile browser must be able to resolve this real named export');
+});
 test('package never edits the public entry, PWA, legacy owner or real profiles',()=>{
  const index=fs.readFileSync(path.join(root,'index.html'));
  assert.equal(gitblob(index),'c53d234fca05e49a33650a61776fae1c1985613e',

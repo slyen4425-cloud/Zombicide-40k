@@ -4,7 +4,7 @@
 // No storage, gameplay, view, fallback, clock or second roster authority here.
 export function createCaptureSavedProfileBattleBridgeV1({
   activeHeroId,loadHeroState,saveHeroState,readEncounter,
-  exported,adaptCombatExport,validateBattleResult
+  exported,adaptCombatExport,validateBattleResult,encounterKind='wild'
 }) {
   for(const [key,fn] of Object.entries({
     activeHeroId,loadHeroState,saveHeroState,readEncounter,adaptCombatExport,validateBattleResult
@@ -12,6 +12,10 @@ export function createCaptureSavedProfileBattleBridgeV1({
     if(typeof fn!=='function')throw new TypeError('Capture owner requires '+key);
   }
   if(!exported||typeof exported!=='object')throw new TypeError('Official authored Combat export required');
+  if(encounterKind!=='wild'&&encounterKind!=='trainer'){
+    throw new TypeError('Explicit Capture encounter kind must be wild or trainer');
+  }
+  const isTrainer=encounterKind==='trainer';
   const nativeSource=adaptCombatExport(exported);
   const format=nativeSource?.battleFormat;
   const actors=format?.actors;
@@ -48,7 +52,32 @@ export function createCaptureSavedProfileBattleBridgeV1({
     }
   }
 
+  // A trainer is a distinct World event, not a wild battle with renamed UI.
+  // World owns trainer identity, difficulty and the declared opponent roster.
+  function trainerFingerprint(encounter){
+    return JSON.stringify({
+      type:encounter?.type,trainerId:encounter?.trainerId,
+      trainerName:encounter?.trainerName,trainerDifficulty:encounter?.trainerDifficulty,
+      creatureIds:encounter?.creatureIds,captureAllowed:encounter?.captureAllowed
+    });
+  }
   function encounterSpecies(encounter){
+    if(isTrainer){
+      if(!['friendly_trainer','hostile_trainer'].includes(encounter?.type)||
+        !text(encounter?.encounterId)||!text(encounter?.trainerId)||
+        !text(encounter?.trainerName)||
+        !Number.isInteger(encounter?.trainerDifficulty)||
+        encounter.trainerDifficulty<1||encounter.trainerDifficulty>4||
+        encounter.captureAllowed!==false){
+        throw new TypeError('Official trainer encounter requires stable NPC identity, difficulty and capture prohibition');
+      }
+      const ids=encounter.creatureIds;
+      if(!Array.isArray(ids)||ids.length!==activeCount||
+        ids.some((id,i)=>!text(id)||id!==enemyActors[i].creatureId)){
+        throw new TypeError('Trainer opponent roster must match official authored Combat creatures');
+      }
+      return [...ids];
+    }
     if(encounter?.type!=='wild'||!text(encounter.encounterId)||!text(encounter.creatureId)){
       throw new TypeError('A live Capture wild encounter is required');
     }
@@ -150,13 +179,14 @@ export function createCaptureSavedProfileBattleBridgeV1({
   function prepareEncounter(){
     const heroId=text(activeHeroId()),encounter=readEncounter();
     if(!heroId)throw new TypeError('Capture active hero identity required');
-    const wildSpecies=encounterSpecies(encounter);
+    const declaredSpecies=encounterSpecies(encounter);
+    const initialTrainer=isTrainer?trainerFingerprint(encounter):null;
     const saved=loadHeroState(heroId);
     const player=readActiveMembers(saved);
     const reserveAtStart=reserveFingerprint(saved,player);
     const encounterId=text(encounter.encounterId);
     const enemies=enemyActors.map((actor,i)=>{
-      const instanceId='wild:'+encounterId+(i?':'+(i+1):'');
+      const instanceId=(isTrainer?'trainer:':'wild:')+encounterId+(i?':'+(i+1):'');
       return Object.freeze({
         instanceId,creatureId:actor.creatureId,
         hp:nativeSource.fighterConfigs[actor.creatureId].maxHp,
@@ -176,7 +206,7 @@ export function createCaptureSavedProfileBattleBridgeV1({
     const snapshot=Object.freeze({sides:[
       {name:localActors[0].displayName??'',active:player.map(x=>x.uid),
        creatures:player.map(asCreature)},
-      {name:enemyActors[0].displayName??'',active:enemies.map(x=>x.instanceId),
+      {name:isTrainer?encounter.trainerName:(enemyActors[0].displayName??''),active:enemies.map(x=>x.instanceId),
        creatures:enemies.map(asCreature)}
     ]});
     let applied=false;
@@ -201,9 +231,10 @@ export function createCaptureSavedProfileBattleBridgeV1({
           throw new Error('Stale Capture encounter: result cannot be persisted');
         }
         const species=encounterSpecies(live);
-        if(species.length!==wildSpecies.length||
-          species.some((id,i)=>id!==wildSpecies[i])){
-          throw new Error('Stale Capture wild encounter species changed');
+        if(species.length!==declaredSpecies.length||
+          species.some((id,i)=>id!==declaredSpecies[i])||
+          (isTrainer&&trainerFingerprint(live)!==initialTrainer)){
+          throw new Error('Stale Capture encounter identity, difficulty or species changed');
         }
         const state=loadHeroState(heroId);
         if(!matchesExpected(state,player,reserveAtStart)){

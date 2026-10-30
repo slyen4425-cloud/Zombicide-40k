@@ -273,11 +273,11 @@ function captureDeclareWorldTrainerEncounter(type,location){
     captureTrainerDifficulty134():null;
   if(!Number.isInteger(difficulty)||difficulty<1||difficulty>4)
     throw new Error("La difficulté du dresseur n'est pas configurée par le World.");
-  if(typeof crypto?.randomUUID!=="function")
+  if(typeof globalThis.crypto?.randomUUID!=="function")
     throw new Error("Identifiant sécurisé du dresseur indisponible.");
   const hostile=type==="hostile_trainer";
   if(!hostile&&type!=="friendly_trainer")throw new TypeError("Type de dresseur World invalide");
-  return {type,trainerId:"npc-"+crypto.randomUUID().replaceAll("-",""),
+  return {type,trainerId:"npc-"+globalThis.crypto.randomUUID().replaceAll("-",""),
     trainerName:hostile?"Dresseur hostile":"Dresseur amical",
     trainerDifficulty:difficulty,creatureIds:[String(creature.id)],
     captureAllowed:false,text:hostile?

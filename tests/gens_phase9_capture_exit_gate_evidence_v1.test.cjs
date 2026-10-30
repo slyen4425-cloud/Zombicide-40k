@@ -145,7 +145,9 @@ assert.equal(staged.stagedExplicitProfileMigration?.productionActivated,false);
 assert.equal(staged.stagedExplicitProfileMigration?.oneOwner,'assets/gensrpg/capture/team-roster-v1.js');
 const hubCommand=read('assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs');
 assert.match(hubCommand,/combatPort\.startEncounter\(/,'Hub must use the existing single Combat owner');
-assert.match(hubCommand,/transaction\.prepareWild\(/,'Hub must read the original World ticket');
+assert.match(hubCommand,/owner\.prepareWild\(creatureId\)/,'Wild still uses its original World ticket');
+assert.match(hubCommand,/owner\.prepareTrainer\(\)/,'Trainer uses the explicit typed World ticket');
+assert.match(hubCommand,/isTrainer\?trainerTransaction:transaction/,'One command dispatches to one typed transaction');
 assert.doesNotMatch(hubCommand,/localStorage|window\.|createCombatSession|createCombatRuntime|startSkill|location\.reload/,
   'Hub cannot own another storage, global old combat override, clock or damage rules');
 assert.equal(staged.stagedWorldWildTransaction,true);

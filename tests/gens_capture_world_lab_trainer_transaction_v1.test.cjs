@@ -119,3 +119,30 @@ test('one pending trainer ticket; cancelled attempt leaves original NPC encounte
  assert.equal(f.consumes(),0);
  assert.equal(tx.status().pending,false);
 });
+
+test('one existing Combat Lab command dispatches trainer to typed ticket and commits once',async()=>{
+ const {createCaptureLabHubBattleCommandV1}=await import(pathToFileURL(path.resolve(__dirname,
+  '../assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs')).href);
+ let settle,installed=false,battle=false,kind=null,applied=0,prepared=0,returned=[];
+ const completion=new Promise(resolve=>{settle=resolve});
+ const ticket={encounterId:'trainer-7',snapshot:{sides:[]},
+  resolveBattle:()=>({}),applyResult:()=>{applied++;return {applied:true,outcome:'flee'}},
+  cancel:()=>true};
+ const tx={prepareTrainer:()=>{prepared++;return ticket},status:()=>({pending:false})};
+ const wild={prepareWild:()=>{throw Error('wild must not start')},status:()=>({pending:false})};
+ const port={status:()=>({installed,battleActive:battle}),
+  install:()=>{installed=true},uninstall:()=>{installed=false},
+  startEncounter:options=>{kind=options.mode;battle=true;return {completion}},
+  stopEncounter:()=>{battle=false}};
+ const command=createCaptureLabHubBattleCommandV1({transaction:wild,trainerTransaction:tx,
+  combatPort:port,engine:{createRosterSession:()=>{}},
+  createProvider:()=>({}),mountBattle:()=>{},onReturn:e=>returned.push(e)});
+ const started=command.startTrainerBattle();
+ assert.equal(started.ready,true);assert.equal(kind,'capture-world-trainer');
+ assert.equal(prepared,1);assert.equal(installed,true);
+ settle({outcome:'flee',creatures:[]});
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(applied,1);assert.equal(returned.length,1);
+ assert.equal(command.status().phase,'idle');assert.equal(installed,false);
+ assert.equal(command.dispose(),true);
+});

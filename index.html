@@ -8827,12 +8827,18 @@ function resumeAfterLiveEdit(){
 }
 
 function resumeGame(){
+  // The new module has no old Capture session state to resume.
+  if(window.GensShellModuleLaunchV1?.activeModule?.()==="capture")
+    return window.GensShellModuleLaunchV1.startModuleSession("capture");
   if(!hasActiveSession())return;
   {const e=document.getElementById("setup");if(e)e.style.display="none";}
   {const e=document.getElementById("menu");if(e)e.style.display="block";}
   renderMenuStatuses();renderDeckBadge();applyGameCustomizationUi();window.scrollTo(0,0);
 }
 function newGame(){
+  // Capture V2 owns its complete session launch. Never enter old Capture pregame or clear legacy saves.
+  if(window.GensShellModuleLaunchV1?.activeModule?.()==="capture")
+    return window.GensShellModuleLaunchV1.startModuleSession("capture");
   if(hasActiveSession() && !confirm("Commencer une nouvelle partie ? Toute la progression actuelle sera effacée."))return;
 
   // UI/state reset must be immediate and never depend on network.

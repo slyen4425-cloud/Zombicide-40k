@@ -460,9 +460,9 @@ def verify():
                     # current graph fields once, not a guessed intermediate.
                     import re
                     for pattern,replacement in (
-                        (r"size,\\d+,'production composition","size,94,'production composition"),
-                        (r"allJs\\.length,\\d+,","allJs.length,160,"),
-                        (r"reachable\\.size,\\d+,","reachable.size,137,"),
+                        (r"size,\d+,'production composition","size,94,'production composition"),
+                        (r"allJs\.length,\d+,","allJs.length,160,"),
+                        (r"reachable\.size,\d+,","reachable.size,137,"),
                     ):
                         expected_after,count=re.subn(pattern,replacement,expected_after)
                         assert count==1, f"{path}: expected exactly one historical graph field {pattern}"

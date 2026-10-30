@@ -71,12 +71,18 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.locator('#gensGameHome:visible').count(),0);
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   const buttons=page.locator('#gensCaptureV2Root [data-capture-v2-view]');
-  assert.equal(await buttons.count(),7);
+  assert.equal(await buttons.count(),5);
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="creature"]').tap();
   const iframe=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
   await iframe.waitFor({state:'visible'});
   assert.match(await iframe.getAttribute('src'),/vendor\/combat-lab\/examples\/dom-demo\/capture-editor-v2\.html/);
-  await page.frameLocator('#gensCaptureV2Root iframe').locator('[data-capture-editor-human]').waitFor({timeout:25000});
+  const official=page.frameLocator('#gensCaptureV2Root iframe');
+  await official.locator('[data-capture-editor-human]').waitFor({timeout:25000});
+  // No alternate skill/rule editor: exercise the REAL author UI's tabs.
+  await official.locator('[data-editor-tab="skills"]').tap();
+  await official.locator('[data-editor-panel="skills"]:visible').waitFor({timeout:20000});
+  await official.locator('[data-editor-tab="combat"]').tap();
+  await official.locator('[data-editor-panel="combat"]:visible').waitFor({timeout:20000});
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="bestiary"]').tap();
   await page.frameLocator('#gensCaptureV2Root iframe').locator('[data-bestiary]').waitFor({timeout:25000});
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').tap();

@@ -28,6 +28,15 @@ export function createCaptureNativeLabProviderV1({resolveBattle,mountBattle}) {
      !source.exported){
    throw new TypeError('Signed Lab Combat actor/export boundary incomplete');
   }
+  // World selects a level; only the signed Lab adapter owns its coefficients.
+  // Do not start a trainer when the pinned Lab cannot execute that policy.
+  if(source.trainerDifficulty!==undefined&&
+     (!Number.isInteger(source.trainerDifficulty)||source.trainerDifficulty<1||
+      source.trainerDifficulty>4||
+      native.trainerDifficultyPolicy?.schema!=='capture-trainer-difficulty-policy-v1'||
+      native.trainerDifficultyPolicy.levels?.[source.trainerDifficulty-1]?.level!==source.trainerDifficulty)){
+   throw new TypeError('Signed Combat Lab trainer difficulty policy required for native battle');
+  }
   const team=native.battleFormat.teamOf(actorIds[0]);
   const foe=native.battleFormat.teamOf(actorIds[count]);
   if(team===foe||actorIds.some((id,i)=>native.battleFormat.teamOf(id)!==(i<count?team:foe)))

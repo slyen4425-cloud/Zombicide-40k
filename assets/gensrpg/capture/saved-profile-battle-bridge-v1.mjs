@@ -217,7 +217,8 @@ export function createCaptureSavedProfileBattleBridgeV1({
           !equalSnapshots(context?.snapshot,snapshot)){
           throw new TypeError('Official Combat resolver received a different Capture encounter snapshot');
         }
-        return Object.freeze({nativeCombatSource:nativeSource,actorIds,exported});
+        return Object.freeze({nativeCombatSource:nativeSource,actorIds,exported,
+          ...(isTrainer?{trainerDifficulty:encounter.trainerDifficulty}:{})});
       },
       applyResult(rawResult){
         if(applied)return false;

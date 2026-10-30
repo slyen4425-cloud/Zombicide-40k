@@ -83,10 +83,13 @@ test('official vendor imports under final URL-shaped directory; never rely on a 
 });
 test('package never edits the public entry, PWA, legacy owner or real profiles',()=>{
  const index=fs.readFileSync(path.join(root,'index.html'));
- assert.equal(gitblob(index),'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646',
+ assert.equal(gitblob(index),'c53d234fca05e49a33650a61776fae1c1985613e',
    'exact uploaded product source remains unchanged');
  assert.ok(!index.includes('src="vendor/combat-lab/'));
  assert.ok(!index.includes('runtime-data/'));
+ assert.ok(index.includes('capture-lab-author-entry-v1.mjs'),'the real product index must reference the sole native Lab author host');
+ assert.ok(index.includes("GensCaptureLabAuthorUiV1.open('bestiary')"),'the real Capture World must expose the official Bestiary');
+ assert.ok(index.includes("GensCaptureLabAuthorUiV1.open('rules')"),'the real Capture World must expose official combat rule editing');
  const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
  assert.ok(!sw.includes('vendor/combat-lab/'),'not PWA-cached before official activation');
  assert.ok(!sw.includes('runtime-data/'),'no orphan PWA caching');

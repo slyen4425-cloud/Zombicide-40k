@@ -1,5 +1,5 @@
 // Actual Capture editor/skill/rules/bestiary navigation to the unmodified
-// official, continuously developed Combat Lab Pages application.
+// official Combat Lab main modules delivered and verified in the GenSrpg Pages artifact.
 // This is a viewport host, NOT an editor, catalog writer or second combat Core.
 // The game retains its own saved profile and only consumes CI-verified/pinned
 // Lab author exports when a release is published.
@@ -59,7 +59,7 @@ function open(kind){
  const port=owners();
  if(port.status().installed)throw new Error('Une session Labo est déjà active; termine-la avant de changer de domaine');
  const provider=createCaptureLabAuthorUiProviderV1({
-  labBaseUrl:new URL('/GenSrpg_labo_combat_dynamique/',root.location.origin).href,
+  labBaseUrl:new URL('/Zombicide-40k/vendor/combat-lab/',root.location.origin).href,
   hostOrigin:root.location.origin,mountLabPage:makeHost
  });
  let handle;

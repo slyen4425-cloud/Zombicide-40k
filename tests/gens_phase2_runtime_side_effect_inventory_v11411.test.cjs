@@ -41,7 +41,34 @@ while(queue.length){
   reachable.add(rel);
   for(const dep of assetRefs(read(rel)))if(!reachable.has(dep))queue.push(dep);
 }
-assert.equal(reachable.size,134,'R16 adds the byte-identical Core303 Dungeon timeline owner to the R15 reachable graph');
+// The original Phase 2 graph stays byte-identical. The only two new
+// production-reachable modules are the explicitly reviewed Capture Lab author
+// port and entry. Never relax the inventory to allow an unknown dependency.
+const {toHistoricalIndex}=require('./helpers/gens_capture_author_index_reverse_20261030.cjs');
+const historical=toHistoricalIndex(Buffer.from(index,'utf8')).toString('utf8');
+const historicalDirect=[...historical.matchAll(/<script\\b[^>]*\\bsrc=["']([^"']+)["'][^>]*>/gi)]
+  .map(m=>m[1]).filter(src=>/^assets\\/(?:gensrpg|dungeon)\\//.test(src)).map(stripQuery);
+const historicalQueue=[
+ ...historicalDirect.filter(x=>![
+  'assets/gensrpg/gens-mobile-combat-performance-16781022.js',
+  'assets/gensrpg/shell/module-launch-final-authority-v1.js'
+ ].includes(x)),...injected
+];
+const historicalReachable=new Set();
+while(historicalQueue.length){
+ const rel=historicalQueue.shift();
+ if(historicalReachable.has(rel))continue;
+ historicalReachable.add(rel);
+ for(const dep of assetRefs(read(rel)))if(!historicalReachable.has(dep))historicalQueue.push(dep);
+}
+assert.equal(historicalReachable.size,134,'R16 historical reachability must remain unchanged');
+assert.deepEqual([...reachable].filter(rel=>!historicalReachable.has(rel)).sort(),[
+ 'assets/gensrpg/capture/capture-lab-author-entry-v1.mjs',
+ 'assets/gensrpg/capture/lab-ownership-port-v1.js'
+], 'Only the two approved Capture author routes may extend the Phase 2 graph');
+assert.deepEqual([...historicalReachable].filter(rel=>!reachable.has(rel)),[],
+ 'No historical production module may be removed by the Capture author route');
+assert.equal(reachable.size,136,'R16 baseline plus exactly two reviewed Capture author routes');
 assert.equal(reachable.has('assets/gensrpg/capture/legacy-monolith-functions-v1.js'),true,'R10 Capture owner must be genuinely reachable in the production graph');
 assert.equal(reachable.has('assets/gensrpg/core/legacy-magic-sounds-v1.js'),true,'R07 audio data must be genuinely production-reachable');
 assert.equal(reachable.has('assets/gensrpg/dungeon/core303-timeline-single-authority-v1.js'),true,'R16 Core303 must be reachable from its actual synchronous parser slot');

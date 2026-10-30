@@ -12,6 +12,10 @@ const hash=x=>crypto.createHash('sha1').update(Buffer.from('blob '+x.length+'\0'
 const PATCHED='cc355585acab68958bd349ffcf8fa0de4eab9b0d';
 const ORIGINAL='260f00aa179c939f35188ca854f9875971ce8a7b';
 const upload=require('../fixtures/gens_profile_save_upload_exact_edits_20261025.json');
+// The active product has exactly four reviewed Lab author links. Reconstruct
+// the historical HTML ONLY when its full Git blob matches that reviewed
+// version; all other input must still fail the old fingerprint sentinels.
+const labAuthorIndex=require('./gens_capture_author_index_reverse_20261030.cjs');
 function beforeChrome(input){
  const index=Buffer.from(input);
  if(hash(index)!==upload.toBlob)return index;
@@ -31,7 +35,8 @@ let cachedInput=null,cachedOutput=null;
 function sourceForHistoricalSentinel(input){
  const original=Buffer.from(input);
  if(cachedInput&&original.equals(cachedInput))return Buffer.from(cachedOutput);
- const index=beforeChrome(original);
+ const index=beforeChrome(hash(original)===labAuthorIndex.reviewed
+  ?labAuthorIndex.toHistoricalIndex(original):original);
  if(hash(index)!==PATCHED)return index;
  const rollback=execFileSync('python3',[
   path.resolve(__dirname,'../gens_chrome_hero_recursion_patch_20261024.py'),
@@ -43,5 +48,5 @@ function sourceForHistoricalSentinel(input){
 }
 module.exports=sourceForHistoricalSentinel;
 module.exports.beforeChrome=beforeChrome;
-module.exports.accepts=input=>[PATCHED,upload.toBlob].includes(hash(Buffer.from(input)));
+module.exports.accepts=input=>[PATCHED,upload.toBlob,labAuthorIndex.reviewed].includes(hash(Buffer.from(input)));
 if(require.main===module)process.stdout.write(sourceForHistoricalSentinel(require('node:fs').readFileSync(0)));

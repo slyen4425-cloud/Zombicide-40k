@@ -61,3 +61,11 @@ test('World-owned team/healing settings work for a new profile without inventing
   teamSize:3,minBattleTeam:1,maxBattleTeam:3,healMode:'free',healCost:0
  });
 });
+
+test('historical R14 rollback accepts only exact reviewed Capture writer and refuses drift',()=>{
+ const {restoreOriginalR14Owner}=require('../tools/gensrpg_capture_rpg_rules_historical_reverse_20261030.cjs');
+ const restored=restoreOriginalR14Owner(source);
+ assert.notEqual(restored,source,'the reviewed rules writer differs from original R14');
+ assert.equal(restoreOriginalR14Owner(restored),restored,'original R14 is idempotent');
+ assert.throws(()=>restoreOriginalR14Owner(source+' '),/Unauthorized Builders owner drift/);
+});

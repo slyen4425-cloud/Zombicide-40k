@@ -20,7 +20,7 @@ function runSave({profile,controls}){
   saveGameProfiles:profiles=>{assert.equal(profiles[0],profile);writes++;},
   alert:message=>alerts.push(message)
  };
- vm.runInNewContext(originalOwner+'\\nsaveRpgTrainerPvpSettings();',context);
+ vm.runInNewContext(originalOwner+';saveRpgTrainerPvpSettings();',context);
  return {writes,alerts};
 }
 test('World settings save never rewrites the legacy battle rules or a saved profile identity',()=>{

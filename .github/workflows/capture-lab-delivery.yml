@@ -29,6 +29,7 @@ on:
       - 'tests/gens_capture_real_wild_button_browser_v1.test.cjs'
       - 'tests/gens_capture_public_world_2v2_browser_v1.test.cjs'
       - 'tests/gens_capture_native_lab_scene_v1.test.cjs'
+      - 'tests/gens_capture_lab_single_authority_acceptance_v1.test.cjs'
       - 'assets/gensrpg/capture/capture-native-lab-*.mjs'
       - '.github/workflows/capture-lab-delivery.yml'
       - 'service-worker.js'
@@ -94,6 +95,7 @@ jobs:
           COMBAT_ASSETS_ROOT: ${{ github.workspace }}/combat-assets
           CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
         run: |
+          node --test tests/gens_capture_lab_single_authority_acceptance_v1.test.cjs
           node --test tests/gens_capture_native_lab_scene_v1.test.cjs
           node --test tests/gens_capture_lab_delivery_v1.test.cjs
           node --test tests/gens_capture_official_hub_composition_v1.test.cjs

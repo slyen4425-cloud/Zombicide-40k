@@ -236,3 +236,39 @@ test('native provider refuses a trainer level without a signed Lab policy',async
  });
  assert.throws(()=>provider.createBattle({snapshot}),/trainer.*policy|policy.*trainer/i);
 });
+test('projected trainer NPC HP requires Lab combat maximum; wild and player bounds stay strict',()=>{
+ require('../assets/gensrpg/capture/battle-bridge-contract-v1.js');
+ const contract=globalThis.GensCaptureBattleBridgeContractV1;
+ const snapshot={sides:[
+  {name:'Joueur',active:['hero'],creatures:[{instanceId:'hero',creatureId:'p',hp:60,maxHp:100}]},
+  {name:'PNJ',active:['npc'],creatures:[{instanceId:'npc',creatureId:'e',hp:50,maxHp:50}]}
+ ]};
+ const base={outcome:'victory',creatures:[{instanceId:'hero',hp:40},{instanceId:'npc',hp:80}]};
+ assert.throws(()=>contract.result(base,snapshot),/HP/i,'wild cannot exceed its original HP maximum');
+ assert.throws(()=>contract.result(base,snapshot,{encounterKind:'trainer'}),/HP|Lab|max/i,
+  'trainer cannot accept an unverified projected maximum');
+ const signed={...base,creatures:[base.creatures[0],{...base.creatures[1],combatMaxHp:100}]};
+ assert.equal(contract.result(signed,snapshot,{encounterKind:'trainer'}).creatures[1].hp,80);
+ assert.throws(()=>contract.result({...signed,creatures:[
+  signed.creatures[0],{...signed.creatures[1],hp:101}]},snapshot,{encounterKind:'trainer'}),/HP/i);
+ assert.throws(()=>contract.result({...signed,creatures:[
+  {instanceId:'hero',hp:101},signed.creatures[1]]},snapshot,{encounterKind:'trainer'}),/HP/i,
+  'trainer may never raise the saved player maximum');
+});
+test('trainer World transaction explicitly selects the projected-HP validation mode',async()=>{
+ const {createCaptureWorldLabTrainerTransactionV1}=await import(moduleUrl);
+ const f=fixture();
+ let validationContext;
+ f.options.validateBattleResult=(raw,snapshot,context)=>{
+  assert.equal(snapshot.sides[1].name,'Dresseur confirmé');
+  validationContext=context;
+  return raw;
+ };
+ const ticket=createCaptureWorldLabTrainerTransactionV1(f.options).prepareTrainer();
+ ticket.applyResult({outcome:'flee',creatures:[
+  {instanceId:'wolf-1',hp:81},{instanceId:'trainer:trainer-7',hp:180,combatMaxHp:180}
+ ]});
+ assert.deepEqual(validationContext,{encounterKind:'trainer'});
+ assert.equal(f.profile().creatureTeam[0].hp,81);
+ assert.equal(f.saves(),1);
+});

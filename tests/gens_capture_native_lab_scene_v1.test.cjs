@@ -104,3 +104,30 @@ test('pinned Lab resolver is initialized after async module import inside native
  assert.equal(scene.slice(0,start).includes('globalAsset.createGlobalPresentationAssetResolverV1'),false,
   'the media owner must not be invoked outside the mounted Lab scene');
 });
+test('native trainer result reports real Lab projected NPC maximum, without clipping or boosting the player',async()=>{
+ const {createCaptureNativeLabProviderV1}=await load();
+ const policy={schema:'capture-trainer-difficulty-policy-v1',version:1,
+  levels:[1,2,3,4].map(level=>({level,hpMultiplier:level,outgoingDamagePctBonus:level-1}))};
+ const signed={nativeCombatSource:{...native,trainerDifficultyPolicy:policy},
+  actorIds:ids,exported:{battleFormat:'signed-Lab-author'},trainerDifficulty:3};
+ let settle;
+ const provider=createCaptureNativeLabProviderV1({
+  resolveBattle:()=>signed,
+  mountBattle:async()=>({combat:{
+   completion:new Promise(resolve=>{settle=resolve}),flee:()=>false
+  },dispose(){}})
+ });
+ const handle=provider.createBattle({snapshot});
+ provider.startBattle(handle);
+ await new Promise(resolve=>setImmediate(resolve));
+ settle({outcome:'victory',state:{fighters:{
+  player:{hp:65,maxHp:100},ally:{hp:66,maxHp:101},
+  opponent:{hp:150,maxHp:153},'opponent-b':{hp:145,maxHp:154}
+ }}});
+ const completed=await handle.completion;
+ assert.deepEqual(completed.creatures.slice(0,2).map(c=>c.hp),[65,66]);
+ assert.equal(completed.creatures[2].hp,150);
+ assert.equal(completed.creatures[2].combatMaxHp,153);
+ assert.equal(completed.creatures[3].combatMaxHp,154);
+ provider.disposeBattle(handle);
+});

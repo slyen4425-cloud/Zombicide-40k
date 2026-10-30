@@ -46,8 +46,8 @@ while(queue.length){
 // port and entry. Never relax the inventory to allow an unknown dependency.
 const {toHistoricalIndex}=require('./helpers/gens_capture_author_index_reverse_20261030.cjs');
 const historical=toHistoricalIndex(Buffer.from(index,'utf8')).toString('utf8');
-const historicalDirect=[...historical.matchAll(/<script\\b[^>]*\\bsrc=["']([^"']+)["'][^>]*>/gi)]
-  .map(m=>m[1]).filter(src=>/^assets\\/(?:gensrpg|dungeon)\\//.test(src)).map(stripQuery);
+const historicalDirect=[...historical.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi)]
+  .map(m=>m[1]).filter(src=>/^assets\/(?:gensrpg|dungeon)\//.test(src)).map(stripQuery);
 const historicalQueue=[
  ...historicalDirect.filter(x=>![
   'assets/gensrpg/gens-mobile-combat-performance-16781022.js',

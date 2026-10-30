@@ -206,11 +206,15 @@ test('native authored source, existing saved-profile seam and sole Core provider
 
 // Data-owned author matrix: verify every published species, not merely a
 // static list or a preview dummy. All definitions come from the same pinned Lab.
-test('all twelve media-complete pinned Lab author creature transfers export genuine native 1v1 with their own skills', async()=>{
- const official=["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"];
+test('all thirteen media-complete pinned Lab author creature transfers export genuine native 1v1 with their own skills', async()=>{
+ const official=["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_nat_1","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"];
  const settings=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/capture-lab-authored-preview-settings-v1.json'),'utf8'));
  const transfers=settings.authoredCreatureFiles.map(read);
- assert.equal(transfers.length,12,'only the twelve media-complete official species are deliverable');
+ const upstream=await importLab('src/catalogs/capture-showcase-creature-presets-v1.js');
+ assert.deepEqual([...settings.authoredCreatureFiles].sort(),
+  [...upstream.CAPTURE_SHOWCASE_CREATURE_PRESET_FILES_V1].sort(),
+  'All staged species must match the pinned Lab main author manifest, without a shadow catalog');
+ assert.equal(transfers.length,13,'only the thirteen media-complete official species are deliverable');
  assert.deepEqual(transfers.map(x=>x.draft.id),official,'exact author order and IDs, no aliases or invented entries');
  const visualRoot=process.env.COMBAT_ASSETS_ROOT;
  assert.ok(visualRoot,'Official pinned visual catalog checkout required');

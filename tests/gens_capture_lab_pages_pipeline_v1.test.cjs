@@ -16,7 +16,7 @@ test('Pages release resolves the single immutable official Combat and visual SHA
  const source=read('assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs');
  const pins=JSON.parse(read('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'));
  assert.equal(pins.authoredSourceLabPin,'248f718ec924106d16999d59e5dc8310f8450180');
- assert.equal(pins.authoredAssetsPin,'b3d46ce6f2639ebb59a2984aeff17f97cbcd7377');
+ assert.equal(pins.authoredAssetsPin,'e6ef519b062e9e590faae63130ec12bfab263bac');
  assert.ok(source.includes(pins.authoredSourceLabPin));
  assert.ok(workflow.includes('id: capture_pages_pins'),'Pages must resolve from source manifest');
  assert.ok(workflow.includes("console.log('combat='+COMBAT_LAB_SOURCE_V1.sha)"));

@@ -1,3 +1,14 @@
+## 2026-10-30 — Synchronisation automatique approuvée Combat main -> GenSrpg (branche dédiée)
+- BASE main@a18774bc524259ebb8d40f5e24211fd1f2f40730, checkpoint `checkpoint/gensrpg-start-combat-main-autosync-2026-10-30`, branche `work/gensrpg-combat-main-autosync-2026-10-30`.
+- Contrat : seul Combat `refs/heads/main` et son run Laboratory CI SUCCESS au SHA exact peuvent déclencher une mise à jour. `gh-pages` et tout autre commit hors main sont interdits, même si CI verte.
+- `tools/sync_capture_combat_main_pin.mjs` conserve une autorité source unique; modifie atomiquement le chargeur, manifeste auteur/World et les assertions de SHA au lieu de créer des doublons. Aucun asset médias ni gameplay ne sont automatiquement promus.
+- `.github/workflows/gensrpg-capture-combat-main-autosync.yml` : horaires 17 et 47 de chaque heure + déclenchement manuel; checkpoint de départ et PR automatique par SHA, six workflows indépendants (Combat réel, livraison auteur, Pages build, architecture, Firefox, Tactical), contrôle des SHA au moment de fusionner. Branches non conformes restent en PR, jamais publiées.
+- Déploiement conditionné à `main` : les previews/PR ne peuvent pas publier Pages. Après promotion, workflow Pages redéclenché explicitement, puis smoke public 2v2.
+- Tests TDD : `tests/gens_capture_combat_main_autosync_20261030.test.mjs` et `tests/gens_capture_combat_autosync_workflow_20261030.test.cjs` couvrent drift, absence de source concurrente et contrôle publication. Les vraies prochaines promotions restent à prouver en conditions futures : ne pas annoncer une synchronisation réalisée tant qu'aucun nouveau main Combat n'est arrivé.
+- Pas de modification de `index.html`, SW, sauvegardes, Combat ou Exploration.
+
+---
+
 ## 2026-10-30 — Contrats CI actifs Builder/Survie/Tactical (PR #221)
 - START : main@856e69be736ab68e91eac5357881acb6b54d17cb ; checkpoint `checkpoint/gensrpg-start-retired-ci-2026-10-30` ; branche `work/gensrpg-retired-ci-contracts-2026-10-30`.
 - TDD RED prouvé sur main : Builder #41043406380 (assertion V16.78.102 périmée) et V113 #41043406428 (ancien module Survival supprimé). Cascades observées et traitées sur la branche : propriété native de la fiche héros, copie périmée du test UI, stub d'équipement sans Core.

@@ -1,5 +1,6 @@
 name: Capture official Combat runtime
 on:
+  workflow_dispatch:
   push:
     branches: ['work/gensrpg-capture-lab-bridge-runtime-*', 'work/gensrpg-capture-lab-bridge-history-*', 'work/gensrpg-capture-explicit-profile-migration-*', 'work/gensrpg-capture-world-paired-encounters-*']
   pull_request:

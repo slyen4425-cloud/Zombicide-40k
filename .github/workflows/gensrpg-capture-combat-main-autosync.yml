@@ -1,0 +1,34 @@
+name: GenSrpg auto-sync verified Combat main
+on:
+  schedule:
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: gensrpg-approved-combat-main
+  cancel-in-progress: false
+
+jobs:
+  official-combat-sync:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 88
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify immutable source pin and failure protection
+        run: |
+          node --test tests/gens_capture_combat_main_autosync_20261030.test.mjs
+          node --test tests/gens_capture_combat_main_only_guard_20261030.test.cjs
+      - name: Detect approved Combat main, stage versioned PR, certify before merging and publish
+        run: node tools/run_capture_combat_main_autosync.mjs

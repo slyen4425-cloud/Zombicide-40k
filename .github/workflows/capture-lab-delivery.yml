@@ -88,6 +88,16 @@ jobs:
           path: combat-assets
           sparse-checkout: |
             data/assets/catalog
+      - name: Refuser Combat main sans le contrat de scène native déjà validé
+        run: |
+          node - <<'JS'
+          const fs = require('node:fs');
+          const scene = fs.readFileSync('combat-lab/src/ui/capture-combat-preview-v1.js','utf8');
+          const combat = fs.readFileSync('combat-lab/src/ui/combat-2v2-test-ui.js','utf8');
+          if (!scene.includes('embeddedBattle') || !combat.includes('embeddedBattle')) {
+            throw new Error('Combat main lacks embeddedBattle native scene ownership; cannot ship GenSrpg without an unapproved gh-pages fallback');
+          }
+          JS
       - name: Build official static release payload without installing it in the game
         run: |
           mkdir -p _site

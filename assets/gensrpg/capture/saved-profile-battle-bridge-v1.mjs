@@ -98,7 +98,7 @@ export function createCaptureSavedProfileBattleBridgeV1({
   function readActiveMembers(hero){
     if(!hero||!Array.isArray(hero.creatureTeam)||
       hero.creatureTeam.length!==activeCount||
-      (activeCount===1&&Array.isArray(hero.creatureReserve)&&hero.creatureReserve.length)) {
+      (activeCount===1&&!isTrainer&&Array.isArray(hero.creatureReserve)&&hero.creatureReserve.length)) {
       throw new TypeError('Persisted Capture active team requires '+activeCount+' members'+
         (activeCount===1?' and no reserve':''));
     }
@@ -131,7 +131,7 @@ export function createCaptureSavedProfileBattleBridgeV1({
       throw new TypeError('Invalid Capture reserve: expected an array');
     }
     const reserve=raw??[];
-    if(activeCount===1&&reserve.length){
+    if(activeCount===1&&!isTrainer&&reserve.length){
       throw new TypeError('Capture 1v1 historical profile requires no reserve');
     }
     const used=new Set(active.map(item=>item.uid));

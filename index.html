@@ -4237,6 +4237,7 @@ body.gensCapturePregame #sessionHeroSetup::before{
 <script src="assets/gensrpg/core/asset-resolver-v1.js"></script>
 <script src="assets/gensrpg/survival/entry-v1.js?v=1"></script>
 <script src="assets/gensrpg/dungeon/entry-v1.js?v=1"></script>
+<script src="assets/gensrpg/core/game-profile-builder-v1.js"></script>
 <script src="assets/gensrpg/capture-v2/identity-v1.js"></script>
 <script src="assets/gensrpg/core/legacy-visual-data-v1.js"></script><script src="assets/gensrpg/shell/legacy-hub-family-ui-v1.js"></script>
 <script src="assets/gensrpg/builders/equipment-library-editor-v1.js"></script>
@@ -6064,7 +6065,7 @@ function ensureBaseGameProfile(){
   ensureCustomContentGameModes(profiles);
 
   if(!profiles.some(p=>p.id===GAME_PROFILE_BASE_ID)){
-    const base=captureCurrentGameProfile("Zombicide — Base",GAME_PROFILE_BASE_ID,true);
+    const base=gensBuildGameProfileBaseV1("Zombicide — Base",GAME_PROFILE_BASE_ID,true);
     base.gameStyle="zombicide";base.survival=gensReferenceSurvivalSettings();
     base.factory=JSON.parse(JSON.stringify({...base,factory:undefined}));
     profiles.unshift(base);
@@ -6072,7 +6073,7 @@ function ensureBaseGameProfile(){
   }
 
   if(!profiles.some(p=>p.id===GAME_PROFILE_DUNGEON_ID)){
-    const dungeon=captureCurrentGameProfile("Dungeon RPG — Démo",GAME_PROFILE_DUNGEON_ID,true);
+    const dungeon=gensBuildGameProfileBaseV1("Dungeon RPG — Démo",GAME_PROFILE_DUNGEON_ID,true);
     dungeon.gameStyle="dungeon";dungeon.rpgUniverse=gensReferenceRpgSettings();
     dungeon.modules={rules:true,objects:true,heroes:true,enemies:true,waves:false};
     dungeon.rules={
@@ -6862,7 +6863,7 @@ function saveGameProfileEditor(){
   const existing=profiles.find(x=>x.id===gameProfileEditingId);
   const id=(gameProfileCreating||!existing)?gameProfileId():existing.id;
 
-  const captured=captureCurrentGameProfile(name,id,existing?.builtIn||false);
+  const captured=gensBuildGameProfileBaseV1(name,id,existing?.builtIn||false);
   captured.modules={
     rules:document.getElementById("gpeRules").checked,
     objects:document.getElementById("gpeObjects").checked,
@@ -6894,7 +6895,7 @@ function saveCurrentSetupIntoActiveProfile(){
   const idx=profiles.findIndex(x=>x.id===active.id);
   if(idx<0)return;
 
-  const fresh=captureCurrentGameProfile(active.name,active.id,active.builtIn);
+  const fresh=gensBuildGameProfileBaseV1(active.name,active.id,active.builtIn);
   fresh.modules={...active.modules};
   fresh.heroPool=Array.isArray(active.heroPool)?[...active.heroPool]:currentAllHeroIds();
   fresh.objectPool=Array.isArray(active.objectPool)?[...active.objectPool]:ITEMS.map(it=>String(it.id));

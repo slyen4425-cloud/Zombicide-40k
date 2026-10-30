@@ -9,7 +9,7 @@ const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
 assert.doesNotThrow(()=>new Function(src),'V16.78.102.2 cleanup syntax');
 assert.match(src,/APP_VERSION="16\.78\.102\.2"/);
 assert.match(index,/id="dc01Heroes"/,'Dungeon party cards must exist');
-assert.match(index,/function renderHeroes\(x\)/,'Dungeon party renderer must remain present');
+assert.match(src,/function repairPartyCards\(\)/,'current scoped cleanup owns Dungeon party-card art repair');
 assert.match(index,/id="dungeonCombatFormula"/,'legacy rule summary container must remain present for compatibility');
 assert.match(sw,/gensrpg-cache-16\.78\.100-ui-cleanup/);
 assert.ok(sw.includes('gens-dungeon-ui-cleanup-1678100.js'));

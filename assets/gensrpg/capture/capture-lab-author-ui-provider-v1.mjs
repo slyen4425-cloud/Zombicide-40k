@@ -1,4 +1,4 @@
-// UI adapter to the EXISTING published Combat Lab editor and Bestiary.
+// UI adapter to the unmodified Combat Lab editor and Bestiary transported from its pinned main SHA.
 // It cannot author a creature, skill, combat rule, drop or XP; only the Lab's
 // own published UI and export protocols may do that. This adapter has NO
 // alternate editor model, combat runtime, storage, exporter or fallback.
@@ -17,9 +17,9 @@ export function createCaptureLabAuthorUiProviderV1({labBaseUrl,hostOrigin,mountL
  const base=new URL(labBaseUrl);
  const host=new URL(hostOrigin);
  if(base.protocol!=="https:"||base.origin!==host.origin||
-    !base.pathname.endsWith("/GenSrpg_labo_combat_dynamique/")||
+    base.pathname!=="/Zombicide-40k/vendor/combat-lab/"||
     base.search||base.hash) {
-  throw new TypeError("Only the same-origin official Combat Lab Pages author is supported");
+  throw new TypeError("Only the same-origin GenSrpg pinned Combat main vendor author is supported");
  }
  const handles=new WeakSet();
  function openAuthoring(kind,context={}){

@@ -27,17 +27,28 @@
     if(new Set(ids).size!==ids.length)throw new TypeError("Creature instanceIds must be unique across sides");
     return {version:1,sides};
   }
-  function result(input,original){
+  function result(input,original,{encounterKind="wild"}={}){
     if(!plain(input)||!TYPES.includes(input.outcome))throw new TypeError("Unknown battle outcome");
+    if(encounterKind!=="wild"&&encounterKind!=="trainer")throw new TypeError("Unknown Capture encounter kind");
     const source=snapshot(original);
     if(!Array.isArray(input.creatures))throw new TypeError("Battle result creatures required");
     const expected=new Set(source.sides.flatMap(side=>side.creatures.map(c=>c.instanceId)));
+    const trainerEnemies=new Set(encounterKind==="trainer"?source.sides[1].creatures.map(c=>c.instanceId):[]);
     const seen=new Set();
     const creatures=input.creatures.map(c=>{
       if(!plain(c)||!expected.has(c.instanceId)||seen.has(c.instanceId))throw new TypeError("Unknown or repeated result creature");
       seen.add(c.instanceId);
       const base=source.sides.flatMap(side=>side.creatures).find(x=>x.instanceId===c.instanceId);
-      if(!Number.isFinite(c.hp)||c.hp<0||c.hp>base.maxHp)throw new TypeError("Invalid result HP");
+      // Only the trusted native Lab provider supplies the projected NPC max.
+      // It is not a World setting or a new GenSrpg HP calculation. Player HP
+      // and every wild encounter keep the original saved snapshot maximum.
+      const trainerEnemy=trainerEnemies.has(c.instanceId);
+      if(trainerEnemy&&(!Number.isSafeInteger(c.combatMaxHp)||c.combatMaxHp<=0))
+        throw new TypeError("Native Lab trainer result maximum HP required");
+      if(!Number.isFinite(c.hp)||c.hp<0||c.hp>(trainerEnemy?c.combatMaxHp:base.maxHp))
+        throw new TypeError("Invalid result HP");
+      if(encounterKind==="trainer"&&!trainerEnemy&&c.combatMaxHp!==undefined&&c.combatMaxHp!==base.maxHp)
+        throw new TypeError("Native Lab cannot project player maximum HP");
       return {instanceId:c.instanceId,hp:c.hp,ko:c.hp===0};
     });
     if(seen.size!==expected.size)throw new TypeError("Incomplete battle result");

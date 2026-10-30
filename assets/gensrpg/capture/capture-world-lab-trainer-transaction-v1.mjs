@@ -84,7 +84,10 @@ export function createCaptureWorldLabTrainerTransactionV1({
   };
   const bridge=createCaptureSavedProfileBattleBridgeV1({
    activeHeroId,loadHeroState,saveHeroState,readEncounter,
-   exported:authored.exported,adaptCombatExport,validateBattleResult,
+   exported:authored.exported,adaptCombatExport,
+   // World supplies only the NPC identity/level. The official Lab provider
+   // supplies its CombatSession result maximum; no wild validation relaxation.
+   validateBattleResult:(raw,snapshot)=>validateBattleResult(raw,snapshot,{encounterKind:'trainer'}),
    encounterKind:'trainer'
   });
   const ticket=bridge.prepareEncounter();

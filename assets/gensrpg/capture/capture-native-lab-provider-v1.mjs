@@ -61,11 +61,19 @@ export function createCaptureNativeLabProviderV1({resolveBattle,mountBattle}) {
    if(phase==='settled'||phase==='disposed')return false;
    if(!['flee','victory','defeat'].includes(result?.outcome)||!result.state?.fighters)
      throw new TypeError('Only native Lab battle outcomes may be committed');
+   const trainer=source.trainerDifficulty!==undefined;
    const creatures=members.map((member,i)=>{
     const fighter=result.state.fighters[actorIds[i]];
     if(!fighter||!Number.isFinite(fighter.hp)||fighter.hp<0||
-       fighter.hp>member.maxHp)throw new TypeError('Native Lab result missing fighter '+actorIds[i]);
-    return Object.freeze({instanceId:member.instanceId,hp:fighter.hp});
+       (trainer&&(!Number.isSafeInteger(fighter.maxHp)||fighter.maxHp<=0||
+         fighter.hp>fighter.maxHp||(i<count&&fighter.maxHp!==member.maxHp)))||
+       (!trainer&&fighter.hp>member.maxHp)){
+     throw new TypeError('Native Lab result missing or invalid fighter '+actorIds[i]);
+    }
+    // The signed Lab CombatSession alone knows the projected opponent maxHp.
+    // Capture does not recalculate its policy and never projects player HP.
+    return Object.freeze({instanceId:member.instanceId,hp:fighter.hp,
+     ...(trainer&&i>=count?{combatMaxHp:fighter.maxHp}:{})});
    });
    phase='settled';
    resolveDone(Object.freeze({outcome:result.outcome,creatures}));

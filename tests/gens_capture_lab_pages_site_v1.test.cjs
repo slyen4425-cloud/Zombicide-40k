@@ -15,7 +15,7 @@ test('final Pages build contains pinned official modules and exact signed author
  const manifest=JSON.parse(rel(site,data+'delivery-manifest.json').toString('utf8'));
  assert.equal(manifest.schema,'gensrpg-capture-official-delivery-v1');
  assert.equal(manifest.productionActivated,false,'release must remain dormant');
- assert.equal(manifest.combatSha,'29b57811b5510686bbdc7efbbc58d8657862e841');
+ assert.equal(manifest.combatSha,'248f718ec924106d16999d59e5dc8310f8450180');
  assert.equal(manifest.assetsSha,'b3d46ce6f2639ebb59a2984aeff17f97cbcd7377');
  assert.deepEqual(manifest.supportedCreatureIds,["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"],
   'all twelve exact pinned author species must be published, none invented');

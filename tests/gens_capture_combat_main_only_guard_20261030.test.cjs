@@ -16,7 +16,7 @@ for (const name of ['.github/workflows/main.yml','.github/workflows/capture-lab-
 }
 test('engine and authored data share the single main-approved SHA',()=>{
  assert.match(manifest.authoredSourceLabPin,/^[a-f0-9]{40}$/);
- assert.equal(manifest.authoredSourceLabPin,'29b57811b5510686bbdc7efbbc58d8657862e841');
+ assert.equal(manifest.authoredSourceLabPin,'248f718ec924106d16999d59e5dc8310f8450180');
  assert.ok(loader.includes(manifest.authoredSourceLabPin));
  assert.equal(manifest.originalWildBattleButton.officialSourceSha,manifest.authoredSourceLabPin);
  assert.doesNotMatch(loader,/8318220b6a9b883aeced1d4bf693f906b0f36d3d/);

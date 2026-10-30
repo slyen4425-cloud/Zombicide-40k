@@ -106,8 +106,15 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    }
    assert.ok(requests.some(url=>url.includes(prefix+'vendor/combat-lab/src/')),
     'real Lab editor code should load, not just an iframe template');
-   assert.ok(!requests.some(url=>url.includes('/GenSrpg_labo_combat_dynamique/')),
-    'author UI must not request another branch/publication');
+   // Raw asset URLs correctly include the Laboratory repository name; only
+   // the unpinned sibling github.io application is forbidden as an editor host.
+   const siblingPages=requests.filter(value=>{
+    const url=new URL(value);
+    return url.hostname==='slyen4425-cloud.github.io' &&
+     url.pathname.startsWith('/GenSrpg_labo_combat_dynamique/');
+   });
+   assert.deepEqual(siblingPages,[],
+    'official author HTML/JS must load from this pinned GenSrpg delivery, not sibling Pages');
    assert.ok(!missing.some(url=>/capture-editor-v2.html|bestiary.html|capture-editor-v2.js/.test(url)),
     'actual native author HTML/JS must exist in the signed published vendor');
   });

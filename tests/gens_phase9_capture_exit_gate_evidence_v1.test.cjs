@@ -157,18 +157,22 @@ assert.match(savedBridge,/saveHeroState\(heroId,next\)/,'only the injected Captu
 assert.doesNotMatch(savedBridge,/localStorage|createCombatSession|createCombatRuntime|startSkill/,'mapping owns neither storage nor combat execution');
 for(const file of [...staged.classicScripts,...staged.captureEsmAdapters]){
   assert.ok(fs.statSync(path.join(root,file)).isFile(),file+' must exist');
-  assert.equal(read('index.html').includes('src="'+file),false,file+' must not silently load in the saved game');
+  assert.equal(read('index.html').includes('src="'+file),file==='assets/gensrpg/capture/lab-ownership-port-v1.js',
+    file+' production-reachable only when explicitly approved as the ONE Lab owner');
 }
 assert.deepEqual(fs.readdirSync(path.join(root,staged.capturePreviewDirectory)).sort(),staged.capturePreviewFiles);
 assert.ok(read(staged.previewEntry).includes('assets/gensrpg/capture/preview/zone.mjs'));
 const historicalEntries=['builtin-seed-v1.js','combat-core-v1.js','entry-v1.js','hub-entry-v1.js','legacy-monolith-functions-v1.js','legacy-patches','module-contract-v1.json','screen-return-v1.js','session-start-v1.js','team-roster-v1.js','world-exploration-v1.js'];
+const approvedNativeAuthorEntries=['capture-lab-author-entry-v1.mjs','capture-lab-author-ui-provider-v1.mjs'];
 const expected=[...historicalEntries,...stagedCaptureScripts.map(file=>path.basename(file)),
- ...staged.captureEsmAdapters.map(file=>path.basename(file)),path.basename(staged.capturePreviewDirectory)].sort();
+ ...staged.captureEsmAdapters.map(file=>path.basename(file)),...approvedNativeAuthorEntries,
+ path.basename(staged.capturePreviewDirectory)].sort();
 assert.deepEqual(existing,expected,'Capture folder has new owner files; re-audit the exit matrix on any expansion');
 
 const r06Source=require('./helpers/gens_phase12_r06_capture_source_view_v1.cjs');
 // Apply only the certified Chrome startup inverse first; then test the immutable R06 rollback.
 const originalChromeIndex=require('./helpers/gens_chrome_hero_recursion_source_view_20261024.cjs');
+const approvedSourceOnly=require('./helpers/gens_capture_author_index_reverse_20261030.cjs');
 const crypto=require('node:crypto');
 const blob=v=>crypto.createHash('sha1').update(Buffer.from('blob '+v.length+String.fromCharCode(0))).update(v).digest('hex');
 const moduleNames=["captureGameplayModalMount","capturePlaytestFix128","captureFix129","captureFix130","captureFix131","captureFix132","captureFix133","captureFix134","captureFix135","captureFix136","captureFix137","captureFix138","captureFix139","captureFix140","captureItems141","captureBuffs142","captureBuffFx143","captureAbilityTruth144"];
@@ -176,7 +180,7 @@ const archiveDir=path.join(root,'assets/gensrpg/capture/legacy-patches');
 const actualPatches=fs.readdirSync(archiveDir).sort();
 const expectedPatches=moduleNames.map(name=>name.replace(/([A-Z])/g,'-$1').toLowerCase().replace(/^-/, '')+'-v1.js').sort();
 assert.deepEqual(actualPatches,expectedPatches,'R06 Capture patches must contain only the 18 historical active bodies, no new autonomous engine');
-assert.equal(blob(r06Source(originalChromeIndex(fs.readFileSync(path.join(root,'index.html'))))),'b33542b033c5afa8a1643d99c56c21dbd4be266c',
+assert.equal(blob(r06Source(originalChromeIndex(approvedSourceOnly.toHistoricalIndex(fs.readFileSync(path.join(root,'index.html')))))),'b33542b033c5afa8a1643d99c56c21dbd4be266c',
   'R06 physical extraction must byte-restore the prior Phase9-approved source');
 const stagedClassicNames=new Set(stagedCaptureScripts.map(file=>path.basename(file)));
 const exportedOwnerFile=existing.filter(x=>x.endsWith('.js')&&!stagedClassicNames.has(x));

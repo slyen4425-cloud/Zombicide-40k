@@ -10892,6 +10892,9 @@ function openChar(id){
 }
 const gensShellScreenReturnProvidersV1=Object.create(null);
 function gensShellActiveModuleV1(){
+  // New Capture V2 is entered directly from the selected home FAMILY.
+  // It never reads old RPG universes or starts their Capture session.
+  if(String(gensSelectedFamily||"")==="capture")return "capture";
   if(String(gensSelectedFamily||"")==="pvp")return "pvp";
   let profile=null;
   try{profile=typeof activeGameProfileRaw==="function"?activeGameProfileRaw():null}catch(e){}

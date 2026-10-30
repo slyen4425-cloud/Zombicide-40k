@@ -97,7 +97,17 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
      await frame.locator('[data-bestiary]').waitFor();
     }else{
      await frame.getByRole('heading',{name:'Éditeur de combat'}).waitFor();
-     await frame.locator('[data-editor-tab="'+expected+'"]').waitFor();
+     const nativeTab=frame.locator('[data-editor-tab="'+expected+'"]');
+     await nativeTab.waitFor();
+     await page.waitForFunction(tab=>{
+      const frame=document.querySelector('#gensCaptureLabAuthorHost iframe')?.contentDocument;
+      if(!frame)return false;
+      const node=frame.querySelector('[data-editor-tab="'+tab+'"]');
+      const panel=frame.querySelector('[data-editor-panel="'+tab+'"]');
+      return node?.dataset.active==='true' && panel?.hidden===false;
+     },expected,{timeout:15000});
+     assert.equal(await nativeTab.getAttribute('data-active'),'true',
+      'The Lab editor owner itself must activate the requested authoring tab');
     }
     assert.equal(await page.evaluate(()=>GensCaptureLabOwnershipPortV1.status().editorKind),kind);
     await host.getByRole('button',{name:'Retour au jeu'}).click();

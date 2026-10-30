@@ -1,3 +1,12 @@
+## 2026-10-30 — Contrats CI actifs Builder/Survie/Tactical (PR #221)
+- START : main@856e69be736ab68e91eac5357881acb6b54d17cb ; checkpoint `checkpoint/gensrpg-start-retired-ci-2026-10-30` ; branche `work/gensrpg-retired-ci-contracts-2026-10-30`.
+- TDD RED prouvé sur main : Builder #41043406380 (assertion V16.78.102 périmée) et V113 #41043406428 (ancien module Survival supprimé). Cascades observées et traitées sur la branche : propriété native de la fiche héros, copie périmée du test UI, stub d'équipement sans Core.
+- Corrections **tests et workflows uniquement** : contrôles d'autorité de la fiche native sans ancien propriétaire, suppression de toute dépendance à la garde Survival retirée, vraie logique Core des bonus/évolution, sentinelles Phase 6 et PR. Aucun changement de moteur, de PWA ou de sauvegarde.
+- CI à l'instant de cette entrée : Builder #41051072751 SUCCESS et V113 #41051072686 SUCCESS sur 5b6740c ; autres sentinelles/Pages requises avant checkpoint GREEN et fusion.
+- Provenance Combat séparée : moteur et données officiels main@248f718ec924106d16999d59e5dc8310f8450180, GenSrpg encore épinglé ; **aucune synchronisation automatique GenSrpg sur promotion Combat main n'est annoncée**.
+
+---
+
 ## 2026-10-29 — Scène native : métadonnées FX directionnelles, autorité unique Lab
 - Audit de `capture-native-lab-scene-v1.mjs` : l'adaptateur GenSrpg recopiait partiellement le catalogue média et perdait `resource.headingRad`, `displayScale*` et `playbackMode:stretch`. Cause racine identique au défaut d'orientation déjà traité dans le Lab : un deuxième normaliseur écrasait le contrat auteur. Aucun média ni moteur ne doit être retouché pour le masquer.
 - TDD RED authentique sur `152bf064b33aa1142ed22010714058cb8c34de86` : GitHub Actions Capture release `40966952249` a échoué uniquement sur la sentinelle « native FX metadata is resolved by the pinned Lab owner ». Correction : importer le `createGlobalPresentationAssetResolverV1` du Lab épinglé et lui déléguer intégralement les propriétés d'animation/direction/échelle, sans nouvelle autorité. Test supplémentaire : heading nul vs déclaré zéro, stretch, cadence, échelles.

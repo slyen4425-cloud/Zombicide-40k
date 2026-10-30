@@ -12,7 +12,7 @@ test('only an approved Combat main can cause a source update',()=>{
  assert.match(y,/workflow_dispatch:/);
  assert.match(y,/pull-requests: write/);
  assert.match(y,/concurrency:/);
- assert.match(runner,/git\/ref\/heads\/main/);
+ assert.match(runner,/shaRef\(combat,'main'\)/);
  assert.match(runner,/x\.head_sha===official && x\.name==='Laboratory CI'/);
  assert.match(runner,/x\.conclusion==='success'/);
  assert.match(runner,/shaRef\(combat,'main'\)===official/);

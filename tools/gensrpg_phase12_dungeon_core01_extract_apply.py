@@ -455,13 +455,17 @@ def verify():
                 if path in (PATH_OWNERS,PATH_GLOBALS):
                     expected_after=reviewed_author
                 elif path==PATH_GRAPH:
-                    for former,current in (
-                        ("size,64,","size,94,"),
-                        ("allJs.length,121,","allJs.length,160,"),
-                        ("reachable.size,107,","reachable.size,137,"),
+                    # The old R01 verifier has already applied its D2-R05
+                    # extraction-specific counts above. Assert the exact three
+                    # current graph fields once, not a guessed intermediate.
+                    import re
+                    for pattern,replacement in (
+                        (r"size,\\d+,'production composition","size,94,'production composition"),
+                        (r"allJs\\.length,\\d+,","allJs.length,160,"),
+                        (r"reachable\\.size,\\d+,","reachable.size,137,"),
                     ):
-                        assert expected_after.count(former)==1, f"{path}: historical graph count drift {former}"
-                        expected_after=expected_after.replace(former,current,1)
+                        expected_after,count=re.subn(pattern,replacement,expected_after)
+                        assert count==1, f"{path}: expected exactly one historical graph field {pattern}"
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

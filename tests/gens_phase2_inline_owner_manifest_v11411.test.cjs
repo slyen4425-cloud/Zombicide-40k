@@ -9,11 +9,14 @@ const manifest=JSON.parse(fs.readFileSync(path.join(root,'docs','GENSRPG_PHASE2_
 
 const gitBlobSha=execFileSync('git',['hash-object','index.html'],{cwd:root,encoding:'utf8'}).trim();
 const HISTORICAL_CAPTURE_HUB_BLOB='613b4a21d83e9adcdd091be82240a3a6f9cf5bf7';
-const CURRENT_BLOB='17ba8e6f1faf6f8a0be8cdec68c4515d538ff646';
+const CURRENT_BLOB='c53d234fca05e49a33650a61776fae1c1985613e';
 const hubPatch=require('./fixtures/gens_phase9_capture_root_hub_exact_edits_v1.json');
 assert.equal(hubPatch.fromBlob,'b64eae3650081af624155c8a4b8e47e4a1791658');
 assert.equal(hubPatch.toBlob,HISTORICAL_CAPTURE_HUB_BLOB);
 const HISTORICAL_BLOB='18627cc0c5fc7945732c8a910504c59ef823b6ae';
+const reviewedIndex = require('./helpers/gens_capture_author_index_reverse_20261030.cjs');
+assert.equal(reviewedIndex.blob(reviewedIndex.toHistoricalIndex(fs.readFileSync(path.join(root,'index.html')))),reviewedIndex.original,
+ 'historical owner audit remains byte-exact after reversing ONLY the four intended Lab author routes');
 assert.equal(gitBlobSha,CURRENT_BLOB,'physical index must load the extracted world module and seed; legacy snapshot remains independently byte-verified');
 const activeIndex=fs.readFileSync(path.join(root,'index.html'),'utf8');
 assert.match(activeIndex,/class="gensRootModeCard capture"/,'new Shell root exposes independent Capture family');

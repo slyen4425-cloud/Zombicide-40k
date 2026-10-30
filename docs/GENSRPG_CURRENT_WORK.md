@@ -1,3 +1,15 @@
+## 2026-10-30 — Monster Capture : reconstruction soustractive C3 (PR #225, NON GREEN)
+- **Ordre utilisateur** : retirer entièrement l'ancien système Capture du runtime et reconstruire une base propre exclusivement à partir de Combat main et Exploration main. Ne pas rebâtir maintenant XP, rencontres, marchands, capture, loot ni équipe.
+- **START** : GenSrpg `main@900cbcba0cdd517db773ff39c9c56264c16b32ed` ; checkpoint `checkpoint/gensrpg-start-capture-clean-replacement-2026-10-30` ; branche `work/gensrpg-capture-clean-replacement-2026-10-30`.
+- **Source index §26** : copie utilisateur Library vérifiée contre blob officiel `17ba8e6f1faf6f8a0be8cdec68c4515d538ff646`. Source modifiée exactement `9aaa10516a3bc73da8ebefa09fceaea871e05693`.
+- **Ablation** : 27 imports historiques Capture, ancien hub DOM et choix des anciens starters supprimés du vrai index. Source Git historisée, aucun effacement de sauvegarde ni mutation des trois autres modes.
+- **Nouveaux propriétaires** : `assets/gensrpg/capture-v2/` = uniquement Shell/navigation. Combat `main@248f718ec924106d16999d59e5dc8310f8450180` = éditeur/compétences/Bestiaire/moteur. Exploration `main@474aa42674c9bd976a8a5a8af684d65cbe848b61` = scène 2.5D, World Builder et monde. Vendor transport immutable depuis les deux mains au build; aucun gh-pages ni règle dupliquée.
+- **TDD** : vérification RED de l'ancien chargement [#41118516988](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/41118516988), puis sentinelle Clean #41118663417 SUCCESS sur le premier commit de coupure. Architecture [#41118663382](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/41118663382) RED sur un verrou ancien blob Capture de Phase 9 ; ce gardien doit être réévalué sans falsifier ni désactiver les sentinelles des trois autres modes.
+- **Prochaine étape** : recette du vrai `index.html` en Chromium/Firefox paysage, vérifier assemblage Exploration/Combat, service worker, navigation réelle, absence de chargements Capture et non-interférence. Puis prise en compte des vrais tests historiques devenus sans propriétaire. Pas de promotion main ni GREEN avant CI au HEAD exact, déploiement et recette.
+- **Décisions** : PR de remplacement #225 est C3 DRAFT; PR ancien raccord #219 est hors objectif et ne doit pas être fusionnée avec #225. Garder tous les checkpoints; aucune suppression de profils persistants.
+
+---
+
 ## 2026-10-30 — Synchronisation automatique approuvée Combat main -> GenSrpg (branche dédiée)
 - BASE main@a18774bc524259ebb8d40f5e24211fd1f2f40730, checkpoint `checkpoint/gensrpg-start-combat-main-autosync-2026-10-30`, branche `work/gensrpg-combat-main-autosync-2026-10-30`.
 - Contrat : seul Combat `refs/heads/main` et son run Laboratory CI SUCCESS au SHA exact peuvent déclencher une mise à jour. `gh-pages` et tout autre commit hors main sont interdits, même si CI verte.

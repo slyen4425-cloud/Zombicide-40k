@@ -52,19 +52,14 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.locator('#captureGameHub').count(),0);
   assert.equal(await page.evaluate(()=>window.GensCaptureV1.VERSION),'2.0.0');
   assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().active),false);
+  // The original four-mode Capture card must start the NEW module directly.
+  // There is deliberately no old RPG Universe profile / pregame / starter flow.
   await page.locator('button.gensRootModeCard.capture').tap();
-  await page.locator('#gensFamilyGames [data-rpg-profile] .gensUniverseMainBtn').first().waitFor();
-  const choices=await page.locator('#gensFamilyGames [data-rpg-profile]').count();
-  assert.ok(choices>=1,'Actual Capture built-in profile must still be selectable from the Shell');
-  await page.locator('#gensFamilyGames [data-rpg-profile] .gensUniverseMainBtn').first().tap();
-  await page.waitForFunction(()=>window.GensShellModuleLaunchV1.activeModule()==='capture',
-   null,{timeout:20000});
-  // Press the REAL, existing game-home action. Calling the provider directly
-  // would hide an old newGame() path that still destroys the user's session.
-  await page.locator('#gensGameHomeActions button.newGameBtn').tap();
   await page.locator('#gensCaptureV2Root').waitFor({state:'visible'});
-  assert.equal(await page.locator('#pregameSetup:visible').count(),0,
-    'Old Capture pregame setup must not be started');
+  assert.equal(await page.evaluate(()=>window.GensShellModuleLaunchV1.activeModule()),'capture');
+  assert.equal(await page.locator('#gensFamilyHome:visible').count(),0);
+  assert.equal(await page.locator('#pregameSetup:visible').count(),0);
+  assert.equal(await page.locator('#gensGameHome:visible').count(),0);
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   const buttons=page.locator('#gensCaptureV2Root [data-capture-v2-view]');
   assert.equal(await buttons.count(),7);

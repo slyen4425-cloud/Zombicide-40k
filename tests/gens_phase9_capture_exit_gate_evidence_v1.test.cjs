@@ -80,7 +80,7 @@ assert.match(officialTrainerPort,/createCaptureSavedProfileBattleBridgeV1/,
   'trainer HP must be persisted by the existing Capture saved-profile owner');
 assert.match(officialTrainerPort,/encounterKind:'trainer'/,
   'trainer transaction must never masquerade as wild');
-assert.doesNotMatch(officialTrainerPort,/localStorage|createCombatSession|createCombatRuntime|window\\.|startSkill|location\\.reload/,
+assert.doesNotMatch(officialTrainerPort,/localStorage|createCombatSession|createCombatRuntime|window\.|startSkill|location\.reload/,
   'trainer port cannot invent a storage owner, second engine, global override or Combat clock');
 assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-official-battle-view-v1.mjs'));
 assert.equal(staged.stagedOfficialBattleView?.productionActivated,false);

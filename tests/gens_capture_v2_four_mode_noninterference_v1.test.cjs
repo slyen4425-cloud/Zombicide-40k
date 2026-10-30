@@ -14,7 +14,7 @@ const mime={'.html':'text/html;charset=utf-8','.js':'text/javascript;charset=utf
  '.json':'application/json;charset=utf-8','.webmanifest':'application/manifest+json'};
 const server=http.createServer(async(req,res)=>{
  try{
-  const rel=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname).replace(/^\\/+/, '')||'index.html';
+  const rel=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname).replace(/^[/]+/, '')||'index.html';
   if(rel.split('/').includes('..')){res.writeHead(403).end();return;}
   const file=path.resolve(root,rel);
   if(!file.startsWith(root+path.sep)){res.writeHead(403).end();return;}
@@ -78,7 +78,7 @@ test('real Shell: Survie, Dungeon, PvP and clean Capture remain isolated through
     const frame=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
     await frame.waitFor({state:'attached'});
     assert.match(await frame.getAttribute('src'),
-      /vendor\\/combat-lab\\/examples\\/dom-demo\\/capture-editor-v2\\.html/);
+      new RegExp('vendor/combat-lab/examples/dom-demo/capture-editor-v2[.]html'));
     await page.getByRole('button',{name:'Accueil Capture'}).tap();
     assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0,'native iframe disposed');
     await page.getByRole('button',{name:'Quitter le mode'}).tap();

@@ -1,6 +1,9 @@
 name: Capture 2v2 public GitHub Pages URL smoke
 
 on:
+  # Non-deploying diagnostic on this isolated Capture repair branch.
+  push:
+    branches: ['work/gensrpg-capture-lab-single-authority-*']
   workflow_run:
     workflows: ['Deploy GenSrpG to GitHub Pages']
     types: [completed]
@@ -12,7 +15,7 @@ permissions:
 
 jobs:
   public-pages-http:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:

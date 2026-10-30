@@ -90,6 +90,17 @@ def project_active_source_for_history(data):
         assert len(data)==1720766 and blob(data)=="260f00aa179c939f35188ca854f9875971ce8a7b", "historical source projection not exact"
     return data
 
+def _restore_original_fix134_for_history(data):
+    # Read-only, SHA-gated inverse of the reviewed Capture trainer override removal.
+    # Never called by the game; immutable R06 fingerprints remain unchanged.
+    assert blob(data)=="f119720452fbcfa9f62f8c1ddc248efaeff656a9", "unexpected current fix134 body"
+    now="/* Dresseurs : le World Capture possède le seul handler de combat.\n   La difficulté MJ ci-dessus reste une donnée World, sans surcharge globale. */\n\n".encode("utf8")
+    old="/* ---------- dresseur hostile : aucun choix de difficulté côté joueur ---------- */\nwindow.captureOpenTrainerBattle=function(){\n  const playerRoster=captureTeamEntityRoster(),pool=loadSharedEntities().filter(x=>x.category===\"creature\");\n  if(!playerRoster.length){alert(\"Aucune créature disponible dans ton équipe.\");return}\n  if(!playerRoster.some(c=>Number(c._instance?.hp??c.hp??0)>0)){alert(\"Toutes tes créatures sont K.O.\");return}\n  if(!pool.length){alert(\"Aucune créature disponible pour créer le dresseur adverse.\");return}\n  const diff=captureTrainerDifficulty134(),delta=[-3,0,3,6][diff-1];\n  const avg=Math.max(1,Math.round(playerRoster.reduce((n,c)=>n+(Number(c.level)||1),0)/playerRoster.length));\n  const auto=captureAutoTrainerRules(playerRoster),enemy=[];\n  for(let i=0;i<auto.teamSize;i++){\n    const base=pool[Math.floor(Math.random()*pool.length)],lvl=Math.max(1,avg+delta+Math.floor(Math.random()*3)-1);\n    enemy.push({...base,level:lvl,hp:Math.max(1,Number(base.hp)||10)+Math.max(0,lvl-(Number(base.level)||1))*2});\n  }\n  const names=[\"Dresseur novice\",\"Dresseur rival\",\"Dresseur confirmé\",\"Dresseur expert\"];\n  captureStartBattleAutomatic(\n    {name:CHARS[captureActiveHeroId()]?.name||\"Dresseur\",roster:playerRoster,controller:\"human\"},\n    {name:names[diff-1],roster:enemy,controller:\"auto\"},\n    {type:\"trainer\",captureAllowed:false,activeSlots:auto.activeSlots,teamSize:auto.teamSize,minBattleTeam:1,maxBattleTeam:6,recallCost:\"turn\",controller:\"auto\"}\n  );\n};\n\n".encode("utf8")
+    assert data.count(now)==1, "only one reviewed trainer replacement"
+    result=data.replace(now,old,1)
+    assert blob(result)=="804846e88cb8e030e1677a01420a2215e631ed8f", "original fix134 source must be byte exact"
+    return result
+
 def historical_r05_view(data):
     data=project_active_source_for_history(data)
     # New R11 source is strictly reconstructed via R11→R10→R09 before old snapshot checks.
@@ -135,6 +146,7 @@ def historical_r05_view(data):
             ROOT, NAMES, location, restore, SOURCE_BLOB,
         )
         bodies={location(n):(ROOT/location(n)).read_bytes() for n in NAMES}
+        bodies[location('captureFix134')]=_restore_original_fix134_for_history(bodies[location('captureFix134')])
         data=restore(data,bodies)
         assert blob(data)==SOURCE_BLOB and len(data)==2782155, "exact R06 -> approved Dungeon checkpoint"
     if blob(data)!=NEW_BLOB:

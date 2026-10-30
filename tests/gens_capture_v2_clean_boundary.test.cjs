@@ -72,3 +72,26 @@ test('packaged native Exploration and Combat are present when Pages build is sup
    'vendor/combat-lab/examples/dom-demo/bestiary.html'
  ])assert.ok(fs.statSync(path.join(site,file)).size>0,file);
 });
+
+test('the original RPG Builders no longer authors Capture combat or trainer rules',()=>{
+ const builder=text('assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js');
+ assert.doesNotMatch(builder,/p\.rpgUniverse\.(?:captureCombat|trainerCombat)\s*=/,
+  'Old builder cannot be a second writer of Combat Lab-owned rules');
+ assert.doesNotMatch(builder,/set\("rpgCapture/,
+  'Old Capture rules cannot be rendered as an alternative configured authority');
+ assert.match(builder,/p\.rpgUniverse\.pvp\s*=/,
+  'PvP belongs to its own domain and must not be deleted as Capture collateral');
+});
+
+test('original four-mode Capture card delegates to the clean registered Shell without legacy profile',()=>{
+ const owner=text('assets/gensrpg/shell/legacy-hub-family-ui-v1.js');
+ const start=owner.indexOf('function openGensFamily(family){');
+ const end=owner.indexOf('function gensFamilyForProfileId(',start);
+ assert.ok(start>=0&&end>start);
+ const slice=owner.slice(start,end);
+ assert.match(slice,/if\(family==="capture"\)\s*\{/);
+ assert.match(slice,/return shell\.startModuleSession\("capture"\)/);
+ assert.match(index(),/if\(String\(gensSelectedFamily\|\|""\)==="capture"\)return "capture"/);
+ const entry=text('assets/gensrpg/capture-v2/shell-entry-v1.js');
+ assert.doesNotMatch(entry,/loadSharedEntities|ensureBuiltinMonsterCapture|captureStartBattleAutomatic/);
+});

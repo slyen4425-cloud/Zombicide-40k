@@ -30,6 +30,7 @@ on:
       - 'tests/gens_capture_public_world_2v2_browser_v1.test.cjs'
       - 'tests/gens_capture_native_lab_scene_v1.test.cjs'
       - 'tests/gens_capture_lab_single_authority_acceptance_v1.test.cjs'
+      - 'tests/gens_capture_lab_world_settings_owner_v1.test.cjs'
       - 'tests/gens_capture_lab_authoring_port_v1.test.cjs'
       - 'tests/gens_capture_lab_author_ui_provider_v1.test.cjs'
       - 'assets/gensrpg/capture/capture-lab-author-ui-provider-v1.mjs'
@@ -101,6 +102,7 @@ jobs:
         run: |
           node --test tests/gens_capture_lab_authoring_port_v1.test.cjs
           node --test tests/gens_capture_lab_author_ui_provider_v1.test.cjs
+          node --test tests/gens_capture_lab_world_settings_owner_v1.test.cjs
           node --test tests/gens_capture_lab_single_authority_acceptance_v1.test.cjs
           node --test tests/gens_capture_native_lab_scene_v1.test.cjs
           node --test tests/gens_capture_lab_delivery_v1.test.cjs

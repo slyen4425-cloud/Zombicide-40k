@@ -4,7 +4,8 @@
    No runtime wiring or automatic installation in this preparation lot. */
 (function(root){
   const PROTOCOL=1;
-  const REQUIRED=["createBattle","startBattle","stopBattle","disposeBattle","openCreatureEditor","closeCreatureEditor"];
+  const BATTLE_METHODS=["createBattle","startBattle","stopBattle","disposeBattle"];
+  const LEGACY_CREATURE_METHODS=["openCreatureEditor","closeCreatureEditor"];
   // The single existing ownership port also mediates official Lab authoring.
   // A role is a capability, not a new editor or a second persistence owner.
   const AUTHOR_ROLES=Object.freeze({
@@ -17,10 +18,20 @@
     if(!next||next.protocol!==PROTOCOL)throw new TypeError("Unsupported Capture lab protocol");
     if(typeof next.version!=="string"||!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$/.test(next.version))throw new TypeError("Provider semantic version required");
     if(!Array.isArray(next.capabilities)||next.capabilities.some(x=>typeof x!=="string"||!x)||new Set(next.capabilities).size!==next.capabilities.length)throw new TypeError("Provider capabilities must be unique strings");
-    for(const method of REQUIRED)if(typeof next[method]!=="function")throw new TypeError("Provider missing "+method);
-    // Existing protocol-v1 battle adapters stay valid. A provider declaring
-    // any NEW author domain must expose the native author's session pair.
-    if(AUTHOR_V2.some(capability=>next.capabilities.includes(capability))){
+    if(next.capabilities.includes("battle-trigger")){
+      for(const method of BATTLE_METHODS)
+        if(typeof next[method]!=="function")throw new TypeError("Provider missing "+method);
+    }
+    const nativeAuthor=Object.values(AUTHOR_ROLES).some(capability=>next.capabilities.includes(capability))
+      &&typeof next.openAuthoring==="function";
+    // The author-only provider is NOT made to provide fake battle operations.
+    // Creature-only old providers may still use the protocol-1 editor pair
+    // until the actual Lab editor has replaced their final call sites.
+    if(next.capabilities.includes("creature-editor")&&!nativeAuthor){
+      for(const method of LEGACY_CREATURE_METHODS)
+        if(typeof next[method]!=="function")throw new TypeError("Provider missing "+method);
+    }
+    if(AUTHOR_V2.some(capability=>next.capabilities.includes(capability))||nativeAuthor){
       for(const method of ["openAuthoring","closeAuthoring"])
         if(typeof next[method]!=="function")throw new TypeError("Provider missing "+method);
     }
@@ -41,6 +52,7 @@
   function editCreature(context){
     if(!provider||!has("creature-editor")||session||editor)return null;
     if(!context||typeof context!=="object"||typeof context.creatureId!=="string"||!context.creatureId)throw new TypeError("Creature ID required");
+    if(typeof provider.openAuthoring==="function")return openAuthoring("creature",context);
     const opened=provider.openCreatureEditor(context);
     if(!opened||typeof opened!=="object")throw new TypeError("Invalid editor session");
     editor=opened;editorKind="creature";editorViaAuthoring=false;return opened;

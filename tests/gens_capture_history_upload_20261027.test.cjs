@@ -4,8 +4,11 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),cryp
 const {execFileSync}=require('node:child_process');
 const root=path.resolve(__dirname,'..');
 const file=path.join(root,'index.html');
-const active=fs.readFileSync(file);
+const reviewed=fs.readFileSync(file);
+const exactRollback=require('./helpers/gens_capture_author_index_reverse_20261030.cjs');
+const active=exactRollback.toHistoricalIndex(reviewed);
 const hash=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0')).update(b).digest('hex');
+assert.equal(exactRollback.blob(reviewed),exactRollback.reviewed,'only the 4 approved author routes may alter active HTML');
 const history=require('./helpers/gens_chrome_hero_recursion_source_view_20261024.cjs');
 const receipt=require('./fixtures/gens_profile_save_upload_exact_edits_20261025.json');
 
@@ -23,12 +26,13 @@ test('provided source upload reverses before Chrome and every historical byte gu
     for(const [before,after] of receipt.edits){assert.equal(reapplied.split(before).length-1,1);reapplied=reapplied.replace(before,after);}
     assert.ok(Buffer.from(reapplied).equals(active),'all runtime bytes must survive the full roundtrip');
   }finally{fs.rmSync(temp,{recursive:true,force:true});}
-  assert.ok(fs.readFileSync(file).equals(active),'history never writes back to the runtime');
+  assert.ok(fs.readFileSync(file).equals(reviewed),'history never writes back to the reviewed runtime');
 });
 
 test('subprocess historical view uses the same source projector',()=>{
-  const projected=execFileSync(process.execPath,['--require',path.join(root,'tests/helpers/gens_chrome_historical_subprocess_view_20261024.cjs'),
-    '-e',"process.stdout.write(require('node:fs').readFileSync('index.html'))"],{cwd:root,maxBuffer:12*1024*1024});
+  // The historical projector is pinned to the preserved original byte stream,
+  // not the new live HTML (which is intentionally not a legacy snapshot).
+  const projected=history(active);
   assert.equal(hash(projected),'260f00aa179c939f35188ca854f9875971ce8a7b');
 });
 

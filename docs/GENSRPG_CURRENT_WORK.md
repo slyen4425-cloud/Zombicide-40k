@@ -1,3 +1,10 @@
+# 2026-10-30 — Correction systémique MIME ESM des sentinelles navigateur (CI à certifier)
+- TDD RED réel : `architecture-sentinels` sur PR #219 HEAD `8bac2fbb65f957df37bb7262c21d88ce480a646e`, run `41041614797`, job `124023677900`, échec du navigateur Survie Phase 6 : `.mjs` servi en `application/octet-stream` au lieu de `text/javascript`. La sentinelle statique Architecture était SUCCESS. Les 100 espèces sans transfert Lab restent RED (run `41041614795`), défaut métier distinct.
+- Correction initiale source du test Phase 6 au commit `fdee57a935fc82923d64b2edc832847d42edb178`. Audit complet du job navigateur Architecture : 54 commandes, 36 autres fixtures HTTP possédaient la même omission `.mjs`. Mise à jour explicite de leur table MIME uniquement, sans toucher aux moteurs, HTML, PWA, sauvegardes, règles ni désactiver les assertions.
+- Vérifier le job browser-sentinel complet au SHA du nouveau commit avant GREEN ; le produit reste NON GREEN tant que les 100 espèces historiques et la difficulté dresseur auteur ne sont pas publiées et vérifiées. `main` non modifié.
+
+---
+
 # 2026-10-30 — Combat MAIN-ONLY réconcilié sur la PR #219, produit NON GREEN
 - Source Lab officielle `main@248f718ec924106d16999d59e5dc8310f8450180` et CI Lab main [41037930250](https://github.com/slyen4425-cloud/GenSrpg_labo_combat_dynamique/actions/runs/41037930250) GREEN. Cette branche Capture réutilise les garde-fous PR #220 sans merger dans `main` GenSrpg.
 - Manifeste, loader, tests, livraison et Pages utilisent un seul SHA main ; les workflows exigent `refs/heads/main` et une vraie scène `embeddedBattle`, sans pin gh-pages ou moteur de secours. L'ancien SHA `8318220` est retiré des sources actives.

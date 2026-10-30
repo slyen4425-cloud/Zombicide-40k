@@ -3,7 +3,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),http=require('n
 const {chromium}=require('playwright');
 const root=path.join(__dirname,'..'),artifacts=path.join(root,'artifacts','gensrpg-survival-editor');
 const CAPTURE_ID='gp_mt7ker7t_m2iw9',BASE_ID='game_profile_zombicide_base',CUSTOM_ID='editor-survival-custom';
-const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8',
+const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8',
  '.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.webmanifest':'application/manifest+json'};
 const server=http.createServer((req,res)=>{
  const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);

@@ -1,6 +1,7 @@
 name: Validate V16.78.113 Authoritative Runtime
 
 on:
+  pull_request:
   push:
     branches:
       - work/v16.78.107.1-tactical-readability-roll-walls
@@ -61,7 +62,8 @@ jobs:
       - name: Guard tactical isolation
         run: node tests/gens_rpg_tactical_combat_v2_isolation.test.cjs
       - name: Preserve Survival isolation
-        run: node tests/gens_survival_mode_isolation_v1678104.test.cjs
+        run: node tests/gens_phase6_survival_legacy_guard_retirement_v1.test.cjs
+          node tests/gens_phase6_survival_builtin_boundary_retirement_v1.test.cjs
       - name: Preserve mode-aware dice and mobile combat performance guard
         run: node tests/gens_mobile_combat_performance_v16781022.test.cjs
       - name: Preserve equipment combat cache

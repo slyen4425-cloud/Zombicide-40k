@@ -61,7 +61,7 @@ const officialFiles=creaturePresets.CAPTURE_SHOWCASE_CREATURE_PRESET_FILES_V1;
 if(!Array.isArray(officialFiles)||officialFiles.length<2||
    new Set(officialFiles).size!==officialFiles.length||
    officialFiles.some(file=>typeof file!=='string'||
-     !/^data\\/capture\\/showcase\\/[^/]+\\.capture-creature-transfer-v1\\.json$/.test(file))){
+     !/^data\/capture\/showcase\/[^/]+\.capture-creature-transfer-v1\.json$/.test(file))){
  throw new Error('Official Combat Lab creature author manifest is missing, duplicate or unsafe');
 }
 const officialCreatureTransfers=officialFiles.map(file=>data(file));

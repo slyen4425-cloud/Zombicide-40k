@@ -94,7 +94,7 @@ jobs:
             for(const [name,launcher] of [['Chromium',chromium],['Firefox',firefox]]){
             const browser=await launcher.launch({headless:true});
             try{
-              const page=await browser.newPage({viewport:{width:932,height:430},isMobile:true,hasTouch:true});
+              const page=await browser.newPage({viewport:{width:932,height:430},hasTouch:true,...(name==='Chromium'?{isMobile:true}:{})});
               await page.goto('https://slyen4425-cloud.github.io/Zombicide-40k/capture-world-2v2-test.html',
                 {waitUntil:'domcontentloaded'});
               const result=await page.evaluate(async()=>{

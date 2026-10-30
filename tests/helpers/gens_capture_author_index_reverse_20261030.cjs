@@ -8,7 +8,7 @@ const original='17ba8e6f1faf6f8a0be8cdec68c4515d538ff646';
 const reviewed='c53d234fca05e49a33650a61776fae1c1985613e';
 const blob=value=>{
  const data=Buffer.isBuffer(value)?value:Buffer.from(value,'utf8');
- return crypto.createHash('sha1').update('blob '+data.length+'\\0').update(data).digest('hex');
+ return crypto.createHash('sha1').update('blob '+data.length+'\0').update(data).digest('hex');
 };
 const pairs=[
  [`onclick="(GensCaptureV1.isProfile(getActiveGameProfile())?GensCaptureLabAuthorUiV1.open('creature'):openControllableCreatureLibrary())"`,`onclick="openControllableCreatureLibrary()"`],

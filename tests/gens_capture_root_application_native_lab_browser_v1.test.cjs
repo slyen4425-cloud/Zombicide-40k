@@ -93,6 +93,14 @@ async function seedOnlyThroughOwners(page){
   const ent=loadSharedEntities().find(x=>x.id==='crea_voltik'&&x.category==='creature');
   if(!heroId||!ent)throw Error('Built-in Capture Voltige starter is missing');
   const saved=loadState(heroId);
+  // Use real owned items, never a fictitious inventory ID that the main
+  // application may legitimately reject through its catalog normalization.
+  const items=Array.isArray(saved.inventory)?JSON.parse(JSON.stringify(saved.inventory)):[];
+  if(!items.length){
+   const item=captureShopItems()[0];
+   if(!item)throw Error('No canonical Capture item for inventory preservation gate');
+   items.push({itemId:item.id,id:item.id,name:item.name,type:item.type,qty:2});
+  }
   const uid='ci_root_real_shell_voltige';
   const skills=ent.abilityIds.slice(0,4);
   saveHeroCreatureState(heroId,{
@@ -101,14 +109,17 @@ async function seedOnlyThroughOwners(page){
     statAlloc:{power:0,defense:0,agility:0,speed:0,spirit:0,hp:0},
     talents:[],note:'persist-real-root-test'}],
    creatureReserve:[],gold:41,
-   inventory:[{id:'ci-owned-item',qty:2}]
+   inventory:items
   });
   const ws=captureWorldState();
   saveCaptureWorldState({...ws,day:3,locationId:'cap_forest',
    locationName:'Forêt réelle',last:{type:'wild',creatureId:'crea_voltik',
     text:'Rencontre sauvage depuis la partie GenSrpg'}});
   renderCaptureWorldHub();
+  const persisted=loadState(heroId);
+  if(!persisted.inventory?.length)throw Error('Inventory lost before entering battle: invalid fixture or owner');
   return {heroId,uid,worldKey:captureWorldKey(),
+   expectedInventory:JSON.parse(JSON.stringify(persisted.inventory)),
    originalOwner:window.captureStartWildBattle.toString()};
  });
 }
@@ -167,7 +178,8 @@ for(const [name,engine] of [['Chromium',chromium],['Firefox',firefox]]){
    assert.equal(after.hero.creatureTeam[0].uid,setup.uid);
    assert.equal(after.hero.creatureTeam[0].note,'persist-real-root-test');
    assert.equal(after.hero.gold,41);
-   assert.deepEqual(after.hero.inventory,[{id:'ci-owned-item',qty:2}]);
+   assert.deepEqual(after.hero.inventory,setup.expectedInventory,
+    'real saved inventory must remain byte-equivalent after the Lab battle');
    assert.equal(after.port.installed,false);
    assert.equal(after.session,'1');
    assert.notEqual(after.hub,'none');

@@ -1346,8 +1346,11 @@ jobs:
       - name: Vérifier la preview manuelle dans Chromium
         run: node tests/gens_preview_browser_v11411.test.cjs
 
-      - name: Vérifier le lien externe exact de preview sur le SHA courant
-        run: node tests/gens_preview_external_browser_v1.test.cjs
+      - name: Vérifier la preview externe du Shell Capture V2 sur le SHA courant
+        run: node tests/gens_preview_external_capture_v2_browser_v1.test.cjs
+
+      - name: Préserver la preview externe complète Capture V1 sur le checkpoint immuable
+        run: GITHUB_SHA=900cbcba0cdd517db773ff39c9c56264c16b32ed bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_preview_external_browser_v1.test.cjs
 
       - name: Caractériser la résolution réelle des assets Phase 4
         run: node tests/gens_asset_resolver_browser_v1.test.cjs

@@ -1151,7 +1151,9 @@ jobs:
         run: node tests/gens_asset_resolver_loot_owner_v1.test.cjs
 
   browser-sentinel:
-    needs: architecture-sentinels
+    # Independent browser regressions must run alongside the long architecture
+    # census, not be skipped when an unrelated historical characterization is RED.
+    # Both jobs remain mandatory status checks; neither bypasses the other.
     runs-on: ubuntu-24.04
     steps:
       - name: Récupérer le dépôt

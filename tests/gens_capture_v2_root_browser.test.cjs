@@ -71,11 +71,12 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.locator('#gensGameHome:visible').count(),0);
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   const buttons=page.locator('#gensCaptureV2Root [data-capture-v2-view]');
-  assert.equal(await buttons.count(),5);
+  assert.equal(await buttons.count(),8,
+   'the FOUR native Combat editor tabs share one official Lab owner, without extra editors');
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="creature"]').tap();
   const iframe=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
   await iframe.waitFor({state:'visible'});
-  assert.match(await iframe.getAttribute('src'),/vendor\/combat-lab\/examples\/dom-demo\/capture-editor-v2\.html/);
+  assert.match(await iframe.getAttribute('src'),/vendor\/combat-lab\/examples\/dom-demo\/capture-editor-v2\.html[?]tab=creature$/);
   const official=page.frameLocator('#gensCaptureV2Root iframe');
   await official.locator('[data-capture-editor-human]').waitFor({timeout:25000});
   // Static HTML appears before its real JS owner has attached listeners:
@@ -96,6 +97,33 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   }
   await official.locator('[data-editor-tab="combat"]').tap();
   await official.locator('[data-editor-panel="combat"]:visible').waitFor({timeout:3500});
+  // Consumer navigation uses official Lab main's ?tab= deep links.
+  // No alternative Creature, Skills, Combat or Music editor is instantiated.
+  for(const tab of ['skills','combat','music']){
+    await page.locator('#gensCaptureV2Root [data-capture-v2-view="'+tab+'"]').tap();
+    const native=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
+    assert.match(await native.getAttribute('src'),
+      new RegExp('vendor/combat-lab/examples/dom-demo/capture-editor-v2[.]html[?]tab='+tab+'
+  await page.frameLocator('#gensCaptureV2Root iframe').locator('[data-bestiary]').waitFor({timeout:25000});
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').tap();
+  await page.frameLocator('#gensCaptureV2Root iframe').locator('canvas#game').waitFor({timeout:25000});
+  assert.equal(await page.locator('button.gensRootModeCard').count(),4);
+  await page.getByRole('button',{name:'Quitter le mode'}).tap();
+  assert.equal(await page.locator('#gensCaptureV2Root').count(),0);
+  assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().active),false);
+  // No assertion about XP/encounters or Lab session/save ownership: deferred.
+  assert.deepEqual(errors.filter(x=>/GensCaptureV2|Competing Capture|Duplicate Capture/.test(x)),[]);
+ }finally{
+  await context?.close();await browser?.close();
+  server.closeAllConnections();
+  await new Promise(ok=>server.close(ok));
+ }
+});
+));
+    const editor=page.frameLocator('#gensCaptureV2Root iframe');
+    await editor.locator('[data-editor-tab="'+tab+'"][data-active="true"]').waitFor({timeout:25000});
+    await editor.locator('[data-editor-panel="'+tab+'"]:visible').waitFor({timeout:25000});
+  }
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="bestiary"]').tap();
   await page.frameLocator('#gensCaptureV2Root iframe').locator('[data-bestiary]').waitFor({timeout:25000});
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').tap();

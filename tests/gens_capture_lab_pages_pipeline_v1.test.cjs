@@ -41,7 +41,7 @@ test('Pages uses same verified payload publisher AFTER site preparation and BEFO
  assert.ok(at('- name: Préparer le site')<at(staging),'stage only after copying the site');
  assert.ok(at(staging)<at(verify)&&at(verify)<at(publish),'never publish unverified vendor');
  assert.ok(at(guard)<at(publish),'guard before release artifact');
- assert.ok(y.includes("if: github.event_name != 'pull_request'"),'never deploy production from PR');
+ assert.ok(y.includes("if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'"),'only main may deploy Pages, never PR or work branch');
 });
 
 test('staged payload stays dormant; historic public index, SW and real profiles unchanged',()=>{

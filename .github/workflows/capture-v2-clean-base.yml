@@ -11,6 +11,7 @@ on:
       - 'tests/gens_capture_v2_clean_boundary.test.cjs'
       - 'tests/gens_capture_v2_generic_profile_owner.test.cjs'
       - 'tests/gens_capture_v2_root_browser.test.cjs'
+      - 'tests/gens_dungeon_builder_visibility_after_capture_v2_browser_v1.test.cjs'
       - '.github/workflows/main.yml'
       - '.github/workflows/capture-v2-clean-base.yml'
 permissions:
@@ -88,5 +89,7 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.57.0
           npx playwright install chromium
-      - name: Run real four-mode GenSrpg root in Chromium landscape
-        run: node --test tests/gens_capture_v2_root_browser.test.cjs
+      - name: Run real four-mode GenSrpg root and Capture V2-to-Dungeon Builder in Chromium
+        run: |
+          node --test tests/gens_capture_v2_root_browser.test.cjs
+          node tests/gens_dungeon_builder_visibility_after_capture_v2_browser_v1.test.cjs

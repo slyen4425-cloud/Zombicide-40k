@@ -231,9 +231,17 @@ function restoreCombatCoreIfExtracted(index,root){
 function teamRosterPreExtractionIndexBytes(root=path.resolve(__dirname,'../..')){
  const hist=snapshotRootForV2(root);
  if(hist){
-  const previous=process.cwd();
-  try{process.chdir(hist);return teamRosterPreExtractionIndexBytes(hist)}
-  finally{process.chdir(previous)}
+  // The nested R06-R16 rollback tools resolve modules relative to __dirname.
+  // Use the certified historical HELPERS as well as historical files, in an
+  // isolated subprocess. The caller still audits all current external files.
+  const source=path.join(hist,'tests/helpers/gens_capture_team_roster_snapshot_v1.cjs');
+  const code='const helper=require(process.argv[1]);process.stdout.write(helper.teamRosterPreExtractionIndexBytes(process.argv[2]))';
+  const bytes=execFileSync(process.execPath,['-e',code,source,hist],{
+   cwd:hist,maxBuffer:16*1024*1024
+  });
+  assert.equal(bytes.length,7959089,'certified historic Capture team reconstruction size');
+  assert.equal(hash(bytes),'e777d484ab10049650440fee04f47cf2dfdc3043','certified historic Capture team reconstruction blob');
+  return bytes;
  }
  let index=restoreCombatCoreIfExtracted(restoreHistoricalHubSnapshot(fs.readFileSync(path.join(root,'index.html')),root),root);
  const module=fs.readFileSync(path.join(root,'assets/gensrpg/capture/team-roster-v1.js'));

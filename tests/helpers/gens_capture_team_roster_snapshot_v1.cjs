@@ -4,8 +4,30 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
+const {execFileSync}=require('node:child_process');
 const assert=require('node:assert/strict');
 const hash=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0')).update(b).digest('hex');
+// Capture V2 changed the *live* index deliberately. Historical rollback
+// certificates must start at the immutable pre-V2 Git blob, while the tests
+// continue to read CURRENT external Dungeon/Core files from root.
+// This source view is NEVER executed or delivered by the PWA.
+const preV2='900cbcba0cdd517db773ff39c9c56264c16b32ed';
+const preV2IndexBlob='17ba8e6f1faf6f8a0be8cdec68c4515d538ff646';
+const captureV2Tag=Buffer.from('<script src="assets/gensrpg/capture-v2/shell-entry-v1.js"></script>');
+function indexForHistoricalSnapshot(root){
+ const active=fs.readFileSync(path.join(root,'index.html'));
+ if(active.indexOf(captureV2Tag)<0)return active;
+ const first=active.indexOf(captureV2Tag);
+ assert.ok(first>0&&active.indexOf(captureV2Tag,first+captureV2Tag.length)<0,
+  'V2 Shell must have exactly one source owner');
+ assert.equal(active.includes(Buffer.from('<script src="assets/gensrpg/capture/entry-v1.js?v=1"></script>')),false,
+  'retired Capture V1 public entry must not be reintroduced for historical tests');
+ const hasCommit=()=>{try{execFileSync('git',['cat-file','-e',preV2+'^{commit}'],{cwd:root,stdio:'ignore'});return true}catch{return false}};
+ if(!hasCommit())execFileSync('git',['fetch','--no-tags','--depth=1','origin',preV2],{cwd:root,stdio:'pipe',maxBuffer:1024*1024});
+ const original=execFileSync('git',['show',preV2+':index.html'],{cwd:root,maxBuffer:32*1024*1024});
+ assert.equal(hash(original),preV2IndexBlob,'pre-V2 certified historical source blob changed');
+ return original;
+}
 const TAG=Buffer.from('<script src="assets/gensrpg/capture/team-roster-v1.js?v=1"></script>\n');
 const HEADER='// GenSrpG Phase 9 Capture Team / Reserve V1: physically moved legacy owner.\n'
   +'// Classic synchronous script: original global API, persisted keys, and rules unchanged.\n';
@@ -207,7 +229,7 @@ function restoreCombatCoreIfExtracted(index,root){
  return index;
 }
 function teamRosterPreExtractionIndexBytes(root=path.resolve(__dirname,'../..')){
- let index=restoreCombatCoreIfExtracted(restoreHistoricalHubSnapshot(fs.readFileSync(path.join(root,'index.html')),root),root);
+ let index=restoreCombatCoreIfExtracted(restoreHistoricalHubSnapshot(indexForHistoricalSnapshot(root),root),root);
  const module=fs.readFileSync(path.join(root,'assets/gensrpg/capture/team-roster-v1.js'));
  assert.equal(index.length,7950873,'Capture team extracted index bytes');
  assert.equal(hash(index),'57415a1071475cc10f0c79e092897190577127e8','Capture team index fingerprint');

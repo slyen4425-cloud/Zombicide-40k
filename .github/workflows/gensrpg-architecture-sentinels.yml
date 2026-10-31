@@ -978,8 +978,8 @@ jobs:
       - name: Retirer le dernier wrapper global openChar Capture139 (checkpoint historique V1)
         run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 
-      - name: Pré-auditer le contrat public de lancement module Phase 5
-        run: node tests/gens_phase5_module_launch_contract_preaudit_v1.test.cjs
+      - name: Pré-auditer le contrat public de lancement module Phase 5 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_launch_contract_preaudit_v1.test.cjs
 
       - name: Pré-auditer le raccord runtime module-launch Phase 5
         run: node tests/gens_phase5_module_launch_raccord_runtime_preaudit_v1.test.cjs

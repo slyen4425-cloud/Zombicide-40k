@@ -9,7 +9,7 @@ const {chromium}=require('playwright');
 const root=path.join(__dirname,'..');
 const DUNGEON_ID='game_profile_dungeon_demo';
 const artifacts=path.join(root,'artifacts','dungeon-desktop-movement-assets');
-const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.webmanifest':'application/manifest+json'};
+const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.webmanifest':'application/manifest+json'};
 const server=http.createServer((req,res)=>{
   const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
   const file=path.resolve(root,'.'+(pathname==='/'?'/preview.html':pathname));

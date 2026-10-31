@@ -39,7 +39,7 @@ const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core',
 assert.doesNotMatch(runtimeBootstrap,/gens-survival-mode-isolation-1678104\.js/,'Phase 6 runtime bootstrap must not load the retired Survival/Dungeon isolation guard');
 const mime={
   '.html':'text/html; charset=utf-8',
-  '.js':'text/javascript; charset=utf-8',
+  '.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8',
   '.css':'text/css; charset=utf-8',
   '.json':'application/json',
   '.webmanifest':'application/manifest+json',

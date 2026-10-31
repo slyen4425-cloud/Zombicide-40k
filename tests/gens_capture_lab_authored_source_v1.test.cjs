@@ -7,7 +7,7 @@ const vm=require('node:vm');
 const {pathToFileURL}=require('node:url');
 const {execFileSync}=require('node:child_process');
 const lab=process.env.COMBAT_LAB_ROOT;
-const PIN='248f718ec924106d16999d59e5dc8310f8450180';
+const PIN='81ad362a401b7b2eb9faa811528aced9f2d6384a';
 assert.ok(lab,'Official pinned Combat Lab checkout required');
 assert.equal(execFileSync('git',['-C',lab,'rev-parse','HEAD'],{encoding:'utf8'}).trim(),PIN);
 const read=rel=>JSON.parse(fs.readFileSync(path.join(lab,rel),'utf8'));
@@ -206,11 +206,15 @@ test('native authored source, existing saved-profile seam and sole Core provider
 
 // Data-owned author matrix: verify every published species, not merely a
 // static list or a preview dummy. All definitions come from the same pinned Lab.
-test('all twelve media-complete pinned Lab author creature transfers export genuine native 1v1 with their own skills', async()=>{
- const official=["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"];
+test('all thirteen media-complete pinned Lab author creature transfers export genuine native 1v1 with their own skills', async()=>{
+ const official=["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_nat_1","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"];
  const settings=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/capture-lab-authored-preview-settings-v1.json'),'utf8'));
  const transfers=settings.authoredCreatureFiles.map(read);
- assert.equal(transfers.length,12,'only the twelve media-complete official species are deliverable');
+ const upstream=await importLab('src/catalogs/capture-showcase-creature-presets-v1.js');
+ assert.deepEqual([...settings.authoredCreatureFiles].sort(),
+  [...upstream.CAPTURE_SHOWCASE_CREATURE_PRESET_FILES_V1].sort(),
+  'All staged species must match the pinned Lab main author manifest, without a shadow catalog');
+ assert.equal(transfers.length,13,'only the thirteen media-complete official species are deliverable');
  assert.deepEqual(transfers.map(x=>x.draft.id),official,'exact author order and IDs, no aliases or invented entries');
  const visualRoot=process.env.COMBAT_ASSETS_ROOT;
  assert.ok(visualRoot,'Official pinned visual catalog checkout required');
@@ -254,7 +258,12 @@ test('all twelve media-complete pinned Lab author creature transfers export genu
   assert.ok(exported,opponent+' official author missing');
   assert.ok(source.fighterConfigs[opponent]?.maxHp>0,opponent+' native HP missing');
   assert.equal(source.battleFormat.actors.find(x=>x.actorId==='opponent').creatureId,opponent);
-  assert.equal(source.skillIdsByActor.opponent.length,5,opponent+' five authored abilities required');
+  const authorLoadout=transfers.find(x=>x.draft.id===opponent)?.loadout?.slots
+   .map(slot=>slot.skillId).filter(Boolean);
+  assert.ok(Array.isArray(authorLoadout)&&authorLoadout.length>0&&authorLoadout.length<=5,
+   opponent+' must have one to five authored active abilities');
+  assert.deepEqual(source.skillIdsByActor.opponent,authorLoadout,
+   opponent+' native skills must exactly equal the official authored loadout, never padded or guessed');
   assert.ok(source.skillIdsByActor.opponent.every(id=>source.skills[id]),opponent+' official skills not imported');
   assert.ok(exported.presentationId&&built.exported.presentation.creatures[exported.presentationId]?.visual?.front?.assetId,
    opponent+' official face sprite missing');

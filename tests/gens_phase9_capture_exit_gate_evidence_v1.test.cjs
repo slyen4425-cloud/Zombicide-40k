@@ -71,7 +71,17 @@ const staged=JSON.parse(read('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.j
 assert.equal(staged.schemaVersion,1);assert.equal(staged.productionActivated,false);
 const stagedCaptureScripts=staged.classicScripts.filter(file=>file.startsWith('assets/gensrpg/capture/'));
 assert.equal(stagedCaptureScripts.length,8,'every opt-in Capture script must be audited');
-assert.equal(staged.captureEsmAdapters.length,13,'Capture opt-in inventory includes the single Lab scene and transport provider without hiding historical adapters');
+assert.equal(staged.captureEsmAdapters.length,14,'Capture opt-in inventory adds exactly one typed trainer World port to the thirteen certified adapters');
+assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-world-lab-trainer-transaction-v1.mjs'),
+  'trainer has its own typed transaction, never a fake wild event');
+assert.ok(staged.coverage.includes('tests/gens_capture_world_lab_trainer_transaction_v1.test.cjs'));
+const officialTrainerPort=read('assets/gensrpg/capture/capture-world-lab-trainer-transaction-v1.mjs');
+assert.match(officialTrainerPort,/createCaptureSavedProfileBattleBridgeV1/,
+  'trainer HP must be persisted by the existing Capture saved-profile owner');
+assert.match(officialTrainerPort,/encounterKind:'trainer'/,
+  'trainer transaction must never masquerade as wild');
+assert.doesNotMatch(officialTrainerPort,/localStorage|createCombatSession|createCombatRuntime|window\.|startSkill|location\.reload/,
+  'trainer port cannot invent a storage owner, second engine, global override or Combat clock');
 assert.ok(staged.captureEsmAdapters.includes('assets/gensrpg/capture/capture-official-battle-view-v1.mjs'));
 assert.equal(staged.stagedOfficialBattleView?.productionActivated,false);
 assert.equal(staged.stagedOfficialBattleView?.ownsStorage,false);
@@ -112,7 +122,7 @@ assert.match(officialComposer,/createCaptureWorldLabWildTransactionV1/,'Hub must
 assert.match(officialComposer,/createCaptureLabHubBattleCommandV1/,'Hub must reuse the validated single command');
 assert.match(officialComposer,/delivery-manifest\.json/,'Hub must require the certified delivery manifest');
 assert.doesNotMatch(officialComposer,/window\.captureStartWildBattle\s*=|localStorage\./,'no second runtime or storage authority');
-assert.equal(staged.authoredSourceLabPin,'248f718ec924106d16999d59e5dc8310f8450180',
+assert.equal(staged.authoredSourceLabPin,'81ad362a401b7b2eb9faa811528aced9f2d6384a',
   'the approved official Combat Lab author source must be pinned to the certified Kitsune 8-frame release');
 assert.match(read('assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs'),
   new RegExp(staged.authoredSourceLabPin),'one immutable Combat author SHA shared by the source loader and staged manifest');
@@ -135,7 +145,9 @@ assert.equal(staged.stagedExplicitProfileMigration?.productionActivated,false);
 assert.equal(staged.stagedExplicitProfileMigration?.oneOwner,'assets/gensrpg/capture/team-roster-v1.js');
 const hubCommand=read('assets/gensrpg/capture/capture-lab-hub-battle-command-v1.mjs');
 assert.match(hubCommand,/combatPort\.startEncounter\(/,'Hub must use the existing single Combat owner');
-assert.match(hubCommand,/transaction\.prepareWild\(/,'Hub must read the original World ticket');
+assert.match(hubCommand,/owner\.prepareWild\(creatureId\)/,'Wild still uses its original World ticket');
+assert.match(hubCommand,/owner\.prepareTrainer\(\)/,'Trainer uses the explicit typed World ticket');
+assert.match(hubCommand,/isTrainer\?trainerTransaction:transaction/,'One command dispatches to one typed transaction');
 assert.doesNotMatch(hubCommand,/localStorage|window\.|createCombatSession|createCombatRuntime|startSkill|location\.reload/,
   'Hub cannot own another storage, global old combat override, clock or damage rules');
 assert.equal(staged.stagedWorldWildTransaction,true);
@@ -157,18 +169,22 @@ assert.match(savedBridge,/saveHeroState\(heroId,next\)/,'only the injected Captu
 assert.doesNotMatch(savedBridge,/localStorage|createCombatSession|createCombatRuntime|startSkill/,'mapping owns neither storage nor combat execution');
 for(const file of [...staged.classicScripts,...staged.captureEsmAdapters]){
   assert.ok(fs.statSync(path.join(root,file)).isFile(),file+' must exist');
-  assert.equal(read('index.html').includes('src="'+file),false,file+' must not silently load in the saved game');
+  assert.equal(read('index.html').includes('src="'+file),file==='assets/gensrpg/capture/lab-ownership-port-v1.js',
+    file+' production-reachable only when explicitly approved as the ONE Lab owner');
 }
 assert.deepEqual(fs.readdirSync(path.join(root,staged.capturePreviewDirectory)).sort(),staged.capturePreviewFiles);
 assert.ok(read(staged.previewEntry).includes('assets/gensrpg/capture/preview/zone.mjs'));
 const historicalEntries=['builtin-seed-v1.js','combat-core-v1.js','entry-v1.js','hub-entry-v1.js','legacy-monolith-functions-v1.js','legacy-patches','module-contract-v1.json','screen-return-v1.js','session-start-v1.js','team-roster-v1.js','world-exploration-v1.js'];
+const approvedNativeAuthorEntries=['capture-lab-author-entry-v1.mjs','capture-lab-author-ui-provider-v1.mjs'];
 const expected=[...historicalEntries,...stagedCaptureScripts.map(file=>path.basename(file)),
- ...staged.captureEsmAdapters.map(file=>path.basename(file)),path.basename(staged.capturePreviewDirectory)].sort();
+ ...staged.captureEsmAdapters.map(file=>path.basename(file)),...approvedNativeAuthorEntries,
+ path.basename(staged.capturePreviewDirectory)].sort();
 assert.deepEqual(existing,expected,'Capture folder has new owner files; re-audit the exit matrix on any expansion');
 
 const r06Source=require('./helpers/gens_phase12_r06_capture_source_view_v1.cjs');
 // Apply only the certified Chrome startup inverse first; then test the immutable R06 rollback.
 const originalChromeIndex=require('./helpers/gens_chrome_hero_recursion_source_view_20261024.cjs');
+const approvedSourceOnly=require('./helpers/gens_capture_author_index_reverse_20261030.cjs');
 const crypto=require('node:crypto');
 const blob=v=>crypto.createHash('sha1').update(Buffer.from('blob '+v.length+String.fromCharCode(0))).update(v).digest('hex');
 const moduleNames=["captureGameplayModalMount","capturePlaytestFix128","captureFix129","captureFix130","captureFix131","captureFix132","captureFix133","captureFix134","captureFix135","captureFix136","captureFix137","captureFix138","captureFix139","captureFix140","captureItems141","captureBuffs142","captureBuffFx143","captureAbilityTruth144"];
@@ -176,7 +192,7 @@ const archiveDir=path.join(root,'assets/gensrpg/capture/legacy-patches');
 const actualPatches=fs.readdirSync(archiveDir).sort();
 const expectedPatches=moduleNames.map(name=>name.replace(/([A-Z])/g,'-$1').toLowerCase().replace(/^-/, '')+'-v1.js').sort();
 assert.deepEqual(actualPatches,expectedPatches,'R06 Capture patches must contain only the 18 historical active bodies, no new autonomous engine');
-assert.equal(blob(r06Source(originalChromeIndex(fs.readFileSync(path.join(root,'index.html'))))),'b33542b033c5afa8a1643d99c56c21dbd4be266c',
+assert.equal(blob(r06Source(originalChromeIndex(approvedSourceOnly.toHistoricalIndex(fs.readFileSync(path.join(root,'index.html')))))),'b33542b033c5afa8a1643d99c56c21dbd4be266c',
   'R06 physical extraction must byte-restore the prior Phase9-approved source');
 const stagedClassicNames=new Set(stagedCaptureScripts.map(file=>path.basename(file)));
 const exportedOwnerFile=existing.filter(x=>x.endsWith('.js')&&!stagedClassicNames.has(x));

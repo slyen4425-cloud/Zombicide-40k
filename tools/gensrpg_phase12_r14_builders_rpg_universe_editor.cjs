@@ -56,7 +56,11 @@ function restoreR13(){
  const hash=blob(html);
  if(hash===SOURCE)return html;
  assert(hash===TARGET&&Buffer.byteLength(html)===TARGET_SIZE,'not an authorized R14 index');
- const extracted=fs.readFileSync(MODULE,'utf8');
+ // The product owner may evolve; historical rollback reads ONLY the exact
+ // reviewed Capture World writer revision, reversed to the certified R14 blob.
+ // Unknown changes remain hard failures; no history guard is disabled.
+ const extracted=require('./gensrpg_capture_rpg_rules_historical_reverse_20261030.cjs')
+  .restoreOriginalR14Owner(fs.readFileSync(MODULE,'utf8'));
  assert(blob(extracted)===OWNER_BLOB&&Buffer.byteLength(extracted)===OWNER_SIZE,'Builders owner drift');
  const without=html.replace(HOOK,'');assert(without!==html,'single parser hook missing');
  const list=tags(without);assert(list.length===150,'R13 parser count on rollback');

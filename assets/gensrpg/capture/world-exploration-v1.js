@@ -223,6 +223,18 @@ function captureConsumeWildEncounter(reason="battle"){
   renderCaptureWorldHub();
   renderCaptureExploreResult();
 }
+function captureConsumeTrainerEncounter(reason="battle"){
+  const ws=captureWorldState(),event=ws.last;
+  if(!["friendly_trainer","hostile_trainer"].includes(event?.type)||
+     !event.encounterId||!event.trainerId||event.captureAllowed!==false){
+    throw new Error("Aucune rencontre de dresseur officielle active à consommer.");
+  }
+  ws.last={type:"resolved",text:reason==="victory"?
+    "Le dresseur est vaincu. Vous pouvez poursuivre votre exploration.":
+    "Le combat de dresseur est terminé."};
+  saveCaptureWorldState(ws);
+  renderCaptureWorldHub();renderCaptureExploreResult();
+}
 function captureIgnoreEncounter(){const ws=captureWorldState();ws.last={type:"empty",text:"Le groupe poursuit son chemin."};saveCaptureWorldState(ws);renderCaptureWorldHub();renderCaptureExploreResult()}
 function captureOpenEncounter(){
   if(typeof isGameMasterDevice==="function"&&!isGameMasterDevice()){
@@ -251,6 +263,26 @@ function renderCaptureEncounterPage(){
   }
   const loc=captureProfileLocations().find(x=>String(x.id)===String(ws.locationId))||captureProfileLocations()[0];
   host.innerHTML=`<div class="captureEncounterCard"><strong>📍 ${z40kEscHtml(loc?.name||"Zone sauvage")}</strong><div style="margin:8px 0">${z40kEscHtml(last?.text||"Explore les environs.")}</div><button class="startGameBtn" onclick="captureGenerateEncounter()">🎲 EXPLORER LES ENVIRONS</button></div>`;
+}
+function captureDeclareWorldTrainerEncounter(type,location){
+  // World owns the NPC and uses its canonical location/rarity species picker.
+  // Never silently filter unsupported historical species to fake Lab coverage.
+  const rolled=captureRollLocation(location),creature=rolled?.creature;
+  if(!creature?.id)return {type:"empty",text:"🌿 Aucun dresseur ne s'arrête dans cette zone."};
+  const difficulty=typeof captureTrainerDifficulty134==="function"?
+    captureTrainerDifficulty134():null;
+  if(!Number.isInteger(difficulty)||difficulty<1||difficulty>4)
+    throw new Error("La difficulté du dresseur n'est pas configurée par le World.");
+  if(typeof globalThis.crypto?.randomUUID!=="function")
+    throw new Error("Identifiant sécurisé du dresseur indisponible.");
+  const hostile=type==="hostile_trainer";
+  if(!hostile&&type!=="friendly_trainer")throw new TypeError("Type de dresseur World invalide");
+  return {type,trainerId:"npc-"+globalThis.crypto.randomUUID().replaceAll("-",""),
+    trainerName:hostile?"Dresseur hostile":"Dresseur amical",
+    trainerDifficulty:difficulty,creatureIds:[String(creature.id)],
+    captureAllowed:false,text:hostile?
+      "😠 Un dresseur hostile vous barre la route. Le combat est inévitable !":
+      "🙂 Vous rencontrez un dresseur amical. Il propose un combat d'entraînement."};
 }
 function captureGenerateEncounter(){
   const ws=captureWorldState();
@@ -287,9 +319,9 @@ function captureGenerateEncounter(){
     const amount=5+Math.floor(Math.random()*21);
     result={type:"money",amount,text:"🪙 Vous trouvez "+amount+" pièces !"};
   }else if(roll<92){
-    result={type:"friendly_trainer",text:"🙂 Vous rencontrez un dresseur amical. Il propose un combat d'entraînement."};
+    result=captureDeclareWorldTrainerEncounter("friendly_trainer",loc);
   }else{
-    result={type:"hostile_trainer",text:"😠 Un dresseur hostile vous barre la route. Le combat est inévitable !"};
+    result=captureDeclareWorldTrainerEncounter("hostile_trainer",loc);
   }
   ws.last=result;saveCaptureWorldState(ws);renderCaptureWorldHub();renderCaptureEncounterPage();
 }

@@ -5,6 +5,7 @@ import {COMBAT_LAB_SOURCE_V1,loadCombatLabEngineV1} from './combat-lab-engine-lo
 import {createCaptureLabAuthoredSourceV1} from './combat-lab-authored-source-v1.mjs';
 import {createCombatLabProviderV1} from './combat-lab-provider-v1.mjs';
 import {createCaptureWorldLabWildTransactionV1} from './capture-world-lab-wild-transaction-v1.mjs';
+import {createCaptureWorldLabTrainerTransactionV1} from './capture-world-lab-trainer-transaction-v1.mjs';
 import {createCaptureLabHubBattleCommandV1} from './capture-lab-hub-battle-command-v1.mjs';
 
 const REQUIRED_OWNERS=[
@@ -146,13 +147,20 @@ export async function createCaptureOfficialHubCompositionV1({
   authoredSource,adaptCombatExport:adapter.adaptCaptureCombatExportStackV1,
   validateBattleResult,readBattleSettings:()=>settings
  });
+ const trainerTransaction=typeof owners.consumeTrainerEncounter==='function'?
+  createCaptureWorldLabTrainerTransactionV1({
+   ...Object.fromEntries(REQUIRED_OWNERS.map(name=>[name,owners[name]])),
+   consumeTrainerEncounter:owners.consumeTrainerEncounter,
+   authoredSource,adaptCombatExport:adapter.adaptCaptureCombatExportStackV1,
+   validateBattleResult,readBattleSettings:()=>settings
+  }):null;
  const resources=Object.freeze({
   authoredSource,catalog:packageData.catalog,
   source:packageData.source,settings,
   publishedSpecies:Object.freeze([...packageData.manifest.supportedCreatureIds])
  });
  const command=createCaptureLabHubBattleCommandV1({
-  transaction,combatPort,engine,createProvider,
+  transaction,trainerTransaction,combatPort,engine,createProvider,
   clock:nextClock,mountBattle:(...args)=>mountBattle(...args,resources),
   onReturn,onError
  });
@@ -162,6 +170,26 @@ export async function createCaptureOfficialHubCompositionV1({
     throw new RangeError('This species has no official Combat Lab author transfer in the current release: '+id);
    }
    return command.startWildBattle(id);
+  },
+  startTrainerBattle(){
+   const encounter=owners.readWorldState()?.last;
+   if(!['friendly_trainer','hostile_trainer'].includes(encounter?.type)||
+      !Array.isArray(encounter.creatureIds)||
+      encounter.creatureIds.some(id=>!resources.publishedSpecies.includes(id))){
+    throw new RangeError('Trainer NPC requires official signed Combat Lab creature transfers');
+   }
+   // A list of level labels is not an executable difficulty rule.
+   // Only the signed Lab author may publish its complete native policy.
+   // The Lab exporter and CombatSession remain the sole validators and
+   // executors of HP/damage coefficients; World supplies only the level.
+   const policy=settings.trainerDifficultyPolicy;
+   if(policy?.schema!=='capture-trainer-difficulty-policy-v1'||
+      policy.version!==1||!Array.isArray(policy.levels)||
+      policy.levels.length!==4||
+      policy.levels[encounter.trainerDifficulty-1]?.level!==encounter.trainerDifficulty){
+    throw new Error('Signed Combat Lab trainer difficulty policy is required before an NPC battle');
+   }
+   return command.startTrainerBattle();
   },
   cancel:()=>command.cancel(),
   retryCommit:()=>command.retryCommit(),

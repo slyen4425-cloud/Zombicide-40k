@@ -5,11 +5,13 @@
  */
 const fs=require('node:fs'),path=require('node:path');
 const original=fs.readFileSync.bind(fs);
-const indexPath=path.resolve(__dirname,'../../index.html');
+// The same read-only historical projector is used by nested rollback tools
+// and by isolated temp-directory tests. Only a certified index.html blob is
+// eligible; unrelated files and unknown bytes remain untouched.
 const historical=require('./gens_chrome_hero_recursion_source_view_20261024.cjs');
 fs.readFileSync=function(file,...args){
  const data=original(file,...args);
- if(typeof file!=='string'||path.resolve(file)!==indexPath)return data;
+ if(typeof file!=='string'||path.basename(path.resolve(file))!=='index.html')return data;
  const source=Buffer.isBuffer(data)?data:Buffer.from(data,'utf8');
  if(!historical.accepts(source))return data;
  const originalVersion=historical(source);

@@ -24,6 +24,8 @@ assert.deepEqual(rawDirect,[
   'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',
+  'assets/gensrpg/capture/lab-ownership-port-v1.js',
+  'assets/gensrpg/capture/capture-lab-author-entry-v1.mjs',
   'assets/gensrpg/capture/entry-v1.js',
   'assets/gensrpg/capture/session-start-v1.js',
   'assets/gensrpg/capture/screen-return-v1.js',
@@ -108,12 +110,12 @@ const productionDirect=buildPrelude.includeBuildPrelude([
   ].includes(x)),
   ...injected
 ],workflow);
-assert.equal(new Set(productionDirect).size,92,'production composition includes the explicit profile repair prelude and the single Capture combat core owner');
+assert.equal(new Set(productionDirect).size,94,'production composition includes sole Lab authoring port and native UI route plus all prior owners');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,112,'R11 must retire exactly 17 previously disabled named script tags from 129');
 assert.equal((index.match(/<script\b[^>]*type=["']application\/x-gensrpg-disabled["']/gi)||[]).length,0,'R11 must leave no legacy disabled script tags');
-assert.equal([...index.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)].length,152,'R16 replaces the inline Core303 slot by a single external entry, preserving 152 tags');
+assert.equal([...index.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)].length,154,'two reviewed Lab authoring scripts added to 152 historical script tags');
 
 const assetRefs=source=>[...source.matchAll(/assets\/(?:gensrpg|dungeon)\/[^"'\x60\s)]+\.js(?:\?[^"'\x60\s)]*)?/g)]
   .map(m=>stripQuery(m[0]))
@@ -190,6 +192,7 @@ const phase9ConnectedServices=[
   'assets/gensrpg/capture/world-exploration-v1.js',
   'assets/gensrpg/capture/team-roster-v1.js',
   'assets/gensrpg/capture/combat-core-v1.js',
+  'assets/gensrpg/capture/lab-ownership-port-v1.js',
   'assets/gensrpg/capture/legacy-patches/capture-gameplay-modal-mount-v1.js',
   'assets/gensrpg/capture/legacy-patches/capture-playtest-fix128-v1.js',
   'assets/gensrpg/capture/legacy-patches/capture-fix129-v1.js',
@@ -225,7 +228,8 @@ const captureLabOptInServices=captureLabInventory.classicScripts;
 assert.equal(new Set(captureLabOptInServices).size,10,'every staged Capture/Lab service is explicitly classified');
 for(const rel of captureLabOptInServices){
   assert.equal(allJs.includes(rel),true,'staged Capture/Lab service must exist: '+rel);
-  assert.equal(reachable.has(rel),false,'staged Capture/Lab service must not enter production implicitly: '+rel);
+  assert.equal(reachable.has(rel),rel==='assets/gensrpg/capture/lab-ownership-port-v1.js',
+    'only the explicitly connected single Lab ownership port may be active: '+rel);
 }
 // Preview-only owner scaffolding is a new, explicit isolated JS file.
 // Keep the production reachable set exactly identical; do not accidentally
@@ -246,7 +250,7 @@ const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
 assert.equal(allJs.length,160,'physical inventory includes ten Capture/Lab opt-in services, isolated preview owner and Core profile repair prelude');
 assert.equal(phase2Js.length,82,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
-assert.equal(reachable.size,135,'production graph must include the profile repair prelude and existing Capture owners');
+assert.equal(reachable.size,137,'production graph includes only the reviewed Lab port and native author UI route beyond prior owners');
 const connectedPhaseEntrypoints=new Set([
   'assets/gensrpg/survival/entry-v1.js',
   'assets/gensrpg/dungeon/entry-v1.js',

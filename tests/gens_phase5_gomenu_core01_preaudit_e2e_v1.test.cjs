@@ -73,7 +73,7 @@ assert.equal((core200.slice(core200.indexOf(oldCapture)+oldCapture.length).match
   'Core 2.00 must not keep using the retired public object after replacement');
 
 const mime={
-  '.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8',
+  '.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8',
   '.css':'text/css; charset=utf-8','.json':'application/json',
   '.webmanifest':'application/manifest+json','.png':'image/png',
   '.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp',

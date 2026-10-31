@@ -2661,10 +2661,10 @@ body.gensCapturePregame #sessionHeroSetup::before{
     <div class="panel">
       <div class="hint" id="liveEditHint" style="margin-bottom:10px">💾 Les éditeurs de héros, objets, compétences et ennemis restent accessibles pendant une partie. La session active est conservée. Les réglages structurels du mode de jeu restent verrouillés pendant la session.</div>
       <div class="hint">Crée ici le contenu réutilisable dans tous tes modes de jeu. Rien ici ne lance une partie.</div>
-      <div class="editorHubGrid"><button id="controllableCreatureEditorCard" type="button" class="editorHubCard" onclick="openControllableCreatureLibrary()"><b>🐲 CRÉATURES</b><small>Créatures contrôlables, capturables ou évolutives.</small></button>
+      <div class="editorHubGrid"><button id="controllableCreatureEditorCard" type="button" class="editorHubCard" onclick="(GensCaptureV1.isProfile(getActiveGameProfile())?GensCaptureLabAuthorUiV1.open('creature'):openControllableCreatureLibrary())"><b>🐲 CRÉATURES</b><small>Créatures contrôlables, capturables ou évolutives.</small></button>
 <button id="companionEditorCard" type="button" class="editorHubCard" onclick="openCompanionLibrary()"><b>🐺 COMPAGNONS / INVOCATIONS</b><small>PNJ alliés, familiers, invocations et constructs.</small></button>
         <button class="editorHubCard" onclick="openHeroManagerFromHub()"><b>👤 HÉROS</b><small>Créer, modifier et supprimer les héros.</small></button>
-        <button class="editorHubCard" onclick="openObjectManagerFromHub()"><b>📦 OBJETS</b><small>Créer les équipements et gérer la bibliothèque.</small></button><button id="abilityLibraryHubCard" class="editorHubCard" onclick="openAbilityLibrary(null)"><b>📚 COMPÉTENCES</b><small>Consulter, créer et modifier le répertoire de compétences réutilisables.</small></button>
+        <button class="editorHubCard" onclick="openObjectManagerFromHub()"><b>📦 OBJETS</b><small>Créer les équipements et gérer la bibliothèque.</small></button><button id="abilityLibraryHubCard" class="editorHubCard" onclick="(GensCaptureV1.isProfile(getActiveGameProfile())?GensCaptureLabAuthorUiV1.open('skill'):openAbilityLibrary(null))"><b>📚 COMPÉTENCES</b><small>Consulter, créer et modifier le répertoire de compétences réutilisables.</small></button>
         <button id="survivalModEditorHubBtn" class="editorHubCard" onclick="openSurvivalModEditor()"><b>🧩 UNIVERS / MODE SURVIE</b><small>Créer ou modifier l’univers Survie actif : progression, règles, héros, objets, ennemis et vagues.</small></button>
         <button id="dungeonAdvancedEditorBtn" class="editorHubCard" onclick="openDungeonAdvancedEditor()"><b>🏰 DUNGEON</b><small>Salles, Boss, géométrie, événements et génération.</small></button><button id="rpgUniverseEditorHubBtn" class="editorHubCard" onclick="openRpgUniverseEditor()"><b>🧭 UNIVERS / MODE RPG</b><small>Créer ou modifier l’univers RPG actif : progression, stats, combat, talents, exploration et pools.</small></button>
         <button class="editorHubCard" onclick="openWaveEditorFromHub()"><b>🃏 VAGUES</b><small>Créer et enregistrer les sets de vagues.</small></button>
@@ -4028,7 +4028,9 @@ body.gensCapturePregame #sessionHeroSetup::before{
       <div class="captureWorldQuick">
         <button type="button" onclick="captureOpenHeal()">🏥 Centre de soin</button>
         <button type="button" onclick="captureOpenTrainerBattle()">🏟️ Combat dresseur</button>
-        <button id="captureMjQuickBtn" type="button" onclick="captureOpenMjPanel()">🎛️ MJ</button>
+        <button type="button" onclick="GensCaptureLabAuthorUiV1.open('bestiary')">📚 Bestiaire Labo</button>
+         <button type="button" onclick="GensCaptureLabAuthorUiV1.open('rules')">⚙️ Règles du Labo</button>
+         <button id="captureMjQuickBtn" type="button" onclick="captureOpenMjPanel()">🎛️ MJ</button>
       </div>
     </div>
 
@@ -4276,6 +4278,8 @@ body.gensCapturePregame #sessionHeroSetup::before{
 <script src="assets/gensrpg/core/asset-resolver-v1.js"></script>
 <script src="assets/gensrpg/survival/entry-v1.js?v=1"></script>
 <script src="assets/gensrpg/dungeon/entry-v1.js?v=1"></script>
+<script src="assets/gensrpg/capture/lab-ownership-port-v1.js?v=1"></script>
+<script type="module" src="assets/gensrpg/capture/capture-lab-author-entry-v1.mjs"></script>
 <script src="assets/gensrpg/capture/entry-v1.js?v=1"></script>
 <script src="assets/gensrpg/capture/session-start-v1.js?v=1"></script>
 <script src="assets/gensrpg/capture/screen-return-v1.js?v=1"></script>

@@ -10,7 +10,7 @@ const vm=require('node:vm');
 
 const sw=fs.readFileSync(path.resolve(__dirname,'../service-worker.js'),'utf8');
 const scope='https://gensrpg.example/';
-const assetSha='b3d46ce6f2639ebb59a2984aeff17f97cbcd7377';
+const assetSha='e6ef519b062e9e590faae63130ec12bfab263bac';
 const imageUrl='https://raw.githubusercontent.com/slyen4425-cloud/GenSrpg_labo_combat_dynamique/'+
  assetSha+'/assets/library/creatures/kitsune/front.png';
 const cachedUrls=new Map();

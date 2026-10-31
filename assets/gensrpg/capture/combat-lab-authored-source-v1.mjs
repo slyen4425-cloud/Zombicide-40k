@@ -41,7 +41,7 @@ export function createCaptureLabAuthoredSourceV1({
   if(!transfer)throw new RangeError('unknown official authored Capture creature: '+id);
   return transfer;
  };
- function buildEncounter({encounterId,player,opponent,playerTeam,opponentTeam,arenaId,skillSpeedMultiplier,combatRules}={}){
+ function buildEncounter({encounterId,player,opponent,playerTeam,opponentTeam,arenaId,skillSpeedMultiplier,combatRules,trainerDifficultyPolicy}={}){
   const eid=required(encounterId,'encounterId');
   const arena=required(arenaId,'arenaId');
   if(typeof skillSpeedMultiplier!=='number'||!Number.isFinite(skillSpeedMultiplier)||skillSpeedMultiplier<=0){
@@ -109,9 +109,16 @@ export function createCaptureLabAuthoredSourceV1({
    battleSetup:setup,creatureDrafts:drafts,skillDrafts,
    loadouts:participants.map(t=>t.loadout),
    statRegistry,statValues:participants.map(t=>t.statValues),
+   // Only the signed Combat Lab exporter validates/owns these authored values.
+   // No consumer default or invented trainer coefficient is permitted.
+   ...(trainerDifficultyPolicy===undefined?{}:{trainerDifficultyPolicy}),
    metadata:{producer:'GenSrpg-Capture-consumer',encounterId:eid}
   });
   const nativeCombatSource=adaptCombatExport(exported);
+  if(trainerDifficultyPolicy!==undefined&&
+     (!exported.battle?.trainerDifficultyPolicy||!nativeCombatSource.trainerDifficultyPolicy)){
+   throw new TypeError('Signed Combat Lab trainer difficulty policy was not exported and adapted');
+  }
   const actors=nativeCombatSource.battleFormat.actors;
   if(actors.length!==declared.length||nativeCombatSource.battleFormat.localActorId!=='player'){
    throw new TypeError('Official Combat Lab export does not match the Capture encounter actors');

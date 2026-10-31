@@ -15,8 +15,8 @@ test('Pages release resolves the single immutable official Combat and visual SHA
  const standalone=read('.github/workflows/capture-lab-delivery.yml');
  const source=read('assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs');
  const pins=JSON.parse(read('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'));
- assert.equal(pins.authoredSourceLabPin,'248f718ec924106d16999d59e5dc8310f8450180');
- assert.equal(pins.authoredAssetsPin,'b3d46ce6f2639ebb59a2984aeff17f97cbcd7377');
+ assert.equal(pins.authoredSourceLabPin,'81ad362a401b7b2eb9faa811528aced9f2d6384a');
+ assert.equal(pins.authoredAssetsPin,'e6ef519b062e9e590faae63130ec12bfab263bac');
  assert.ok(source.includes(pins.authoredSourceLabPin));
  assert.ok(workflow.includes('id: capture_pages_pins'),'Pages must resolve from source manifest');
  assert.ok(workflow.includes("console.log('combat='+COMBAT_LAB_SOURCE_V1.sha)"));
@@ -41,15 +41,19 @@ test('Pages uses same verified payload publisher AFTER site preparation and BEFO
  assert.ok(at('- name: Préparer le site')<at(staging),'stage only after copying the site');
  assert.ok(at(staging)<at(verify)&&at(verify)<at(publish),'never publish unverified vendor');
  assert.ok(at(guard)<at(publish),'guard before release artifact');
- assert.ok(y.includes("if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'"),'only production main may deploy, never a PR or candidate branch');
+ assert.ok(y.includes("if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'"),'only main may deploy Pages, never PR or work branch');
 });
 
 test('staged payload stays dormant; historic public index, SW and real profiles unchanged',()=>{
  const index=fs.readFileSync(path.join(root,'index.html'));
  const sw=read('service-worker.js');
- assert.equal(gitblob(index),'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646');
+ assert.equal(gitblob(index),'c53d234fca05e49a33650a61776fae1c1985613e');
  assert.ok(!index.includes(Buffer.from('vendor/combat-lab/')),'no automatic Combat install');
  assert.ok(!index.includes(Buffer.from('runtime-data/')),'no extra public UI owner');
+ assert.ok(index.includes(Buffer.from('capture-lab-author-entry-v1.mjs')),'the product index must load the sole author host instead of a second editor');
+ assert.ok(index.includes(Buffer.from("GensCaptureLabAuthorUiV1.open('creature')")),'creature hub links to official Lab only in Monster Capture');
+ assert.ok(index.includes(Buffer.from("GensCaptureLabAuthorUiV1.open('skill')")),'skill hub links to official Lab only in Monster Capture');
+ assert.ok(index.includes(Buffer.from("openControllableCreatureLibrary()")),'Dungeon editor branch preserved');
  assert.ok(!sw.includes('vendor/combat-lab/'),'no premature PWA precache');
  assert.ok(!sw.includes('runtime-data/'),'no orphan author cache keys');
  assert.equal(fs.existsSync(path.join(root,'vendor/combat-lab')),false,'no vendored duplicate engine in git');

@@ -894,26 +894,15 @@ function captureStartWildBattle(creatureId){
 }
 
 function captureOpenTrainerBattle(){
-  const playerRoster=captureTeamEntityRoster(),pool=loadSharedEntities().filter(x=>x.category==="creature");
-  if(!playerRoster.length){alert("Aucune créature dans l’équipe du dresseur.");return}
-  if(!pool.length){alert("Aucune créature disponible pour créer un adversaire.");return}
-  const auto=captureAutoTrainerRules(playerRoster);
-  const enemy=[];
-  for(let i=0;i<auto.teamSize;i++)enemy.push(pool[Math.floor(Math.random()*pool.length)]);
-  captureStartBattleAutomatic(
-    {name:(CHARS[captureActiveHeroId()]?.name||"Dresseur"),roster:playerRoster,controller:"human"},
-    {name:"Dresseur rival",roster:enemy,controller:"auto"},
-    {
-      type:"trainer",
-      captureAllowed:false,
-      activeSlots:auto.activeSlots,
-      teamSize:auto.teamSize,
-      minBattleTeam:1,
-      maxBattleTeam:6,
-      recallCost:"turn",
-      controller:"auto"
-    }
-  );
+  // Original World button owner: one typed native Lab entry, no old combat.
+  const moduleUrl=new URL('assets/gensrpg/capture/capture-official-wild-entry-v1.mjs',document.baseURI);
+  return import(moduleUrl.href)
+    .then(({startCaptureOfficialTrainerEntryV1})=>startCaptureOfficialTrainerEntryV1())
+    .catch(error=>{
+      console.error('Capture official trainer battle entry',error);
+      alert('Combat de dresseur officiel indisponible : '+String(error?.message||error));
+      return false;
+    });
 }
 
 function captureLaunchTrainerBattle(qty){

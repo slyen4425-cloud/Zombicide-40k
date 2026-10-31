@@ -118,14 +118,14 @@ async function ready(extra={},user={}){
 }
 test('official static payload + exact Capture owners start one real native fight, flee and commit once',async()=>{
  const s=await ready();
- assert.equal(s.controller.resources.publishedSpecies.length,12);
- assert.deepEqual([...s.controller.resources.publishedSpecies],["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"]);
+ assert.equal(s.controller.resources.publishedSpecies.length,13);
+ assert.deepEqual([...s.controller.resources.publishedSpecies],["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_nat_1","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"]);
  assert.equal(s.writes().hero,0);
  const start=s.controller.startWildBattle('crea_voltik');
  assert.equal(start.ready,true);
  assert.equal(s.session().state().fighters.player.maxHp,150);
  assert.equal(s.session().state().fighters.opponent.maxHp,120);
- assert.equal(s.resources().source.combatSha,'248f718ec924106d16999d59e5dc8310f8450180');
+ assert.equal(s.resources().source.combatSha,'81ad362a401b7b2eb9faa811528aced9f2d6384a');
  assert.equal(s.combatPort.status().battleActive,true);
  assert.equal(s.world().last.encounterId,start.encounterId);
  assert.equal(s.writes().world,s.baseline+1);
@@ -217,4 +217,37 @@ test('integration factory requires real owner callbacks and never creates a glob
  assert.ok(!sourceBody.includes('localStorage'));
  assert.ok(!sourceBody.includes('createFakeCombat'));
  assert.equal(s.writes().hero,0);
+});
+test('TDD: a signed list of trainer level labels without authored combat modifiers cannot start an NPC fight',async()=>{
+ const {createHash}=require('node:crypto');
+ const inputsPath='assets/gensrpg/capture/runtime-data/author-inputs.json';
+ const manifestPath='assets/gensrpg/capture/runtime-data/delivery-manifest.json';
+ const inputs=JSON.parse(fs.readFileSync(path.join(site,inputsPath),'utf8'));
+ // Deliberately simulate the earlier false-positive: all four level names
+ // were advertised but there is no executable Combat Lab author policy.
+ inputs.battleSettings={...inputs.battleSettings,trainerDifficultyLevels:[1,2,3,4]};
+ delete inputs.battleSettings.trainerDifficultyPolicy;
+ const payload=Buffer.from(JSON.stringify(inputs));
+ const manifest=JSON.parse(fs.readFileSync(path.join(site,manifestPath),'utf8'));
+ const entry=manifest.transport.find(x=>x.path===inputsPath);
+ assert.ok(entry,'real signed payload must inventory author inputs');
+ entry.size=payload.length;
+ entry.sha256=createHash('sha256').update(payload).digest('hex');
+ const signedReader={
+  [inputsPath]:()=>new Uint8Array(payload),
+  [manifestPath]:()=>new TextEncoder().encode(JSON.stringify(manifest))
+ };
+ const s=await ready(signedReader);
+ const before=s.world();
+ s.ctx.saveCaptureWorldState({...before,last:{
+  type:'hostile_trainer',trainerId:'npc-test-3',trainerName:'Dresseur',
+  trainerDifficulty:3,creatureIds:['crea_voltik'],captureAllowed:false
+ }});
+ const baseline=s.writes();
+ const declared=s.world();
+ assert.throws(()=>s.controller.startTrainerBattle(),/signed.*trainer.*policy|trainer.*policy.*signed/i);
+ assert.deepEqual(s.writes(),baseline,'rejected policy cannot write player or World');
+ assert.deepEqual(s.world(),declared,'trainer event must remain available');
+ assert.equal(s.combatPort.status().installed,false);
+ assert.equal(s.controller.dispose(),true);
 });

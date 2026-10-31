@@ -683,6 +683,16 @@
       "owner": "Dungeon Core303 / timeline combat",
       "domain": "dungeon",
       "role": "9 158 octets originaux du propriétaire historique final Core303 déplacés à l'identique au même parser slot après Core316. Anciens wrappers inchangés pour parité jusqu'à preuve de retrait."
+    },
+    "assets/gensrpg/capture/lab-ownership-port-v1.js": {
+      "owner": "Monster Capture / sole Combat Lab session and authoring ownership port",
+      "domain": "capture",
+      "role": "One explicit exclusive capability boundary between the existing Capture Shell and the official Lab battle or authoring provider. No second runtime, editor, rules writer or persistence owner."
+    },
+    "assets/gensrpg/capture/capture-lab-author-entry-v1.mjs": {
+      "owner": "Monster Capture / official Combat Lab author UI host",
+      "domain": "capture",
+      "role": "Original Capture Shell route to the published Lab editor and bestiary via same-origin page; no author data mutation, battle engine or alternate editor."
     }
   }
 }

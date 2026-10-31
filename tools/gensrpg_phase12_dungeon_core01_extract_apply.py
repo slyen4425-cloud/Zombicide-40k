@@ -446,6 +446,31 @@ def verify():
                 assert "assert.equal(reachable.size,135," in updated, "preview must not increase production reachability"
                 assert expected_after.count("allJs.length,159,")==1, "R01 historical 159 baseline changed"
                 expected_after=expected_after.replace("allJs.length,159,","allJs.length,160,",1)
+            # Lab authoring changes exactly four SHA-certified links in the
+            # current product HTML. Historical D1-D9 reconstruction above
+            # remains byte-exact; live owner tests pin the NEW index and the
+            # two additional author scripts without relaxing old counts.
+            reviewed_author="c53d234fca05e49a33650a61776fae1c1985613e"
+            if current_blob==reviewed_author:
+                if path in (PATH_OWNERS,PATH_GLOBALS):
+                    expected_after=reviewed_author
+                elif path==PATH_GRAPH:
+                    # The old R01 verifier has already applied its D2-R05
+                    # extraction-specific counts above. Assert the exact three
+                    # current graph fields once, not a guessed intermediate.
+                    import re
+                    replacements=0
+                    for pattern,replacement in (
+                        (r"size,\d+,'production composition","size,94,'production composition"),
+                        (r"allJs\.length,\d+,","allJs.length,160,"),
+                        (r"reachable\.size,\d+,","reachable.size,137,"),
+                    ):
+                        expected_after,count=re.subn(pattern,replacement,expected_after)
+                        assert count<=1, f"{path}: duplicate historical graph field {pattern}"
+                        replacements+=count
+                    # Each test_replacements pair is a SINGLE old assertion
+                    # fragment, or a script-path addition, never all 3 fields.
+                    assert replacements<=1, f"{path}: ambiguous graph assertion fragment"
             assert updated.count(expected_after)==1, f"{path}: R01 owner graph expected {expected_after!r}; found {updated.count(expected_after)} copies"
     print("Phase 12 verified: exact index rollback, 22768-byte Dungeon owner and four explicit regression-guard updates")
 

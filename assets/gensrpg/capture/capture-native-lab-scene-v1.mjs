@@ -132,7 +132,11 @@ export function createCaptureNativeLabSceneV1({
   try{
    const mounted=await preview.mountCaptureCombatPreviewV1({
     root,nativeCombatSource:resolved.nativeCombatSource,
-    nativeVisualSource:nativeVisual,embeddedBattle:{initialHpByActor},
+    nativeVisualSource:nativeVisual,
+    // The native Lab CombatSession alone projects trainer HP/damage. Capture
+    // passes only the World-selected level and the original saved player HP.
+    embeddedBattle:{initialHpByActor,
+     ...(resolved.trainerDifficulty===undefined?{}:{trainerDifficulty:resolved.trainerDifficulty})},
     presentationAssets
    });
    return Object.freeze({

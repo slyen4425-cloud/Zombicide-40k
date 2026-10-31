@@ -6,7 +6,7 @@ const {chromium}=require('playwright');
 
 const root=path.join(__dirname,'..');
 const SURVIVAL_ID='game_profile_zombicide_base';
-const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.webmanifest':'application/manifest+json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.gif':'image/gif','.svg':'image/svg+xml','.mp3':'audio/mpeg'};
+const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.webmanifest':'application/manifest+json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.gif':'image/gif','.svg':'image/svg+xml','.mp3':'audio/mpeg'};
 const server=http.createServer((req,res)=>{
   const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
   const rel=pathname==='/'?'/preview.html':pathname,file=path.resolve(root,'.'+rel);
@@ -59,10 +59,10 @@ async function startSurvival(page){
   const context=await browser.newContext({viewport:{width:412,height:915},deviceScaleFactor:2.625,isMobile:true,hasTouch:true,locale:'fr-FR',serviceWorkers:'block'});
   await context.addInitScript(()=>{try{localStorage.clear();sessionStorage.clear()}catch(e){}window.supabase={createClient:()=>({})}});
   const page=await context.newPage();page.setDefaultTimeout(25000);
-  const errors=[],badAssets=[];
+  const errors=[],badAssets=[],badModuleMime=[];
   page.on('pageerror',e=>errors.push('pageerror:'+String(e)));
   page.on('console',m=>{if(m.type()==='error'&&!/Failed to load resource|ERR_FAILED|NS_BINDING_ABORTED/.test(m.text()))errors.push('console:'+m.text())});
-  page.on('response',r=>{const u=r.url();if(r.status()>=400&&/\.(?:png|jpe?g|webp|gif|svg)(?:\?|$)/i.test(u))badAssets.push({status:r.status(),url:u})});
+  page.on('response',r=>{const u=r.url();if(r.status()>=400&&/\.(?:png|jpe?g|webp|gif|svg)(?:\?|$)/i.test(u))badAssets.push({status:r.status(),url:u});if(r.request().resourceType()==='script'&&/application\/octet-stream/i.test(r.headers()['content-type']||''))badModuleMime.push({url:u,contentType:r.headers()['content-type'],status:r.status()})});
   page.on('requestfailed',r=>{const u=r.url();if(/\.(?:png|jpe?g|webp|gif|svg)(?:\?|$)/i.test(u))badAssets.push({status:'failed',url:u,error:r.failure()?.errorText||''})});
   page.on('dialog',async d=>{try{await d.dismiss()}catch(e){}});
   await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
@@ -183,6 +183,7 @@ async function startSurvival(page){
 
     const brokenSurvivalArts=badAssets.filter(x=>/\/assets\/img_\d+_/i.test(x.url||''));
     assert.deepEqual(brokenSurvivalArts,[],'Survival built-in art links must resolve without 404');
+    assert.deepEqual(badModuleMime,[],'Every actual script request must resolve to JavaScript MIME; never suppress browser module errors');
     assert.deepEqual(errors,[],'Survival search/art scenario must not raise browser runtime errors');
   }finally{
     clearTimeout(watchdog);server.closeAllConnections?.();server.closeIdleConnections?.();server.close();await context.close();await browser.close();

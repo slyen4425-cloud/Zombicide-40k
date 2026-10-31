@@ -31,6 +31,6 @@ test('exact one official entry owns native composer, view, migration, persistent
 test('historical R10 rollback remains byte-pinned and original index remains unchanged',()=>{
  const crypto=require('node:crypto');
  const blob=bytes=>crypto.createHash('sha1').update('blob '+bytes.length+'\0').update(bytes).digest('hex');
- assert.equal(blob(fs.readFileSync(path.join(root,'index.html'))),'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646');
+ assert.equal(blob(fs.readFileSync(path.join(root,'index.html'))),'c53d234fca05e49a33650a61776fae1c1985613e');
  assert.equal(blob(fs.readFileSync(path.join(root,'tests/fixtures/gensrpg-phase12-r10-capture-original-owner-20261018.js.txt'))),'c6ea3c101a6861b99f8bc064d2d1fec874e7266b');
 });

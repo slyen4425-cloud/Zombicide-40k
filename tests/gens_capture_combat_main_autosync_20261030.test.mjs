@@ -23,7 +23,7 @@ test('RED/GREEN: repin all author, engine and test sources together, no implicit
   const m=JSON.parse(fs.readFileSync(path.join(dir,FILES[1])));
   assert.equal(m.authoredSourceLabPin,newSha);
   assert.equal(m.originalWildBattleButton.officialSourceSha,newSha);
-  assert.equal(m.authoredAssetsPin,'b3d46ce6f2639ebb59a2984aeff17f97cbcd7377');
+  assert.equal(m.authoredAssetsPin,JSON.parse(fs.readFileSync(path.join(root,FILES[1]))).authoredAssetsPin,'source-only repin must preserve the exact original authored visual SHA');
   for(const f of FILES){const s=fs.readFileSync(path.join(dir,f),'utf8');assert.ok(s.includes(newSha));assert.ok(!s.includes(old))}
   assert.equal(plan(dir,newSha,99101).changed,false);
  }finally{fs.rmSync(dir,{recursive:true,force:true})}

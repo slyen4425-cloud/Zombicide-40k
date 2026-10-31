@@ -25,13 +25,13 @@ test('Capture production-shaped static transport: real official pins and every b
  assert.equal(manifest.schema,'gensrpg-capture-official-delivery-v1');
  assert.equal(manifest.version,1);
  assert.equal(manifest.productionActivated,false);
- assert.equal(manifest.combatSha,'248f718ec924106d16999d59e5dc8310f8450180');
+ assert.equal(manifest.combatSha,'81ad362a401b7b2eb9faa811528aced9f2d6384a');
  assert.equal(manifest.combatSha,gitsha(lab));
  assert.equal(manifest.assetsSha,gitsha(assets));
  assert.equal(manifest.assetsSha,pins.authoredAssetsPin);
  assert.equal(manifest.combatRepository,'slyen4425-cloud/GenSrpg_labo_combat_dynamique');
- assert.deepEqual(manifest.supportedCreatureIds,["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"],
-  'only the twelve media-complete SHA-pinned official author transfers may be published');
+ assert.ok(manifest.supportedCreatureIds.length>=2,
+  'A live Lab main author manifest, rather than a fixed GenSrpg fixture, must ship');
  assert.equal(manifest.vendorDirectory,'vendor/combat-lab/');
  assert.equal(manifest.dataDirectory,data);
  const paths=manifest.transport.map(x=>x.path);
@@ -81,12 +81,27 @@ test('official vendor imports under final URL-shaped directory; never rely on a 
  }
  assert.equal(engine.source.sha,gitsha(lab));
 });
+test('native projectile-power contract is transported and executable at the actual published ESM path',async()=>{
+ const relative='vendor/combat-lab/src/contracts/projectile-power-v1.js';
+ const delivery=JSON.parse(read(data+'delivery-manifest.json').toString());
+ assert.ok(delivery.transport.some(x=>x.path===relative),
+  'The exact JS module from the Android error must exist in the official Pages manifest');
+ const bytes=read(relative);
+ assert.deepEqual(bytes,fs.readFileSync(path.join(lab,'src/contracts/projectile-power-v1.js')),
+  'No rewritten/doubled projectile power rule may be shipped by GenSrpg');
+ const contract=await import(pathToFileURL(path.join(site,relative)).href);
+ assert.equal(typeof contract.normalizeProjectilePowerV1,'function',
+  'The mobile browser must be able to resolve this real named export');
+});
 test('package never edits the public entry, PWA, legacy owner or real profiles',()=>{
  const index=fs.readFileSync(path.join(root,'index.html'));
- assert.equal(gitblob(index),'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646',
+ assert.equal(gitblob(index),'c53d234fca05e49a33650a61776fae1c1985613e',
    'exact uploaded product source remains unchanged');
  assert.ok(!index.includes('src="vendor/combat-lab/'));
  assert.ok(!index.includes('runtime-data/'));
+ assert.ok(index.includes('capture-lab-author-entry-v1.mjs'),'the real product index must reference the sole native Lab author host');
+ assert.ok(index.includes("GensCaptureLabAuthorUiV1.open('bestiary')"),'the real Capture World must expose the official Bestiary');
+ assert.ok(index.includes("GensCaptureLabAuthorUiV1.open('rules')"),'the real Capture World must expose official combat rule editing');
  const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
  assert.ok(!sw.includes('vendor/combat-lab/'),'not PWA-cached before official activation');
  assert.ok(!sw.includes('runtime-data/'),'no orphan PWA caching');

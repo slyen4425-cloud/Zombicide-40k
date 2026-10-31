@@ -15,10 +15,11 @@ test('final Pages build contains pinned official modules and exact signed author
  const manifest=JSON.parse(rel(site,data+'delivery-manifest.json').toString('utf8'));
  assert.equal(manifest.schema,'gensrpg-capture-official-delivery-v1');
  assert.equal(manifest.productionActivated,false,'release must remain dormant');
- assert.equal(manifest.combatSha,'248f718ec924106d16999d59e5dc8310f8450180');
- assert.equal(manifest.assetsSha,'b3d46ce6f2639ebb59a2984aeff17f97cbcd7377');
- assert.deepEqual(manifest.supportedCreatureIds,["crea-loup","crea_ailevent","crea_dracendre","crea_foudrillon","crea_lumilo","crea_maraileron","crea_mossback","crea_ombre_2","crea_scar_2","crea_tox_2","crea_voltik","kitsune_lunaire"],
-  'all twelve exact pinned author species must be published, none invented');
+ assert.equal(manifest.combatSha,'81ad362a401b7b2eb9faa811528aced9f2d6384a');
+ assert.equal(manifest.assetsSha,'e6ef519b062e9e590faae63130ec12bfab263bac');
+ const authorInputs=JSON.parse(rel(site,data+'author-inputs.json').toString('utf8'));
+ assert.deepEqual(manifest.supportedCreatureIds,authorInputs.creatureTransfers.map(x=>x.draft.id),
+  'The release inventory must match the generated official author payload without a frozen species list');
  assert.ok(manifest.transport.length>15);
  assert.equal(new Set(manifest.transport.map(f=>f.path)).size,manifest.transport.length);
  for(const entry of manifest.transport){

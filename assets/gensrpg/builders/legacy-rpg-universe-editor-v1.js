@@ -138,23 +138,15 @@ function saveRpgTrainerPvpSettings(){
   const ctx=lockedRpgEditingProfile();if(!ctx)return;
   const p=ctx.profile;ensureRpgProfileData(p);
 
+  // Capture World owns team limits and healing economy, not Combat Lab rules.
+  // Preserve historical rule keys unchanged until an explicit consented migration.
+  const previous=p.rpgUniverse.captureCombat;
+  const preserved=previous&&typeof previous==="object"&&!Array.isArray(previous)?previous:{};
   p.rpgUniverse.captureCombat={
-    activeSlots:Math.max(1,Math.min(3,Number(document.getElementById("rpgCaptureActiveSlots")?.value)||1)),
+    ...preserved,
     teamSize:Math.max(1,Math.min(20,Number(document.getElementById("rpgCaptureTeamSize")?.value)||6)),
     minBattleTeam:Math.max(1,Math.min(20,Number(document.getElementById("rpgCaptureMinBattleTeam")?.value)||3)),
     maxBattleTeam:Math.max(1,Math.min(20,Number(document.getElementById("rpgCaptureMaxBattleTeam")?.value)||6)),
-    recallCost:document.getElementById("rpgCaptureRecallCost")?.value||"turn",
-    autoReplaceKo:document.getElementById("rpgCaptureAutoReplaceKo")?.checked!==false,
-    itemsAllowed:document.getElementById("rpgCaptureItemsAllowed")?.checked!==false,
-    captureAllowed:true,
-    controller:document.getElementById("rpgCaptureController")?.value||"auto",
-    allowBattleOverride:document.getElementById("rpgCaptureAllowBattleOverride")?.checked!==false,
-    itemSlots:Math.max(0,Math.min(20,Number(document.getElementById("rpgCaptureItemSlots")?.value)||0)),
-    itemsPerTurn:Math.max(0,Math.min(10,Number(document.getElementById("rpgCaptureItemsPerTurn")?.value)||0)),
-    defendAllowed:document.getElementById("rpgCaptureDefendAllowed")?.checked!==false,
-    initiativeMode:"dynamic",
-    victoryMode:document.getElementById("rpgCaptureVictoryMode")?.value||"all_ko",
-    saveBattle:document.getElementById("rpgCaptureSaveBattle")?.checked!==false,
     healMode:document.getElementById("rpgCaptureHealMode")?.value||"free",
     healCost:Math.max(0,Number(document.getElementById("rpgCaptureHealCost")?.value)||0)
   };

@@ -34,6 +34,9 @@ assert.deepEqual(directSrcs,[
   'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/gensrpg/survival/entry-v1.js?v=1',
   'assets/gensrpg/dungeon/entry-v1.js?v=1',
+  // The official Capture author port precedes the original Capture entry; no replacement runtime.
+  'assets/gensrpg/capture/lab-ownership-port-v1.js?v=1',
+  'assets/gensrpg/capture/capture-lab-author-entry-v1.mjs',
   'assets/gensrpg/capture/entry-v1.js?v=1',
   'assets/gensrpg/capture/session-start-v1.js?v=1',
   'assets/gensrpg/capture/screen-return-v1.js?v=1',
@@ -91,6 +94,17 @@ assert.deepEqual(directSrcs,[
   'assets/gensrpg/pvp/shell-composition-v1.js',
   'assets/gensrpg/shell/module-launch-final-authority-v1.js'
 ],'source index direct script composition changed: update the runtime map deliberately before accepting a new composition');
+// Exact physical author files and one parser slot: the Capture owner must not be doubled.
+for(const tag of [
+  'assets/gensrpg/capture/lab-ownership-port-v1.js?v=1',
+  'assets/gensrpg/capture/capture-lab-author-entry-v1.mjs'
+]){
+  assert.equal(directSrcs.filter(src=>src===tag).length,1,
+    'The official Capture author port must have exactly one parser slot: '+tag);
+  assert.ok(fs.existsSync(tag.split('?')[0]),
+    'The official Capture author script must exist physically: '+tag);
+}
+
 
 assert.match(source,/window\.GensPvpShellCompositionV1\.connect\(\)/,
   'PvP Shell composition must remain explicitly invoked after its three scripts');

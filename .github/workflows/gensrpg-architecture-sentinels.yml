@@ -292,7 +292,7 @@ jobs:
         run: node tests/gens_core053_bridge_fallback_lot3.test.cjs
 
       - name: Vérifier le retrait des dépendances actives à l'ancien setup Dungeon
-        run: node tests/gens_open_dungeon_setup_retirement_lot3.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_open_dungeon_setup_retirement_lot3.test.cjs
 
       - name: Vérifier la migration des boutons de rencontre Core 2.01
         run: node tests/gens_core201_direct_bridge_lot4a.test.cjs

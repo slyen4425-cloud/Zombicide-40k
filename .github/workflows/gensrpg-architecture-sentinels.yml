@@ -35,6 +35,7 @@ jobs:
           bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_startconfiguredgame_remaining_chain_preaudit_v1.test.cjs
           bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_screen_return_dungeon_s2_v1.test.cjs
           bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_launch_contract_preaudit_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_launch_final_shell_authority_preaudit_v1.test.cjs
           bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase4_storage_inline_audit_v1.test.cjs
           node tests/gens_phase4_storage_bootstrap_order_v1.test.cjs
   architecture-sentinels:
@@ -1005,8 +1006,8 @@ jobs:
       - name: Raccorder le provider Dungeon module-launch S4
         run: node tests/gens_phase5_module_launch_s4_dungeon_provider_v1.test.cjs
 
-      - name: Pré-auditer l'autorité Shell finale module-launch Phase 5
-        run: node tests/gens_phase5_module_launch_final_shell_authority_preaudit_v1.test.cjs
+      - name: Pré-auditer l'autorité Shell finale module-launch Phase 5 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_launch_final_shell_authority_preaudit_v1.test.cjs
 
       - name: Raccorder l'autorité Shell finale module-launch Phase 5
         run: node tests/gens_phase5_module_launch_final_shell_authority_v1.test.cjs
@@ -1288,8 +1289,11 @@ jobs:
           GENSRPG_BROWSER: chromium
         run: node tests/gens_dungeon_after_survival_start_state_browser_v11411.test.cjs
 
-      - name: Vérifier le Dungeon Builder dans le vrai éditeur
-        run: node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs
+      - name: Caractériser le Dungeon Builder après l'ancien pré-game Capture (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs
+
+      - name: Vérifier le Dungeon Builder après sortie du vrai Shell Capture V2
+        run: node tests/gens_dungeon_builder_visibility_after_capture_v2_browser_v1.test.cjs
 
       - name: Caractériser la stabilité de Config objet moderne
         run: node tests/gens_object_config_editor_browser_v11411.test.cjs

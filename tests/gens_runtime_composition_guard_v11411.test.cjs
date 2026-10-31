@@ -23,7 +23,7 @@ const bootstrap=read('assets/gensrpg/core/runtime-bootstrap-v1.js');
 const tacticalEntry=read('assets/gensrpg/tactical/entry-v1.js');
 const integration=read('assets/gensrpg/gens-rpg-tactical-combat-v2-integration.js');
 
-// 1. Source index remains the known legacy shell entry point, now with Core storage bootstrapped before inline storage.
+// 1. Source index has four modes but only the V2 Capture identity and clean Shell. The exact parser order is certified from the approved V2 index diff; no retired Capture V1 script may return.
 const directSrcs=[...source.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.deepEqual(directSrcs,[
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
@@ -34,19 +34,13 @@ assert.deepEqual(directSrcs,[
   'assets/gensrpg/core/asset-resolver-v1.js',
   'assets/gensrpg/survival/entry-v1.js?v=1',
   'assets/gensrpg/dungeon/entry-v1.js?v=1',
-  'assets/gensrpg/capture/entry-v1.js?v=1',
-  'assets/gensrpg/capture/session-start-v1.js?v=1',
-  'assets/gensrpg/capture/screen-return-v1.js?v=1',
-  'assets/gensrpg/capture/hub-entry-v1.js?v=1',
-  'assets/gensrpg/capture/world-exploration-v1.js?v=1',
-  'assets/gensrpg/capture/team-roster-v1.js?v=1',
-  'assets/gensrpg/capture/combat-core-v1.js?v=1',
+  'assets/gensrpg/core/game-profile-builder-v1.js',
+  'assets/gensrpg/capture-v2/identity-v1.js',
   'assets/gensrpg/core/legacy-visual-data-v1.js',
   'assets/gensrpg/shell/legacy-hub-family-ui-v1.js',
   'assets/gensrpg/builders/equipment-library-editor-v1.js',
   'assets/gensrpg/core/legacy-magic-sounds-v1.js',
   'assets/gensrpg/survival/legacy-wave-presets-spawn-v1.js',
-  'assets/gensrpg/capture/legacy-monolith-functions-v1.js',
   'assets/gensrpg/dungeon/legacy-rpg-rules-talents-v1.js',
   'assets/gensrpg/builders/legacy-enemy-editor-v1.js',
   'assets/gensrpg/builders/legacy-rpg-universe-editor-v1.js',
@@ -54,25 +48,6 @@ assert.deepEqual(directSrcs,[
   'assets/gensrpg/builders/legacy-ability-skill-catalog-v1.js',
   'assets/gensrpg/builders/legacy-character-entity-editors-v1.js',
   'assets/gensrpg/dungeon/mj72-scene-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-gameplay-modal-mount-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-playtest-fix128-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-fix129-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-fix130-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-fix131-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-fix132-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-fix133-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-fix134-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-fix135-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-fix136-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-fix137-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-fix138-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-fix139-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-fix140-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-items141-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-buffs142-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-buff-fx143-v1.js',
-  'assets/gensrpg/capture/legacy-patches/capture-ability-truth144-v1.js',
-  'assets/gensrpg/capture/builtin-seed-v1.js?v=1',
   'assets/gensrpg/dungeon/core01-session-ui-v1.js',
   'assets/gensrpg/core/progression-v1.js?v=1',
   'assets/gensrpg/dungeon/core051-exploration-polish-v1.js',
@@ -89,8 +64,9 @@ assert.deepEqual(directSrcs,[
   'assets/gensrpg/pvp/session-v1.js',
   'assets/gensrpg/pvp/module-launch-v1.js',
   'assets/gensrpg/pvp/shell-composition-v1.js',
-  'assets/gensrpg/shell/module-launch-final-authority-v1.js'
-],'source index direct script composition changed: update the runtime map deliberately before accepting a new composition');
+  'assets/gensrpg/shell/module-launch-final-authority-v1.js',
+  'assets/gensrpg/capture-v2/shell-entry-v1.js'
+],'the four-mode Shell must match the exact V2 source script composition; no extra/retired runtime owner');
 
 assert.match(source,/window\.GensPvpShellCompositionV1\.connect\(\)/,
   'PvP Shell composition must remain explicitly invoked after its three scripts');

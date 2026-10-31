@@ -64,7 +64,7 @@
     "reserve recall/forced substitution not yet enabled (off-field 2v2 reserve persistence supported)"
   ],
   "stagedSavedProfileMapping": true,
-  "authoredSourceLabPin": "248f718ec924106d16999d59e5dc8310f8450180",
+  "authoredSourceLabPin": "81ad362a401b7b2eb9faa811528aced9f2d6384a",
   "authoredAssetsPin": "e6ef519b062e9e590faae63130ec12bfab263bac",
   "authoredAssetsRepository": "slyen4425-cloud/GenSrpg_labo_combat_dynamique",
   "stagedWorldWildTransaction": true,
@@ -107,7 +107,7 @@
   "originalWildBattleButton": {
     "owner": "assets/gensrpg/capture/legacy-monolith-functions-v1.js",
     "entry": "assets/gensrpg/capture/capture-official-wild-entry-v1.mjs",
-    "officialSourceSha": "248f718ec924106d16999d59e5dc8310f8450180",
+    "officialSourceSha": "81ad362a401b7b2eb9faa811528aced9f2d6384a",
     "stageWired": true,
     "productionActivated": false,
     "requiresExplicitMigrationConsent": true,

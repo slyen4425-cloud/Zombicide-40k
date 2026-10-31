@@ -35,6 +35,22 @@ test('Survival, Dungeon and PvP are preserved in the actual root application',()
  ])assert.ok(html.includes('src="'+src+'"'),src);
 });
 
+test('Capture V2 does not acquire the shared Dungeon/Survival dice owner',()=>{
+ const folder=path.join(root,'assets/gensrpg/capture-v2');
+ const files=fs.readdirSync(folder).filter(name=>name.endsWith('.js'));
+ assert.ok(files.includes('shell-entry-v1.js')&&files.includes('identity-v1.js'),
+   'the two current Capture V2 Shell boundaries must be audited');
+ for(const file of files){
+  const src=fs.readFileSync(path.join(folder,file),'utf8');
+  assert.doesNotMatch(src,/\bGensDiceV1\b|\bd100ThresholdFromChance\b|\bdungeonUniversalTest\b|assets\/gensrpg\/core\/dice-v1\.js/,
+   'Capture V2 must not import or redefine shared Dungeon/Survival dice: '+file);
+ }
+ // The other modes keep their original Dice owner; removing it globally
+ // would violate the four-mode non-interference contract.
+ assert.equal(index().split('<script src="assets/gensrpg/core/dice-v1.js"></script>').length-1,1,
+   'Core Dice remains a single owner for its existing consumers');
+});
+
 test('new Capture shell delegates to two pinned mains; never loads the historic game engine',()=>{
  const entry=text('assets/gensrpg/capture-v2/shell-entry-v1.js');
  const identity=text('assets/gensrpg/capture-v2/identity-v1.js');

@@ -36,6 +36,8 @@ jobs:
           bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_screen_return_dungeon_s2_v1.test.cjs
           bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_launch_contract_preaudit_v1.test.cjs
           bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_launch_final_shell_authority_preaudit_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_startconfiguredgame_core200_global_retirement_preaudit_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_startconfiguredgame_core200_global_retirement_v1.test.cjs
           bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase4_storage_inline_audit_v1.test.cjs
           node tests/gens_phase4_storage_bootstrap_order_v1.test.cjs
   architecture-sentinels:

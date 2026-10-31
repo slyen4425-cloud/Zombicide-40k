@@ -7,10 +7,13 @@
     explore:{label:"Exploration 2.5D",path:"vendor/exploration-lab/index.html",family:"exploration"},
     builder:{label:"World Builder",path:"vendor/exploration-lab/builder.html",family:"exploration"},
     world:{label:"Carte du monde",path:"vendor/exploration-lab/world-assembler.html",family:"exploration"},
-    // ONE official editor with native Creature, Skills and Combat tabs.
-    // Combat main does not yet support ?tab= direct links (PR #156 unpromoted).
-    // Never advertise separate menus that silently open the wrong tab.
-    creature:{label:"Éditeur Combat · Créatures, capacités, règles",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html",family:"combat"},
+    // Four native entry points, ONE actual Lab Combat editor. Combat main
+    // (SHA-pinned PR #156) owns ?tab= routing, native state and all rules.
+    // Never click tabs from the consumer or implement a parallel editor.
+    creature:{label:"Créatures · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=creature",family:"combat"},
+    skills:{label:"Capacités · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=skills",family:"combat"},
+    combat:{label:"Règles de combat · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=combat",family:"combat"},
+    music:{label:"Musiques · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=music",family:"combat"},
     bestiary:{label:"Bestiaire · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/bestiary.html",family:"combat"}
   });
   const shell=root.GensShellModuleLaunchV1;

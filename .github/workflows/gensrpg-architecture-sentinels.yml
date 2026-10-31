@@ -13,6 +13,20 @@ permissions:
   contents: read
 
 jobs:
+  historical-snapshot-fast-preflight:
+    # Runs in PARALLEL with the full C3 matrix: no test is skipped.
+    # Fail quickly on read-only V1 source reconstruction before the expensive
+    # eight Dungeon extraction checks have completed.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify byte-certified archived Capture snapshot and live Dungeon storage
+        run: |
+          node tests/gens_phase4_storage_next_audit_3_v1.test.cjs
+          node tests/gens_phase4_storage_mj_rules_owner_v1.test.cjs
+          node tests/gens_phase5_exit_audit_v1.test.cjs
+          node tests/gens_phase7_exit_audit_v1.test.cjs
+
   architecture-sentinels:
     runs-on: ubuntu-24.04
     steps:

@@ -26,7 +26,8 @@ jobs:
           node --check assets/gensrpg/capture-v2/identity-v1.js
           node --check assets/gensrpg/capture-v2/shell-entry-v1.js
       - name: Verify real GenSrpg root and both official sources (TDD RED first)
-        run: node --test tests/gens_capture_v2_clean_boundary.test.cjs
+        run: |
+          node --test tests/gens_capture_v2_clean_boundary.test.cjs
           node --test tests/gens_capture_v2_pwa_cache_owner_v1.test.cjs
       - name: Historical Survival Dungeon game profile factory parity
         run: node --test tests/gens_capture_v2_generic_profile_owner.test.cjs

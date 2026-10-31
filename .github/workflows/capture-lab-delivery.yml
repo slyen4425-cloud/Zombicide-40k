@@ -32,6 +32,7 @@ jobs:
           node --check assets/gensrpg/capture-v2/shell-entry-v1.js
           node --check tools/stage_capture_v2_labs.mjs
           node --test tests/gens_capture_v2_clean_boundary.test.cjs
+          node --test tests/gens_capture_v2_pwa_cache_owner_v1.test.cjs
           node --test tests/gens_capture_v2_generic_profile_owner.test.cjs
           node --test tests/gens_capture_combat_main_only_guard_20261030.test.cjs
       - name: Resolve the TWO exact, immutable Lab main SHAs

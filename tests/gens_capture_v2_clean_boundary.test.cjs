@@ -51,6 +51,22 @@ test('Capture V2 does not acquire the shared Dungeon/Survival dice owner',()=>{
    'Core Dice remains a single owner for its existing consumers');
 });
 
+test('live Dungeon Resume remains its own Shell boundary; Capture V2 cannot take it over',()=>{
+ const html=index();
+ const m=html.match(/<script\\b[^>]*\\bid=["']dungeonCore310PersistenceAndTokens["'][^>]*>([\\s\\S]*?)<\\/script>/i);
+ assert.ok(m,'the current Dungeon Core 3.10 resume owner must still be loaded');
+ const inline=m[1];
+ assert.equal((inline.match(/window\\.resumeGame\\s*=/g)||[]).length,1,
+   'the Dungeon owner must expose one resumeGame assignment');
+ assert.equal((html.match(/window\\.resumeGame\\s*=/g)||[]).length,1,
+   'the active four-mode page must not contain a second global Resume owner');
+ for(const file of ['identity-v1.js','shell-entry-v1.js']){
+  const src=text('assets/gensrpg/capture-v2/'+file);
+  assert.doesNotMatch(src,/\\bresumeGame\\b|window\\.goMenu\\s*=|window\\.startConfiguredGame\\s*=/,
+    'Capture V2 must never steal a Dungeon/Shell global owner: '+file);
+ }
+});
+
 test('new Capture shell delegates to two pinned mains; never loads the historic game engine',()=>{
  const entry=text('assets/gensrpg/capture-v2/shell-entry-v1.js');
  const identity=text('assets/gensrpg/capture-v2/identity-v1.js');

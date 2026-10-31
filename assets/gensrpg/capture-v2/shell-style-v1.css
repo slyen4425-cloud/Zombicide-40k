@@ -1,0 +1,16 @@
+/* Capture v2 has no selectors or presentation ownership outside its root. */
+#gensCaptureV2Root {position:fixed;inset:0;z-index:90000;background:#08121b;color:#eaf1f3;
+ display:flex;flex-direction:column;font:14px system-ui,sans-serif;min-height:0}
+#gensCaptureV2Root header{display:flex;align-items:center;justify-content:space-between;
+ padding:8px 12px;background:#142b36;gap:10px}
+#gensCaptureV2Root header strong{font-size:17px}
+#gensCaptureV2Root button{border:1px solid #527789;border-radius:8px;background:#204251;
+ color:#fff;padding:10px 12px;font:600 13px system-ui;min-height:40px}
+#gensCaptureV2Root nav{display:flex;gap:6px;flex-wrap:wrap;padding:8px;overflow:auto;max-height:35vh}
+#gensCaptureV2Root p{margin:6px 12px;color:#c2d7df;font-size:12px}
+#gensCaptureV2Root .gensCaptureV2Stage{flex:1;min-height:0;display:flex;padding:0 6px 6px}
+#gensCaptureV2Root iframe{width:100%;height:100%;border:0;border-radius:8px;background:#0c131d}
+@media (orientation:landscape) and (max-height:550px){
+ #gensCaptureV2Root nav{max-height:23vh;flex-wrap:nowrap}
+ #gensCaptureV2Root nav button{white-space:nowrap}
+}

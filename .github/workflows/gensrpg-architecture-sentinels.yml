@@ -13,6 +13,35 @@ permissions:
   contents: read
 
 jobs:
+  historical-snapshot-fast-preflight:
+    # Runs in PARALLEL with the full C3 matrix: no test is skipped.
+    # Fail quickly on read-only V1 source reconstruction before the expensive
+    # eight Dungeon extraction checks have completed.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify byte-certified archived Capture snapshot and live Dungeon storage
+        run: |
+          node tests/gens_phase4_storage_next_audit_3_v1.test.cjs
+          node tests/gens_phase4_storage_mj_rules_owner_v1.test.cjs
+          node tests/gens_phase5_exit_audit_v1.test.cjs
+          node tests/gens_phase7_exit_audit_v1.test.cjs
+
+      - name: Check V2 live Shell and Phase 5 retired-owner regression in parallel
+        run: |
+          node --test tests/gens_capture_v2_clean_boundary.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_resume_single_owner_retirement_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_gomenu_core01_retirement_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_startconfiguredgame_remaining_chain_preaudit_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_screen_return_dungeon_s2_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_launch_contract_preaudit_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_launch_final_shell_authority_preaudit_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_startconfiguredgame_core200_global_retirement_preaudit_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_startconfiguredgame_core200_global_retirement_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase3_target_structure_contracts_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase4_storage_inline_audit_v1.test.cjs
+          node tests/gens_phase4_storage_bootstrap_order_v1.test.cjs
   architecture-sentinels:
     runs-on: ubuntu-24.04
     steps:
@@ -27,11 +56,16 @@ jobs:
         # checkpoint exact, et non sur l'index du produit amendé aujourd'hui.
         run: bash tests/gens_phase12_certified_r07_r08_history_20261024.sh
 
-      - name: Verrouiller le transfert propriétaire de la transition Hub Capture Phase 9
+      - name: Certifier l'autorité Capture V2 de la vraie application actuelle
         run: |
-          node tests/gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs
-          node tests/gens_phase9_capture_shell_home_return_boundary_v1.test.cjs
-          node tests/gens_phase9_capture_combat_core_owner_v1.test.cjs
+          node --test tests/gens_capture_v2_clean_boundary.test.cjs
+          node --test tests/gens_capture_v2_generic_profile_owner.test.cjs
+
+      - name: Verrouiller le transfert propriétaire de la transition Hub Capture Phase 9 (checkpoint historique V1)
+        run: |
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_shell_home_return_boundary_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_combat_core_owner_v1.test.cjs
 
       - name: Verrouiller l'autorité PvP Phase 10 S0 sans toucher aux autres modules
         run: node tests/gens_phase10_pvp_session_owner_v1.test.cjs
@@ -48,27 +82,27 @@ jobs:
       - name: Vérifier la sortie architecturale PvP Phase 10 sans gameplay
         run: node tests/gens_phase10_pvp_architectural_exit_s4.test.cjs
 
-      - name: Vérifier les huit extractions physiques réversibles Dungeon Phase 12
+      - name: Vérifier les huit extractions physiques réversibles Dungeon Phase 12 (checkpoint historique)
         run: |
-          node tests/gens_phase12_dungeon_core01_extraction_v1.test.cjs
-          node tests/gens_phase12_dungeon_core051_extraction_v1.test.cjs
-          node tests/gens_phase12_dungeon_mj72_extraction_v1.test.cjs
-          node tests/gens_phase12_dungeon_core200_extraction_v1.test.cjs
-          node tests/gens_phase12_dungeon_core211_extraction_v1.test.cjs
-          node tests/gens_phase12_dungeon_core213_extraction_v1.test.cjs
-          node tests/gens_phase12_dungeon_core214_extraction_v1.test.cjs
-          node tests/gens_phase12_dungeon_core201_d8_extraction_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase12_dungeon_core01_extraction_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase12_dungeon_core051_extraction_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase12_dungeon_mj72_extraction_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase12_dungeon_core200_extraction_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase12_dungeon_core211_extraction_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase12_dungeon_core213_extraction_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase12_dungeon_core214_extraction_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase12_dungeon_core201_d8_extraction_v1.test.cjs
 
       - name: Vérifier le propriétaire Core R05, la synchronisation et le rollback R05 vers R04
-        run: node tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase12_r05_core_cloud_sync_extraction_v1.test.cjs
 
       - name: Vérifier la frontière R04 Builders équipement et restauration R03
-        run: node tests/gens_phase12_r04_builders_equipment_extraction_v1.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase12_r04_builders_equipment_extraction_v1.test.cjs
 
       - name: Vérifier la frontière R03 Shell Hub et le rollback R03 vers R02
         run: |
-          node tests/gens_phase12_r03_shell_hub_extraction_v1.test.cjs
-          node tests/gens_phase12_r02_legacy_visual_data_extraction_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase12_r03_shell_hub_extraction_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase12_r02_legacy_visual_data_extraction_v1.test.cjs
 
       - name: Vérifier le recensement réel des images et les collisions Phase 11 A0
         run: node tests/gens_phase11_asset_inventory_a0.test.cjs
@@ -87,17 +121,17 @@ jobs:
       - name: Vérifier RuntimeBootstrap V1
         run: node tests/gens_runtime_bootstrap_v1.test.cjs
 
-      - name: Auditer la frontière publique Capture / ancien lancement 138
-        run: node tests/gens_phase9_capture_legacy138_launch_boundary_preaudit_v1.test.cjs
+      - name: Auditer la frontière publique Capture / ancien lancement 138 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_legacy138_launch_boundary_preaudit_v1.test.cjs
 
-      - name: Caractériser l'ordre réel Capture138 Dungeon200 Shell final
-        run: node tests/gens_phase9_capture_legacy138_final_shell_route_characterization_v1.test.cjs
+      - name: Caractériser l'ordre réel Capture138 Dungeon200 Shell final (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_legacy138_final_shell_route_characterization_v1.test.cjs
 
-      - name: Bloquer les callbacks historiques Capture138 apres bascule de mode
-        run: node tests/gens_phase9_capture138_delayed_hub_guard_v1.test.cjs
+      - name: Bloquer les callbacks historiques Capture138 apres bascule de mode (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture138_delayed_hub_guard_v1.test.cjs
 
-      - name: Mesurer les critères de sortie Phase 9 sans déclarer Capture autonome prématurément
-        run: node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs
+      - name: Mesurer les critères de sortie Phase 9 sans déclarer Capture autonome prématurément (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs
 
       - name: Verrouiller la frontière canonique de l’éditeur Survie
         run: node tests/gens_phase9_survival_editor_canonical_boundary_v1.test.cjs
@@ -272,7 +306,10 @@ jobs:
         run: node tests/gens_bridge_single_entry_contract_v11411.test.cjs
 
       - name: Figer l'inventaire des anciens points d'entrée combat
-        run: node tests/gens_combat_callsite_inventory_v11411.test.cjs
+        # Historical D4 Core200 rollback uses 7.78 MB byte-identical HTML;
+        # the current V2 HTML is intentionally smaller. Preserve the test on
+        # its certified pre-replacement snapshot, not the current V2 runtime.
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_combat_callsite_inventory_v11411.test.cjs
 
       - name: Vérifier la migration directe des deux boutons combat UI
         run: node tests/gens_combat_ui_direct_entry_migration_1.test.cjs
@@ -284,7 +321,7 @@ jobs:
         run: node tests/gens_core053_bridge_fallback_lot3.test.cjs
 
       - name: Vérifier le retrait des dépendances actives à l'ancien setup Dungeon
-        run: node tests/gens_open_dungeon_setup_retirement_lot3.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_open_dungeon_setup_retirement_lot3.test.cjs
 
       - name: Vérifier la migration des boutons de rencontre Core 2.01
         run: node tests/gens_core201_direct_bridge_lot4a.test.cjs
@@ -302,7 +339,7 @@ jobs:
         run: node tests/gens_core209_detection_direct_bridge_lot4e.test.cjs
 
       - name: Vérifier la migration directe de l'embuscade Core 2.09
-        run: node tests/gens_core209_ambush_direct_bridge_lot4f.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_core209_ambush_direct_bridge_lot4f.test.cjs
 
       - name: Vérifier la composition de la preview manuelle
         run: node tests/gens_preview_composition_v11411.test.cjs
@@ -310,32 +347,35 @@ jobs:
       - name: Scanner les anciennes empreintes Core200
         run: node tests/gens_phase5_core200_retirement_stale_baseline_scan_v1.test.cjs
 
-      - name: Scanner les anciennes empreintes captureFix135
-        run: node tests/gens_phase5_capture135_retirement_stale_baseline_scan_v1.test.cjs
+      - name: Scanner les anciennes empreintes captureFix135 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_capture135_retirement_stale_baseline_scan_v1.test.cjs
 
-      - name: Vérifier la cartographie du graphe runtime Phase 2
-        run: node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
+      # Phase 2 manifests are immutable snapshots of the pre-V2 production graph.
+      # The current V2 graph is checked above by gens_runtime_composition_guard
+      # and by the Capture V2 clean-ownership CI, not by these older counts.
+      - name: Vérifier la cartographie du graphe runtime Phase 2 (historique)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase2_runtime_load_graph_v11411.test.cjs
 
       - name: Vérifier l'inventaire des chaînes d'autorité Phase 2
-        run: node tests/gens_phase2_global_owner_inventory_v11411.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase2_global_owner_inventory_v11411.test.cjs
 
       - name: Vérifier le manifeste des propriétaires runtime Phase 2
-        run: node tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase2_runtime_owner_manifest_v11411.test.cjs
 
       - name: Vérifier le manifeste des propriétaires inline Phase 2
-        run: node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase2_inline_owner_manifest_v11411.test.cjs
 
       - name: Vérifier les derniers propriétaires globaux inline Phase 2
-        run: node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase2_inline_global_last_owner_v11411.test.cjs
 
       - name: Inventorier les effets globaux et le stockage Phase 2
-        run: node tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase2_runtime_side_effect_inventory_v11411.test.cjs
 
       - name: Classer timers gameplay, UI et retries Phase 2
-        run: node tests/gens_phase2_timer_classification_v11411.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase2_timer_classification_v11411.test.cjs
 
       - name: Caractériser les propriétaires du stockage Phase 2
-        run: node tests/gens_phase2_storage_ownership_characterization_v11411.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase2_storage_ownership_characterization_v11411.test.cjs
 
       - name: Auditer le sous-périmètre stockage Builders Phase 4
         run: node tests/gens_phase4_storage_builder_audit_v1.test.cjs
@@ -556,29 +596,29 @@ jobs:
       - name: Caractériser la cohérence Stats éditeur vers runtime et fiche
         run: node tests/gens_stats_editor_game_coherence_preaudit_v1.test.cjs
 
-      - name: Retirer le wrapper captureFix131 de startConfiguredGame
-        run: node tests/gens_phase5_startconfiguredgame_capture131_retirement_v1.test.cjs
+      - name: Retirer le wrapper captureFix131 de startConfiguredGame (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_startconfiguredgame_capture131_retirement_v1.test.cjs
 
       - name: Pré-auditer la chaîne startConfiguredGame restante Phase 5
-        run: node tests/gens_phase5_startconfiguredgame_remaining_chain_preaudit_v1.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_startconfiguredgame_remaining_chain_preaudit_v1.test.cjs
 
-      - name: Pré-auditer le contrat public de lancement Capture Phase 5
-        run: node tests/gens_phase5_capture_public_launch_entry_preaudit_v1.test.cjs
+      - name: Pré-auditer le contrat public de lancement Capture Phase 5 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_capture_public_launch_entry_preaudit_v1.test.cjs
 
-      - name: Retirer le global startConfiguredGame captureFix135
-        run: node tests/gens_phase5_startconfiguredgame_capture135_global_retirement_v1.test.cjs
+      - name: Retirer le global startConfiguredGame captureFix135 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_startconfiguredgame_capture135_global_retirement_v1.test.cjs
 
       - name: Caractériser la régression utilisateur Phase 5
-        run: node tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_user_regression_rollback_guard_v1.test.cjs
 
-      - name: Verrouiller le routage Resume Capture hors du propriétaire Dungeon
-        run: node tests/gens_phase5_capture_resume_routing_owner_v1.test.cjs
+      - name: Verrouiller le routage Resume Capture hors du propriétaire Dungeon (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_capture_resume_routing_owner_v1.test.cjs
 
       - name: Exiger un propriétaire Dungeon unique pour Resume
-        run: node tests/gens_phase5_resume_single_owner_retirement_v1.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_resume_single_owner_retirement_v1.test.cjs
 
       - name: Pré-auditer goMenu et les transitions écrans Phase 5
-        run: node tests/gens_phase5_gomenu_screen_transitions_preaudit_v1.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_gomenu_screen_transitions_preaudit_v1.test.cjs
 
       - name: Pré-auditer la frontière finale goMenu Phase 5
         run: node tests/gens_phase5_gomenu_final_boundary_preaudit_v1.test.cjs
@@ -589,17 +629,17 @@ jobs:
       - name: Pré-auditer le raccord runtime retour écran module Phase 5
         run: node tests/gens_phase5_module_screen_return_raccord_preaudit_v1.test.cjs
 
-      - name: Raccorder Capture S1 au retour écran Shell Phase 5
-        run: node tests/gens_phase5_module_screen_return_capture_raccord_v1.test.cjs
+      - name: Raccorder Capture S1 au retour écran Shell Phase 5 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_screen_return_capture_raccord_v1.test.cjs
 
       - name: Raccorder Dungeon S2 au retour écran Shell Phase 5
-        run: node tests/gens_phase5_module_screen_return_dungeon_s2_v1.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_screen_return_dungeon_s2_v1.test.cjs
 
       - name: Pré-auditer l'autorité openChar Phase 5
         run: node tests/gens_phase5_openchar_authority_preaudit_v1.test.cjs
 
       - name: Retirer le wrapper openChar Dungeon Core 0.28
-        run: node tests/gens_phase5_openchar_core028_retirement_v1.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_openchar_core028_retirement_v1.test.cjs
 
       - name: Auditer le critère de sortie Phase 5
         run: node tests/gens_phase5_exit_audit_v1.test.cjs
@@ -880,74 +920,74 @@ jobs:
       - name: Auditer la sortie officielle Phase 8
         run: node tests/gens_phase8_exit_audit_v1.test.cjs
 
-      - name: Pré-auditer la reprise Monster Capture Phase 9
-        run: node tests/gens_phase9_capture_recovery_preaudit_v1.test.cjs
+      - name: Pré-auditer la reprise Monster Capture Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_recovery_preaudit_v1.test.cjs
 
-      - name: Pré-auditer l'ownership de l'entrée publique Capture Phase 9
-        run: node tests/gens_phase9_capture_public_entry_ownership_preaudit_v1.test.cjs
+      - name: Pré-auditer l'ownership de l'entrée publique Capture Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_public_entry_ownership_preaudit_v1.test.cjs
 
-      - name: Raccorder l'entrée publique Capture Phase 9
-        run: node tests/gens_phase9_capture_public_entry_raccord_v1.test.cjs
+      - name: Raccorder l'entrée publique Capture Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_public_entry_raccord_v1.test.cjs
 
-      - name: Pré-auditer l'entrée Capture autonome de premier niveau Phase 9
-        run: node tests/gens_phase9_capture_top_level_entry_preaudit_v1.test.cjs
+      - name: Pré-auditer l'entrée Capture autonome de premier niveau Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_top_level_entry_preaudit_v1.test.cjs
 
-      - name: Caractériser le transfert propriétaire du démarrage Capture
-        run: node tests/gens_phase9_capture_session_start_owner_transfer_preaudit_v1.test.cjs
+      - name: Caractériser le transfert propriétaire du démarrage Capture (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_session_start_owner_transfer_preaudit_v1.test.cjs
 
-      - name: Transférer le propriétaire du démarrage Capture
-        run: node tests/gens_phase9_capture_session_start_owner_transfer_v1.test.cjs
+      - name: Transférer le propriétaire du démarrage Capture (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_session_start_owner_transfer_v1.test.cjs
 
-      - name: Pré-auditer le retour écran Capture autonome Phase 9
-        run: node tests/gens_phase9_capture_screen_return_ownership_preaudit_v1.test.cjs
+      - name: Pré-auditer le retour écran Capture autonome Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_screen_return_ownership_preaudit_v1.test.cjs
 
-      - name: Caractériser le propriétaire actuel du Hub Monde Capture Phase 9
-        run: node tests/gens_phase9_capture_hub_world_owner_characterization_v1.test.cjs
+      - name: Caractériser le propriétaire actuel du Hub Monde Capture Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_hub_world_owner_characterization_v1.test.cjs
 
-      - name: Pré-auditer l'identité Capture Phase 9
-        run: node tests/gens_phase9_capture_identity_ownership_preaudit_v1.test.cjs
+      - name: Pré-auditer l'identité Capture Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_identity_ownership_preaudit_v1.test.cjs
 
-      - name: Raccorder l'autorité identité Capture Phase 9
-        run: node tests/gens_phase9_capture_identity_authority_raccord_v1.test.cjs
+      - name: Raccorder l'autorité identité Capture Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_identity_authority_raccord_v1.test.cjs
 
-      - name: Pré-auditer l'identité participants Capture Phase 9
-        run: node tests/gens_phase9_capture_participant_identity_preaudit_v1.test.cjs
+      - name: Pré-auditer l'identité participants Capture Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_participant_identity_preaudit_v1.test.cjs
 
-      - name: Exiger le raccord participants Capture Phase 9
-        run: node tests/gens_phase9_capture_participant_identity_raccord_v1.test.cjs
+      - name: Exiger le raccord participants Capture Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_participant_identity_raccord_v1.test.cjs
 
-      - name: Pré-auditer les couplages Capture / identité Dungeon Phase 9
-        run: node tests/gens_phase9_capture_dungeon_identity_coupling_preaudit_v1.test.cjs
+      - name: Pré-auditer les couplages Capture / identité Dungeon Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_dungeon_identity_coupling_preaudit_v1.test.cjs
 
-      - name: Exiger le propriétaire natif unique de l'entrée Dungeon hors Capture
-        run: node tests/gens_phase9_capture_dungeon_setup_entry_owner_transfer_v1.test.cjs
+      - name: Exiger le propriétaire natif unique de l'entrée Dungeon hors Capture (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_dungeon_setup_entry_owner_transfer_v1.test.cjs
 
-      - name: Caractériser les gardes réels de l'entrée Dungeon en pré-game Capture
-        run: node tests/gens_phase9_capture_dungeon_setup_entry_ownership_characterization_v1.test.cjs
+      - name: Caractériser les gardes réels de l'entrée Dungeon en pré-game Capture (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_dungeon_setup_entry_ownership_characterization_v1.test.cjs
 
-      - name: Exiger l'ownership unique du pré-game Capture / Dungeon Phase 9
-        run: node tests/gens_phase9_capture_pregame_ownership_raccord_v1.test.cjs
+      - name: Exiger l'ownership unique du pré-game Capture / Dungeon Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_pregame_ownership_raccord_v1.test.cjs
 
-      - name: Exiger le transfert du bouton Dungeon hors de Capture139
-        run: node tests/gens_phase9_capture_dungeon_button_owner_transfer_v1.test.cjs
+      - name: Exiger le transfert du bouton Dungeon hors de Capture139 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_dungeon_button_owner_transfer_v1.test.cjs
 
-      - name: Pré-auditer les dépendances session Capture139 Phase 9
-        run: node tests/gens_phase9_capture139_session_dependency_preaudit_v1.test.cjs
+      - name: Pré-auditer les dépendances session Capture139 Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture139_session_dependency_preaudit_v1.test.cjs
 
-      - name: Exiger le retrait de ensureBaseGameProfile du lancement Capture139 Phase 9
-        run: node tests/gens_phase9_capture139_base_profile_retirement_v1.test.cjs
+      - name: Exiger le retrait de ensureBaseGameProfile du lancement Capture139 Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture139_base_profile_retirement_v1.test.cjs
 
-      - name: Exiger le retrait de saveActiveEnemies du lancement Capture139 Phase 9
-        run: node tests/gens_phase9_capture139_active_enemies_retirement_v1.test.cjs
+      - name: Exiger le retrait de saveActiveEnemies du lancement Capture139 Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture139_active_enemies_retirement_v1.test.cjs
 
-      - name: Exiger le retrait de gameStyle Dungeon du seed Monster Capture Phase 9
-        run: node tests/gens_phase9_capture_seed_dungeon_style_retirement_v1.test.cjs
+      - name: Exiger le retrait de gameStyle Dungeon du seed Monster Capture Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_seed_dungeon_style_retirement_v1.test.cjs
 
-      - name: Retirer le dernier wrapper global openChar Capture139
-        run: node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
+      - name: Retirer le dernier wrapper global openChar Capture139 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_capture139_openchar_retirement_v1.test.cjs
 
-      - name: Pré-auditer le contrat public de lancement module Phase 5
-        run: node tests/gens_phase5_module_launch_contract_preaudit_v1.test.cjs
+      - name: Pré-auditer le contrat public de lancement module Phase 5 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_launch_contract_preaudit_v1.test.cjs
 
       - name: Pré-auditer le raccord runtime module-launch Phase 5
         run: node tests/gens_phase5_module_launch_raccord_runtime_preaudit_v1.test.cjs
@@ -958,11 +998,11 @@ jobs:
       - name: Raccorder le provider Survival module-launch S2
         run: node tests/gens_phase5_module_launch_s2_survival_provider_v1.test.cjs
 
-      - name: Pré-auditer le provider Capture module-launch S3
-        run: node tests/gens_phase5_module_launch_s3_capture_provider_preaudit_v1.test.cjs
+      - name: Pré-auditer le provider Capture module-launch S3 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_launch_s3_capture_provider_preaudit_v1.test.cjs
 
-      - name: Raccorder le provider Capture module-launch S3
-        run: node tests/gens_phase5_module_launch_s3_capture_provider_v1.test.cjs
+      - name: Raccorder le provider Capture module-launch S3 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_launch_s3_capture_provider_v1.test.cjs
 
       - name: Pré-auditer le provider Dungeon module-launch S4
         run: node tests/gens_phase5_module_launch_s4_dungeon_provider_preaudit_v1.test.cjs
@@ -970,17 +1010,17 @@ jobs:
       - name: Raccorder le provider Dungeon module-launch S4
         run: node tests/gens_phase5_module_launch_s4_dungeon_provider_v1.test.cjs
 
-      - name: Pré-auditer l'autorité Shell finale module-launch Phase 5
-        run: node tests/gens_phase5_module_launch_final_shell_authority_preaudit_v1.test.cjs
+      - name: Pré-auditer l'autorité Shell finale module-launch Phase 5 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_launch_final_shell_authority_preaudit_v1.test.cjs
 
-      - name: Raccorder l'autorité Shell finale module-launch Phase 5
-        run: node tests/gens_phase5_module_launch_final_shell_authority_v1.test.cjs
+      - name: Certifier l'autorité Shell finale module-launch Phase 5 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_launch_final_shell_authority_v1.test.cjs
 
-      - name: Pré-auditer le retrait du global startConfiguredGame Core200
-        run: node tests/gens_phase5_startconfiguredgame_core200_global_retirement_preaudit_v1.test.cjs
+      - name: Pré-auditer le retrait du global startConfiguredGame Core200 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_startconfiguredgame_core200_global_retirement_preaudit_v1.test.cjs
 
-      - name: Retirer le global startConfiguredGame Core200
-        run: node tests/gens_phase5_startconfiguredgame_core200_global_retirement_v1.test.cjs
+      - name: Certifier le retrait du global startConfiguredGame Core200 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_startconfiguredgame_core200_global_retirement_v1.test.cjs
 
       - name: Exiger le retrait du propriétaire goMenu Core 0.30
         run: node tests/gens_phase5_gomenu_core030_retirement_v1.test.cjs
@@ -1018,17 +1058,17 @@ jobs:
       - name: Verrouiller l’autorité Core du stockage Manual MJ Effects
         run: node tests/gens_phase4_storage_manual_mj_effects_owner_v1.test.cjs
 
-      - name: Auditer le bootstrap stockage inline Phase 4
-        run: node tests/gens_phase4_storage_inline_audit_v1.test.cjs
+      - name: Auditer le bootstrap stockage inline et la progression Capture Phase 4 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase4_storage_inline_audit_v1.test.cjs
 
       - name: Verrouiller l'ordre de bootstrap Core Storage Phase 4
         run: node tests/gens_phase4_storage_bootstrap_order_v1.test.cjs
 
-      - name: Caractériser la parité stockage Capture progress
-        run: node tests/gens_phase4_storage_capture_progress_parity_v1.test.cjs
+      - name: Caractériser la parité stockage Capture progress (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase4_storage_capture_progress_parity_v1.test.cjs
 
-      - name: Verrouiller l’autorité Capture / Core Storage
-        run: node tests/gens_phase4_storage_capture_progress_owner_v1.test.cjs
+      - name: Verrouiller l’autorité Capture / Core Storage (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase4_storage_capture_progress_owner_v1.test.cjs
 
       - name: Caractériser la parité stockage Dungeon Primary Selection
         run: node tests/gens_phase4_storage_primary_selection_parity_v1.test.cjs
@@ -1051,14 +1091,14 @@ jobs:
       - name: Rejouer le test historique World Summary via le Core stockage
         run: node tests/gens_world_summary_v167820.test.cjs
 
-      - name: Caractériser les fichiers hors graphe de production Phase 2
-        run: node tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs
+      - name: Caractériser les anciens fichiers hors graphe de production Phase 2 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase2_unreachable_files_characterization_v11411.test.cjs
 
       - name: Verrouiller les responsabilités stratifiées Phase 2
         run: node tests/gens_phase2_layered_responsibilities_v11411.test.cjs
 
-      - name: Vérifier la structure cible inerte Phase 3
-        run: node tests/gens_phase3_target_structure_contracts_v1.test.cjs
+      - name: Vérifier la structure cible inerte Phase 3 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase3_target_structure_contracts_v1.test.cjs
 
       - name: Vérifier le resolver d’assets pur Phase 4
         run: node tests/gens_core_asset_resolver_v1.test.cjs
@@ -1116,7 +1156,9 @@ jobs:
         run: node tests/gens_asset_resolver_loot_owner_v1.test.cjs
 
   browser-sentinel:
-    needs: architecture-sentinels
+    # Independent browser regressions must run alongside the long architecture
+    # census, not be skipped when an unrelated historical characterization is RED.
+    # Both jobs remain mandatory status checks; neither bypasses the other.
     runs-on: ubuntu-24.04
     steps:
       - name: Récupérer le dépôt
@@ -1132,8 +1174,11 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Verrouiller l’éditeur Survie et les sauvegardes étrangères en vrai navigateur mobile et PC
-        run: node tests/gens_phase9_survival_editor_canonical_boundary_browser_v1.test.cjs
+      - name: Protéger le vrai Shell Capture V2 et les sauvegardes étrangères sur mobile
+        run: node --test tests/gens_capture_v2_four_mode_noninterference_v1.test.cjs
+
+      - name: Caractériser l'éditeur Survie et Capture V1 avant remplacement (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_survival_editor_canonical_boundary_browser_v1.test.cjs
 
       - name: Conserver les preuves de la frontière native de l’éditeur Survie
         if: always()
@@ -1143,8 +1188,8 @@ jobs:
           path: artifacts/gensrpg-survival-editor/
           if-no-files-found: ignore
 
-      - name: Vérifier les bibliothèques réelles Survie et Adventure sur mobile et PC
-        run: node tests/gens_phase9_survival_library_canonical_classification_browser_v1.test.cjs
+      - name: Caractériser les bibliothèques historiques Survie et Capture V1 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_survival_library_canonical_classification_browser_v1.test.cjs
 
       - name: Conserver les preuves du classement réel des bibliothèques
         if: always()
@@ -1195,8 +1240,8 @@ jobs:
       - name: Caractériser l'autorité exploration Dungeon Phase 7 dans Chromium
         run: node tests/gens_phase7_dungeon_exploration_authority_browser_characterization_v1.test.cjs
 
-      - name: Caractériser goMenu Dungeon et Capture
-        run: node tests/gens_phase5_gomenu_e2e_browser_v1.test.cjs
+      - name: Caractériser goMenu Dungeon et Capture V1 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_gomenu_e2e_browser_v1.test.cjs
 
       - name: Caractériser la responsabilité résiduelle goMenu Core 0.23
         run: node tests/gens_phase5_gomenu_core023_e2e_characterization_v1.test.cjs
@@ -1208,7 +1253,7 @@ jobs:
         run: node tests/gens_phase5_gomenu_core01_preaudit_e2e_v1.test.cjs
 
       - name: Exiger le retrait de l'autorité goMenu Core 0.01
-        run: node tests/gens_phase5_gomenu_core01_retirement_v1.test.cjs
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_gomenu_core01_retirement_v1.test.cjs
 
       - name: Caractériser goMenu Survie
         run: node tests/gens_phase5_gomenu_survival_e2e_browser_v1.test.cjs
@@ -1216,40 +1261,43 @@ jobs:
       - name: Verrouiller Dungeon map vers Tactical V2
         run: node tests/gens_phase5_dungeon_map_combat_e2e_browser_v1.test.cjs
 
-      - name: Prouver Capture seul sans démarrage Dungeon pendant monde et combat
-        run: node tests/gens_phase9_capture_axis_a_no_dungeon_runtime_browser_v1.test.cjs
+      - name: Prouver Capture seul sans démarrage Dungeon pendant monde et combat (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_axis_a_no_dungeon_runtime_browser_v1.test.cjs
 
-      - name: Prouver reprise Capture après reload puis jour 3 sans sauvegarde Dungeon
-        run: node tests/gens_phase9_capture_axis_b_clean_resume_browser_v1.test.cjs
+      - name: Prouver reprise Capture après reload puis jour 3 sans sauvegarde Dungeon (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_axis_b_clean_resume_browser_v1.test.cjs
 
-      - name: Prouver Save Quit Capture puis seconde session sans Dungeon
-        run: node tests/gens_phase9_capture_axis_c_shutdown_owner_browser_v1.test.cjs
+      - name: Prouver Save Quit Capture puis seconde session sans Dungeon (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_axis_c_shutdown_owner_browser_v1.test.cjs
 
-      - name: Verrouiller extraction physique et source unique du seed Capture V16.162
-        run: node tests/gens_phase9_capture_seed_physical_extraction_v1.test.cjs
+      - name: Verrouiller extraction physique et source unique du seed Capture V16.162 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_seed_physical_extraction_v1.test.cjs
 
-      - name: Verrouiller le propriétaire physique Monde / Exploration Capture Phase 9
-        run: node tests/gens_phase9_capture_world_physical_extraction_v1.test.cjs
+      - name: Verrouiller le propriétaire physique Monde / Exploration Capture Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_world_physical_extraction_v1.test.cjs
 
-      - name: Verrouiller le propriétaire physique Équipe / Réserve Capture Phase 9
-        run: node tests/gens_phase9_capture_team_roster_owner_v1.test.cjs
+      - name: Verrouiller le propriétaire physique Équipe / Réserve Capture Phase 9 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_team_roster_owner_v1.test.cjs
 
-      - name: Protéger les lieux MJ Capture et la persistance par profil
-        run: node tests/gens_phase9_capture_world_creator_preservation_v1.test.cjs
+      - name: Protéger les lieux MJ Capture et la persistance par profil (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_world_creator_preservation_v1.test.cjs
 
       - name: Bloquer toute multi-autorité de l'éditeur Dungeon
         run: node tests/gens_phase9_dungeon_editor_single_owner_v1.test.cjs
 
-      - name: Verrouiller Capture victoire et reprise inter-module
-        run: node tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs
+      - name: Verrouiller Capture victoire et reprise inter-module (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_capture_victory_resume_e2e_browser_v1.test.cjs
 
       - name: Caractériser Dungeon après Survie dans Chromium
         env:
           GENSRPG_BROWSER: chromium
         run: node tests/gens_dungeon_after_survival_start_state_browser_v11411.test.cjs
 
-      - name: Vérifier le Dungeon Builder dans le vrai éditeur
-        run: node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs
+      - name: Caractériser le Dungeon Builder après l'ancien pré-game Capture (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_dungeon_builder_visibility_browser_v11411.test.cjs
+
+      - name: Vérifier le Dungeon Builder après sortie du vrai Shell Capture V2
+        run: node tests/gens_dungeon_builder_visibility_after_capture_v2_browser_v1.test.cjs
 
       - name: Caractériser la stabilité de Config objet moderne
         run: node tests/gens_object_config_editor_browser_v11411.test.cjs
@@ -1272,26 +1320,26 @@ jobs:
       - name: Vérifier le placeholder PvP par le vrai Shell
         run: node tests/gens_pvp_placeholder_shell_browser_v11411.test.cjs
 
-      - name: Vérifier Monster Capture actuel par le vrai Shell
-        run: node tests/gens_capture_current_shell_browser_v11411.test.cjs
+      - name: Vérifier Monster Capture actuel par le vrai Shell (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_capture_current_shell_browser_v11411.test.cjs
 
-      - name: Exiger le routage Shell Capture sans identité Dungeon historique
-        run: node tests/gens_phase9_capture_seed_without_dungeon_style_browser_characterization_v1.test.cjs
+      - name: Exiger le routage Shell Capture sans identité Dungeon historique (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_seed_without_dungeon_style_browser_characterization_v1.test.cjs
 
-      - name: Exiger le pré-game Capture sans identité Dungeon historique
-        run: node tests/gens_phase9_capture_post_shell_without_dungeon_style_browser_characterization_v1.test.cjs
+      - name: Exiger le pré-game Capture sans identité Dungeon historique (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_post_shell_without_dungeon_style_browser_characterization_v1.test.cjs
 
-      - name: Verrouiller reprise Capture persistée sans identité Dungeon historique
-        run: node tests/gens_phase9_capture_persisted_profile_without_dungeon_style_resume_characterization_v1.test.cjs
+      - name: Verrouiller reprise Capture persistée sans identité Dungeon historique (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_persisted_profile_without_dungeon_style_resume_characterization_v1.test.cjs
 
-      - name: Vérifier le provider Capture module-launch S3
-        run: node tests/gens_phase5_module_launch_s3_capture_provider_browser_v1.test.cjs
+      - name: Vérifier le provider Capture module-launch S3 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_module_launch_s3_capture_provider_browser_v1.test.cjs
 
-      - name: Caractériser Capture dans la composition complète Phase 2
-        run: node tests/gens_phase2_full_composition_capture_browser_v11411.test.cjs
+      - name: Caractériser Capture dans la composition complète Phase 2 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase2_full_composition_capture_browser_v11411.test.cjs
 
-      - name: Vérifier la non-interférence des quatre modules
-        run: node tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs
+      - name: Préserver la non-interférence historique des quatre modules avant V2 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs
 
       - name: Vérifier le vrai formulaire PvP isolé sur mobile et PC
         run: node tests/gens_phase10_pvp_setup_ui_s3_browser.test.cjs
@@ -1302,8 +1350,11 @@ jobs:
       - name: Vérifier la preview manuelle dans Chromium
         run: node tests/gens_preview_browser_v11411.test.cjs
 
-      - name: Vérifier le lien externe exact de preview sur le SHA courant
-        run: node tests/gens_preview_external_browser_v1.test.cjs
+      - name: Vérifier la preview externe du Shell Capture V2 sur le SHA courant
+        run: node tests/gens_preview_external_capture_v2_browser_v1.test.cjs
+
+      - name: Préserver la preview externe complète Capture V1 sur le checkpoint immuable
+        run: GITHUB_SHA=900cbcba0cdd517db773ff39c9c56264c16b32ed bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_preview_external_browser_v1.test.cjs
 
       - name: Caractériser la résolution réelle des assets Phase 4
         run: node tests/gens_asset_resolver_browser_v1.test.cjs

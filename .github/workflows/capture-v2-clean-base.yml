@@ -1,0 +1,97 @@
+name: Capture v2 clean ownership boundary
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'work/gensrpg-capture-clean-replacement-*'
+  pull_request:
+    paths:
+      - 'assets/gensrpg/capture-v2/**'
+      - 'index.html'
+      - 'tests/gens_capture_v2_clean_boundary.test.cjs'
+      - 'tests/gens_capture_v2_generic_profile_owner.test.cjs'
+      - 'tests/gens_capture_v2_root_browser.test.cjs'
+      - 'tests/gens_dungeon_builder_visibility_after_capture_v2_browser_v1.test.cjs'
+      - 'tests/gens_preview_external_capture_v2_browser_v1.test.cjs'
+      - '.github/workflows/main.yml'
+      - '.github/workflows/capture-v2-clean-base.yml'
+permissions:
+  contents: read
+jobs:
+  clean-authority:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse the two new Capture-only modules
+        run: |
+          node --check assets/gensrpg/capture-v2/identity-v1.js
+          node --check assets/gensrpg/capture-v2/shell-entry-v1.js
+      - name: Verify real GenSrpg root and both official sources (TDD RED first)
+        run: |
+          node --test tests/gens_capture_v2_clean_boundary.test.cjs
+          node --test tests/gens_capture_v2_pwa_cache_owner_v1.test.cjs
+      - name: Historical Survival Dungeon game profile factory parity
+        run: node --test tests/gens_capture_v2_generic_profile_owner.test.cjs
+
+  root-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve and certify both published main pins
+        id: pins
+        run: |
+          node --input-type=module - <<'JS' >> "$GITHUB_OUTPUT"
+          import fs from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          const sources=JSON.parse(fs.readFileSync('assets/gensrpg/capture-v2/source-pins-v1.json','utf8'));
+          if(sources.legacyCaptureRuntime!==false)throw Error('Legacy Capture is forbidden');
+          for(const name of ['combat','exploration']){
+            const owner=sources[name];
+            if(owner.ref!=='main'||!/^[a-f0-9]{40}$/.test(owner.sha))throw Error('Missing main-only pin');
+            const current=execFileSync('git',['ls-remote','https://github.com/'+owner.repository+'.git','refs/heads/main'],{encoding:'utf8'}).trim().split(/\s+/)[0];
+            if(current!==owner.sha)throw Error('Uncertified '+name+' main drift');
+            console.log(name+'='+owner.sha);
+          }
+          JS
+      - name: Read official Combat from main at its certified SHA
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
+          ref: ${{ steps.pins.outputs.combat }}
+          path: combat-lab
+          sparse-checkout: |
+            src
+            data
+            examples/dom-demo
+      - name: Read official Exploration from main at its certified SHA
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/laboratoire_dynamique_exploration-
+          ref: ${{ steps.pins.outputs.exploration }}
+          path: exploration-lab
+          sparse-checkout: |
+            src
+            assets
+            index.html
+            builder.html
+            world-assembler.html
+            sculpt-lab.html
+      - name: Assemble original Lab modules without any GenSrpg engine copy
+        run: |
+          test "$(git -C combat-lab rev-parse HEAD)" = "${{ steps.pins.outputs.combat }}"
+          test "$(git -C exploration-lab rev-parse HEAD)" = "${{ steps.pins.outputs.exploration }}"
+          mkdir -p _site/vendor/combat-lab _site/vendor/exploration-lab
+          cp -a combat-lab/src combat-lab/data combat-lab/examples _site/vendor/combat-lab/
+          cp -a exploration-lab/src exploration-lab/assets _site/vendor/exploration-lab/
+          cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html exploration-lab/sculpt-lab.html _site/vendor/exploration-lab/
+      - name: Install browser test dependencies
+        run: |
+          npm install --no-save --no-package-lock playwright@1.57.0
+          npx playwright install chromium
+      - name: Run real four-mode GenSrpg root and Capture V2-to-Dungeon Builder in Chromium
+        run: |
+          node --test tests/gens_capture_v2_root_browser.test.cjs
+          node tests/gens_dungeon_builder_visibility_after_capture_v2_browser_v1.test.cjs
+          node tests/gens_preview_external_capture_v2_browser_v1.test.cjs

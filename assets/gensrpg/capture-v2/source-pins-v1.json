@@ -1,0 +1,26 @@
+{
+  "schema": "gensrpg-capture-v2-official-main-pins-v1",
+  "combat": {
+    "repository": "slyen4425-cloud/GenSrpg_labo_combat_dynamique",
+    "ref": "main",
+    "sha": "81ad362a401b7b2eb9faa811528aced9f2d6384a",
+    "path": "vendor/combat-lab/",
+    "certifiedCiRun": 41157293534
+  },
+  "exploration": {
+    "repository": "slyen4425-cloud/laboratoire_dynamique_exploration-",
+    "ref": "main",
+    "sha": "312131b393b11a88bee481c43df66573a09f04c9",
+    "path": "vendor/exploration-lab/",
+    "certifiedCiRun": 41238048876
+  },
+  "legacyCaptureRuntime": false,
+  "featuresDeferred": [
+    "XP",
+    "encounters",
+    "merchant",
+    "capture",
+    "team",
+    "loot"
+  ]
+}

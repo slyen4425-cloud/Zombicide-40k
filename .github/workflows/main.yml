@@ -96,22 +96,21 @@ jobs:
           node --check tools/run_capture_combat_main_autosync.mjs
           node --test tests/gens_capture_combat_main_only_guard_20261030.test.cjs
 
-      - name: Résoudre la version officielle immuable Capture / visuels (aucune synchronisation mouvante)
+      - name: Résoudre les deux seules autorités officielles depuis leurs main exacts
         id: capture_pages_pins
         run: |
           node --input-type=module - <<'JS' >> "$GITHUB_OUTPUT"
-          import {COMBAT_LAB_SOURCE_V1} from './assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs';
           import fs from 'node:fs';
           import {execFileSync} from 'node:child_process';
-          const manifest=JSON.parse(fs.readFileSync('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json','utf8'));
-          if(COMBAT_LAB_SOURCE_V1.sha!==manifest.authoredSourceLabPin)throw Error('Conflicting pinned Combat authority');
-          // Only an approved Combat main HEAD may enter GenSrpg. No gh-pages SHA.
-          const combatMain=execFileSync('git',['ls-remote','https://github.com/slyen4425-cloud/GenSrpg_labo_combat_dynamique.git','refs/heads/main'],{encoding:'utf8'}).trim().split(/\s+/)[0];
-          if(!combatMain||COMBAT_LAB_SOURCE_V1.sha!==combatMain)throw Error('Combat pin differs from approved main; repin and recertify');
-          if(!/^[0-9a-f]{40}$/.test(manifest.authoredAssetsPin))throw Error('Unpinned official visuals');
-          if(manifest.productionActivated!==false)throw Error('Capture Hub must remain dormant');
-          console.log('combat='+COMBAT_LAB_SOURCE_V1.sha);
-          console.log('visuals='+manifest.authoredAssetsPin);
+          const pins=JSON.parse(fs.readFileSync('assets/gensrpg/capture-v2/source-pins-v1.json','utf8'));
+          if(pins.legacyCaptureRuntime!==false)throw Error('Historical Capture engine must not be published');
+          for(const owner of ['combat','exploration']){
+            const entry=pins[owner];
+            if(entry.ref!=='main'||!/^[0-9a-f]{40}$/.test(entry.sha))throw Error('Invalid main-only source pin: '+owner);
+            const actual=execFileSync('git',['ls-remote','https://github.com/'+entry.repository+'.git','refs/heads/main'],{encoding:'utf8'}).trim().split(/\s+/)[0];
+            if(actual!==entry.sha)throw Error(owner+' main has changed: recertify the new version before shipping');
+            console.log(owner+'='+entry.sha);
+          }
           JS
 
       - name: Charger uniquement les modules officiels Capture au SHA épinglé
@@ -135,15 +134,6 @@ jobs:
             throw new Error('Combat main lacks embeddedBattle native scene ownership; cannot ship GenSrpg without an unapproved gh-pages fallback');
           }
           JS
-      - name: Charger uniquement le catalogue visuel officiel au SHA épinglé
-        uses: actions/checkout@v4
-        with:
-          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
-          ref: ${{ steps.capture_pages_pins.outputs.visuals }}
-          path: combat-assets
-          sparse-checkout: |
-            data/assets/catalog
-
       - name: Préparer le site
         run: |
           rm -rf _site
@@ -185,12 +175,6 @@ jobs:
             cp -f dungeon-profiles-safe-repair.html _site/dungeon-profiles-safe-repair.html
           fi
 
-          # Standalone opt-in Capture 2v2 demonstration. Never injected in
-          # index.html, never registered in the PWA and owns separate demo saves.
-          if [ -f "capture-world-2v2-test.html" ]; then
-            cp -f capture-world-2v2-test.html _site/capture-world-2v2-test.html
-          fi
-
           if [ -f "manifest.webmanifest" ]; then
             cp -f manifest.webmanifest _site/manifest.webmanifest
           fi
@@ -221,8 +205,12 @@ jobs:
 
           if [ -d "assets" ]; then
             mkdir -p _site/assets
-            cp -R assets/. _site/assets/
+            # Capture V2 is shipped without the retired Capture runtime.
+            rsync -a --exclude='/gensrpg/capture/' assets/ _site/assets/
           fi
+          # Archived ZIPs must never resurrect V1 inside the publication.
+          rm -rf _site/assets/gensrpg/capture
+          rm -f _site/capture-world-2v2-test.html
 
           echo ""
           echo "========================================="
@@ -288,30 +276,62 @@ jobs:
           # Remove both source tail tags first so Pages rebuilds the same canonical order.
           perf_tag = '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>'
           final_shell_tag = '<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>'
+          capture_v2_tag = '<script src="assets/gensrpg/capture-v2/shell-entry-v1.js"></script>'
           html = html.replace(perf_tag + "\n", "").replace(perf_tag, "")
           html = html.replace(final_shell_tag + "\n", "").replace(final_shell_tag, "")
+          # Preserve the single Shell owner: the clean Capture entry MUST come after it.
+          if html.count(capture_v2_tag) != 1:
+              raise SystemExit("Clean Capture V2 entry missing or duplicated")
+          html = html.replace(capture_v2_tag + "\n", "").replace(capture_v2_tag, "")
           for module, tag, error in modules:
               if not module.exists():
                   raise SystemExit(error)
               if tag not in html:
                   html = html.replace("</body>", tag + "\n</body>")
+          html = html.replace("</body>", capture_v2_tag + "\n</body>")
+          if html.index(final_shell_tag) > html.index(capture_v2_tag):
+              raise SystemExit("GenSrpG Capture V2 loaded before the Shell owner")
           index.write_text(html, encoding="utf-8")
           PY
 
-      - name: Construire la livraison Capture officielle passive depuis le publisher unique
-        run: node tools/stage_capture_lab_delivery.mjs combat-lab combat-assets _site
+      - name: Charger Exploration depuis son main officiellement epingle
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/laboratoire_dynamique_exploration-
+          ref: ${{ steps.capture_pages_pins.outputs.exploration }}
+          path: exploration-lab
+          sparse-checkout: |
+            src
+            assets
+            index.html
+            builder.html
+            world-assembler.html
+            sculpt-lab.html
+            manifest.webmanifest
 
-      - name: Vérifier les bytes, SHA, propriétaire et non-activation de la livraison Pages
+      - name: Assembler les deux laboratoires main, sans ancien paquet Capture
         env:
+          CAPTURE_V2_SITE: ${{ github.workspace }}/_site
           COMBAT_LAB_ROOT: ${{ github.workspace }}/combat-lab
-          COMBAT_ASSETS_ROOT: ${{ github.workspace }}/combat-assets
-          CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
+          EXPLORATION_LAB_ROOT: ${{ github.workspace }}/exploration-lab
         run: |
-          node --test tests/gens_capture_lab_pages_pipeline_v1.test.cjs
-          node --test tests/gens_capture_lab_delivery_v1.test.cjs
-          node --test tests/gens_capture_lab_pages_site_v1.test.cjs
-          node --test tests/gens_capture_official_hub_composition_v1.test.cjs
-          node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs
+          node - <<'JS'
+          const fs=require('node:fs');
+          const {execFileSync}=require('node:child_process');
+          const pins=JSON.parse(fs.readFileSync('assets/gensrpg/capture-v2/source-pins-v1.json'));
+          for(const [name,folder] of [['combat','combat-lab'],['exploration','exploration-lab']]){
+            const actual=execFileSync('git',['-C',folder,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
+            if(actual!==pins[name].sha)throw Error('Non-canonical '+name+' Lab checkout');
+          }
+          JS
+          mkdir -p _site/vendor/exploration-lab
+          cp -a exploration-lab/src exploration-lab/assets _site/vendor/exploration-lab/
+          cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html exploration-lab/sculpt-lab.html exploration-lab/manifest.webmanifest _site/vendor/exploration-lab/
+          node tools/stage_capture_v2_labs.mjs combat-lab exploration-lab _site
+          node --test tests/gens_capture_v2_clean_boundary.test.cjs
+          node --test tests/gens_capture_v2_pwa_cache_owner_v1.test.cjs
+          node --test tests/gens_capture_v2_generic_profile_owner.test.cjs
+          node --test tests/gens_capture_v2_pages_delivery_v1.test.cjs
 
       - name: Tester le chargement réel mur HD et pions adaptatifs Dungeon
         run: node tests/dungeon_wall_visual_v167866.test.cjs _site/index.html

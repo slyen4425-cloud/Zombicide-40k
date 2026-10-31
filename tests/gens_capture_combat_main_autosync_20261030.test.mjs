@@ -6,46 +6,53 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {FILES,plan,apply} from '../tools/sync_capture_combat_main_pin.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const newSha='1234567890abcdef1234567890abcdef12345678';
+const next='1234567890abcdef1234567890abcdef12345678';
 function scratch(){
- const dir=fs.mkdtempSync(path.join(os.tmpdir(),'capture-main-only-'));
- for(const file of FILES){fs.mkdirSync(path.dirname(path.join(dir,file)),{recursive:true});fs.copyFileSync(path.join(root,file),path.join(dir,file))}
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'capture-v2-main-only-'));
+ for(const f of FILES){fs.mkdirSync(path.dirname(path.join(dir,f)),{recursive:true});fs.copyFileSync(path.join(root,f),path.join(dir,f));}
  return dir;
 }
-test('RED/GREEN: repin all author, engine and test sources together, no implicit content promotion',()=>{
+test('V2 source update moves only the certified Combat main pin, not old catalogues or Exploration',()=>{
  const dir=scratch();
  try{
-  const old=JSON.parse(fs.readFileSync(path.join(dir,FILES[1]))).authoredSourceLabPin;
-  const p=plan(dir,newSha,99101);
-  assert.equal(p.changed,true);assert.equal(p.updates.length,FILES.length);
-  for(const u of p.updates)assert.equal(fs.readFileSync(path.join(dir,u.file),'utf8'),u.before,'planning is pure');
-  apply(dir,p);
-  const m=JSON.parse(fs.readFileSync(path.join(dir,FILES[1])));
-  assert.equal(m.authoredSourceLabPin,newSha);
-  assert.equal(m.originalWildBattleButton.officialSourceSha,newSha);
-  assert.equal(m.authoredAssetsPin,'b3d46ce6f2639ebb59a2984aeff17f97cbcd7377');
-  for(const f of FILES){const s=fs.readFileSync(path.join(dir,f),'utf8');assert.ok(s.includes(newSha));assert.ok(!s.includes(old))}
-  assert.equal(plan(dir,newSha,99101).changed,false);
- }finally{fs.rmSync(dir,{recursive:true,force:true})}
+  assert.deepEqual(FILES,['assets/gensrpg/capture-v2/source-pins-v1.json']);
+  const original=JSON.parse(fs.readFileSync(path.join(dir,FILES[0])));
+  const candidate=plan(dir,next,99101);
+  assert.equal(candidate.changed,true);
+  assert.equal(candidate.updates.length,1);
+  assert.equal(fs.readFileSync(path.join(dir,FILES[0]),'utf8'),candidate.updates[0].before,'planning is pure');
+  apply(dir,candidate);
+  const result=JSON.parse(fs.readFileSync(path.join(dir,FILES[0])));
+  assert.equal(result.combat.sha,next);
+  assert.equal(result.combat.certifiedCiRun,99101);
+  assert.deepEqual(result.exploration,original.exploration);
+  assert.deepEqual(result.featuresDeferred,original.featuresDeferred);
+  assert.equal(result.legacyCaptureRuntime,false);
+  assert.equal(plan(dir,next,99101).changed,false);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
-test('reject invalid SHA and incomplete CI proof before changing any file',()=>{
+test('refuse invalid SHAs, missing CI proof, non-main lab or competing engine',()=>{
  const dir=scratch();
  try{
   assert.throws(()=>plan(dir,'gh-pages',12),/full git SHA/);
-  assert.throws(()=>plan(dir,newSha,0),/CI run/);
-  const file=path.join(dir,FILES[1]),m=JSON.parse(fs.readFileSync(file));
-  m.originalWildBattleButton.officialSourceSha='0'.repeat(40);
-  fs.writeFileSync(file,JSON.stringify(m));
-  assert.throws(()=>plan(dir,newSha,12),/competing/);
- }finally{fs.rmSync(dir,{recursive:true,force:true})}
+  assert.throws(()=>plan(dir,next,0),/CI run/);
+  const file=path.join(dir,FILES[0]),base=JSON.parse(fs.readFileSync(file));
+  base.exploration.ref='gh-pages';fs.writeFileSync(file,JSON.stringify(base));
+  assert.throws(()=>plan(dir,next,12),/main only/);
+  base.exploration.ref='main';base.legacyCaptureRuntime=true;fs.writeFileSync(file,JSON.stringify(base));
+  assert.throws(()=>plan(dir,next,12),/retired/);
+  base.legacyCaptureRuntime=false;base.combat.repository='other/repo';fs.writeFileSync(file,JSON.stringify(base));
+  assert.throws(()=>plan(dir,next,12),/Competing/);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
-test('a changed gate aborts the whole repin, leaving the release manifest intact',()=>{
+test('atomic stale-input failure leaves the verified original Capture V2 consumer untouched',()=>{
  const dir=scratch();
  try{
-  const m=fs.readFileSync(path.join(dir,FILES[1]),'utf8');
-  const old=JSON.parse(m).authoredSourceLabPin,filename=path.join(dir,FILES.at(-1));
-  fs.writeFileSync(filename,fs.readFileSync(filename,'utf8').replaceAll(old,'0'.repeat(40)));
-  assert.throws(()=>plan(dir,newSha,99),/Static source drift/);
-  assert.equal(fs.readFileSync(path.join(dir,FILES[1]),'utf8'),m);
- }finally{fs.rmSync(dir,{recursive:true,force:true})}
+  const candidate=plan(dir,next,99);
+  const file=path.join(dir,FILES[0]);
+  const data=fs.readFileSync(file,'utf8');
+  fs.writeFileSync(file,data+' ');
+  assert.throws(()=>apply(dir,candidate),/Concurrent change/);
+  assert.equal(fs.readFileSync(file,'utf8'),data+' ');
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });

@@ -124,24 +124,3 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await new Promise(ok=>server.close(ok));
  }
 });
-));
-    const editor=page.frameLocator('#gensCaptureV2Root iframe');
-    await editor.locator('[data-editor-tab="'+tab+'"][data-active="true"]').waitFor({timeout:25000});
-    await editor.locator('[data-editor-panel="'+tab+'"]:visible').waitFor({timeout:25000});
-  }
-  await page.locator('#gensCaptureV2Root [data-capture-v2-view="bestiary"]').tap();
-  await page.frameLocator('#gensCaptureV2Root iframe').locator('[data-bestiary]').waitFor({timeout:25000});
-  await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').tap();
-  await page.frameLocator('#gensCaptureV2Root iframe').locator('canvas#game').waitFor({timeout:25000});
-  assert.equal(await page.locator('button.gensRootModeCard').count(),4);
-  await page.getByRole('button',{name:'Quitter le mode'}).tap();
-  assert.equal(await page.locator('#gensCaptureV2Root').count(),0);
-  assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().active),false);
-  // No assertion about XP/encounters or Lab session/save ownership: deferred.
-  assert.deepEqual(errors.filter(x=>/GensCaptureV2|Competing Capture|Duplicate Capture/.test(x)),[]);
- }finally{
-  await context?.close();await browser?.close();
-  server.closeAllConnections();
-  await new Promise(ok=>server.close(ok));
- }
-});

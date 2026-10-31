@@ -1169,8 +1169,11 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Verrouiller l’éditeur Survie et les sauvegardes étrangères en vrai navigateur mobile et PC
-        run: node tests/gens_phase9_survival_editor_canonical_boundary_browser_v1.test.cjs
+      - name: Protéger le vrai Shell Capture V2 et les sauvegardes étrangères sur mobile
+        run: node --test tests/gens_capture_v2_four_mode_noninterference_v1.test.cjs
+
+      - name: Caractériser l'éditeur Survie et Capture V1 avant remplacement (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_survival_editor_canonical_boundary_browser_v1.test.cjs
 
       - name: Conserver les preuves de la frontière native de l’éditeur Survie
         if: always()
@@ -1180,8 +1183,8 @@ jobs:
           path: artifacts/gensrpg-survival-editor/
           if-no-files-found: ignore
 
-      - name: Vérifier les bibliothèques réelles Survie et Adventure sur mobile et PC
-        run: node tests/gens_phase9_survival_library_canonical_classification_browser_v1.test.cjs
+      - name: Caractériser les bibliothèques historiques Survie et Capture V1 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_survival_library_canonical_classification_browser_v1.test.cjs
 
       - name: Conserver les preuves du classement réel des bibliothèques
         if: always()
@@ -1232,8 +1235,8 @@ jobs:
       - name: Caractériser l'autorité exploration Dungeon Phase 7 dans Chromium
         run: node tests/gens_phase7_dungeon_exploration_authority_browser_characterization_v1.test.cjs
 
-      - name: Caractériser goMenu Dungeon et Capture
-        run: node tests/gens_phase5_gomenu_e2e_browser_v1.test.cjs
+      - name: Caractériser goMenu Dungeon et Capture V1 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase5_gomenu_e2e_browser_v1.test.cjs
 
       - name: Caractériser la responsabilité résiduelle goMenu Core 0.23
         run: node tests/gens_phase5_gomenu_core023_e2e_characterization_v1.test.cjs
@@ -1327,8 +1330,8 @@ jobs:
       - name: Caractériser Capture dans la composition complète Phase 2 (checkpoint historique V1)
         run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase2_full_composition_capture_browser_v11411.test.cjs
 
-      - name: Vérifier la non-interférence des quatre modules
-        run: node tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs
+      - name: Préserver la non-interférence historique des quatre modules avant V2 (checkpoint historique V1)
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs
 
       - name: Vérifier le vrai formulaire PvP isolé sur mobile et PC
         run: node tests/gens_phase10_pvp_setup_ui_s3_browser.test.cjs

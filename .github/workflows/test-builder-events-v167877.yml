@@ -1,5 +1,6 @@
 name: Test Builder Events V16.78.102.2
 on:
+  pull_request:
   push:
     branches:
       - main

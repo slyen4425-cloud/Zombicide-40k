@@ -10,10 +10,14 @@ assert.match(src,/function invalidateEquipmentBonusCache\(\)/,'cache invalidatio
 assert.match(src,/equipmentBonusCache\.get\(cacheKey\)/,'cached equipment bonus path must exist');
 assert.match(src,/CACHE_TTL_MS=120/,'cache must stay short-lived');
 let equippedCalls=0;
-const item={id:'blade',evolution:{enabled:true,levels:[{level:2,xp:10,rpgBonuses:{force:3}}]}};
+const item={id:'blade',rpgBonuses:{force:5},evolution:{enabled:true,levels:[{level:2,xp:10,rpgBonuses:{force:3}}]}};
 const sandbox={console,setTimeout:()=>0,clearTimeout:()=>{},globalThis:null,document:{readyState:'complete',getElementById:()=>null,querySelectorAll:()=>[],addEventListener:()=>{},__gensSetCanon102:false},performance:{now:(()=>{let n=0;return()=>n+=1})()},GensCleanRpgStats167874:{runtimeDefs:()=>[],def:()=>null},state:{xp:20},current:'hero',dungeonEquippedItems:()=>{equippedCalls++;return [item]},dungeonEquipmentBonus:()=>5};
-sandbox.globalThis=sandbox;vm.createContext(sandbox);vm.runInContext(src,sandbox);
-assert.equal(sandbox.dungeonEquipmentBonus('force'),8);
+sandbox.globalThis=sandbox;vm.createContext(sandbox);
+// Load the actual Core owners rather than a stub that bypasses the canonical patch.
+for(const mod of ['core/equipment-bonus-sets-v1.js','core/equipment-evolution-v1.js'])
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'..','assets','gensrpg',mod),'utf8'),sandbox,{filename:mod});
+vm.runInContext(src,sandbox);
+assert.equal(sandbox.dungeonEquipmentBonus('force'),8,'Core direct bonus 5 + evolution bonus 3');
 assert.equal(sandbox.dungeonEquipmentBonus('force'),8);
 assert.equal(equippedCalls,1,'second identical combat lookup must reuse cached equipped items');
 sandbox.GensEquipmentStatCleanup1678102.invalidateEquipmentBonusCache();

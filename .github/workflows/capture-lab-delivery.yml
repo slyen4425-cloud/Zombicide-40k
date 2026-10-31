@@ -1,5 +1,6 @@
 name: Capture official release payload (not public activation)
 on:
+  workflow_dispatch:
   push:
     branches:
       - 'work/gensrpg-capture-official-delivery-package-*'

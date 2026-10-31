@@ -1,3 +1,30 @@
+## 2026-10-31 — Réconciliation sans perte de la PR #219 avec main@900cbc (CI EN ATTENTE, NON GREEN)
+- Base de fusion : branche Capture `4026b5b5f84184f4579369162fcb3be4d5b1c0cd`, main `900cbcba0cdd517db773ff39c9c56264c16b32ed`, ancêtre commun `812839d187ae250d079c254e4e72428e664a2d7a`. Checkpoint avant fusion `checkpoint/gensrpg-before-main-900cbc-reconcile-2026-10-31`.
+- Préservation de toutes les créations propres à main (charte LIVE, auto-sync Combat main, tests et workflows Survie/Dungeon) ; conservation du SHA auteur plus récent déjà validé dans #219. Workflows Capture réconcilient les contrôles main-only, le déclenchement manuel, les tests atomiques et la protection de publication Pages. Aucune modification de moteur, catalogue, sauvegarde, index ou PWA dans cette fusion.
+- Le seul échec métier connu demeure **99 espèces historiques sans transfert auteur signé** (`crea_son_1` compris). Politique native dresseur #155 non promue. Aucune fusion de #219 sur main ni activation de production avant CI sur SHA exact, vrai navigateur et Android.
+
+---
+
+## 2026-10-30 — Synchronisation automatique approuvée Combat main -> GenSrpg (branche dédiée)
+- BASE main@a18774bc524259ebb8d40f5e24211fd1f2f40730, checkpoint `checkpoint/gensrpg-start-combat-main-autosync-2026-10-30`, branche `work/gensrpg-combat-main-autosync-2026-10-30`.
+- Contrat : seul Combat `refs/heads/main` et son run Laboratory CI SUCCESS au SHA exact peuvent déclencher une mise à jour. `gh-pages` et tout autre commit hors main sont interdits, même si CI verte.
+- `tools/sync_capture_combat_main_pin.mjs` conserve une autorité source unique; modifie atomiquement le chargeur, manifeste auteur/World et les assertions de SHA au lieu de créer des doublons. Aucun asset médias ni gameplay ne sont automatiquement promus.
+- `.github/workflows/gensrpg-capture-combat-main-autosync.yml` : horaires 17 et 47 de chaque heure + déclenchement manuel; checkpoint de départ et PR automatique par SHA, six workflows indépendants (Combat réel, livraison auteur, Pages build, architecture, Firefox, Tactical), contrôle des SHA au moment de fusionner. Branches non conformes restent en PR, jamais publiées.
+- Déploiement conditionné à `main` : les previews/PR ne peuvent pas publier Pages. Après promotion, workflow Pages redéclenché explicitement, puis smoke public 2v2.
+- Tests TDD : `tests/gens_capture_combat_main_autosync_20261030.test.mjs` et `tests/gens_capture_combat_autosync_workflow_20261030.test.cjs` couvrent drift, absence de source concurrente et contrôle publication. Les vraies prochaines promotions restent à prouver en conditions futures : ne pas annoncer une synchronisation réalisée tant qu'aucun nouveau main Combat n'est arrivé.
+- Pas de modification de `index.html`, SW, sauvegardes, Combat ou Exploration.
+
+---
+
+## 2026-10-30 — Contrats CI actifs Builder/Survie/Tactical (PR #221)
+- START : main@856e69be736ab68e91eac5357881acb6b54d17cb ; checkpoint `checkpoint/gensrpg-start-retired-ci-2026-10-30` ; branche `work/gensrpg-retired-ci-contracts-2026-10-30`.
+- TDD RED prouvé sur main : Builder #41043406380 (assertion V16.78.102 périmée) et V113 #41043406428 (ancien module Survival supprimé). Cascades observées et traitées sur la branche : propriété native de la fiche héros, copie périmée du test UI, stub d'équipement sans Core.
+- Corrections **tests et workflows uniquement** : contrôles d'autorité de la fiche native sans ancien propriétaire, suppression de toute dépendance à la garde Survival retirée, vraie logique Core des bonus/évolution, sentinelles Phase 6 et PR. Aucun changement de moteur, de PWA ou de sauvegarde.
+- CI à l'instant de cette entrée : Builder #41051072751 SUCCESS et V113 #41051072686 SUCCESS sur 5b6740c ; autres sentinelles/Pages requises avant checkpoint GREEN et fusion.
+- Provenance Combat séparée : moteur et données officiels main@248f718ec924106d16999d59e5dc8310f8450180, GenSrpg encore épinglé ; **aucune synchronisation automatique GenSrpg sur promotion Combat main n'est annoncée**.
+
+---
+
 ## 2026-10-31 — Corriger le faux garde RED de difficulté PNJ, sans affaiblir l'acceptation (PR #219, NON GREEN)
 - TDD RED constaté dans [Capture release #41157485858](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/41157485858) sur `c3f244c4723c036faa15ce9b51cf70dd53b0bbc2` : **4/6** assertions métier passent, **2/6** échouent. Les quatre véritables panneaux auteur et le bestiaire passent en Chromium/Firefox avec Combat main épinglé ; l'une des deux erreurs restantes provient d'un test qui exigeait l'ancienne simple étiquette `trainerDifficultyLevels` alors que le code source exige désormais une vraie politique auteur versionnée et signée.
 - Correction limitée au **test d'acceptation** : remplacer l'assertion d'étiquettes par l'exigence explicite de `settings.trainerDifficultyPolicy`, du schéma `capture-trainer-difficulty-policy-v1` et de l'entrée correspondant au niveau PNJ. Refuser un garde basé seulement sur `manifest.trainerDifficultyLevels`. Aucune règle de combat ni coefficient inventé, aucune autorité additionnelle, aucun changement d'UI ou de sauvegarde.

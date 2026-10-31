@@ -12,6 +12,7 @@ on:
       - 'tests/gens_capture_v2_generic_profile_owner.test.cjs'
       - 'tests/gens_capture_v2_root_browser.test.cjs'
       - 'tests/gens_dungeon_builder_visibility_after_capture_v2_browser_v1.test.cjs'
+      - 'tests/gens_preview_external_capture_v2_browser_v1.test.cjs'
       - '.github/workflows/main.yml'
       - '.github/workflows/capture-v2-clean-base.yml'
 permissions:
@@ -93,3 +94,4 @@ jobs:
         run: |
           node --test tests/gens_capture_v2_root_browser.test.cjs
           node tests/gens_dungeon_builder_visibility_after_capture_v2_browser_v1.test.cjs
+          node tests/gens_preview_external_capture_v2_browser_v1.test.cjs

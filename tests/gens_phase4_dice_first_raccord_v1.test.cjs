@@ -14,12 +14,8 @@ const sha256=value=>crypto.createHash('sha256').update(value,'utf8').digest('hex
 
 const activeIndex=read('index.html');
 const index=require('./helpers/gens_capture_world_extraction_snapshot_v1.cjs').seedEraIndexBytes(root).toString('utf8');
-// This test keeps the byte-certified Phase 4 Dice census while checking the CURRENT
-// four-mode root: Capture V1 World must stay physically retired after Capture V2.
-assert.equal(activeIndex.split('<script src="assets/gensrpg/capture/world-exploration-v1.js?v=1"></script>').length-1,0,
-  'retired Capture V1 World cannot regain production ownership');
-assert.equal(activeIndex.split('<script src="assets/gensrpg/capture-v2/identity-v1.js"></script>').length-1,1,
-  'the active four-mode Shell must load one Capture V2 identity owner');
+// Scope: the Dice owner only. Capture V2 retirement and source composition
+// are certified independently by gens_capture_v2_clean_boundary.test.cjs.
 assert.equal(activeIndex.split('<script src="assets/gensrpg/core/dice-v1.js"></script>').length-1,1,
   'the real root must still load its independent Core Dice exactly once');
 const coreSrc=read('assets/gensrpg/core/dice-v1.js');

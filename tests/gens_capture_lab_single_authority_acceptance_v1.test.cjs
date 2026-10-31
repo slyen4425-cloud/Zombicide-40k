@@ -85,8 +85,8 @@ test('trainer World button enters the same native Lab scene and has no global ov
  // A list of accepted difficulty labels is not a combat policy. The native
  // Lab author must sign an executable versioned four-level policy; never
  // allow a UI-only difficulty selector to make a trainer battle pass.
- assert.match(composition,/settings\\.trainerDifficultyPolicy/);
- assert.match(composition,/capture-trainer-difficulty-policy-v1/);
- assert.match(composition,/policy\\.levels\\[encounter\\.trainerDifficulty-1\\]/);
- assert.doesNotMatch(composition,/manifest\\.trainerDifficultyLevels/);
+ assert.ok(composition.includes('settings.trainerDifficultyPolicy'), 'Lab authored policy must be read');
+ assert.ok(composition.includes('capture-trainer-difficulty-policy-v1'), 'Require signed versioned policy schema');
+ assert.ok(composition.includes('policy.levels[encounter.trainerDifficulty-1]'), 'Require actual selected difficulty level');
+ assert.ok(!composition.includes('manifest.trainerDifficultyLevels'), 'Labels alone must not authorize trainer battle');
 });

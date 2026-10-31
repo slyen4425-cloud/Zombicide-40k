@@ -277,7 +277,10 @@ jobs:
         run: node tests/gens_bridge_single_entry_contract_v11411.test.cjs
 
       - name: Figer l'inventaire des anciens points d'entrée combat
-        run: node tests/gens_combat_callsite_inventory_v11411.test.cjs
+        # Historical D4 Core200 rollback uses 7.78 MB byte-identical HTML;
+        # the current V2 HTML is intentionally smaller. Preserve the test on
+        # its certified pre-replacement snapshot, not the current V2 runtime.
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_combat_callsite_inventory_v11411.test.cjs
 
       - name: Vérifier la migration directe des deux boutons combat UI
         run: node tests/gens_combat_ui_direct_entry_migration_1.test.cjs

@@ -42,13 +42,12 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
     await page.locator('#gensCaptureV2Root').waitFor({state:'visible'});
     assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view]').count(),8,
       'external Shell must expose the original native-author destinations');
-    // External preview cannot serve vendor/ from the GitHub source repository:
-    // check the exact native URL only, not a fabricated editor/frame state.
-    await page.locator('#gensCaptureV2Root [data-capture-v2-view="skills"]').click();
-    const native=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
-    await native.waitFor({state:'attached'});
-    assert.match(await native.getAttribute('src'),
-      /vendor\/combat-lab\/examples\/dom-demo\/capture-editor-v2[.]html[?]tab=skills$/);
+    // The external GitHub-source origin has NO staged vendor Labs and cannot
+    // satisfy the strict same-origin owner boundary. Do not open a broken
+    // external editor and never mistake this shell-only transport for _site.
+    assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0,
+      'external shell must not fake a native editor that is absent from its origin');
+    assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),null);
     await page.getByRole('button',{name:'Quitter le mode'}).click();
     assert.equal(await page.locator('#gensCaptureV2Root').count(),0);
     console.log(JSON.stringify({scenario:'external pinned SHA Capture V2 Shell preview',

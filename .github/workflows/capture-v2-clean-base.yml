@@ -88,6 +88,14 @@ jobs:
           cp -a combat-lab/src combat-lab/data combat-lab/examples _site/vendor/combat-lab/
           cp -a exploration-lab/src exploration-lab/assets _site/vendor/exploration-lab/
           cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html exploration-lab/sculpt-lab.html _site/vendor/exploration-lab/
+          # The installed-PWA regression must run against real GenSrpg Pages files,
+          # not a vendor-only directory that returned 404 for every pre-cache URL.
+          cp -f index.html service-worker.js manifest.webmanifest _site/
+          mkdir -p _site/assets
+          rsync -a --exclude='/gensrpg/capture/' assets/ _site/assets/
+          test -f _site/index.html
+          test -f _site/assets/gensrpg/capture-v2/shell-entry-v1.js
+          test ! -e _site/assets/gensrpg/capture
       - name: Install browser test dependencies
         run: |
           npm install --no-save --no-package-lock playwright@1.57.0

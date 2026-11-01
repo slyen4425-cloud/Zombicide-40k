@@ -44,6 +44,17 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
       'external Shell must expose the original native-author destinations');
     // External preview only: render each original Lab on its immutable commit.
     // Production must still require its own same-origin vendor owner.
+    const diagnostics=await page.evaluate(()=>({
+      href:location.href,base:document.baseURI,
+      previewFlag:window.__GENSRPG_PREVIEW__,
+      transportType:typeof window.GensCaptureV2PreviewTransportV1,
+      inlineScriptCount:[...document.scripts].filter(s=>!!s.textContent.trim()).length,
+      injectedScriptCount:[...document.scripts].filter(s=>s.textContent.includes('GensCaptureV2PreviewTransportV1')).length,
+      injectedScripts:[...document.scripts].filter(s=>s.textContent.includes('GensCaptureV2PreviewTransportV1'))
+        .map(s=>s.textContent.slice(0,240)),
+      headStart:document.head?.innerHTML.slice(0,700)
+    }));
+    console.log('CAPTURE_PREVIEW_TRANSPORT_DEBUG',JSON.stringify(diagnostics));
     const roots=await page.evaluate(()=>window.GensCaptureV2PreviewTransportV1||null);
     assert.ok(roots,'external preview must publish its explicit native-Lab transport');
     assert.equal(roots.combat,

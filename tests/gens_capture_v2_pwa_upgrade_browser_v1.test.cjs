@@ -142,8 +142,26 @@ test('an already installed Capture V2 PWA upgrades without deleting saved data o
   // Offline navigation is intentionally only a SHELL guarantee. Native Labs
   // are not promised offline and must not be copied into the SW owner.
   await page.goto(url+'/index.html',{waitUntil:'domcontentloaded',timeout:45000});
+  const offlinePreflight=await page.evaluate(async key=>{
+   const registration=await navigator.serviceWorker.getRegistration('/');
+   const owned=await caches.open(key);
+   const entries=await owned.keys();
+   const cachedIndex=await owned.match('/index.html');
+   const cachedRoot=await owned.match('/');
+   return {controller:!!navigator.serviceWorker.controller,
+    workerState:registration?.active?.state,
+    cachedIndex:!!cachedIndex,indexStatus:cachedIndex?.status,
+    cachedRoot:!!cachedRoot,entryCount:entries.length,
+    sample:entries.slice(0,8).map(request=>request.url),keys:await caches.keys()};
+  },newKey);
+  assert.equal(offlinePreflight.controller,true,
+   'the installed worker must control real GenSrpg index before offline test: '+JSON.stringify(offlinePreflight));
+  assert.equal(offlinePreflight.cachedIndex,true,
+   'the active worker must have saved real index.html for offline shell: '+JSON.stringify(offlinePreflight));
   await context.setOffline(true);
-  await page.reload({waitUntil:'domcontentloaded',timeout:45000});
+  try{await page.reload({waitUntil:'domcontentloaded',timeout:45000});}
+  catch(error){throw new Error('PWA offline shell navigation failed; preflight='+
+   JSON.stringify(offlinePreflight)+'; cause='+error.message);}
   assert.match(await page.content(),/gensRootHome/,
    'installed PWA must serve its real GenSrpg shell HTML while offline');
   assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg-ci-protected-save')),

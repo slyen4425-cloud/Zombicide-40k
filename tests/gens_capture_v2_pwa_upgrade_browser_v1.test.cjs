@@ -90,7 +90,7 @@ test('an already installed Capture V2 PWA upgrades without deleting saved data o
   revision='new';
   await page.evaluate(async()=>{
    const registration=await navigator.serviceWorker.getRegistration('/');
-   assert.ok(registration);
+   if(!registration)throw new Error('Installed PWA SW registration missing');
    await registration.update();
   });
   await page.waitForFunction(async key=>(await caches.keys()).includes(key),newKey,

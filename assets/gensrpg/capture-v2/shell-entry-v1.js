@@ -61,6 +61,11 @@
     frame=root.document.createElement("iframe");
     frame.title=info.label;
     frame.setAttribute("referrerpolicy","same-origin");
+    // The official Combat main editor calls requestFullscreen on its own
+    // document when launching a battle. An embedded cross-origin Lab must
+    // receive explicit permission; otherwise Android shows a tiny 16:9 game.
+    frame.setAttribute("allow","fullscreen");
+    frame.setAttribute("allowfullscreen","");
     frame.setAttribute("data-capture-v2-native",info.family);
     frame.src=url.href;
     stage.replaceChildren(frame);

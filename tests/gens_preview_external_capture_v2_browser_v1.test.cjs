@@ -79,6 +79,8 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
       await page.locator('#gensCaptureV2Root [data-capture-v2-view="'+key+'"]').click();
       const frame=page.locator('#gensCaptureV2Root iframe');
       await frame.waitFor({state:'visible'});
+      assert.equal(await frame.getAttribute('allow'),'fullscreen');
+      assert.equal(await frame.getAttribute('allowfullscreen'),'');
       assert.equal(await frame.getAttribute('src'),roots[family]+rel,
         'native '+key+' must be pinned to its single official Lab main SHA');
       await page.frameLocator('#gensCaptureV2Root iframe').locator(selector).waitFor({timeout:60000});

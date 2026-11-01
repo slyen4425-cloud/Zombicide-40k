@@ -80,6 +80,10 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),false);
   assert.equal(await page.locator('#gensCaptureV2Root > header').isVisible(),false);
   assert.equal(await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').isVisible(),true);
+  assert.equal(await iframe.getAttribute('allow'),'fullscreen',
+    'native Combat main must be allowed to request fullscreen');
+  assert.equal(await iframe.getAttribute('allowfullscreen'),'',
+    'fullscreen permission must also cover embedded Android Chromium');
   const fullSize=await page.evaluate(()=>{
     const rect=document.querySelector('#gensCaptureV2Root iframe').getBoundingClientRect();
     return {width:rect.width,height:rect.height,vw:innerWidth,vh:innerHeight};

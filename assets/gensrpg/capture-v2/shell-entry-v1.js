@@ -25,6 +25,30 @@
   function urlFor(kind){
     const info=VIEWS[kind];
     if(!info)throw new RangeError("Unknown Capture native owner");
+    // Dedicated external *preview* only. The real Pages app still requires
+    // same-origin /vendor/ documents and never reads a cross-origin override.
+    // The preview source is derived from official exact-main pins by preview.html.
+    const preview=root.GensCaptureV2PreviewTransportV1;
+    if(root.__GENSRPG_PREVIEW__===true &&
+       root.location.origin==="https://html-preview.github.io" && preview){
+      const canonical=info.family==="combat"
+        ?"slyen4425-cloud/GenSrpg_labo_combat_dynamique"
+        :"slyen4425-cloud/laboratoire_dynamique_exploration-";
+      const nativePrefix=info.family==="combat"?"vendor/combat-lab/":"vendor/exploration-lab/";
+      const officialRoot=new URL(preview[info.family]);
+      const pathPrefix="/"+canonical+"/";
+      const sha=officialRoot.pathname.startsWith(pathPrefix)
+        ?officialRoot.pathname.slice(pathPrefix.length).replace(/\\/$/,""):"";
+      if(officialRoot.origin!=="https://raw.githack.com" ||
+         !/^[a-f0-9]{40}$/.test(sha) ||
+         officialRoot.pathname!==pathPrefix+sha+"/" ||
+         !info.path.startsWith(nativePrefix))
+        throw new Error("External preview must use a validated official Lab main SHA");
+      const url=new URL(info.path.slice(nativePrefix.length),officialRoot);
+      if(url.origin!==officialRoot.origin||!url.pathname.startsWith(officialRoot.pathname))
+        throw new Error("Native preview path escaped its immutable Lab owner");
+      return url;
+    }
     const url=new URL(info.path,base);
     if(url.origin!==root.location.origin||!url.pathname.startsWith(base.pathname+"vendor/"))
       throw new Error("Capture authority must be same-origin and SHA-pinned");

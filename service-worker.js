@@ -1,4 +1,4 @@
-const CACHE_NAME = "gensrpg-cache-16.78.117-capture-v2-main-only";
+const CACHE_NAME = "gensrpg-cache-16.78.118-capture-v2-scoped-cache-cleanup";
 // gensrpg-cache-16.78.114.11-native-ui-authority
 // gensrpg-cache-16.78.114.11-armor-melee-damage
 // gensrpg-cache-16.78.114.10-hit-entry-compositor-walls
@@ -183,7 +183,7 @@ async function officialCaptureImageNetworkFirst(request){
   }
 }
 self.addEventListener("install",event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE_NAME).then(async cache=>{for(const file of CORE_FILES)await cacheFresh(cache,file)}))});
-self.addEventListener("activate",event=>{event.waitUntil((async()=>{const cacheNames=await caches.keys();await Promise.all(cacheNames.filter(name=>name!==CACHE_NAME).map(name=>caches.delete(name)));await self.clients.claim()})())});
+self.addEventListener("activate",event=>{event.waitUntil((async()=>{const cacheNames=await caches.keys();await Promise.all(cacheNames.filter(name=>name.startsWith("gensrpg-cache-")&&name!==CACHE_NAME).map(name=>caches.delete(name)));await self.clients.claim()})())});
 self.addEventListener("message",event=>{if(event.data&&event.data.type==="SKIP_WAITING")self.skipWaiting()});
 // A standalone PWA must check for a newer worker when launched from its icon.
 // This is independent of the browser tab and never clears user storage.

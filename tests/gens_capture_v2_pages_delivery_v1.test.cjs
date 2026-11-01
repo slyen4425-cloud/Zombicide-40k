@@ -32,6 +32,27 @@ test('Capture V2 release uses two exact approved main sources, never a parallel 
  assert.ok(manifest.featuresDeferred.includes('encounters'));
  assert.ok(manifest.featuresDeferred.includes('XP'));
 });
+test('Exploration sees ONE official Combat-main Showcase bundle, never duplicate author rules',()=>{
+ const output='vendor/exploration-lab/combat-preview/data/capture/showcase/encounter-bundle.v1.json';
+ assert.ok(fs.existsSync(path.join(site,output)),
+   'Real 2.5D bootstrap must receive the official Combat main Showcase at its exact native URL');
+ assert.equal(manifest.combatEncounterBundle?.path,output);
+ assert.equal(manifest.combatEncounterBundle?.owner,'combat');
+ assert.equal(manifest.combatEncounterBundle?.sourceSha,pins.combat.sha);
+ const bytes=fs.readFileSync(path.join(site,output));
+ assert.equal(manifest.combatEncounterBundle.sha256,hash(bytes));
+ assert.equal(manifest.combatEncounterBundle.size,bytes.length);
+ const bundle=JSON.parse(bytes.toString('utf8'));
+ assert.equal(bundle.schema,'capture-author-encounter-bundle-v1');
+ assert.equal(bundle.version,1);
+ assert.equal(bundle.authorSha,pins.combat.sha);
+ assert.equal(bundle.engineSha,pins.combat.sha);
+ assert.ok(Array.isArray(bundle.creatureTransfers)&&bundle.creatureTransfers.length>0);
+ assert.ok(Array.isArray(bundle.skillTransfers)&&bundle.skillTransfers.length>0);
+ assert.ok(bundle.creatureTransfers.every(x=>x.schema==='capture-creature-transfer-v1'));
+ assert.ok(bundle.skillTransfers.every(x=>x.schema==='capture-skill-transfer-v1'));
+});
+
 test('both main-native tools retain their ORIGINAL bytes and browser sources',()=>{
  assert.ok(manifest.transport.length>=8,'missing native author/browser files');
  const visited=new Set();

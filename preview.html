@@ -92,7 +92,7 @@ small{display:block;margin-top:10px;opacity:.7}
       // The original Lab pages themselves run inside their own cross-origin
       // iframe; this is a limited preview, not a claim of gameplay integration.
       previewNativeTag='<script>window.GensCaptureV2PreviewTransportV1=Object.freeze('+
-        JSON.stringify(roots)+');<\\/script>';
+        JSON.stringify(roots)+');<\/script>';
     }
     let html=await fetch(source.index,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('index '+r.status);return r.text()});
     const perf='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"><\/script>';

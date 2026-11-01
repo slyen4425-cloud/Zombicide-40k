@@ -76,6 +76,16 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="creature"]').tap();
   const iframe=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
   await iframe.waitFor({state:'visible'});
+  // Native tool fills viewport; hub remains available only after explicit return.
+  assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),false);
+  assert.equal(await page.locator('#gensCaptureV2Root > header').isVisible(),false);
+  assert.equal(await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').isVisible(),true);
+  const fullSize=await page.evaluate(()=>{
+    const rect=document.querySelector('#gensCaptureV2Root iframe').getBoundingClientRect();
+    return {width:rect.width,height:rect.height,vw:innerWidth,vh:innerHeight};
+  });
+  assert.ok(fullSize.width>=fullSize.vw-3,'native Lab must span viewport width');
+  assert.ok(fullSize.height>=fullSize.vh-52,'native Lab must span viewport height, less return bar');
   assert.match(await iframe.getAttribute('src'),/vendor\/combat-lab\/examples\/dom-demo\/capture-editor-v2\.html[?]tab=creature$/);
   const official=page.frameLocator('#gensCaptureV2Root iframe');
   await official.locator('[data-capture-editor-human]').waitFor({timeout:25000});
@@ -112,7 +122,21 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await page.frameLocator('#gensCaptureV2Root iframe').locator('[data-bestiary]').waitFor({timeout:25000});
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').tap();
   await page.frameLocator('#gensCaptureV2Root iframe').locator('canvas#game').waitFor({timeout:25000});
+  // Return from a Lab restores Capture home; second Lab gets full screen too.
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),null);
+  assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
+  assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),true);
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="builder"]').tap();
+  const builderFrame=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
+  await builderFrame.waitFor({state:'visible'});
+  await page.frameLocator('#gensCaptureV2Root iframe').locator('#builder-preview').waitFor({timeout:25000});
+  const builderSize=await builderFrame.boundingBox();
+  assert.ok(builderSize.width>=925 && builderSize.height>=370,
+    'World Builder must fill landscape, never render below eight buttons');
+  assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),false);
   assert.equal(await page.locator('button.gensRootModeCard').count(),4);
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   await page.getByRole('button',{name:'Quitter le mode'}).tap();
   assert.equal(await page.locator('#gensCaptureV2Root').count(),0);
   assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().active),false);

@@ -21,7 +21,7 @@
   if(!shell||!returnShell||!root.GensCaptureV1?.isProfile)
     throw new Error("Clean Capture requires the existing four-mode Shell");
   if(root.GensCaptureV2)throw new Error("Duplicate Capture module authority");
-  let host=null,frame=null,stage=null,notice=null,current=null;
+  let host=null,frame=null,stage=null,notice=null,current=null,nativeTitle=null;
   function urlFor(kind){
     const info=VIEWS[kind];
     if(!info)throw new RangeError("Unknown Capture native owner");
@@ -65,6 +65,7 @@
     frame.src=url.href;
     stage.replaceChildren(frame);
     current=kind;
+    nativeTitle.textContent=info.label;
     notice.textContent=info.label+" · modules officiels des laboratoires";
     host.dataset.view=kind;
     return true;
@@ -74,6 +75,7 @@
     if(frame){frame.src="about:blank";frame.remove();frame=null;}
     stage.replaceChildren();
     current=null;host.dataset.view="home";
+    nativeTitle.textContent="";
     notice.textContent="Socle neuf. L'équipe, les rencontres, l'XP, la capture et les marchands seront raccordés ultérieurement.";
     return true;
   }
@@ -101,8 +103,19 @@
       button.addEventListener("click",()=>open(key));nav.append(button);
     }
     notice=doc.createElement("p");notice.setAttribute("role","status");
+    // Full native tool viewport. The 8-button Capture hub is only the home view.
+    const nativeBar=doc.createElement("div");
+    nativeBar.className="gensCaptureV2NativeBar";
+    const nativeBack=doc.createElement("button");
+    nativeBack.type="button";
+    nativeBack.className="gensCaptureV2NativeBack";
+    nativeBack.textContent="← Monster Capture";
+    nativeBack.addEventListener("click",home);
+    nativeTitle=doc.createElement("span");
+    nativeTitle.className="gensCaptureV2NativeTitle";
+    nativeBar.append(nativeBack,nativeTitle);
     stage=doc.createElement("div");stage.className="gensCaptureV2Stage";
-    host.append(header,nav,notice,stage);
+    host.append(header,nav,notice,nativeBar,stage);
     doc.body.append(host);
     root.gensHideHomeLevels?.();
     home();
@@ -111,7 +124,7 @@
   function stop(){
     if(!host)return false;
     if(frame){frame.src="about:blank";frame.remove();}
-    frame=null;stage=null;notice=null;current=null;
+    frame=null;stage=null;notice=null;nativeTitle=null;current=null;
     host.remove();host=null;
     // Only the already-established Shell returns to the four-mode home.
     root.showGensRootHome?.();

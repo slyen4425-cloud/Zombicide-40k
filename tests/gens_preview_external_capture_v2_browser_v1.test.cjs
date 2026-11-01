@@ -80,8 +80,19 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
         'native '+key+' must be pinned to its single official Lab main SHA');
       await page.frameLocator('#gensCaptureV2Root iframe').locator(selector).waitFor({timeout:60000});
     }
-    await page.locator('#gensCaptureV2Root button').getByText('Accueil Capture',{exact:true}).click();
+    // Phone portrait/landscape: native UI must occupy the full available viewport.
+    assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),false);
+    assert.equal(await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').isVisible(),true);
+    const landscape=await page.locator('#gensCaptureV2Root iframe').boundingBox();
+    assert.ok(landscape.width>=925 && landscape.height>=370,
+      'Lab must fill landscape viewport');
+    await page.setViewportSize({width:412,height:915});
+    const portrait=await page.locator('#gensCaptureV2Root iframe').boundingBox();
+    assert.ok(portrait.width>=407 && portrait.height>=860,
+      'Lab must fill portrait viewport without eight hub controls');
+    await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').click();
     assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
+    assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),true);
     await page.getByRole('button',{name:'Quitter le mode'}).click();
     assert.equal(await page.locator('#gensCaptureV2Root').count(),0);
     console.log(JSON.stringify({scenario:'external pinned SHA Capture V2 Shell preview',

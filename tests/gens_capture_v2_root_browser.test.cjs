@@ -169,6 +169,10 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.ok(png.width>300&&png.height>150&&colors.size>=4&&lit>=8,
     'Capture V2 must render actual, varied terrain pixels in landscape: '+
     JSON.stringify({w:png.width,h:png.height,colors:colors.size,lit,errors:errors.slice(-12)}));
+  console.log('GENSRPG_CAPTURE_V2_NATIVE_MAP_PIXELS',JSON.stringify({
+    width:png.width,height:png.height,distinctColors:colors.size,visibleSamples:lit,
+    source:'official-Exploration-main',combatShowcase:'official-Combat-main'
+  }));
   const builderSize=await builderFrame.boundingBox();
   assert.ok(builderSize.width>=925 && builderSize.height>=422,
     'World Builder must fill landscape, never render below eight buttons');

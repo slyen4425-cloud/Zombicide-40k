@@ -36,3 +36,8 @@ test('PWA activates a new versioned V2 cache while keeping same-origin updates a
  assert.doesNotMatch(sw,/(?:indexedDB\.deleteDatabase|localStorage\.clear|caches\.delete\(CACHE_NAME\))/,
   'PWA update may not erase user saves or its active cache');
 });
+
+test('upgrading GenSrpg PWA deletes only its own versioned caches, preserving unrelated apps on the same origin',()=>{
+ assert.match(sw,/cacheNames[.]filter[(]name=>name[.]startsWith[(]"gensrpg-cache-"[)]&&name!==CACHE_NAME[)]/,
+  'service worker must never evict unrelated same-origin caches');
+});

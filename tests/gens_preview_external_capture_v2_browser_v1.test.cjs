@@ -73,6 +73,9 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
       ['builder','exploration','builder.html','#builder-preview'],
       ['world','exploration','world-assembler.html','#world-area-count']
     ]){
+      if(key!=='creature'){
+        await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').click();
+      }
       await page.locator('#gensCaptureV2Root [data-capture-v2-view="'+key+'"]').click();
       const frame=page.locator('#gensCaptureV2Root iframe');
       await frame.waitFor({state:'visible'});

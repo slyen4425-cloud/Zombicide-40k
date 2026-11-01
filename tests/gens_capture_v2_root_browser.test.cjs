@@ -109,6 +109,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await official.locator('[data-editor-panel="combat"]:visible').waitFor({timeout:3500});
   // All shortcuts use the SAME original editor source; only its native ?tab= changes.
   for(const tab of ['skills','combat','music']){
+    await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
     await page.locator('#gensCaptureV2Root [data-capture-v2-view="'+tab+'"]').tap();
     const native=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
     const expected='vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab='+tab;
@@ -118,8 +119,10 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
     await editor.locator('[data-editor-tab="'+tab+'"][data-active="true"]').waitFor({timeout:25000});
     await editor.locator('[data-editor-panel="'+tab+'"]:visible').waitFor({timeout:25000});
   }
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="bestiary"]').tap();
   await page.frameLocator('#gensCaptureV2Root iframe').locator('[data-bestiary]').waitFor({timeout:25000});
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').tap();
   await page.frameLocator('#gensCaptureV2Root iframe').locator('canvas#game').waitFor({timeout:25000});
   // Return from a Lab restores Capture home; second Lab gets full screen too.

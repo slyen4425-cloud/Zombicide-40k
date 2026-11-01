@@ -18,6 +18,11 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
   const page=await context.newPage();
   page.setDefaultTimeout(45000);
   page.setDefaultNavigationTimeout(90000);
+  const pageErrors=[],failedRequests=[],badResponses=[];
+  page.on('pageerror',error=>pageErrors.push(String(error?.stack||error)));
+  page.on('console',msg=>{if(msg.type()==='error')pageErrors.push('console '+msg.text())});
+  page.on('requestfailed',req=>failedRequests.push({url:req.url(),reason:req.failure()?.errorText}));
+  page.on('response',res=>{if(res.status()>=400)badResponses.push({url:res.url(),status:res.status()})});
   try{
     const response=await page.goto(target,{waitUntil:'domcontentloaded'});
     assert.ok(response?.ok(),'external GitHub preview host must serve a page');
@@ -115,7 +120,7 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
       return last;
     });
     assert.ok(paint?.moduleReady&&paint.uniqueColors>=4&&paint.coloredSamples>=8,
-      'REAL sculpt scene must draw nonblack pixels: '+JSON.stringify(paint));
+      'REAL sculpt scene must draw nonblack pixels: '+JSON.stringify({paint,pageErrors:pageErrors.slice(-18),failedRequests:failedRequests.slice(-24),badResponses:badResponses.slice(-24)}));
     // Phone portrait/landscape: native UI must occupy the full available viewport.
     assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),false);
     assert.equal(await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').isVisible(),true);

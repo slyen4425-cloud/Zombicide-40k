@@ -87,6 +87,7 @@ test('an already installed Capture V2 PWA upgrades without deleting saved data o
   },otherKey);
   assert.ok(before.includes(oldKey),'previous SW must have a distinct installed cache');
   assert.ok(before.includes(otherKey),'independent same-origin cache seeded for regression');
+  await page.evaluate(()=>{window.__gensCiOldWorker=navigator.serviceWorker.controller;window.__gensCiControllerChanges=0;navigator.serviceWorker.addEventListener('controllerchange',()=>{window.__gensCiControllerChanges++});});
   revision='new';
   await page.evaluate(async()=>{
    const registration=await navigator.serviceWorker.getRegistration('/');
@@ -95,8 +96,10 @@ test('an already installed Capture V2 PWA upgrades without deleting saved data o
   });
   await page.waitForFunction(async key=>(await caches.keys()).includes(key),newKey,
    {timeout:70000});
+  const keysAfterNewInstall=await page.evaluate(()=>caches.keys());
   await page.waitForFunction(async key=>!(await caches.keys()).includes(key),oldKey,
    {timeout:70000});
+  const keysAfterOldRetirement=await page.evaluate(()=>caches.keys());
   const actual=await page.evaluate(async key=>{
    const keys=await caches.keys();
    const foreign=await caches.open(key);
@@ -110,11 +113,19 @@ test('an already installed Capture V2 PWA upgrades without deleting saved data o
     r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);
    });
    db.close();
+   const registration=await navigator.serviceWorker.getRegistration('/');
    return {keys,foreign:saved?await saved.text():null,
-    profile:stored,local:localStorage.getItem('gensrpg-ci-protected-save')};
+    profile:stored,local:localStorage.getItem('gensrpg-ci-protected-save'),
+    workerState:registration?.active?.state,
+    controllerIsOld:navigator.serviceWorker.controller===window.__gensCiOldWorker,
+    activeIsOld:registration?.active===window.__gensCiOldWorker,
+    controllerChanges:window.__gensCiControllerChanges};
   },otherKey);
   assert.ok(actual.keys.includes(newKey),'new SW cache activated');
-  assert.ok(!actual.keys.includes(oldKey),'old GenSrpg SW cache retired');
+  assert.ok(!actual.keys.includes(oldKey),
+   'old GenSrpg SW cache retired; upgrade diagnostics='+JSON.stringify({
+    keysAfterNewInstall,keysAfterOldRetirement,actual
+   }));
   assert.equal(actual.foreign,'preserve-other-owner','foreign CacheStorage owner must survive');
   assert.deepEqual(actual.profile,{hero:'unchanged',level:3},'IndexedDB saved profiles unchanged');
   assert.equal(actual.local,'profile-kept','localStorage saved profile unchanged');

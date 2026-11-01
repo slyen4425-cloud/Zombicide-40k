@@ -62,7 +62,7 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
     assert.equal(roots.combat,
       'https://raw.githack.com/slyen4425-cloud/GenSrpg_labo_combat_dynamique/81ad362a401b7b2eb9faa811528aced9f2d6384a/');
     assert.equal(roots.exploration,
-      'https://raw.githack.com/slyen4425-cloud/laboratoire_dynamique_exploration-/8dc6f23792cbad9d4ac65bc3825c60de0ffcd32c/');
+      'https://raw.githack.com/slyen4425-cloud/laboratoire_dynamique_exploration-/46042ccaa7debd28b7d85fd3c85bb4d881eee7c5/');
     for(const [key,family,rel,selector] of [
       ['creature','combat','examples/dom-demo/capture-editor-v2.html?tab=creature','[data-capture-editor-human]'],
       ['skills','combat','examples/dom-demo/capture-editor-v2.html?tab=skills','[data-editor-panel="skills"]'],

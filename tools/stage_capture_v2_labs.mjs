@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import {tmpdir} from 'node:os';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const [combatArg,explorationArg,siteArg]=process.argv.slice(2);
@@ -68,6 +69,40 @@ for(const [name,folder] of [['combat',combat],['exploration',exploration]]){
   });
  }
 }
+// The native Exploration source reads its Combat Showcase from a relative
+// "combat-preview" URL. Populate that transport using Exploration's own build
+// adapter, NEVER from historical GenSrpg catalogs or a second runtime owner.
+// A short-lived worktree is the SAME verified Combat main SHA as combatArg.
+const showcaseScript=path.join(exploration,'scripts/stage-capture-author-showcase.mjs');
+if(!fs.existsSync(showcaseScript))throw Error('Official Exploration Showcase stage script unavailable');
+const temp=fs.mkdtempSync(path.join(tmpdir(),'gensrpg-official-combat-preview-'));
+let attached=false,showcaseBundle;
+try{
+ execFileSync('git',['-C',combat,'worktree','add','--detach',temp,pins.combat.sha],{stdio:'pipe'});
+ attached=true;
+ const worktreeSha=head(temp);
+ if(worktreeSha!==pins.combat.sha)throw Error('Temporary author transport diverged from Combat main');
+ const {stageCaptureAuthorShowcaseV1}=await import(pathToFileURL(showcaseScript).href);
+ const proof=await stageCaptureAuthorShowcaseV1({authorRoot:combat,combatRoot:temp});
+ if(proof.author?.commit!==pins.combat.sha||proof.engine?.commit!==pins.combat.sha)
+  throw Error('Official Combat author data SHA mismatch');
+ const local=path.join(temp,'data/capture/showcase/encounter-bundle.v1.json');
+ const bytes=fs.readFileSync(local);
+ const bundle=JSON.parse(bytes.toString('utf8'));
+ if(bundle.schema!=='capture-author-encounter-bundle-v1'||bundle.version!==1||
+    bundle.authorSha!==pins.combat.sha||bundle.engineSha!==pins.combat.sha||
+    !bundle.creatureTransfers?.length||!bundle.skillTransfers?.length)
+  throw Error('Official Combat Showcase derived bundle invalid');
+ const rel='combat-preview/data/capture/showcase/encounter-bundle.v1.json';
+ const dest=path.join(explorationOut,rel);
+ fs.mkdirSync(path.dirname(dest),{recursive:true});
+ fs.writeFileSync(dest,bytes);
+ showcaseBundle={owner:'combat',path:pins.exploration.path+rel,
+   sourceSha:pins.combat.sha,size:bytes.length,sha256:hash(bytes)};
+}finally{
+ if(attached)execFileSync('git',['-C',combat,'worktree','remove','--force',temp],{stdio:'pipe'});
+ fs.rmSync(temp,{recursive:true,force:true});
+}
 const originalHtml=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const liveHtml=fs.readFileSync(path.join(site,'index.html'),'utf8');
 for(const [name,html] of [['source',originalHtml],['site',liveHtml]]){
@@ -87,6 +122,7 @@ const manifest={
  combat:{repository:pins.combat.repository,sha:pins.combat.sha,ref:'main'},
  exploration:{repository:pins.exploration.repository,sha:pins.exploration.sha,ref:'main'},
  legacyCaptureRuntime:false,
+ combatEncounterBundle:showcaseBundle,
  featuresDeferred:pins.featuresDeferred,
  transport
 };

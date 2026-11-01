@@ -74,6 +74,7 @@ jobs:
             builder.html
             world-assembler.html
             sculpt-lab.html
+            scripts
       - name: Assemble exact Lab source files and refuse any historical Capture payload
         env:
           CAPTURE_V2_SITE: ${{ github.workspace }}/_site

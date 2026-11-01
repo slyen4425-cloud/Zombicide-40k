@@ -307,6 +307,7 @@ jobs:
             builder.html
             world-assembler.html
             sculpt-lab.html
+            scripts
             manifest.webmanifest
 
       - name: Assembler les deux laboratoires main, sans ancien paquet Capture

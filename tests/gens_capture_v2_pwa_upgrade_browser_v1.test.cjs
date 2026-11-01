@@ -50,6 +50,17 @@ const server=http.createServer(async(req,res)=>{
 });
 const eventually=async(page,predicate,timeout=70000)=>
  page.waitForFunction(predicate,null,{timeout});
+// Wait on settled CacheStorage keys from Node: an async waitForFunction
+// callback can return a truthy Promise before worker activation finishes.
+const waitForCacheState=async(page,accept,label,timeout=70000)=>{
+ const start=Date.now();let keys=[];
+ for(;;){
+  keys=await page.evaluate(()=>caches.keys());
+  if(accept(keys))return keys;
+  if(Date.now()-start>timeout)throw new Error(label+'; cache keys='+JSON.stringify(keys));
+  await new Promise(resolve=>setTimeout(resolve,150));
+ }
+};
 test('an already installed Capture V2 PWA upgrades without deleting saved data or unrelated caches',
  {timeout:195000},async()=>{
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
@@ -94,12 +105,11 @@ test('an already installed Capture V2 PWA upgrades without deleting saved data o
    if(!registration)throw new Error('Installed PWA SW registration missing');
    await registration.update();
   });
-  await page.waitForFunction(async key=>(await caches.keys()).includes(key),newKey,
-   {timeout:70000});
-  const keysAfterNewInstall=await page.evaluate(()=>caches.keys());
-  await page.waitForFunction(async key=>!(await caches.keys()).includes(key),oldKey,
-   {timeout:70000});
-  const keysAfterOldRetirement=await page.evaluate(()=>caches.keys());
+  // A cache created during INSTALL is not proof that the worker is ACTIVE.
+  await page.waitForFunction(()=>!!navigator.serviceWorker.controller&&
+    navigator.serviceWorker.controller!==window.__gensCiOldWorker,null,{timeout:70000});
+  await waitForCacheState(page,keys=>keys.includes(newKey)&&!keys.includes(oldKey),
+   'new PWA worker must finish activation and retire the old GenSrpg cache');
   const actual=await page.evaluate(async key=>{
    const keys=await caches.keys();
    const foreign=await caches.open(key);
@@ -122,10 +132,10 @@ test('an already installed Capture V2 PWA upgrades without deleting saved data o
     controllerChanges:window.__gensCiControllerChanges};
   },otherKey);
   assert.ok(actual.keys.includes(newKey),'new SW cache activated');
-  assert.ok(!actual.keys.includes(oldKey),
-   'old GenSrpg SW cache retired; upgrade diagnostics='+JSON.stringify({
-    keysAfterNewInstall,keysAfterOldRetirement,actual
-   }));
+  assert.ok(!actual.keys.includes(oldKey),'old GenSrpg SW cache retired');
+  assert.equal(actual.controllerIsOld,false,'replacement PWA worker controls the page');
+  assert.equal(actual.activeIsOld,false,'replacement PWA worker is the active registration');
+  assert.ok(actual.controllerChanges>=1,'browser emitted a real controllerchange');
   assert.equal(actual.foreign,'preserve-other-owner','foreign CacheStorage owner must survive');
   assert.deepEqual(actual.profile,{hero:'unchanged',level:3},'IndexedDB saved profiles unchanged');
   assert.equal(actual.local,'profile-kept','localStorage saved profile unchanged');

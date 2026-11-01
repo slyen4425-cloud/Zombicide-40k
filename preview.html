@@ -71,7 +71,7 @@ small{display:block;margin-top:10px;opacity:.7}
     // Only this external GitHub SHA preview needs alternate public transport.
     // Read the SINGLE canonical Lab pins from the same immutable GenSrpg commit;
     // never select moving branches, gh-pages or duplicate upstream assets.
-    let previewNativeTag='';
+    let nativePreviewRoots=null;
     if(source.external){
       const pinUrl=new URL('assets/gensrpg/capture-v2/source-pins-v1.json',source.base);
       const pins=await fetch(pinUrl.href,{cache:'no-store'}).then(r=>{
@@ -91,8 +91,7 @@ small{display:block;margin-top:10px;opacity:.7}
       }
       // The original Lab pages themselves run inside their own cross-origin
       // iframe; this is a limited preview, not a claim of gameplay integration.
-      previewNativeTag='<script>window.GensCaptureV2PreviewTransportV1=Object.freeze('+
-        JSON.stringify(roots)+');<\/script>';
+      nativePreviewRoots=Object.freeze(roots);
     }
     let html=await fetch(source.index,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('index '+r.status);return r.text()});
     const perf='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"><\/script>';
@@ -100,7 +99,7 @@ small{display:block;margin-top:10px;opacity:.7}
     html=html.split(perf).join('');
     html=html.split(finalShell).join('');
     const base=source.base;
-    html=html.replace(/<head([^>]*)>/i,(m,a)=>`<head${a}><base href="${base}">${previewGuard}${previewNativeTag}`);
+    html=html.replace(/<head([^>]*)>/i,(m,a)=>`<head${a}><base href="${base}">${previewGuard}`);
     if(!/<\/body>/i.test(html))throw new Error('</body> absent');
     // Preview-only readiness gate: prevent a game switch/reload from cancelling
     // the external auxiliary script graph before it is fully installed.
@@ -117,6 +116,9 @@ small{display:block;margin-top:10px;opacity:.7}
       await new Promise(resolve=>document.addEventListener("DOMContentLoaded",resolve,{once:true}));
     }
     if(source.external){
+      // document.open() replaces the DOM; expose the single validated native
+      // transport on Window AFTER document.close(), before enabling interactions.
+      window.GensCaptureV2PreviewTransportV1=nativePreviewRoots;
       for(const tag of tags){
         const match=tag.match(/src="([^"]+)"/);
         if(!match)throw new Error("Script de preview invalide");

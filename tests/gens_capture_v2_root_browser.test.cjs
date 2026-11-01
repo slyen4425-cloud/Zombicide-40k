@@ -7,6 +7,7 @@ const http=require('node:http');
 const fs=require('node:fs/promises');
 const path=require('node:path');
 const {chromium}=require('playwright');
+const {PNG}=require('pngjs');
 const root=path.resolve(__dirname,'..');
 const vendor=path.resolve(process.env.CAPTURE_V2_SITE||'_site');
 const mime={'.html':'text/html;charset=utf-8','.js':'text/javascript;charset=utf-8',
@@ -31,7 +32,7 @@ const server=http.createServer(async(req,res)=>{
  }catch(e){res.writeHead(500).end(String(e));}
 });
 test('real four-mode root enters the NEW Capture Shell and opens original pinned Labs, no old Hub',
- {timeout:115000},async()=>{
+ {timeout:185000},async()=>{
  await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
  let browser,context;
  const errors=[];
@@ -138,6 +139,36 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   const builderFrame=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
   await builderFrame.waitFor({state:'visible'});
   await page.frameLocator('#gensCaptureV2Root iframe').locator('#sculpt-canvas').waitFor({timeout:25000});
+  // Browser-gate: the real build serves Combat+Exploration at one origin.
+  // A present canvas DOM element is insufficient: original 2.5D MUST paint
+  // terrain. Canvas readback is forbidden when the native art is CORS-tainted,
+  // so inspect the actual Chromium compositor screenshot instead.
+  const nativeCanvas=page.frameLocator('#gensCaptureV2Root iframe').locator('#sculpt-canvas');
+  const boot=await nativeCanvas.evaluate(async canvas=>{
+    const sleep=ms=>new Promise(ok=>setTimeout(ok,ms));
+    for(let n=0;n<75;n++){
+      const ready=typeof window.__sculptLabProbe==='function';
+      if(ready&&canvas.width>300&&canvas.height>150)return {ready,w:canvas.width,h:canvas.height};
+      await sleep(300);
+    }
+    return {ready:typeof window.__sculptLabProbe==='function',w:canvas.width,h:canvas.height};
+  });
+  assert.ok(boot.ready&&boot.w>300&&boot.h>150,
+    'Capture V2 same-origin native 2.5D never finished map bootstrap: '+
+    JSON.stringify({boot,pageErrors:errors.slice(-12)}));
+  await page.waitForTimeout(300);
+  const png=PNG.sync.read(await nativeCanvas.screenshot({animations:'disabled',timeout:45000}));
+  const colors=new Set();let lit=0;
+  for(let yi=1;yi<=11;yi++)for(let xi=1;xi<=11;xi++){
+    const x=Math.min(png.width-1,Math.floor(png.width*xi/12));
+    const y=Math.min(png.height-1,Math.floor(png.height*yi/12));
+    const k=(y*png.width+x)*4;
+    const r=png.data[k],g=png.data[k+1],b=png.data[k+2];
+    colors.add(r+','+g+','+b);if(r+g+b>80)lit++;
+  }
+  assert.ok(png.width>300&&png.height>150&&colors.size>=4&&lit>=8,
+    'Capture V2 must render actual, varied terrain pixels in landscape: '+
+    JSON.stringify({w:png.width,h:png.height,colors:colors.size,lit,errors:errors.slice(-12)}));
   const builderSize=await builderFrame.boundingBox();
   assert.ok(builderSize.width>=925 && builderSize.height>=422,
     'World Builder must fill landscape, never render below eight buttons');

@@ -89,7 +89,7 @@ jobs:
           node --test tests/gens_capture_v2_pages_delivery_v1.test.cjs
       - name: Install real Chromium for the actual four-mode app, landscape touch
         run: |
-          npm install --no-save --no-package-lock playwright@1.57.0
+          npm install --no-save --no-package-lock playwright@1.57.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
       - name: Test real GenSrpg root, native Combat and Exploration, without old Capture
         env:

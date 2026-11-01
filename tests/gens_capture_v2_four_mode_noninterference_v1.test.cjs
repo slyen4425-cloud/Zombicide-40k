@@ -79,7 +79,11 @@ test('real Shell: Survie, Dungeon, PvP and clean Capture remain isolated through
     await frame.waitFor({state:'attached'});
     assert.match(await frame.getAttribute('src'),
       new RegExp('vendor/combat-lab/examples/dom-demo/capture-editor-v2[.]html'));
-    await page.getByRole('button',{name:'Accueil Capture'}).tap();
+    assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),false,
+      'the old hub must not consume a native tool viewport');
+    assert.equal(await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').isVisible(),true);
+    await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+    assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),true);
     assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0,'native iframe disposed');
     await page.getByRole('button',{name:'Quitter le mode'}).tap();
     await page.locator('#gensRootHome').waitFor({state:'visible'});

@@ -1171,7 +1171,7 @@ jobs:
 
       - name: Installer Playwright pour la sentinelle navigateur
         run: |
-          npm install --no-save playwright@1.55.0
+          npm install --no-save playwright@1.55.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
 
       - name: Protéger le vrai Shell Capture V2 et les sauvegardes étrangères sur mobile

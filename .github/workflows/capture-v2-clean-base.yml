@@ -98,7 +98,7 @@ jobs:
           test ! -e _site/assets/gensrpg/capture
       - name: Install browser test dependencies
         run: |
-          npm install --no-save --no-package-lock playwright@1.57.0
+          npm install --no-save --no-package-lock playwright@1.57.0 pngjs@7.0.0
           npx playwright install chromium
       - name: Run real four-mode GenSrpg root and Capture V2-to-Dungeon Builder in Chromium
         run: |

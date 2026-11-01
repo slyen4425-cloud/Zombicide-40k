@@ -5,6 +5,7 @@
 // This verifies native pages, not cross-laboratory gameplay or app persistence.
 const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
+const {PNG}=require('pngjs');
 const repo=process.env.GITHUB_REPOSITORY||'slyen4425-cloud/Zombicide-40k';
 const sha=process.env.GITHUB_SHA;
 assert.match(String(sha||''),/^[a-f0-9]{40}$/,'current external preview SHA must be immutable');
@@ -96,31 +97,45 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
     await page.locator('#gensCaptureV2Root [data-capture-v2-view="builder"]').click();
     const sculpt=page.frameLocator('#gensCaptureV2Root iframe').locator('#sculpt-canvas');
     await sculpt.waitFor({state:'visible',timeout:30000});
-    const paint=await sculpt.evaluate(async canvas=>{
+    // The official sculpt renderer draws real cross-origin art. A legitimately
+    // tainted canvas cannot be inspected with getImageData; that is a browser
+    // security feature, not a failed terrain draw. Screenshot the actual
+    // composited canvas pixels, never a synthetic tile or a CSS placeholder.
+    const initialized=await sculpt.evaluate(async canvas=>{
       const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-      let last=null;
-      for(let attempt=0;attempt<35;attempt++){
-        try{
-          const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
-          if(ctx&&w>=80&&h>=80){
-            const colors=new Set();let colored=0;
-            for(let yi=1;yi<=11;yi++)for(let xi=1;xi<=11;xi++){
-              const x=Math.min(w-1,Math.floor(w*xi/12)),y=Math.min(h-1,Math.floor(h*yi/12));
-              const d=ctx.getImageData(x,y,1,1).data;
-              colors.add(d[0]+','+d[1]+','+d[2]);
-              if(d[0]+d[1]+d[2]>80)colored++;
-            }
-            last={width:w,height:h,uniqueColors:colors.size,coloredSamples:colored,
-              moduleReady:typeof window.__sculptExplorationSoundProbe==='function'};
-            if(last.moduleReady&&colors.size>=4&&colored>=8)return last;
-          }
-        }catch(e){last={error:String(e)}}
-        await sleep(500);
+      for(let attempt=0;attempt<70;attempt++){
+        const ready=typeof window.__sculptLabProbe==='function';
+        const result={ready,width:canvas.width,height:canvas.height,
+          cssWidth:canvas.getBoundingClientRect().width,
+          cssHeight:canvas.getBoundingClientRect().height};
+        if(result.ready&&result.width>300&&result.height>150&&
+            result.cssWidth>300&&result.cssHeight>150)return result;
+        await sleep(400);
       }
-      return last;
+      return {ready:typeof window.__sculptLabProbe==='function',
+        width:canvas.width,height:canvas.height};
     });
-    assert.ok(paint?.moduleReady&&paint.uniqueColors>=4&&paint.coloredSamples>=8,
-      'REAL sculpt scene must draw nonblack pixels: '+JSON.stringify({paint,pageErrors:pageErrors.slice(-18),failedRequests:failedRequests.slice(-24),badResponses:badResponses.slice(-24)}));
+    assert.ok(initialized?.ready&&initialized.width>300&&initialized.height>150,
+      'Real 2.5D module must complete init before pixel proof: '+
+      JSON.stringify({initialized,pageErrors:pageErrors.slice(-12),badResponses:badResponses.slice(-12)}));
+    await page.waitForTimeout(350);
+    const screenshot=PNG.sync.read(await sculpt.screenshot({timeout:45000,animations:'disabled'}));
+    const colors=new Set();let lit=0;
+    for(let yi=1;yi<=11;yi++)for(let xi=1;xi<=11;xi++){
+      const x=Math.min(screenshot.width-1,Math.floor(screenshot.width*xi/12));
+      const y=Math.min(screenshot.height-1,Math.floor(screenshot.height*yi/12));
+      const k=(y*screenshot.width+x)*4;
+      const red=screenshot.data[k],green=screenshot.data[k+1],blue=screenshot.data[k+2];
+      colors.add(red+','+green+','+blue);
+      if(red+green+blue>80)lit++;
+    }
+    const paint={width:screenshot.width,height:screenshot.height,
+      uniqueColors:colors.size,coloredSamples:lit,initialized};
+    assert.ok(screenshot.width>300&&screenshot.height>150&&
+      colors.size>=4&&lit>=8,
+      'REAL sculpt scene screenshot must show painted terrain pixels: '+
+      JSON.stringify({paint,pageErrors:pageErrors.slice(-16),
+        failedRequests:failedRequests.slice(-12),badResponses:badResponses.slice(-16)}));
     // Phone portrait/landscape: native UI must occupy the full available viewport.
     assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),false);
     assert.equal(await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').isVisible(),true);

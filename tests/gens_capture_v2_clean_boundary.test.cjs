@@ -74,6 +74,12 @@ test('new Capture shell delegates to two pinned mains; never loads the historic 
  assert.equal(p.legacyCaptureRuntime,false);
  assert.match(entry,/shell\.register\("capture",start\)/);
  assert.match(entry,/vendor\/exploration-lab\/index\.html/);
+ // Authoritative 2.5D World Builder is sculpt-lab.html. The old builder.html
+ // is explicitly the 2D legacy editor and must not be the Capture V2 entry.
+ assert.match(entry,/vendor\/exploration-lab\/sculpt-lab\.html/,
+   'Capture must route to the true native 2.5D sculpt Lab');
+ assert.doesNotMatch(entry,/path:\"vendor\/exploration-lab\/builder\.html\"/,
+   'Do not accidentally expose the obsolete 2D Builder as the 2.5D experience');
  assert.match(entry,/vendor\/combat-lab\/examples\/dom-demo\/capture-editor-v2\.html/);
  assert.match(entry,/vendor\/combat-lab\/examples\/dom-demo\/bestiary\.html/);
  assert.doesNotMatch(entry+identity, /captureStartBattleAutomatic|monster-capture-creatures|captureWorldState|gensrpg_capture_world/);

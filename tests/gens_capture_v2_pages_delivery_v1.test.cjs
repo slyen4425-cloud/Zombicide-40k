@@ -53,6 +53,8 @@ test('both main-native tools retain their ORIGINAL bytes and browser sources',()
   'vendor/combat-lab/src/ui/capture-combat-preview-v1.js',
   'vendor/exploration-lab/index.html',
   'vendor/exploration-lab/builder.html',
+  'vendor/exploration-lab/sculpt-lab.html',
+  'vendor/exploration-lab/src/sculpt-lab-main.js',
   'vendor/exploration-lab/world-assembler.html',
   'vendor/exploration-lab/src/main.js'
  ])assert.ok(visited.has(rel),'missing native contract: '+rel);

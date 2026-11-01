@@ -4,8 +4,8 @@
 (function(root){
   const base=new URL("./",root.document.baseURI);
   const VIEWS=Object.freeze({
-    explore:{label:"Exploration 2.5D",path:"vendor/exploration-lab/index.html",family:"exploration"},
-    builder:{label:"World Builder",path:"vendor/exploration-lab/builder.html",family:"exploration"},
+    explore:{label:"Exploration 2.5D · Tester",path:"vendor/exploration-lab/sculpt-lab.html",family:"exploration"},
+    builder:{label:"Éditeur 2.5D",path:"vendor/exploration-lab/sculpt-lab.html",family:"exploration"},
     world:{label:"Carte du monde",path:"vendor/exploration-lab/world-assembler.html",family:"exploration"},
     // Four native entry points, ONE actual Lab Combat editor. Combat main
     // (SHA-pinned PR #156) owns ?tab= routing, native state and all rules.
@@ -71,7 +71,7 @@
     stage.replaceChildren(frame);
     current=kind;
     nativeTitle.textContent=info.label;
-    notice.textContent=info.label+" · modules officiels des laboratoires";
+    notice.textContent=info.label+" · module officiel du laboratoire";
     host.dataset.view=kind;
     return true;
   }

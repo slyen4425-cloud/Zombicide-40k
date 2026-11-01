@@ -62,15 +62,15 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
     assert.equal(roots.combat,
       'https://raw.githack.com/slyen4425-cloud/GenSrpg_labo_combat_dynamique/81ad362a401b7b2eb9faa811528aced9f2d6384a/');
     assert.equal(roots.exploration,
-      'https://raw.githack.com/slyen4425-cloud/laboratoire_dynamique_exploration-/46042ccaa7debd28b7d85fd3c85bb4d881eee7c5/');
+      'https://raw.githack.com/slyen4425-cloud/laboratoire_dynamique_exploration-/ba0701224b764f4c60d4294c9729a49ade5869ad/');
     for(const [key,family,rel,selector] of [
       ['creature','combat','examples/dom-demo/capture-editor-v2.html?tab=creature','[data-capture-editor-human]'],
       ['skills','combat','examples/dom-demo/capture-editor-v2.html?tab=skills','[data-editor-panel="skills"]'],
       ['combat','combat','examples/dom-demo/capture-editor-v2.html?tab=combat','[data-editor-panel="combat"]'],
       ['music','combat','examples/dom-demo/capture-editor-v2.html?tab=music','[data-editor-panel="music"]'],
       ['bestiary','combat','examples/dom-demo/bestiary.html','[data-bestiary]'],
-      ['explore','exploration','index.html','canvas#game'],
-      ['builder','exploration','builder.html','#builder-preview'],
+      ['explore','exploration','sculpt-lab.html','#sculpt-canvas'],
+      ['builder','exploration','sculpt-lab.html','#sculpt-canvas'],
       ['world','exploration','world-assembler.html','#world-area-count']
     ]){
       if(key!=='creature'){
@@ -85,15 +85,46 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
         'native '+key+' must be pinned to its single official Lab main SHA');
       await page.frameLocator('#gensCaptureV2Root iframe').locator(selector).waitFor({timeout:60000});
     }
+    // A static canvas tag is not a rendered map. This test must refuse the
+    // historic 2D black-screen preview with scripts that never initialized.
+    await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').click();
+    await page.locator('#gensCaptureV2Root [data-capture-v2-view="builder"]').click();
+    const sculpt=page.frameLocator('#gensCaptureV2Root iframe').locator('#sculpt-canvas');
+    await sculpt.waitFor({state:'visible',timeout:30000});
+    const paint=await sculpt.evaluate(async canvas=>{
+      const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+      let last=null;
+      for(let attempt=0;attempt<35;attempt++){
+        try{
+          const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
+          if(ctx&&w>=80&&h>=80){
+            const colors=new Set();let colored=0;
+            for(let yi=1;yi<=11;yi++)for(let xi=1;xi<=11;xi++){
+              const x=Math.min(w-1,Math.floor(w*xi/12)),y=Math.min(h-1,Math.floor(h*yi/12));
+              const d=ctx.getImageData(x,y,1,1).data;
+              colors.add(d[0]+','+d[1]+','+d[2]);
+              if(d[0]+d[1]+d[2]>80)colored++;
+            }
+            last={width:w,height:h,uniqueColors:colors.size,coloredSamples:colored,
+              moduleReady:typeof window.__sculptExplorationSoundProbe==='function'};
+            if(last.moduleReady&&colors.size>=4&&colored>=8)return last;
+          }
+        }catch(e){last={error:String(e)}}
+        await sleep(500);
+      }
+      return last;
+    });
+    assert.ok(paint?.moduleReady&&paint.uniqueColors>=4&&paint.coloredSamples>=8,
+      'REAL sculpt scene must draw nonblack pixels: '+JSON.stringify(paint));
     // Phone portrait/landscape: native UI must occupy the full available viewport.
     assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),false);
     assert.equal(await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').isVisible(),true);
     const landscape=await page.locator('#gensCaptureV2Root iframe').boundingBox();
-    assert.ok(landscape.width>=925 && landscape.height>=370,
+    assert.ok(landscape.width>=925 && landscape.height>=422,
       'Lab must fill landscape viewport');
     await page.setViewportSize({width:412,height:915});
     const portrait=await page.locator('#gensCaptureV2Root iframe').boundingBox();
-    assert.ok(portrait.width>=407 && portrait.height>=860,
+    assert.ok(portrait.width>=407 && portrait.height>=903,
       'Lab must fill portrait viewport without eight hub controls');
     await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').click();
     assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);

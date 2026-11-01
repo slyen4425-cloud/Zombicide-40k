@@ -112,6 +112,8 @@ test('packaged native Exploration and Combat are present when Pages build is sup
    'vendor/exploration-lab/index.html',
    'vendor/exploration-lab/src/main.js',
    'vendor/exploration-lab/builder.html',
+   'vendor/exploration-lab/sculpt-lab.html',
+   'vendor/exploration-lab/src/sculpt-lab-main.js',
    'vendor/combat-lab/examples/dom-demo/capture-editor-v2.html',
    'vendor/combat-lab/examples/dom-demo/bestiary.html'
  ])assert.ok(fs.statSync(path.join(site,file)).size>0,file);

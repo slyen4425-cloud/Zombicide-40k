@@ -1,0 +1,134 @@
+'use strict';
+// C2 acceptance: actual installed service worker update in a same-origin
+// Chromium PWA context, preserving localStorage, IndexedDB and unrelated caches.
+// The old SW fixture differs from the approved source in CACHE_NAME only.
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs/promises');
+const fsSync=require('node:fs');
+const http=require('node:http');
+const path=require('node:path');
+const {chromium}=require('playwright');
+const root=path.resolve(__dirname,'..');
+const site=path.resolve(process.env.CAPTURE_V2_SITE||'_site');
+const swSource=fsSync.readFileSync(path.join(root,'service-worker.js'),'utf8');
+const match=swSource.match(/const CACHE_NAME\s*=\s*"([^"]+)";/);
+assert.ok(match,'real versioned SW cache owner must exist');
+const newKey=match[1];
+const oldKey='gensrpg-cache-16.78.116-ci-previous-install';
+const otherKey='unrelated-tool-cache-ci-preserve';
+assert.notEqual(newKey,oldKey,'upgraded cache revision must differ');
+let revision='old';
+const mime={'.html':'text/html;charset=utf-8','.js':'text/javascript;charset=utf-8',
+ '.css':'text/css;charset=utf-8','.json':'application/json;charset=utf-8',
+ '.webmanifest':'application/manifest+json','.png':'image/png',
+ '.jpg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml'};
+const server=http.createServer(async(req,res)=>{
+ try{
+  const url=new URL(req.url,'http://127.0.0.1');
+  if(url.pathname==='/__ci_pwa_probe'){
+   res.writeHead(200,{'content-type':'text/html','cache-control':'no-store'})
+     .end('<!doctype html><title>PWA update probe</title><p>Same-origin PWA probe</p>');
+   return;
+  }
+  if(url.pathname==='/service-worker.js'){
+   const body=revision==='old'
+     ?swSource.replace(/const CACHE_NAME\s*=\s*"[^"]+";/,'const CACHE_NAME = "'+oldKey+'";')
+     :swSource;
+   res.writeHead(200,{'content-type':'text/javascript;charset=utf-8','cache-control':'no-store'})
+     .end(body);
+   return;
+  }
+  const rel=decodeURIComponent(url.pathname).replace(/^\/+/,'')||'index.html';
+  if(rel.split('/').includes('..')){res.writeHead(403).end();return;}
+  const file=path.resolve(site,rel);
+  if(!file.startsWith(site+path.sep)){res.writeHead(403).end();return;}
+  const data=await fs.readFile(file);
+  res.writeHead(200,{'content-type':mime[path.extname(file)]||'application/octet-stream',
+   'cache-control':'no-store'}).end(data);
+ }catch(error){res.writeHead(404).end('Missing actual Pages asset');}
+});
+const eventually=async(page,predicate,timeout=70000)=>
+ page.waitForFunction(predicate,null,{timeout});
+test('an already installed Capture V2 PWA upgrades without deleting saved data or unrelated caches',
+ {timeout:195000},async()=>{
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ let browser,context;
+ try{
+  browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
+  context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true,
+   locale:'fr-FR',serviceWorkers:'allow'});
+  const page=await context.newPage();
+  const url='http://127.0.0.1:'+server.address().port;
+  await page.goto(url+'/__ci_pwa_probe',{waitUntil:'domcontentloaded'});
+  const initial=await page.evaluate(async()=>{
+   const registration=await navigator.serviceWorker.register('/service-worker.js',{scope:'/'});
+   await navigator.serviceWorker.ready;
+   return !!registration.active;
+  });
+  assert.equal(initial,true,'real previous PWA SW must activate');
+  await eventually(page,()=>!!navigator.serviceWorker.controller);
+  const before=await page.evaluate(async key=>{
+   localStorage.setItem('gensrpg-ci-protected-save','profile-kept');
+   const db=await new Promise((resolve,reject)=>{
+    const r=indexedDB.open('gensrpg-ci-saved-profile',1);
+    r.onupgradeneeded=()=>r.result.createObjectStore('profiles');
+    r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);
+   });
+   await new Promise((resolve,reject)=>{
+    const tx=db.transaction('profiles','readwrite');
+    tx.objectStore('profiles').put({hero:'unchanged',level:3},'test');
+    tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);
+   });
+   db.close();
+   const foreign=await caches.open(key);
+   await foreign.put('/unrelated-app-page',new Response('preserve-other-owner'));
+   return caches.keys();
+  },otherKey);
+  assert.ok(before.includes(oldKey),'previous SW must have a distinct installed cache');
+  assert.ok(before.includes(otherKey),'independent same-origin cache seeded for regression');
+  revision='new';
+  await page.evaluate(async()=>{
+   const registration=await navigator.serviceWorker.getRegistration('/');
+   assert.ok(registration);
+   await registration.update();
+  });
+  await page.waitForFunction(async key=>(await caches.keys()).includes(key),newKey,
+   {timeout:70000});
+  await page.waitForFunction(async key=>!(await caches.keys()).includes(key),oldKey,
+   {timeout:70000});
+  const actual=await page.evaluate(async key=>{
+   const keys=await caches.keys();
+   const foreign=await caches.open(key);
+   const saved=await foreign.match('/unrelated-app-page');
+   const db=await new Promise((resolve,reject)=>{
+    const r=indexedDB.open('gensrpg-ci-saved-profile',1);
+    r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);
+   });
+   const stored=await new Promise((resolve,reject)=>{
+    const r=db.transaction('profiles').objectStore('profiles').get('test');
+    r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);
+   });
+   db.close();
+   return {keys,foreign:saved?await saved.text():null,
+    profile:stored,local:localStorage.getItem('gensrpg-ci-protected-save')};
+  },otherKey);
+  assert.ok(actual.keys.includes(newKey),'new SW cache activated');
+  assert.ok(!actual.keys.includes(oldKey),'old GenSrpg SW cache retired');
+  assert.equal(actual.foreign,'preserve-other-owner','foreign CacheStorage owner must survive');
+  assert.deepEqual(actual.profile,{hero:'unchanged',level:3},'IndexedDB saved profiles unchanged');
+  assert.equal(actual.local,'profile-kept','localStorage saved profile unchanged');
+  // Offline navigation is intentionally only a SHELL guarantee. Native Labs
+  // are not promised offline and must not be copied into the SW owner.
+  await page.goto(url+'/index.html',{waitUntil:'domcontentloaded',timeout:45000});
+  await context.setOffline(true);
+  await page.reload({waitUntil:'domcontentloaded',timeout:45000});
+  assert.match(await page.content(),/gensRootHome/,
+   'installed PWA must serve its real GenSrpg shell HTML while offline');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg-ci-protected-save')),
+   'profile-kept','saved data stays intact during offline restart');
+ }finally{
+  await context?.close();await browser?.close();
+  server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
+ }
+});

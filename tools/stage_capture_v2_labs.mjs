@@ -49,7 +49,8 @@ const required={
   'src/ui/combat-2v2-test-ui.js'
  ],
  exploration:[
-  'index.html','builder.html','world-assembler.html','src/main.js'
+  'index.html','builder.html','world-assembler.html','sculpt-lab.html',
+  'src/main.js','src/sculpt-lab-main.js'
  ]
 };
 const transport=[];

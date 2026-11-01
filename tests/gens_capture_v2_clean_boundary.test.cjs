@@ -73,7 +73,7 @@ test('new Capture shell delegates to two pinned mains; never loads the historic 
  const p=pins();
  assert.equal(p.legacyCaptureRuntime,false);
  assert.match(entry,/shell\.register\("capture",start\)/);
- assert.match(entry,/vendor\/exploration-lab\/index\.html/);
+ assert.match(entry,/vendor\/exploration-lab\/sculpt-lab\.html/);
  // Authoritative 2.5D World Builder is sculpt-lab.html. The old builder.html
  // is explicitly the 2D legacy editor and must not be the Capture V2 entry.
  assert.match(entry,/vendor\/exploration-lab\/sculpt-lab\.html/,

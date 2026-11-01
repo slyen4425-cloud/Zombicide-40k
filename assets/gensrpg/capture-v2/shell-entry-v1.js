@@ -38,7 +38,7 @@
       const officialRoot=new URL(preview[info.family]);
       const pathPrefix="/"+canonical+"/";
       const sha=officialRoot.pathname.startsWith(pathPrefix)
-        ?officialRoot.pathname.slice(pathPrefix.length).replace(/\\/$/,""):"";
+        ?officialRoot.pathname.slice(pathPrefix.length,-1):"";
       if(officialRoot.origin!=="https://raw.githack.com" ||
          !/^[a-f0-9]{40}$/.test(sha) ||
          officialRoot.pathname!==pathPrefix+sha+"/" ||

@@ -55,12 +55,14 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
       headStart:document.head?.innerHTML.slice(0,700)
     }));
     console.log('CAPTURE_PREVIEW_TRANSPORT_DEBUG',JSON.stringify(diagnostics));
+    assert.equal(await page.evaluate(()=>window.__GENSRPG_PREVIEW__),true,
+      'external host must execute the explicit preview flag even when in-document scripts are inert');
     const roots=await page.evaluate(()=>window.GensCaptureV2PreviewTransportV1||null);
     assert.ok(roots,'external preview must publish its explicit native-Lab transport');
     assert.equal(roots.combat,
       'https://raw.githack.com/slyen4425-cloud/GenSrpg_labo_combat_dynamique/81ad362a401b7b2eb9faa811528aced9f2d6384a/');
     assert.equal(roots.exploration,
-      'https://raw.githack.com/slyen4425-cloud/laboratoire_dynamique_exploration-/312131b393b11a88bee481c43df66573a09f04c9/');
+      'https://raw.githack.com/slyen4425-cloud/laboratoire_dynamique_exploration-/8dc6f23792cbad9d4ac65bc3825c60de0ffcd32c/');
     for(const [key,family,rel,selector] of [
       ['creature','combat','examples/dom-demo/capture-editor-v2.html?tab=creature','[data-capture-editor-human]'],
       ['skills','combat','examples/dom-demo/capture-editor-v2.html?tab=skills','[data-editor-panel="skills"]'],

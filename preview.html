@@ -118,6 +118,9 @@ small{display:block;margin-top:10px;opacity:.7}
     if(source.external){
       // document.open() replaces the DOM; expose the single validated native
       // transport on Window AFTER document.close(), before enabling interactions.
+      // External HTML-preview turns in-document scripts into inert text/htmlpreview.
+      // Set the preview flag from the executable transport controller itself.
+      window.__GENSRPG_PREVIEW__=true;
       window.GensCaptureV2PreviewTransportV1=nativePreviewRoots;
       for(const tag of tags){
         const match=tag.match(/src="([^"]+)"/);

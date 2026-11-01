@@ -19,6 +19,7 @@ const oldKey='gensrpg-cache-16.78.116-ci-previous-install';
 const otherKey='unrelated-tool-cache-ci-preserve';
 assert.notEqual(newKey,oldKey,'upgraded cache revision must differ');
 let revision='old';
+const serverRequests=[];
 const mime={'.html':'text/html;charset=utf-8','.js':'text/javascript;charset=utf-8',
  '.css':'text/css;charset=utf-8','.json':'application/json;charset=utf-8',
  '.webmanifest':'application/manifest+json','.png':'image/png',
@@ -44,9 +45,10 @@ const server=http.createServer(async(req,res)=>{
   const file=path.resolve(site,rel);
   if(!file.startsWith(site+path.sep)){res.writeHead(403).end();return;}
   const data=await fs.readFile(file);
+  serverRequests.push({path:url.pathname,status:200,size:data.length});
   res.writeHead(200,{'content-type':mime[path.extname(file)]||'application/octet-stream',
    'cache-control':'no-store'}).end(data);
- }catch(error){res.writeHead(404).end('Missing actual Pages asset');}
+ }catch(error){serverRequests.push({path:req.url,status:404,error:error.message});res.writeHead(404).end('Missing actual Pages asset');}
 });
 const eventually=async(page,predicate,timeout=70000)=>
  page.waitForFunction(predicate,null,{timeout});
@@ -157,7 +159,7 @@ test('an already installed Capture V2 PWA upgrades without deleting saved data o
   assert.equal(offlinePreflight.controller,true,
    'the installed worker must control real GenSrpg index before offline test: '+JSON.stringify(offlinePreflight));
   assert.equal(offlinePreflight.cachedIndex,true,
-   'the active worker must have saved real index.html for offline shell: '+JSON.stringify(offlinePreflight));
+   'the active worker must have saved real index.html for offline shell: '+JSON.stringify({offlinePreflight,serverRequests:serverRequests.slice(0,160),requestCount:serverRequests.length}));
   await context.setOffline(true);
   try{await page.reload({waitUntil:'domcontentloaded',timeout:45000});}
   catch(error){throw new Error('PWA offline shell navigation failed; preflight='+

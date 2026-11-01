@@ -30,7 +30,7 @@ test('PWA install has no retired Capture V1 script in its core pre-cache',()=>{
 test('PWA activates a new versioned V2 cache while keeping same-origin updates and user data',()=>{
  assert.match(sw,/const CACHE_NAME\s*=\s*"gensrpg-cache-[^"]+-capture-v2[^"]*"/);
  assert.match(sw,/self\.addEventListener\("activate"/);
- assert.match(sw,/cacheNames\.filter\(name=>name!==CACHE_NAME\)/);
+ assert.match(sw,/await Promise\.all\(cacheNames\.filter\(/);
  assert.match(sw,/request\.mode==="navigate"/);
  assert.match(sw,/fetch\(url\.href,\{cache:"no-store"/);
  assert.doesNotMatch(sw,/(?:indexedDB\.deleteDatabase|localStorage\.clear|caches\.delete\(CACHE_NAME\))/,

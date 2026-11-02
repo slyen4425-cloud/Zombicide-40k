@@ -556,6 +556,14 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
+      # The deploy job runs on a new runner. It never inherits the source
+      # checkout performed by build; the live proof reads our single version
+      # pin from this exact published commit, not from a moving branch.
+      - name: Checkout exact published source for HTTPS proof
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
       - name: Verify actual HTTPS preview provenance and untouched production root
         run: |
           set -eu

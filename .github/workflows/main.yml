@@ -452,6 +452,9 @@ jobs:
       - name: Test real native Combat arena and Exploration 2.5D at Pages nested URL
         run: node --test tests/gens_capture_v2_isolated_pages_browser.test.cjs
 
+      - name: Tester checkout de la preuve HTTPS dans le runner Pages distinct
+        run: node --test tests/gens_capture_v2_pages_deploy_checkout.test.cjs
+
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5
 

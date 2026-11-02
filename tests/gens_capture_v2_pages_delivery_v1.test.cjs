@@ -111,3 +111,26 @@ test('Capture V2 does not mutate the user PWA cache or persistent profiles',()=>
  assert.doesNotMatch(v2,/localStorage|sessionStorage|indexedDB|captureStartBattleAutomatic|captureWorldState|gen(?:s|srpg)_capture_world/i);
  assert.match(v2,/shell\.register\("capture",start\)/);
 });
+
+test('native preview artifact is self-contained, not rescued by the GitHub checkout',()=>{
+  // A local server that falls back to the source tree hides missing deployed
+  // files. Each first-party entry must be physically inside the _site tree.
+  for(const required of [
+    'index.html','service-worker.js','manifest.webmanifest',
+    'assets/gensrpg/capture-v2/identity-v1.js',
+    'assets/gensrpg/capture-v2/shell-entry-v1.js',
+    'assets/gensrpg/shell/module-launch-final-authority-v1.js',
+    'assets/dungeon/dungeon-room-creator-100.js',
+    'vendor/exploration-lab/sculpt-lab.html',
+    'vendor/combat-lab/examples/dom-demo/capture-editor-v2.html'
+  ])assert.ok(fs.statSync(path.join(site,required)).isFile(),
+    'Native preview must physically ship '+required);
+  for(const raw of scripts(published('index.html'))){
+    const rel=raw.split(/[?#]/,1)[0].replace(/^\\/+/,'');
+    if(!rel.startsWith('assets/'))continue;
+    assert.ok(fs.existsSync(path.join(site,rel)),
+      'Native preview cannot fetch this missing source from local checkout: '+rel);
+  }
+  assert.ok(!fs.existsSync(path.join(site,'assets/gensrpg/capture')),
+    'The retired Capture owner must never enter the artifact');
+});

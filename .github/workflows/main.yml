@@ -452,6 +452,9 @@ jobs:
       - name: Test real native Combat arena and Exploration 2.5D at Pages nested URL
         run: node --test tests/gens_capture_v2_isolated_pages_browser.test.cjs
 
+      - name: Tester checkout de la preuve HTTPS dans le runner Pages distinct
+        run: node --test tests/gens_capture_v2_pages_deploy_checkout.test.cjs
+
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5
 
@@ -552,6 +555,14 @@ jobs:
       - name: Déployer sur GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      # The deploy job runs on a new runner. It never inherits the source
+      # checkout performed by build; the live proof reads our single version
+      # pin from this exact published commit, not from a moving branch.
+      - name: Checkout exact published source for HTTPS proof
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
 
       - name: Verify actual HTTPS preview provenance and untouched production root
         run: |

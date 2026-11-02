@@ -452,6 +452,84 @@ jobs:
         with:
           path: _site
 
+  # Independent PR review GATE of the exact same preview assembly. This is
+  # not a publisher: only the original build+deploy job may update Pages.
+  # It stays testable while production's older Combat pin is separately
+  # recertified through its existing official auto-sync candidate PR.
+  capture-preview-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Establish unchanged stable root as browser-test baseline
+        run: |
+          mkdir -p _site
+          cp index.html service-worker.js manifest.webmanifest _site/
+          node --check tools/stage_capture_v2_pages_preview.mjs
+      - name: Resolve the single immutable candidate release pin
+        id: preview_pin
+        run: |
+          node - <<'JS' >> "$GITHUB_OUTPUT"
+          const fs=require('node:fs');
+          const pin=JSON.parse(fs.readFileSync('tools/capture_v2_pages_preview_pin.json','utf8'));
+          if(pin.schema!=='gensrpg-capture-v2-pages-source-pin-v1'||
+             pin.repository!=='slyen4425-cloud/Zombicide-40k'||
+             pin.publicPath!=='/preview/capture-v2-pr225/'||
+             !/^[a-f0-9]{40}$/.test(pin.sha))throw Error('Invalid review SHA');
+          console.log('sha='+pin.sha);
+          JS
+      - uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/Zombicide-40k
+          ref: ${{ steps.preview_pin.outputs.sha }}
+          path: capture-v2-source
+      - uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
+          ref: 81ad362a401b7b2eb9faa811528aced9f2d6384a
+          path: preview-combat-lab
+          sparse-checkout: |
+            src
+            data
+            examples/dom-demo
+      - uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/laboratoire_dynamique_exploration-
+          ref: ba0701224b764f4c60d4294c9729a49ade5869ad
+          path: preview-exploration-lab
+          sparse-checkout: |
+            src
+            assets
+            index.html
+            builder.html
+            world-assembler.html
+            sculpt-lab.html
+            manifest.webmanifest
+            scripts
+      - name: Build the physical Pages subdirectory from the three official SHAs
+        run: |
+          node tools/stage_capture_v2_pages_preview.mjs capture-v2-source preview-combat-lab preview-exploration-lab _site
+          node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
+      - name: Install Chromium and verify the real nested site
+        run: |
+          npm install --no-save --no-package-lock playwright@1.57.0 pngjs@7.0.0
+          npx playwright install chromium
+          node --test tests/gens_capture_v2_isolated_pages_browser.test.cjs
+      - name: Keep the self-contained tested preview as a review artifact only
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capture-v2-isolated-preview-review-${{ github.sha }}
+          path: _site/preview/capture-v2-pr225/
+          if-no-files-found: error
+          retention-days: 14
+
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     environment:

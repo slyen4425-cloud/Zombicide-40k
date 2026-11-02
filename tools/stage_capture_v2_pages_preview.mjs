@@ -7,6 +7,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {assertOfficialMainHistoryPin} from './verify_official_main_pin.mjs';
 
 const [sourceArg,combatArg,explorationArg,siteArg]=process.argv.slice(2);
 if(!sourceArg||!combatArg||!explorationArg||!siteArg)
@@ -34,10 +35,7 @@ for(const [owner,dir] of Object.entries(owners)){
   const pin=sourcePin[owner];
   if(pin.ref!=='main'||!/^[a-f0-9]{40}$/.test(pin.sha)||head(dir)!==pin.sha)
     throw Error(owner+' checkout does not match the certified preview main pin');
-  const main=execFileSync('git',['ls-remote','https://github.com/'+pin.repository+'.git',
-    'refs/heads/main'],{encoding:'utf8'}).trim().split(/\s+/)[0];
-  if(main!==pin.sha)
-    throw Error(owner+' published main moved: preview must be explicitly recertified');
+  assertOfficialMainHistoryPin({repository:pin.repository,sha:pin.sha});
 }
 if(!fs.existsSync(path.join(site,'index.html')))
   throw Error('Canonical Pages production root must be assembled first');

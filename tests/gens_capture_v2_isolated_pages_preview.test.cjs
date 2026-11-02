@@ -41,6 +41,27 @@ test('production root remains intact and preview exists ONLY in its isolated Pag
   assert.doesNotMatch(html,/<script[^>]+src=["']assets\/gensrpg\/capture\//);
   assert.equal(fs.existsSync(path.join(trial,'assets/gensrpg/capture/runtime-data')),false);
 });
+test('preview PWA never shares the production cache namespace or cleanup authority',()=>{
+ const production=read(site,'service-worker.js').toString('utf8');
+ const candidate=read(trial,'service-worker.js').toString('utf8');
+ assert.match(production,/const CACHE_NAME = "gensrpg-cache-/,
+   'the existing root worker stays byte-for-byte the production owner');
+ assert.match(candidate,/const CACHE_NAME = "gensrpg-preview-capture-v2-[0-9a-f]{12}";/,
+   'preview has a distinct deterministic cache namespace');
+ assert.match(candidate,/name\.startsWith\("gensrpg-preview-capture-v2-"\)\s*&&\s*name!==CACHE_NAME/,
+   'preview worker must never delete production PWA cache names during activation');
+ assert.doesNotMatch(candidate,/name\.startsWith\("gensrpg-cache-"\)/,
+   'unbounded production cache cleanup is forbidden from an isolated preview');
+ const manifest=json(trial,'manifest.webmanifest');
+ assert.equal(manifest.start_url,'./');
+ assert.equal(manifest.scope,'./');
+ assert.equal(manifest.id,'./',
+   'preview PWA identity must remain relative to its isolated public path');
+ assert.equal(json(trial,'release-provenance.v1.json').previewServiceWorkerSha256,
+   sha256(read(trial,'service-worker.js')));
+ assert.equal(json(trial,'release-provenance.v1.json').productionServiceWorkerSha256,
+   sha256(read(site,'service-worker.js')));
+});
 test('exact official Lab main files and derived Showcase have one owner and verified checksums',()=>{
   const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
   const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');

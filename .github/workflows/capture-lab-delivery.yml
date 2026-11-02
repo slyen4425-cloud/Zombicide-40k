@@ -81,8 +81,19 @@ jobs:
           COMBAT_LAB_ROOT: ${{ github.workspace }}/combat-lab
           EXPLORATION_LAB_ROOT: ${{ github.workspace }}/exploration-lab
         run: |
-          mkdir -p _site/vendor/exploration-lab
-          cp index.html _site/index.html
+          mkdir -p _site/vendor/exploration-lab _site/assets _site/icons
+          # A native preview must be a complete immutable site, never an
+          # iframe silently loading first-party files from the CI checkout.
+          # Keep the existing Pages publisher separate; do not deploy this PR.
+          cp -f index.html service-worker.js manifest.webmanifest _site/
+          rsync -a --exclude='/gensrpg/capture/' assets/ _site/assets/
+          for file in icon-192.png icon-512.png; do
+            if test -f "$file"; then cp -f "$file" _site/ && cp -f "$file" _site/icons/; fi
+          done
+          for file in sound_*.mp3; do
+            if test -f "$file"; then cp -f "$file" _site/; fi
+          done
+          test ! -e _site/assets/gensrpg/capture
           cp -a exploration-lab/src exploration-lab/assets _site/vendor/exploration-lab/
           cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html exploration-lab/sculpt-lab.html _site/vendor/exploration-lab/
           node tools/stage_capture_v2_labs.mjs combat-lab exploration-lab _site
@@ -95,6 +106,14 @@ jobs:
         env:
           CAPTURE_V2_SITE: ${{ github.workspace }}/_site
         run: node --test tests/gens_capture_v2_root_browser.test.cjs
+      - name: Preserve the COMPLETE native same-origin preview artifact (not deployed)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capture-v2-native-static-preview-${{ github.sha }}
+          path: _site/
+          if-no-files-found: error
+          retention-days: 14
       - name: Preserve the exact consumer source manifest as CI evidence (not deployed)
         uses: actions/upload-artifact@v4
         with:

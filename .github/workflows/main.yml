@@ -25,7 +25,10 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Playwright 1.57 Chromium is tested on Ubuntu 24.04; ubuntu-latest now
+    # selects Ubuntu 26.04 where the browser installer fails before tests.
+    # Pin CI OS only: does not touch the shipped game or any Lab pin.
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Récupérer le dépôt
@@ -95,6 +98,7 @@ jobs:
           node --test tests/gens_capture_combat_autosync_workflow_20261030.test.cjs
           node --check tools/run_capture_combat_main_autosync.mjs
           node --test tests/gens_capture_combat_main_only_guard_20261030.test.cjs
+          node --test tests/gens_official_lab_main_pin_history.test.mjs
 
       - name: Résoudre la version officielle immuable Capture / visuels (aucune synchronisation mouvante)
         id: capture_pages_pins
@@ -102,12 +106,16 @@ jobs:
           node --input-type=module - <<'JS' >> "$GITHUB_OUTPUT"
           import {COMBAT_LAB_SOURCE_V1} from './assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs';
           import fs from 'node:fs';
-          import {execFileSync} from 'node:child_process';
+          import {assertOfficialMainHistoryPin} from './tools/verify_official_main_pin.mjs';
           const manifest=JSON.parse(fs.readFileSync('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json','utf8'));
           if(COMBAT_LAB_SOURCE_V1.sha!==manifest.authoredSourceLabPin)throw Error('Conflicting pinned Combat authority');
-          // Only an approved Combat main HEAD may enter GenSrpg. No gh-pages SHA.
-          const combatMain=execFileSync('git',['ls-remote','https://github.com/slyen4425-cloud/GenSrpg_labo_combat_dynamique.git','refs/heads/main'],{encoding:'utf8'}).trim().split(/\s+/)[0];
-          if(!combatMain||COMBAT_LAB_SOURCE_V1.sha!==combatMain)throw Error('Combat pin differs from approved main; repin and recertify');
+          // Immutable approved releases stay valid AFTER new main commits.
+          // Fetch ONLY refs/heads/main and reject branch-only / Pages SHAs.
+          const proof=assertOfficialMainHistoryPin({
+            repository:'slyen4425-cloud/GenSrpg_labo_combat_dynamique',
+            sha:COMBAT_LAB_SOURCE_V1.sha
+          });
+          console.error('OFFICIAL_COMBAT_MAIN_HISTORY',JSON.stringify(proof));
           if(!/^[0-9a-f]{40}$/.test(manifest.authoredAssetsPin))throw Error('Unpinned official visuals');
           if(manifest.productionActivated!==false)throw Error('Capture Hub must remain dormant');
           console.log('combat='+COMBAT_LAB_SOURCE_V1.sha);
@@ -377,6 +385,73 @@ jobs:
       - name: Tester les récapitulatifs de mondes V16.78.20
         run: node tests/gens_world_summary_v167820.test.cjs _site/index.html
 
+      # Single publisher, isolated URL: the production root above remains
+      # byte-for-byte unchanged by this candidate. Do not merge PR #225.
+      - name: Resolve single official Capture V2 candidate SHA for preview
+        id: preview_pin
+        run: |
+          node - <<'JS' >> "$GITHUB_OUTPUT"
+          const fs=require('node:fs');
+          const pin=JSON.parse(fs.readFileSync('tools/capture_v2_pages_preview_pin.json','utf8'));
+          if(pin.schema!=='gensrpg-capture-v2-pages-source-pin-v1'||
+             pin.repository!=='slyen4425-cloud/Zombicide-40k'||
+             pin.publicPath!=='/preview/capture-v2-pr225/'||
+             !/^[a-f0-9]{40}$/.test(pin.sha))throw Error('Invalid canonical preview pin');
+          console.log('sha='+pin.sha);
+          JS
+      - name: Checkout exact CI-verified GenSrpg Capture V2 candidate (preview ONLY)
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/Zombicide-40k
+          ref: ${{ steps.preview_pin.outputs.sha }}
+          path: capture-v2-source
+
+      # Production Combat uses an earlier certified version. NEVER replace its
+      # checkout while composing this independent test-only subtree.
+      - name: Checkout approved Combat main for isolated Capture V2 preview
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
+          ref: 81ad362a401b7b2eb9faa811528aced9f2d6384a
+          path: preview-combat-lab
+          sparse-checkout: |
+            src
+            data
+            examples/dom-demo
+
+      - name: Checkout approved Exploration main for isolated Capture V2 preview
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/laboratoire_dynamique_exploration-
+          ref: ba0701224b764f4c60d4294c9729a49ade5869ad
+          path: preview-exploration-lab
+          sparse-checkout: |
+            src
+            assets
+            index.html
+            builder.html
+            world-assembler.html
+            sculpt-lab.html
+            manifest.webmanifest
+            scripts
+
+      - name: Stage isolated native preview under the existing Pages owner
+        run: |
+          test "$(git -C capture-v2-source rev-parse HEAD)" = "${{ steps.preview_pin.outputs.sha }}"
+          test "$(git -C preview-combat-lab rev-parse HEAD)" = "81ad362a401b7b2eb9faa811528aced9f2d6384a"
+          test "$(git -C preview-exploration-lab rev-parse HEAD)" = "ba0701224b764f4c60d4294c9729a49ade5869ad"
+          node --check tools/stage_capture_v2_pages_preview.mjs
+          node tools/stage_capture_v2_pages_preview.mjs capture-v2-source preview-combat-lab preview-exploration-lab _site
+          node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
+
+      - name: Install Chromium for real nested Capture V2 browser proof
+        run: |
+          npm install --no-save --no-package-lock playwright@1.57.0 pngjs@7.0.0
+          npx playwright install chromium
+
+      - name: Test real native Combat arena and Exploration 2.5D at Pages nested URL
+        run: node --test tests/gens_capture_v2_isolated_pages_browser.test.cjs
+
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5
 
@@ -384,6 +459,84 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+
+  # Independent PR review GATE of the exact same preview assembly. This is
+  # not a publisher: only the original build+deploy job may update Pages.
+  # It stays testable while production's older Combat pin is separately
+  # recertified through its existing official auto-sync candidate PR.
+  capture-preview-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Establish unchanged stable root as browser-test baseline
+        run: |
+          mkdir -p _site
+          cp index.html service-worker.js manifest.webmanifest _site/
+          node --check tools/stage_capture_v2_pages_preview.mjs
+      - name: Resolve the single immutable candidate release pin
+        id: preview_pin
+        run: |
+          node - <<'JS' >> "$GITHUB_OUTPUT"
+          const fs=require('node:fs');
+          const pin=JSON.parse(fs.readFileSync('tools/capture_v2_pages_preview_pin.json','utf8'));
+          if(pin.schema!=='gensrpg-capture-v2-pages-source-pin-v1'||
+             pin.repository!=='slyen4425-cloud/Zombicide-40k'||
+             pin.publicPath!=='/preview/capture-v2-pr225/'||
+             !/^[a-f0-9]{40}$/.test(pin.sha))throw Error('Invalid review SHA');
+          console.log('sha='+pin.sha);
+          JS
+      - uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/Zombicide-40k
+          ref: ${{ steps.preview_pin.outputs.sha }}
+          path: capture-v2-source
+      - uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
+          ref: 81ad362a401b7b2eb9faa811528aced9f2d6384a
+          path: preview-combat-lab
+          sparse-checkout: |
+            src
+            data
+            examples/dom-demo
+      - uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/laboratoire_dynamique_exploration-
+          ref: ba0701224b764f4c60d4294c9729a49ade5869ad
+          path: preview-exploration-lab
+          sparse-checkout: |
+            src
+            assets
+            index.html
+            builder.html
+            world-assembler.html
+            sculpt-lab.html
+            manifest.webmanifest
+            scripts
+      - name: Build the physical Pages subdirectory from the three official SHAs
+        run: |
+          node tools/stage_capture_v2_pages_preview.mjs capture-v2-source preview-combat-lab preview-exploration-lab _site
+          node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
+      - name: Install Chromium and verify the real nested site
+        run: |
+          npm install --no-save --no-package-lock playwright@1.57.0 pngjs@7.0.0
+          npx playwright install chromium
+          node --test tests/gens_capture_v2_isolated_pages_browser.test.cjs
+      - name: Keep the self-contained tested preview as a review artifact only
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capture-v2-isolated-preview-review-${{ github.sha }}
+          path: _site/preview/capture-v2-pr225/
+          if-no-files-found: error
+          retention-days: 14
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -399,3 +552,53 @@ jobs:
       - name: Déployer sur GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify actual HTTPS preview provenance and untouched production root
+        run: |
+          set -eu
+          base="https://slyen4425-cloud.github.io/Zombicide-40k"
+          dir="/tmp/capture-v2-pages-check"
+          mkdir -p "$dir"
+          # The successful Pages deploy API is NOT proof that the intended
+          # immutable candidate and original Labs are what HTTPS now serves.
+          curl -fsSL --retry 15 --retry-all-errors --retry-delay 3 \
+            "$base/preview/capture-v2-pr225/release-provenance.v1.json?build=$GITHUB_RUN_ID" \
+            -o "$dir/release.json"
+          for file in \
+            "index.html" \
+            "assets/gensrpg/capture-v2/delivery-manifest.json" \
+            "vendor/combat-lab/examples/dom-demo/capture-editor-v2.html" \
+            "vendor/exploration-lab/sculpt-lab.html" \
+            "vendor/exploration-lab/src/sculpt-lab-main.js"; do
+            mkdir -p "$dir/preview/$(dirname "$file")"
+            curl -fsSL --retry 15 --retry-all-errors --retry-delay 3 \
+              "$base/preview/capture-v2-pr225/$file?build=$GITHUB_RUN_ID" \
+              -o "$dir/preview/$file"
+          done
+          curl -fsSL --retry 15 --retry-all-errors --retry-delay 3 \
+            "$base/index.html?build=$GITHUB_RUN_ID" -o "$dir/root-index.html"
+          node - "$dir" <<'JS'
+          const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+          const folder=process.argv[2],bytes=p=>fs.readFileSync(path.join(folder,p));
+          const hash=x=>crypto.createHash('sha256').update(x).digest('hex');
+          const release=JSON.parse(bytes('release.json'));
+          const manifestBytes=bytes('preview/assets/gensrpg/capture-v2/delivery-manifest.json');
+          const delivery=JSON.parse(manifestBytes);
+          const pin=JSON.parse(fs.readFileSync('tools/capture_v2_pages_preview_pin.json','utf8'));
+          if(release.schema!=='gensrpg-capture-v2-isolated-pages-preview-v1'||
+             release.source.commit!==pin.sha||
+             release.productionRootSha256!==hash(bytes('root-index.html'))||
+             release.previewIndexSha256!==hash(bytes('preview/index.html'))||
+             release.deliveryManifestSha256!==hash(manifestBytes)||
+             release.combat.sha!==delivery.combat.sha||
+             release.exploration.sha!==delivery.exploration.sha||
+             release.legacyCaptureRuntime!==false||delivery.legacyCaptureRuntime!==false)
+            throw Error('LIVE HTTPS failed immutable Capture V2 and root integrity gate');
+          const html=bytes('preview/index.html').toString('utf8');
+          if(!html.includes('assets/gensrpg/capture-v2/shell-entry-v1.js'))
+            throw Error('Live Capture V2 shell unavailable');
+          console.log('VERIFIED live same-origin preview:',release.publicPath,
+            'Capture:',release.source.commit,
+            'Combat:',release.combat.sha,
+            'Exploration:',release.exploration.sha);
+          JS

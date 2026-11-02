@@ -14,7 +14,13 @@ if(!sourceArg||!combatArg||!explorationArg||!siteArg)
 const source=path.resolve(sourceArg),combat=path.resolve(combatArg),
   exploration=path.resolve(explorationArg),site=path.resolve(siteArg);
 const trial=path.join(site,'preview','capture-v2-pr225');
-const expectedPreviewSha='4015c36321fe090558c9933cc7c4e548ebbd81e7';
+const previewPin=JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)),
+  'capture_v2_pages_preview_pin.json'),'utf8'));
+if(previewPin.schema!=='gensrpg-capture-v2-pages-source-pin-v1'||
+   previewPin.repository!=='slyen4425-cloud/Zombicide-40k'||
+   previewPin.publicPath!=='/preview/capture-v2-pr225/'||
+   !/^[a-f0-9]{40}$/.test(previewPin.sha))throw Error('Invalid canonical preview pin');
+const expectedPreviewSha=previewPin.sha;
 const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const head=dir=>execFileSync('git',['-C',dir,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
 const bytes=(dir,rel)=>fs.readFileSync(path.join(dir,rel));
@@ -95,7 +101,7 @@ if(delivery.combat.sha!==sourcePin.combat.sha||
   throw Error('Certified native delivery differs from approved pins');
 const provenance={
   schema:'gensrpg-capture-v2-isolated-pages-preview-v1',
-  publicPath:'/preview/capture-v2-pr225/',
+  publicPath:previewPin.publicPath,
   source:{repository:'slyen4425-cloud/Zombicide-40k',
     ref:'pr-225-immutable-commit',commit:expectedPreviewSha},
   combat:{repository:sourcePin.combat.repository,ref:'main',sha:sourcePin.combat.sha},

@@ -11,7 +11,8 @@ const root=path.resolve(__dirname,'..');
 const site=path.resolve(process.env.GENSRPG_PAGES_SITE||'_site');
 const rel='preview/capture-v2-pr225';
 const trial=path.join(site,rel);
-const previewSha='4015c36321fe090558c9933cc7c4e548ebbd81e7';
+const previewPin=JSON.parse(fs.readFileSync(path.join(root,'tools/capture_v2_pages_preview_pin.json')));
+const previewSha=previewPin.sha;
 const combatSha='81ad362a401b7b2eb9faa811528aced9f2d6384a';
 const explorationSha='ba0701224b764f4c60d4294c9729a49ade5869ad';
 const sha256=buf=>crypto.createHash('sha256').update(buf).digest('hex');
@@ -74,7 +75,8 @@ test('the existing single Pages publisher remains the only deployment authority'
   assert.match(text,/name: Deploy GenSrpG to GitHub Pages/);
   assert.match(text,/uses: actions\/deploy-pages@v4/);
   assert.match(text,/github\.ref == 'refs\/heads\/main'/);
-  assert.match(text,/ref: 4015c36321fe090558c9933cc7c4e548ebbd81e7/);
+  assert.ok(text.includes('ref: ${{ steps.preview_pin.outputs.sha }}'),
+    'preview checkout must derive only from the canonical immutable release pin');
   assert.match(text,/node tools\/stage_capture_v2_pages_preview\.mjs/);
   assert.doesNotMatch(text,/ref: work\/gensrpg-capture-clean-replacement-/);
 });

@@ -4,8 +4,30 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
+const {execFileSync}=require('node:child_process');
 const assert=require('node:assert/strict');
 const hash=b=>crypto.createHash('sha1').update(Buffer.from('blob '+b.length+'\0')).update(b).digest('hex');
+// The archived Capture V1 chain includes R16 subprocesses that read index.html
+// from the process working directory. Reconstruct it inside an isolated,
+// SHA-certified historical worktree, never by substituting today's V2 runtime.
+const preV2='900cbcba0cdd517db773ff39c9c56264c16b32ed';
+const preV2IndexBlob='17ba8e6f1faf6f8a0be8cdec68c4515d538ff646';
+const captureV2Tag=Buffer.from('<script src="assets/gensrpg/capture-v2/shell-entry-v1.js"></script>');
+function snapshotRootForV2(root){
+ const active=fs.readFileSync(path.join(root,'index.html'));
+ const first=active.indexOf(captureV2Tag);
+ if(first<0)return null;
+ assert.ok(first>0&&active.indexOf(captureV2Tag,first+captureV2Tag.length)<0,'one V2 Shell owner');
+ assert.equal(active.includes(Buffer.from('<script src="assets/gensrpg/capture/entry-v1.js?v=1"></script>')),false,
+  'retired V1 public entry must remain removed');
+ const hist=path.join(process.env.RUNNER_TEMP||require('node:os').tmpdir(),'gensrpg-capture-v1-checkpoint-900cbcba');
+ const hasCommit=()=>{try{execFileSync('git',['cat-file','-e',preV2+'^{commit}'],{cwd:root,stdio:'ignore'});return true}catch{return false}};
+ if(!hasCommit())execFileSync('git',['fetch','--no-tags','--depth=1','origin',preV2],{cwd:root,stdio:'pipe',maxBuffer:1024*1024});
+ if(!fs.existsSync(path.join(hist,'.git')))execFileSync('git',['worktree','add','--detach',hist,preV2],{cwd:root,stdio:'pipe',maxBuffer:1024*1024});
+ assert.equal(execFileSync('git',['-C',hist,'rev-parse','HEAD'],{encoding:'utf8'}).trim(),preV2,'archived worktree SHA drift');
+ assert.equal(hash(fs.readFileSync(path.join(hist,'index.html'))),preV2IndexBlob,'archived source blob drift');
+ return hist;
+}
 const TAG=Buffer.from('<script src="assets/gensrpg/capture/team-roster-v1.js?v=1"></script>\n');
 const HEADER='// GenSrpG Phase 9 Capture Team / Reserve V1: physically moved legacy owner.\n'
   +'// Classic synchronous script: original global API, persisted keys, and rules unchanged.\n';
@@ -207,6 +229,20 @@ function restoreCombatCoreIfExtracted(index,root){
  return index;
 }
 function teamRosterPreExtractionIndexBytes(root=path.resolve(__dirname,'../..')){
+ const hist=snapshotRootForV2(root);
+ if(hist){
+  // The nested R06-R16 rollback tools resolve modules relative to __dirname.
+  // Use the certified historical HELPERS as well as historical files, in an
+  // isolated subprocess. The caller still audits all current external files.
+  const source=path.join(hist,'tests/helpers/gens_capture_team_roster_snapshot_v1.cjs');
+  const code='const helper=require(process.argv[1]);process.stdout.write(helper.teamRosterPreExtractionIndexBytes(process.argv[2]))';
+  const bytes=execFileSync(process.execPath,['-e',code,source,hist],{
+   cwd:hist,maxBuffer:16*1024*1024
+  });
+  assert.equal(bytes.length,7959089,'certified historic Capture team reconstruction size');
+  assert.equal(hash(bytes),'e777d484ab10049650440fee04f47cf2dfdc3043','certified historic Capture team reconstruction blob');
+  return bytes;
+ }
  let index=restoreCombatCoreIfExtracted(restoreHistoricalHubSnapshot(fs.readFileSync(path.join(root,'index.html')),root),root);
  const module=fs.readFileSync(path.join(root,'assets/gensrpg/capture/team-roster-v1.js'));
  assert.equal(index.length,7950873,'Capture team extracted index bytes');

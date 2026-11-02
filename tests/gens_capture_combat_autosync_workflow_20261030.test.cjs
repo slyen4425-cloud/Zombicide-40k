@@ -22,7 +22,7 @@ test('only an approved Combat main can cause a source update',()=>{
 test('fail-closed CI requires immutable checkout, all browser/architecture checks and unchanged upstream',()=>{
  const source=read('tools/run_capture_combat_main_autosync.mjs');
  for(const workflow of [
- 'capture-lab-runtime.yml','capture-lab-delivery.yml','main.yml',
+ 'capture-v2-clean-base.yml','capture-lab-delivery.yml','main.yml',
  'gensrpg-architecture-sentinels.yml','gensrpg-firefox-wall-sentinel.yml',
  'gensrpg-tactical-dock-sentinel.yml'
  ])assert.ok(source.includes(workflow),'missing independent certification '+workflow);
@@ -35,6 +35,6 @@ test('fail-closed CI requires immutable checkout, all browser/architecture check
  const pages=read('.github/workflows/main.yml');
  assert.match(pages,/if: github\.ref == 'refs\/heads\/main' && github\.event_name != 'pull_request'/);
  assert.match(pages,/node --test tests\/gens_capture_combat_main_autosync_20261030\.test\.mjs/);
- for(const workflow of ['capture-lab-runtime.yml','capture-lab-delivery.yml'])
+ for(const workflow of ['capture-v2-clean-base.yml','capture-lab-delivery.yml'])
   assert.match(read('.github/workflows/'+workflow),/workflow_dispatch:/);
 });

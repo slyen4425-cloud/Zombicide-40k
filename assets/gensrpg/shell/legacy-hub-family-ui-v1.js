@@ -56,6 +56,14 @@ function renderGensFamilyGamesIfVisible(){
 function openGensFamily(family){
   gensSelectedFamily=family;
   document.body.classList.remove("gensCapturePregame","gensAdventurePregame");
+  // The completely new Capture V2 has no historic RPG universes or pregame.
+  // Route from the original four-mode Shell directly into its one provider.
+  if(family==="capture"){
+    const shell=window.GensShellModuleLaunchV1;
+    if(!window.GensCaptureV2||!shell||shell.activeModule()!=="capture")
+      throw new Error("Clean Capture Shell is not installed");
+    return shell.startModuleSession("capture");
+  }
   if(family!=="adventure")document.body.classList.remove("gensDungeonTheme");
   gensHideHomeLevels();
   const page=document.getElementById("gensFamilyHome");if(page)page.style.display="block";

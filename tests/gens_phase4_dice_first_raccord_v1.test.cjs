@@ -14,9 +14,10 @@ const sha256=value=>crypto.createHash('sha256').update(value,'utf8').digest('hex
 
 const activeIndex=read('index.html');
 const index=require('./helpers/gens_capture_world_extraction_snapshot_v1.cjs').seedEraIndexBytes(root).toString('utf8');
-// Preserve the historical Phase 4 Dice census while proving the active source loads
-// the extracted Capture World owner only once.
-assert.equal(activeIndex.split('<script src="assets/gensrpg/capture/world-exploration-v1.js?v=1"></script>').length-1,1,'Capture World script remains a unique production owner');
+// Scope: the Dice owner only. Capture V2 retirement and source composition
+// are certified independently by gens_capture_v2_clean_boundary.test.cjs.
+assert.equal(activeIndex.split('<script src="assets/gensrpg/core/dice-v1.js"></script>').length-1,1,
+  'the real root must still load its independent Core Dice exactly once');
 const coreSrc=read('assets/gensrpg/core/dice-v1.js');
 const workflow=read('.github/workflows/main.yml');
 const preview=read('preview.html');

@@ -92,7 +92,7 @@ jobs:
           npm install --no-save --no-package-lock playwright@1.55.0 pngjs@7.0.0
           npx playwright install --with-deps chromium
           node tests/gens_v11411_native_ui_browser.test.cjs
-          node tests/gens_four_module_noninterference_shell_browser_v11411.test.cjs
+          node tests/gens_capture_v2_four_mode_noninterference_v1.test.cjs
           node tests/gens_tactical_dock_browser_v11411.test.cjs
       - name: Exact adapter D100 scale and entered-hero boundary
         run: |
@@ -104,4 +104,4 @@ jobs:
       - name: Preserve Phase6 Survival isolation after retired global guard
         run: |
           node tests/gens_phase6_survival_legacy_guard_retirement_v1.test.cjs
-          node tests/gens_phase6_survival_builtin_boundary_retirement_v1.test.cjs
+          bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase6_survival_builtin_boundary_retirement_v1.test.cjs

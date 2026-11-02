@@ -97,14 +97,14 @@ const server=http.createServer((req,res)=>{
       participants:typeof loadGameParticipants==='function'?loadGameParticipants().map(String):[],
       menu:getComputedStyle(document.getElementById('menu')).display,
       dungeon:getComputedStyle(document.getElementById('gensDungeonCore01')).display,
-      capture:getComputedStyle(document.getElementById('captureGameHub')).display
+      capture:document.getElementById('captureGameHub')?getComputedStyle(document.getElementById('captureGameHub')).display:'absent'
     }));
 
     assert.equal(before.family,'survival','fixture must be a real Survival session');
     assert.ok(before.participants.length>0,'Survival fixture must expose a real participant');
     assert.notEqual(before.menu,'none');
     assert.equal(before.dungeon,'none');
-    assert.equal(before.capture,'none');
+    assert.equal(before.capture,'absent','old Capture V1 Hub must remain physically retired');
 
     await page.evaluate(id=>window.openChar(id),before.participants[0]);
     await page.waitForFunction(()=>getComputedStyle(document.getElementById('sheet')).display!=='none');
@@ -122,7 +122,7 @@ const server=http.createServer((req,res)=>{
       menu:getComputedStyle(document.getElementById('menu')).display,
       sheet:getComputedStyle(document.getElementById('sheet')).display,
       dungeon:getComputedStyle(document.getElementById('gensDungeonCore01')).display,
-      capture:getComputedStyle(document.getElementById('captureGameHub')).display,
+      capture:document.getElementById('captureGameHub')?getComputedStyle(document.getElementById('captureGameHub')).display:'absent',
       dungeonTheme:document.body.classList.contains('gensDungeonTheme')
     }));
 
@@ -132,7 +132,7 @@ const server=http.createServer((req,res)=>{
     assert.notEqual(after.menu,'none','Survival goMenu must return to the Survival menu');
     assert.equal(after.sheet,'none','Survival goMenu must close the hero sheet');
     assert.equal(after.dungeon,'none','Survival goMenu must not enter Dungeon');
-    assert.equal(after.capture,'none','Survival goMenu must not enter Capture');
+    assert.equal(after.capture,'absent','Survival goMenu must not resurrect the retired Capture Hub');
     assert.equal(after.dungeonTheme,false,'Survival goMenu must not leak Dungeon theme');
     assert.deepEqual(errors,[],'Survival goMenu E2E must not raise browser/runtime errors');
 

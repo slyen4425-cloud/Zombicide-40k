@@ -68,6 +68,31 @@ small{display:block;margin-top:10px;opacity:.7}
       return {base,index:new URL('index.html',base).href,external:false};
     };
     const source=resolveSource();
+    // Only this external GitHub SHA preview needs alternate public transport.
+    // Read the SINGLE canonical Lab pins from the same immutable GenSrpg commit;
+    // never select moving branches, gh-pages or duplicate upstream assets.
+    let nativePreviewRoots=null;
+    if(source.external){
+      const pinUrl=new URL('assets/gensrpg/capture-v2/source-pins-v1.json',source.base);
+      const pins=await fetch(pinUrl.href,{cache:'no-store'}).then(r=>{
+        if(!r.ok)throw new Error('Sources officielles '+r.status);
+        return r.json();
+      });
+      const canonical={
+        combat:'slyen4425-cloud/GenSrpg_labo_combat_dynamique',
+        exploration:'slyen4425-cloud/laboratoire_dynamique_exploration-'
+      };
+      const roots={};
+      for(const [key,repository] of Object.entries(canonical)){
+        const owner=pins[key];
+        if(owner?.repository!==repository||owner.ref!=='main'||!/^[a-f0-9]{40}$/.test(owner.sha))
+          throw new Error('Version officielle '+key+' invalide pour la preview');
+        roots[key]='https://raw.githack.com/'+repository+'/'+owner.sha+'/';
+      }
+      // The original Lab pages themselves run inside their own cross-origin
+      // iframe; this is a limited preview, not a claim of gameplay integration.
+      nativePreviewRoots=Object.freeze(roots);
+    }
     let html=await fetch(source.index,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('index '+r.status);return r.text()});
     const perf='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"><\/script>';
     const finalShell='<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"><\/script>';
@@ -91,6 +116,12 @@ small{display:block;margin-top:10px;opacity:.7}
       await new Promise(resolve=>document.addEventListener("DOMContentLoaded",resolve,{once:true}));
     }
     if(source.external){
+      // document.open() replaces the DOM; expose the single validated native
+      // transport on Window AFTER document.close(), before enabling interactions.
+      // External HTML-preview turns in-document scripts into inert text/htmlpreview.
+      // Set the preview flag from the executable transport controller itself.
+      window.__GENSRPG_PREVIEW__=true;
+      window.GensCaptureV2PreviewTransportV1=nativePreviewRoots;
       for(const tag of tags){
         const match=tag.match(/src="([^"]+)"/);
         if(!match)throw new Error("Script de preview invalide");

@@ -2,6 +2,8 @@
 """Metadata-only Phase 12 EXIT inventory regressions. No production HTML loaded."""
 from pathlib import Path
 import os
+import io
+import tarfile
 import subprocess
 import sys
 import tempfile
@@ -49,7 +51,17 @@ class ExitInventoryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="gensrpg-historical-r06-") as tmp:
             historical = Path(tmp)
             (historical / "index.html").write_bytes(original)
-            for name in ("tools", "assets", "docs"):
+            # Old rollback scripts are immutable, but their *owners* are now
+            # intentionally different in Capture V2. Reconstruct the certified
+            # historical workspace from the certified Git tree, never from
+            # current assets (whose bytes legitimately changed).
+            archived_assets = subprocess.check_output(
+                ["git", "archive", "--format=tar", certified_ref, "assets/gensrpg"],
+                cwd=root,
+            )
+            with tarfile.open(fileobj=io.BytesIO(archived_assets), mode="r:") as archive:
+                archive.extractall(path=historical, filter="data")
+            for name in ("tools", "docs"):
                 os.symlink(root / name, historical / name, target_is_directory=True)
             # R09 restoration traverses R10: its certified historical owner is
             # now archived (never loaded at runtime) under tests/fixtures.

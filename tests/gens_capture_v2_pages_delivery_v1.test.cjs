@@ -126,7 +126,7 @@ test('native preview artifact is self-contained, not rescued by the GitHub check
   ])assert.ok(fs.statSync(path.join(site,required)).isFile(),
     'Native preview must physically ship '+required);
   for(const raw of scripts(published('index.html'))){
-    const rel=raw.split(/[?#]/,1)[0].replace(/^\\/+/,'');
+    const rel=raw.split(/[?#]/,1)[0];
     if(!rel.startsWith('assets/'))continue;
     assert.ok(fs.existsSync(path.join(site,rel)),
       'Native preview cannot fetch this missing source from local checkout: '+rel);

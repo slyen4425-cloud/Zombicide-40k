@@ -62,6 +62,38 @@ test('preview PWA never shares the production cache namespace or cleanup authori
  assert.equal(json(trial,'release-provenance.v1.json').productionServiceWorkerSha256,
    sha256(read(site,'service-worker.js')));
 });
+test('actual preview service worker activation cannot delete production caches',async()=>{
+ // Execute the actual SW activate callback, not a copy of its cleanup
+ // algorithm. The minimal CacheStorage fixture exposes a collision with the
+ // installed stable PWA on the SAME origin.
+ const vm=require('node:vm');
+ const worker=read(trial,'service-worker.js').toString('utf8');
+ const current='gensrpg-preview-capture-v2-'+previewSha.slice(0,12);
+ const previous='gensrpg-preview-capture-v2-previous';
+ const production='gensrpg-cache-16.78.118-capture-v2-scoped-cache-cleanup';
+ const keys=[production,current,previous];
+ let activation=null,waited=null;
+ const deleted=[];
+ const scope={
+   self:{
+     addEventListener(name,listener){if(name==='activate')activation=listener;},
+     clients:{claim:async()=>{}},registration:{scope:'https://example.invalid/preview/capture-v2-pr225/'},
+     skipWaiting(){}
+   },
+   caches:{
+     keys:async()=>keys.slice(),
+     delete:async name=>{deleted.push(name);return true;}
+   },
+   console
+ };
+ vm.runInNewContext(worker,scope,{filename:'actual-staged-preview-service-worker.js'});
+ assert.equal(typeof activation,'function','real preview SW must install its activation listener');
+ activation({waitUntil(promise){waited=promise;}});
+ assert.ok(waited&&typeof waited.then==='function');
+ await waited;
+ assert.deepEqual(deleted,[previous],
+   'preview SW may remove old preview cache versions only; installed production stays untouched');
+});
 test('exact official Lab main files and derived Showcase have one owner and verified checksums',()=>{
   const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
   const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');

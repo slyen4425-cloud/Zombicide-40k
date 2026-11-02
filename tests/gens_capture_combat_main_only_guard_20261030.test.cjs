@@ -6,12 +6,14 @@ const read = p => fs.readFileSync(require('node:path').join(root,p),'utf8');
 const manifest = JSON.parse(read('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'));
 const loader = read('assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs');
 for (const name of ['.github/workflows/main.yml','.github/workflows/capture-lab-delivery.yml']) {
- test(name+' refuses unpromoted Combat revisions',()=>{
-  const y = read(name);
-  assert.match(y,/refs\/heads\/main/);
-  assert.match(y,/COMBAT_LAB_SOURCE_V1\.sha!==combatMain/);
-  assert.match(y,/throw Error\('Combat pin differs from approved main/);
-  assert.doesNotMatch(y,/ref:\s*gh-pages/);
+ test(name+' certifies an immutable historical official main release and rejects dev-only commits',()=>{
+  const y=read(name);
+  assert.match(y,/assertOfficialMainHistoryPin/);
+  assert.match(y,/repository:'slyen4425-cloud\\/GenSrpg_labo_combat_dynamique'/);
+  assert.match(y,/sha:COMBAT_LAB_SOURCE_V1\\.sha/);
+  assert.doesNotMatch(y,/COMBAT_LAB_SOURCE_V1\\.sha!==combatMain/,
+   'a later official main commit must not invalidate a pinned certified release');
+  assert.doesNotMatch(y,/ref:\\s*gh-pages/);
  });
 }
 test('engine and authored data share the single main-approved SHA',()=>{

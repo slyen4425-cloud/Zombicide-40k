@@ -25,7 +25,10 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Playwright 1.57 Chromium is tested on Ubuntu 24.04; ubuntu-latest now
+    # selects Ubuntu 26.04 where the browser installer fails before tests.
+    # Pin CI OS only: does not touch the shipped game or any Lab pin.
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Récupérer le dépôt

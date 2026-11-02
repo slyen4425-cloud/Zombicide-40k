@@ -56,6 +56,27 @@ const copyFile=(rel,dst=rel)=>{
 };
 for(const rel of ['index.html','service-worker.js','manifest.webmanifest'])
   copyFile(rel);
+// The preview is a separate SW scope on the SAME origin as the real app.
+// CacheStorage names are ORIGIN-wide, not scoped by service worker. If we copy
+// the root worker byte-for-byte, its activate handler will evict the installed
+// production PWA's caches. Configure ONLY this staged worker's cache namespace;
+// the single canonical source worker and the production build remain untouched.
+const productionWorker=bytes(source,'service-worker.js').toString('utf8');
+const canonicalCacheLine=/^const CACHE_NAME = "gensrpg-cache-[^"]+";$/m;
+const productionCleanup='name.startsWith("gensrpg-cache-")&&name!==CACHE_NAME';
+if(!canonicalCacheLine.test(productionWorker)||
+   productionWorker.split(productionCleanup).length!==2)
+  throw Error('Canonical root PWA cache contract drift: review required before isolated preview release');
+const isolatedCacheName='gensrpg-preview-capture-v2-'+expectedPreviewSha.slice(0,12);
+const scopedWorker=productionWorker
+ .replace(canonicalCacheLine,'const CACHE_NAME = "'+isolatedCacheName+'";')
+ .replace(productionCleanup,
+  'name.startsWith("gensrpg-preview-capture-v2-")&&name!==CACHE_NAME');
+if(scopedWorker===productionWorker||
+   scopedWorker.includes(productionCleanup)||
+   !scopedWorker.includes(isolatedCacheName))
+  throw Error('Preview PWA cache namespace isolation failed');
+fs.writeFileSync(path.join(trial,'service-worker.js'),scopedWorker);
 for(const filename of fs.readdirSync(source).filter(x=>/^sound_.*\.mp3$/.test(x)))
   copyFile(filename);
 for(const filename of ['icon-192.png','icon-512.png']){
@@ -107,6 +128,7 @@ const provenance={
   legacyCaptureRuntime:false,
   productionRootSha256:preserved['index.html'],
   productionServiceWorkerSha256:preserved['service-worker.js'],
+  previewServiceWorkerSha256:digest(bytes(trial,'service-worker.js')),
   productionManifestSha256:preserved['manifest.webmanifest'],
   previewIndexSha256:digest(bytes(trial,'index.html')),
   deliveryManifestSha256:digest(bytes(trial,'assets/gensrpg/capture-v2/delivery-manifest.json'))

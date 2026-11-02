@@ -114,6 +114,9 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   }
   await official.locator('[data-editor-tab="combat"]').tap();
   await official.locator('[data-editor-panel="combat"]:visible').waitFor({timeout:3500});
+  const captureReturnDock=await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').boundingBox();
+  assert.ok(captureReturnDock.y<65 && captureReturnDock.x>fullSize.vw*.5,
+    'Capture return control must avoid the native Combat footer and its lower-right test action');
   // The Android bug was not an editor-tab bug: clicking the REAL native
   // "Tester en combat" used to leave a tiny combat inside the GenSrpg Hub.
   // Exercise the unchanged Combat main preview lifecycle from the four-mode

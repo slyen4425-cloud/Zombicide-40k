@@ -20,6 +20,14 @@
  right:calc(8px + env(safe-area-inset-right,0px));z-index:20;align-items:center;gap:0;
  background:rgba(16,35,47,.88);border:1px solid #517284;border-radius:999px;
  box-shadow:0 2px 14px #0008;padding:2px;box-sizing:border-box;max-width:min(55vw,220px)}
+/* RED Chromium 41452718143: the old lower-right return overlay physically
+   intercepted the official Combat editor's lower-right "Tester en combat".
+   Relocate the SAME Shell-owned control above the Combat header's non-action
+   status region; leave the native preview's upper-left "Retour à l'éditeur"
+   and Exploration's independent toolbar placement available. No Lab DOM
+   queries, capture events or synthetic button forwarding. */
+#gensCaptureV2Root[data-native-family="combat"] > .gensCaptureV2NativeBar{
+  top:calc(8px + env(safe-area-inset-top,0px));bottom:auto}
 #gensCaptureV2Root .gensCaptureV2NativeBack{min-height:34px;padding:5px 10px;
  font-size:12px;flex-shrink:0;white-space:nowrap;border-radius:999px}
 #gensCaptureV2Root .gensCaptureV2NativeTitle{display:none}

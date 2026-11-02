@@ -73,6 +73,10 @@
     nativeTitle.textContent=info.label;
     notice.textContent=info.label+" · module officiel du laboratoire";
     host.dataset.view=kind;
+    // Presentation-only placement of the shared return control: Combat's
+    // official editor footer and Exploration's toolbars use different corners.
+    // This derived family does not own or inspect either Lab's DOM.
+    host.dataset.nativeFamily=info.family;
     return true;
   }
   function home(){
@@ -80,6 +84,7 @@
     if(frame){frame.src="about:blank";frame.remove();frame=null;}
     stage.replaceChildren();
     current=null;host.dataset.view="home";
+    delete host.dataset.nativeFamily;
     nativeTitle.textContent="";
     notice.textContent="Socle neuf. L'équipe, les rencontres, l'XP, la capture et les marchands seront raccordés ultérieurement.";
     return true;

@@ -377,6 +377,9 @@ jobs:
       - name: Tester les récapitulatifs de mondes V16.78.20
         run: node tests/gens_world_summary_v167820.test.cjs _site/index.html
 
+      - name: Gate RED - isolated Capture V2 must be truly staged in Pages artifact
+        run: node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
+
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5
 

@@ -21,7 +21,9 @@ const server=http.createServer(async(req,res)=>{
   const rel=decodeURIComponent(url.pathname).replace(/^\/+/,'')||'index.html';
   if(rel.split('/').includes('..')){res.writeHead(403).end();return;}
   let file,body;
-  for(const folder of [vendor,root]){
+  // The browser must consume ONLY the built preview artifact. Falling back
+  // to the Git checkout hides 404s that would recur in Android / HTTPS.
+  for(const folder of [vendor]){
    const candidate=path.resolve(folder,rel);
    if(!candidate.startsWith(folder+path.sep))continue;
    try{body=await fs.readFile(candidate);file=candidate;break;}catch{}

@@ -114,6 +114,50 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   }
   await official.locator('[data-editor-tab="combat"]').tap();
   await official.locator('[data-editor-panel="combat"]:visible').waitFor({timeout:3500});
+  // The Android bug was not an editor-tab bug: clicking the REAL native
+  // "Tester en combat" used to leave a tiny combat inside the GenSrpg Hub.
+  // Exercise the unchanged Combat main preview lifecycle from the four-mode
+  // root, without generating any alternative creature, arena or combat model.
+  const nativeTestButton=official.locator('[data-editor-test-combat]:not([disabled])');
+  await nativeTestButton.waitFor({state:'visible',timeout:30000});
+  await nativeTestButton.tap();
+  const nativeBattle=official.locator('[data-capture-preview-shell]:visible');
+  await nativeBattle.waitFor({timeout:30000});
+  await nativeBattle.locator('[data-combat-demo]:visible').waitFor({timeout:30000});
+  const realArena=nativeBattle.locator('[data-combat-arena]:visible');
+  await realArena.waitFor({timeout:15000});
+  const combatBounds=await realArena.evaluate(arena=>{
+    const shell=document.querySelector('[data-capture-preview-shell]');
+    const game=shell?.querySelector('[data-combat-demo]');
+    const box=arena.getBoundingClientRect();
+    const gameBox=game?.getBoundingClientRect();
+    const shellBox=shell?.getBoundingClientRect();
+    return {
+      viewport:{w:innerWidth,h:innerHeight},
+      shell:{w:shellBox?.width,h:shellBox?.height},
+      game:{w:gameBox?.width,h:gameBox?.height},
+      arena:{w:box.width,h:box.height},
+      frameFullscreen:!!document.fullscreenElement,
+      combatActors:arena.querySelectorAll('[data-preview-actor-ui]').length
+    };
+  });
+  assert.ok(combatBounds.combatActors>0,
+    'real Combat main must mount actor UI rather than an empty presentation shell');
+  assert.ok(combatBounds.arena.w>=combatBounds.viewport.w*.65 &&
+    combatBounds.arena.h>=combatBounds.viewport.h*.65,
+    'native combat arena is too small inside the full-screen Capture iframe: '+
+    JSON.stringify({combatBounds,errors:errors.slice(-12)}));
+  assert.ok(combatBounds.shell.w>=combatBounds.viewport.w*.95 &&
+    combatBounds.shell.h>=combatBounds.viewport.h*.95,
+    'Combat main preview shell must occupy the actual landscape viewport: '+
+    JSON.stringify(combatBounds));
+  console.log('GENSRPG_CAPTURE_V2_NATIVE_COMBAT_ARENA',JSON.stringify(combatBounds));
+  await nativeBattle.locator('[data-preview-back-editor]').tap();
+  await official.locator('[data-capture-editor-human]:visible').waitFor({timeout:15000});
+  assert.equal(await official.locator('[data-combat-demo]').count(),0,
+    'original Combat preview lifecycle must dispose its battle on editor return');
+  assert.equal(await official.locator('body').getAttribute('data-editor-view'),'editor',
+    'native Combat editor must restore ownership after its preview closes');
   // All shortcuts use the SAME original editor source; only its native ?tab= changes.
   for(const tab of ['skills','combat','music']){
     await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();

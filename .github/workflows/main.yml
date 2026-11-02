@@ -377,8 +377,60 @@ jobs:
       - name: Tester les récapitulatifs de mondes V16.78.20
         run: node tests/gens_world_summary_v167820.test.cjs _site/index.html
 
-      - name: Gate RED - isolated Capture V2 must be truly staged in Pages artifact
-        run: node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
+      # Single publisher, isolated URL: the production root above remains
+      # byte-for-byte unchanged by this candidate. Do not merge PR #225.
+      - name: Checkout exact CI-verified GenSrpg Capture V2 candidate (preview ONLY)
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/Zombicide-40k
+          ref: 4015c36321fe090558c9933cc7c4e548ebbd81e7
+          path: capture-v2-source
+
+      # Production Combat uses an earlier certified version. NEVER replace its
+      # checkout while composing this independent test-only subtree.
+      - name: Checkout approved Combat main for isolated Capture V2 preview
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
+          ref: 81ad362a401b7b2eb9faa811528aced9f2d6384a
+          path: preview-combat-lab
+          sparse-checkout: |
+            src
+            data
+            examples/dom-demo
+
+      - name: Checkout approved Exploration main for isolated Capture V2 preview
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/laboratoire_dynamique_exploration-
+          ref: ba0701224b764f4c60d4294c9729a49ade5869ad
+          path: preview-exploration-lab
+          sparse-checkout: |
+            src
+            assets
+            index.html
+            builder.html
+            world-assembler.html
+            sculpt-lab.html
+            manifest.webmanifest
+            scripts
+
+      - name: Stage isolated native preview under the existing Pages owner
+        run: |
+          test "$(git -C capture-v2-source rev-parse HEAD)" = "4015c36321fe090558c9933cc7c4e548ebbd81e7"
+          test "$(git -C preview-combat-lab rev-parse HEAD)" = "81ad362a401b7b2eb9faa811528aced9f2d6384a"
+          test "$(git -C preview-exploration-lab rev-parse HEAD)" = "ba0701224b764f4c60d4294c9729a49ade5869ad"
+          node --check tools/stage_capture_v2_pages_preview.mjs
+          node tools/stage_capture_v2_pages_preview.mjs capture-v2-source preview-combat-lab preview-exploration-lab _site
+          node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
+
+      - name: Install Chromium for real nested Capture V2 browser proof
+        run: |
+          npm install --no-save --no-package-lock playwright@1.57.0 pngjs@7.0.0
+          npx playwright install chromium
+
+      - name: Test real native Combat arena and Exploration 2.5D at Pages nested URL
+        run: node --test tests/gens_capture_v2_isolated_pages_browser.test.cjs
 
       - name: Configurer GitHub Pages
         uses: actions/configure-pages@v5

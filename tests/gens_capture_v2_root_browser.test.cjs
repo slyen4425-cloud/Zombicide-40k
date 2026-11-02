@@ -173,6 +173,44 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
     width:png.width,height:png.height,distinctColors:colors.size,visibleSamples:lit,
     source:'official-Exploration-main',combatShowcase:'official-Combat-main'
   }));
+  // True native Tester (not merely a painted Builder canvas): exercise the
+  // official Exploration main button, one active navigation loop, and return.
+  // No GenSrpg-supplied actor, gameplay rules or synthetic terrain.
+  const sculptFrame=page.frameLocator('#gensCaptureV2Root iframe');
+  const tester=sculptFrame.locator('#navigation-toggle');
+  await tester.tap();
+  assert.equal(await tester.getAttribute('aria-pressed'),'true',
+    'Tester must enter the native Exploration movement session');
+  await sculptFrame.locator('#navigation-stick:visible').waitFor({timeout:6000});
+  await sculptFrame.locator('#navigation-hud:visible').waitFor({timeout:6000});
+  const navigating=await nativeCanvas.evaluate(async()=>{
+    const sleep=ms=>new Promise(ok=>setTimeout(ok,ms));
+    for(let i=0;i<30;i++){
+      const metrics=document.querySelector('#navigation-metrics')?.textContent||'';
+      if(metrics.includes(' FPS '))return {
+        enabled:document.body.classList.contains('navigation-testing'),
+        status:document.querySelector('#navigation-status')?.textContent||'',
+        metrics
+      };
+      await sleep(120);
+    }
+    return {enabled:document.body.classList.contains('navigation-testing'),
+      status:document.querySelector('#navigation-status')?.textContent||'',
+      metrics:document.querySelector('#navigation-metrics')?.textContent||''};
+  });
+  assert.equal(navigating.enabled,true,'native navigation mode must remain active');
+  assert.match(navigating.status,/Case [0-9]+ \/ [0-9]+/,
+    'native collision/movement owner must expose a real terrain position');
+  assert.match(navigating.metrics,/[0-9]+ FPS/,
+    'the native Explorer navigation animation loop must run frames');
+  await tester.tap();
+  assert.equal(await tester.getAttribute('aria-pressed'),'false',
+    'leaving Tester must restore the same native editor');
+  assert.equal(await sculptFrame.locator('#navigation-stick').isVisible(),false,
+    'Tester joystick must be released on exit');
+  assert.equal(await nativeCanvas.evaluate(canvas=>
+    document.body.classList.contains('navigation-testing')),false,
+    'the native navigation runtime must be disposed');
   const builderSize=await builderFrame.boundingBox();
   assert.ok(builderSize.width>=925 && builderSize.height>=422,
     'World Builder must fill landscape, never render below eight buttons');

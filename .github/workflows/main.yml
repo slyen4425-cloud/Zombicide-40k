@@ -454,3 +454,52 @@ jobs:
       - name: Déployer sur GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify actual HTTPS preview provenance and untouched production root
+        run: |
+          set -eu
+          base="https://slyen4425-cloud.github.io/Zombicide-40k"
+          dir="/tmp/capture-v2-pages-check"
+          mkdir -p "$dir"
+          # The successful Pages deploy API is NOT proof that the intended
+          # immutable candidate and original Labs are what HTTPS now serves.
+          curl -fsSL --retry 15 --retry-all-errors --retry-delay 3 \
+            "$base/preview/capture-v2-pr225/release-provenance.v1.json?build=$GITHUB_RUN_ID" \
+            -o "$dir/release.json"
+          for file in \
+            "index.html" \
+            "assets/gensrpg/capture-v2/delivery-manifest.json" \
+            "vendor/combat-lab/examples/dom-demo/capture-editor-v2.html" \
+            "vendor/exploration-lab/sculpt-lab.html" \
+            "vendor/exploration-lab/src/sculpt-lab-main.js"; do
+            mkdir -p "$dir/preview/$(dirname "$file")"
+            curl -fsSL --retry 15 --retry-all-errors --retry-delay 3 \
+              "$base/preview/capture-v2-pr225/$file?build=$GITHUB_RUN_ID" \
+              -o "$dir/preview/$file"
+          done
+          curl -fsSL --retry 15 --retry-all-errors --retry-delay 3 \
+            "$base/index.html?build=$GITHUB_RUN_ID" -o "$dir/root-index.html"
+          node - "$dir" <<'JS'
+          const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+          const folder=process.argv[2],bytes=p=>fs.readFileSync(path.join(folder,p));
+          const hash=x=>crypto.createHash('sha256').update(x).digest('hex');
+          const release=JSON.parse(bytes('release.json'));
+          const manifestBytes=bytes('preview/assets/gensrpg/capture-v2/delivery-manifest.json');
+          const delivery=JSON.parse(manifestBytes);
+          if(release.schema!=='gensrpg-capture-v2-isolated-pages-preview-v1'||
+             release.source.commit!=='4015c36321fe090558c9933cc7c4e548ebbd81e7'||
+             release.productionRootSha256!==hash(bytes('root-index.html'))||
+             release.previewIndexSha256!==hash(bytes('preview/index.html'))||
+             release.deliveryManifestSha256!==hash(manifestBytes)||
+             release.combat.sha!==delivery.combat.sha||
+             release.exploration.sha!==delivery.exploration.sha||
+             release.legacyCaptureRuntime!==false||delivery.legacyCaptureRuntime!==false)
+            throw Error('LIVE HTTPS failed immutable Capture V2 and root integrity gate');
+          const html=bytes('preview/index.html').toString('utf8');
+          if(!html.includes('assets/gensrpg/capture-v2/shell-entry-v1.js'))
+            throw Error('Live Capture V2 shell unavailable');
+          console.log('VERIFIED live same-origin preview:',release.publicPath,
+            'Capture:',release.source.commit,
+            'Combat:',release.combat.sha,
+            'Exploration:',release.exploration.sha);
+          JS

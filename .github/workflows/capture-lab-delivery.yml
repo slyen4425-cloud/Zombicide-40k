@@ -74,6 +74,7 @@ jobs:
             builder.html
             world-assembler.html
             sculpt-lab.html
+            play.html
             scripts
       - name: Assemble exact Lab source files and refuse any historical Capture payload
         env:
@@ -95,7 +96,7 @@ jobs:
           done
           test ! -e _site/assets/gensrpg/capture
           cp -a exploration-lab/src exploration-lab/assets _site/vendor/exploration-lab/
-          cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html exploration-lab/sculpt-lab.html _site/vendor/exploration-lab/
+          cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html exploration-lab/sculpt-lab.html exploration-lab/play.html _site/vendor/exploration-lab/
           node tools/stage_capture_v2_labs.mjs combat-lab exploration-lab _site
           node --test tests/gens_capture_v2_pages_delivery_v1.test.cjs
       - name: Install real Chromium for the actual four-mode app, landscape touch

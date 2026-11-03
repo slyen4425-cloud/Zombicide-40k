@@ -83,6 +83,25 @@ test('both main-native tools retain their ORIGINAL bytes and browser sources',()
   'vendor/exploration-lab/src/main.js'
  ])assert.ok(visited.has(rel),'missing native contract: '+rel);
 });
+test('Aventure loads byte-identical public-certified Combat visuals, never a floating catalogue',()=>{
+ const pin=JSON.parse(fs.readFileSync(path.join(root,
+  'approved-public-preview/tools/capture_v2_pages_preview_pin.json'),'utf8'));
+ const visual=pin.officialVisuals;
+ assert.equal(pin.schema,'gensrpg-capture-v2-pages-source-pin-v1');
+ assert.equal(visual.repository,'slyen4425-cloud/GenSrpg_labo_combat_dynamique');
+ assert.equal(visual.ref,'global-assets');
+ assert.match(visual.sha,/^[0-9a-f]{40}$/);
+ assert.equal(sha(path.join(root,'approved-adventure-visuals')),visual.sha);
+ const file='data/assets/catalog/global-visual-assets.v1.json';
+ const sourceBytes=fs.readFileSync(path.join(root,'approved-adventure-visuals',file));
+ const publicBytes=fs.readFileSync(path.join(site,
+  'vendor/exploration-lab/capture-assets',file));
+ assert.deepEqual(publicBytes,sourceBytes,
+  'Aventure must fetch the same immutable visual catalog as the public certified Bestiary');
+ const catalog=JSON.parse(publicBytes.toString('utf8'));
+ assert.equal(catalog.catalogId,'gensrpg-global-visual-assets');
+ assert.ok(catalog.assets.length>0);
+});
 test('actual Pages root has ONLY Capture V2 entry and its existing four-mode Shell',()=>{
  const page=published('index.html');
  const origin=source('index.html');

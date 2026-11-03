@@ -14,7 +14,7 @@ const trial=path.join(site,rel);
 const previewPin=JSON.parse(fs.readFileSync(path.join(root,'tools/capture_v2_pages_preview_pin.json')));
 const previewSha=previewPin.sha;
 const combatSha='81ad362a401b7b2eb9faa811528aced9f2d6384a';
-const explorationSha='ba0701224b764f4c60d4294c9729a49ade5869ad';
+const explorationSha='9d5b198f193b73c1912dd21881311786415ba113';
 const sha256=buf=>crypto.createHash('sha256').update(buf).digest('hex');
 const read=(base,p)=>fs.readFileSync(path.join(base,p));
 const json=(base,p)=>JSON.parse(read(base,p));

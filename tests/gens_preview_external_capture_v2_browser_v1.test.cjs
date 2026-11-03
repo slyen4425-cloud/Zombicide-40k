@@ -4,6 +4,14 @@
 // main-certified SHAs without pretending to host the complete GenSrpg bundle.
 // This verifies native pages, not cross-laboratory gameplay or app persistence.
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const pins=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../assets/gensrpg/capture-v2/source-pins-v1.json'),'utf8'));
+for(const family of ['combat','exploration']){
+  assert.equal(pins[family].ref,'main','external native Lab must have one official main owner');
+  assert.match(pins[family].sha,/^[a-f0-9]{40}$/,'Lab SHA must be immutable');
+}
+
 const {chromium}=require('playwright');
 const {PNG}=require('pngjs');
 const repo=process.env.GITHUB_REPOSITORY||'slyen4425-cloud/Zombicide-40k';
@@ -65,10 +73,11 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
       'external host must execute the explicit preview flag even when in-document scripts are inert');
     const roots=await page.evaluate(()=>window.GensCaptureV2PreviewTransportV1||null);
     assert.ok(roots,'external preview must publish its explicit native-Lab transport');
-    assert.equal(roots.combat,
-      'https://raw.githack.com/slyen4425-cloud/GenSrpg_labo_combat_dynamique/81ad362a401b7b2eb9faa811528aced9f2d6384a/');
-    assert.equal(roots.exploration,
-      'https://raw.githack.com/slyen4425-cloud/laboratoire_dynamique_exploration-/ba0701224b764f4c60d4294c9729a49ade5869ad/');
+    for(const family of ['combat','exploration']){
+      const official=pins[family];
+      assert.equal(roots[family],'https://raw.githack.com/'+official.repository+'/'+official.sha+'/',
+        'external native '+family+' must follow the immutable canonical source-pins-v1.json main owner');
+    }
     for(const [key,family,rel,selector] of [
       ['creature','combat','examples/dom-demo/capture-editor-v2.html?tab=creature','[data-capture-editor-human]'],
       ['skills','combat','examples/dom-demo/capture-editor-v2.html?tab=skills','[data-editor-panel="skills"]'],

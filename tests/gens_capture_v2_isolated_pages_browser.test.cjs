@@ -151,8 +151,20 @@ test('map encounter opens the packaged official Combat handoff page and a real b
   assert.equal(expected.href,base+battle);
   const res=await page.goto(expected.href,{waitUntil:'domcontentloaded',timeout:60000});
   assert.equal(res.status(),200,'the actual Android Encounter page cannot return HTTP 404');
-  await page.locator('[data-bridge-status][data-ready="true"]')
-   .waitFor({timeout:90000});
+  // Official Explorer bridge intentionally hides the status banner after
+  // it marks itself ready. Waiting for visible data-ready=true can NEVER
+  // succeed (the native CSS uses display:none on that precise state).
+  try{
+   await page.waitForFunction(()=>document.querySelector('[data-bridge-status]')?.dataset.ready==='true',
+    null,{timeout:60000});
+  }catch(error){
+   const status=await page.locator('[data-bridge-status]').evaluate(node=>({
+    text:node.textContent,ready:node.dataset.ready,error:node.dataset.error
+   })).catch(()=>({text:'bridge DOM absent'}));
+   throw Error('Official Combat bridge failed to become ready: '+JSON.stringify({
+    status,failed,errors,cause:String(error)
+   }));
+  }
   await page.locator('[data-combat-arena]:visible').waitFor({timeout:10000});
   await page.locator('[data-combat-skill]:not([disabled])').first()
    .waitFor({timeout:20000});

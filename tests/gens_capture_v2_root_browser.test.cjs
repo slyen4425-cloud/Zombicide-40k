@@ -103,6 +103,62 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   }
   const species=await adventureFrame.locator('#adventure-starter option:not([disabled])').count();
   assert.ok(species>=1,'at least one official Bestiary creature is playable');
+
+  // Executed against the ACTUAL pinned Combat Bestiary and Exploration
+  // Encounter Catalog, not a copied list of supposed published species.
+  const publication=await adventureFrame.locator('#adventure-create').evaluate(async()=>{
+    const [
+      {captureBestiaryCardsV1},
+      {projectCaptureShowcaseEncounterSourceV1},
+      {createCaptureCreatureCatalogProvider},
+      {createPublishedEncounterCatalogV1}
+    ]=await Promise.all([
+      import('../../../vendor/combat-lab/src/ui/capture-bestiary-cards-v1.js'),
+      import('../../../vendor/exploration-lab/src/capture/capture-showcase-encounter-source-v1.js'),
+      import('../../../vendor/exploration-lab/src/capture/capture-creature-catalog-provider.js'),
+      import('./adventure-encounter-catalog-v1.mjs')
+    ]);
+    const json=async rel=>{
+      const response=await fetch(new URL(rel,document.baseURI),{cache:'no-store'});
+      if(!response.ok)throw Error('Official source missing HTTP '+response.status+': '+rel);
+      return response.json();
+    };
+    const [bundle,assets,stats,skills,manifest]=await Promise.all([
+      json('../../../vendor/exploration-lab/combat-preview/data/capture/showcase/encounter-bundle.v1.json'),
+      json('../../../vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json'),
+      json('../../../vendor/combat-lab/data/capture/monster-capture-stat-registry.v1.json'),
+      json('../../../vendor/combat-lab/data/combat/skills/catalog.v1.json'),
+      json('./delivery-manifest.json')
+    ]);
+    if(bundle.authorSha!==manifest.combat.sha||bundle.engineSha!==manifest.combat.sha)
+      throw Error('Author bundle differs from official Combat SHA');
+    const official=captureBestiaryCardsV1({
+      creatureTransfers:bundle.creatureTransfers,skillTransfers:bundle.skillTransfers,
+      assetCatalog:assets,statRegistry:stats,nativeSkills:skills.entries??[]
+    });
+    const native=createCaptureCreatureCatalogProvider(
+      projectCaptureShowcaseEncounterSourceV1(bundle.creatureTransfers));
+    const filtered=createPublishedEncounterCatalogV1({
+      bestiaryCards:official,captureCatalog:native
+    });
+    const allowed=new Set(official.filter(c=>c.skills?.some(s=>s.state==='ready')).map(c=>c.id));
+    const records=filtered.listCreatures();
+    return {
+      officialCount:official.length,sourceCount:native.listCreatures().length,
+      filteredCount:records.length,
+      leaked:records.filter(c=>!allowed.has(c.id)).map(c=>c.id),
+      changed:records.filter(c=>native.resolveCreature(c.id)?.spawnChance!==c.spawnChance ||
+        JSON.stringify(native.resolveCreature(c.id)?.elements)!==JSON.stringify(c.elements)).map(c=>c.id),
+      nonPublishedIds:native.listCreatures().filter(c=>!allowed.has(c.id)).map(c=>c.id),
+      survivors:records.map(c=>c.id)
+    };
+  });
+  assert.ok(publication.officialCount>=1,'Bestiary must originate from native Combat');
+  assert.ok(publication.sourceCount>=publication.filteredCount);
+  assert.deepEqual(publication.leaked,[],'Never spawn an unpublished Combat creature');
+  assert.deepEqual(publication.changed,[],'Exploration owns rarity and elements, no rewritten gameplay');
+  assert.equal(publication.survivors.length,publication.filteredCount);
+
   await adventureFrame.locator('#adventure-xp-base').fill('777');
   await adventureFrame.locator('#adventure-create').tap();
   const saved=await adventureFrame.locator('#adventure-save-summary').textContent();

@@ -418,7 +418,7 @@ jobs:
             src
             data
             examples/dom-demo
-            assets/runtime/audio-test
+            assets/runtime/audio
 
       - name: Checkout approved Exploration main for isolated Capture V2 preview
         uses: actions/checkout@v4
@@ -441,7 +441,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
-          ref: b3d46ce6f2639ebb59a2984aeff17f97cbcd7377
+          ref: aded6a9bc571dd1dd557889d35ad4e513f6f27dd
           path: preview-combat-assets
           sparse-checkout: |
             data/assets/catalog
@@ -521,7 +521,7 @@ jobs:
             src
             data
             examples/dom-demo
-            assets/runtime/audio-test
+            assets/runtime/audio
       - uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/laboratoire_dynamique_exploration-
@@ -541,7 +541,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
-          ref: b3d46ce6f2639ebb59a2984aeff17f97cbcd7377
+          ref: aded6a9bc571dd1dd557889d35ad4e513f6f27dd
           path: preview-combat-assets
           sparse-checkout: |
             data/assets/catalog

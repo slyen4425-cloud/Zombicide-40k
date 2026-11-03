@@ -105,13 +105,17 @@ export function stageOfficialCaptureEncounterBridge({
  record(catalogFrom,path.join(target,catalogRel),catalogRel);
  const mediaRoot=path.join(visualsRoot,'assets/library');
  const all=new Set(requested);
- for(const folder of sequenceDirs){
-  const from=path.join(mediaRoot,folder);
-  for(const name of fs.readdirSync(from,{withFileTypes:true})){
-   if(!name.isFile())throw Error('Unexpected sequence media entry: '+name.name);
-   all.add(folder+'/'+name.name);
+ const visitSequence=(folder,relative='')=>{
+  const dir=path.join(mediaRoot,folder,relative);
+  for(const entry of fs.readdirSync(dir,{withFileTypes:true})){
+   const next=relative?relative+'/'+entry.name:entry.name;
+   if(entry.isSymbolicLink())throw Error('Symlink in official sequence media: '+next);
+   if(entry.isDirectory())visitSequence(folder,next);
+   else if(entry.isFile())all.add(certifiedPath(folder+'/'+next));
+   else throw Error('Unexpected author media entry: '+next);
   }
- }
+ };
+ for(const folder of sequenceDirs)visitSequence(folder);
  for(const rel of [...all].sort())record(path.join(mediaRoot,rel),
   path.join(media,'assets/library',rel),'capture-assets/assets/library/'+rel);
  // The native bridge files have a SOURCE-OF-TRUTH label, not their own author

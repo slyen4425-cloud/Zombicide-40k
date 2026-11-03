@@ -179,3 +179,60 @@ test('map encounter opens the packaged official Combat handoff page and a real b
   server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
  }
 });
+
+// Android's reported regression: start the ACTUAL 2.5D Tester, walk until
+// Exploration creates a real EncounterSnapshot, tap its native Battle action
+// and verify the embedded Combat main session starts. No mock encounter or
+// separately launched demo is permitted in this end-to-end test.
+test('real Exploration 2.5D Tester encounter tap opens native Combat instead of HTTP 404',
+ {timeout:180000},async()=>{
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ let browser,context;
+ const broken=[];
+ try{
+  browser=await chromium.launch({headless:true});
+  context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true,
+   locale:'fr-FR',serviceWorkers:'block'});
+  const page=await context.newPage();
+  const base='http://127.0.0.1:'+server.address().port;
+  page.on('pageerror',e=>broken.push('JS '+String(e)));
+  page.on('response',r=>{
+   if(r.url().startsWith(base+scope+'vendor/exploration-lab/')&&r.status()>=400)
+    broken.push('HTTP '+r.status()+' '+r.url());
+  });
+  await page.goto(base+scope+'vendor/exploration-lab/sculpt-lab.html?encounterTest=1',
+   {waitUntil:'domcontentloaded',timeout:60000});
+  await page.waitForFunction(()=>typeof window.__sculptEncounterProbe==='function',
+   null,{timeout:45000});
+  await page.locator('#navigation-toggle').tap();
+  await page.waitForFunction(()=>window.__sculptEncounterProbe?.().testing,
+   null,{timeout:12000});
+  // These are REAL keyboard inputs consumed by Navigation World and its
+  // collision/terrain encounter controller, never direct state mutations.
+  for(const key of ['ArrowRight','ArrowDown','ArrowLeft','ArrowUp']){
+   if(await page.evaluate(()=>window.__sculptEncounterProbe?.().pending))break;
+   await page.keyboard.down(key);
+   try{await page.waitForFunction(()=>window.__sculptEncounterProbe?.().pending,
+    null,{timeout:9000});}catch{/* Continue walking; collision may block a direction. */}
+   await page.keyboard.up(key);
+  }
+  const probe=await page.evaluate(()=>window.__sculptEncounterProbe?.());
+  assert.ok(probe?.pending,'real 2.5D walking must trigger a canonical Encounter: '+JSON.stringify(probe));
+  assert.equal(probe.overlayVisible,true);
+  await page.locator('#sculpt-encounter-combat').tap();
+  const frame=page.frameLocator('.combat-overlay__frame');
+  await frame.locator('[data-combat-arena]:visible').waitFor({timeout:60000});
+  await frame.locator('[data-combat-skill]:not([disabled])').first().waitFor({timeout:30000});
+  const ready=await frame.locator('[data-bridge-status]').getAttribute('data-ready');
+  assert.equal(ready,'true','the actual combat session must complete native boot');
+  assert.deepEqual(broken,[],'real map → Combat must not request 404 resources');
+  console.log('GENSRPG_EXPLORATION_TO_NATIVE_COMBAT_HANDOFF_GREEN',JSON.stringify({
+   source:'real Exploration navigation encounter',creatureId:probe.creatureId,
+   bridge:'/combat-preview/examples/dom-demo/exploration-encounter.html',
+   skills:await frame.locator('[data-combat-skill]').count()
+  }));
+ }finally{
+  await context?.close();await browser?.close();
+  server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
+ }
+});

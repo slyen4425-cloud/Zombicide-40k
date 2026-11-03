@@ -1,3 +1,15 @@
+## 2026-11-03 — Lot suivant Monster Capture V2 : candidats rencontres = Bestiaire publié Combat (EN COURS, NON GREEN)
+
+- **Base** : PR #239 candidat `a75e42e396fa3f373e4029532cdb294f8998694b` avec les quatre contrôles CI GREEN ; checkpoint START `checkpoint/gensrpg-published-encounter-gate-start-2026-11-03`, lot `work/gensrpg-adventure-published-encounter-gate-2026-11-03`. GenSRPG `main@aa34bf1f` préservé.
+- **Demande** : rencontrer et combattre **uniquement** les créatures publiées dans le véritable Bestiaire Combat, puis enregistrer XP/loot sans doublons.
+- **Lot actuel minimal** : construire un filtre **lecture seule** à partir des cartes retournées par `captureBestiaryCardsV1` (autorité Combat), et des candidats de l'Encounter Catalog propriétaire Exploration, avec la règle « capacité utilisable » pour éviter les adversaires impossibles à combattre. **Pas de catalogue de créatures GenSRPG, ni d'IDs codés en dur**. Le filtre garde l'identité/les poids/éléments/spawn du catalogue source pour le vrai Encounter Controller ; aucun calcul de combat, XP ou loot.
+- **Autorités** : Combat = publication/compétences ; Exploration = resolver familles, fréquence, choix de rencontres, position, handoff/retour ; GenSRPG = état/XP/loot/équipe/sauvegarde. Tout raccord sera versionné et injecté, jamais une seconde source. Explorer le problème critique de corrélation des encounters après rechargement avant activation des récompenses.
+- **TDD** : RED dans un test contrat isolé, puis correction. Tester espèces visibles/non visibles, compétences non prêtes, doublons, rareté/éléments inchangés, absence de candidat, invariant Bestiaire officiel. CI du commit exact ; test navigateur ultérieur du vrai chemin *Jouer* quand Exploration expose un contrat sécurisé.
+- **Hors périmètre de ce sous-lot** : activer la rencontre dans le runtime, simuler une victoire, attribuer des récompenses à partir de données fictives, écrire le moteur Combat, modifier l'Exploration main, publier la PWA. Les blocages de handoff doivent être résolus chez leur propriétaire avant la première partie complète.
+- **Statut** : périmètre isolé, aucun GREEN produit ni publication à cette étape.
+
+---
+
 ## 2026-11-03 — GenSRPG Aventure → mode Jouer natif Exploration (lot en chantier, NON GREEN)
 
 - **Autorisation** : poursuivre le raccord des laboratoires, intégrer le jeu via GenSRPG. Propriétaire de la session/XP/loot : GenSRPG Capture V2. Propriétaire du WorldDocument, de la navigation et du checkpoint : Exploration main. Combat main demeure seul propriétaire des créatures, stats et capacités.

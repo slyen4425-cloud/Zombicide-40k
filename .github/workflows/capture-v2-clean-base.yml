@@ -39,6 +39,9 @@ jobs:
       - name: TDD GenSRPG Aventure → Exploration Jouer session corrélée (RED puis GREEN)
         run: node --test tests/gens_capture_v2_native_play_handoff_v1.test.mjs
 
+      - name: TDD official Bestiary → native Exploration encounter candidates, published only
+        run: node --test tests/gens_capture_v2_published_encounter_catalog_v1.test.mjs
+
       - name: Aventure V2 — seule UI propriétaire, vrais éditeurs et Bestiaire non dupliqués
         run: node --test tests/gens_capture_v2_adventure_ui_owner_v1.test.mjs
 

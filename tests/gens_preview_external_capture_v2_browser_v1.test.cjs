@@ -54,8 +54,8 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
     assert.equal(owner.modeCount,4);
     await page.locator('button.gensRootModeCard.capture').click();
     await page.locator('#gensCaptureV2Root').waitFor({state:'visible'});
-    assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view]').count(),8,
-      'external Shell must expose the original native-author destinations');
+    assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view]').count(),9,
+      'external Shell must keep all eight native Lab destinations plus the owned Adventure view');
     // External preview only: render each original Lab on its immutable commit.
     // Production must still require its own same-origin vendor owner.
     const diagnostics=await page.evaluate(()=>({

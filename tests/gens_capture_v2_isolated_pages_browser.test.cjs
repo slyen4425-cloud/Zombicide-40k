@@ -104,3 +104,66 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
   server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
  }
 });
+
+// Full real Encounter handoff browser regression: the previous test opened
+// Combat editor and the Map tester separately and missed a native iframe 404.
+test('map encounter opens the packaged official Combat handoff page and a real battle', {
+ timeout:180000
+},async()=>{
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ let browser,context;
+ const failed=[],errors=[];
+ try{
+  browser=await chromium.launch({headless:true});
+  context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true,
+   locale:'fr-FR',serviceWorkers:'block'});
+  const base='http://127.0.0.1:'+server.address().port;
+  const sub=scope+'vendor/exploration-lab/';
+  const battle=sub+'combat-preview/examples/dom-demo/exploration-encounter.html';
+  const snapshot={
+   schema:'capture-encounter-snapshot-v1',version:1,
+   encounterId:'http-regression-native-1',source:'terrain-random',
+   player:{partyRef:'capture-party-player-v1'},
+   opponents:[{creatureId:'crea_nat_1'}],
+   rules:{rulesetId:'capture.standard.1v1'},
+   context:{areaId:'forest-exterior',terrainFamilyId:'forest',elementId:'nature'},
+   returnToken:'http-regression-return-1'
+  };
+  await context.addInitScript(({snapshot,sub})=>{
+   if(location.pathname.endsWith('/combat-preview/examples/dom-demo/exploration-encounter.html')){
+    const envelope={version:1,snapshot,returnState:{
+     areaId:'forest-exterior',x:62,y:18,
+     returnUrl:location.origin+sub+'sculpt-lab.html?combatReturn=1'
+    },result:null};
+    sessionStorage.setItem('gensrpg.capture.combat-handoff.v1',JSON.stringify(envelope));
+   }
+  },{snapshot,sub});
+  const page=await context.newPage();
+  page.on('pageerror',error=>errors.push(String(error)));
+  page.on('response',response=>{
+   if(response.url().startsWith(base+sub)&&response.status()>=400)
+    failed.push({status:response.status(),url:response.url()});
+  });
+  // Same URL computed by the original Exploration main's encounter
+  // navigation, not a made-up GenSrpg entry or separate demo.
+  const expected=new URL('./combat-preview/examples/dom-demo/exploration-encounter.html',
+   base+sub+'sculpt-lab.html');
+  assert.equal(expected.href,base+battle);
+  const res=await page.goto(expected.href,{waitUntil:'domcontentloaded',timeout:60000});
+  assert.equal(res.status(),200,'the actual Android Encounter page cannot return HTTP 404');
+  await page.locator('[data-bridge-status][data-ready="true"]')
+   .waitFor({timeout:90000});
+  await page.locator('[data-combat-arena]:visible').waitFor({timeout:10000});
+  await page.locator('[data-combat-skill]:not([disabled])').first()
+   .waitFor({timeout:20000});
+  assert.deepEqual(failed,[],'all own native Encounter module/media URLs must load');
+  assert.deepEqual(errors,[],'real official Combat bridge must mount without JS exceptions');
+  console.log('GENSRPG_REAL_MAP_TO_COMBAT_HTTP_PROOF',JSON.stringify({
+   url:expected.pathname,battle:'real Combat main',http:res.status(),
+   skills:await page.locator('[data-combat-skill]').count(),source:'official Exploration + Combat'
+  }));
+ }finally{
+  await context?.close();await browser?.close();
+  server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
+ }
+});

@@ -50,7 +50,8 @@ const required={
   'src/ui/combat-2v2-test-ui.js'
  ],
  exploration:[
-  'index.html','builder.html','world-assembler.html','sculpt-lab.html',
+  'index.html','builder.html','world-assembler.html','sculpt-lab.html','play.html',
+  'src/play/exploration-play-session.js','src/play/exploration-play-entry.js',
   'src/main.js','src/sculpt-lab-main.js'
  ]
 };

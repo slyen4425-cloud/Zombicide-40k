@@ -86,6 +86,7 @@ jobs:
             builder.html
             world-assembler.html
             sculpt-lab.html
+            play.html
             scripts
       # Real Adventure/Bestiary browser test must use the certified public
       # preview's ONE immutable author-visual pin. Never fake the catalog or
@@ -129,7 +130,7 @@ jobs:
           mkdir -p _site/vendor/combat-lab _site/vendor/exploration-lab
           cp -a combat-lab/src combat-lab/data combat-lab/examples _site/vendor/combat-lab/
           cp -a exploration-lab/src exploration-lab/assets _site/vendor/exploration-lab/
-          cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html exploration-lab/sculpt-lab.html _site/vendor/exploration-lab/
+          cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html exploration-lab/sculpt-lab.html exploration-lab/play.html _site/vendor/exploration-lab/
           # The installed-PWA regression must run against real GenSrpg Pages files,
           # not a vendor-only directory that returned 404 for every pre-cache URL.
           cp -f index.html service-worker.js manifest.webmanifest _site/

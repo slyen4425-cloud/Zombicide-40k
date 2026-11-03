@@ -424,7 +424,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/laboratoire_dynamique_exploration-
-          ref: ba0701224b764f4c60d4294c9729a49ade5869ad
+          ref: 9d5b198f193b73c1912dd21881311786415ba113
           path: preview-exploration-lab
           sparse-checkout: |
             src
@@ -450,7 +450,7 @@ jobs:
         run: |
           test "$(git -C capture-v2-source rev-parse HEAD)" = "${{ steps.preview_pin.outputs.sha }}"
           test "$(git -C preview-combat-lab rev-parse HEAD)" = "81ad362a401b7b2eb9faa811528aced9f2d6384a"
-          test "$(git -C preview-exploration-lab rev-parse HEAD)" = "ba0701224b764f4c60d4294c9729a49ade5869ad"
+          test "$(git -C preview-exploration-lab rev-parse HEAD)" = "9d5b198f193b73c1912dd21881311786415ba113"
           node --check tools/stage_capture_v2_pages_preview.mjs
           node tools/stage_capture_v2_pages_preview.mjs capture-v2-source preview-combat-lab preview-exploration-lab _site preview-combat-assets
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
@@ -525,7 +525,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/laboratoire_dynamique_exploration-
-          ref: ba0701224b764f4c60d4294c9729a49ade5869ad
+          ref: 9d5b198f193b73c1912dd21881311786415ba113
           path: preview-exploration-lab
           sparse-checkout: |
             src

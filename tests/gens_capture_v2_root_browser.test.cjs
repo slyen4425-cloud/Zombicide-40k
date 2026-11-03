@@ -74,8 +74,8 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.locator('#gensGameHome:visible').count(),0);
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   const buttons=page.locator('#gensCaptureV2Root [data-capture-v2-view]');
-  assert.equal(await buttons.count(),8,
-   'the FOUR native Combat editor tabs share one official Lab owner, without extra editors');
+  assert.equal(await buttons.count(),9,
+   'eight native Lab entry points plus one GenSrpg-owned Adventure settings view, without extra editors');
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="creature"]').tap();
   const iframe=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
   await iframe.waitFor({state:'visible'});

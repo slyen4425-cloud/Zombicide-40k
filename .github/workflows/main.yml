@@ -443,6 +443,7 @@ jobs:
           node --check tools/stage_capture_v2_pages_preview.mjs
           node tools/stage_capture_v2_pages_preview.mjs capture-v2-source preview-combat-lab preview-exploration-lab _site
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
+          node --test tests/gens_capture_v2_encounter_bridge_site.test.cjs
 
       - name: Install Chromium for real nested Capture V2 browser proof
         run: |
@@ -527,6 +528,7 @@ jobs:
         run: |
           node tools/stage_capture_v2_pages_preview.mjs capture-v2-source preview-combat-lab preview-exploration-lab _site
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
+          node --test tests/gens_capture_v2_encounter_bridge_site.test.cjs
       - name: Install Chromium and verify the real nested site
         run: |
           npm install --no-save --no-package-lock playwright@1.57.0 pngjs@7.0.0

@@ -76,6 +76,18 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   const buttons=page.locator('#gensCaptureV2Root [data-capture-v2-view]');
   assert.equal(await buttons.count(),9,
    'eight native Lab entry points plus one GenSrpg-owned Adventure settings view, without extra editors');
+  // Aventure is the ninth, GenSrpg-owned screen; the original eight native
+  // Lab destinations keep their exact URLs and full-screen contracts.
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
+  const adventureFrame=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
+  await adventureFrame.locator('#adventure-xp-base').waitFor({timeout:15000});
+  await adventureFrame.locator('#adventure-create').waitFor({timeout:15000});
+  const adventureSrc=await page.locator('#gensCaptureV2Root iframe').getAttribute('src');
+  assert.match(adventureSrc,/assets\/gensrpg\/capture-v2\/adventure\.html$/,
+    'GenSrpg owns the Adventure configuration, not the Combat/Exploration Labs');
+  assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),false);
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="creature"]').tap();
   const iframe=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
   await iframe.waitFor({state:'visible'});

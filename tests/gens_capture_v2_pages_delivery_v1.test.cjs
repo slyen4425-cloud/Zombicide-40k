@@ -75,6 +75,9 @@ test('both main-native tools retain their ORIGINAL bytes and browser sources',()
   'vendor/exploration-lab/index.html',
   'vendor/exploration-lab/builder.html',
   'vendor/exploration-lab/sculpt-lab.html',
+  'vendor/exploration-lab/play.html',
+  'vendor/exploration-lab/src/play/exploration-play-session.js',
+  'vendor/exploration-lab/src/play/exploration-play-entry.js',
   'vendor/exploration-lab/src/sculpt-lab-main.js',
   'vendor/exploration-lab/world-assembler.html',
   'vendor/exploration-lab/src/main.js'
@@ -122,6 +125,8 @@ test('native preview artifact is self-contained, not rescued by the GitHub check
     'assets/gensrpg/shell/module-launch-final-authority-v1.js',
     'assets/dungeon/dungeon-room-creator-100.js',
     'vendor/exploration-lab/sculpt-lab.html',
+    'vendor/exploration-lab/play.html',
+    'vendor/exploration-lab/src/play/exploration-play-session.js',
     'vendor/combat-lab/examples/dom-demo/capture-editor-v2.html'
   ])assert.ok(fs.statSync(path.join(site,required)).isFile(),
     'Native preview must physically ship '+required);

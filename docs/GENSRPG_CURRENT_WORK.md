@@ -1,3 +1,15 @@
+## 2026-11-03 — GenSRPG Aventure → mode Jouer natif Exploration (lot en chantier, NON GREEN)
+
+- **Autorisation** : poursuivre le raccord des laboratoires, intégrer le jeu via GenSRPG. Propriétaire de la session/XP/loot : GenSRPG Capture V2. Propriétaire du WorldDocument, de la navigation et du checkpoint : Exploration main. Combat main demeure seul propriétaire des créatures, stats et capacités.
+- **Base** : GenSRPG Capture V2 candidat `f36a156c114008d700adbef843e3259fe5d04069` (PR #238, 4 CI GREEN sur la correction du 404), checkpoint START `checkpoint/gensrpg-adventure-native-play-handoff-start-2026-11-03`, branche `work/gensrpg-adventure-native-play-handoff-2026-11-03` ; `main` de GenSRPG `aa34bf1f` inchangé.
+- **Précondition propriétaire en cours** : PR Exploration #346 DRAFT basée sur `main@d999e8e6`, ajout d'une API `{sessionId}` pour isoler les positions et conserver la sauvegarde standalone. **Ne pas consommer une branche Exploration de développement en production** ; mise à jour pin uniquement après sa promotion vérifiée sur main.
+- **Périmètre** : contrat pur `AventureSession → WorldDocument officiel → checkpoint scoped Exploration → ouverture du vrai `sculpt-lab.html?play=1&adventureSession=...``. L'UI Aventure appartient à GenSRPG, aucun monde construit artificiellement, aucune création de partie si le World Builder sur la même origine n'a pas de WorldDocument. Conserver jeu/stockage existant ; reprendre sans réinitialiser un checkpoint corrélé.
+- **TDD RED** : tests avant code : démarrage d'une session configurée, validation de source monde, reprise sans reset, sessions séparées et détection d'une incompatibilité avant sauvegarde; puis test navigateur GenSRPG réel. Contrôler les 4 modes, bestiaire publié, XP et loot inchangés.
+- **Hors périmètre** : combat de partie, rencontres whitelist, récompenses réelles, réglages physiques caméra/vitesse, publication main/Service Worker, migrations multi-profils. Pas de GREEN produit sans navigation/retour vrai Chromium et tests tactiles.
+- **Risque** : World Builder labo et World Builder GenSRPG ont chacun leur stockage par origine. Montrer explicitement le besoin de charger/créer le monde dans le World Builder officiel embarqué GenSRPG. Ne jamais recopier silencieusement une autre origine.
+
+---
+
 ## 2026-11-03 — Monster Capture V2 : socle Aventure, règles, sauvegarde, bestiaire officiel (PR #233, C2, DRAFT)
 - **Demande utilisateur** : onglet Aventure pour règles XP/créatures, loot et vraie partie à sauvegarder/reprendre ; seuls les monstres apparaissant dans le Bestiaire officiel doivent pouvoir entrer en partie. Après correction publiée de l'entrée Combat #229, ne pas confondre le `Tester` natif de l'éditeur avec une vraie partie.
 - **Source, gouvernance** : GenSrpg `main@aa34bf1f415d14ba2c62e6745f8655aec6e3a4fa` intact et PWA de production inchangée ; branche dédiée `work/gensrpg-capture-v2-adventure-foundation-2026-11-03`, empilée sur la candidate V2 #225 `2324cb05ed67f050147a08519c5fd46f320f88fd`, checkpoint START `checkpoint/gensrpg-capture-v2-adventure-foundation-start-2026-11-03`. **Ne pas fusionner #233 sur le main stable séparément de #225**.

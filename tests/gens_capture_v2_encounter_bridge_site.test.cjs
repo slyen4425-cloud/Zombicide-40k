@@ -37,6 +37,19 @@ test('packaged native encounter has a single immutable source per owner and offi
  assert.equal(manifest.exploration.sha,'ba0701224b764f4c60d4294c9729a49ade5869ad');
  assert.match(manifest.assets.sha,/^[0-9a-f]{40}$/);
  assert.equal(release.encounterBridgeManifestSha256,digest(read('bridge-transport-manifest.v1.json')));
+ const catalog=JSON.parse(read('vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json'));
+ const resources=new Map(catalog.assets.map(a=>[a.id,a.resource]));
+ for(const id of ['pack:capture:creature-heriplante-opponent-01',
+  'pack:capture:creature-heriplante-player-01',
+  'pack:capture:creature-heriplante-icon-01',
+  'pack:capture:sprite-fleur-defense-01']){
+  const resource=resources.get(id);
+  assert.ok(resource?.file,'Native Combat author transfer refers to missing official media: '+id);
+  required('vendor/exploration-lab/capture-assets/assets/library/'+resource.file);
+ }
+ for(const audio of ['assets/runtime/audio/music-v1/battle-01-cb4ed87d.mp3',
+  'assets/runtime/audio/private-v1/sanctuary-367a77dd.mp3'])
+  required('vendor/exploration-lab/combat-preview/'+audio);
  const paths=new Set();
  for(const item of manifest.files){
   assert.ok(!paths.has(item.path),'duplicate authority transport '+item.path);

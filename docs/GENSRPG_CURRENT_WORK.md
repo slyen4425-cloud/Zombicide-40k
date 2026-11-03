@@ -1,3 +1,11 @@
+## 2026-11-03 — Index documentaire et idées futures Monster Capture (documentation uniquement)
+- **Base** : `main@aa34bf1f415d14ba2c62e6745f8655aec6e3a4fa` ; checkpoint START `checkpoint/gensrpg-start-documentation-navigation-assets-2026-11-03` ; branche `work/gensrpg-documentation-navigation-assets-2026-11-03`. Aucun gameplay, aucun asset, aucun code runtime modifié.
+- **Périmètre** : créer un point d'entrée stable [`docs/GENSRPG_POINT_ENTREE.md`](GENSRPG_POINT_ENTREE.md) lié depuis le README (charte, roadmap, CURRENT_WORK et issues officielles sans duplication) et noter [`docs/MONSTER_CAPTURE_IDEES_EXPLORATION_ARENES.md`](MONSTER_CAPTURE_IDEES_EXPLORATION_ARENES.md) : décors enneigés, port, points d'intérêt, arènes à champion IA/humain avec défense IA hors ligne.
+- **Propriétaires et protections** : Labo Exploration pour les cartes/assets ; Combat pour le combat/IA ; GenSrpg pour partie/persistance ; futur contrat PvP pour le duel synchrone. Les chantiers V2 en cours, le runtime, les sources laboratoires, PWA/cache et sauvegardes restent inchangés ; ne pas appeler ces idées « développées ». Référence du dernier GREEN technique : documents actifs du chantier 404, **non modifiés**.
+- **Contrôle de ce lot documentaire** : relire les liens, confirmer que la PR ne contient que README et docs ; **aucun CI ou déploiement fonctionnel ne peut être revendiqué par ce simple ajout**. Étape suivante : revue de documentation/PR ; continuer le 404 et la synchronisation dans leurs propres branches, puis arbitrer les idées sans mêler les lots.
+
+---
+
 ## 2026-11-03 — 404 lors de la rencontre de monstre (C2, sous-chemin Capture V2)
 - **Signalement Android utilisateur** : éditeur de cartes, éditeur de créatures et test de carte démarrent correctement ; après une rencontre, « Lancer le combat » affiche HTTP 404. Le navigateur n'a pas d'erreur jusqu'au raccord Exploration → Combat.
 - **Base et checkpoint START** : `main@4464afcb541652526dbea826f8754e744f3ccb7d` ; checkpoint `checkpoint/gensrpg-start-capture-v2-encounter-404-2026-11-03` sur cette même base, branche dédiée `work/gensrpg-capture-v2-encounter-404-2026-11-03`. Publisher unique `.github/workflows/main.yml` ; PR #225 conservée DRAFT, sources officielles des Labos inchangées.

@@ -32,7 +32,8 @@ test('Adventure does not pretend the Exploration editor Tester is a native Game 
  assert.doesNotMatch(ui,/#navigation-toggle|\.click\(\).*navigation|window\.parent\.document|script.*monster-capture-creatures/);
  assert.match(html,/id="adventure-play"/);
  assert.match(html,/id="adventure-world-builder"/);
- assert.match(html,/vendor\/exploration-lab\/world-assembler\.html/);
+ assert.match(ui,/shell\?\.open\?\.\('world'\)/);
+ assert.match(ui,/vendor\/exploration-lab\/world-assembler\.html/);
  assert.match(ui,/startAdventureExplorationV1\(/);
  assert.match(ui,/readWorldAssemblerDraft\(window\.localStorage\)/);
  assert.match(ui,/createNewExplorationPlay,readExplorationPlay/);

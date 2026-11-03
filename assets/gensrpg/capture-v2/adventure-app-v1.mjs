@@ -192,6 +192,16 @@ $('adventure-create').addEventListener('click',guarded(()=>{
  stateMessage('Partie sauvegardée. Tu peux entrer dans le monde si une carte est disponible dans le World Builder GenSRPG.');
  showSave();updatePreview();
 }));
+$('adventure-world-builder').addEventListener('click',guarded(()=>{
+ // The existing Monster Capture Shell owns navigation between the two Lab UIs.
+ // The fallback only supports opening this standalone GenSRPG page directly.
+ const shell=window.parent!==window?window.parent.GensCaptureV2:null;
+ if(shell?.open('world')===true)return;
+ const url=new URL('../../../vendor/exploration-lab/world-assembler.html',import.meta.url);
+ if(url.origin!==window.location.origin)
+  throw Error('World Builder officiel requis sur la même origine GenSRPG');
+ window.location.assign(url.href);
+}));
 $('adventure-play').addEventListener('click',guarded(()=>{
  const world=readWorldAssemblerDraft(window.localStorage);
  const result=startAdventureExplorationV1({

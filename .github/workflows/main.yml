@@ -601,7 +601,12 @@ jobs:
             -o "$dir/release.json"
           for file in \
             "index.html" \
+            "bridge-transport-manifest.v1.json" \
             "assets/gensrpg/capture-v2/delivery-manifest.json" \
+            "vendor/exploration-lab/combat-preview/examples/dom-demo/exploration-encounter.html" \
+            "vendor/exploration-lab/combat-preview/examples/dom-demo/exploration-encounter.js" \
+            "vendor/exploration-lab/combat-preview/data/capture/showcase/encounter-bundle.v1.json" \
+            "vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json" \
             "vendor/combat-lab/examples/dom-demo/capture-editor-v2.html" \
             "vendor/exploration-lab/sculpt-lab.html" \
             "vendor/exploration-lab/src/sculpt-lab-main.js"; do
@@ -619,12 +624,21 @@ jobs:
           const release=JSON.parse(bytes('release.json'));
           const manifestBytes=bytes('preview/assets/gensrpg/capture-v2/delivery-manifest.json');
           const delivery=JSON.parse(manifestBytes);
+          const bridgeBytes=bytes('preview/bridge-transport-manifest.v1.json');
+          const bridge=JSON.parse(bridgeBytes);
           const pin=JSON.parse(fs.readFileSync('tools/capture_v2_pages_preview_pin.json','utf8'));
           if(release.schema!=='gensrpg-capture-v2-isolated-pages-preview-v1'||
              release.source.commit!==pin.sha||
              release.productionRootSha256!==hash(bytes('root-index.html'))||
              release.previewIndexSha256!==hash(bytes('preview/index.html'))||
              release.deliveryManifestSha256!==hash(manifestBytes)||
+             release.encounterBridgeManifestSha256!==hash(bridgeBytes)||
+             bridge.schema!=='gensrpg-capture-v2-native-encounter-transport-v1'||
+             bridge.combat.sha!==release.combat.sha||
+             bridge.exploration.sha!==release.exploration.sha||
+             bridge.legacyCaptureRuntime!==false||
+             !bytes('preview/vendor/exploration-lab/combat-preview/examples/dom-demo/exploration-encounter.html').toString('utf8').includes('./exploration-encounter.js')||
+             !bytes('preview/vendor/exploration-lab/combat-preview/examples/dom-demo/exploration-encounter.js').toString('utf8').includes('mountCoop2v2Test')||
              release.combat.sha!==delivery.combat.sha||
              release.exploration.sha!==delivery.exploration.sha||
              release.legacyCaptureRuntime!==false||delivery.legacyCaptureRuntime!==false)

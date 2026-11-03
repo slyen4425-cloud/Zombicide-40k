@@ -14,7 +14,8 @@
     skills:{label:"Capacités · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=skills",family:"combat"},
     combat:{label:"Règles de combat · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=combat",family:"combat"},
     music:{label:"Musiques · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=music",family:"combat"},
-    bestiary:{label:"Bestiaire · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/bestiary.html",family:"combat"}
+    bestiary:{label:"Bestiaire · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/bestiary.html",family:"combat"},
+    adventure:{label:"Aventure · XP, butin et partie",path:"assets/gensrpg/capture-v2/adventure.html",family:"capture"}
   });
   const shell=root.GensShellModuleLaunchV1;
   const returnShell=root.GensShellScreenReturnV1;
@@ -25,6 +26,19 @@
   function urlFor(kind){
     const info=VIEWS[kind];
     if(!info)throw new RangeError("Unknown Capture native owner");
+    // The Adventure controls are owned by GenSrpg Capture itself. This is
+    // NOT a third Lab or an alternate creature/battle editor.
+    if(info.family==="capture"){
+      const url=new URL(info.path,base);
+      const ownRoot=new URL("assets/gensrpg/capture-v2/",base);
+      if(url.origin!==ownRoot.origin || !url.pathname.startsWith(ownRoot.pathname))
+        throw new Error("Adventure UI escaped the Capture V2 owner");
+      const externalPreview=root.__GENSRPG_PREVIEW__===true &&
+        root.location.origin==="https://html-preview.github.io";
+      if(!externalPreview && url.origin!==root.location.origin)
+        throw new Error("Adventure UI must be same-origin with its active Capture session");
+      return url;
+    }
     // Dedicated external *preview* only. The real Pages app still requires
     // same-origin /vendor/ documents and never reads a cross-origin override.
     // The preview source is derived from official exact-main pins by preview.html.
@@ -86,7 +100,7 @@
     current=null;host.dataset.view="home";
     delete host.dataset.nativeFamily;
     nativeTitle.textContent="";
-    notice.textContent="Socle neuf. L'équipe, les rencontres, l'XP, la capture et les marchands seront raccordés ultérieurement.";
+    notice.textContent="Éditeurs officiels et premier onglet Aventure : progression, butin et sauvegarde. Le mode Jouer sera raccordé séparément.";
     return true;
   }
   function start(){

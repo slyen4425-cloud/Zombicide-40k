@@ -33,6 +33,12 @@ jobs:
         run: |
           node --test tests/gens_capture_v2_clean_boundary.test.cjs
           node --test tests/gens_capture_v2_pwa_cache_owner_v1.test.cjs
+      - name: Aventure V2 — contrat XP, loot, bestiaire publié, sauvegarde et résultat unique (TDD)
+        run: node --test tests/gens_capture_v2_adventure_contract_v1.test.mjs
+
+      - name: Aventure V2 — seule UI propriétaire, vrais éditeurs et Bestiaire non dupliqués
+        run: node --test tests/gens_capture_v2_adventure_ui_owner_v1.test.mjs
+
       - name: Historical Survival Dungeon game profile factory parity
         run: node --test tests/gens_capture_v2_generic_profile_owner.test.cjs
 
@@ -81,6 +87,41 @@ jobs:
             world-assembler.html
             sculpt-lab.html
             scripts
+      # Real Adventure/Bestiary browser test must use the certified public
+      # preview's ONE immutable author-visual pin. Never fake the catalog or
+      # borrow a moving global-assets HEAD.
+      - name: Read the single currently certified public visual pin
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/Zombicide-40k
+          ref: aa34bf1f415d14ba2c62e6745f8655aec6e3a4fa
+          path: approved-public-preview
+          sparse-checkout: |
+            tools
+      - name: Resolve immutable visual catalog SHA from public Pages owner
+        id: adventure_visual_pin
+        run: |
+          node - <<'JS' >> "$GITHUB_OUTPUT"
+          const fs=require('node:fs');
+          const pin=JSON.parse(fs.readFileSync('approved-public-preview/tools/capture_v2_pages_preview_pin.json','utf8'));
+          const visual=pin.officialVisuals;
+          if(pin.schema!=='gensrpg-capture-v2-pages-source-pin-v1' ||
+             pin.publicPath!=='/preview/capture-v2-pr225/' ||
+             visual?.repository!=='slyen4425-cloud/GenSrpg_labo_combat_dynamique' ||
+             visual.ref!=='global-assets' ||
+             !/^[a-f0-9]{40}$/.test(visual.sha) ||
+             !Number.isInteger(visual.certifiedCiRun)||visual.certifiedCiRun<=0)
+            throw Error('No certified visual authority in active Pages pin');
+          console.log('sha='+visual.sha);
+          JS
+      - name: Checkout only the catalog of published author assets
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
+          ref: ${{ steps.adventure_visual_pin.outputs.sha }}
+          path: approved-adventure-visuals
+          sparse-checkout: |
+            data/assets/catalog
       - name: Assemble original Lab modules without any GenSrpg engine copy
         run: |
           test "$(git -C combat-lab rev-parse HEAD)" = "${{ steps.pins.outputs.combat }}"
@@ -98,6 +139,12 @@ jobs:
           test -f _site/assets/gensrpg/capture-v2/shell-entry-v1.js
           test ! -e _site/assets/gensrpg/capture
           node tools/stage_capture_v2_labs.mjs combat-lab exploration-lab _site
+          test "$(git -C approved-adventure-visuals rev-parse HEAD)" = "${{ steps.adventure_visual_pin.outputs.sha }}"
+          mkdir -p _site/vendor/exploration-lab/capture-assets/data/assets/catalog
+          cp approved-adventure-visuals/data/assets/catalog/global-visual-assets.v1.json \
+            _site/vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json
+          cmp approved-adventure-visuals/data/assets/catalog/global-visual-assets.v1.json \
+            _site/vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json
       - name: Install browser test dependencies
         run: |
           npm install --no-save --no-package-lock playwright@1.57.0 pngjs@7.0.0

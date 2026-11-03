@@ -74,8 +74,53 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.locator('#gensGameHome:visible').count(),0);
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   const buttons=page.locator('#gensCaptureV2Root [data-capture-v2-view]');
-  assert.equal(await buttons.count(),8,
-   'the FOUR native Combat editor tabs share one official Lab owner, without extra editors');
+  assert.equal(await buttons.count(),9,
+   'eight native Lab entry points plus one GenSrpg-owned Adventure settings view, without extra editors');
+  // Aventure is the ninth, GenSrpg-owned screen; the original eight native
+  // Lab destinations keep their exact URLs and full-screen contracts.
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
+  const adventureFrame=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
+  await adventureFrame.locator('#adventure-xp-base').waitFor({timeout:15000});
+  await adventureFrame.locator('#adventure-create').waitFor({timeout:15000});
+  // Real published Bestiary data must populate this UI, not a mock species
+  // registry. Create and reopen a native Capture-only save from the genuine
+  // (SHA-pinned) Combat catalogue. The old Tester is not a game session.
+  await adventureFrame.locator('#adventure-create:not([disabled])')
+   .waitFor({timeout:25000});
+  const species=await adventureFrame.locator('#adventure-starter option:not([disabled])').count();
+  assert.ok(species>=1,'at least one official Bestiary creature is playable');
+  await adventureFrame.locator('#adventure-xp-base').fill('777');
+  await adventureFrame.locator('#adventure-create').tap();
+  const saved=await adventureFrame.locator('#adventure-save-summary').textContent();
+  assert.match(saved,/niveau 1.*0 XP.*configuration enregistrée/,
+   'a real Capture-owned save must be created, not just an editor test');
+  const stored=await adventureFrame.locator('#adventure-create').evaluate(()=>{
+   const saved=localStorage.getItem('gensrpg.capture.v2.adventure.save.v1');
+   return saved?JSON.parse(saved):null;
+  });
+  assert.equal(stored?.schema,'gensrpg-capture-adventure-save-v1');
+  assert.equal(stored?.rules?.xp?.baseVictoryXp,777);
+  assert.equal(stored?.party?.active?.speciesId,
+   await adventureFrame.locator('#adventure-starter').inputValue());
+  assert.ok(stored?.party?.active?.instanceId);
+  const adventureSrc=await page.locator('#gensCaptureV2Root iframe').getAttribute('src');
+  assert.match(adventureSrc,/assets\/gensrpg\/capture-v2\/adventure\.html$/,
+    'GenSrpg owns the Adventure configuration, not the Combat/Exploration Labs');
+  assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),false);
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
+  const resumed=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
+  await resumed.locator('#adventure-save-summary').waitFor({timeout:15000});
+  await page.waitForFunction(()=>{
+   const doc=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument;
+   return doc?.querySelector('#adventure-xp-base')?.value==='777' &&
+    /niveau 1.*0 XP/.test(doc?.querySelector('#adventure-save-summary')?.textContent??'');
+  },null,{timeout:20000});
+  assert.equal(await resumed.locator('#adventure-xp-base').inputValue(),'777',
+   'saved Adventure settings must survive reopening the owned screen');
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="creature"]').tap();
   const iframe=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
   await iframe.waitFor({state:'visible'});

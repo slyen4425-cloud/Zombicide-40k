@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GenSrpg · Aventure Monster Capture V2</title>
+<link rel="stylesheet" href="./adventure-style-v1.css">
+</head>
+<body>
+<main data-adventure-app>
+ <header class="adventure-head">
+  <div><span class="eyebrow">MONSTER CAPTURE V2</span><h1>Aventure</h1>
+   <p>Progression, butin, équipe de départ et sauvegarde de ta future partie.</p></div>
+  <output id="adventure-status" role="status" aria-live="polite">Chargement du bestiaire officiel…</output>
+ </header>
+ <div class="adventure-columns">
+  <section aria-labelledby="adventure-game-heading">
+   <h2 id="adventure-game-heading">Ma partie</h2>
+   <p class="hint">Seules les créatures réellement publiées dans le Bestiaire officiel peuvent être choisies.</p>
+   <label for="adventure-starter">Créature de départ</label>
+   <select id="adventure-starter" aria-label="Créature de départ publiée" disabled>
+    <option value="">Chargement du Bestiaire…</option>
+   </select>
+   <p id="adventure-bestiary-count" class="hint"></p>
+   <div class="actions">
+    <button type="button" id="adventure-create" disabled>Créer une partie</button>
+    <button type="button" id="adventure-resume">Afficher la sauvegarde</button>
+   </div>
+   <section class="save-state" aria-labelledby="adventure-save-heading">
+    <h3 id="adventure-save-heading">Sauvegarde en cours</h3>
+    <output id="adventure-save-summary">Aucune partie créée.</output>
+   </section>
+   <p class="hint">Le véritable bouton « Jouer » sera raccordé au mode partie du Labo Exploration ; il ne lancera pas simplement le Tester de l'éditeur.</p>
+  </section>
+  <section aria-labelledby="adventure-rules-heading">
+   <h2 id="adventure-rules-heading">Règles de progression</h2>
+   <p class="hint">Ces paramètres appartiennent à Aventure. Le calcul de niveau utilise le Core GenSrpg existant.</p>
+   <div class="fields">
+    <label>XP de base par victoire à niveau égal <input type="number" id="adventure-xp-base" min="0" max="1000000" step="1"></label>
+    <label>Bonus par niveau ennemi supérieur (%) <input type="number" id="adventure-xp-bonus" min="0" max="200" step="1"></label>
+    <label>Malus par niveau allié supérieur (%) <input type="number" id="adventure-xp-penalty" min="0" max="100" step="1"></label>
+    <label>Multiplicateur global <input type="number" id="adventure-xp-global" min="0" max="100" step="0.1"></label>
+    <label>XP nécessaire par niveau <input type="number" id="adventure-xp-level" min="1" max="1000000000" step="1"></label>
+    <label>Niveau maximum <input type="number" id="adventure-level-max" min="1" max="100" step="1"></label>
+   </div>
+   <div class="preview">
+    <h3>Aperçu du calcul (sans récompense réelle)</h3>
+    <label>Ennemi publié <select id="adventure-enemy" disabled></select></label>
+    <output id="adventure-xp-preview">Sélectionne une créature publiée.</output>
+   </div>
+  </section>
+  <section aria-labelledby="adventure-loot-heading">
+   <h2 id="adventure-loot-heading">Butin et économie</h2>
+   <div class="fields">
+    <label>Monnaie par victoire <input type="number" id="adventure-currency" min="0" max="100000000" step="1"></label>
+   </div>
+   <h3>Catalogue d'objets</h3>
+   <div class="fields">
+    <label>Nom de l'objet <input type="text" id="adventure-item-name" maxlength="80" placeholder="Ex. Plume d'Ailevent"></label>
+    <label>Valeur de vente <input type="number" id="adventure-item-value" min="0" value="0" step="1"></label>
+   </div>
+   <button type="button" id="adventure-item-add">Ajouter cet objet</button>
+   <div id="adventure-items" class="rules-list"></div>
+   <h3>Drops par créature</h3>
+   <div class="fields">
+    <label>Espèce publiée <select id="adventure-drop-species" disabled></select></label>
+    <label>Objet <select id="adventure-drop-item"></select></label>
+    <label>Chance (%) <input id="adventure-drop-chance" type="number" min="0" max="100" value="20"></label>
+    <label>Quantité minimum <input id="adventure-drop-min" type="number" min="1" max="9999" value="1"></label>
+    <label>Quantité maximum <input id="adventure-drop-max" type="number" min="1" max="9999" value="1"></label>
+   </div>
+   <button type="button" id="adventure-drop-add">Ajouter une règle de drop</button>
+   <div id="adventure-drops" class="rules-list"></div>
+   <div class="actions"><button id="adventure-save-rules" type="button">Enregistrer les réglages</button></div>
+  </section>
+ </div>
+</main>
+<script src="../core/storage-v1.js"></script>
+<script src="../core/progression-v1.js"></script>
+<script type="module" src="./adventure-app-v1.mjs"></script>
+</body>
+</html>

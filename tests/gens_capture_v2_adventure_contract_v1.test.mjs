@@ -115,8 +115,10 @@ test('configurable species-specific loot uses declared items, deterministic inje
    drops:[{speciesId:'crea_dracendre',itemId:'plume',chancePercent:50,minQuantity:1,maxQuantity:2}]}
  });
  const state=newGame('crea_nat_1',rule);
+ let draw=0;
  const x=applyAdventureCombatResultV1({session:state,envelope:combatEnvelope(),
-  bestiaryCards:published,progressionCore:progression,random:()=>0.1});
+  bestiaryCards:published,progressionCore:progression,
+  random:()=>++draw===1?0.1:0.95});
  assert.equal(x.session.inventory.currency,4);
  assert.equal(x.session.inventory.items.plume,2);
  assert.equal(x.award.drops[0].itemId,'plume');

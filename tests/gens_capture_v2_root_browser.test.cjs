@@ -133,6 +133,71 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   },null,{timeout:20000});
   assert.equal(await resumed.locator('#adventure-xp-base').inputValue(),'777',
    'saved Adventure settings must survive reopening the owned screen');
+
+  // Native game handoff — no made-up map, no reused Tester. First prove the
+  // actual GenSRPG origin has no WorldDocument and will not create a fake one.
+  await resumed.locator('#adventure-play').tap();
+  assert.match(await resumed.locator('#adventure-status').textContent(),/World Builder|monde jouable/i);
+  assert.equal(await resumed.locator('#adventure-play').isVisible(),true);
+  const authored=await resumed.locator('#adventure-play').evaluate(async()=>{
+    // The genuine World Builder model/serializer owns the data. This is not
+    // a parallel test terrain or a fabricated runtime world.
+    const [{createBlankWorldBuilderDraft},{saveWorldAssemblerDraft}]=await Promise.all([
+      import('../../../vendor/exploration-lab/src/builder/world-builder-draft.js'),
+      import('../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js')
+    ]);
+    const world=createBlankWorldBuilderDraft({id:'gen-ci-capture-world',width:36*28,height:24*21});
+    saveWorldAssemblerDraft(localStorage,world);
+    return localStorage.getItem('gensrpg.world-assembler.document.v1');
+  });
+  assert.ok(authored&&authored.includes('gen-ci-capture-world'),'canonical WorldDocument was not saved');
+  await resumed.locator('#adventure-play').tap();
+  await page.waitForFunction(()=>{
+    const f=document.querySelector('#gensCaptureV2Root iframe');
+    try{return !!f?.contentWindow?.__sculptPlayProbe?.().active &&
+      f.contentWindow.__sculptPlayProbe().playing &&
+      f.contentDocument.querySelector('#sculpt-canvas')?.width>300;}catch{return false;}
+  },null,{timeout:60000});
+  const launched=await page.locator('#gensCaptureV2Root iframe').evaluate(frame=>{
+    const w=frame.contentWindow;
+    return {session:new URL(w.location.href).searchParams.get('adventureSession'),
+      src:w.location.pathname,probe:w.__sculptPlayProbe?.()};
+  });
+  assert.equal(launched.session,stored.sessionId);
+  assert.match(launched.src,/vendor\/exploration-lab\/sculpt-lab\.html$/);
+  assert.equal(launched.probe.editorHidden,true);
+  const scopedBefore=await page.evaluate(id=>{
+    const raw=localStorage.getItem('gensrpg.exploration.play.navigation.v1:'+id);
+    return raw?JSON.parse(raw):null;
+  },stored.sessionId);
+  assert.equal(scopedBefore?.worldId,'gen-ci-capture-world');
+  assert.equal(scopedBefore?.sessionId,stored.sessionId);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg.exploration.play.navigation.v1')),null,
+    'GenSRPG must not reuse the standalone native checkpoint');
+  await resumed.locator('#play-menu-button').tap();
+  await resumed.locator('#play-continue:not([disabled])').waitFor({timeout:30000});
+  assert.equal(await resumed.locator('#play-new').isVisible(),false,
+    'Exploration may never create/reset a GenSRPG-owned AdventureSession');
+  await resumed.locator('#play-continue').tap();
+  await page.waitForFunction(()=>{
+    try{return document.querySelector('#gensCaptureV2Root iframe')?.contentWindow?.__sculptPlayProbe?.().active;}catch{return false;}
+  },null,{timeout:60000});
+  const scopedAfter=await page.evaluate(id=>{
+    const raw=localStorage.getItem('gensrpg.exploration.play.navigation.v1:'+id);
+    return raw?JSON.parse(raw):null;
+  },stored.sessionId);
+  assert.equal(scopedAfter.worldId,scopedBefore.worldId);
+  assert.equal(scopedAfter.sessionId,stored.sessionId);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg.world-assembler.document.v1')),authored,
+    'native game cannot mutate the World Builder authored document');
+  const playingSave=await page.evaluate(()=>{
+    const raw=localStorage.getItem('gensrpg.capture.v2.adventure.save.v1');
+    return raw?JSON.parse(raw):null;
+  });
+  assert.equal(playingSave?.status,'playing');
+  assert.equal(playingSave?.world?.mapRef,'gen-ci-capture-world');
+  assert.equal(playingSave?.world?.position,null,'Exploration alone owns coordinates');
+
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="creature"]').tap();

@@ -122,11 +122,17 @@ if(delivery.combat.sha!==sourcePin.combat.sha||
 // Complete the original Lab Exploration handoff contract. Exploration owns
 // integration/combat-bridge and Combat owns its original runtime. Never
 // invent the missing page or redirect to another engine/legacy renderer.
-const archivedAuthority=JSON.parse(fs.readFileSync('docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json','utf8'));
-const approvedVisuals=archivedAuthority.authoredAssetsPin;
-if(archivedAuthority.authoredAssetsRepository!==sourcePin.combat.repository||
+// Visual art has its OWN official immutable author branch, separate from
+// Combat main's rule authority. The preview release pin is its single
+// explicitly certified source. Never borrow the older production catalog
+// whose Heriplante IDs are absent, and never read a moving branch at runtime.
+const mediaAuthority=previewPin.officialVisuals;
+const approvedVisuals=mediaAuthority?.sha;
+if(mediaAuthority?.repository!==sourcePin.combat.repository||
+   mediaAuthority.ref!=='global-assets'||
+   !Number.isInteger(mediaAuthority.certifiedCiRun)||mediaAuthority.certifiedCiRun<=0||
    !/^[a-f0-9]{40}$/.test(approvedVisuals)||head(visuals)!==approvedVisuals)
-  throw Error('Encounter media source differs from the existing official pinned asset authority');
+  throw Error('Encounter media must use the single certified immutable official visual library SHA');
 const bridge=stageOfficialCaptureEncounterBridge({
   previewRoot:trial,combatRoot:combat,explorationRoot:exploration,visualsRoot:visuals,
   combatSha:sourcePin.combat.sha,explorationSha:sourcePin.exploration.sha,

@@ -36,6 +36,9 @@ jobs:
       - name: Aventure V2 — contrat XP, loot, bestiaire publié, sauvegarde et résultat unique (TDD)
         run: node --test tests/gens_capture_v2_adventure_contract_v1.test.mjs
 
+      - name: Aventure V2 — seule UI propriétaire, vrais éditeurs et Bestiaire non dupliqués
+        run: node --test tests/gens_capture_v2_adventure_ui_owner_v1.test.mjs
+
       - name: Historical Survival Dungeon game profile factory parity
         run: node --test tests/gens_capture_v2_generic_profile_owner.test.cjs
 

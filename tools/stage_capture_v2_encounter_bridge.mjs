@@ -59,9 +59,13 @@ export function stageOfficialCaptureEncounterBridge({
  // which builds the bridge as an overlay on the real Combat repository.
  for(const folder of ['src','data','examples/dom-demo'])
   copyTree(path.join(combatRoot,folder),path.join(battle,folder));
- const audio='assets/runtime/audio-test';
- if(fs.existsSync(path.join(combatRoot,audio)))
-  copyTree(path.join(combatRoot,audio),path.join(battle,audio));
+ // The canonical soundtrack SFX and Battle tracks are explicitly part of
+ // Combat main, not a second music provider. Ship the entire original
+ // immutable runtime/audio graph (music-v1/private-v1), never fallback URLs.
+ const audio='assets/runtime/audio';
+ if(!fs.existsSync(path.join(combatRoot,audio)))
+  throw Error('Official Combat main audio runtime unavailable');
+ copyTree(path.join(combatRoot,audio),path.join(battle,audio));
  for(const name of ['exploration-encounter.html','exploration-encounter.js',
    'exploration-native-source-v1.js','party.preview.v1.json'])
   copyFile(path.join(explorationRoot,'integration/combat-bridge',name),

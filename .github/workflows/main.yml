@@ -307,6 +307,7 @@ jobs:
             builder.html
             world-assembler.html
             sculpt-lab.html
+            play.html
             scripts
             manifest.webmanifest
 
@@ -327,7 +328,7 @@ jobs:
           JS
           mkdir -p _site/vendor/exploration-lab
           cp -a exploration-lab/src exploration-lab/assets _site/vendor/exploration-lab/
-          cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html exploration-lab/sculpt-lab.html exploration-lab/manifest.webmanifest _site/vendor/exploration-lab/
+          cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html exploration-lab/sculpt-lab.html exploration-lab/play.html exploration-lab/manifest.webmanifest _site/vendor/exploration-lab/
           node tools/stage_capture_v2_labs.mjs combat-lab exploration-lab _site
           node --test tests/gens_capture_v2_clean_boundary.test.cjs
           node --test tests/gens_capture_v2_pwa_cache_owner_v1.test.cjs

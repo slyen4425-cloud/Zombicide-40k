@@ -2,6 +2,11 @@
 // Bestiary publication is computed by the SAME official Combat main function.
 // The only gameplay model lives in adventure-contract-v1.mjs (not DOM).
 import {captureBestiaryCardsV1} from '../../../vendor/combat-lab/src/ui/capture-bestiary-cards-v1.js';
+import {readWorldAssemblerDraft} from '../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js';
+import {
+ createNewExplorationPlay,readExplorationPlay
+} from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
+import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
 import {
  DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
  createAdventureSessionV1,createAdventureStoreV1,publishedAdventureSpeciesV1
@@ -132,8 +137,11 @@ function showSave(){
   const state=store.load();
   if(!state){
    text($('adventure-save-summary'),'Aucune partie créée.');
+   $('adventure-play').disabled=true;
    return;
   }
+  $('adventure-play').disabled=false;
+  $('adventure-play').textContent=state.status==='playing'?'Continuer la partie':'Entrer dans le monde';
   const card=published.find(c=>c.id===state.party.active.speciesId);
   const a=state.party.active;
   const reward=state.lastAward;
@@ -143,6 +151,7 @@ function showSave(){
    (reward?' · Dernier combat : '+reward.outcome+' ('+reward.xp+' XP)':'')+
    ' · statut : '+(state.status==='configured'?'configuration enregistrée':'en cours'));
  }catch(error){
+  $('adventure-play').disabled=true;
   stateMessage('Sauvegarde protégée : '+error.message,true);
  }
 }
@@ -180,8 +189,24 @@ $('adventure-create').addEventListener('click',guarded(()=>{
   rules,ids:{sessionId:id(),instanceId:id()},now:new Date().toISOString()
  });
  store.create(state);
- stateMessage('Partie sauvegardée. Le vrai mode Jouer sera activé une fois raccordé au Labo Exploration.');
+ stateMessage('Partie sauvegardée. Tu peux entrer dans le monde si une carte est disponible dans le World Builder GenSRPG.');
  showSave();updatePreview();
+}));
+$('adventure-play').addEventListener('click',guarded(()=>{
+ const world=readWorldAssemblerDraft(window.localStorage);
+ const result=startAdventureExplorationV1({
+  store,storage:window.localStorage,world,
+  navigation:{createNewExplorationPlay,readExplorationPlay},
+  now:new Date().toISOString()
+ });
+ // This iframe and the native Lab are on the SAME first-party origin.
+ // Only the native Exploration runtime receives the scoped session ID.
+ const url=new URL('../../../vendor/exploration-lab/sculpt-lab.html',import.meta.url);
+ url.searchParams.set('play','1');
+ url.searchParams.set('adventureSession',result.session.sessionId);
+ if(url.origin!==window.location.origin)
+  throw new Error('Jouer doit utiliser le moteur Exploration officiel de la même origine');
+ window.location.assign(url.href);
 }));
 $('adventure-resume').addEventListener('click',guarded(()=>{
  const state=store.load();

@@ -8,12 +8,13 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {assertOfficialMainHistoryPin} from './verify_official_main_pin.mjs';
+import {stageOfficialCaptureEncounterBridge} from './stage_capture_v2_encounter_bridge.mjs';
 
-const [sourceArg,combatArg,explorationArg,siteArg]=process.argv.slice(2);
-if(!sourceArg||!combatArg||!explorationArg||!siteArg)
-  throw Error('Usage: stage_capture_v2_pages_preview.mjs <capture-pr-SHA> <combat-main> <exploration-main> <_site>');
+const [sourceArg,combatArg,explorationArg,siteArg,visualsArg]=process.argv.slice(2);
+if(!sourceArg||!combatArg||!explorationArg||!siteArg||!visualsArg)
+  throw Error('Usage: stage_capture_v2_pages_preview.mjs <capture-pr-SHA> <combat-main> <exploration-main> <_site> <approved-visuals>');
 const source=path.resolve(sourceArg),combat=path.resolve(combatArg),
-  exploration=path.resolve(explorationArg),site=path.resolve(siteArg);
+  exploration=path.resolve(explorationArg),site=path.resolve(siteArg),visuals=path.resolve(visualsArg);
 const trial=path.join(site,'preview','capture-v2-pr225');
 const previewPin=JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)),
   'capture_v2_pages_preview_pin.json'),'utf8'));
@@ -118,6 +119,25 @@ if(delivery.combat.sha!==sourcePin.combat.sha||
    delivery.exploration.sha!==sourcePin.exploration.sha||
    delivery.legacyCaptureRuntime!==false)
   throw Error('Certified native delivery differs from approved pins');
+// Complete the original Lab Exploration handoff contract. Exploration owns
+// integration/combat-bridge and Combat owns its original runtime. Never
+// invent the missing page or redirect to another engine/legacy renderer.
+// Visual art has its OWN official immutable author branch, separate from
+// Combat main's rule authority. The preview release pin is its single
+// explicitly certified source. Never borrow the older production catalog
+// whose Heriplante IDs are absent, and never read a moving branch at runtime.
+const mediaAuthority=previewPin.officialVisuals;
+const approvedVisuals=mediaAuthority?.sha;
+if(mediaAuthority?.repository!==sourcePin.combat.repository||
+   mediaAuthority.ref!=='global-assets'||
+   !Number.isInteger(mediaAuthority.certifiedCiRun)||mediaAuthority.certifiedCiRun<=0||
+   !/^[a-f0-9]{40}$/.test(approvedVisuals)||head(visuals)!==approvedVisuals)
+  throw Error('Encounter media must use the single certified immutable official visual library SHA');
+const bridge=stageOfficialCaptureEncounterBridge({
+  previewRoot:trial,combatRoot:combat,explorationRoot:exploration,visualsRoot:visuals,
+  combatSha:sourcePin.combat.sha,explorationSha:sourcePin.exploration.sha,
+  visualsSha:approvedVisuals
+});
 const provenance={
   schema:'gensrpg-capture-v2-isolated-pages-preview-v1',
   publicPath:previewPin.publicPath,
@@ -131,7 +151,8 @@ const provenance={
   previewServiceWorkerSha256:digest(bytes(trial,'service-worker.js')),
   productionManifestSha256:preserved['manifest.webmanifest'],
   previewIndexSha256:digest(bytes(trial,'index.html')),
-  deliveryManifestSha256:digest(bytes(trial,'assets/gensrpg/capture-v2/delivery-manifest.json'))
+  deliveryManifestSha256:digest(bytes(trial,'assets/gensrpg/capture-v2/delivery-manifest.json')),
+  encounterBridgeManifestSha256:digest(bytes(trial,'bridge-transport-manifest.v1.json'))
 };
 fs.writeFileSync(path.join(trial,'release-provenance.v1.json'),JSON.stringify(provenance,null,2)+'\n');
 for(const [rel,hash] of Object.entries(preserved))

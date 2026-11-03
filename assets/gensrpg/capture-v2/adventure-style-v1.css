@@ -1,0 +1,32 @@
+:root{color-scheme:dark;font-family:system-ui,-apple-system,sans-serif;background:#08131c;color:#eaf5f5}
+*{box-sizing:border-box}
+body{margin:0}
+main{width:100%;min-height:100dvh;background:linear-gradient(150deg,#112f34,#09141d 58%);padding:clamp(10px,2.2vw,22px)}
+.adventure-head{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.18em;color:#93decb}
+h1{font-size:clamp(24px,4vw,36px);margin:0}
+h2{font-size:19px;margin:0 0 10px;color:#e4fff5}
+h3{font-size:14px;margin:14px 0 8px}
+p{margin:5px 0 10px;line-height:1.4}
+.adventure-head p,.hint{color:#b4c8ca;font-size:12px}
+#adventure-status{font-size:12px;color:#a0f0db;max-width:24rem}
+#adventure-status[data-error=true]{color:#ffb2a4}
+.adventure-columns{display:grid;grid-template-columns:repeat(3,minmax(240px,1fr));gap:14px;align-items:start}
+.adventure-columns>section{padding:16px;border-radius:14px;border:1px solid #2e6468;background:rgba(11,33,41,.85);min-width:0}
+label{display:grid;gap:5px;font-weight:650;font-size:12px;color:#d6edef;margin:8px 0}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 12px}
+input,select,button{font:inherit;border-radius:8px;border:1px solid #538a8e;background:#173a45;color:#f0ffff}
+input,select{height:40px;padding:7px;min-width:0;width:100%}
+button{padding:9px 12px;min-height:44px;cursor:pointer;font-size:12px;font-weight:700}
+button:disabled{opacity:.46;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #7fe5c3}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+#adventure-create{background:#1b705c;border-color:#73d8b4}
+.preview,.save-state{border-radius:10px;background:#10232c;padding:10px;border:1px solid #285762;margin:10px 0}
+output{display:block;overflow-wrap:anywhere}
+.preview output,.save-state output{font-size:12px;line-height:1.5}
+.rules-list{display:grid;gap:7px;margin:8px 0}
+.rule-row{border:1px solid #2a5159;border-radius:8px;padding:8px;display:flex;align-items:center;justify-content:space-between;gap:7px;font-size:12px}
+.rule-row button{min-height:33px;padding:5px 8px}
+@media(max-width:950px){.adventure-columns{grid-template-columns:repeat(2,minmax(0,1fr))}.adventure-columns>section:last-child{grid-column:1/-1}}
+@media(max-width:580px){.adventure-columns{grid-template-columns:minmax(0,1fr)}.adventure-columns>section:last-child{grid-column:auto}.fields{grid-template-columns:minmax(0,1fr)}}

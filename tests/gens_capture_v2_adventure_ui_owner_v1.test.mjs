@@ -30,6 +30,13 @@ test('Adventure does not pretend the Exploration editor Tester is a native Game 
  const ui=read('assets/gensrpg/capture-v2/adventure-app-v1.mjs');
  const html=read('assets/gensrpg/capture-v2/adventure.html');
  assert.doesNotMatch(ui,/#navigation-toggle|\.click\(\).*navigation|window\.parent\.document|script.*monster-capture-creatures/);
- assert.match(html,/Le véritable bouton « Jouer » sera raccordé/);
- assert.match(ui,/Partie sauvegardée\. Le vrai mode Jouer sera activé/);
+ assert.match(html,/id="adventure-play"/);
+ assert.match(html,/id="adventure-world-builder"/);
+ assert.match(html,/vendor\/exploration-lab\/world-assembler\.html/);
+ assert.match(ui,/startAdventureExplorationV1\(/);
+ assert.match(ui,/readWorldAssemblerDraft\(window\.localStorage\)/);
+ assert.match(ui,/createNewExplorationPlay,readExplorationPlay/);
+ assert.match(ui,/url\.searchParams\.set\('adventureSession',result\.session\.sessionId\)/);
+ assert.match(ui,/url\.searchParams\.set\('play','1'\)/);
+ assert.doesNotMatch(ui,/sculpt-lab\.html\?tester|navigation-toggle/);
 });

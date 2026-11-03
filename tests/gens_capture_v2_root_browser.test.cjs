@@ -111,7 +111,12 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
   const resumed=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
-  await resumed.locator('#adventure-save-summary').getByText(/niveau 1.*0 XP/).waitFor({timeout:15000});
+  await resumed.locator('#adventure-save-summary').waitFor({timeout:15000});
+  await page.waitForFunction(()=>{
+   const doc=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument;
+   return doc?.querySelector('#adventure-xp-base')?.value==='777' &&
+    /niveau 1.*0 XP/.test(doc?.querySelector('#adventure-save-summary')?.textContent??'');
+  },null,{timeout:20000});
   assert.equal(await resumed.locator('#adventure-xp-base').inputValue(),'777',
    'saved Adventure settings must survive reopening the owned screen');
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();

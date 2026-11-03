@@ -76,6 +76,38 @@ jobs:
             sculpt-lab.html
             play.html
             scripts
+      - name: Read the certified public Capture visual approval (immutable)
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/Zombicide-40k
+          ref: aa34bf1f415d14ba2c62e6745f8655aec6e3a4fa
+          path: approved-public-preview
+          sparse-checkout: |
+            tools
+      - name: Resolve approved immutable visual SHA
+        id: adventure_visual_pin
+        run: |
+          node - <<'JS' >> "$GITHUB_OUTPUT"
+          const fs=require('node:fs');
+          const pin=JSON.parse(fs.readFileSync('approved-public-preview/tools/capture_v2_pages_preview_pin.json','utf8'));
+          const v=pin.officialVisuals;
+          if(pin.schema!=='gensrpg-capture-v2-pages-source-pin-v1' ||
+             pin.publicPath!=='/preview/capture-v2-pr225/' ||
+             v?.repository!=='slyen4425-cloud/GenSrpg_labo_combat_dynamique' ||
+             v.ref!=='global-assets' || !/^[a-f0-9]{40}$/.test(v.sha) ||
+             !Number.isInteger(v.certifiedCiRun) || v.certifiedCiRun<=0)
+            throw Error('Publicly certified immutable visual authority missing');
+          console.log('sha='+v.sha);
+          JS
+      - name: Read only approved Combat visual catalogue bytes
+        uses: actions/checkout@v4
+        with:
+          repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
+          ref: ${{ steps.adventure_visual_pin.outputs.sha }}
+          path: approved-adventure-visuals
+          sparse-checkout: |
+            data/assets/catalog
+
       - name: Assemble exact Lab source files and refuse any historical Capture payload
         env:
           CAPTURE_V2_SITE: ${{ github.workspace }}/_site
@@ -98,6 +130,7 @@ jobs:
           cp -a exploration-lab/src exploration-lab/assets _site/vendor/exploration-lab/
           cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html exploration-lab/sculpt-lab.html exploration-lab/play.html _site/vendor/exploration-lab/
           node tools/stage_capture_v2_labs.mjs combat-lab exploration-lab _site
+          node tools/stage_capture_v2_official_visuals.mjs approved-adventure-visuals approved-public-preview/tools/capture_v2_pages_preview_pin.json _site
           node --test tests/gens_capture_v2_pages_delivery_v1.test.cjs
       - name: Install real Chromium for the actual four-mode app, landscape touch
         run: |

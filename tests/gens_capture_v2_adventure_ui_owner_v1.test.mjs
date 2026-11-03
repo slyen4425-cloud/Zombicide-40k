@@ -1,0 +1,35 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const read=rel=>readFileSync(new URL('../'+rel,import.meta.url),'utf8');
+test('Capture V2 has one GenSrpg-owned Adventure page without duplicating native Lab editors',()=>{
+ const shell=read('assets/gensrpg/capture-v2/shell-entry-v1.js');
+ const html=read('assets/gensrpg/capture-v2/adventure.html');
+ const ui=read('assets/gensrpg/capture-v2/adventure-app-v1.mjs');
+ assert.match(shell,/adventure:\{label:"Aventure/);
+ assert.match(shell,/path:"assets\/gensrpg\/capture-v2\/adventure.html",family:"capture"/);
+ assert.match(shell,/if\(info\.family==="capture"\)/);
+ assert.match(shell,/same-origin with its active Capture session/);
+ assert.match(html,/id="adventure-create"/);
+ assert.match(html,/id="adventure-resume"/);
+ assert.match(html,/id="adventure-save-rules"/);
+ assert.match(html,/id="adventure-starter"/);
+ assert.match(html,/id="adventure-drop-species"/);
+ assert.match(html,/id="adventure-xp-preview"/);
+ assert.match(html,/src="\.\.\/core\/progression-v1\.js"/);
+ assert.match(html,/src="\.\.\/core\/storage-v1\.js"/);
+ assert.match(ui,/import \{captureBestiaryCardsV1\} from '\.\.\/\.\.\/\.\.\/vendor\/combat-lab\/src\/ui\/capture-bestiary-cards-v1\.js'/);
+ assert.match(ui,/publishedAdventureSpeciesV1\(captureBestiaryCardsV1\(/);
+ assert.match(ui,/combat-preview\/data\/capture\/showcase\/encounter-bundle\.v1\.json/);
+ assert.match(ui,/capture-assets\/data\/assets\/catalog\/global-visual-assets\.v1\.json/);
+ assert.match(ui,/delivery-manifest\.json/);
+ assert.match(ui,/createAdventureStoreV1\(\{storage:window\.localStorage,coreStorage:window\.GensStorageV1\}\)/);
+ assert.doesNotMatch(ui+shell, /captureGameHub|captureStartBattleAutomatic|window\.resumeGame\s*=|location\.reload\(/);
+});
+test('Adventure does not pretend the Exploration editor Tester is a native Game launch',()=>{
+ const ui=read('assets/gensrpg/capture-v2/adventure-app-v1.mjs');
+ const html=read('assets/gensrpg/capture-v2/adventure.html');
+ assert.doesNotMatch(ui,/#navigation-toggle|\.click\(\).*navigation|window\.parent\.document|script.*monster-capture-creatures/);
+ assert.match(html,/Le véritable bouton « Jouer » sera raccordé/);
+ assert.match(ui,/Partie sauvegardée\. Le vrai mode Jouer sera activé/);
+});

@@ -3,6 +3,9 @@
 // The only gameplay model lives in adventure-contract-v1.mjs (not DOM).
 import {captureBestiaryCardsV1} from '../../../vendor/combat-lab/src/ui/capture-bestiary-cards-v1.js';
 import {readWorldAssemblerDraft} from '../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js';
+import {createUserHeroStoreV1} from '../../../vendor/exploration-lab/src/storage/user-hero-store-v1.js';
+import {writeAdventureHeroSelectionGrantV1,ADVENTURE_HERO_SELECTION_SCHEMA_V1}
+ from './adventure-hero-selection-grant-v1.mjs';
 import {
  createNewExplorationPlay,readExplorationPlay
 } from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
@@ -30,6 +33,8 @@ let rules=normalizeAdventureRulesV1(DEFAULT_ADVENTURE_RULES_V1);
 let published=[];
 let officialCombatSha=null;
 let store;
+let heroLibrary=null,knownHeroes=[];
+const officialHeroLibrary=()=>heroLibrary??(heroLibrary=createUserHeroStoreV1());
 const text=(node,value)=>{node.textContent=String(value);};
 const stateMessage=(message,error=false)=>{
  text(status,message);status.dataset.error=String(error);
@@ -154,15 +159,57 @@ function renderItemRules(){
     renderItemRules();
    })): [document.createTextNode('Aucun drop : aucune récompense aléatoire implicite.')]));
 }
+// The official Explorer Hero Library owns image and animation Blob data.
+// Aventure keeps only the chosen HeroDefinition ID in its Core Storage save.
+async function refreshHeroChoices({preferStored=true}={}){
+ const picker=$('adventure-hero-choice');
+ const saved=store?.load();
+ const desired=preferStored?(saved?.hero?.definitionId??picker.value):picker.value;
+ knownHeroes=await officialHeroLibrary().list();
+ picker.replaceChildren(
+  new Option('Héros standard (sans visuel personnalisé)',''),
+  ...knownHeroes.map(hero=>new Option(hero.name,hero.id))
+ );
+ picker.value=desired&&knownHeroes.some(hero=>hero.id===desired)?desired:'';
+ if(desired&&!knownHeroes.some(hero=>hero.id===desired))
+  stateMessage('Héros choisi introuvable dans la bibliothèque Exploration : sauvegarde préservée, aucun visuel fictif.',true);
+}
+function selectedHeroRecord(){
+ const id=$('adventure-hero-choice').value;
+ if(!id)return null;
+ const record=knownHeroes.find(hero=>hero.id===id);
+ if(!record)throw new Error('Sélectionne un héros de la bibliothèque Exploration officielle.');
+ return record;
+}
+function saveHeroChoice(){
+ const session=store?.load();
+ if(!session)throw new Error('Crée une partie avant de choisir son héros.');
+ const chosen=selectedHeroRecord();
+ const hero={...(session.hero??{progression:null})};
+ if(chosen)hero.definitionId=chosen.id;
+ else delete hero.definitionId;
+ store.save({...session,hero,updatedAt:new Date().toISOString()});
+ showSave();
+ stateMessage('Choix du héros enregistré. Ses images restent dans la bibliothèque Exploration.');
+}
+async function heroRecordFromSession(session){
+ const id=session?.hero?.definitionId;
+ if(!id)return null;
+ const record=await officialHeroLibrary().get(id);
+ if(!record)throw new Error('Héros choisi introuvable dans la bibliothèque officielle. Sauvegarde conservée, entrée Jouer bloquée.');
+ return record;
+}
 function showSave(){
  try{
   const state=store.load();
   if(!state){
    text($('adventure-save-summary'),'Aucune partie créée.');
    $('adventure-play').disabled=true;
+   $('adventure-hero-save-selection').disabled=true;
    return;
   }
   $('adventure-play').disabled=false;
+  $('adventure-hero-save-selection').disabled=false;
   $('adventure-play').textContent=state.status==='playing'?'Continuer la partie':'Entrer dans le monde';
   const card=published.find(c=>c.id===state.party.active.speciesId);
   const a=state.party.active;
@@ -206,13 +253,33 @@ setFields(rules);
 for(const field of Object.values(idField))$(field).addEventListener('input',updatePreview);
 $('adventure-enemy').addEventListener('change',updatePreview);
 $('adventure-starter').addEventListener('change',updatePreview);
+$('adventure-hero-refresh').addEventListener('click',()=>{
+ refreshHeroChoices({preferStored:false})
+  .then(()=>stateMessage(knownHeroes.length+' héros officiels disponibles dans la bibliothèque locale.'))
+  .catch(error=>stateMessage(error.message,true));
+});
+$('adventure-hero-save-selection').addEventListener('click',guarded(saveHeroChoice));
+$('adventure-hero-editor').addEventListener('click',guarded(()=>{
+ const root=new URL('../../../vendor/exploration-lab/',import.meta.url);
+ const url=new URL('hero-editor.html',root);
+ if(root.origin!==window.location.origin||!url.pathname.startsWith(root.pathname))
+  throw new Error('Éditeur Explorer officiel requis sur la même origine.');
+ $('adventure-hero-editor-frame').src=url.href;
+ $('adventure-hero-editor-panel').hidden=false;
+}));
+$('adventure-hero-editor-close').addEventListener('click',()=>{
+ $('adventure-hero-editor-panel').hidden=true;
+ $('adventure-hero-editor-frame').src='about:blank';
+ refreshHeroChoices({preferStored:false}).catch(error=>stateMessage(error.message,true));
+});
 $('adventure-create').addEventListener('click',guarded(()=>{
  if(!published.length)throw new Error('Bestiaire officiel indisponible; aucun contenu fictif ne sera utilisé');
  rules=fromFields();
  const id=()=>crypto.randomUUID();
  const state=createAdventureSessionV1({
   bestiaryCards:published,starterId:$('adventure-starter').value,
-  rules,ids:{sessionId:id(),instanceId:id()},now:new Date().toISOString()
+  rules,heroDefinitionId:selectedHeroRecord()?.id??null,
+  ids:{sessionId:id(),instanceId:id()},now:new Date().toISOString()
  });
  store.create(state);
  stateMessage('Partie sauvegardée. Tu peux entrer dans le monde si une carte est disponible dans le World Builder GenSRPG.');
@@ -228,8 +295,14 @@ $('adventure-world-builder').addEventListener('click',guarded(()=>{
   throw Error('World Builder officiel requis sur la même origine GenSRPG');
  window.location.assign(url.href);
 }));
-$('adventure-play').addEventListener('click',guarded(()=>{
- const world=readWorldAssemblerDraft(window.localStorage);
+$('adventure-play').addEventListener('click',()=>{
+ (async()=>{
+  const current=store.load();
+  if(!current)throw new Error('Aucune partie enregistrée.');
+  // Validate the author-owned HeroDefinition before opening a playing session.
+  // Never reset the actor or invent a visual if the selected Blob was deleted.
+  const heroRecord=await heroRecordFromSession(current);
+  const world=readWorldAssemblerDraft(window.localStorage);
  const result=startAdventureExplorationV1({
   store,storage:window.localStorage,world,
   navigation:{createNewExplorationPlay,readExplorationPlay},
@@ -250,6 +323,11 @@ $('adventure-play').addEventListener('click',guarded(()=>{
   publicationGrant:officialGrant,combatSha:officialCombatSha
  });
  refreshParty(result.session);
+ const heroGrant=writeAdventureHeroSelectionGrantV1({
+  storage:window.sessionStorage,session:result.session,world,heroRecord
+ });
+ if(heroGrant===null)
+  window.sessionStorage.removeItem(ADVENTURE_HERO_SELECTION_SCHEMA_V1+':'+result.session.sessionId);
  const url=new URL('../../../vendor/exploration-lab/sculpt-lab.html',import.meta.url);
  const sessionId=result.session.sessionId;
  url.searchParams.set('play','1');
@@ -266,7 +344,8 @@ $('adventure-play').addEventListener('click',guarded(()=>{
  frame.src=url.href;
  frame.hidden=false;
  document.querySelector('[data-adventure-app]').hidden=true;
-}));
+ })().catch(error=>stateMessage(error.message,true));
+});
 $('adventure-resume').addEventListener('click',guarded(()=>{
  const state=store.load();
  if(!state)throw new Error('Aucune partie enregistrée à charger');
@@ -317,6 +396,11 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   if(active){rules=normalizeAdventureRulesV1(active.rules);setFields(rules);}
   renderItemRules();showSave();updatePreview();
   stateMessage(published.length+' créatures officielles publiées, aucune créature de brouillon chargée.');
+  // Optional Hero Library failure must never disable historical adventures.
+  try{await refreshHeroChoices();}catch(error){
+   stateMessage('Bibliothèque de héros inaccessible : '+error.message+
+    '. Une partie sans héros personnalisé reste disponible.',true);
+  }
  }catch(error){
   stateMessage('Aventure indisponible : '+error.message,true);
   $('adventure-create').disabled=true;

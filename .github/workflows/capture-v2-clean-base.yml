@@ -45,6 +45,9 @@ jobs:
       - name: TDD GenSRPG published Combat Bestiary grant into real Exploration Jouer
         run: node --test tests/gens_capture_v2_adventure_publication_grant_v1.test.mjs
 
+      - name: TDD CombatResult officiel → Core Storage Aventure, commit avant ack, replay sans double loot
+        run: node --test tests/gens_capture_v2_adventure_combat_commit_v1.test.mjs
+
       - name: Aventure V2 — seule UI propriétaire, vrais éditeurs et Bestiaire non dupliqués
         run: node --test tests/gens_capture_v2_adventure_ui_owner_v1.test.mjs
 

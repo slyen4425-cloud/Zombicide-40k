@@ -1,6 +1,9 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
+const vm=require('node:vm');
+const {test}=require('node:test');
+const {setImmediate:nextTurn}=require('node:timers/promises');
 const root=path.join(__dirname,'..');
 const preview=fs.readFileSync(path.join(root,'preview.html'),'utf8');
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');
@@ -35,7 +38,6 @@ assert.ok(preview.includes("return {base,index:base+'index.html',external:true}"
 assert.ok(preview.includes("return {base,index:new URL('index.html',base).href,external:false}"),'local preview must keep its native source-root composition');
 assert.ok(preview.includes("if(!source.external)html=html.replace(/<\\/body>/i,tags.join("),'local preview must preserve the historical parser-ordered script injection');
 assert.ok(preview.includes("if(source.external){"),'external preview must use an explicit dependency load path');
-assert.ok(preview.includes('script.async=false')&&preview.includes('script.onload=resolve'),'external dependencies must load in sequence and await completion');
 assert.ok(preview.includes('gensrpgPreviewLoadGate')&&preview.includes('document.getElementById("gensrpgPreviewLoadGate")?.remove()'),'preview must block user navigation until the external dependency graph completes');
 assert.ok(preview.includes("if(!window.supabase)"),'manual preview must survive a blocked Supabase CDN without changing production runtime');
 assert.ok(preview.includes('<base href="${base}">'),'preview must inject the commit-root base into the source document');
@@ -47,3 +49,58 @@ assert.ok(preview.includes('gensrpg-cache-'),'preview must clear GenSrpG preview
 assert.ok(preview.includes('gensrpgPreviewReady'),'preview must emit an explicit runtime-ready marker');
 
 console.log('GenSrpG manual preview composition matches GitHub Pages:',previewSrcs.length,'added modules + one inherited Core storage bootstrap + top-level restart-safe PWA isolation');
+
+function runExternalBootstrap(){
+  const sha='f'.repeat(40);
+  const base='https://raw.githack.com/slyen4425-cloud/Zombicide-40k/'+sha+'/';
+  const search='?url='+encodeURIComponent('https://github.com/slyen4425-cloud/Zombicide-40k/blob/'+sha+'/preview.html');
+  const scripts=[];
+  const gate={textContent:'Chargement',remove(){this.removed=true;}};
+  const document={
+    readyState:'interactive',
+    documentElement:{dataset:{}},
+    getElementById:id=>id==='gensrpgPreviewLoadGate'?gate:null,
+    open(){},
+    write(){},
+    close(){},
+    createElement:()=>({dataset:{}}),
+    body:{appendChild:script=>scripts.push(script)}
+  };
+  const bootstrap=preview.match(/\n<script>([\s\S]*?)\n<\/script>/)[1];
+  const done=vm.runInNewContext(bootstrap,{
+    document,window:{},location:{search},URL,URLSearchParams,
+    fetch:async()=>({
+      ok:true,text:async()=>'<html><head></head><body></body></html>',
+      json:async()=>({
+        combat:{repository:'slyen4425-cloud/GenSrpg_labo_combat_dynamique',ref:'main',sha},
+        exploration:{repository:'slyen4425-cloud/laboratoire_dynamique_exploration-',ref:'main',sha}
+      })
+    })
+  });
+  return {base,document,done,gate,scripts};
+}
+
+test('external preview requests all auxiliary scripts while the first response is pending',async()=>{
+  const {base,document,done,gate,scripts}=runExternalBootstrap();
+  await nextTurn();
+  assert.deepEqual(scripts.map(script=>script.src),previewSrcs.map(src=>base+src));
+  assert.ok(scripts.every(script=>script.async===false),'classic scripts must execute in insertion order');
+  assert.equal(document.documentElement.dataset.gensrpgPreviewReady,undefined);
+  for(const script of scripts.slice(0,-1))script.onload();
+  await nextTurn();
+  assert.equal(gate.removed,undefined,'the menu stays locked until every dependency executes');
+  scripts.at(-1).onload();
+  await done;
+  assert.equal(document.documentElement.dataset.gensrpgPreviewReady,'1');
+  assert.equal(gate.removed,true);
+});
+
+test('external preview keeps the gate and identifies an inaccessible dependency',async()=>{
+  const {document,done,gate,scripts}=runExternalBootstrap();
+  await nextTurn();
+  scripts[0].onerror();
+  await done;
+  assert.equal(document.documentElement.dataset.gensrpgPreviewReady,undefined);
+  assert.equal(gate.removed,undefined);
+  assert.ok(gate.textContent.includes(previewSrcs[0]));
+});

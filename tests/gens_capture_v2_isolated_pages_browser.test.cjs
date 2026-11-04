@@ -133,6 +133,13 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
    document.querySelectorAll('button.gensRootModeCard').length===4,null,{timeout:60000});
   assert.equal(await page.locator('button.gensRootModeCard').count(),4);
   await page.locator('button.gensRootModeCard.capture').tap();
+  assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu button:visible').count(),2,
+   'the live preview must offer only Jouer and Éditeurs on the home screen');
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="world"] button:visible').count(),2,
+   'World Assembler and 2.5D Sculpt belong to the same editor group');
+  assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').count(),0,
+   'duplicated 2.5D Tester is removed, not hidden');
   await page.locator('[data-capture-v2-view="creature"]').tap();
   const combat=page.locator('#gensCaptureV2Root iframe');
   await combat.waitFor({state:'visible'});
@@ -154,6 +161,7 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
   await combatFrame.locator('[data-preview-back-editor]').tap();
   await combatFrame.locator('[data-capture-editor-human]:visible').waitFor();
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
   await page.locator('[data-capture-v2-view="builder"]').tap();
   const frame=page.locator('#gensCaptureV2Root iframe');
   assert.ok((await frame.getAttribute('src')).includes(scope+'vendor/exploration-lab/sculpt-lab.html'));

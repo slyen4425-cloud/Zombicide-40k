@@ -341,6 +341,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
       areaId:point.areaId,terrainFamilyId:'forest',elementId:'nature'
     });
     const here=new URL(location.href);here.searchParams.set('combatReturn','1');
+    const empty=await send('commit');
     saveCombatHandoff(localStorage,{
       snapshot,returnState:{areaId:point.areaId,x:point.actor.x,y:point.actor.y,returnUrl:here.href},
       result:{encounterId:snapshot.encounterId,returnToken:snapshot.returnToken,outcome:'fled',
@@ -348,15 +349,15 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
     },scope);
     const ready=await send('ready');
     const wrong=await send('commit','other-session');
-    const first=await send('commit');
-    const repeated=await send('commit');
+    const [first,repeated]=await Promise.all([send('commit'),send('commit')]);
     const pending=readCombatHandoff(localStorage,scope);
     const grant=JSON.parse(sessionStorage.getItem('gensrpg.capture.v2.active-party.v1:'+args.sessionId));
     const consumed=consumeCombatResult(localStorage,{...scope,receipt:first.receipt});
-    return {ready,wrong,first,repeated,pending:pending?.result?.outcome,grant,consumed:consumed?.result?.outcome};
+    return {ready,wrong,empty,first,repeated,pending:pending?.result?.outcome,grant,consumed:consumed?.result?.outcome};
   },{sessionId:stored.sessionId,speciesId:stored.party.active.speciesId});
   assert.deepEqual(port.ready,{ready:true});
   assert.match(port.wrong.error,/partie/i);
+  assert.match(port.empty.error,/Aucun résultat/);
   assert.equal(port.first.receipt.persisted,true);
   assert.equal(port.first.receipt.applied,true);
   assert.equal(port.repeated.receipt.applied,false);

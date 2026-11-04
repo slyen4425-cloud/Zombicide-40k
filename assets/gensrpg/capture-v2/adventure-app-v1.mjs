@@ -18,7 +18,10 @@ const status=$('adventure-status');
 const idField={
  base:'adventure-xp-base',bonus:'adventure-xp-bonus',penalty:'adventure-xp-penalty',
  global:'adventure-xp-global',level:'adventure-xp-level',max:'adventure-level-max',
- currency:'adventure-currency'
+ currency:'adventure-currency',
+ heroEnabled:'adventure-hero-xp-enabled',heroShare:'adventure-hero-xp-share',
+ heroXpLevel:'adventure-hero-xp-per-level',heroMax:'adventure-hero-max-level',
+ heroTalent:'adventure-hero-talent-points'
 };
 let rules=normalizeAdventureRulesV1(DEFAULT_ADVENTURE_RULES_V1);
 let published=[];
@@ -41,6 +44,11 @@ function setFields(value){
  $(idField.level).value=value.progression.xpPerLevel;
  $(idField.max).value=value.progression.maxLevel;
  $(idField.currency).value=value.loot.currencyPerVictory;
+ $(idField.heroEnabled).checked=value.heroProgression.enabled;
+ $(idField.heroShare).value=value.heroProgression.xpGainPercent;
+ $(idField.heroXpLevel).value=value.heroProgression.xpPerLevel;
+ $(idField.heroMax).value=value.heroProgression.maxLevel;
+ $(idField.heroTalent).value=value.heroProgression.talentPointsPerLevel;
 }
 function fromFields(){
  return normalizeAdventureRulesV1({
@@ -51,7 +59,13 @@ function fromFields(){
    globalMultiplier:numberFrom(idField.global)},
   progression:{...rules.progression,xpPerLevel:numberFrom(idField.level),
    maxLevel:numberFrom(idField.max)},
-  loot:{...rules.loot,currencyPerVictory:numberFrom(idField.currency)}
+  loot:{...rules.loot,currencyPerVictory:numberFrom(idField.currency)},
+  heroProgression:{...rules.heroProgression,
+   enabled:$(idField.heroEnabled).checked,
+   xpGainPercent:numberFrom(idField.heroShare),
+   xpPerLevel:numberFrom(idField.heroXpLevel),
+   maxLevel:numberFrom(idField.heroMax),
+   talentPointsPerLevel:numberFrom(idField.heroTalent)}
  });
 }
 async function fetchJson(relative){
@@ -153,6 +167,10 @@ function showSave(){
   text($('adventure-save-summary'),
    'Partie '+state.sessionId.slice(0,8)+' · '+(card?.name??a.speciesId)+
    ' · niveau '+a.level+' · '+a.xp+' XP · '+state.inventory.currency+' pièces'+
+   (state.rules.heroProgression?.enabled===true
+    ?' · Héros niv. '+(state.hero?.progression?.level??1)+' · '+
+      (state.hero?.progression?.xp??0)+' XP'
+    :' · Héros sans niveau')+
    (reward?' · Dernier combat : '+reward.outcome+' ('+reward.xp+' XP)':'')+
    ' · statut : '+(state.status==='configured'?'configuration enregistrée':'en cours'));
  }catch(error){

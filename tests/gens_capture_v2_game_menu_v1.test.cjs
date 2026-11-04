@@ -89,3 +89,21 @@ test('real Capture Shell home is a vertical game menu, with coherent grouped edi
  s.rootWindow.GensCaptureV2.stop();
  assert.equal(s.exits(),1);
 });
+
+test('Jouer is a game-facing screen: party first, advanced progression and loot folded away',()=>{
+ const html=fs.readFileSync(path.join(root,'assets/gensrpg/capture-v2/adventure.html'),'utf8');
+ const style=fs.readFileSync(path.join(root,'assets/gensrpg/capture-v2/adventure-style-v1.css'),'utf8');
+ assert.match(html,/<h1>Jouer<\/h1>/);
+ assert.match(html,/<details id="adventure-rules-panel" class="adventure-options">/);
+ assert.match(html,/<details id="adventure-loot-panel" class="adventure-options">/);
+ assert.doesNotMatch(html,/<details[^>]*open(?:=|\s|>)/i,
+  'advanced authoring settings must be folded for a normal player');
+ for(const id of ['adventure-create','adventure-resume','adventure-play',
+  'adventure-world-builder','adventure-save-rules','adventure-xp-base',
+  'adventure-drop-species']){
+  assert.ok(html.includes('id="'+id+'"'),'do not remove native save/game or creator option '+id);
+ }
+ assert.doesNotMatch(html,/Le monde doit être créé ou importé depuis le World Builder|Ces paramètres appartiennent à Aventure|Le calcul de niveau utilise le Core/);
+ assert.match(style,/adventure-options>summary/);
+ assert.match(style,/adventure-columns>section:first-child/);
+});

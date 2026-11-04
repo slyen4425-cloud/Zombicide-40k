@@ -143,3 +143,26 @@ test('preview transport can include the official Jouer entry from its certified 
   assert.match(stage,/for\(const filename of \[[^\]]*'play\.html'[^\]]*\]\)/);
   assert.match(stage,/const from=path\.join\(exploration,filename\);\s*if\(fs\.existsSync\(from\)\)fs\.copyFileSync\(from,path\.join\(exploreDest,filename\)\)/);
 });
+
+
+test('published Adventure preview carries the real Explorer hero editor and its IndexedDB owner',()=>{
+  const flow=read(root,'.github/workflows/main.yml').toString('utf8');
+  const stage=read(root,'tools/stage_capture_v2_pages_preview.mjs').toString('utf8');
+  const sparse=[...flow.matchAll(/path: preview-exploration-lab\n\s+sparse-checkout: \|\n((?: {12,}\S[^\n]*\n)+)/g)];
+  assert.equal(sparse.length,2,'both review and publisher must stage the SAME official Explorer editor');
+  for(const [,files] of sparse)
+    assert.match(files,/^\s*hero-editor\.html\s*$/m,'official editor must be present in each immutable main checkout');
+  assert.match(stage,/for\(const filename of \[[^\]]*'hero-editor\.html'[^\]]*\]\)/,
+    'the single existing publisher must copy the native editor, not an imitation');
+  for(const name of ['hero-editor.html','src/actors/hero-editor-v1.js',
+    'src/storage/user-hero-store-v1.js','src/actors/user-hero-definition-v1.js',
+    'src/actors/scoped-adventure-hero-v1.js'])
+    required(trial,'vendor/exploration-lab/'+name);
+  const html=read(trial,'vendor/exploration-lab/hero-editor.html').toString('utf8');
+  assert.match(html,/src=["']\.\/src\/actors\/hero-editor-v1\.js["']/,
+    'the real Explorer Hero Editor must load its own owner code on the same origin');
+  const editor=read(trial,'vendor/exploration-lab/src/actors/hero-editor-v1.js').toString('utf8');
+  assert.match(editor,/createUserHeroStoreV1/,'no second GenSRPG hero image storage');
+  const scope=json(trial,'release-provenance.v1.json');
+  assert.equal(scope.exploration.sha,explorationSha,'only the certified Exploration main may supply hero media');
+});

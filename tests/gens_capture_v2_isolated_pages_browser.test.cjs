@@ -326,3 +326,41 @@ test('real Exploration 2.5D Tester encounter tap opens native Combat instead of 
   server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
  }
 });
+
+test('official Hero Editor loads in Adventure preview with the same-origin native IndexedDB', 
+ {timeout:120000},async()=>{
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  let browser,context;
+  const broken=[];
+  try{
+    browser=await chromium.launch({headless:true});
+    context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true,
+      locale:'fr-FR',serviceWorkers:'block'});
+    const page=await context.newPage();
+    const url='http://127.0.0.1:'+server.address().port+scope+
+      'vendor/exploration-lab/hero-editor.html';
+    page.on('pageerror',err=>broken.push('JS '+String(err)));
+    page.on('response',response=>{
+      if(response.url().startsWith(new URL(scope,url).href)&&response.status()>=400)
+        broken.push('HTTP '+response.status()+' '+response.url());
+    });
+    const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
+    assert.equal(response.status(),200,'Hero Editor must exist in physical Pages preview');
+    await page.locator('#hero-save:visible').waitFor({timeout:30000});
+    await page.waitForFunction(async()=> (await indexedDB.databases())
+      .some(entry=>entry.name==='gensrpg-exploration-user-heroes-v1'),
+      null,{timeout:20000});
+    const owner=await page.evaluate(async()=>{
+      const names=await indexedDB.databases();
+      return {origin:location.origin,path:location.pathname,
+        db:names.some(entry=>entry.name==='gensrpg-exploration-user-heroes-v1'),
+        canvas:Boolean(document.querySelector('#hero-canvas'))};
+    });
+    assert.equal(owner.db,true,'official Explorer media library must be readable under current origin');
+    assert.equal(owner.canvas,true,'official Explorer native hero preview must render');
+    assert.deepEqual(broken,[],'hero owner JS and media must have zero 404 or errors');
+  }finally{
+    await context?.close();await browser?.close();
+    server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
+  }
+});

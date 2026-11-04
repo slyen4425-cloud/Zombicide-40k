@@ -86,6 +86,10 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   // destinations preserve the original native URLs and fullscreen.
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
   const adventureFrame=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
+  assert.equal(await adventureFrame.locator('#adventure-rules-panel').getAttribute('open'),null,
+   'new game opens without developer settings exposed by default');
+  assert.equal(await adventureFrame.locator('#adventure-loot-panel').getAttribute('open'),null);
+  await adventureFrame.locator('#adventure-rules-panel > summary').tap();
   await adventureFrame.locator('#adventure-xp-base').waitFor({timeout:15000});
   await adventureFrame.locator('#adventure-create').waitFor({timeout:15000});
   // Real published Bestiary data must populate this UI, not a mock species

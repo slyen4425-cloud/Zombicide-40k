@@ -309,7 +309,10 @@ export function applyAdventureCombatResultV1({
    throw new TypeError('Core earnedSkillPointsFromLevel required for hero progression');
   const talentPoints=progressionCore.earnedSkillPointsFromLevel(heroLevel,heroProgression);
   integer(talentPoints,'hero Core talent points');
-  heroState={progression:{xp:totalHeroXp,level:heroLevel,talentPoints}};
+  // Keep the official Exploration HeroDefinition selection when Aventure
+  // updates only the hero's optional progression after a real combat.
+  // Legacy sessions without hero remain valid: do not fabricate a selection.
+  heroState={...(state.hero??{}),progression:{xp:totalHeroXp,level:heroLevel,talentPoints}};
  }
 
  const timestamp=iso(now??state.updatedAt,'now');

@@ -133,3 +133,13 @@ test('the existing single Pages publisher remains the only deployment authority'
   assert.match(text,/node tools\/stage_capture_v2_pages_preview\.mjs/);
   assert.doesNotMatch(text,/ref: work\/gensrpg-capture-clean-replacement-/);
 });
+
+test('preview transport can include the official Jouer entry from its certified Explorer checkout',()=>{
+  const flow=read(root,'.github/workflows/main.yml').toString('utf8');
+  const stage=read(root,'tools/stage_capture_v2_pages_preview.mjs').toString('utf8');
+  const sparse=[...flow.matchAll(/path: preview-exploration-lab\n\s+sparse-checkout: \|\n((?: {12,}\S[^\n]*\n)+)/g)];
+  assert.equal(sparse.length,2);
+  for(const [,files] of sparse)assert.match(files,/^\s*play\.html\s*$/m);
+  assert.match(stage,/for\(const filename of \[[^\]]*'play\.html'[^\]]*\]\)/);
+  assert.match(stage,/const from=path\.join\(exploration,filename\);\s*if\(fs\.existsSync\(from\)\)fs\.copyFileSync\(from,path\.join\(exploreDest,filename\)\)/);
+});

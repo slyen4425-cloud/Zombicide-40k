@@ -433,6 +433,7 @@ jobs:
             builder.html
             world-assembler.html
             sculpt-lab.html
+            play.html
             manifest.webmanifest
             scripts
             integration/combat-bridge
@@ -534,6 +535,7 @@ jobs:
             builder.html
             world-assembler.html
             sculpt-lab.html
+            play.html
             manifest.webmanifest
             scripts
             integration/combat-bridge

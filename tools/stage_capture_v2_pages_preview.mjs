@@ -105,7 +105,7 @@ for(const folder of ['src','assets'])
       if(fs.lstatSync(p).isSymbolicLink())throw Error('Symlink in official Exploration: '+p);
       return true;
     }});
-for(const filename of ['index.html','builder.html','world-assembler.html','sculpt-lab.html','play.html','manifest.webmanifest']){
+for(const filename of ['index.html','builder.html','world-assembler.html','sculpt-lab.html','hero-editor.html','play.html','manifest.webmanifest']){
   const from=path.join(exploration,filename);
   if(fs.existsSync(from))fs.copyFileSync(from,path.join(exploreDest,filename));
 }

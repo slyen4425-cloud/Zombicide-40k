@@ -412,7 +412,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
-          ref: 81ad362a401b7b2eb9faa811528aced9f2d6384a
+          ref: 46b4efede522f3410778271fddec872a36f1c54b
           path: preview-combat-lab
           sparse-checkout: |
             src
@@ -424,7 +424,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/laboratoire_dynamique_exploration-
-          ref: 9d5b198f193b73c1912dd21881311786415ba113
+          ref: 4e7abd15d7b57909524ba697b74f63a193fce839
           path: preview-exploration-lab
           sparse-checkout: |
             src
@@ -450,8 +450,8 @@ jobs:
       - name: Stage isolated native preview under the existing Pages owner
         run: |
           test "$(git -C capture-v2-source rev-parse HEAD)" = "${{ steps.preview_pin.outputs.sha }}"
-          test "$(git -C preview-combat-lab rev-parse HEAD)" = "81ad362a401b7b2eb9faa811528aced9f2d6384a"
-          test "$(git -C preview-exploration-lab rev-parse HEAD)" = "9d5b198f193b73c1912dd21881311786415ba113"
+          test "$(git -C preview-combat-lab rev-parse HEAD)" = "46b4efede522f3410778271fddec872a36f1c54b"
+          test "$(git -C preview-exploration-lab rev-parse HEAD)" = "4e7abd15d7b57909524ba697b74f63a193fce839"
           node --check tools/stage_capture_v2_pages_preview.mjs
           node tools/stage_capture_v2_pages_preview.mjs capture-v2-source preview-combat-lab preview-exploration-lab _site preview-combat-assets
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
@@ -516,7 +516,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
-          ref: 81ad362a401b7b2eb9faa811528aced9f2d6384a
+          ref: 46b4efede522f3410778271fddec872a36f1c54b
           path: preview-combat-lab
           sparse-checkout: |
             src
@@ -526,7 +526,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/laboratoire_dynamique_exploration-
-          ref: 9d5b198f193b73c1912dd21881311786415ba113
+          ref: 4e7abd15d7b57909524ba697b74f63a193fce839
           path: preview-exploration-lab
           sparse-checkout: |
             src

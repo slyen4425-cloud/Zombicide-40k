@@ -11,6 +11,7 @@ const {PNG}=require('pngjs');
 const site=path.resolve(process.env.GENSRPG_PAGES_SITE||'_site');
 const scope='/preview/capture-v2-pr225/';
 const mime={'.html':'text/html;charset=utf-8','.js':'text/javascript;charset=utf-8',
+ '.mjs':'text/javascript;charset=utf-8',
  '.json':'application/json;charset=utf-8','.css':'text/css;charset=utf-8',
  '.webmanifest':'application/manifest+json','.svg':'image/svg+xml',
  '.png':'image/png','.webp':'image/webp','.mp3':'audio/mpeg','.wav':'audio/wav'};
@@ -23,6 +24,95 @@ const server=http.createServer(async(request,response)=>{
   response.writeHead(200,{'content-type':mime[path.extname(full)]||'application/octet-stream',
    'cache-control':'no-store'}).end(bytes);
  }catch(e){response.writeHead(404).end('Missing _site resource');}
+});
+
+test('Adventure starts from the Pages menu and saves a native encounter once at the exact map point',
+ {timeout:180000},async()=>{
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ let browser,context;
+ try{
+  browser=await chromium.launch({headless:true});
+  context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true,
+   locale:'fr-FR',serviceWorkers:'block'});
+  await context.addInitScript(()=>{window.supabase={createClient:()=>({})};});
+  const page=await context.newPage();
+  await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
+  const base='http://127.0.0.1:'+server.address().port;
+  const missing=[];
+  page.on('response',response=>{
+   if(response.status()>=400&&response.url().startsWith(base+scope))
+    missing.push(response.status()+' '+response.url());
+  });
+  const start=async()=>{
+   await page.goto(base+scope+'index.html',{waitUntil:'domcontentloaded'});
+   await page.locator('button.gensRootModeCard.capture').tap();
+   await page.locator('[data-capture-v2-view="adventure"]').tap();
+  };
+  await start();
+  const adventure=page.frameLocator('#gensCaptureV2Root iframe');
+  const starter=adventure.locator('#adventure-starter:not([disabled])');
+  await starter.selectOption('crea_lumilo');
+  await adventure.locator('#adventure-create').tap();
+  // Use the real world authoring APIs for a plain, walkable area with a
+  // guaranteed Shadow encounter. The battle journal is written by Combat.
+  await starter.evaluate(async(_,vendor)=>{
+   const [{createBlankWorldBuilderDraft,updateTerrainFamilyEncounterProfile,
+    setTerrainFamilyExclusiveEncounterElement,setAreaEncounterRandomEnabled},{saveWorldAssemblerDraft}]=await Promise.all([
+    import(vendor+'src/builder/world-builder-draft.js'),
+    import(vendor+'src/builder/world-assembler-handoff.js')
+   ]);
+   let world=createBlankWorldBuilderDraft({id:'adventure-pages-test',width:36*28,height:24*21});
+   const area=world.areas.find(item=>item.id===world.initialAreaId);
+   const family=area.surface.baseTerrainFamilyId;
+   world=updateTerrainFamilyEncounterProfile(world,family,{encounterChancePercent:100});
+   world=setTerrainFamilyExclusiveEncounterElement(world,family,'shadow');
+   world=setAreaEncounterRandomEnabled(world,area.id,true);
+   saveWorldAssemblerDraft(localStorage,world);
+  },scope+'vendor/exploration-lab/');
+  await adventure.locator('#adventure-play').tap();
+  const map=adventure.frameLocator('#adventure-play-frame');
+  const canvas=map.locator('#sculpt-canvas');
+  await map.locator('#play-menu-button:visible').waitFor();
+  await canvas.evaluate(()=>window.focus());
+  await page.keyboard.down('ArrowRight');
+  try{await map.locator('#sculpt-encounter-preview:visible').waitFor({timeout:18000});}
+  finally{await page.keyboard.up('ArrowRight');}
+  const point=await canvas.evaluate(()=>window.__sculptPlayProbe().actor);
+  assert.equal(await canvas.evaluate(()=>window.__sculptEncounterProbe().creatureId),'crea_ombre_2');
+  await map.locator('#sculpt-encounter-combat').tap();
+  const battle=map.locator('.combat-overlay__frame');
+  await battle.waitFor({state:'attached'});
+  const fight=map.frameLocator('.combat-overlay__frame');
+  try{
+   await fight.locator('[data-bridge-status][data-ready="true"]').waitFor({state:'attached'});
+  }catch(error){
+   throw new Error('Native duel did not start: '+JSON.stringify({
+    src:await battle.getAttribute('src'),
+    status:await fight.locator('[data-bridge-status]').textContent({timeout:1000}).catch(()=>null),
+    missing
+   }),{cause:error});
+  }
+  assert.equal(await fight.locator('[data-combat-skill]').count(),1,'only the true level-one skill is available');
+  await fight.locator('[data-encounter-flee]').tap();
+  await battle.waitFor({state:'detached'});
+  const saveKey='gensrpg.capture.v2.adventure.save.v1';
+  const save=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),saveKey);
+  assert.equal(save.party.active.level,1);
+  assert.equal(save.party.active.xp,0);
+  assert.equal(save.lastAward.outcome,'fled');
+  assert.equal(save.processedEncounterKeys.length,1);
+  assert.deepEqual(await canvas.evaluate(()=>window.__sculptPlayProbe().actor),point);
+  await start();
+  await adventure.locator('#adventure-play').tap();
+  await map.locator('#play-menu-button:visible').waitFor();
+  assert.deepEqual(await canvas.evaluate(()=>window.__sculptPlayProbe().actor),point);
+  const reopened=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),saveKey);
+  assert.deepEqual(reopened.processedEncounterKeys,save.processedEncounterKeys);
+  assert.equal(reopened.lastAward.outcome,'fled');
+ }finally{
+  await context?.close();await browser?.close();
+  server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
+ }
 });
 test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves root unchanged',
  {timeout:180000},async()=>{

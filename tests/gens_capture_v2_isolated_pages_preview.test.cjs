@@ -13,8 +13,8 @@ const rel='preview/capture-v2-pr225';
 const trial=path.join(site,rel);
 const previewPin=JSON.parse(fs.readFileSync(path.join(root,'tools/capture_v2_pages_preview_pin.json')));
 const previewSha=previewPin.sha;
-const combatSha='81ad362a401b7b2eb9faa811528aced9f2d6384a';
-const explorationSha='9d5b198f193b73c1912dd21881311786415ba113';
+const combatSha='46b4efede522f3410778271fddec872a36f1c54b';
+const explorationSha='4e7abd15d7b57909524ba697b74f63a193fce839';
 const sha256=buf=>crypto.createHash('sha256').update(buf).digest('hex');
 const read=(base,p)=>fs.readFileSync(path.join(base,p));
 const json=(base,p)=>JSON.parse(read(base,p));
@@ -22,14 +22,14 @@ const required=(base,p)=>assert.ok(fs.statSync(path.join(base,p)).isFile(),p);
 test('production root remains intact and preview exists ONLY in its isolated Pages subdirectory',()=>{
   for(const f of ['index.html','service-worker.js','manifest.webmanifest'])required(site,f);
   for(const f of ['index.html','service-worker.js','manifest.webmanifest','assets/gensrpg/capture-v2/shell-entry-v1.js',
-   'assets/gensrpg/capture-v2/source-pins-v1.json',
+   'assets/gensrpg/capture-v2/source-pins-v1.json','assets/gensrpg/capture-v2/adventure.html',
    'vendor/combat-lab/examples/dom-demo/capture-editor-v2.html',
-   'vendor/exploration-lab/sculpt-lab.html',
+   'vendor/exploration-lab/sculpt-lab.html','vendor/exploration-lab/play.html',
    'vendor/exploration-lab/src/sculpt-lab-main.js'])required(trial,f);
   const provenance=json(trial,'release-provenance.v1.json');
   assert.equal(provenance.schema,'gensrpg-capture-v2-isolated-pages-preview-v1');
   assert.equal(provenance.source.commit,previewSha);
-  assert.equal(provenance.source.ref,'pr-225-immutable-commit');
+  assert.equal(provenance.source.ref,'approved-immutable-commit');
   assert.equal(provenance.publicPath,'/'+rel+'/');
   assert.equal(provenance.productionRootSha256,sha256(read(site,'index.html')),
     'publisher must never replace production root with the draft Capture app');

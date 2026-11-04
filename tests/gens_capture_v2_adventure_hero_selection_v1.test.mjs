@@ -90,8 +90,8 @@ test('real Aventure UI exposes official Explorer user heroes, never requires tec
    assert.ok(html.includes('id="'+id+'"'),'Aventure must offer a user-friendly owner UI: '+id);
  assert.match(app,/createUserHeroStoreV1/);
  assert.match(app,/vendor\/exploration-lab\/src\/storage\/user-hero-store-v1\.js/);
- assert.match(app,/heroLibrary\.list\(\)/);
- assert.match(app,/heroLibrary\.get\(/);
+ assert.match(app,/officialHeroLibrary\(\)\.list\(\)/);
+ assert.match(app,/officialHeroLibrary\(\)\.get\(/);
  assert.match(app,/heroDefinitionId:\s*selectedHero/);
  assert.match(app,/writeAdventureHeroSelectionGrantV1/);
  assert.match(app,/vendor\/exploration-lab\/hero-editor\.html/);

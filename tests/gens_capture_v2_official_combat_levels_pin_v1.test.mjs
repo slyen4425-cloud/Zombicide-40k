@@ -6,8 +6,8 @@ import {resolveCaptureCombatCreatureLevelsV1} from '../_site/vendor/combat-lab/s
 const pins=JSON.parse(fs.readFileSync(new URL('../assets/gensrpg/capture-v2/source-pins-v1.json',import.meta.url),'utf8'));
 test('GenSRPG consumer explicitly pins certified Combat main owner commit with per-creature levels',()=>{
  assert.equal(pins.combat.ref,'main');
- assert.equal(pins.combat.sha,'4425d123f4f02d04b2e2942c989789abaf159b0a');
- assert.equal(pins.combat.certifiedCiRun,41841493907);
+ assert.equal(pins.combat.sha,'46b4efede522f3410778271fddec872a36f1c54b');
+ assert.equal(pins.combat.certifiedCiRun,41876979206);
  assert.equal(pins.exploration.ref,'main');
  assert.equal(pins.exploration.sha,'12759a802f57b83127aef46884763ef53e13b481',
   'Exploration pin must be the official merge with the certified combat journal tree');

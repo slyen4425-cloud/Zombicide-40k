@@ -45,6 +45,7 @@ export function connectAdventureCombatHostV1({
  frame.addEventListener(ADVENTURE_COMBAT_REQUEST_V1,event=>{
   const request=event.detail;
   if(event.target!==frame||typeof request?.respond!=='function')return;
+  event.preventDefault(); // Claim the cancellable request before the asynchronous Core write.
   void handle(request).then(
    response=>request.respond(response),
    error=>request.respond({error:error.message})

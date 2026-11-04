@@ -18,6 +18,9 @@ export function commitAdventureCombatResultV1({
  const partyRef='adventure-party:'+state.sessionId;
  if(envelope?.snapshot?.player?.partyRef!==partyRef)
   throw new Error('Combat snapshot partyRef does not match Adventure session');
+ const instanceId=envelope.result?.partyState?.activeInstanceId;
+ if(instanceId!==undefined&&instanceId!==state.party.active.instanceId)
+  throw new Error('Combat result instance does not match the saved Adventure fighter');
  // Delegate ALL rules, random loot, level and HP projection to the existing
  // GenSRPG Aventure authority; no second reward path is permitted.
  const result=applyAdventureCombatResultV1({

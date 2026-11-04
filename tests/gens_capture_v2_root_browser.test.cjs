@@ -328,9 +328,10 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
     const send=(kind,sessionId=args.sessionId)=>new Promise(resolve=>{
       const target=window.frameElement;
       if(!target)throw Error('Adventure result port requires its official host iframe');
-      target.dispatchEvent(new CustomEvent('gensrpg.capture.v2.adventure-combat-commit.v1',{
-        detail:{kind,sessionId,respond:resolve}
+      const claimed=!target.dispatchEvent(new CustomEvent('gensrpg.capture.v2.adventure-combat-commit.v1',{
+        cancelable:true,detail:{kind,sessionId,respond:resolve}
       }));
+      if(!claimed)throw Error('The Adventure owner did not claim the request');
     });
     const scope={sessionId:args.sessionId};
     const point=window.__sculptPlayProbe();
@@ -345,7 +346,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
     saveCombatHandoff(localStorage,{
       snapshot,returnState:{areaId:point.areaId,x:point.actor.x,y:point.actor.y,returnUrl:here.href},
       result:{encounterId:snapshot.encounterId,returnToken:snapshot.returnToken,outcome:'fled',
-        partyState:{activeCreatureId:args.speciesId,hp:17}}
+        partyState:{activeCreatureId:args.speciesId,activeInstanceId:args.instanceId,hp:17}}
     },scope);
     const ready=await send('ready');
     const wrong=await send('commit','other-session');
@@ -354,7 +355,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
     const grant=JSON.parse(sessionStorage.getItem('gensrpg.capture.v2.active-party.v1:'+args.sessionId));
     const consumed=consumeCombatResult(localStorage,{...scope,receipt:first.receipt});
     return {ready,wrong,empty,first,repeated,pending:pending?.result?.outcome,grant,consumed:consumed?.result?.outcome};
-  },{sessionId:stored.sessionId,speciesId:stored.party.active.speciesId});
+  },{sessionId:stored.sessionId,speciesId:stored.party.active.speciesId,instanceId:stored.party.active.instanceId});
   assert.deepEqual(port.ready,{ready:true});
   assert.match(port.wrong.error,/partie/i);
   assert.match(port.empty.error,/Aucun résultat/);

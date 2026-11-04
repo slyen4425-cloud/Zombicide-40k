@@ -60,6 +60,13 @@ function identity(value,field){
   throw new RangeError(field+' must be a safe identifier');
  return s;
 }
+// Adventure only persists an official Exploration HeroDefinition ID.
+export function officialAdventureHeroDefinitionIdV1(value){
+ if(typeof value!=='string'||
+  !/^hero\.user\.[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(value))
+  throw new RangeError('Aventure requires an authored Exploration HeroDefinition ID');
+ return value;
+}
 function iso(value,field){
  if(typeof value!=='string'||!Number.isFinite(Date.parse(value)))
   throw new TypeError(field+' must be a valid ISO date');
@@ -174,7 +181,9 @@ function assertSession(session){
  integer(actor.xp,'party.active.xp');
  if(actor.hp!==null)integer(actor.hp,'party.active.hp');
  if(Object.hasOwn(v,'hero')){
-  const hero=exact(v.hero,['progression'],'hero');
+  const hasDefinition=Object.hasOwn(v.hero,'definitionId');
+  const hero=exact(v.hero,hasDefinition?['progression','definitionId']:['progression'],'hero');
+  if(hasDefinition)officialAdventureHeroDefinitionIdV1(hero.definitionId);
   if(hero.progression!==null){
    const progress=exact(hero.progression,['xp','level','talentPoints'],'hero.progression');
    integer(progress.xp,'hero.progression.xp');
@@ -197,7 +206,8 @@ function assertSession(session){
  return v;
 }
 export function createAdventureSessionV1({
- bestiaryCards,starterId,rules=DEFAULT_ADVENTURE_RULES_V1,ids,now
+ bestiaryCards,starterId,rules=DEFAULT_ADVENTURE_RULES_V1,ids,now,
+ heroDefinitionId=null
 }){
  const cards=publishedAdventureSpeciesV1(bestiaryCards);
  const starter=cards.find(c=>c.id===starterId);
@@ -212,8 +222,11 @@ export function createAdventureSessionV1({
   schema:ADVENTURE_SAVE_SCHEMA_V1,version:1,sessionId,
   status:'configured',createdAt:timestamp,updatedAt:timestamp,rules:settings,
   party:{active:{instanceId,speciesId:starter.id,level:1,xp:0,hp:null}},
-  hero:{progression:settings.heroProgression.enabled
-   ?{xp:0,level:1,talentPoints:0}:null},
+  hero:{
+   ...(heroDefinitionId===null?{}:{definitionId:officialAdventureHeroDefinitionIdV1(heroDefinitionId)}),
+   progression:settings.heroProgression.enabled
+    ?{xp:0,level:1,talentPoints:0}:null
+  },
   inventory:{currency:0,items:{}},
   world:{mapRef:null,position:null},
   processedEncounterKeys:[],lastAward:null

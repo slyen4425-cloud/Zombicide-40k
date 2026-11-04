@@ -45,6 +45,18 @@
     <label>XP nécessaire par niveau <input type="number" id="adventure-xp-level" min="1" max="1000000000" step="1"></label>
     <label>Niveau maximum <input type="number" id="adventure-level-max" min="1" max="100" step="1"></label>
    </div>
+   <section aria-labelledby="adventure-hero-heading">
+    <h3 id="adventure-hero-heading">Progression du héros</h3>
+    <p class="hint">Par défaut, le héros ne gagne ni niveau ni XP. Le créateur peut activer cette option, indépendante des créatures.</p>
+    <div class="fields">
+     <label>Activer les niveaux du héros <input id="adventure-hero-xp-enabled" type="checkbox"></label>
+     <label>Part des XP attribuée au héros (%) <input id="adventure-hero-xp-share" type="number" min="0" max="1000" value="100"></label>
+     <label>XP par niveau du héros <input id="adventure-hero-xp-per-level" type="number" min="1" value="1000"></label>
+     <label>Niveau maximum du héros <input id="adventure-hero-max-level" type="number" min="1" max="100" value="100"></label>
+     <label>Points de talent par niveau <input id="adventure-hero-talent-points" type="number" min="0" value="0"></label>
+    </div>
+    <p class="hint">Les points de talent utilisent le Core. Le visuel et les compétences du héros restent dans leurs éditeurs officiels.</p>
+   </section>
    <div class="preview">
     <h3>Aperçu du calcul (sans récompense réelle)</h3>
     <label>Ennemi publié <select id="adventure-enemy" disabled></select></label>

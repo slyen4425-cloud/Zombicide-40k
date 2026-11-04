@@ -144,6 +144,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
     const allowed=new Set(official.filter(c=>c.skills?.some(s=>s.state==='ready')).map(c=>c.id));
     const records=filtered.listCreatures();
     return {
+      combatSha:manifest.combat.sha,
       officialCount:official.length,sourceCount:native.listCreatures().length,
       filteredCount:records.length,
       leaked:records.filter(c=>!allowed.has(c.id)).map(c=>c.id),
@@ -222,6 +223,38 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(launched.session,stored.sessionId);
   assert.match(launched.src,/vendor\/exploration-lab\/sculpt-lab\.html$/);
   assert.equal(launched.probe.editorHidden,true);
+
+  // Read the transient grant with the REAL Exploration main reader, not a
+  // duplicate GenSRPG validity check. The sender must use the identical
+  // published Combat Bestiary cards and never enable an unpublished species.
+  const delivered=await page.locator('#gensCaptureV2Root iframe').evaluate(
+   async(frame,args)=>{
+    const child=frame.contentWindow;
+    const {readScopedAdventurePublishedEncountersV1,
+      adventurePublishedEncounterStorageKeyV1}=await import(
+      '/vendor/exploration-lab/src/encounters/adventure-published-encounters-v1.js');
+    const key=adventurePublishedEncounterStorageKeyV1(args.sessionId);
+    const raw=child.sessionStorage.getItem(key);
+    const allowed=readScopedAdventurePublishedEncountersV1({
+      storage:child.sessionStorage,sessionId:args.sessionId,worldId:args.worldId,
+      authorSha:args.combatSha,engineSha:args.combatSha
+    });
+    return {raw:raw?JSON.parse(raw):null,ids:allowed,
+      runtimeCount:child.__sculptEncounterProbe?.().playPublishedCount??null};
+  },{sessionId:stored.sessionId,worldId:'gen-ci-capture-world',
+     combatSha:publication.combatSha});
+  assert.ok(delivered.raw,'official Adventure must write a same-origin transient publication grant');
+  assert.equal(delivered.raw.worldId,'gen-ci-capture-world');
+  assert.equal(delivered.raw.sessionId,stored.sessionId);
+  assert.equal(delivered.raw.combatSha,publication.combatSha);
+  assert.deepEqual([...delivered.ids].sort(),[...publication.survivors].sort(),
+    'real Exploration may only encounter the published and ready Combat species');
+  assert.equal(delivered.runtimeCount,publication.filteredCount,
+    'native Sculpt must consume the actual published-only grant');
+  assert.equal(await page.evaluate(()=>localStorage.getItem(
+    'gensrpg.capture.v2.published-encounters.v1:'+ stored.sessionId)),null,
+    'derived encounter grant must never be persisted in Core localStorage');
+
   const scopedBefore=await page.evaluate(id=>{
     const raw=localStorage.getItem('gensrpg.exploration.play.navigation.v1:'+id);
     return raw?JSON.parse(raw):null;

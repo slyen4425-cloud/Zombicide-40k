@@ -159,6 +159,9 @@ jobs:
           test ! -e _site/assets/gensrpg/capture
           node tools/stage_capture_v2_labs.mjs combat-lab exploration-lab _site
           node tools/stage_capture_v2_official_visuals.mjs approved-adventure-visuals approved-public-preview/tools/capture_v2_pages_preview_pin.json _site
+      - name: Capture V2 — véritable Combat main et niveaux 1 uniques, pas de fallback Tester (TDD)
+        run: node --test tests/gens_capture_v2_official_combat_levels_pin_v1.test.mjs
+
       - name: Install browser test dependencies
         run: |
           npm install --no-save --no-package-lock playwright@1.57.0 pngjs@7.0.0

@@ -1,3 +1,13 @@
+## 04/11/2026 — synchroniser la source certifiée Combat main : vrais niveaux par créature (EN COURS, NON GREEN)
+
+- **Signal CI bloquant utile** : GenSRPG PR #247 clean/root et official release [#41847115526](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/41847115526) et [#41847115490](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/41847115490) refusent correctement `Uncertified combat main drift`. Le propriétaire Combat main a évolué `81ad362a` → `4425d123f4f02d04b2e2942c989789abaf159b0a` pour les niveaux explicites (PR #232). Aucun fallback vers gh-pages, aucune désactivation du gate.
+- **Preuve source officielle** : Git tree SHA `f63c3713a202c29f888d022d7f2118f76db08748` est **identique** sur le HEAD Combat validé `096e1ae8887b9ed9d217f6bbe0f1bc8316f238eb` (Laboratory CI [#41841493907](https://github.com/slyen4425-cloud/GenSrpg_labo_combat_dynamique/actions/runs/41841493907) 5/5 jobs SUCCESS) et le commit merge officiel main `4425d123`. Donc le contenu de main est exactement celui dont la CI a testé le moteur et les bibliothèques.
+- **Branche/périmètre** : GenSRPG candidat PR #247 `f1fc28f947ba1673c8f30de72775f120fb79ad0a`, checkpoint START `checkpoint/gensrpg-capture-combat-main-levels-sync-start-2026-11-04`, work `work/gensrpg-capture-combat-main-levels-sync-2026-11-04`. Changer SEULEMENT le pin de Combat main et son run certifié `source-pins-v1.json`, test de contrat importé du VRAI vendor officiel et journal. Exploration main pin reste `a5c02440`, GenSRPG production main `aa34bf1f` inchangés.
+- **Tests** : official clean-root 4 modes et release gate, cas niveau 1 de vrai starter et ennemi niveau indépendant via `resolveCaptureCombatCreatureLevelsV1` importé du seul vendor Combat main; test Tester legacy niveau 20, refus des niveaux manquants sans fallback, préservation XP/loot/session, V113 et Builder. Pas de second moteur ni adaptation d'éditeur.
+- **Critère publication** : tous les jobs CI verts au SHA final, checkpoint GREEN, PR ciblée vers branche GenSRPG héro candidat #247 (qui devra alors repasser CI 4/4). Pas de promotion main GenSRPG avant vraie session Jouer/Combat.
+
+---
+
 ## 04/11/2026 — sélection du héros dans AdventureSession + grant visuel Jouer (LOT ISOLÉ, NON GREEN)
 
 - **Demande auteur** : choisir l'apparence du héros parmi les définitions officielles Explorateur, image fixe oscillante ou sprites repos/marche. Les créatures restent de niveau 1 au départ; héros sans XP par défaut, XP activable distinct. La fiche et les compétences n'appartiennent pas aux sprites.

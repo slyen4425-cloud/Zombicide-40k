@@ -6,7 +6,8 @@ test('Capture V2 has one GenSrpg-owned Adventure page without duplicating native
  const shell=read('assets/gensrpg/capture-v2/shell-entry-v1.js');
  const html=read('assets/gensrpg/capture-v2/adventure.html');
  const ui=read('assets/gensrpg/capture-v2/adventure-app-v1.mjs');
- assert.match(shell,/adventure:\{label:"Aventure/);
+ assert.match(shell,/adventure:\{label:"Jouer"/,
+  'the single GenSRPG Adventure owner must appear as the game entry');
  assert.match(shell,/path:"assets\/gensrpg\/capture-v2\/adventure.html",family:"capture"/);
  assert.match(shell,/if\(info\.family==="capture"\)/);
  assert.match(shell,/same-origin with its active Capture session/);

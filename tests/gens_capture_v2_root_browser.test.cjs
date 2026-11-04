@@ -74,12 +74,22 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.locator('#gensGameHome:visible').count(),0);
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   const buttons=page.locator('#gensCaptureV2Root [data-capture-v2-view]');
-  assert.equal(await buttons.count(),9,
-   'eight native Lab entry points plus one GenSrpg-owned Adventure settings view, without extra editors');
-  // Aventure is the ninth, GenSrpg-owned screen; the original eight native
-  // Lab destinations keep their exact URLs and full-screen contracts.
+  assert.equal(await buttons.count(),8,
+   'seven distinct native Lab destinations plus the game, without duplicate 2.5D Tester');
+  assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu > button').count(),2,
+   'the game home shows only Jouer and Éditeurs');
+  assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="world"] button').count(),2,
+   'Carte du monde and native Terrain 2.5D live in the SAME menu group');
+  assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').count(),0,
+   'the old duplicate Exploration 2.5D entry must be gone');
+  // The single Adventure game entry and seven genuinely distinct Lab
+  // destinations preserve the original native URLs and fullscreen.
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
   const adventureFrame=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
+  assert.equal(await adventureFrame.locator('#adventure-rules-panel').getAttribute('open'),null,
+   'new game opens without developer settings exposed by default');
+  assert.equal(await adventureFrame.locator('#adventure-loot-panel').getAttribute('open'),null);
+  await adventureFrame.locator('#adventure-rules-panel > summary').tap();
   await adventureFrame.locator('#adventure-xp-base').waitFor({timeout:15000});
   await adventureFrame.locator('#adventure-create').waitFor({timeout:15000});
   // Real published Bestiary data must populate this UI, not a mock species
@@ -372,6 +382,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
 
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="creature"]').tap();
   const iframe=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
   await iframe.waitFor({state:'visible'});
@@ -460,6 +471,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   // All shortcuts use the SAME original editor source; only its native ?tab= changes.
   for(const tab of ['skills','combat','music']){
     await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+    await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
     await page.locator('#gensCaptureV2Root [data-capture-v2-view="'+tab+'"]').tap();
     const native=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
     const expected='vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab='+tab;
@@ -470,16 +482,19 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
     await editor.locator('[data-editor-panel="'+tab+'"]:visible').waitFor({timeout:25000});
   }
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="bestiary"]').tap();
   await page.frameLocator('#gensCaptureV2Root iframe').locator('[data-bestiary]').waitFor({timeout:25000});
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
-  await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').tap();
-  await page.frameLocator('#gensCaptureV2Root iframe').locator('#sculpt-canvas').waitFor({timeout:25000});
-  // Return from a Lab restores Capture home; second Lab gets full screen too.
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="world"]').tap();
+  await page.frameLocator('#gensCaptureV2Root iframe').locator('#world-name').waitFor({timeout:25000});
+  // Two DISTINCT editor owners grouped under one Monde menu.
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),null);
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),true);
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="builder"]').tap();
   const builderFrame=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
   await builderFrame.waitFor({state:'visible'});

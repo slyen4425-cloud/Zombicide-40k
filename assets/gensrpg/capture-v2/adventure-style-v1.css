@@ -11,8 +11,15 @@ p{margin:5px 0 10px;line-height:1.4}
 .adventure-head p,.hint{color:#b4c8ca;font-size:12px}
 #adventure-status{font-size:12px;color:#a0f0db;max-width:24rem}
 #adventure-status[data-error=true]{color:#ffb2a4}
-.adventure-columns{display:grid;grid-template-columns:repeat(3,minmax(240px,1fr));gap:14px;align-items:start}
-.adventure-columns>section{padding:16px;border-radius:14px;border:1px solid #2e6468;background:rgba(11,33,41,.85);min-width:0}
+.adventure-columns{display:grid;grid-template-columns:minmax(280px,560px) minmax(280px,700px);gap:14px;align-items:start;justify-content:center;max-width:1320px;margin:auto}
+.adventure-columns>section,.adventure-columns>details{padding:16px;border-radius:14px;border:1px solid #2e6468;background:rgba(11,33,41,.85);min-width:0}
+.adventure-columns>section:first-child{grid-row:span 2}
+.adventure-options>summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 2px;font-size:18px;font-weight:750;color:#dcfff4}
+.adventure-options>summary::-webkit-details-marker{display:none}
+.adventure-options>summary::after{content:"+";font-size:22px;line-height:1;color:#9cdbcc}
+.adventure-options[open]>summary::after{content:"−"}
+.adventure-options>summary:focus-visible{outline:3px solid #7fe5c3;border-radius:8px}
+.adventure-options[open]>summary{margin-bottom:16px}
 label{display:grid;gap:5px;font-weight:650;font-size:12px;color:#d6edef;margin:8px 0}
 .fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 12px}
 input,select,button{font:inherit;border-radius:8px;border:1px solid #538a8e;background:#173a45;color:#f0ffff}
@@ -28,7 +35,8 @@ output{display:block;overflow-wrap:anywhere}
 .rules-list{display:grid;gap:7px;margin:8px 0}
 .rule-row{border:1px solid #2a5159;border-radius:8px;padding:8px;display:flex;align-items:center;justify-content:space-between;gap:7px;font-size:12px}
 .rule-row button{min-height:33px;padding:5px 8px}
-@media(max-width:950px){.adventure-columns{grid-template-columns:repeat(2,minmax(0,1fr))}.adventure-columns>section:last-child{grid-column:1/-1}}
-@media(max-width:580px){.adventure-columns{grid-template-columns:minmax(0,1fr)}.adventure-columns>section:last-child{grid-column:auto}.fields{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:950px){.adventure-columns{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:580px){.adventure-columns{grid-template-columns:minmax(0,1fr)}.adventure-columns>section:first-child{grid-row:auto}.fields{grid-template-columns:minmax(0,1fr)}}
+@media(orientation:landscape) and (max-height:550px){.adventure-head{margin-bottom:8px}.adventure-columns>section,.adventure-columns>details{padding:10px}}
 
 #adventure-play-frame{position:fixed;inset:0;width:100%;height:100%;border:0}

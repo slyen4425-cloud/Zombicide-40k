@@ -4,19 +4,28 @@
 (function(root){
   const base=new URL("./",root.document.baseURI);
   const VIEWS=Object.freeze({
-    explore:{label:"Exploration 2.5D · Tester",path:"vendor/exploration-lab/sculpt-lab.html",family:"exploration"},
-    builder:{label:"Éditeur 2.5D",path:"vendor/exploration-lab/sculpt-lab.html",family:"exploration"},
+    // Two genuinely distinct World owners: World Assembler, and ONE native
+    // 2.5D Sculpt editor. The former duplicate "Exploration · Tester" button
+    // opened exactly the same Sculpt URL, so it is removed from the game menu.
+    builder:{label:"Terrain et exploration 2,5D",path:"vendor/exploration-lab/sculpt-lab.html",family:"exploration"},
     world:{label:"Carte du monde",path:"vendor/exploration-lab/world-assembler.html",family:"exploration"},
     // Four native entry points, ONE actual Lab Combat editor. Combat main
     // (SHA-pinned PR #156) owns ?tab= routing, native state and all rules.
     // Never click tabs from the consumer or implement a parallel editor.
-    creature:{label:"Créatures · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=creature",family:"combat"},
-    skills:{label:"Capacités · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=skills",family:"combat"},
-    combat:{label:"Règles de combat · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=combat",family:"combat"},
-    music:{label:"Musiques · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=music",family:"combat"},
-    bestiary:{label:"Bestiaire · Labo Combat",path:"vendor/combat-lab/examples/dom-demo/bestiary.html",family:"combat"},
-    adventure:{label:"Aventure · XP, butin et partie",path:"assets/gensrpg/capture-v2/adventure.html",family:"capture"}
+    creature:{label:"Créatures",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=creature",family:"combat"},
+    skills:{label:"Capacités",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=skills",family:"combat"},
+    combat:{label:"Règles de combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=combat",family:"combat"},
+    music:{label:"Musiques",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=music",family:"combat"},
+    bestiary:{label:"Bestiaire",path:"vendor/combat-lab/examples/dom-demo/bestiary.html",family:"combat"},
+    adventure:{label:"Jouer",path:"assets/gensrpg/capture-v2/adventure.html",family:"capture"}
   });
+  // Navigation is presentation-only: one destination per native owner,
+  // grouped by the player's task rather than by implementation laboratory.
+  const EDITOR_GROUPS=Object.freeze([
+    Object.freeze({id:"world",title:"Monde",items:Object.freeze(["world","builder"])}),
+    Object.freeze({id:"combat",title:"Créatures et combat",items:Object.freeze(
+      ["creature","skills","combat","bestiary","music"])})
+  ]);
   const shell=root.GensShellModuleLaunchV1;
   const returnShell=root.GensShellScreenReturnV1;
   if(!shell||!returnShell||!root.GensCaptureV1?.isProfile)
@@ -85,7 +94,7 @@
     stage.replaceChildren(frame);
     current=kind;
     nativeTitle.textContent=info.label;
-    notice.textContent=info.label+" · module officiel du laboratoire";
+    notice.textContent=info.label;
     host.dataset.view=kind;
     // Presentation-only placement of the shared return control: Combat's
     // official editor footer and Exploration's toolbars use different corners.
@@ -97,10 +106,16 @@
     if(!host)return false;
     if(frame){frame.src="about:blank";frame.remove();frame=null;}
     stage.replaceChildren();
-    current=null;host.dataset.view="home";
+    current=null;host.dataset.view="home";host.dataset.menu="main";
     delete host.dataset.nativeFamily;
     nativeTitle.textContent="";
-    notice.textContent="Éditeurs officiels, Aventure, sauvegarde et entrée dans le mode Jouer natif Exploration.";
+    notice.textContent="Choisis comment commencer.";
+    return true;
+  }
+  function editors(){
+    if(!home())return false;
+    host.dataset.menu="editors";
+    notice.textContent="Choisis un outil de création.";
     return true;
   }
   function start(){
@@ -109,25 +124,56 @@
     const doc=root.document;
     host=doc.createElement("section");
     host.id="gensCaptureV2Root";
-    host.setAttribute("aria-label","Monster Capture — nouveau module");
+    host.setAttribute("aria-label","Monster Capture");
     host.dataset.view="home";
+    host.dataset.menu="main";
     const header=doc.createElement("header");
     const name=doc.createElement("strong");name.textContent="Monster Capture";
     const exit=doc.createElement("button");
     exit.type="button";exit.textContent="Quitter le mode";
     exit.addEventListener("click",stop);
     header.append(name,exit);
+    // Two choices on the actual game home screen. The tools are not a
+    // row of development/debug shortcuts; they live in ONE grouped editor list.
     const nav=doc.createElement("nav");
-    nav.setAttribute("aria-label","Fonctions officielles Monster Capture");
-    const back=doc.createElement("button");back.type="button";back.textContent="Accueil Capture";
-    back.addEventListener("click",home);nav.append(back);
-    for(const [key,info] of Object.entries(VIEWS)){
-      const button=doc.createElement("button");button.type="button";
-      button.dataset.captureV2View=key;button.textContent=info.label;
-      button.addEventListener("click",()=>open(key));nav.append(button);
+    nav.className="gensCaptureV2MainMenu";
+    nav.setAttribute("aria-label","Menu principal Monster Capture");
+    const play=doc.createElement("button");play.type="button";
+    play.dataset.captureV2View="adventure";
+    play.textContent="Jouer";
+    play.addEventListener("click",()=>open("adventure"));
+    const editing=doc.createElement("button");editing.type="button";
+    editing.dataset.captureV2Menu="editors";
+    editing.textContent="Éditeurs";
+    editing.addEventListener("click",editors);
+    nav.append(play,editing);
+    const editorPanel=doc.createElement("section");
+    editorPanel.className="gensCaptureV2Editors";
+    editorPanel.setAttribute("aria-label","Éditeurs Monster Capture");
+    const menuBack=doc.createElement("button");menuBack.type="button";
+    menuBack.className="gensCaptureV2MenuBack";
+    menuBack.dataset.captureV2MenuBack="main";
+    menuBack.textContent="← Menu principal";
+    menuBack.addEventListener("click",home);
+    editorPanel.append(menuBack);
+    for(const group of EDITOR_GROUPS){
+      const section=doc.createElement("section");
+      section.className="gensCaptureV2EditorGroup";
+      section.dataset.editorGroup=group.id;
+      const title=doc.createElement("h2");title.textContent=group.title;
+      const entries=doc.createElement("ul");
+      for(const kind of group.items){
+        const li=doc.createElement("li");
+        const button=doc.createElement("button");button.type="button";
+        button.dataset.captureV2View=kind;
+        button.textContent=VIEWS[kind].label;
+        button.addEventListener("click",()=>open(kind));
+        li.append(button);entries.append(li);
+      }
+      section.append(title,entries);editorPanel.append(section);
     }
     notice=doc.createElement("p");notice.setAttribute("role","status");
-    // Full native tool viewport. The 8-button Capture hub is only the home view.
+    // Native Lab pages own the whole viewport; this menu never overlays gameplay.
     const nativeBar=doc.createElement("div");
     nativeBar.className="gensCaptureV2NativeBar";
     const nativeBack=doc.createElement("button");
@@ -139,7 +185,7 @@
     nativeTitle.className="gensCaptureV2NativeTitle";
     nativeBar.append(nativeBack,nativeTitle);
     stage=doc.createElement("div");stage.className="gensCaptureV2Stage";
-    host.append(header,nav,notice,nativeBar,stage);
+    host.append(header,nav,editorPanel,notice,nativeBar,stage);
     doc.body.append(host);
     root.gensHideHomeLevels?.();
     home();

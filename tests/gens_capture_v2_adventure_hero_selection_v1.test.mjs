@@ -1,4 +1,6 @@
 import test from 'node:test';
+import fs from 'node:fs';
+
 import assert from 'node:assert/strict';
 import {DEFAULT_ADVENTURE_RULES_V1,createAdventureSessionV1} from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 import {writeAdventureHeroSelectionGrantV1,ADVENTURE_HERO_SELECTION_SCHEMA_V1} from '../assets/gensrpg/capture-v2/adventure-hero-selection-grant-v1.mjs';
@@ -76,4 +78,27 @@ test('hero and world identity remain frozen in AdventureSession even when combat
  const before=newGame();
  const after={...before,party:{active:{...before.party.active,level:3,xp:2500}}};
  assert.equal(after.hero.definitionId,heroId);
+});
+
+test('real Aventure UI exposes official Explorer user heroes, never requires technical IDs, and grants the saved hero',()=>{
+ const html=fs.readFileSync(new URL('../assets/gensrpg/capture-v2/adventure.html',import.meta.url),'utf8');
+ const app=fs.readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ const flow=fs.readFileSync(new URL('../.github/workflows/capture-v2-clean-base.yml',import.meta.url),'utf8');
+ for(const id of ['adventure-hero-choice','adventure-hero-editor','adventure-hero-refresh',
+  'adventure-hero-save-selection','adventure-hero-editor-panel','adventure-hero-editor-frame',
+  'adventure-hero-editor-close'])
+   assert.ok(html.includes('id="'+id+'"'),'Aventure must offer a user-friendly owner UI: '+id);
+ assert.match(app,/createUserHeroStoreV1/);
+ assert.match(app,/vendor\/exploration-lab\/src\/storage\/user-hero-store-v1\.js/);
+ assert.match(app,/heroLibrary\.list\(\)/);
+ assert.match(app,/heroLibrary\.get\(/);
+ assert.match(app,/heroDefinitionId:\s*selectedHero/);
+ assert.match(app,/writeAdventureHeroSelectionGrantV1/);
+ assert.match(app,/vendor\/exploration-lab\/hero-editor\.html/);
+ assert.ok(app.indexOf('writeAdventureHeroSelectionGrantV1(')>app.indexOf('startAdventureExplorationV1('),
+  'only the validated real playing session may grant its saved HeroDefinition');
+ assert.match(flow,/hero-editor\.html/,
+  'the official CI packaged site must exercise the same page users will open');
+ assert.doesNotMatch(app,/localStorage\.setItem\([^\n]*hero/i,
+  'the Explorer IndexedDB is the only owner of image bytes');
 });

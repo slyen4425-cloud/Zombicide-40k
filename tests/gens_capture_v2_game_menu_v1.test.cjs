@@ -42,12 +42,12 @@ function scene(){
  return {rootWindow,body,find,click,exits:()=>exitCount};
 }
 test('one 2.5D editor endpoint: no duplicate Exploration Tester menu entry or second engine',()=>{
- const entries=[...source.matchAll(/path:"vendor\\/exploration-lab\\/sculpt-lab\\.html"/g)];
+ const entries=[...source.matchAll(/path:"vendor\/exploration-lab\/sculpt-lab\.html"/g)];
  assert.equal(entries.length,1,'one distinct 2.5D editor entry must be published');
- assert.doesNotMatch(source,/\\bexplore:\\{label:/,'the duplicate Exploration Tester entry is retired');
- assert.match(source,/builder:\\{label:/);
- assert.match(source,/world:\\{label:/);
- assert.doesNotMatch(source,/vendor\\/exploration-lab\\/builder\\.html/,
+ assert.doesNotMatch(source,/\bexplore:\{label:/,'the duplicate Exploration Tester entry is retired');
+ assert.match(source,/builder:\{label:/);
+ assert.match(source,/world:\{label:/);
+ assert.doesNotMatch(source,/vendor\/exploration-lab\/builder\.html/,
   'the 2D legacy Builder must not be substituted for native 2.5D');
 });
 test('real Capture Shell home is a vertical game menu, with coherent grouped editor destinations',()=>{
@@ -78,14 +78,14 @@ test('real Capture Shell home is a vertical game menu, with coherent grouped edi
  assert.equal(s.rootWindow.GensCaptureV2.status().view,'builder');
  const frames=all(s.body).filter(n=>n.tag==='iframe');
  assert.equal(frames.length,1,'native Lab must still own its only full-screen iframe');
- assert.match(frames[0].src,/vendor\\/exploration-lab\\/sculpt-lab\\.html$/);
+ assert.match(frames[0].src,/vendor\/exploration-lab\/sculpt-lab\.html$/);
  assert.equal(s.body.children[0].dataset.nativeFamily,'exploration');
  s.rootWindow.GensCaptureV2.home();
  assert.equal(s.rootWindow.GensCaptureV2.status().view,null);
  assert.equal(all(s.body).filter(n=>n.tag==='iframe').length,0);
  s.click('captureV2View','adventure');
  assert.equal(s.rootWindow.GensCaptureV2.status().view,'adventure');
- assert.match(all(s.body).find(n=>n.tag==='iframe').src,/assets\\/gensrpg\\/capture-v2\\/adventure\\.html$/);
+ assert.match(all(s.body).find(n=>n.tag==='iframe').src,/assets\/gensrpg\/capture-v2\/adventure\.html$/);
  s.rootWindow.GensCaptureV2.stop();
  assert.equal(s.exits(),1);
 });

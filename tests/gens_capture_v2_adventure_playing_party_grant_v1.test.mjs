@@ -24,7 +24,7 @@ function fixture(){
  const publicationGrant=writeAdventurePublishedEncounterGrantV1({
   storage,session,world,bestiaryCards:cards,combatSha:SHA
  });
- return {storage,session,world,publicationGrant};
+ return {storage,session,world,publicationGrant,combatSha:SHA};
 }
 test('only official real Adventure member instance, creature level and HP enter temporary playing-party grant',()=>{
  const f=fixture();
@@ -49,7 +49,6 @@ test('refuses stale save, wrong WorldDocument and uncertified unpublished specie
   f=>({session:{...f.session,party:{active:{...f.session.party.active,level:101}}}}),
   f=>({session:{...f.session,party:{active:{...f.session.party.active,hp:-1}}}}),
   f=>({session:{...f.session,party:{active:{...f.session.party.active,instanceId:'broken/path'}}}}),
-  f=>({publicationGrant:{...f.publicationGrant,combatSha:'f'.repeat(40)}}),
   f=>({publicationGrant:{...f.publicationGrant,allowedCreatureIds:['official-unready']}}),
   f=>({publicationGrant:{...f.publicationGrant,sessionId:'other'}}),
   f=>({publicationGrant:{...f.publicationGrant,extra:['false-owner']}})
@@ -58,6 +57,12 @@ test('refuses stale save, wrong WorldDocument and uncertified unpublished specie
   const f=fixture();assert.throws(()=>writeAdventurePlayingPartyV1({...f,...make(f)}));
   assert.equal(f.storage.getItem('gensrpg.capture.v2.active-party.v1:session-1'),null);
  }
+});
+test('a valid but different Combat commit must not authorize the saved party',()=>{
+ const f=fixture();
+ const publicationGrant={...f.publicationGrant,combatSha:'f'.repeat(40)};
+ assert.throws(()=>writeAdventurePlayingPartyV1({...f,publicationGrant}),/Combat SHA mismatch/);
+ assert.equal(f.storage.getItem('gensrpg.capture.v2.active-party.v1:session-1'),null);
 });
 test('party revalidation after a creature level-up overwrites only scoped projection, never the save',()=>{
  const f=fixture(),before=JSON.stringify(f.session);

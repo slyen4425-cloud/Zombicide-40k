@@ -1,3 +1,12 @@
+## 2026-11-04 — Gate externe Capture V2 : diagnostic d'un démarrage de preview en timeout (EN COURS, NON GREEN)
+
+- **Signal CI réel** : après pin officiel Exploration `main@ecfb3276`, [clean #41753662242](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/41753662242) : `clean-authority` GREEN, `root-browser` RED à `tests/gens_preview_external_capture_v2_browser_v1.test.cjs:38`, `waitForFunction` de l'amorçage de `html-preview.github.io` au bout de 60 s. Le test local GenSRPG→Jouer et la livraison officielle sont GREEN sur le même pin. Ne pas conclure à un problème de WorldDocument, un défaut créature, ni un aléa passager sans preuve.
+- **Base** : GenSRPG candidate #239 `61408bea83f58eeff62540ea14f2a53854ad461e`, checkpoint START `checkpoint/gensrpg-preview-external-observability-start-2026-11-04`, branche `work/gensrpg-preview-external-observability-2026-11-04`. Stable `main@aa34bf1f` préservé.
+- **Périmètre** : enrichir UNIQUEMENT l'assertion réelle d'initialisation externe avec les états du DOM, `window.__GENSRPG_PREVIEW__`, le statut `GensCaptureV2`, le nombre de modes, réponses HTTP et erreurs JS ; **ne pas** allonger le timeout, changer les URLs officielles, supprimer l'assertion ou simuler un script.
+- **Gate** : si RED persiste, classer la vraie cause (transport plateforme externe, scripts non chargés, pin SHA, CORS/404) et corriger au propriétaire. Si GREEN, conserver les diagnostics en sentinelle. Aucune promotion sur main avant les checks. Aucune mutation PWA, des sauvegardes, du Combat ou d'Exploration.
+
+---
+
 ## 2026-11-03 — Lot suivant Monster Capture V2 : candidats rencontres = Bestiaire publié Combat (EN COURS, NON GREEN)
 
 - **Base** : PR #239 candidat `a75e42e396fa3f373e4029532cdb294f8998694b` avec les quatre contrôles CI GREEN ; checkpoint START `checkpoint/gensrpg-published-encounter-gate-start-2026-11-03`, lot `work/gensrpg-adventure-published-encounter-gate-2026-11-03`. GenSRPG `main@aa34bf1f` préservé.

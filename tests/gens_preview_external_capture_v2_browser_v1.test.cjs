@@ -35,12 +35,31 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
   try{
     const response=await page.goto(target,{waitUntil:'domcontentloaded'});
     assert.ok(response?.ok(),'external GitHub preview host must serve a page');
-    await page.waitForFunction(()=>(
-      document.documentElement?.dataset?.gensrpgPreviewReady==='1' &&
-      !!window.GensCaptureV2 &&
-      typeof window.GensShellModuleLaunchV1?.activeModule==='function' &&
-      document.querySelectorAll('button.gensRootModeCard').length===4
-    ),null,{timeout:60000});
+    try{
+      await page.waitForFunction(()=>(
+        document.documentElement?.dataset?.gensrpgPreviewReady==='1' &&
+        !!window.GensCaptureV2 &&
+        typeof window.GensShellModuleLaunchV1?.activeModule==='function' &&
+        document.querySelectorAll('button.gensRootModeCard').length===4
+      ),null,{timeout:60000});
+    }catch(error){
+      // Never relax the external gate. Report real host DOM and transport.
+      const observed=await page.evaluate(()=>({
+        url:location.href,base:document.baseURI,title:document.title,
+        readyFlag:document.documentElement?.dataset?.gensrpgPreviewReady,
+        previewMode:window.__GENSRPG_PREVIEW__,
+        captureV2:typeof window.GensCaptureV2,
+        shellLaunch:typeof window.GensShellModuleLaunchV1?.activeModule,
+        modeButtons:document.querySelectorAll('button.gensRootModeCard').length,
+        inlineScripts:[...document.scripts].filter(s=>!!s.textContent.trim()).length,
+        externalScripts:[...document.scripts].filter(s=>!!s.src).map(s=>s.src).slice(0,12),
+        bodyText:document.body?.textContent?.trim().slice(0,650)
+      })).catch(e=>({readError:String(e)}));
+      throw new Error('Real external Capture preview did not bootstrap: '+
+        JSON.stringify({observed,pageErrors:pageErrors.slice(-12),
+          badResponses:badResponses.slice(-12),failedRequests:failedRequests.slice(-12)})+
+        '; '+String(error));
+    }
     const owner=await page.evaluate(()=>({
       base:document.baseURI,
       v2:typeof window.GensCaptureV2?.start,

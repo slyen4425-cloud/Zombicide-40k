@@ -1,3 +1,9 @@
+## 2026-11-04 — Aventure : projection de l’instance active avec provenance Combat vérifiée
+
+- START `checkpoint/gensrpg-start-adventure-active-party-compat-2026-11-04` sur la PR #249 `7cb27d927c404e9dcd537179b1dc0cbc28e45956` (CI Clean, navigateur racine, livraison native, Builder et V113 verts). Branche `work/gensrpg-adventure-active-party-compat-2026-11-04`, main GenSRPG `aa34bf1f415d14ba2c62e6745f8655aec6e3a4fa` protégé.
+- Propriétaire GenSRPG Aventure. Réintégrer #246, reproduire son contrôle RED de divergence SHA Combat, vérifier la référence issue de la livraison officielle avant d’écrire la projection. Le grant Bestiaire existant, déjà intégré via #243, reste seul émetteur de la liste. Pas de règle Combat, de copie de catalogue ni de donnée persistante nouvelle.
+- Tests : vrai écrivain de grant, instance/niveau/PV, identité monde/partie, faux SHA et espèce non publiée, puis navigateur du vrai Shell sur le main Exploration recertifié. L’activation des combats et la persistance de leur résultat passent par des lots séparés.
+
 ## 2026-11-04 — Aventure : préserver HeroDefinition après CombatResult / XP (PR #249, À CERTIFIER)
 
 - **Contexte** : objectif [#235](https://github.com/slyen4425-cloud/Zombicide-40k/issues/235), vraie partie Monster Capture avec héros visuel facultatif. La PR #248, base immuable `7c011a1334abcc1eb697cc7d2b01dbd5c07314d7`, a 4/4 workflows SUCCESS sur le contrat de synchronisation Combat main `4425d123` ; elle reste DRAFT, non publiée.
@@ -28,6 +34,16 @@
 - **Périmètre actuel sans dépendance nouvelle** : ajouter `hero.definitionId` optionnel au modèle AdventureSession v1 avec vérification ID officiel et conservation exacte des anciennes parties, et émetteur strict du grant après validation d'un vrai HeroDefinition récupéré de la bibliothèque Exploration. Aucun changement du niveau initial des créatures, de leur progression ou des résultats de combat. Le mode sans héros choisi conserve rétrocompatibilité et n'écrit aucun grant.
 - **TDD** : création avec/sans héro, sauvegarde ancienne et résultat XP sans modification de sélection, identité de partie/monde, validation record réel, aucun fallback si héros demandé mais absent, no credentials/paths/assets en grant, portée sessionStorage uniquement. Le prochain lot UI ne pourra être GREEN que lorsque Exploration #355/#356/#357 sera certifiée sur main et re-épinglée avec navigateur mobile PC; pas d'import de source de branche Exploration dans G.
 - **Hors périmètre** : UI actuelle sélection de héros, emploi dans Combat, nouvelle fiche/compétences héros, navigation/collision/CSS, service worker, Dungeon, Duel/Survie. La PR reste candidate jusqu'à CI et promotion official main Exploration.
+
+---
+
+## 04/11/2026 — équipe réelle Aventure : projection de session pour le Combat natif (TDD, NON GREEN)
+
+- **Base/checkpoint** : GenSRPG candidat #239 après PR héros #245 `6a158dd4e3291ff2685a83bc44a1fdb2fe1d36ef`, checkpoint START `checkpoint/gensrpg-adventure-active-party-grant-start-2026-11-04`, branche `work/gensrpg-adventure-active-party-grant-2026-11-04`. GenSRPG stable `main@aa34bf1f` et Combat main `81ad362a` protégés ; Exploration main `a5c02440` actuellement sans lecteur équipe, [PR Exploration #354](https://github.com/slyen4425-cloud/laboratoire_dynamique_exploration-/pull/354) propriétaire en vérification.
+- **Mission** : remplacer l'équipe de démonstration lorsque Jouer sera autorisé à combattre. GenSRPG Aventure possède `AdventureSession.party.active.instanceId/speciesId/level/hp` ; écrire une **projection éphémère** `sessionStorage` dérivée de la sauvegarde authentique après vérification identité partie/monde/Bestiaire publié et pin Combat officiel. Contrat versionné `gensrpg.capture.v2.active-party.v1:<sessionId>` avec `{schema,version,sessionId,worldId,combatSha,partyRef:'adventure-party:'+sessionId,active:{instanceId,speciesId,level,hp}}`. Aucune statistique/compétence, aucune équipe fictive, aucun ID manuel ni duplication durable dans WorldDocument.
+- **Unique owner** : Combat main construit les statistiques de combattant **par instance** ; le lecteur Exploration ne lit pas la sauvegarde GenSRPG et ne possède pas les niveaux ; GenSRPG ne touche pas la position/caméra/collision, ni le résultat natif. Adapter au retour GenSRPG déjà créé `adventure-combat-commit-v1.mjs` exige `snapshot.player.partyRef === 'adventure-party:'+sessionId`.
+- **TDD RED** : les projections doivent reprendre exactement les IDs et niveaux de la véritable partie ; refus si partie non en cours, mapRef monde incompatible, espèce non publiée ou sans capacité `ready`, HP/level invalides, SHA officiel incorrect, duplications ; aucun écrit sur échec ; reprise du grant après changement de session sans réutiliser le Tester. Test Node du propriétaire et vrai Chromium de l'onglet Aventure en consommant le **lecteur strict d'Exploration PR#354 après promotion sur main**.
+- **Hors périmètre** : modifier Combat main, multiplier les sources de personnage, envoyer l'XP au moteur Exploration, calculer combats/niveaux/stat dans l'UI, remplacer le héros visuel, autoriser les rencontres tant que le moteur utilise encore `previewLevel:20` et `party.preview.v1.json`. Recette physique Pixel requise avant GREEN produit.
 
 ---
 

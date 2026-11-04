@@ -40,6 +40,11 @@ test('only official real Adventure member instance, creature level and HP enter 
  assert.deepEqual(JSON.parse(f.storage.getItem('gensrpg.capture.v2.active-party.v1:session-1')),grant);
  assert.equal(f.storage.getItem('gensrpg.capture.v2.active-party.v1:other'),null);
 });
+test('projects the exact fractional HP saved after native combat',()=>{
+ const f=fixture(),hp=33.47000000000003;
+ const session={...f.session,party:{active:{...f.session.party.active,hp}}};
+ assert.equal(writeAdventurePlayingPartyV1({...f,session}).active.hp,hp);
+});
 test('refuses stale save, wrong WorldDocument and uncertified unpublished species before writing',()=>{
  const variants=[
   f=>({session:{...f.session,status:'configured'}}),

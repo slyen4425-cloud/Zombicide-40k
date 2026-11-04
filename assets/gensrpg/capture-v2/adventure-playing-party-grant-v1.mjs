@@ -49,8 +49,8 @@ export function writeAdventurePlayingPartyV1({
   throw new RangeError('Owned playing species not published/ready in official Bestiaire');
  if(!Number.isSafeInteger(saved.level)||saved.level<1||saved.level>100)
   throw new RangeError('Saved creature level must be between 1 and 100');
- if(saved.hp!==null&&(!Number.isSafeInteger(saved.hp)||saved.hp<0))
-  throw new RangeError('Saved creature HP must be null or nonnegative');
+ if(saved.hp!==null&&(!Number.isFinite(saved.hp)||saved.hp<0||saved.hp>Number.MAX_SAFE_INTEGER))
+  throw new RangeError('Saved creature HP must be null or a finite nonnegative number');
  const data=Object.freeze({
   schema:ADVENTURE_PLAYING_PARTY_SCHEMA_V1,version:1,
   sessionId,worldId,combatSha:grant.combatSha,

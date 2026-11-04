@@ -1,3 +1,9 @@
+## 2026-11-04 — Prévisualisation Pages : transporter le point d’entrée Jouer officiel
+
+- START `checkpoint/gensrpg-start-adventure-preview-play-entry-2026-11-04` sur `main@aa34bf1f415d14ba2c62e6745f8655aec6e3a4fa`. Branche `work/gensrpg-adventure-preview-play-entry-2026-11-04`.
+- Propriétaire : publisher Pages existant. Son sparse checkout et la copie statique de la prévisualisation omettent `play.html`, que le manifeste du candidat Aventure exige. Ajouter le fichier officiel des deux côtés ; le SHA de prévisualisation existant demeure sélectionné et compatible s’il ne contient pas cette entrée. Aucun changement des pins, des règles, du PWA ou des pages de production.
+- RED/GREEN sur les deux checkouts et la copie de l’entrée dans le répertoire Exploration isolé. L’adoption du candidat de jeu certifié sera un lot de publication distinct.
+
 ## 2026-11-03 — 404 lors de la rencontre de monstre (C2, sous-chemin Capture V2)
 - **Signalement Android utilisateur** : éditeur de cartes, éditeur de créatures et test de carte démarrent correctement ; après une rencontre, « Lancer le combat » affiche HTTP 404. Le navigateur n'a pas d'erreur jusqu'au raccord Exploration → Combat.
 - **Base et checkpoint START** : `main@4464afcb541652526dbea826f8754e744f3ccb7d` ; checkpoint `checkpoint/gensrpg-start-capture-v2-encounter-404-2026-11-03` sur cette même base, branche dédiée `work/gensrpg-capture-v2-encounter-404-2026-11-03`. Publisher unique `.github/workflows/main.yml` ; PR #225 conservée DRAFT, sources officielles des Labos inchangées.

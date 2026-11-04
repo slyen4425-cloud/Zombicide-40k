@@ -82,7 +82,8 @@ test('combat XP never erases the chosen official HeroDefinition, including after
  assert.equal(store.load().hero.definitionId,heroDefinitionId);
  const second=apply(store.load(),'encounter2');
  assert.equal(second.session.hero.definitionId,heroDefinitionId);
- assert.equal(second.session.hero.progression.xp,1300);
+ assert.equal(second.award.heroXp,500); // second battle: both creatures now level 2
+ assert.equal(second.session.hero.progression.xp,victory.session.hero.progression.xp+second.award.heroXp);
  // Replaying a processed result must not duplicate XP or modify the visual selection.
  assert.equal(apply(victory.session).session.hero.definitionId,heroDefinitionId);
 });

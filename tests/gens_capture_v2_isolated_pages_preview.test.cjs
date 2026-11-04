@@ -149,8 +149,8 @@ test('the physical published preview contains the single native 2.5D destination
  const shell=read(trial,'assets/gensrpg/capture-v2/shell-entry-v1.js').toString('utf8');
  const css=read(trial,'assets/gensrpg/capture-v2/shell-style-v1.css').toString('utf8');
  const game=read(trial,'assets/gensrpg/capture-v2/adventure.html').toString('utf8');
- assert.match(shell,/data\.captureV2Menu="editors"/,'the menu must offer Éditeurs, not nine loose shortcuts');
- assert.match(shell,/data\.captureV2View="adventure"/,'the menu must offer one Jouer entry');
+ assert.match(shell,/dataset\.captureV2Menu="editors"/,'the menu must offer Éditeurs, not nine loose shortcuts');
+ assert.match(shell,/dataset\.captureV2View="adventure"/,'the menu must offer one Jouer entry');
  assert.equal([...shell.matchAll(/path:"vendor\/exploration-lab\/sculpt-lab\.html"/g)].length,1,
   'the duplicate Exploration Tester and Sculpt routes must not reach publication');
  assert.doesNotMatch(shell,/\bexplore:\{label:/);

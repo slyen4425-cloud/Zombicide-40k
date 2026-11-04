@@ -8,8 +8,10 @@ test('GenSRPG consumer explicitly pins certified Combat main owner commit with p
  assert.equal(pins.combat.ref,'main');
  assert.equal(pins.combat.sha,'4425d123f4f02d04b2e2942c989789abaf159b0a');
  assert.equal(pins.combat.certifiedCiRun,41841493907);
- assert.equal(pins.exploration.sha,'a5c02440d7b5b5e0c136b3161036c50ffe15be6f',
-  'Explore main must not be silently repinned before its own CI');
+ assert.equal(pins.exploration.ref,'main');
+ assert.equal(pins.exploration.sha,'0f9d9ffc18396f911e5460b439786949185905d4',
+  'Exploration pin must be the official merge with the certified prerequisites tree');
+ assert.equal(pins.exploration.certifiedCiRun,41875194048);
 });
 test('a true owned starter level 1 and an enemy level 3 project independently through official Combat',()=>{
  const levels=resolveCaptureCombatCreatureLevelsV1({

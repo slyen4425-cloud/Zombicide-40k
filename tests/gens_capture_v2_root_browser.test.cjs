@@ -251,8 +251,8 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
     'real Exploration may only encounter the published and ready Combat species');
   assert.equal(delivered.runtimeCount,publication.filteredCount,
     'native Sculpt must consume the actual published-only grant');
-  assert.equal(await page.evaluate(()=>localStorage.getItem(
-    'gensrpg.capture.v2.published-encounters.v1:'+ stored.sessionId)),null,
+  assert.equal(await page.evaluate(id=>localStorage.getItem(
+    'gensrpg.capture.v2.published-encounters.v1:'+id),stored.sessionId),null,
     'derived encounter grant must never be persisted in Core localStorage');
 
   const scopedBefore=await page.evaluate(id=>{

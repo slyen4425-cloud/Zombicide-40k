@@ -7,6 +7,7 @@ import {
  createNewExplorationPlay,readExplorationPlay
 } from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
 import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
+import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
 import {
  DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
  createAdventureSessionV1,createAdventureStoreV1,publishedAdventureSpeciesV1
@@ -21,6 +22,7 @@ const idField={
 };
 let rules=normalizeAdventureRulesV1(DEFAULT_ADVENTURE_RULES_V1);
 let published=[];
+let officialCombatSha=null;
 let store;
 const text=(node,value)=>{node.textContent=String(value);};
 const stateMessage=(message,error=false)=>{
@@ -73,11 +75,14 @@ async function fetchPublishedBestiary(){
    bundle.authorSha!==delivery?.combat?.sha||
    bundle.engineSha!==delivery.combat.sha)
   throw new Error('Bestiaire: transferts incompatibles avec la version Combat officielle publiée');
- return publishedAdventureSpeciesV1(captureBestiaryCardsV1({
-  creatureTransfers:bundle.creatureTransfers,
-  skillTransfers:bundle.skillTransfers,
-  assetCatalog:assets,statRegistry:stats,nativeSkills:skills.entries??[]
- }));
+ return Object.freeze({
+  cards:publishedAdventureSpeciesV1(captureBestiaryCardsV1({
+   creatureTransfers:bundle.creatureTransfers,
+   skillTransfers:bundle.skillTransfers,
+   assetCatalog:assets,statRegistry:stats,nativeSkills:skills.entries??[]
+  })),
+  combatSha:delivery.combat.sha
+ });
 }
 function option(value,caption,disabled=false){
  const o=document.createElement('option');
@@ -209,6 +214,13 @@ $('adventure-play').addEventListener('click',guarded(()=>{
   navigation:{createNewExplorationPlay,readExplorationPlay},
   now:new Date().toISOString()
  });
+ // GenSRPG owns the one transient permission to encounter Combat-published
+ // species. The real Exploration main independently validates it against its
+ // authoritative Showcase bundle before ever considering wild encounters.
+ writeAdventurePublishedEncounterGrantV1({
+  storage:window.sessionStorage,session:result.session,world,
+  bestiaryCards:published,combatSha:officialCombatSha
+ });
  // This iframe and the native Lab are on the SAME first-party origin.
  // Only the native Exploration runtime receives the scoped session ID.
  const url=new URL('../../../vendor/exploration-lab/sculpt-lab.html',import.meta.url);
@@ -261,7 +273,8 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
 (async()=>{
  try{
   store=createAdventureStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
-  published=await fetchPublishedBestiary();
+  const official=await fetchPublishedBestiary();
+  published=official.cards;officialCombatSha=official.combatSha;
   fillPublicSpecies();
   const active=store.load();
   if(active){rules=normalizeAdventureRulesV1(active.rules);setFields(rules);}

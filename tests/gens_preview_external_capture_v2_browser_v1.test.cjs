@@ -73,8 +73,9 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
     assert.equal(owner.modeCount,4);
     await page.locator('button.gensRootModeCard.capture').click();
     await page.locator('#gensCaptureV2Root').waitFor({state:'visible'});
-    assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view]').count(),9,
-      'external Shell must keep all eight native Lab destinations plus the owned Adventure view');
+    assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view]').count(),8,
+      'external Shell has seven distinct native Lab destinations and one Jouer entry');
+    assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').count(),1);
     // External preview only: render each original Lab on its immutable commit.
     // Production must still require its own same-origin vendor owner.
     const diagnostics=await page.evaluate(()=>({
@@ -103,13 +104,13 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
       ['combat','combat','examples/dom-demo/capture-editor-v2.html?tab=combat','[data-editor-panel="combat"]'],
       ['music','combat','examples/dom-demo/capture-editor-v2.html?tab=music','[data-editor-panel="music"]'],
       ['bestiary','combat','examples/dom-demo/bestiary.html','[data-bestiary]'],
-      ['explore','exploration','sculpt-lab.html','#sculpt-canvas'],
       ['builder','exploration','sculpt-lab.html','#sculpt-canvas'],
       ['world','exploration','world-assembler.html','#world-area-count']
     ]){
       if(key!=='creature'){
         await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').click();
       }
+      await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').click();
       await page.locator('#gensCaptureV2Root [data-capture-v2-view="'+key+'"]').click();
       const frame=page.locator('#gensCaptureV2Root iframe');
       await frame.waitFor({state:'visible'});
@@ -122,6 +123,7 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
     // A static canvas tag is not a rendered map. This test must refuse the
     // historic 2D black-screen preview with scripts that never initialized.
     await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').click();
+    await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').click();
     await page.locator('#gensCaptureV2Root [data-capture-v2-view="builder"]').click();
     const sculpt=page.frameLocator('#gensCaptureV2Root iframe').locator('#sculpt-canvas');
     await sculpt.waitFor({state:'visible',timeout:30000});

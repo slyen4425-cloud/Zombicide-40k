@@ -35,6 +35,11 @@ test('Adventure does not pretend the Exploration editor Tester is a native Game 
  assert.match(ui,/shell\?\.open\?\.\('world'\)/);
  assert.match(ui,/vendor\/exploration-lab\/world-assembler\.html/);
  assert.match(ui,/startAdventureExplorationV1\(/);
+ assert.match(ui,/createAdventurePublishedEncounterGrantV1\(/);
+ assert.match(ui,/projectCaptureShowcaseEncounterSourceV1\(bundle\.creatureTransfers\)/);
+ assert.match(ui,/adventurePublishedEncounterStorageKeyV1\(result\.session\.sessionId\)/);
+ assert.match(ui,/window\.sessionStorage\.setItem\(/);
+ assert.match(ui,/combatSha:publishedCombatSha,bestiaryCards:published/);
  assert.match(ui,/readWorldAssemblerDraft\(window\.localStorage\)/);
  assert.match(ui,/createNewExplorationPlay,readExplorationPlay/);
  assert.match(ui,/url\.searchParams\.set\('adventureSession',result\.session\.sessionId\)/);

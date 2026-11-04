@@ -347,7 +347,8 @@ test('official Hero Editor loads in Adventure preview with the same-origin nativ
     const response=await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
     assert.equal(response.status(),200,'Hero Editor must exist in physical Pages preview');
     await page.locator('#hero-save:visible').waitFor({timeout:30000});
-    await page.waitForFunction(()=>document.querySelector('#hero-saved')?.options.length>0,
+    await page.waitForFunction(async()=> (await indexedDB.databases())
+      .some(entry=>entry.name==='gensrpg-exploration-user-heroes-v1'),
       null,{timeout:20000});
     const owner=await page.evaluate(async()=>{
       const names=await indexedDB.databases();

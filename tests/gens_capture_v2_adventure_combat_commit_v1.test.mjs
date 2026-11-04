@@ -45,7 +45,7 @@ function fixture(){
 }
 function envelope({encounterId='encounter-1',returnToken='return-1',
   partyRef='adventure-party:session-game-1',outcome='victory',
-  activeCreatureId='real-player'}={}){
+  activeCreatureId='real-player',hp=81}={}){
  return {
   version:1,
   snapshot:{
@@ -61,7 +61,7 @@ function envelope({encounterId='encounter-1',returnToken='return-1',
   result:{
    schema:'capture-combat-result-v1',version:1,
    encounterId,returnToken,outcome,
-   partyState:{activeCreatureId,hp:81},rewards:[],
+   partyState:{activeCreatureId,hp},rewards:[],
    capture:null,worldEffects:[]
   }
  };
@@ -83,6 +83,14 @@ test('official Combat result is committed to real Core storage BEFORE a result m
  assert.equal(fx.writes,originalWrites+1);
  assert.equal(fx.store.load().world.mapRef,'real-world');
  assert.equal(fx.store.load().world.position,null);
+});
+test('victory persists the exact fractional native HP and acknowledges it only once',()=>{
+ const fx=fixture(),hp=33.47000000000003,raw=envelope({hp});
+ assert.equal(commit(fx.store,raw).persisted,true);
+ assert.equal(fx.store.load().party.active.hp,hp);
+ const writes=fx.writes;
+ assert.equal(commit(fx.store,raw).applied,false);
+ assert.equal(fx.writes,writes);
 });
 test('repeat CombatResult is acknowledged without any second XP, loot roll or storage write',()=>{
  const fx=fixture();

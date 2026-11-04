@@ -179,7 +179,7 @@ function assertSession(session){
  identity(actor.speciesId,'party.active.speciesId');
  integer(actor.level,'party.active.level',1,v.rules.progression.maxLevel);
  integer(actor.xp,'party.active.xp');
- if(actor.hp!==null)integer(actor.hp,'party.active.hp');
+ if(actor.hp!==null)number(actor.hp,'party.active.hp');
  if(Object.hasOwn(v,'hero')){
   const hasDefinition=Object.hasOwn(v.hero,'definitionId');
   const hero=exact(v.hero,hasDefinition?['progression','definitionId']:['progression'],'hero');
@@ -290,7 +290,7 @@ export function applyAdventureCombatResultV1({
   }
  }
  const hp=result.partyState?.hp;
- if(hp!==undefined&&hp!==null)integer(hp,'official battle HP');
+ if(hp!==undefined&&hp!==null)number(hp,'official battle HP');
  // Hero progression is optional, independent of Creature XP and computed by
  // existing Core Progression. No new stats, hero skill definitions or battle
  // simulation are created. Legacy saves without a hero property stay intact.

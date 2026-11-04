@@ -1,3 +1,9 @@
+## 2026-11-04 — Aventure conserve les PV exacts du Combat officiel
+
+- START `checkpoint/gensrpg-start-adventure-exact-combat-hp-2026-11-04`, base `039cffdefc283e513b2a0a642e5097088f866011`, checkpoint CI vert `checkpoint/gensrpg-adventure-native-preview-candidate-ci-green-2026-11-04`, branche `work/gensrpg-adventure-exact-combat-hp-2026-11-04`.
+- RED Chromium réel : Lumilo niveau 1 bat Noctigriffe. Combat enregistre `victory` et 33,47000000000003 PV. Aventure refuse les décimales et conserve le journal sans reçu. Correction au propriétaire du contrat de sauvegarde et de projection, avec le lecteur Exploration adapté dans son propre lot.
+- PV historiques entiers et nuls encore admis, valeurs invalides encore refusées. Aucun arrondi, modification des règles de combat, du tirage, de l’idempotence ou du format de sauvegarde. Tests de la victoire Core, projection, reprise réelle puis certification des deux sources avant publication.
+
 ## 2026-11-04 — Aventure : port de sauvegarde du résultat pour Jouer
 
 - START `checkpoint/gensrpg-start-adventure-result-host-2026-11-04` sur le HEAD GitHub de #250 `762b37ac9090dd8c79fb935fc138d3b8ea6cfde8`. Branche `work/gensrpg-adventure-result-host-2026-11-04`. Clean Authority, Root Browser et livraison native validés sur la base. GenSRPG production reste protégé.

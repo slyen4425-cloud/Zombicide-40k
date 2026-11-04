@@ -137,3 +137,13 @@ test('missing or untrusted combat result must fail before touching storage or gu
   assert.equal(JSON.stringify(fx.store.load()),before);
  }
 });
+
+
+test('reject a different owned instance even when its species matches',()=>{
+ const fx=fixture();
+ const raw=envelope();
+ raw.result.partyState.activeInstanceId='different-owned-instance';
+ assert.throws(()=>commit(fx.store,raw),/instance/i);
+ assert.equal(fx.store.load().party.active.xp,0);
+ assert.deepEqual(fx.store.load().processedEncounterKeys,[]);
+});

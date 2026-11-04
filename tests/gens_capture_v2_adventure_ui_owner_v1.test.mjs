@@ -37,7 +37,10 @@ test('Adventure does not pretend the Exploration editor Tester is a native Game 
  assert.match(ui,/startAdventureExplorationV1\(/);
  assert.match(ui,/readWorldAssemblerDraft\(window\.localStorage\)/);
  assert.match(ui,/createNewExplorationPlay,readExplorationPlay/);
- assert.match(ui,/url\.searchParams\.set\('adventureSession',result\.session\.sessionId\)/);
+ assert.match(ui,/const sessionId=result\.session\.sessionId/);
+ assert.match(ui,/url\.searchParams\.set\('adventureSession',sessionId\)/);
+ assert.match(ui,/connectAdventureCombatHostV1\(\{/);
+ assert.match(html,/<iframe id="adventure-play-frame"/);
  assert.match(ui,/url\.searchParams\.set\('play','1'\)/);
  assert.doesNotMatch(ui,/sculpt-lab\.html\?tester|navigation-toggle/);
 });

@@ -6,6 +6,8 @@ import {readWorldAssemblerDraft} from '../../../vendor/exploration-lab/src/build
 import {
  createNewExplorationPlay,readExplorationPlay
 } from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
+import {readCombatHandoff} from '../../../vendor/exploration-lab/src/encounters/combat-handoff-store.js';
+import {connectAdventureCombatHostV1} from './adventure-combat-host-v1.mjs';
 import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
 import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
 import {writeAdventurePlayingPartyV1} from './adventure-playing-party-grant-v1.mjs';
@@ -243,18 +245,27 @@ $('adventure-play').addEventListener('click',guarded(()=>{
  // The member instance/level/HP are projected from the SAME Core save.
  // Exploration may read this versioned envelope, never our private storage.
  // Exploration owns encounter activation and consumes the projection.
- writeAdventurePlayingPartyV1({
-  storage:window.sessionStorage,session:result.session,world,
+ const refreshParty=session=>writeAdventurePlayingPartyV1({
+  storage:window.sessionStorage,session,world,
   publicationGrant:officialGrant,combatSha:officialCombatSha
  });
- // This iframe and the native Lab are on the SAME first-party origin.
- // Only the native Exploration runtime receives the scoped session ID.
+ refreshParty(result.session);
  const url=new URL('../../../vendor/exploration-lab/sculpt-lab.html',import.meta.url);
+ const sessionId=result.session.sessionId;
  url.searchParams.set('play','1');
- url.searchParams.set('adventureSession',result.session.sessionId);
+ url.searchParams.set('adventureSession',sessionId);
  if(url.origin!==window.location.origin)
   throw new Error('Jouer doit utiliser le moteur Exploration officiel de la même origine');
- window.location.assign(url.href);
+ const frame=$('adventure-play-frame');
+ connectAdventureCombatHostV1({
+  frame,playUrl:url.href,sessionId,worldId:world.id,store,locks:window.navigator.locks,
+  readPending:()=>readCombatHandoff(window.localStorage,{sessionId}),
+  refreshParty,bestiaryCards:published,progressionCore:window.GensProgressionV1
+ });
+ // Keep the Aventure owner mounted while the native Exploration frame runs.
+ frame.src=url.href;
+ frame.hidden=false;
+ document.querySelector('[data-adventure-app]').hidden=true;
 }));
 $('adventure-resume').addEventListener('click',guarded(()=>{
  const state=store.load();

@@ -122,11 +122,13 @@ small{display:block;margin-top:10px;opacity:.7}
       // Set the preview flag from the executable transport controller itself.
       window.__GENSRPG_PREVIEW__=true;
       window.GensCaptureV2PreviewTransportV1=nativePreviewRoots;
-      for(const tag of tags){
+      // Request all files together. Dynamic classic scripts with async=false
+      // still execute in insertion order, even when a later response arrives first.
+      await Promise.all(tags.map(tag=>{
         const match=tag.match(/src="([^"]+)"/);
         if(!match)throw new Error("Script de preview invalide");
         const src=new URL(match[1],source.base).href;
-        await new Promise((resolve,reject)=>{
+        return new Promise((resolve,reject)=>{
           const script=document.createElement("script");
           script.src=src;
           script.async=false;
@@ -135,7 +137,7 @@ small{display:block;margin-top:10px;opacity:.7}
           script.onerror=()=>reject(new Error("Script de preview inaccessible : "+match[1]));
           document.body.appendChild(script);
         });
-      }
+      }));
     }
     document.documentElement.dataset.gensrpgPreviewReady="1";
     document.getElementById("gensrpgPreviewLoadGate")?.remove();

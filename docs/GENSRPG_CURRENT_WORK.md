@@ -1,3 +1,10 @@
+## 2026-11-04 — Prévisualisation externe : téléchargement ordonné des scripts
+
+- START `checkpoint/gensrpg-start-preview-ordered-download-2026-11-04` sur GenSRPG main `2f0bc1600361dad619a2b73d2998bb148257ba27`. Branche `work/gensrpg-preview-ordered-download-2026-11-04`. Dernier checkpoint vert `checkpoint/gensrpg-adventure-preview-play-entry-ci-green-2026-11-04`.
+- Périmètre : bootstrap externe de `preview.html`. Le navigateur a reproduit le délai de la PR #251, avec menu présent, document interactif et un seul script auxiliaire demandé à la fois. Le téléchargement séquentiel prolonge le verrou jusqu'au dernier des 31 scripts.
+- Test RED : exercer le vrai bootstrap avec le premier script retenu. Tous les scripts doivent déjà être demandés, dans l’ordre d’insertion, et le verrou doit rester actif jusqu'au chargement du dernier. Une erreur doit conserver le verrou et afficher son diagnostic. Vérifier Chromium et l’intégrité de la composition native.
+- Fonctions protégées : ordre d’exécution et garde de disponibilité, source immuable, composition locale, index racine, Pages de production, PWA et sauvegardes. Risque : inversion de dépendance si les scripts deviennent asynchrones. Après certification, intégrer le correctif au candidat Aventure.
+
 ## 2026-11-04 — Prévisualisation Pages : transporter le point d’entrée Jouer officiel
 
 - START `checkpoint/gensrpg-start-adventure-preview-play-entry-2026-11-04` sur `main@aa34bf1f415d14ba2c62e6745f8655aec6e3a4fa`. Branche `work/gensrpg-adventure-preview-play-entry-2026-11-04`.

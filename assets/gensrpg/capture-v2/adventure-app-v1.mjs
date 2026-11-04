@@ -2,6 +2,12 @@
 // Bestiary publication is computed by the SAME official Combat main function.
 // The only gameplay model lives in adventure-contract-v1.mjs (not DOM).
 import {captureBestiaryCardsV1} from '../../../vendor/combat-lab/src/ui/capture-bestiary-cards-v1.js';
+import {readWorldAssemblerDraft} from '../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js';
+import {
+ createNewExplorationPlay,readExplorationPlay
+} from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
+import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
+import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
 import {
  DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
  createAdventureSessionV1,createAdventureStoreV1,publishedAdventureSpeciesV1
@@ -12,10 +18,14 @@ const status=$('adventure-status');
 const idField={
  base:'adventure-xp-base',bonus:'adventure-xp-bonus',penalty:'adventure-xp-penalty',
  global:'adventure-xp-global',level:'adventure-xp-level',max:'adventure-level-max',
- currency:'adventure-currency'
+ currency:'adventure-currency',
+ heroEnabled:'adventure-hero-xp-enabled',heroShare:'adventure-hero-xp-share',
+ heroXpLevel:'adventure-hero-xp-per-level',heroMax:'adventure-hero-max-level',
+ heroTalent:'adventure-hero-talent-points'
 };
 let rules=normalizeAdventureRulesV1(DEFAULT_ADVENTURE_RULES_V1);
 let published=[];
+let officialCombatSha=null;
 let store;
 const text=(node,value)=>{node.textContent=String(value);};
 const stateMessage=(message,error=false)=>{
@@ -34,6 +44,11 @@ function setFields(value){
  $(idField.level).value=value.progression.xpPerLevel;
  $(idField.max).value=value.progression.maxLevel;
  $(idField.currency).value=value.loot.currencyPerVictory;
+ $(idField.heroEnabled).checked=value.heroProgression.enabled;
+ $(idField.heroShare).value=value.heroProgression.xpGainPercent;
+ $(idField.heroXpLevel).value=value.heroProgression.xpPerLevel;
+ $(idField.heroMax).value=value.heroProgression.maxLevel;
+ $(idField.heroTalent).value=value.heroProgression.talentPointsPerLevel;
 }
 function fromFields(){
  return normalizeAdventureRulesV1({
@@ -44,7 +59,13 @@ function fromFields(){
    globalMultiplier:numberFrom(idField.global)},
   progression:{...rules.progression,xpPerLevel:numberFrom(idField.level),
    maxLevel:numberFrom(idField.max)},
-  loot:{...rules.loot,currencyPerVictory:numberFrom(idField.currency)}
+  loot:{...rules.loot,currencyPerVictory:numberFrom(idField.currency)},
+  heroProgression:{...rules.heroProgression,
+   enabled:$(idField.heroEnabled).checked,
+   xpGainPercent:numberFrom(idField.heroShare),
+   xpPerLevel:numberFrom(idField.heroXpLevel),
+   maxLevel:numberFrom(idField.heroMax),
+   talentPointsPerLevel:numberFrom(idField.heroTalent)}
  });
 }
 async function fetchJson(relative){
@@ -68,11 +89,14 @@ async function fetchPublishedBestiary(){
    bundle.authorSha!==delivery?.combat?.sha||
    bundle.engineSha!==delivery.combat.sha)
   throw new Error('Bestiaire: transferts incompatibles avec la version Combat officielle publiée');
- return publishedAdventureSpeciesV1(captureBestiaryCardsV1({
-  creatureTransfers:bundle.creatureTransfers,
-  skillTransfers:bundle.skillTransfers,
-  assetCatalog:assets,statRegistry:stats,nativeSkills:skills.entries??[]
- }));
+ return Object.freeze({
+  cards:publishedAdventureSpeciesV1(captureBestiaryCardsV1({
+   creatureTransfers:bundle.creatureTransfers,
+   skillTransfers:bundle.skillTransfers,
+   assetCatalog:assets,statRegistry:stats,nativeSkills:skills.entries??[]
+  })),
+  combatSha:delivery.combat.sha
+ });
 }
 function option(value,caption,disabled=false){
  const o=document.createElement('option');
@@ -132,17 +156,25 @@ function showSave(){
   const state=store.load();
   if(!state){
    text($('adventure-save-summary'),'Aucune partie créée.');
+   $('adventure-play').disabled=true;
    return;
   }
+  $('adventure-play').disabled=false;
+  $('adventure-play').textContent=state.status==='playing'?'Continuer la partie':'Entrer dans le monde';
   const card=published.find(c=>c.id===state.party.active.speciesId);
   const a=state.party.active;
   const reward=state.lastAward;
   text($('adventure-save-summary'),
    'Partie '+state.sessionId.slice(0,8)+' · '+(card?.name??a.speciesId)+
    ' · niveau '+a.level+' · '+a.xp+' XP · '+state.inventory.currency+' pièces'+
+   (state.rules.heroProgression?.enabled===true
+    ?' · Héros niv. '+(state.hero?.progression?.level??1)+' · '+
+      (state.hero?.progression?.xp??0)+' XP'
+    :' · Héros sans niveau')+
    (reward?' · Dernier combat : '+reward.outcome+' ('+reward.xp+' XP)':'')+
    ' · statut : '+(state.status==='configured'?'configuration enregistrée':'en cours'));
  }catch(error){
+  $('adventure-play').disabled=true;
   stateMessage('Sauvegarde protégée : '+error.message,true);
  }
 }
@@ -180,8 +212,41 @@ $('adventure-create').addEventListener('click',guarded(()=>{
   rules,ids:{sessionId:id(),instanceId:id()},now:new Date().toISOString()
  });
  store.create(state);
- stateMessage('Partie sauvegardée. Le vrai mode Jouer sera activé une fois raccordé au Labo Exploration.');
+ stateMessage('Partie sauvegardée. Tu peux entrer dans le monde si une carte est disponible dans le World Builder GenSRPG.');
  showSave();updatePreview();
+}));
+$('adventure-world-builder').addEventListener('click',guarded(()=>{
+ // The existing Monster Capture Shell owns navigation between the two Lab UIs.
+ // The fallback only supports opening this standalone GenSRPG page directly.
+ const shell=window.parent!==window?window.parent.GensCaptureV2:null;
+ if(shell?.open?.('world')===true)return;
+ const url=new URL('../../../vendor/exploration-lab/world-assembler.html',import.meta.url);
+ if(url.origin!==window.location.origin)
+  throw Error('World Builder officiel requis sur la même origine GenSRPG');
+ window.location.assign(url.href);
+}));
+$('adventure-play').addEventListener('click',guarded(()=>{
+ const world=readWorldAssemblerDraft(window.localStorage);
+ const result=startAdventureExplorationV1({
+  store,storage:window.localStorage,world,
+  navigation:{createNewExplorationPlay,readExplorationPlay},
+  now:new Date().toISOString()
+ });
+ // GenSRPG owns the one transient permission to encounter Combat-published
+ // species. The real Exploration main independently validates it against its
+ // authoritative Showcase bundle before ever considering wild encounters.
+ writeAdventurePublishedEncounterGrantV1({
+  storage:window.sessionStorage,session:result.session,world,
+  bestiaryCards:published,combatSha:officialCombatSha
+ });
+ // This iframe and the native Lab are on the SAME first-party origin.
+ // Only the native Exploration runtime receives the scoped session ID.
+ const url=new URL('../../../vendor/exploration-lab/sculpt-lab.html',import.meta.url);
+ url.searchParams.set('play','1');
+ url.searchParams.set('adventureSession',result.session.sessionId);
+ if(url.origin!==window.location.origin)
+  throw new Error('Jouer doit utiliser le moteur Exploration officiel de la même origine');
+ window.location.assign(url.href);
 }));
 $('adventure-resume').addEventListener('click',guarded(()=>{
  const state=store.load();
@@ -226,7 +291,8 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
 (async()=>{
  try{
   store=createAdventureStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
-  published=await fetchPublishedBestiary();
+  const official=await fetchPublishedBestiary();
+  published=official.cards;officialCombatSha=official.combatSha;
   fillPublicSpecies();
   const active=store.load();
   if(active){rules=normalizeAdventureRulesV1(active.rules);setFields(rules);}

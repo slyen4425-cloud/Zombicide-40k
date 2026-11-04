@@ -20,7 +20,12 @@ export const DEFAULT_ADVENTURE_RULES_V1=freeze({
   higherAllyPenaltyPercent:30,globalMultiplier:1,distribution:'active'
  },
  progression:{xpCurveMode:'linear',xpPerLevel:1000,maxLevel:100},
- loot:{currencyPerVictory:0,items:[],drops:[]}
+ loot:{currencyPerVictory:0,items:[],drops:[]},
+ // A Capture hero is a travel avatar with NO level by default. A game's
+ // creator can explicitly enable its independent progression and talent
+ // points; this never steals or changes a creature's victory XP.
+ heroProgression:{enabled:false,xpGainPercent:100,xpPerLevel:1000,
+  maxLevel:100,talentPointsPerLevel:0}
 });
 function object(value,label){
  if(!value||typeof value!=='object'||Array.isArray(value))
@@ -61,7 +66,18 @@ function iso(value,field){
  return value;
 }
 export function normalizeAdventureRulesV1(input){
- const rule=exact(input,['schema','version','xp','progression','loot'],'AdventureRules');
+ // Additive optional policy: historical v1 rules have no heroProgression.
+ // Their precise old representation remains legal, and never enables hero XP.
+ const {heroProgression:heroRaw,...legacy}=object(input,'AdventureRules');
+ const rule=exact(legacy,['schema','version','xp','progression','loot'],'AdventureRules');
+ const hero=heroRaw===undefined?DEFAULT_ADVENTURE_RULES_V1.heroProgression:
+  exact(heroRaw,['enabled','xpGainPercent','xpPerLevel','maxLevel',
+   'talentPointsPerLevel'],'heroProgression');
+ if(typeof hero.enabled!=='boolean')throw new TypeError('heroProgression.enabled must be boolean');
+ number(hero.xpGainPercent,'heroProgression.xpGainPercent',0,1000);
+ integer(hero.xpPerLevel,'heroProgression.xpPerLevel',1,1000000000);
+ integer(hero.maxLevel,'heroProgression.maxLevel',1,100);
+ integer(hero.talentPointsPerLevel,'heroProgression.talentPointsPerLevel',0,1000);
  if(rule.schema!==ADVENTURE_RULES_SCHEMA_V1||rule.version!==1)
   throw new RangeError('Unknown AdventureRules schema/version');
  const xp=exact(rule.xp,[
@@ -109,7 +125,10 @@ export function normalizeAdventureRulesV1(input){
    higherAllyPenaltyPercent:xp.higherAllyPenaltyPercent,
    globalMultiplier:xp.globalMultiplier,distribution:'active'},
   progression:{xpCurveMode:'linear',xpPerLevel:p.xpPerLevel,maxLevel:p.maxLevel},
-  loot:{currencyPerVictory:loot.currencyPerVictory,items,drops}
+  loot:{currencyPerVictory:loot.currencyPerVictory,items,drops},
+  heroProgression:{enabled:hero.enabled,xpGainPercent:hero.xpGainPercent,
+   xpPerLevel:hero.xpPerLevel,maxLevel:hero.maxLevel,
+   talentPointsPerLevel:hero.talentPointsPerLevel}
  });
 }
 // This function NEVER decides if a draft is published: the official Combat
@@ -154,6 +173,15 @@ function assertSession(session){
  integer(actor.level,'party.active.level',1,v.rules.progression.maxLevel);
  integer(actor.xp,'party.active.xp');
  if(actor.hp!==null)integer(actor.hp,'party.active.hp');
+ if(Object.hasOwn(v,'hero')){
+  const hero=exact(v.hero,['progression'],'hero');
+  if(hero.progression!==null){
+   const progress=exact(hero.progression,['xp','level','talentPoints'],'hero.progression');
+   integer(progress.xp,'hero.progression.xp');
+   integer(progress.level,'hero.progression.level',1,100);
+   integer(progress.talentPoints,'hero.progression.talentPoints');
+  }
+ }
  const inventory=object(v.inventory,'inventory');
  integer(inventory.currency,'inventory.currency');
  object(inventory.items,'inventory.items');
@@ -184,6 +212,8 @@ export function createAdventureSessionV1({
   schema:ADVENTURE_SAVE_SCHEMA_V1,version:1,sessionId,
   status:'configured',createdAt:timestamp,updatedAt:timestamp,rules:settings,
   party:{active:{instanceId,speciesId:starter.id,level:1,xp:0,hp:null}},
+  hero:{progression:settings.heroProgression.enabled
+   ?{xp:0,level:1,talentPoints:0}:null},
   inventory:{currency:0,items:{}},
   world:{mapRef:null,position:null},
   processedEncounterKeys:[],lastAward:null
@@ -248,15 +278,37 @@ export function applyAdventureCombatResultV1({
  }
  const hp=result.partyState?.hp;
  if(hp!==undefined&&hp!==null)integer(hp,'official battle HP');
+ // Hero progression is optional, independent of Creature XP and computed by
+ // existing Core Progression. No new stats, hero skill definitions or battle
+ // simulation are created. Legacy saves without a hero property stay intact.
+ const heroConfig=normalizeAdventureRulesV1(state.rules).heroProgression;
+ let heroState=state.hero,heroXp=0;
+ if(heroConfig.enabled){
+  const previous=state.hero?.progression??{xp:0,level:1,talentPoints:0};
+  heroXp=result.outcome==='victory'?Math.round(amount*heroConfig.xpGainPercent/100):0;
+  integer(heroXp,'hero XP award');
+  const totalHeroXp=integer(previous.xp+heroXp,'hero total XP');
+  const heroProgression={xpCurveMode:'linear',xpPerLevel:heroConfig.xpPerLevel,
+   maxLevel:heroConfig.maxLevel,talentPointsPerLevel:heroConfig.talentPointsPerLevel};
+  const heroLevel=progressionCore.levelFromXp(totalHeroXp,heroProgression);
+  integer(heroLevel,'hero Core level',1,heroConfig.maxLevel);
+  if(typeof progressionCore.earnedSkillPointsFromLevel!=='function')
+   throw new TypeError('Core earnedSkillPointsFromLevel required for hero progression');
+  const talentPoints=progressionCore.earnedSkillPointsFromLevel(heroLevel,heroProgression);
+  integer(talentPoints,'hero Core talent points');
+  heroState={progression:{xp:totalHeroXp,level:heroLevel,talentPoints}};
+ }
+
  const timestamp=iso(now??state.updatedAt,'now');
  const award=freeze({
   encounterId,enemyId,outcome:result.outcome,xp:amount,
-  levelBefore:before,levelAfter:level,currency,drops
+  levelBefore:before,levelAfter:level,currency,drops,heroXp
  });
  const updated=freeze({
   ...state,updatedAt:timestamp,
   party:{active:{...state.party.active,level,xp:total,
    hp:hp==null?state.party.active.hp:hp}},
+  ...(heroState===undefined?{}:{hero:heroState}),
   inventory:{currency:state.inventory.currency+currency,items:itemCounts},
   processedEncounterKeys:[...state.processedEncounterKeys,key],
   lastAward:award

@@ -103,6 +103,69 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   }
   const species=await adventureFrame.locator('#adventure-starter option:not([disabled])').count();
   assert.ok(species>=1,'at least one official Bestiary creature is playable');
+
+  // Executed against the ACTUAL pinned Combat Bestiary and Exploration
+  // Encounter Catalog, not a copied list of supposed published species.
+  const publication=await adventureFrame.locator('#adventure-create').evaluate(async()=>{
+    const [
+      {captureBestiaryCardsV1},
+      {projectCaptureShowcaseEncounterSourceV1},
+      {createCaptureCreatureCatalogProvider},
+      {createPublishedEncounterCatalogV1}
+    ]=await Promise.all([
+      import('../../../vendor/combat-lab/src/ui/capture-bestiary-cards-v1.js'),
+      import('../../../vendor/exploration-lab/src/capture/capture-showcase-encounter-source-v1.js'),
+      import('../../../vendor/exploration-lab/src/capture/capture-creature-catalog-provider.js'),
+      import('./adventure-encounter-catalog-v1.mjs')
+    ]);
+    const json=async rel=>{
+      const response=await fetch(new URL(rel,document.baseURI),{cache:'no-store'});
+      if(!response.ok)throw Error('Official source missing HTTP '+response.status+': '+rel);
+      return response.json();
+    };
+    const [bundle,assets,stats,skills,manifest]=await Promise.all([
+      json('../../../vendor/exploration-lab/combat-preview/data/capture/showcase/encounter-bundle.v1.json'),
+      json('../../../vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json'),
+      json('../../../vendor/combat-lab/data/capture/monster-capture-stat-registry.v1.json'),
+      json('../../../vendor/combat-lab/data/combat/skills/catalog.v1.json'),
+      json('./delivery-manifest.json')
+    ]);
+    if(bundle.authorSha!==manifest.combat.sha||bundle.engineSha!==manifest.combat.sha)
+      throw Error('Author bundle differs from official Combat SHA');
+    const official=captureBestiaryCardsV1({
+      creatureTransfers:bundle.creatureTransfers,skillTransfers:bundle.skillTransfers,
+      assetCatalog:assets,statRegistry:stats,nativeSkills:skills.entries??[]
+    });
+    const native=createCaptureCreatureCatalogProvider(
+      projectCaptureShowcaseEncounterSourceV1(bundle.creatureTransfers));
+    const filtered=createPublishedEncounterCatalogV1({
+      bestiaryCards:official,captureCatalog:native
+    });
+    const allowed=new Set(official.filter(c=>c.skills?.some(s=>s.state==='ready')).map(c=>c.id));
+    const records=filtered.listCreatures();
+    return {
+      combatSha:manifest.combat.sha,
+      officialCount:official.length,sourceCount:native.listCreatures().length,
+      filteredCount:records.length,
+      leaked:records.filter(c=>!allowed.has(c.id)).map(c=>c.id),
+      changed:records.filter(c=>native.resolveCreature(c.id)?.spawnChance!==c.spawnChance ||
+        JSON.stringify(native.resolveCreature(c.id)?.elements)!==JSON.stringify(c.elements)).map(c=>c.id),
+      nonPublishedIds:native.listCreatures().filter(c=>!allowed.has(c.id)).map(c=>c.id),
+      survivors:records.map(c=>c.id)
+    };
+  });
+  assert.ok(publication.officialCount>=1,'Bestiary must originate from native Combat');
+  assert.ok(publication.sourceCount>=publication.filteredCount);
+  assert.deepEqual(publication.leaked,[],'Never spawn an unpublished Combat creature');
+  assert.deepEqual(publication.changed,[],'Exploration owns rarity and elements, no rewritten gameplay');
+  assert.equal(publication.survivors.length,publication.filteredCount);
+
+  assert.equal(await adventureFrame.locator('#adventure-hero-xp-enabled').isChecked(),false,
+    'Capture hero has no XP by default');
+  await adventureFrame.locator('#adventure-hero-xp-enabled').check();
+  await adventureFrame.locator('#adventure-hero-xp-share').fill('35');
+  await adventureFrame.locator('#adventure-hero-xp-per-level').fill('400');
+  await adventureFrame.locator('#adventure-hero-talent-points').fill('2');
   await adventureFrame.locator('#adventure-xp-base').fill('777');
   await adventureFrame.locator('#adventure-create').tap();
   const saved=await adventureFrame.locator('#adventure-save-summary').textContent();
@@ -114,6 +177,12 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   });
   assert.equal(stored?.schema,'gensrpg-capture-adventure-save-v1');
   assert.equal(stored?.rules?.xp?.baseVictoryXp,777);
+  assert.equal(stored?.rules?.heroProgression?.enabled,true,
+    'real Aventure editor must persist author hero opt-in');
+  assert.equal(stored?.rules?.heroProgression?.xpGainPercent,35);
+  assert.equal(stored?.rules?.heroProgression?.xpPerLevel,400);
+  assert.equal(stored?.hero?.progression?.level,1);
+  assert.equal(stored?.hero?.progression?.xp,0);
   assert.equal(stored?.party?.active?.speciesId,
    await adventureFrame.locator('#adventure-starter').inputValue());
   assert.ok(stored?.party?.active?.instanceId);
@@ -133,6 +202,103 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   },null,{timeout:20000});
   assert.equal(await resumed.locator('#adventure-xp-base').inputValue(),'777',
    'saved Adventure settings must survive reopening the owned screen');
+
+  // Native game handoff — no made-up map, no reused Tester. First prove the
+  // actual GenSRPG origin has no WorldDocument and will not create a fake one.
+  await resumed.locator('#adventure-play').tap();
+  assert.match(await resumed.locator('#adventure-status').textContent(),/World Builder|monde jouable/i);
+  assert.equal(await resumed.locator('#adventure-play').isVisible(),true);
+  const authored=await resumed.locator('#adventure-play').evaluate(async()=>{
+    // The genuine World Builder model/serializer owns the data. This is not
+    // a parallel test terrain or a fabricated runtime world.
+    const [{createBlankWorldBuilderDraft},{saveWorldAssemblerDraft}]=await Promise.all([
+      import('../../../vendor/exploration-lab/src/builder/world-builder-draft.js'),
+      import('../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js')
+    ]);
+    const world=createBlankWorldBuilderDraft({id:'gen-ci-capture-world',width:36*28,height:24*21});
+    saveWorldAssemblerDraft(localStorage,world);
+    return localStorage.getItem('gensrpg.world-assembler.document.v1');
+  });
+  assert.ok(authored&&authored.includes('gen-ci-capture-world'),'canonical WorldDocument was not saved');
+  await resumed.locator('#adventure-play').tap();
+  await page.waitForFunction(()=>{
+    const f=document.querySelector('#gensCaptureV2Root iframe');
+    try{return !!f?.contentWindow?.__sculptPlayProbe?.().active &&
+      f.contentWindow.__sculptPlayProbe().playing &&
+      f.contentDocument.querySelector('#sculpt-canvas')?.width>300;}catch{return false;}
+  },null,{timeout:60000});
+  const launched=await page.locator('#gensCaptureV2Root iframe').evaluate(frame=>{
+    const w=frame.contentWindow;
+    return {session:new URL(w.location.href).searchParams.get('adventureSession'),
+      src:w.location.pathname,probe:w.__sculptPlayProbe?.()};
+  });
+  assert.equal(launched.session,stored.sessionId);
+  assert.match(launched.src,/vendor\/exploration-lab\/sculpt-lab\.html$/);
+  assert.equal(launched.probe.editorHidden,true);
+
+  // Read the transient grant with the REAL Exploration main reader, not a
+  // duplicate GenSRPG validity check. The sender must use the identical
+  // published Combat Bestiary cards and never enable an unpublished species.
+  const delivered=await page.locator('#gensCaptureV2Root iframe').evaluate(
+   async(frame,args)=>{
+    const child=frame.contentWindow;
+    const {readScopedAdventurePublishedEncountersV1,
+      adventurePublishedEncounterStorageKeyV1}=await import(
+      '/vendor/exploration-lab/src/encounters/adventure-published-encounters-v1.js');
+    const key=adventurePublishedEncounterStorageKeyV1(args.sessionId);
+    const raw=child.sessionStorage.getItem(key);
+    const allowed=readScopedAdventurePublishedEncountersV1({
+      storage:child.sessionStorage,sessionId:args.sessionId,worldId:args.worldId,
+      authorSha:args.combatSha,engineSha:args.combatSha
+    });
+    return {raw:raw?JSON.parse(raw):null,ids:allowed,
+      runtimeCount:child.__sculptEncounterProbe?.().playPublishedCount??null};
+  },{sessionId:stored.sessionId,worldId:'gen-ci-capture-world',
+     combatSha:publication.combatSha});
+  assert.ok(delivered.raw,'official Adventure must write a same-origin transient publication grant');
+  assert.equal(delivered.raw.worldId,'gen-ci-capture-world');
+  assert.equal(delivered.raw.sessionId,stored.sessionId);
+  assert.equal(delivered.raw.combatSha,publication.combatSha);
+  assert.deepEqual([...delivered.ids].sort(),[...publication.survivors].sort(),
+    'real Exploration may only encounter the published and ready Combat species');
+  assert.equal(delivered.runtimeCount,publication.filteredCount,
+    'native Sculpt must consume the actual published-only grant');
+  assert.equal(await page.evaluate(id=>localStorage.getItem(
+    'gensrpg.capture.v2.published-encounters.v1:'+id),stored.sessionId),null,
+    'derived encounter grant must never be persisted in Core localStorage');
+
+  const scopedBefore=await page.evaluate(id=>{
+    const raw=localStorage.getItem('gensrpg.exploration.play.navigation.v1:'+id);
+    return raw?JSON.parse(raw):null;
+  },stored.sessionId);
+  assert.equal(scopedBefore?.worldId,'gen-ci-capture-world');
+  assert.equal(scopedBefore?.sessionId,stored.sessionId);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg.exploration.play.navigation.v1')),null,
+    'GenSRPG must not reuse the standalone native checkpoint');
+  await resumed.locator('#play-menu-button').tap();
+  await resumed.locator('#play-continue:not([disabled])').waitFor({timeout:30000});
+  assert.equal(await resumed.locator('#play-new').isVisible(),false,
+    'Exploration may never create/reset a GenSRPG-owned AdventureSession');
+  await resumed.locator('#play-continue').tap();
+  await page.waitForFunction(()=>{
+    try{return document.querySelector('#gensCaptureV2Root iframe')?.contentWindow?.__sculptPlayProbe?.().active;}catch{return false;}
+  },null,{timeout:60000});
+  const scopedAfter=await page.evaluate(id=>{
+    const raw=localStorage.getItem('gensrpg.exploration.play.navigation.v1:'+id);
+    return raw?JSON.parse(raw):null;
+  },stored.sessionId);
+  assert.equal(scopedAfter.worldId,scopedBefore.worldId);
+  assert.equal(scopedAfter.sessionId,stored.sessionId);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg.world-assembler.document.v1')),authored,
+    'native game cannot mutate the World Builder authored document');
+  const playingSave=await page.evaluate(()=>{
+    const raw=localStorage.getItem('gensrpg.capture.v2.adventure.save.v1');
+    return raw?JSON.parse(raw):null;
+  });
+  assert.equal(playingSave?.status,'playing');
+  assert.equal(playingSave?.world?.mapRef,'gen-ci-capture-world');
+  assert.equal(playingSave?.world?.position,null,'Exploration alone owns coordinates');
+
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="creature"]').tap();

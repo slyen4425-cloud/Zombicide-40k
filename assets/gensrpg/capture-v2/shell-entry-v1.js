@@ -100,7 +100,7 @@
     current=null;host.dataset.view="home";
     delete host.dataset.nativeFamily;
     nativeTitle.textContent="";
-    notice.textContent="Éditeurs officiels et premier onglet Aventure : progression, butin et sauvegarde. Le mode Jouer sera raccordé séparément.";
+    notice.textContent="Éditeurs officiels, Aventure, sauvegarde et entrée dans le mode Jouer natif Exploration.";
     return true;
   }
   function start(){

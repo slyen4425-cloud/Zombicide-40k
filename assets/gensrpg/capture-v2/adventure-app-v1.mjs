@@ -8,6 +8,7 @@ import {
 } from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
 import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
 import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
+import {writeAdventurePlayingPartyV1} from './adventure-playing-party-grant-v1.mjs';
 import {
  DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
  createAdventureSessionV1,createAdventureStoreV1,publishedAdventureSpeciesV1
@@ -235,9 +236,16 @@ $('adventure-play').addEventListener('click',guarded(()=>{
  // GenSRPG owns the one transient permission to encounter Combat-published
  // species. The real Exploration main independently validates it against its
  // authoritative Showcase bundle before ever considering wild encounters.
- writeAdventurePublishedEncounterGrantV1({
+ const officialGrant=writeAdventurePublishedEncounterGrantV1({
   storage:window.sessionStorage,session:result.session,world,
   bestiaryCards:published,combatSha:officialCombatSha
+ });
+ // The member instance/level/HP are projected from the SAME Core save.
+ // Exploration may read this versioned envelope, never our private storage.
+ // No real combat is enabled until Combat main supports instance-specific levels.
+ writeAdventurePlayingPartyV1({
+  storage:window.sessionStorage,session:result.session,world,
+  publicationGrant:officialGrant
  });
  // This iframe and the native Lab are on the SAME first-party origin.
  // Only the native Exploration runtime receives the scoped session ID.

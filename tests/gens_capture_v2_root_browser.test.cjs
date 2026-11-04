@@ -160,6 +160,12 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.deepEqual(publication.changed,[],'Exploration owns rarity and elements, no rewritten gameplay');
   assert.equal(publication.survivors.length,publication.filteredCount);
 
+  assert.equal(await adventureFrame.locator('#adventure-hero-xp-enabled').isChecked(),false,
+    'Capture hero has no XP by default');
+  await adventureFrame.locator('#adventure-hero-xp-enabled').check();
+  await adventureFrame.locator('#adventure-hero-xp-share').fill('35');
+  await adventureFrame.locator('#adventure-hero-xp-per-level').fill('400');
+  await adventureFrame.locator('#adventure-hero-talent-points').fill('2');
   await adventureFrame.locator('#adventure-xp-base').fill('777');
   await adventureFrame.locator('#adventure-create').tap();
   const saved=await adventureFrame.locator('#adventure-save-summary').textContent();
@@ -171,6 +177,12 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   });
   assert.equal(stored?.schema,'gensrpg-capture-adventure-save-v1');
   assert.equal(stored?.rules?.xp?.baseVictoryXp,777);
+  assert.equal(stored?.rules?.heroProgression?.enabled,true,
+    'real Aventure editor must persist author hero opt-in');
+  assert.equal(stored?.rules?.heroProgression?.xpGainPercent,35);
+  assert.equal(stored?.rules?.heroProgression?.xpPerLevel,400);
+  assert.equal(stored?.hero?.progression?.level,1);
+  assert.equal(stored?.hero?.progression?.xp,0);
   assert.equal(stored?.party?.active?.speciesId,
    await adventureFrame.locator('#adventure-starter').inputValue());
   assert.ok(stored?.party?.active?.instanceId);

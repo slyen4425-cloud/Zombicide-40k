@@ -261,7 +261,7 @@ $('adventure-hero-refresh').addEventListener('click',()=>{
 $('adventure-hero-save-selection').addEventListener('click',guarded(saveHeroChoice));
 $('adventure-hero-editor').addEventListener('click',guarded(()=>{
  const root=new URL('../../../vendor/exploration-lab/',import.meta.url);
- const url=new URL('hero-editor.html',root);
+ const url=new URL('../../../vendor/exploration-lab/hero-editor.html',import.meta.url);
  if(root.origin!==window.location.origin||!url.pathname.startsWith(root.pathname))
   throw new Error('Éditeur Explorer officiel requis sur la même origine.');
  $('adventure-hero-editor-frame').src=url.href;

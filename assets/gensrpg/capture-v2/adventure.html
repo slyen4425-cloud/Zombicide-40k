@@ -9,14 +9,14 @@
 <body>
 <main data-adventure-app>
  <header class="adventure-head">
-  <div><span class="eyebrow">MONSTER CAPTURE V2</span><h1>Aventure</h1>
-   <p>Progression, butin, équipe de départ et sauvegarde de ta future partie.</p></div>
+  <div><span class="eyebrow">MONSTER CAPTURE</span><h1>Jouer</h1>
+   <p>Choisis ton équipe et lance ton aventure.</p></div>
   <output id="adventure-status" role="status" aria-live="polite">Chargement du bestiaire officiel…</output>
  </header>
  <div class="adventure-columns">
   <section aria-labelledby="adventure-game-heading">
    <h2 id="adventure-game-heading">Ma partie</h2>
-   <p class="hint">Seules les créatures réellement publiées dans le Bestiaire officiel peuvent être choisies.</p>
+   <p class="hint">Choisis ta première créature.</p>
    <label for="adventure-starter">Créature de départ</label>
    <select id="adventure-starter" aria-label="Créature de départ publiée" disabled>
     <option value="">Chargement du Bestiaire…</option>
@@ -31,12 +31,10 @@
     <h3 id="adventure-save-heading">Sauvegarde en cours</h3>
     <output id="adventure-save-summary">Aucune partie créée.</output>
    </section>
-   <p class="hint">Le monde doit être créé ou importé depuis le World Builder ouvert dans GenSRPG (même origine de sauvegarde). La partie utilise ensuite le véritable moteur Jouer d’Exploration, jamais le Tester de l’éditeur.</p>
-   <div class="actions"><button type="button" id="adventure-world-builder">🌍 Ouvrir le World Builder officiel</button></div>
+   <div class="actions"><button type="button" id="adventure-world-builder">🌍 Créer ou modifier le monde</button></div>
   </section>
-  <section aria-labelledby="adventure-rules-heading">
-   <h2 id="adventure-rules-heading">Règles de progression</h2>
-   <p class="hint">Ces paramètres appartiennent à Aventure. Le calcul de niveau utilise le Core GenSrpg existant.</p>
+  <details id="adventure-rules-panel" class="adventure-options">
+   <summary id="adventure-rules-heading">Progression</summary>
    <div class="fields">
     <label>XP de base par victoire à niveau égal <input type="number" id="adventure-xp-base" min="0" max="1000000" step="1"></label>
     <label>Bonus par niveau ennemi supérieur (%) <input type="number" id="adventure-xp-bonus" min="0" max="200" step="1"></label>
@@ -47,7 +45,7 @@
    </div>
    <section aria-labelledby="adventure-hero-heading">
     <h3 id="adventure-hero-heading">Progression du héros</h3>
-    <p class="hint">Par défaut, le héros ne gagne ni niveau ni XP. Le créateur peut activer cette option, indépendante des créatures.</p>
+    <p class="hint">Les niveaux du héros sont facultatifs.</p>
     <div class="fields">
      <label>Activer les niveaux du héros <input id="adventure-hero-xp-enabled" type="checkbox"></label>
      <label>Part des XP attribuée au héros (%) <input id="adventure-hero-xp-share" type="number" min="0" max="1000" value="100"></label>
@@ -55,27 +53,27 @@
      <label>Niveau maximum du héros <input id="adventure-hero-max-level" type="number" min="1" max="100" value="100"></label>
      <label>Points de talent par niveau <input id="adventure-hero-talent-points" type="number" min="0" value="0"></label>
     </div>
-    <p class="hint">Les points de talent utilisent le Core. Le visuel et les compétences du héros restent dans leurs éditeurs officiels.</p>
+    <p class="hint">L'apparence du héros se choisit séparément.</p>
    </section>
    <div class="preview">
-    <h3>Aperçu du calcul (sans récompense réelle)</h3>
+    <h3>Estimation d'XP</h3>
     <label>Ennemi publié <select id="adventure-enemy" disabled></select></label>
     <output id="adventure-xp-preview">Sélectionne une créature publiée.</output>
    </div>
-  </section>
-  <section aria-labelledby="adventure-loot-heading">
-   <h2 id="adventure-loot-heading">Butin et économie</h2>
+  </details>
+  <details id="adventure-loot-panel" class="adventure-options">
+   <summary id="adventure-loot-heading">Récompenses et objets</summary>
    <div class="fields">
     <label>Monnaie par victoire <input type="number" id="adventure-currency" min="0" max="100000000" step="1"></label>
    </div>
-   <h3>Catalogue d'objets</h3>
+   <h3>Objets</h3>
    <div class="fields">
     <label>Nom de l'objet <input type="text" id="adventure-item-name" maxlength="80" placeholder="Ex. Plume d'Ailevent"></label>
     <label>Valeur de vente <input type="number" id="adventure-item-value" min="0" value="0" step="1"></label>
    </div>
    <button type="button" id="adventure-item-add">Ajouter cet objet</button>
    <div id="adventure-items" class="rules-list"></div>
-   <h3>Drops par créature</h3>
+   <h3>Objets trouvés après un combat</h3>
    <div class="fields">
     <label>Espèce publiée <select id="adventure-drop-species" disabled></select></label>
     <label>Objet <select id="adventure-drop-item"></select></label>
@@ -85,8 +83,8 @@
    </div>
    <button type="button" id="adventure-drop-add">Ajouter une règle de drop</button>
    <div id="adventure-drops" class="rules-list"></div>
-   <div class="actions"><button id="adventure-save-rules" type="button">Enregistrer les réglages</button></div>
-  </section>
+   <div class="actions"><button id="adventure-save-rules" type="button">Enregistrer les paramètres</button></div>
+  </details>
  </div>
 </main>
 <iframe id="adventure-play-frame" title="Monster Capture · Jouer" allow="fullscreen; autoplay" allowfullscreen hidden></iframe>

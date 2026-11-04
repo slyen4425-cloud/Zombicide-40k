@@ -1,6 +1,6 @@
-// Single existing GitHub Pages publisher: immutable PR #225 candidate is
+// Single existing GitHub Pages publisher: the approved immutable candidate is
 // staged only under /preview/capture-v2-pr225/. No second runtime/publisher.
-// The exact Combat and Exploration owners are both read from PR #225's
+// The exact Combat and Exploration owners are both read from the candidate's
 // canonical pins and checked against their published main branch SHAs.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -29,7 +29,7 @@ const bytes=(dir,rel)=>fs.readFileSync(path.join(dir,rel));
 const sourcePin=JSON.parse(bytes(source,'assets/gensrpg/capture-v2/source-pins-v1.json'));
 const owners={combat,exploration};
 if(head(source)!==expectedPreviewSha)
-  throw Error('Capture V2 preview may use only approved immutable PR #225 SHA');
+  throw Error('Capture V2 preview may use only the approved immutable candidate SHA');
 if(sourcePin.legacyCaptureRuntime!==false)
   throw Error('Old Capture cannot enter isolated preview');
 for(const [owner,dir] of Object.entries(owners)){
@@ -110,7 +110,7 @@ for(const filename of ['index.html','builder.html','world-assembler.html','sculp
   if(fs.existsSync(from))fs.copyFileSync(from,path.join(exploreDest,filename));
 }
 // Delegate the native Combat transport and the derived official Showcase to
-// the already tested PR #225 staging script, at the SAME exact immutable SHA.
+// the candidate staging script, at the SAME exact immutable SHA.
 const officialStage=path.join(source,'tools/stage_capture_v2_labs.mjs');
 execFileSync(process.execPath,[officialStage,combat,exploration,trial],
   {stdio:'inherit',timeout:180000});
@@ -142,7 +142,7 @@ const provenance={
   schema:'gensrpg-capture-v2-isolated-pages-preview-v1',
   publicPath:previewPin.publicPath,
   source:{repository:'slyen4425-cloud/Zombicide-40k',
-    ref:'pr-225-immutable-commit',commit:expectedPreviewSha},
+    ref:'approved-immutable-commit',commit:expectedPreviewSha},
   combat:{repository:sourcePin.combat.repository,ref:'main',sha:sourcePin.combat.sha},
   exploration:{repository:sourcePin.exploration.repository,ref:'main',sha:sourcePin.exploration.sha},
   legacyCaptureRuntime:false,

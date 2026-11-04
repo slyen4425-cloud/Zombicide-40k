@@ -1,3 +1,11 @@
+## 2026-11-04 — Prévisualisation Pages de la vraie partie Aventure
+
+- START `checkpoint/gensrpg-start-adventure-native-pages-preview-2026-11-04` sur `main@2f0bc1600361dad619a2b73d2998bb148257ba27`, branche `work/gensrpg-adventure-native-pages-preview-2026-11-04`. Base de livraison verte `checkpoint/gensrpg-adventure-preview-play-entry-ci-green-2026-11-04`.
+- Périmètre : promouvoir un candidat Aventure CI vert dans le sous-dossier Pages de revue existant. Le pin précédent `2324cb05ed67f050147a08519c5fd46f320f88fd` demeure le retour arrière. Références des moteurs vérifiées contre les sources officielles du candidat, visuels approuvés inchangés.
+- Chromium paysage : menu racine Capture → Aventure → véritable carte → rencontre du Bestiaire et combattant niveau 1 → fuite réelle → sauvegarde et retour à la même position → rechargement. Vérifier le manifeste de provenance et les contrôles du vrai site HTTPS. La recette locale du vrai KO a déjà récupéré 777 XP, 25 pièces et deux objets, puis repris après réouverture.
+- Candidat exact `f19e35e8e333e76d1febda20ec4b484e3ae559c2`, Combat officiel `46b4efed`, Exploration officiel `4e7abd15` après #368. Les tests Pages du premier assemblage ont exercé le menu, le Tester, le vrai Combat et la nouvelle sauvegarde de partie. Le paquet exact doit repasser ces contrôles.
+- Production protégée : intégrité du shell racine, du service worker et des sauvegardes. Aucun changement de règles, du catalogue ou du propriétaire de la partie. Ne pas promouvoir avant les CI de la préservation des PV décimaux exacts sur les deux dépôts.
+
 ## 2026-11-04 — Prévisualisation Pages : transporter le point d’entrée Jouer officiel
 
 - START `checkpoint/gensrpg-start-adventure-preview-play-entry-2026-11-04` sur `main@aa34bf1f415d14ba2c62e6745f8655aec6e3a4fa`. Branche `work/gensrpg-adventure-preview-play-entry-2026-11-04`.

@@ -242,10 +242,10 @@ $('adventure-play').addEventListener('click',guarded(()=>{
  });
  // The member instance/level/HP are projected from the SAME Core save.
  // Exploration may read this versioned envelope, never our private storage.
- // No real combat is enabled until Combat main supports instance-specific levels.
+ // Exploration owns encounter activation and consumes the projection.
  writeAdventurePlayingPartyV1({
   storage:window.sessionStorage,session:result.session,world,
-  publicationGrant:officialGrant
+  publicationGrant:officialGrant,combatSha:officialCombatSha
  });
  // This iframe and the native Lab are on the SAME first-party origin.
  // Only the native Exploration runtime receives the scoped session ID.

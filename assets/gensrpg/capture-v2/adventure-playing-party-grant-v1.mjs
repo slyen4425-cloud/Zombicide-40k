@@ -18,7 +18,7 @@ function exact(value,keys,label){
  return value;
 }
 export function writeAdventurePlayingPartyV1({
- storage,session,world,publicationGrant
+ storage,session,world,publicationGrant,combatSha
 }={}){
  if(typeof storage?.setItem!=='function'||typeof storage?.getItem!=='function')
   throw new TypeError('Official same-origin sessionStorage required');
@@ -35,8 +35,10 @@ export function writeAdventurePlayingPartyV1({
  if(grant.schema!==ADVENTURE_PUBLISHED_GRANT_SCHEMA_V1||grant.version!==1||
     grant.sessionId!==sessionId||grant.worldId!==worldId)
   throw new Error('Playing party not authorised by matching Bestiaire session/world grant');
- if(typeof grant.combatSha!=='string'||!/^[a-f0-9]{40}$/.test(grant.combatSha))
+ if(typeof combatSha!=='string'||!/^[a-f0-9]{40}$/.test(combatSha))
   throw new TypeError('Official pinned Combat SHA required');
+ if(grant.combatSha!==combatSha)
+  throw new Error('Adventure playing party Combat SHA mismatch');
  if(!Array.isArray(grant.allowedCreatureIds)||
     new Set(grant.allowedCreatureIds).size!==grant.allowedCreatureIds.length)
   throw new TypeError('Official Bestiaire must provide a valid unique species allowlist');

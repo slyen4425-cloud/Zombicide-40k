@@ -22,6 +22,19 @@
     <option value="">Chargement du Bestiaire…</option>
    </select>
    <p id="adventure-bestiary-count" class="hint"></p>
+   <section class="hero-choice" aria-labelledby="adventure-hero-visual-heading">
+    <h3 id="adventure-hero-visual-heading">Apparence du héros</h3>
+    <p class="hint">Choisis un héros de ta bibliothèque Exploration. Son image fixe ou ses animations restent dans l’éditeur officiel, indépendamment de l’XP.</p>
+    <label for="adventure-hero-choice">Héros visuel de la partie</label>
+    <select id="adventure-hero-choice" aria-label="Héros provenant de la bibliothèque Exploration">
+     <option value="">Héros standard (sans visuel personnalisé)</option>
+    </select>
+    <div class="actions">
+     <button type="button" id="adventure-hero-editor">Créer ou modifier un héros</button>
+     <button type="button" id="adventure-hero-refresh">Actualiser la bibliothèque</button>
+     <button type="button" id="adventure-hero-save-selection" disabled>Enregistrer ce choix dans la partie</button>
+    </div>
+   </section>
    <div class="actions">
     <button type="button" id="adventure-create" disabled>Créer une partie</button>
     <button type="button" id="adventure-resume">Afficher la sauvegarde</button>
@@ -89,6 +102,13 @@
   </section>
  </div>
 </main>
+<section id="adventure-hero-editor-panel" aria-label="Éditeur officiel du héros Exploration" class="adventure-hero-editor-panel" hidden>
+ <div class="adventure-hero-editor-bar">
+  <strong>Héros · Éditeur Exploration officiel</strong>
+  <button type="button" id="adventure-hero-editor-close">Retour à Aventure</button>
+ </div>
+ <iframe id="adventure-hero-editor-frame" title="Créer ou modifier le héros visuel" allow="fullscreen" loading="lazy"></iframe>
+</section>
 <iframe id="adventure-play-frame" title="Monster Capture · Jouer" allow="fullscreen; autoplay" allowfullscreen hidden></iframe>
 <script src="../core/storage-v1.js"></script>
 <script src="../core/progression-v1.js"></script>

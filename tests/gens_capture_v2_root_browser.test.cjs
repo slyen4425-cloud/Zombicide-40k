@@ -150,7 +150,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
       changed:records.filter(c=>native.resolveCreature(c.id)?.spawnChance!==c.spawnChance ||
         JSON.stringify(native.resolveCreature(c.id)?.elements)!==JSON.stringify(c.elements)).map(c=>c.id),
       nonPublishedIds:native.listCreatures().filter(c=>!allowed.has(c.id)).map(c=>c.id),
-      survivors:records.map(c=>c.id)
+      survivors:records.map(c=>c.id),combatSha:manifest.combat.sha
     };
   });
   assert.ok(publication.officialCount>=1,'Bestiary must originate from native Combat');
@@ -195,6 +195,9 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await resumed.locator('#adventure-play').tap();
   assert.match(await resumed.locator('#adventure-status').textContent(),/World Builder|monde jouable/i);
   assert.equal(await resumed.locator('#adventure-play').isVisible(),true);
+  assert.equal(await page.evaluate(id=>sessionStorage.getItem(
+    'gensrpg.capture.v2.published-encounters.v1:'+id),stored.sessionId),null,
+    'Aventure cannot issue published encounter authorization without a real world');
   const authored=await resumed.locator('#adventure-play').evaluate(async()=>{
     // The genuine World Builder model/serializer owns the data. This is not
     // a parallel test terrain or a fabricated runtime world.
@@ -222,6 +225,27 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(launched.session,stored.sessionId);
   assert.match(launched.src,/vendor\/exploration-lab\/sculpt-lab\.html$/);
   assert.equal(launched.probe.editorHidden,true);
+
+  // The SAME genuine Combat cards and the SAME native Exploration source
+  // must authorize wild encounters. This is a browser-owned sessionStorage
+  // handoff, not a second creature definition or fabricated battle.
+  const publishedGrant=await page.evaluate(id=>{
+    const raw=sessionStorage.getItem('gensrpg.capture.v2.published-encounters.v1:'+id);
+    return raw?JSON.parse(raw):null;
+  },stored.sessionId);
+  assert.equal(publishedGrant?.schema,'gensrpg.capture.v2.published-encounters.v1');
+  assert.equal(publishedGrant?.sessionId,stored.sessionId);
+  assert.equal(publishedGrant?.worldId,'gen-ci-capture-world');
+  assert.equal(publishedGrant?.combatSha,publication.combatSha);
+  assert.deepEqual(publishedGrant?.allowedCreatureIds,publication.survivors,
+    'true published Bestiary must equal the candidates used by native Exploration');
+  assert.equal(Object.keys(publishedGrant).length,6,
+    'no stats, skills, rarity or duplicate Bestiary may cross the owner boundary');
+  const nativeGrantCount=await page.locator('#gensCaptureV2Root iframe').evaluate(frame=>
+    frame.contentWindow.__sculptEncounterProbe?.().playPublishedCount);
+  assert.equal(nativeGrantCount,publication.survivors.length,
+    'real Sculpt must read exactly the same authorized species, without activating combat rewards');
+
   const scopedBefore=await page.evaluate(id=>{
     const raw=localStorage.getItem('gensrpg.exploration.play.navigation.v1:'+id);
     return raw?JSON.parse(raw):null;

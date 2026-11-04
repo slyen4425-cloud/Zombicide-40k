@@ -222,12 +222,12 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.ok(authored&&authored.includes('gen-ci-capture-world'),'canonical WorldDocument was not saved');
   await resumed.locator('#adventure-play').tap();
   await page.waitForFunction(()=>{
-    const f=document.querySelector('#gensCaptureV2Root iframe');
+    const f=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument?.querySelector('#adventure-play-frame');
     try{return !!f?.contentWindow?.__sculptPlayProbe?.().active &&
       f.contentWindow.__sculptPlayProbe().playing &&
       f.contentDocument.querySelector('#sculpt-canvas')?.width>300;}catch{return false;}
-  },null,{timeout:60000});
-  const launched=await page.locator('#gensCaptureV2Root iframe').evaluate(frame=>{
+  },null,{timeout:15000});
+  const launched=await resumed.locator('#adventure-play-frame').evaluate(frame=>{
     const w=frame.contentWindow;
     return {session:new URL(w.location.href).searchParams.get('adventureSession'),
       src:w.location.pathname,probe:w.__sculptPlayProbe?.()};
@@ -239,7 +239,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   // Read the transient grant with the REAL Exploration main reader, not a
   // duplicate GenSRPG validity check. The sender must use the identical
   // published Combat Bestiary cards and never enable an unpublished species.
-  const delivered=await page.locator('#gensCaptureV2Root iframe').evaluate(
+  const delivered=await resumed.locator('#adventure-play-frame').evaluate(
    async(frame,args)=>{
     const child=frame.contentWindow;
     const {readScopedAdventurePublishedEncountersV1,
@@ -263,7 +263,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
     'real Exploration may only encounter the published and ready Combat species');
   assert.equal(delivered.runtimeCount,publication.filteredCount,
     'native Sculpt must consume the actual published-only grant');
-  const nativeParty=await page.locator('#gensCaptureV2Root iframe').evaluate(
+  const nativeParty=await resumed.locator('#adventure-play-frame').evaluate(
     (frame,sessionId)=>{
       const raw=frame.contentWindow.sessionStorage.getItem(
         'gensrpg.capture.v2.active-party.v1:'+sessionId);
@@ -294,14 +294,15 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(scopedBefore?.sessionId,stored.sessionId);
   assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg.exploration.play.navigation.v1')),null,
     'GenSRPG must not reuse the standalone native checkpoint');
-  await resumed.locator('#play-menu-button').tap();
-  await resumed.locator('#play-continue:not([disabled])').waitFor({timeout:30000});
-  assert.equal(await resumed.locator('#play-new').isVisible(),false,
+  const playFrame=resumed.frameLocator('#adventure-play-frame');
+  await playFrame.locator('#play-menu-button').tap();
+  await playFrame.locator('#play-continue:not([disabled])').waitFor({timeout:30000});
+  assert.equal(await playFrame.locator('#play-new').isVisible(),false,
     'Exploration may never create/reset a GenSRPG-owned AdventureSession');
-  await resumed.locator('#play-continue').tap();
+  await playFrame.locator('#play-continue').tap();
   await page.waitForFunction(()=>{
-    try{return document.querySelector('#gensCaptureV2Root iframe')?.contentWindow?.__sculptPlayProbe?.().active;}catch{return false;}
-  },null,{timeout:60000});
+    try{return document.querySelector('#gensCaptureV2Root iframe')?.contentDocument?.querySelector('#adventure-play-frame')?.contentWindow?.__sculptPlayProbe?.().active;}catch{return false;}
+  },null,{timeout:15000});
   const scopedAfter=await page.evaluate(id=>{
     const raw=localStorage.getItem('gensrpg.exploration.play.navigation.v1:'+id);
     return raw?JSON.parse(raw):null;
@@ -317,6 +318,55 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(playingSave?.status,'playing');
   assert.equal(playingSave?.world?.mapRef,'gen-ci-capture-world');
   assert.equal(playingSave?.world?.position,null,'Exploration alone owns coordinates');
+
+  // Exercise the live same-origin port with a normalized test envelope in
+  // the real durable Exploration journal. Real Combat is tested separately.
+  const port=await playFrame.locator('#sculpt-canvas').evaluate(async(canvas,args)=>{
+    const {saveCombatHandoff,readCombatHandoff,consumeCombatResult}=await import(
+      './src/encounters/combat-handoff-store.js');
+    const {createCaptureEncounterSnapshot}=await import('./src/encounters/capture-encounter-contract.js');
+    const send=(kind,sessionId=args.sessionId)=>new Promise(resolve=>{
+      const target=window.frameElement;
+      if(!target)throw Error('Adventure result port requires its official host iframe');
+      target.dispatchEvent(new CustomEvent('gensrpg.capture.v2.adventure-combat-commit.v1',{
+        detail:{kind,sessionId,respond:resolve}
+      }));
+    });
+    const scope={sessionId:args.sessionId};
+    const point=window.__sculptPlayProbe();
+    const snapshot=createCaptureEncounterSnapshot({
+      encounterId:'browser-result-1',returnToken:'browser-return-1',
+      source:'terrain-random',playerPartyRef:'adventure-party:'+args.sessionId,
+      opponentCreatureId:args.speciesId,rulesetId:'capture.standard.1v1',
+      areaId:point.areaId,terrainFamilyId:'forest',elementId:'nature'
+    });
+    const here=new URL(location.href);here.searchParams.set('combatReturn','1');
+    saveCombatHandoff(localStorage,{
+      snapshot,returnState:{areaId:point.areaId,x:point.actor.x,y:point.actor.y,returnUrl:here.href},
+      result:{encounterId:snapshot.encounterId,returnToken:snapshot.returnToken,outcome:'fled',
+        partyState:{activeCreatureId:args.speciesId,hp:17}}
+    },scope);
+    const ready=await send('ready');
+    const wrong=await send('commit','other-session');
+    const first=await send('commit');
+    const repeated=await send('commit');
+    const pending=readCombatHandoff(localStorage,scope);
+    const grant=JSON.parse(sessionStorage.getItem('gensrpg.capture.v2.active-party.v1:'+args.sessionId));
+    const consumed=consumeCombatResult(localStorage,{...scope,receipt:first.receipt});
+    return {ready,wrong,first,repeated,pending:pending?.result?.outcome,grant,consumed:consumed?.result?.outcome};
+  },{sessionId:stored.sessionId,speciesId:stored.party.active.speciesId});
+  assert.deepEqual(port.ready,{ready:true});
+  assert.match(port.wrong.error,/partie/i);
+  assert.equal(port.first.receipt.persisted,true);
+  assert.equal(port.first.receipt.applied,true);
+  assert.equal(port.repeated.receipt.applied,false);
+  assert.equal(port.grant.active.hp,17);
+  assert.equal(port.pending,'fled','only Exploration may consume its journal');
+  assert.equal(port.consumed,'fled');
+  const battleSave=await page.evaluate(()=>JSON.parse(localStorage.getItem('gensrpg.capture.v2.adventure.save.v1')));
+  assert.equal(battleSave.party.active.hp,17);
+  assert.equal(battleSave.party.active.xp,0);
+  assert.deepEqual(battleSave.processedEncounterKeys,['browser-result-1:browser-return-1']);
 
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);

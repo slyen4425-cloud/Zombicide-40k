@@ -1,3 +1,9 @@
+## 2026-11-04 — Aventure : port de sauvegarde du résultat pour Jouer
+
+- START `checkpoint/gensrpg-start-adventure-result-host-2026-11-04` sur le HEAD GitHub de #250 `762b37ac9090dd8c79fb935fc138d3b8ea6cfde8`. Branche `work/gensrpg-adventure-result-host-2026-11-04`. Clean Authority, Root Browser et livraison native validés sur la base. GenSRPG production reste protégé.
+- Périmètre : Aventure garde son Core Storage vivant pendant Jouer, expose un port versionné au seul iframe officiel corrélé, lit le journal via le lecteur du main Exploration #365, confie le résultat au commit Aventure existant, rafraîchit le grant d’équipe et rend le reçu à Exploration. Le port sérialise les écritures d’une même partie. Exploration reste seule responsable du déplacement, de la restauration et de l’acquittement de son journal.
+- TDD : navigateur sur vraie sauvegarde Aventure, vraie carte et vrai journal avec un résultat de test, refus d’une autre partie, PV persistés et projection mise à jour, répétition idempotente, journal intact jusqu’à acquittement. Pas de règle de récompense, catalogue, Combat, index racine, PWA ni production modifiés. Le port Exploration et la vraie recette Combat seront raccordés ensuite.
+
 ## 2026-11-04 — Aventure : projection de l’instance active avec provenance Combat vérifiée
 
 - START `checkpoint/gensrpg-start-adventure-active-party-compat-2026-11-04` sur la PR #249 `7cb27d927c404e9dcd537179b1dc0cbc28e45956` (CI Clean, navigateur racine, livraison native, Builder et V113 verts). Branche `work/gensrpg-adventure-active-party-compat-2026-11-04`, main GenSRPG `aa34bf1f415d14ba2c62e6745f8655aec6e3a4fa` protégé.

@@ -143,3 +143,22 @@ test('preview transport can include the official Jouer entry from its certified 
   assert.match(stage,/for\(const filename of \[[^\]]*'play\.html'[^\]]*\]\)/);
   assert.match(stage,/const from=path\.join\(exploration,filename\);\s*if\(fs\.existsSync\(from\)\)fs\.copyFileSync\(from,path\.join\(exploreDest,filename\)\)/);
 });
+
+
+test('the physical published preview contains the single native 2.5D destination and the player menu',()=>{
+ const shell=read(trial,'assets/gensrpg/capture-v2/shell-entry-v1.js').toString('utf8');
+ const css=read(trial,'assets/gensrpg/capture-v2/shell-style-v1.css').toString('utf8');
+ const game=read(trial,'assets/gensrpg/capture-v2/adventure.html').toString('utf8');
+ assert.match(shell,/dataset\.captureV2Menu="editors"/,'the menu must offer Éditeurs, not nine loose shortcuts');
+ assert.match(shell,/dataset\.captureV2View="adventure"/,'the menu must offer one Jouer entry');
+ assert.equal([...shell.matchAll(/path:"vendor\/exploration-lab\/sculpt-lab\.html"/g)].length,1,
+  'the duplicate Exploration Tester and Sculpt routes must not reach publication');
+ assert.doesNotMatch(shell,/\bexplore:\{label:/);
+ for(const id of ['world','combat'])assert.ok(shell.includes('id:"'+id+'"'),
+  'the editors must group the official World and Combat native screens');
+ assert.match(css,/gensCaptureV2MainMenu/);
+ assert.match(css,/gensCaptureV2Editors/);
+ assert.match(game,/<h1>Jouer<\/h1>/);
+ assert.match(game,/<details id="adventure-rules-panel"/);
+ assert.match(game,/<details id="adventure-loot-panel"/);
+});

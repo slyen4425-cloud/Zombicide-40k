@@ -36,7 +36,7 @@ test('can enable after creation and disable later without deleting earned hero X
  assert.deepEqual(next.session.hero.progression,first.session.hero.progression);
 });
 test('legacy save without hero or policy stays playable and unchanged',()=>{
- const old=create(DEFAULT_ADVENTURE_RULES_V1);
+ const old={...create(DEFAULT_ADVENTURE_RULES_V1)};
  delete old.hero;
  const legacyRules=JSON.parse(JSON.stringify(old.rules));
  delete legacyRules.heroProgression;

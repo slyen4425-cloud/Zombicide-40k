@@ -2,9 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
-import {DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,createAdventureSessionV1,applyAdventureCombatResultV1} from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
+import {DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,createAdventureSessionV1,applyAdventureCombatResultV1,createAdventureStoreV1} from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 const sandbox={};
 vm.runInNewContext(fs.readFileSync(new URL('../assets/gensrpg/core/progression-v1.js',import.meta.url),'utf8'),sandbox);
+vm.runInNewContext(fs.readFileSync(new URL('../assets/gensrpg/core/storage-v1.js',import.meta.url),'utf8'),sandbox);
 const cards=[{id:'ally',name:'Ally',level:1,skills:[{state:'ready'}]},{id:'foe',name:'Foe',level:2,skills:[{state:'ready'}]}];
 const create=rules=>createAdventureSessionV1({bestiaryCards:cards,starterId:'ally',rules,ids:{sessionId:'session1',instanceId:'instance1'},now:'2026-11-04T10:00:00Z'});
 const rules=changes=>normalizeAdventureRulesV1({...DEFAULT_ADVENTURE_RULES_V1,heroProgression:{...DEFAULT_ADVENTURE_RULES_V1.heroProgression,...changes}});
@@ -55,4 +56,34 @@ test('Aventure exposes hero creator controls, without copying Exploration actor'
  for(const id of ['adventure-hero-xp-enabled','adventure-hero-xp-share','adventure-hero-xp-per-level','adventure-hero-max-level','adventure-hero-talent-points'])
   assert.ok(html.includes('id="'+id+'"'));
  assert.match(ui,/heroProgression/);
+});
+
+test('combat XP never erases the chosen official HeroDefinition, including after Core Storage reload',()=>{
+ const heroDefinitionId='hero.user.00000000-0000-4000-8000-000000000001';
+ const session=createAdventureSessionV1({
+  bestiaryCards:cards,starterId:'ally',heroDefinitionId,
+  rules:rules({enabled:true,xpGainPercent:50,xpPerLevel:500,maxLevel:20,talentPointsPerLevel:3}),
+  ids:{sessionId:'hero-selected-session',instanceId:'hero-selected-ally'},
+  now:'2026-11-04T10:00:00Z'
+ });
+ const data=new Map();
+ const storage={
+  getItem:key=>data.get(key)??null,
+  setItem:(key,value)=>data.set(key,value),
+  removeItem:key=>data.delete(key)
+ };
+ const store=createAdventureStoreV1({storage,coreStorage:sandbox.GensStorageV1});
+ const playing={...session,status:'playing'};
+ store.create(playing);
+ const victory=apply(store.load());
+ assert.equal(victory.session.hero.definitionId,heroDefinitionId);
+ assert.deepEqual(victory.session.hero.progression,{xp:650,level:2,talentPoints:3});
+ store.save(victory.session);
+ assert.equal(store.load().hero.definitionId,heroDefinitionId);
+ const second=apply(store.load(),'encounter2');
+ assert.equal(second.session.hero.definitionId,heroDefinitionId);
+ assert.equal(second.award.heroXp,500); // second battle: both creatures now level 2
+ assert.equal(second.session.hero.progression.xp,victory.session.hero.progression.xp+second.award.heroXp);
+ // Replaying a processed result must not duplicate XP or modify the visual selection.
+ assert.equal(apply(victory.session).session.hero.definitionId,heroDefinitionId);
 });

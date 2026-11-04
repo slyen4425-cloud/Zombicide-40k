@@ -9,6 +9,7 @@ on:
       - 'assets/gensrpg/capture-v2/**'
       - 'index.html'
       - 'tests/gens_capture_v2_clean_boundary.test.cjs'
+      - 'tests/gens_capture_v2_adventure_hero_progression_v1.test.mjs'
       - 'tests/gens_capture_v2_generic_profile_owner.test.cjs'
       - 'tests/gens_capture_v2_root_browser.test.cjs'
       - 'tests/gens_capture_v2_pwa_cache_owner_v1.test.cjs'

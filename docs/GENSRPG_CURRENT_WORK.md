@@ -1,3 +1,15 @@
+## 2026-11-04 — Aventure : préserver HeroDefinition après CombatResult / XP (PR #249, À CERTIFIER)
+
+- **Contexte** : objectif [#235](https://github.com/slyen4425-cloud/Zombicide-40k/issues/235), vraie partie Monster Capture avec héros visuel facultatif. La PR #248, base immuable `7c011a1334abcc1eb697cc7d2b01dbd5c07314d7`, a 4/4 workflows SUCCESS sur le contrat de synchronisation Combat main `4425d123` ; elle reste DRAFT, non publiée.
+- **Branche et START** : `work/gensrpg-adventure-hero-identity-combat-2026-11-04` depuis `checkpoint/gensrpg-start-adventure-hero-identity-combat-2026-11-04` au SHA exact `7c011a13`; GenSRPG `main@aa34bf1f`, Combat main et Exploration main inchangés.
+- **Cause racine démontrée** : `applyAdventureCombatResultV1` remplaçait `session.hero` par `{progression}` lorsque `heroProgression.enabled=true`, effaçant la référence choisie `hero.definitionId` (HeroDefinition possédée par Exploration). En l'absence de progression, l'identité était conservée. Pas de bug de renderer ou de combat.
+- **TDD RED authentique** : `tests/gens_capture_v2_adventure_hero_progression_v1.test.mjs` crée une vraie session avec HeroDefinition, victoire, XP et recharge Core Storage ; [Capture CI #41851627133](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/41851627133), job `clean-authority`, échoue sur `actual: undefined` au lieu de l'identifiant officiel. Le même lot raccorde le fichier de test au path-filter CI pour qu'il ne reste pas non exécuté.
+- **Correction source minimale** : le propriétaire Capture conserve les champs validés existants de `session.hero` et ne remplace que `progression` ; aucun nouveau champ, ID, asset, calcul XP, propriétaire de combat, Core Storage, Explorer ou renderer.
+- **Gates** : test RED→GREEN sur SHA de correction, clean-authority + root-browser + official native + Builder/V113 si déclenchés, vérification de diff et checkpoint limité au contrat. Pas de fusion main/Pages/PWA ni statut « session complète jouable » sans la recette Explorer→Combat→résultat→retour et validation Pixel. Les PR Exploration #355/#356/#357 restent séparées et non présumées intégrées à main.
+- **Étape suivante** : certifier le SHA final de cette PR puis reprendre #235 (lecteurs Héros/équipe et vraie rencontre) depuis les seules livraisons main des Labos.
+
+---
+
 ## 04/11/2026 — synchroniser la source certifiée Combat main : vrais niveaux par créature (EN COURS, NON GREEN)
 
 - **Signal CI bloquant utile** : GenSRPG PR #247 clean/root et official release [#41847115526](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/41847115526) et [#41847115490](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/41847115490) refusent correctement `Uncertified combat main drift`. Le propriétaire Combat main a évolué `81ad362a` → `4425d123f4f02d04b2e2942c989789abaf159b0a` pour les niveaux explicites (PR #232). Aucun fallback vers gh-pages, aucune désactivation du gate.

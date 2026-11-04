@@ -51,6 +51,9 @@ jobs:
       - name: Aventure V2 — choix créateur progression du héros sans XP par défaut (TDD)
         run: node --test tests/gens_capture_v2_adventure_hero_progression_v1.test.mjs
 
+      - name: Aventure V2 — projection de l'instance réelle avant le Combat (TDD)
+        run: node --test tests/gens_capture_v2_adventure_playing_party_grant_v1.test.mjs
+
       - name: Aventure V2 — seule UI propriétaire, vrais éditeurs et Bestiaire non dupliqués
         run: node --test tests/gens_capture_v2_adventure_ui_owner_v1.test.mjs
 

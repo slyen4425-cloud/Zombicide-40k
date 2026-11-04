@@ -3,6 +3,10 @@
 // The only gameplay model lives in adventure-contract-v1.mjs (not DOM).
 import {captureBestiaryCardsV1} from '../../../vendor/combat-lab/src/ui/capture-bestiary-cards-v1.js';
 import {readWorldAssemblerDraft} from '../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js';
+import {createCaptureCreatureCatalogProvider} from '../../../vendor/exploration-lab/src/capture/capture-creature-catalog-provider.js';
+import {projectCaptureShowcaseEncounterSourceV1} from '../../../vendor/exploration-lab/src/capture/capture-showcase-encounter-source-v1.js';
+import {adventurePublishedEncounterStorageKeyV1} from '../../../vendor/exploration-lab/src/encounters/adventure-published-encounters-v1.js';
+import {createAdventurePublishedEncounterGrantV1} from './adventure-published-grant-v1.mjs';
 import {
  createNewExplorationPlay,readExplorationPlay
 } from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
@@ -21,6 +25,7 @@ const idField={
 };
 let rules=normalizeAdventureRulesV1(DEFAULT_ADVENTURE_RULES_V1);
 let published=[];
+let encounterCatalog=null,publishedCombatSha=null;
 let store;
 const text=(node,value)=>{node.textContent=String(value);};
 const stateMessage=(message,error=false)=>{
@@ -73,11 +78,16 @@ async function fetchPublishedBestiary(){
    bundle.authorSha!==delivery?.combat?.sha||
    bundle.engineSha!==delivery.combat.sha)
   throw new Error('Bestiaire: transferts incompatibles avec la version Combat officielle publiée');
- return publishedAdventureSpeciesV1(captureBestiaryCardsV1({
+ const cards=publishedAdventureSpeciesV1(captureBestiaryCardsV1({
   creatureTransfers:bundle.creatureTransfers,
   skillTransfers:bundle.skillTransfers,
   assetCatalog:assets,statRegistry:stats,nativeSkills:skills.entries??[]
  }));
+ return {
+  cards,combatSha:delivery.combat.sha,
+  encounterCatalog:createCaptureCreatureCatalogProvider(
+   projectCaptureShowcaseEncounterSourceV1(bundle.creatureTransfers))
+ };
 }
 function option(value,caption,disabled=false){
  const o=document.createElement('option');
@@ -209,6 +219,16 @@ $('adventure-play').addEventListener('click',guarded(()=>{
   navigation:{createNewExplorationPlay,readExplorationPlay},
   now:new Date().toISOString()
  });
+ // Combat owns publication; Exploration owns canonical rarity and encounters.
+ // Session-scoped IDs are the ONLY data handed to the native Play runtime.
+ const grant=createAdventurePublishedEncounterGrantV1({
+  session:result.session,worldId:world.id,
+  combatSha:publishedCombatSha,bestiaryCards:published,
+  captureCatalog:encounterCatalog
+ });
+ window.sessionStorage.setItem(
+  adventurePublishedEncounterStorageKeyV1(result.session.sessionId),
+  JSON.stringify(grant));
  // This iframe and the native Lab are on the SAME first-party origin.
  // Only the native Exploration runtime receives the scoped session ID.
  const url=new URL('../../../vendor/exploration-lab/sculpt-lab.html',import.meta.url);
@@ -261,7 +281,10 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
 (async()=>{
  try{
   store=createAdventureStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
-  published=await fetchPublishedBestiary();
+  const official=await fetchPublishedBestiary();
+  published=official.cards;
+  encounterCatalog=official.encounterCatalog;
+  publishedCombatSha=official.combatSha;
   fillPublicSpecies();
   const active=store.load();
   if(active){rules=normalizeAdventureRulesV1(active.rules);setFields(rules);}

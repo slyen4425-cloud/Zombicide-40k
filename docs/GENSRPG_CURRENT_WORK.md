@@ -1,3 +1,13 @@
+## 2026-11-04 — Reprise de Work après publication Aventure : éditeur de héros officiel dans la prévisualisation (CI EN COURS)
+
+- **Constat certifié avant le lot** : PR #255 intégrée à `main@a981a5cd39f23e14c2b9c2161aa29f7d62188866`, déploiement Pages #41907347140 et smoke public #41907863605 SUCCESS. L'ancienne prévisualisation `/preview/capture-v2-pr225/` sert le vrai candidat Aventure `f19e35e8`, Combat officiel `46b4efed`, Exploration officiel `4e7abd15`; protection de production et PWA conservée. Ne pas répéter ce chantier livré.
+- **Bug réel suivant** : l'éditeur de héros authentique d'Exploration existe sur son `main` certifié (`hero-editor.html`, `src/actors/hero-editor-v1.js`, `src/storage/user-hero-store-v1.js`), mais le transport Pages Capture excluait sa page des deux sparse-checkouts et de la liste de copie. Il était donc impossible de créer les médias du héros sur **la même origine IndexedDB que Jouer**. Aucune deuxième médiathèque ni téléchargement externe ne doit la remplacer.
+- **Propriétaire / START** : GenSRPG publisher unique, START `checkpoint/gensrpg-start-adventure-hero-editor-pages-2026-11-04` depuis `main@a981a5cd39f23e14c2b9c2161aa29f7d62188866`, branche `work/gensrpg-adventure-hero-editor-pages-2026-11-04`, PR #256 DRAFT. Pas de modification du `main`, de Combat/Exploration officiels, du SW/CacheStorage, du jeu Capture candidat, des profils ou du monde.
+- **TDD** : test de sortie réelle ajouté en premier `tests/gens_capture_v2_isolated_pages_preview.test.cjs` commit `aa18a8c` : exige page native, modules officiels IndexedDB, provenance exacte, deux sparse-checkouts et unique copie ; sur la base publiée l'assertion RED est prouvée par l'absence de `hero-editor.html` des deux listes et de la copie. Correctifs du publisher à `80330621` et de l'assemblage isolé à `c56eb4f1`. La page officielle reste propriété d'Exploration et utilise ses modules exacts.
+- **Validation obligatoire** : vraie sortie `_site` sur le HEAD exact, tests Node/Chromium de tous les scénarios historiques, préflight Pages et sentinelles d'architecture, puis checkpoint CI et revue avant promotion. Pas de GREEN annoncé sans les résultats, pas de déploiement auto de PR. Après certification, le **lot distinct** de choix du héros dans Aventure doit consommer le store officiel et publier le grant `gensrpg.capture.v2.hero-selection.v1`, sans copier les Blobs.
+
+---
+
 ## 2026-11-04 — Prévisualisation Pages de la vraie partie Aventure
 
 - START `checkpoint/gensrpg-start-adventure-native-pages-preview-2026-11-04` sur `main@2f0bc1600361dad619a2b73d2998bb148257ba27`, branche `work/gensrpg-adventure-native-pages-preview-2026-11-04`. Base de livraison verte `checkpoint/gensrpg-adventure-preview-play-entry-ci-green-2026-11-04`.

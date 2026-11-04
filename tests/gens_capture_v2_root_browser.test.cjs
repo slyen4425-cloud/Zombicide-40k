@@ -263,6 +263,25 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
     'real Exploration may only encounter the published and ready Combat species');
   assert.equal(delivered.runtimeCount,publication.filteredCount,
     'native Sculpt must consume the actual published-only grant');
+  const nativeParty=await page.locator('#gensCaptureV2Root iframe').evaluate(
+    (frame,sessionId)=>{
+      const raw=frame.contentWindow.sessionStorage.getItem(
+        'gensrpg.capture.v2.active-party.v1:'+sessionId);
+      return raw?JSON.parse(raw):null;
+    },stored.sessionId);
+  assert.equal(nativeParty?.schema,'gensrpg.capture.v2.active-party.v1');
+  assert.equal(nativeParty?.sessionId,stored.sessionId);
+  assert.equal(nativeParty?.worldId,'gen-ci-capture-world');
+  assert.equal(nativeParty?.partyRef,'adventure-party:'+stored.sessionId,
+    'the real game must never hand the static Tester party to Combat');
+  assert.equal(nativeParty?.combatSha,publication.combatSha);
+  assert.equal(nativeParty?.active?.instanceId,stored.party.active.instanceId);
+  assert.equal(nativeParty?.active?.speciesId,stored.party.active.speciesId);
+  assert.equal(nativeParty?.active?.level,stored.party.active.level);
+  assert.equal(nativeParty?.active?.hp,stored.party.active.hp);
+  assert.equal(await page.evaluate(id=>localStorage.getItem(
+    'gensrpg.capture.v2.active-party.v1:'+id),stored.sessionId),null,
+    'actual-party projection is transient and must not become a second save');
   assert.equal(await page.evaluate(id=>localStorage.getItem(
     'gensrpg.capture.v2.published-encounters.v1:'+id),stored.sessionId),null,
     'derived encounter grant must never be persisted in Core localStorage');

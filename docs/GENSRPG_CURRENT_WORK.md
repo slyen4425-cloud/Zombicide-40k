@@ -1,3 +1,13 @@
+## 2026-11-05 — Revue bloquante #283 : conserver le 2v2 historique réellement utilisé (correction du lot)
+
+- **Fait prouvé** : revue Codex de PR #283 (`c10ab2a`) a trouvé que `capture-world-2v2-test.html` appelle réellement `prepareCapture2v2Preview`, importe `vendor/combat-lab/src/*` et charge `assets/gensrpg/capture/runtime-data/author-inputs.json`. L'ancien nettoyage détruisait ces deux chemins et cassait « Préparer la rencontre 2v2 ». Le smoke de publication `capture-2v2-pages-public-smoke.yml` le confirme.
+- **Correction de cause racine** : conserver pour ce SEUL consommateur l'ancienne livraison versionnée dans le publisher unique, tout en bloquant les nouveaux artefacts historiques automatiques et en imposant la mesure réelle du budget 900 Mio/une seule racine lourde `capture-assets`. Les dépendances V2 et les sources d'assets restent distinctes et inchangées. Une migration 2v2 vers V2 sera un nouveau lot avec preuve fonctionnelle et 404, pas un redirect silencieux.
+- **TDD de non-perte** : `tests/gensrpg_pages_no_legacy_combat_copy.test.cjs` vérifie les deux transporteurs utilisés une seule fois, la présence de la page 2v2 et de ses imports. `tests/gensrpg_pages_release_budget.test.cjs` garde l'inventaire en octets, le budget 900 Mio, une seule racine `capture-assets` et les chemins effectivement utilisés.
+- **Attention** : le chiffre préalable de 468 174 881 octets (2 581 fichiers) correspond au candidat SANS paquet 2v2 et **n'est plus la métrique du candidat correct**. Recalculer les octets exacts dans la CI du SHA final puis vérifier les 8 workflows, navigateur et HTTPS avant fusion/publication.
+- **Statut** : ancien candidat `c10ab2a` NON GREEN annulé fonctionnellement ; pas de fusion. Conserver en checkpoint l'original main stable `e2124541`. Récupérer métrique CI et preuve de navigation avant GREEN.
+
+---
+
 ## 2026-11-05 — Audit publication : supprimer la seconde copie historique du Labo Combat (C2, candidat NON GREEN)
 
 - **Contexte** : demande utilisateur après découverte de duplications de répertoires de laboratoire en publication. **Cause vérifiée sur GitHub** : le publisher unique `.github/workflows/main.yml` envoyait à la racine Pages une archive complète et inactive de Combat V1 (`vendor/combat-lab/` et `assets/gensrpg/capture/runtime-data/`) via `tools/stage_capture_lab_delivery.mjs`, **alors que Capture V2 transporte déjà Combat et Exploration officiellement dans `preview/capture-v2-pr225/`**. Il existe d'autres copies physiques V2 (notamment la scène native Combat dans le pont Exploration) à auditer séparément avant toute réduction de graphe d'import.

@@ -27,6 +27,21 @@ export const DEFAULT_ADVENTURE_RULES_V1=freeze({
  heroProgression:{enabled:false,xpGainPercent:100,xpPerLevel:1000,
   maxLevel:100,talentPointsPerLevel:0}
 });
+// The showcase is an explicit NEW-GAME preset; historical linear saves keep
+// their exact existing progression and do not gain retroactive stat points.
+export const SHOWCASE_ADVENTURE_RULES_V1=freeze({
+ ...DEFAULT_ADVENTURE_RULES_V1,
+ progression:{
+  xpCurveMode:'custom',xpPerLevel:2000,maxLevel:100,statPointsPerLevel:20,
+  xpBands:[
+   {throughLevel:20,xpPerLevel:2000},
+   {throughLevel:40,xpPerLevel:4000},
+   {throughLevel:60,xpPerLevel:6000},
+   {throughLevel:80,xpPerLevel:8000},
+   {throughLevel:100,xpPerLevel:10000}
+  ]
+ }
+});
 function object(value,label){
  if(!value||typeof value!=='object'||Array.isArray(value))
   throw new TypeError(label+' must be an object');
@@ -97,11 +112,33 @@ export function normalizeAdventureRulesV1(input){
  number(xp.globalMultiplier,'globalMultiplier',0,100);
  if(xp.distribution!=='active')
   throw new RangeError('xp.distribution active is the only implemented participant policy');
- const p=exact(rule.progression,['xpCurveMode','xpPerLevel','maxLevel'],'progression');
- if(p.xpCurveMode!=='linear')
-  throw new RangeError('Custom progression thresholds require a separate explicit contract');
+ const {xpBands:bandsRaw,statPointsPerLevel:pointsRaw,...baseProgression}=
+  object(rule.progression,'progression');
+ const p=exact(baseProgression,['xpCurveMode','xpPerLevel','maxLevel'],'progression');
+ if(p.xpCurveMode!=='linear'&&p.xpCurveMode!=='custom')
+  throw new RangeError('Unknown Adventure XP curve mode');
  integer(p.xpPerLevel,'xpPerLevel',1,1000000000);
  integer(p.maxLevel,'maxLevel',1,100);
+ if(pointsRaw!==undefined)integer(pointsRaw,'statPointsPerLevel',0,1000);
+ if(p.xpCurveMode==='linear'&&bandsRaw!==undefined)
+  throw new RangeError('Linear XP curve cannot declare custom bands');
+ let bands;
+ if(p.xpCurveMode==='custom'){
+  if(!Array.isArray(bandsRaw)||bandsRaw.length===0||bandsRaw.length>100)
+   throw new RangeError('Custom XP bands must be a non-empty list');
+  let previous=1;
+  bands=bandsRaw.map((entry,i)=>{
+   const raw=exact(entry,['throughLevel','xpPerLevel'],'xpBands['+i+']');
+   const throughLevel=integer(raw.throughLevel,'xpBands.throughLevel',2,100);
+   const xpPerLevel=integer(raw.xpPerLevel,'xpBands.xpPerLevel',1,1000000000);
+   if(throughLevel<=previous)
+    throw new RangeError('XP band end levels must increase');
+   previous=throughLevel;return {throughLevel,xpPerLevel};
+  });
+  if(previous<p.maxLevel)
+   throw new RangeError('XP bands must cover maxLevel');
+  coreAdventureProgressionConfigV1({...p,xpBands:bands});
+ }
  const loot=exact(rule.loot,['currencyPerVictory','items','drops'],'loot');
  integer(loot.currencyPerVictory,'currencyPerVictory',0,100000000);
  if(!Array.isArray(loot.items)||!Array.isArray(loot.drops))
@@ -131,7 +168,9 @@ export function normalizeAdventureRulesV1(input){
   xp:{baseVictoryXp:xp.baseVictoryXp,higherEnemyBonusPercent:xp.higherEnemyBonusPercent,
    higherAllyPenaltyPercent:xp.higherAllyPenaltyPercent,
    globalMultiplier:xp.globalMultiplier,distribution:'active'},
-  progression:{xpCurveMode:'linear',xpPerLevel:p.xpPerLevel,maxLevel:p.maxLevel},
+  progression:{xpCurveMode:p.xpCurveMode,xpPerLevel:p.xpPerLevel,maxLevel:p.maxLevel,
+    ...(pointsRaw===undefined?{}:{statPointsPerLevel:pointsRaw}),
+    ...(bands===undefined?{}:{xpBands:bands})},
   loot:{currencyPerVictory:loot.currencyPerVictory,items,drops},
   heroProgression:{enabled:hero.enabled,xpGainPercent:hero.xpGainPercent,
    xpPerLevel:hero.xpPerLevel,maxLevel:hero.maxLevel,

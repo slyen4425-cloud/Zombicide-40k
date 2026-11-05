@@ -91,6 +91,17 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await adventureFrame.locator('#adventure-loot-panel').getAttribute('open'),null);
   await adventureFrame.locator('#adventure-rules-panel > summary').tap();
   await adventureFrame.locator('#adventure-xp-base').waitFor({timeout:15000});
+  // Real game preset, sourced from the existing Core rules and Combat registry.
+  assert.equal(await adventureFrame.locator('#adventure-xp-mode').inputValue(),'custom');
+  assert.equal(await adventureFrame.locator('#adventure-level-max').inputValue(),'100');
+  assert.equal(await adventureFrame.locator('#adventure-stat-points-per-level').inputValue(),'20');
+  assert.equal(await adventureFrame.locator('#adventure-xp-bands .xp-band-row').count(),5);
+  assert.equal(await adventureFrame.locator('#adventure-xp-bands .xp-band-row').first()
+   .locator('[data-xp-band-cost]').inputValue(),'2000');
+  await adventureFrame.locator('#adventure-creator-panel > summary').tap();
+  await adventureFrame.locator('#adventure-gm-enabled').check();
+  await adventureFrame.locator('#adventure-join-enabled').check();
+  await adventureFrame.locator('#adventure-guest-edit-progression').check();
   await adventureFrame.locator('#adventure-create').waitFor({timeout:15000});
   // Real published Bestiary data must populate this UI, not a mock species
   // registry. Create and reopen a native Capture-only save from the genuine
@@ -191,6 +202,14 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
     'real Aventure editor must persist author hero opt-in');
   assert.equal(stored?.rules?.heroProgression?.xpGainPercent,35);
   assert.equal(stored?.rules?.heroProgression?.xpPerLevel,400);
+  assert.equal(stored?.rules?.progression?.xpCurveMode,'custom');
+  assert.equal(stored?.rules?.progression?.statPointsPerLevel,20);
+  assert.equal(stored?.rules?.progression?.maxLevel,100);
+  assert.equal(stored?.rules?.progression?.xpBands?.[0]?.xpPerLevel,2000);
+  assert.equal(stored?.sessionControl?.hostIsGameMaster,true);
+  assert.equal(stored?.sessionControl?.joinEnabled,true);
+  assert.equal(stored?.sessionControl?.guestPermissions?.editProgression,true);
+  assert.equal(stored?.party?.active?.statAllocations?.health,undefined);
   assert.equal(stored?.hero?.progression?.level,1);
   assert.equal(stored?.hero?.progression?.xp,0);
   assert.equal(stored?.party?.active?.speciesId,
@@ -212,6 +231,12 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   },null,{timeout:20000});
   assert.equal(await resumed.locator('#adventure-xp-base').inputValue(),'777',
    'saved Adventure settings must survive reopening the owned screen');
+  assert.equal(await resumed.locator('#adventure-gm-enabled').isChecked(),true,
+   'host MJ choice must be restored from saved Core, not just input state');
+  assert.equal(await resumed.locator('#adventure-join-enabled').isChecked(),true);
+  assert.equal(await resumed.locator('#adventure-guest-edit-progression').isChecked(),true);
+  assert.match(await resumed.locator('#adventure-stat-points-left').textContent(),
+   /0 point\(s\) disponibles/,'Level 1 cannot grant level-up points');
 
   // Native game handoff — no made-up map, no reused Tester. First prove the
   // actual GenSRPG origin has no WorldDocument and will not create a fake one.

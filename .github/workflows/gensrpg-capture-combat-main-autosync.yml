@@ -1,7 +1,7 @@
-name: GenSrpg auto-sync verified Combat main
+name: GenSrpg legacy Capture V1 manual Combat main sync
 on:
-  schedule:
-    - cron: '17,47 * * * *'
+  # Legacy Capture V1 only. V2 versions are watched separately and must never
+  # update this historic runtime or publish without a dedicated reviewed PR.
   workflow_dispatch:
 
 permissions:

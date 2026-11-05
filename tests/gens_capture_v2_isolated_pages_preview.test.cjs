@@ -13,8 +13,12 @@ const rel='preview/capture-v2-pr225';
 const trial=path.join(site,rel);
 const previewPin=JSON.parse(fs.readFileSync(path.join(root,'tools/capture_v2_pages_preview_pin.json')));
 const previewSha=previewPin.sha;
-const combatSha='53890e1383b33f7a0ec5bb2fafed59acf1d7a163';
-const explorationSha='7155516b51db9892183cc043837037c4c87a0315';
+// Compare the release against its ONE immutable approved candidate,
+ // not a second hardcoded list of older Lab SHAs that becomes stale.
+const candidateSources=JSON.parse(fs.readFileSync(
+ path.join(trial,'assets/gensrpg/capture-v2/source-pins-v1.json')));
+const combatSha=candidateSources.combat.sha;
+const explorationSha=candidateSources.exploration.sha;
 const sha256=buf=>crypto.createHash('sha256').update(buf).digest('hex');
 const read=(base,p)=>fs.readFileSync(path.join(base,p));
 const json=(base,p)=>JSON.parse(read(base,p));
@@ -98,6 +102,12 @@ test('exact official Lab main files and derived Showcase have one owner and veri
   const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
   const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
   const provenance=json(trial,'release-provenance.v1.json');
+  assert.equal(source.schema,'gensrpg-capture-v2-official-main-pins-v1');
+  assert.equal(source.legacyCaptureRuntime,false);
+  assert.equal(source.combat.ref,'main');
+  assert.equal(source.exploration.ref,'main');
+  assert.ok(Number.isSafeInteger(source.combat.certifiedCiRun)&&source.combat.certifiedCiRun>0);
+  assert.ok(Number.isSafeInteger(source.exploration.certifiedCiRun)&&source.exploration.certifiedCiRun>0);
   assert.equal(source.combat.sha,combatSha);
   assert.equal(source.exploration.sha,explorationSha);
   assert.equal(delivery.combat.sha,combatSha);

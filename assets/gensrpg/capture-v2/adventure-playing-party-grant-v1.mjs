@@ -53,11 +53,16 @@ export function writeAdventurePlayingPartyV1({
   throw new RangeError('Saved creature level exceeds the creator-configured Adventure cap');
  if(saved.hp!==null&&(!Number.isFinite(saved.hp)||saved.hp<0||saved.hp>Number.MAX_SAFE_INTEGER))
   throw new RangeError('Saved creature HP must be null or a finite nonnegative number');
+ // Project only the creator's game-wide combat policy; preserve real saved HP.
+ const multiplier=session.rules?.combat?.hpMultiplier ?? 1;
+ if(typeof multiplier!=='number'||!Number.isFinite(multiplier)||multiplier<=0||multiplier>1)
+  throw new RangeError('Adventure combatHpMultiplier must be in (0,1]');
  const data=Object.freeze({
   schema:ADVENTURE_PLAYING_PARTY_SCHEMA_V1,version:1,
   sessionId,worldId,combatSha:grant.combatSha,
   partyRef:'adventure-party:'+sessionId,
-  active:Object.freeze({instanceId,speciesId,level:saved.level,hp:saved.hp})
+  active:Object.freeze({instanceId,speciesId,level:saved.level,hp:saved.hp}),
+  combatHpMultiplier:multiplier
  });
  storage.setItem(ADVENTURE_PLAYING_PARTY_SCHEMA_V1+':'+sessionId,
   JSON.stringify(data));

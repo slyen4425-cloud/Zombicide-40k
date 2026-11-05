@@ -26,7 +26,7 @@ const idField={
  base:'adventure-xp-base',bonus:'adventure-xp-bonus',penalty:'adventure-xp-penalty',
  global:'adventure-xp-global',level:'adventure-xp-level',max:'adventure-level-max',
  statPoints:'adventure-stat-points-per-level',xpMode:'adventure-xp-mode',
- currency:'adventure-currency',
+ currency:'adventure-currency',hpPercent:'adventure-combat-hp-percent',
  heroEnabled:'adventure-hero-xp-enabled',heroShare:'adventure-hero-xp-share',
  heroXpLevel:'adventure-hero-xp-per-level',heroMax:'adventure-hero-max-level',
  heroTalent:'adventure-hero-talent-points'
@@ -168,6 +168,7 @@ function setFields(value){
  $(idField.xpMode).value=value.progression.xpCurveMode;
  $(idField.statPoints).value=value.progression.statPointsPerLevel??0;
  $(idField.currency).value=value.loot.currencyPerVictory;
+ $(idField.hpPercent).value=100*value.combat.hpMultiplier;
  renderXpBandRows(value.progression.xpBands??SHOWCASE_ADVENTURE_RULES_V1.progression.xpBands);
  toggleXpMode();
  $(idField.heroEnabled).checked=value.heroProgression.enabled;
@@ -188,6 +189,7 @@ function fromFields(){
    statPointsPerLevel:numberFrom(idField.statPoints),
    ...($(idField.xpMode).value==='custom'?{xpBands:readXpBandRows()}: {})},
   loot:{...rules.loot,currencyPerVictory:numberFrom(idField.currency)},
+  combat:{hpMultiplier:numberFrom(idField.hpPercent)/100},
   heroProgression:{...rules.heroProgression,
    enabled:$(idField.heroEnabled).checked,
    xpGainPercent:numberFrom(idField.heroShare),

@@ -63,7 +63,14 @@ function renderXpBandRows(bands){
   xp.step=1;xp.value=band.xpPerLevel;xp.dataset.xpBandCost='1';
   const remove=document.createElement('button');remove.type='button';
   remove.textContent='Retirer';remove.disabled=bands.length===1;
-  remove.addEventListener('click',()=>{row.remove();updatePreview();});
+  remove.addEventListener('click',()=>{
+   if(host.querySelectorAll('.xp-band-row').length<=1)return;
+   row.remove();
+   const remaining=host.querySelectorAll('.xp-band-row');
+   for(const other of remaining)
+    other.querySelector('button').disabled=remaining.length<=1;
+   updatePreview();
+  });
   upper.addEventListener('input',updatePreview);
   xp.addEventListener('input',updatePreview);
   end.append(upper);cost.append(xp);

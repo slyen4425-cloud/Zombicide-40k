@@ -12,6 +12,7 @@ on:
       - 'tests/gens_capture_v2_game_menu_v1.test.cjs'
       - 'tests/gens_capture_v2_adventure_hero_progression_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_progression_access_v1.test.mjs'
+      - 'tests/gens_capture_v2_adventure_rules_draft_persistence_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_hp_policy_20261105.test.mjs'
       - 'tests/gens_capture_v2_adventure_owned_stats_grant_v1.test.mjs'
       - 'tests/gens_capture_v2_official_combat_levels_pin_v1.test.mjs'
@@ -62,6 +63,9 @@ jobs:
 
       - name: Aventure — XP par paliers, stats officielles 20 points, rôles du créateur (TDD)
         run: node --test tests/gens_capture_v2_adventure_progression_access_v1.test.mjs
+
+      - name: Aventure — réglages sauvegardés avant une première partie, recharge sans perte (TDD)
+        run: node --test tests/gens_capture_v2_adventure_rules_draft_persistence_v1.test.mjs
 
       - name: Aventure V2 — choix créateur progression du héros sans XP par défaut (TDD)
         run: node --test tests/gens_capture_v2_adventure_hero_progression_v1.test.mjs

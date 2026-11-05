@@ -1,3 +1,15 @@
+## 2026-11-05 — Capture V2 / Exploration main : réépinglage candidat pour débloquer la CI (#279 ; NON GREEN)
+
+- **START** : SHA source GenSRPG officiel `bd9c16213cb93e9681282c733418c6660bc54a00` (tronc candidat Aventure certifié/publisher #276), checkpoint `checkpoint/gensrpg-start-capture-v2-exploration-main-repin-2026-11-05`, branche `work/gensrpg-capture-v2-exploration-main-repin-2026-11-05`.
+- **Cause observée** : le pin Exploration immuable `4bfb15a3092455bec879d3c5ad6098398759d0d3` ne correspond plus à `main@c6432654cb86cb57f75995e3be6460cbb888f286`, fusion officielle PR Exploration #378. La CI du correctif brouillon #279 échouait avant le navigateur, garde de drift fonctionnelle.
+- **Propriétaire/périmètre** : GenSRPG Capture V2 `source-pins-v1.json` et sentinelle des pins officiels ; aucun fichier Exploration/Combat source, règles de combat, stockage, runtime de jeu, PWA, SW, `index.html` ou publisher. Le rapport de comparaison amont recense assets/visuels/maps et n'autorise **aucun changement de politique de partie** ; source Exploration `main` uniquement.
+- **Preuve amont partielle** : PR Exploration #378 HEAD `00f1357063f65c125f6f4f8c6cb4cbb18a4741ce` dispose de CI de revue SUCCESS (#42074641375 et #42074641454), puis fusion `main@c6432654...`. Le champ `certifiedCiRun` contient ici provisoirement le run CI de revue HEAD **et non une attestation de CI du commit de fusion main**. Cette distinction interdit formellement de qualifier ce candidat de certifié/published avant preuve SHA main exacte et intégration.
+- **TDD** : la sentinelle `tests/gens_capture_v2_official_combat_levels_pin_v1.test.mjs` exige d'abord le nouveau commit officiel, puis le pin du candidat a été changé ; contrôle du vrai chargement des fichiers Lab, Browser Chromium paysage Capture, Core stats (niveaux/HP) et frontière Dungeon. Aucun assouplissement des tests de drift ni des critères de release.
+- **Dépendance** : PR #279 conserve son lot propre, ne pas y introduire ce repin avant que celui-ci soit certifié ; PR #277 résultat de combat encore séparée.
+- **Suite** : CI sur le candidat exact avec pin nouvel Exploration main, vérifier l'intégration `_site` et véritable parcours navigateur ; obtenir preuve CI officielle du SHA `c6432654` via les contrôles d'Exploration, ou rester NON GREEN. Si tous les contrôles requis réussissent, checkpoint GREEN, puis intégration ordonnée dans le candidat de persistance et nouvelle CI complète. **Aucune fusion ou publication automatique.**
+
+---
+
 ## 2026-11-05 — Monster Capture : allocations réelles de statistiques dans une AdventureSession (C2 EN COURS, PAS ENCORE PUBLIÉ)
 
 - **Choix de périmètre utilisateur** : GenSRPG reste une application multi-modes. Les règles, les objets/loot et le futur éditeur d'objets appartiennent au **module Monster Capture**, réutilisable par chaque jeu créé ; aucune activation dans Dungeon/Survie/PvP. Le chantier Dungeon est explicitement différé jusqu'à une partie Monster Capture complète et vérifiée.

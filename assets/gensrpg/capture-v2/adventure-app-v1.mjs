@@ -16,7 +16,8 @@ import {
  DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
  createAdventureSessionV1,createAdventureStoreV1,publishedAdventureSpeciesV1,
  coreAdventureProgressionConfigV1,availableAdventureStatPointsV1,
- allocateAdventureStatPointsV1,updateAdventureSessionControlV1
+ allocateAdventureStatPointsV1,updateAdventureSessionControlV1,
+ initializeAdventureSessionControlV1
 } from './adventure-contract-v1.mjs';
 
 const $=id=>document.getElementById(id);
@@ -83,7 +84,9 @@ function setSessionControlFields(saved){
  $('adventure-guest-edit-rewards').checked=permissions.editRewards;
  $('adventure-guest-edit-world').checked=permissions.editWorld;
  $('adventure-guest-allocate-stats').checked=permissions.allocateOwnCreatureStats;
- $('adventure-save-control').disabled=!value;
+ $('adventure-save-control').disabled=!saved;
+ $('adventure-save-control').textContent=value?'Enregistrer les choix du créateur'
+  :'Activer les choix créateur/MJ pour cette partie';
 }
 function sessionControlFromFields(){
  return {
@@ -402,9 +405,12 @@ $('adventure-resume').addEventListener('click',guarded(()=>{
 $('adventure-save-control').addEventListener('click',guarded(()=>{
  const session=store.load();
  if(!session)throw new Error('Crée une partie avant d’enregistrer les permissions.');
- const updated=updateAdventureSessionControlV1({
-  session,settings:sessionControlFromFields(),now:new Date().toISOString()
- });
+ const settings=sessionControlFromFields(),now=new Date().toISOString();
+ const updated=session.sessionControl
+  ?updateAdventureSessionControlV1({session,settings,now})
+  :initializeAdventureSessionControlV1({
+    session,settings,creatorId:crypto.randomUUID(),now
+   });
  store.save(updated);setSessionControlFields(updated);showSave();
  stateMessage('Choix du créateur/MJ enregistrés. La connexion des invités et les actions MJ seront raccordées ultérieurement.');
 }));

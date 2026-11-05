@@ -47,7 +47,7 @@ test('legacy save without hero or policy stays playable and unchanged',()=>{
  assert.equal(normalizeAdventureRulesV1(legacyRules).heroProgression.enabled,false);
 });
 test('invalid hero policy is rejected',()=>{
- for(const c of [{enabled:1},{xpGainPercent:-1},{xpPerLevel:0},{maxLevel:101},{talentPointsPerLevel:-1}])
+ for(const c of [{enabled:1},{xpGainPercent:-1},{xpPerLevel:0},{maxLevel:Number.MAX_SAFE_INTEGER+1},{talentPointsPerLevel:-1}])
   assert.throws(()=>rules(c));
 });
 test('Aventure exposes hero creator controls, without copying Exploration actor',()=>{

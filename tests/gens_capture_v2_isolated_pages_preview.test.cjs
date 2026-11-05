@@ -13,12 +13,31 @@ const rel='preview/capture-v2-pr225';
 const trial=path.join(site,rel);
 const previewPin=JSON.parse(fs.readFileSync(path.join(root,'tools/capture_v2_pages_preview_pin.json')));
 const previewSha=previewPin.sha;
-const combatSha='46b4efede522f3410778271fddec872a36f1c54b';
-const explorationSha='4e7abd15d7b57909524ba697b74f63a193fce839';
+const combatSha='dd15e3e2df0d36d039a554e89e094aba28b43dff';
+const explorationSha='2b27339a5706fcdb436558aeebd4f8b6b0ce9d85';
 const sha256=buf=>crypto.createHash('sha256').update(buf).digest('hex');
 const read=(base,p)=>fs.readFileSync(path.join(base,p));
 const json=(base,p)=>JSON.parse(read(base,p));
 const required=(base,p)=>assert.ok(fs.statSync(path.join(base,p)).isFile(),p);
+test('RED: Pages bundles the real new 25% Adventure contract, immutable main Combat and Exploration, and keeps Tester separate',()=>{
+  assert.equal(previewPin.sha,'4a80860ab682323be6b32fd97aab24436688f05c',
+    'public preview must promote exactly the certified new-game HP candidate, not old menu');
+  const sourcePins=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
+  assert.equal(sourcePins.combat.sha,combatSha,'only approved Combat main supplies HP projection');
+  assert.equal(sourcePins.exploration.sha,explorationSha,'only approved Exploration main relays it');
+  const contract=read(trial,'assets/gensrpg/capture-v2/adventure-contract-v1.mjs').toString('utf8');
+  const transport=read(trial,'assets/gensrpg/capture-v2/adventure-playing-party-grant-v1.mjs').toString('utf8');
+  const editor=read(trial,'assets/gensrpg/capture-v2/adventure.html').toString('utf8');
+  assert.match(contract,/combat:\s*\{\s*hpMultiplier:\s*0\.25\s*\}/,
+    'new game must default to one editable quarter-life rule');
+  assert.match(contract,/combatRaw===undefined\?\{hpMultiplier:1\}/,
+    'existing saves keep their exact historical full HP');
+  assert.match(editor,/id="adventure-combat-hp-percent"[^>]*value="25"/,
+    'author gets one optional global setting, not per-creature fields');
+  assert.match(transport,/combatHpMultiplier:multiplier/,
+    'only the owned playing-party grant transports the real-game policy');
+});
+
 test('production root remains intact and preview exists ONLY in its isolated Pages subdirectory',()=>{
   for(const f of ['index.html','service-worker.js','manifest.webmanifest'])required(site,f);
   for(const f of ['index.html','service-worker.js','manifest.webmanifest','assets/gensrpg/capture-v2/shell-entry-v1.js',

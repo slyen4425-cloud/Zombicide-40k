@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,createAdventureSessionV1} from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 import {writeAdventurePublishedEncounterGrantV1} from '../assets/gensrpg/capture-v2/adventure-publication-grant-v1.mjs';
 import {writeAdventurePlayingPartyV1} from '../assets/gensrpg/capture-v2/adventure-playing-party-grant-v1.mjs';
@@ -59,4 +60,16 @@ test('RED: level 250 native party grant also carries the sole editable HP policy
  assert.equal(native.active.level,250);
  assert.equal(native.active.hp,33.47000000000003);
  assert.equal(native.combatHpMultiplier,0.25);
+});
+
+test('editable percentage remains in the same compact Aventure UI without hardcapping creature level',()=>{
+ const html=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure.html',import.meta.url),'utf8');
+ const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ assert.match(html,/id="adventure-combat-hp-percent"[^>]*min="1"[^>]*max="100"/);
+ assert.match(app,/hpPercent:'adventure-combat-hp-percent'/);
+ assert.match(app,/combat:\{hpMultiplier:numberFrom\(idField\.hpPercent\)\/100\}/);
+ assert.match(app,/idField\.hpPercent\)\.value=100\*value\.combat\.hpMultiplier/);
+ const cap=html.match(/<input[^>]*id="adventure-level-max"[^>]*>/)?.[0];
+ assert.ok(cap,'the creator's free creature cap remains editable');
+ assert.doesNotMatch(cap,/max="100"/,'100 is only the showcase preset');
 });

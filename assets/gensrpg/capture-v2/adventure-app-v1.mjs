@@ -12,8 +12,11 @@ import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
 import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
 import {writeAdventurePlayingPartyV1} from './adventure-playing-party-grant-v1.mjs';
 import {
- DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
- createAdventureSessionV1,createAdventureStoreV1,publishedAdventureSpeciesV1
+ DEFAULT_ADVENTURE_RULES_V1,SHOWCASE_ADVENTURE_RULES_V1,
+ DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
+ createAdventureSessionV1,createAdventureStoreV1,publishedAdventureSpeciesV1,
+ coreAdventureProgressionConfigV1,availableAdventureStatPointsV1,
+ allocateAdventureStatPointsV1,updateAdventureSessionControlV1
 } from './adventure-contract-v1.mjs';
 
 const $=id=>document.getElementById(id);
@@ -21,14 +24,15 @@ const status=$('adventure-status');
 const idField={
  base:'adventure-xp-base',bonus:'adventure-xp-bonus',penalty:'adventure-xp-penalty',
  global:'adventure-xp-global',level:'adventure-xp-level',max:'adventure-level-max',
+ statPoints:'adventure-stat-points-per-level',xpMode:'adventure-xp-mode',
  currency:'adventure-currency',
  heroEnabled:'adventure-hero-xp-enabled',heroShare:'adventure-hero-xp-share',
  heroXpLevel:'adventure-hero-xp-per-level',heroMax:'adventure-hero-max-level',
  heroTalent:'adventure-hero-talent-points'
 };
-let rules=normalizeAdventureRulesV1(DEFAULT_ADVENTURE_RULES_V1);
+let rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
 let published=[];
-let officialCombatSha=null;
+let officialCombatSha=null,officialStatRegistry=null;
 let store;
 const text=(node,value)=>{node.textContent=String(value);};
 const stateMessage=(message,error=false)=>{
@@ -46,7 +50,11 @@ function setFields(value){
  $(idField.global).value=value.xp.globalMultiplier;
  $(idField.level).value=value.progression.xpPerLevel;
  $(idField.max).value=value.progression.maxLevel;
+ $(idField.xpMode).value=value.progression.xpCurveMode;
+ $(idField.statPoints).value=value.progression.statPointsPerLevel??0;
  $(idField.currency).value=value.loot.currencyPerVictory;
+ renderXpBandRows(value.progression.xpBands??SHOWCASE_ADVENTURE_RULES_V1.progression.xpBands);
+ toggleXpMode();
  $(idField.heroEnabled).checked=value.heroProgression.enabled;
  $(idField.heroShare).value=value.heroProgression.xpGainPercent;
  $(idField.heroXpLevel).value=value.heroProgression.xpPerLevel;
@@ -60,8 +68,10 @@ function fromFields(){
    higherEnemyBonusPercent:numberFrom(idField.bonus),
    higherAllyPenaltyPercent:numberFrom(idField.penalty),
    globalMultiplier:numberFrom(idField.global)},
-  progression:{...rules.progression,xpPerLevel:numberFrom(idField.level),
-   maxLevel:numberFrom(idField.max)},
+  progression:{xpCurveMode:$(idField.xpMode).value,
+   xpPerLevel:numberFrom(idField.level),maxLevel:numberFrom(idField.max),
+   statPointsPerLevel:numberFrom(idField.statPoints),
+   ...($(idField.xpMode).value==='custom'?{xpBands:readXpBandRows()}: {})},
   loot:{...rules.loot,currencyPerVictory:numberFrom(idField.currency)},
   heroProgression:{...rules.heroProgression,
    enabled:$(idField.heroEnabled).checked,
@@ -98,7 +108,8 @@ async function fetchPublishedBestiary(){
    skillTransfers:bundle.skillTransfers,
    assetCatalog:assets,statRegistry:stats,nativeSkills:skills.entries??[]
   })),
-  combatSha:delivery.combat.sha
+  combatSha:delivery.combat.sha,
+  statRegistry:stats
  });
 }
 function option(value,caption,disabled=false){
@@ -312,6 +323,7 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   store=createAdventureStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
   const official=await fetchPublishedBestiary();
   published=official.cards;officialCombatSha=official.combatSha;
+  officialStatRegistry=official.statRegistry;
   fillPublicSpecies();
   const active=store.load();
   if(active){rules=normalizeAdventureRulesV1(active.rules);setFields(rules);}

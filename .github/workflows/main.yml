@@ -385,6 +385,9 @@ jobs:
       - name: Tester les récapitulatifs de mondes V16.78.20
         run: node tests/gens_world_summary_v167820.test.cjs _site/index.html
 
+      - name: Capture V2 release — TDD immutable selected-source Lab pins
+        run: node --test tests/gens_capture_v2_pages_lab_pin_ownership_20261105.test.mjs
+
       # Single publisher, isolated URL: the production root above remains
       # byte-for-byte unchanged by this candidate. Do not merge PR #225.
       - name: Resolve single official Capture V2 candidate SHA for preview
@@ -491,6 +494,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Capture V2 release — TDD immutable selected-source Lab pins
+        run: node --test tests/gens_capture_v2_pages_lab_pin_ownership_20261105.test.mjs
+
       - name: Establish unchanged stable root as browser-test baseline
         run: |
           mkdir -p _site

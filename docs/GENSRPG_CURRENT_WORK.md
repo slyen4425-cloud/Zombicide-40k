@@ -1,3 +1,14 @@
+## 2026-11-05 — Intégration indépendante PV vitrine + plafond libre (C2, NON PUBLIÉ)
+
+- **START réel** : `checkpoint/gensrpg-start-adventure-hp-freecap-integration-2026-11-05` @ `7455165c5bcbe921b218f3e0fb7f3a1d53fb6691` (PR #264, 4/4 CI SUCCESS). Branche unique `work/gensrpg-adventure-hp-freecap-integration-2026-11-05`. Dernier vert : PR #264, CI Clean Browser #41950711141 et Native #41950711399.
+- **Objectif** : réconcilier la politique globale 25 % de PV d'une **nouvelle** partie vitrine (source PR #260, 4/4 CI) avec les plafonds de niveau entièrement libres et paliers XP du lot #264. Anciennes parties sans champ de combat = 100 % ; Tester = 100 % ; aucune mutation des PV sauvegardés, des espèces ou du moteur.
+- **Autorité unique** : GenSRPG Aventure configure `rules.combat.hpMultiplier` et le transmet avec le vrai personnage dans l'unique grant versionné ; Exploration et Combat officiels main appliquent la règle et calculent les PV. Versions certifiées immuables sur ce START : Combat `53890e1383b33f7a0ec5bb2fafed59acf1d7a163` / CI #41948369881, Exploration `7155516b51db9892183cc043837037c4c87a0315` / CI #41949196778.
+- **TDD RED** : porter les cas indépendants `gens_capture_v2_adventure_hp_policy_20261105.test.mjs` d'abord ; prouver son échec sur cette branche START, ensuite ajouter le champ au contrat, la validation historique, l'UI avancée et la projection native, adapter les sentinelles sur la signification métier. Ajouter recette de niveau 250 + coefficient 0,25 pour éviter la régression entre branches.
+- **Interdits** : pas de merge direct sur main, pas de nouveau moteur, pas de raccourci PWA/Pages, pas de refonte des règles progression, pas de changement dans les Labos. **Après GREEN** : proposer la nouvelle source au publisher unique PR #265, reconstruire `_site` et tester le vrai navigateur, puis déployer et vérifier HTTPS seulement si tout est vert.
+- **Rollback** : checkpoint START ci-dessus et publisher main stable `187f388ac4741ccb8e5f1ed5d5a64cfebe9a5448`. Aucun GREEN déclaré avant CI du SHA final.
+
+---
+
 ## 2026-11-05 — Source unique Exploration main recertifiée après drift vérifié (lot de synchronisation distinct)
 
 - **RED prouvé** sur le lot du plafond libre, PR #262 : [Clean Root Chromium #41946323011](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/41946323011) : les tests `clean-authority` passent, mais `root-browser` rejette strictement `Uncertified exploration main drift`. Interdiction de neutraliser la sentinelle ou de réutiliser le vieux SHA 4e7 comme s'il était le main actuel.

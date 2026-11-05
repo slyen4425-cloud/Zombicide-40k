@@ -179,13 +179,18 @@ test('isolated HTTPS Jouer has creator-owned unlimited level caps, Core XP bands
   assert.ok(field,'creator must see '+id);
   assert.doesNotMatch(field,/max="100"/,'no 100 hard cap on '+id);
  }
- for(const id of ['adventure-xp-bands','adventure-stat-points-per-level','adventure-stat-wallet','adventure-gm-enabled'])
+ for(const id of ['adventure-xp-bands','adventure-stat-points-per-level','adventure-stat-wallet','adventure-gm-enabled','adventure-combat-hp-percent'])
   assert.ok(game.includes('id="'+id+'"'),'real game creator setting missing: '+id);
  assert.match(contract,/SHOWCASE_ADVENTURE_RULES_V1/);
  assert.match(core,/progressInBands/);
  assert.match(app,/extendFinalXpBandToCap/);
  assert.doesNotMatch(app,/upper\.max\s*=\s*100\b/);
  assert.match(playing,/saved\.level>session\.rules\.progression\.maxLevel/);
+ assert.match(contract,/combat:\{hpMultiplier:0\.25\}/,'showcase HP policy must be explicit and editable');
+ assert.match(app,/hpPercent:'adventure-combat-hp-percent'/);
+ assert.match(playing,/combatHpMultiplier:multiplier/,'native playing grant keeps the game-wide HP policy');
+ assert.match(exploration,/combatHpMultiplier/,'official Exploration must carry the same rule');
+ assert.match(combat,/hpMultiplier/,'official Combat alone applies HP to both sides');
  assert.doesNotMatch(exploration,/active\.level\s*>\s*100\b/);
  assert.doesNotMatch(combat,/participant\.level\s*>\s*100\b/);
  const pins=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');

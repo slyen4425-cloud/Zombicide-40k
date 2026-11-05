@@ -256,6 +256,21 @@ export function allocateAdventureStatPointsV1({session,registry,statId,points,no
  assertSession(updated);
  return updated;
 }
+// Historical saves intentionally remain unchanged on load. A visible owner
+// action can attach the creator/MJ policy once, with a fresh generated ID.
+export function initializeAdventureSessionControlV1({session,creatorId,settings,now}={}){
+ const v=assertSession(session);
+ if(Object.hasOwn(v,'sessionControl'))
+  throw new Error('Existing creator control cannot be replaced');
+ const input=exact(settings,['hostIsGameMaster','joinEnabled','guestPermissions'],
+  'session control settings');
+ const sessionControl=normalizeAdventureSessionControlV1({
+  ...input,creatorId:identity(creatorId,'creatorId')
+ });
+ const updated=freeze({...v,updatedAt:iso(now??v.updatedAt,'now'),sessionControl});
+ assertSession(updated);
+ return updated;
+}
 export function updateAdventureSessionControlV1({session,settings,now}={}){
  const v=assertSession(session);
  if(!v.sessionControl)

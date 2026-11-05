@@ -1,3 +1,14 @@
+## 2026-11-05 — Aventure Monster Capture : persistance du brouillon de règles avant création de partie (candidat NON GREEN)
+
+- **Signalement** : issue #278 ; l'interface annonçait « réglages prêts : crée une partie pour les sauvegarder » lorsque `store.load()===null`, mais ne persistait aucune configuration. À la réouverture, le preset vitrine remplaçait les valeurs auteur. Défaut démontré par inspection du vrai handler, sans prétendre avoir reproduit le navigateur physique.
+- **START** : dernier candidat source officiel certifié `bd9c16213cb93e9681282c733418c6660bc54a00` (source de preview attestée dans PR #277). Checkpoint `checkpoint/gensrpg-start-adventure-rules-draft-persistence-2026-11-05`, branche `work/gensrpg-adventure-rules-draft-persistence-2026-11-05` depuis ce SHA. Main publié, autres PR actives et Labs intacts.
+- **Propriétaire** : configuration auteur GenSRPG Capture V2, stockage via `GensStorageV1` existant ; nouvelle clé versionnée pour **brouillon de règles sans partie**, jamais un deuxième état de jeu. Le vrai `AdventureSession` conserve l'autorité dès sa création et au rechargement ; ancien contenu invalidé/corrompu non supprimé automatiquement. `index.html` inchangé (§26).
+- **TDD** : test ajouté avant implémentation `tests/gens_capture_v2_adventure_rules_draft_persistence_v1.test.mjs` : modification niveau/loot, vrai aller-retour Core Storage et nouvel objet store, JSON corrompu, non-altération de l'ancienne clé de partie. Câblé à `capture-v2-clean-base.yml` ; GREEN non revendiqué avant CI exacte, navigateur et revue.
+- **Limites explicites** : les choix MJ/permissions pré-partie et la fiche personnage/inventaire en partie sont des sujets séparés restant ouverts dans #278. Aucun déploiement, merge, validation Pixel ni changement des simulations Combat/Exploration dans ce lot.
+- **Suite** : valider les suites CI SHA exact et test navigateur de l'édition avant partie → enregistrer → recharger → créer la partie → reprendre ; inspecter éventuellement les permissions dans lot dédié avant publication. Ne promouvoir que via le publisher de prévisualisation après certification de la source.
+
+---
+
 ## 2026-11-05 — Monster Capture : allocations réelles de statistiques dans une AdventureSession (C2 EN COURS, PAS ENCORE PUBLIÉ)
 
 - **Choix de périmètre utilisateur** : GenSRPG reste une application multi-modes. Les règles, les objets/loot et le futur éditeur d'objets appartiennent au **module Monster Capture**, réutilisable par chaque jeu créé ; aucune activation dans Dungeon/Survie/PvP. Le chantier Dungeon est explicitement différé jusqu'à une partie Monster Capture complète et vérifiée.

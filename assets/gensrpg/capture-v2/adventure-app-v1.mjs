@@ -56,7 +56,7 @@ function renderXpBandRows(bands){
  for(const band of bands){
   const row=document.createElement('div');row.className='xp-band-row';
   const end=document.createElement('label');end.textContent="Jusqu'au niveau";
-  const upper=document.createElement('input');upper.type='number';upper.min=2;upper.max=100;
+  const upper=document.createElement('input');upper.type='number';upper.min=2;
   upper.step=1;upper.value=band.throughLevel;upper.dataset.xpBandTo='1';
   const cost=document.createElement('label');cost.textContent="XP par niveau";
   const xp=document.createElement('input');xp.type='number';xp.min=1;xp.max=1000000000;
@@ -76,6 +76,17 @@ function renderXpBandRows(bands){
   end.append(upper);cost.append(xp);
   row.append(end,cost,remove);host.append(row);
  }
+}
+// Increasing the level cap extends the final XP bracket visibly. Lowering
+// the cap never silently deletes an authored tier; the normalizer will explain
+// conflicting ranges and the creator can adjust them.
+function extendFinalXpBandToCap(){
+ if($(idField.xpMode).value!=='custom')return;
+ const max=numberFrom(idField.max);
+ if(!Number.isSafeInteger(max)||max<2)return;
+ const rows=$('adventure-xp-bands').querySelectorAll('.xp-band-row');
+ const last=rows[rows.length-1]?.querySelector('[data-xp-band-to]');
+ if(last&&max>Number(last.value)){last.value=max;updatePreview();}
 }
 function toggleXpMode(){
  const custom=$(idField.xpMode).value==='custom';
@@ -323,6 +334,7 @@ setFields(rules);
 setSessionControlFields(null);
 for(const field of Object.values(idField))$(field).addEventListener('input',updatePreview);
 $(idField.xpMode).addEventListener('change',()=>{toggleXpMode();updatePreview();});
+$(idField.max).addEventListener('change',extendFinalXpBandToCap);
 $('adventure-xp-band-add').addEventListener('click',guarded(()=>{
  const bands=readXpBandRows();
  if(!bands.length)throw new Error('Conserve au moins un palier de niveaux.');

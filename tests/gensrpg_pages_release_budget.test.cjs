@@ -33,7 +33,10 @@ test('the exact assembled Pages artifact is under a documented size budget with 
   return;
  }
  for(const rel of policy.forbiddenLegacyRoots)
-  assert.equal(fs.existsSync(path.join(site,rel)),false,'legacy full-Lab copy survived: '+rel);
+  assert.equal(fs.existsSync(path.join(site,rel)),false,'forbidden duplicated legacy root: '+rel);
+ for(const rel of policy.requiredLegacy2v2Roots)
+  assert.ok(fs.existsSync(path.join(site,rel)),
+   'retiring legacy ESM or author inputs before 2v2 migration would break the published URL: '+rel);
  assert.equal(fs.existsSync(path.join(site,policy.requiredPreview)),true,
   'the actual approved Capture V2 preview must be preserved');
  const report=inventory(site);

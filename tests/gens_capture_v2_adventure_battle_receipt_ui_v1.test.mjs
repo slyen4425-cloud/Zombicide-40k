@@ -119,7 +119,7 @@ test('RED: visual-only formatter shows authentic saved XP, level, currency, drop
   drops:[{itemId:'plume',quantity:2}],heroXp:0
  };
  session.lastAward=award;
- session.party.active.hp=33.47000000000003;
+ session.party={active:{...session.party.active,hp:33.47000000000003}};
  session.rules={
   ...session.rules,loot:{...session.rules.loot,
    items:[{id:'plume',name:'Plume d’Ailevent',saleValue:8}]}

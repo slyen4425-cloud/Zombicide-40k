@@ -455,9 +455,12 @@ jobs:
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
           node --test tests/gens_capture_v2_encounter_bridge_site.test.cjs
 
-      - name: Refuser toute seconde copie historique du Labo Combat dans Pages
+      - name: Auditer taille réelle et duplication du site avant toute publication
+        env:
+          GENSRPG_REQUIRE_PAGES_SITE: '1'
         run: |
           node --test tests/gensrpg_pages_no_legacy_combat_copy.test.cjs
+          node --test tests/gensrpg_pages_release_budget.test.cjs
           node --test tests/gens_capture_lab_pages_pipeline_v1.test.cjs
 
       - name: Install Chromium for real nested Capture V2 browser proof

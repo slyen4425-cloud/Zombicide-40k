@@ -58,11 +58,10 @@ test('the existing CORE Progression alone levels each bracket: lv20 to lv21 cost
  const rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
  const p=coreAdventureProgressionConfigV1(rules.progression);
  assert.equal(p.xpCurveMode,'custom');
- assert.equal(p.xpThresholds[2],2000);
- assert.equal(p.xpThresholds[20],38000);
- assert.equal(p.xpThresholds[21],42000);
- assert.equal(p.xpThresholds[40],118000);
- assert.equal(p.xpThresholds[41],124000);
+ assert.deepEqual(Array.from(p.xpBands,x=>[x.throughLevel,x.xpPerLevel]),
+  [[20,2000],[40,4000],[60,6000],[80,8000],[100,10000]]);
+ assert.equal(Object.hasOwn(p,'xpThresholds'),false,
+  'Core interprets the exact bands, never a materialized second threshold table');
  assert.equal(progression.levelFromXp(37999,p),19);
  assert.equal(progression.levelFromXp(38000,p),20);
  assert.equal(progression.levelFromXp(41999,p),20);

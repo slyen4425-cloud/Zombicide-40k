@@ -98,7 +98,7 @@ export function normalizeAdventureRulesV1(input){
  if(typeof hero.enabled!=='boolean')throw new TypeError('heroProgression.enabled must be boolean');
  number(hero.xpGainPercent,'heroProgression.xpGainPercent',0,1000);
  integer(hero.xpPerLevel,'heroProgression.xpPerLevel',1,1000000000);
- integer(hero.maxLevel,'heroProgression.maxLevel',1,100);
+ integer(hero.maxLevel,'heroProgression.maxLevel',1);
  integer(hero.talentPointsPerLevel,'heroProgression.talentPointsPerLevel',0,1000);
  if(rule.schema!==ADVENTURE_RULES_SCHEMA_V1||rule.version!==1)
   throw new RangeError('Unknown AdventureRules schema/version');
@@ -118,18 +118,18 @@ export function normalizeAdventureRulesV1(input){
  if(p.xpCurveMode!=='linear'&&p.xpCurveMode!=='custom')
   throw new RangeError('Unknown Adventure XP curve mode');
  integer(p.xpPerLevel,'xpPerLevel',1,1000000000);
- integer(p.maxLevel,'maxLevel',1,100);
+ integer(p.maxLevel,'maxLevel',1);
  if(pointsRaw!==undefined)integer(pointsRaw,'statPointsPerLevel',0,1000);
  if(p.xpCurveMode==='linear'&&bandsRaw!==undefined)
   throw new RangeError('Linear XP curve cannot declare custom bands');
  let bands;
  if(p.xpCurveMode==='custom'){
-  if(!Array.isArray(bandsRaw)||bandsRaw.length===0||bandsRaw.length>100)
+  if(!Array.isArray(bandsRaw)||bandsRaw.length===0)
    throw new RangeError('Custom XP bands must be a non-empty list');
   let previous=1;
   bands=bandsRaw.map((entry,i)=>{
    const raw=exact(entry,['throughLevel','xpPerLevel'],'xpBands['+i+']');
-   const throughLevel=integer(raw.throughLevel,'xpBands.throughLevel',2,100);
+   const throughLevel=integer(raw.throughLevel,'xpBands.throughLevel',2);
    const xpPerLevel=integer(raw.xpPerLevel,'xpBands.xpPerLevel',1,1000000000);
    if(throughLevel<=previous)
     throw new RangeError('XP band end levels must increase');
@@ -177,25 +177,33 @@ export function normalizeAdventureRulesV1(input){
    talentPointsPerLevel:hero.talentPointsPerLevel}
  });
 }
-// Convert creator-friendly XP intervals to the threshold table accepted by
-// the existing GenSRPG Core Progression. The CORE alone calculates levels.
+// The existing Core Progression accepts compact bands and alone computes
+// each level, avoiding a huge thresholds table when the creator sets a large cap.
 export function coreAdventureProgressionConfigV1(input){
  const p=object(input,'progression');
+ const maxLevel=integer(p.maxLevel,'maxLevel',1);
+ const perLevel=integer(p.xpPerLevel,'xpPerLevel',1);
  if(p.xpCurveMode==='linear')
-  return freeze({xpCurveMode:'linear',xpPerLevel:p.xpPerLevel,maxLevel:p.maxLevel});
+  return freeze({xpCurveMode:'linear',xpPerLevel:perLevel,maxLevel});
  if(p.xpCurveMode!=='custom'||!Array.isArray(p.xpBands))
   throw new RangeError('Custom Adventure XP bands are required');
- const xpThresholds={};let cumulative=0;
- for(let next=2;next<=p.maxLevel;next++){
-  const bracket=p.xpBands.find(b=>next<=b.throughLevel);
-  if(!bracket)throw new RangeError('XP bands do not cover level '+next);
-  cumulative+=bracket.xpPerLevel;
-  if(!Number.isSafeInteger(cumulative))
-   throw new RangeError('Total XP threshold overflow');
-  xpThresholds[next]=cumulative;
+ let cumulative=0,previous=1;
+ for(const band of p.xpBands){
+  const last=integer(band.throughLevel,'xpBands.throughLevel',2);
+  const cost=integer(band.xpPerLevel,'xpBands.xpPerLevel',1);
+  if(last<=previous)throw new RangeError('XP bands must be strictly ascending');
+  const end=Math.min(last,maxLevel);
+  if(end>previous){
+   const segmentCost=(end-previous)*cost;
+   if(!Number.isSafeInteger(segmentCost)||!Number.isSafeInteger(cumulative+segmentCost))
+    throw new RangeError('Total XP threshold overflow');
+   cumulative+=segmentCost;
+  }
+  previous=last;
  }
- return freeze({xpCurveMode:'custom',xpPerLevel:p.xpPerLevel,
-  maxLevel:p.maxLevel,xpThresholds});
+ if(previous<maxLevel)throw new RangeError('XP bands do not cover maxLevel');
+ return freeze({xpCurveMode:'custom',xpPerLevel:perLevel,
+  maxLevel,xpBands:p.xpBands.map(b=>({throughLevel:b.throughLevel,xpPerLevel:b.xpPerLevel}))});
 }
 // These declarations belong to the AdventureSession, not to a fabricated
 // multiplayer server or a second exploration Game Master runtime.
@@ -302,7 +310,7 @@ export function publishedAdventureSpeciesV1(officialBestiaryCards){
 export function calculateAdventureXpV1({rules,allyLevel,enemyLevel}){
  const rule=normalizeAdventureRulesV1(rules);
  const local=integer(allyLevel,'allyLevel',1,rule.progression.maxLevel);
- const enemy=integer(enemyLevel,'enemyLevel',1,100);
+ const enemy=integer(enemyLevel,'enemyLevel',1);
  const gap=enemy-local;
  const multiplier=gap>=0
   ?(1+rule.xp.higherEnemyBonusPercent/100)**gap
@@ -337,7 +345,7 @@ function assertSession(session){
   if(hero.progression!==null){
    const progress=exact(hero.progression,['xp','level','talentPoints'],'hero.progression');
    integer(progress.xp,'hero.progression.xp');
-   integer(progress.level,'hero.progression.level',1,100);
+   integer(progress.level,'hero.progression.level',1,v.rules.heroProgression?.maxLevel??Number.MAX_SAFE_INTEGER);
    integer(progress.talentPoints,'hero.progression.talentPoints');
   }
  }

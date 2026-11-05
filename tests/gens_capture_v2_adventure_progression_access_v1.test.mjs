@@ -7,7 +7,8 @@ import {
  normalizeAdventureRulesV1,createAdventureSessionV1,
  applyAdventureCombatResultV1,createAdventureStoreV1,
  coreAdventureProgressionConfigV1,availableAdventureStatPointsV1,
- allocateAdventureStatPointsV1,updateAdventureSessionControlV1
+ allocateAdventureStatPointsV1,updateAdventureSessionControlV1,
+ initializeAdventureSessionControlV1
 } from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 
 const coreModule=fs.readFileSync(new URL('../assets/gensrpg/core/progression-v1.js',import.meta.url),'utf8');
@@ -153,4 +154,25 @@ test('showcase settings expose real game creation, 5 editable XP brackets and of
  assert.match(script,/officialStatRegistry/);
  assert.match(script,/fetchJson\('\.\.\/\.\.\/\.\.\/vendor\/combat-lab\/data\/capture\/monster-capture-stat-registry\.v1\.json'\)/);
  assert.doesNotMatch(script,/const AVAILABLE_STATS=\[/,'Combat registry is the sole stat authority');
+});
+
+test('an old local save may opt into creator/MJ configuration explicitly, never on read',()=>{
+ const old=game(DEFAULT_ADVENTURE_RULES_V1);
+ const legacy={...old};delete legacy.sessionControl;
+ const withOwner=initializeAdventureSessionControlV1({
+  session:legacy,creatorId:'creator-upgraded-1',
+  settings:{hostIsGameMaster:true,joinEnabled:false,guestPermissions:{
+   editProgression:false,editRewards:false,editWorld:false,allocateOwnCreatureStats:true
+  }},now:date
+ });
+ assert.equal(withOwner.sessionControl.creatorId,'creator-upgraded-1');
+ assert.equal(withOwner.sessionControl.hostIsGameMaster,true);
+ assert.equal(Object.hasOwn(legacy,'sessionControl'),false);
+ assert.throws(()=>initializeAdventureSessionControlV1({
+  session:withOwner,creatorId:'creator-stealer',settings:{
+   hostIsGameMaster:false,joinEnabled:true,guestPermissions:{
+    editProgression:true,editRewards:true,editWorld:true,allocateOwnCreatureStats:false
+   }
+  }
+ }),/existing|already|creator/i);
 });

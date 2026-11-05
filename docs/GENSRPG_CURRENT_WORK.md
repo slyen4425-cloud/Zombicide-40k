@@ -1,3 +1,13 @@
+## 2026-11-05 — Prévisualisation HTTPS du plafond libre Aventure, mêmes trois propriétaires (TDD RED)
+
+- **Mission** : publier les réglages de progression vitrine 20 points/niveau, paliers XP, plafond utilisateur sans limite 100, permissions créateur/MJ, et laisser les statistiques/effets aux Labs officiels. Le jeu showcase peut conserver 100, le développeur doit pouvoir configurer 250/1500 et les HeroDefinitions.
+- **START publisher séparé** : checkpoint `checkpoint/gensrpg-start-freecap-pages-preview-2026-11-05` depuis `main@187f388ac4741ccb8e5f1ed5d5a64cfebe9a5448` (dernier Pages GREEN stable, preview sur source `379cd2aa`). Branche dédiée `work/gensrpg-freecap-pages-preview-2026-11-05`, pas de modification directe de main, ni du SW/caches, ni des pins avant certification des propriétaires.
+- **TDD RED** : contrat de **sortie réelle `_site`** dans `tests/gens_capture_v2_isolated_pages_preview.test.cjs` ajouté d'abord : exige page Jouer avec plafond libre, bandes XP, porte-monnaie stats, choix MJ ; vérifie moteur Core propriétaire et *deux* vendored Labs officielles sans limite 100, provenance exacte, isolation de PWA. Ancien preview échoue, aucun faux GREEN.
+- **Dépendances officielles** : GenSRPG source PR #264 empilée sur #262/#259, Combat #250 nouveau main `53890e13` (attendre CI main #41948369881), Exploration #370 nouveau main `7155516b` (attendre CI main #41949196778, publication préflight #41949196728). **Ne jamais pinner une PR de Lab**. Quand tous les propriétaires sont certifiés et les tests browser de leur consommateur sont GREEN, mettre uniquement le nouveau commit immutable GenSRPG candidat dans `tools/capture_v2_pages_preview_pin.json`, adapter les vérifications d'identité des SHA exacts, certifier le build/nested real Chromium/HTTPS et publier via la seule PR du publisher.
+- **Invariants** : production root `index.html` intacte, PWA production et SW intacts, cache preview séparé, profils Dungeon intacts, pas de nouveau propriétaire stats/XP/Combat, anciennes sauvegardes acceptées sans migration silencieuse. Le test physique Pixel reste une recette externe ; CI seul n'est pas GREEN produit.
+
+---
+
 ## 2026-11-04 — Publier le menu de jeu Monster Capture dans la prévisualisation HTTPS (CI / PUBLICATION NON ENCORE VALIDÉES)
 
 - **Propriétaire** : publisher unique GenSRPG `main`, sauvegarde et PWA racine protégés. Départ au `main@a981a5cd39f23e14c2b9c2161aa29f7d62188866` après la livraison Work #255, checkpoint `checkpoint/gensrpg-start-capture-game-menu-pages-2026-11-04`, branche unique `work/gensrpg-capture-game-menu-pages-2026-11-04`. Aucun changement du `main` sans PR, tests et revue, aucun autre publisher.

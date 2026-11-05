@@ -334,3 +334,71 @@ test('real Exploration 2.5D Tester encounter tap opens native Combat instead of 
   server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
  }
 });
+
+
+test('real HTTPS Jouer on mobile landscape saves creator cap 250, 33 stat points, optional hero 350 and MJ choice', 
+ {timeout:150000},async()=>{
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  let browser,context;
+  const bad=[];
+  try{
+   browser=await chromium.launch({headless:true});
+   context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true,
+    locale:'fr-FR',serviceWorkers:'block'});
+   const page=await context.newPage();
+   const base='http://127.0.0.1:'+server.address().port;
+   page.on('pageerror',e=>bad.push('JS '+String(e)));
+   page.on('response',r=>{
+    if(r.url().startsWith(base+scope)&&r.status()>=400)
+     bad.push('HTTP '+r.status()+' '+r.url());
+   });
+   const response=await page.goto(base+scope+'assets/gensrpg/capture-v2/adventure.html',
+    {waitUntil:'domcontentloaded',timeout:60000});
+   assert.equal(response.status(),200);
+   await page.locator('#adventure-create:not([disabled])').waitFor({timeout:45000});
+   await page.locator('#adventure-rules-panel > summary').tap();
+   await page.locator('#adventure-level-max').fill('250');
+   await page.locator('#adventure-level-max').press('Tab');
+   assert.equal(await page.locator('[data-xp-band-to]').last().inputValue(),'250',
+    'last creator-defined XP band should expand visibly, not silently cap at 100');
+   await page.locator('#adventure-stat-points-per-level').fill('33');
+   assert.equal(await page.locator('#adventure-combat-hp-percent').inputValue(),'25',
+    'new game must start with creator-editable 25 percent HP, not Tester HP');
+   await page.locator('#adventure-combat-hp-percent').fill('40');
+   await page.locator('#adventure-hero-xp-enabled').check();
+   await page.locator('#adventure-hero-max-level').fill('350');
+   await page.locator('#adventure-create').tap();
+   await page.locator('#adventure-creator-panel > summary').tap();
+   await page.locator('#adventure-gm-enabled').check();
+   await page.locator('#adventure-join-enabled').check();
+   await page.locator('#adventure-save-control').tap();
+   const key='gensrpg.capture.v2.adventure.save.v1';
+   let saved=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)),key);
+   assert.equal(saved.rules.progression.maxLevel,250);
+   assert.equal(saved.rules.progression.statPointsPerLevel,33);
+   assert.equal(saved.rules.combat.hpMultiplier,0.4,'creator controls HP through the game rule');
+   assert.equal(saved.rules.progression.xpBands.at(-1).throughLevel,250);
+   assert.equal(saved.rules.heroProgression.maxLevel,350);
+   assert.equal(saved.rules.heroProgression.enabled,true);
+   assert.equal(saved.sessionControl.hostIsGameMaster,true);
+   assert.equal(saved.sessionControl.joinEnabled,true);
+   assert.equal(saved.party.active.level,1,'a new real party starts at level one, not the configured maximum');
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.locator('#adventure-resume').tap();
+   assert.equal(await page.locator('#adventure-level-max').inputValue(),'250');
+   assert.equal(await page.locator('#adventure-stat-points-per-level').inputValue(),'33');
+   assert.equal(await page.locator('#adventure-combat-hp-percent').inputValue(),'40',
+    'resume displays saved creator HP policy without resetting to 25');
+   assert.equal(await page.locator('#adventure-hero-max-level').inputValue(),'350');
+   assert.equal(await page.locator('#adventure-gm-enabled').isChecked(),true);
+   assert.equal(await page.locator('#adventure-join-enabled').isChecked(),true);
+   assert.deepEqual(bad,[],'the actual published Jouer and official assets must have zero JS and HTTP errors');
+   console.log('GENSRPG_REAL_SHOWCASE_FREE_LEVEL_CAP',JSON.stringify({
+    creatorCap:250,heroCap:350,statPointsPerLevel:33,hostGM:true,
+    source:'same-origin packaged Adventure Core'
+   }));
+  }finally{
+   await context?.close();await browser?.close();
+   server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
+  }
+});

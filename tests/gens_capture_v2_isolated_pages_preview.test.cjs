@@ -13,8 +13,8 @@ const rel='preview/capture-v2-pr225';
 const trial=path.join(site,rel);
 const previewPin=JSON.parse(fs.readFileSync(path.join(root,'tools/capture_v2_pages_preview_pin.json')));
 const previewSha=previewPin.sha;
-const combatSha='46b4efede522f3410778271fddec872a36f1c54b';
-const explorationSha='4e7abd15d7b57909524ba697b74f63a193fce839';
+const combatSha='53890e1383b33f7a0ec5bb2fafed59acf1d7a163';
+const explorationSha='7155516b51db9892183cc043837037c4c87a0315';
 const sha256=buf=>crypto.createHash('sha256').update(buf).digest('hex');
 const read=(base,p)=>fs.readFileSync(path.join(base,p));
 const json=(base,p)=>JSON.parse(read(base,p));
@@ -161,4 +161,40 @@ test('the physical published preview contains the single native 2.5D destination
  assert.match(game,/<h1>Jouer<\/h1>/);
  assert.match(game,/<details id="adventure-rules-panel"/);
  assert.match(game,/<details id="adventure-loot-panel"/);
+});
+
+
+test('isolated HTTPS Jouer has creator-owned unlimited level caps, Core XP bands and the real Combat stat budget',()=>{
+ const game=read(trial,'assets/gensrpg/capture-v2/adventure.html').toString('utf8');
+ const app=read(trial,'assets/gensrpg/capture-v2/adventure-app-v1.mjs').toString('utf8');
+ const contract=read(trial,'assets/gensrpg/capture-v2/adventure-contract-v1.mjs').toString('utf8');
+ const core=read(trial,'assets/gensrpg/core/progression-v1.js').toString('utf8');
+ const playing=read(trial,'assets/gensrpg/capture-v2/adventure-playing-party-grant-v1.mjs').toString('utf8');
+ const exploration=read(trial,'vendor/exploration-lab/src/encounters/adventure-playing-party-v1.js').toString('utf8');
+ const combat=read(trial,'vendor/combat-lab/src/ui/capture-encounter-combat-source-v1.js').toString('utf8');
+ assert.match(game,/id="adventure-level-max"/);
+ assert.match(game,/id="adventure-hero-max-level"/);
+ for(const id of ['adventure-level-max','adventure-hero-max-level']){
+  const field=game.match(new RegExp('<input[^>]+id="'+id+'"[^>]*>'))?.[0];
+  assert.ok(field,'creator must see '+id);
+  assert.doesNotMatch(field,/max="100"/,'no 100 hard cap on '+id);
+ }
+ for(const id of ['adventure-xp-bands','adventure-stat-points-per-level','adventure-stat-wallet','adventure-gm-enabled','adventure-combat-hp-percent'])
+  assert.ok(game.includes('id="'+id+'"'),'real game creator setting missing: '+id);
+ assert.match(contract,/SHOWCASE_ADVENTURE_RULES_V1/);
+ assert.match(core,/progressInBands/);
+ assert.match(app,/extendFinalXpBandToCap/);
+ assert.doesNotMatch(app,/upper\.max\s*=\s*100\b/);
+ assert.match(playing,/saved\.level>session\.rules\.progression\.maxLevel/);
+ assert.match(contract,/combat:\{hpMultiplier:0\.25\}/,'showcase HP policy must be explicit and editable');
+ assert.match(app,/hpPercent:'adventure-combat-hp-percent'/);
+ assert.match(playing,/combatHpMultiplier:multiplier/,'native playing grant keeps the game-wide HP policy');
+ assert.match(exploration,/combatHpMultiplier/,'official Exploration must carry the same rule');
+ assert.match(combat,/hpMultiplier/,'official Combat alone applies HP to both sides');
+ assert.doesNotMatch(exploration,/active\.level\s*>\s*100\b/);
+ assert.doesNotMatch(combat,/participant\.level\s*>\s*100\b/);
+ const pins=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
+ assert.equal(json(trial,'release-provenance.v1.json').source.commit,previewSha);
+ assert.equal(pins.exploration.sha,explorationSha);
+ assert.equal(pins.combat.sha,combatSha);
 });

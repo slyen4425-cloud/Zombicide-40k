@@ -11,6 +11,7 @@ on:
       - 'tests/gens_capture_v2_clean_boundary.test.cjs'
       - 'tests/gens_capture_v2_game_menu_v1.test.cjs'
       - 'tests/gens_capture_v2_adventure_hero_progression_v1.test.mjs'
+      - 'tests/gens_capture_v2_adventure_progression_access_v1.test.mjs'
       - 'tests/gens_capture_v2_generic_profile_owner.test.cjs'
       - 'tests/gens_capture_v2_root_browser.test.cjs'
       - 'tests/gens_capture_v2_pwa_cache_owner_v1.test.cjs'
@@ -55,6 +56,9 @@ jobs:
 
       - name: Aventure V2 — sélection officielle d'une HeroDefinition et grant Jouer scoped (TDD)
         run: node --test tests/gens_capture_v2_adventure_hero_selection_v1.test.mjs
+
+      - name: Aventure — XP par paliers, stats officielles 20 points, rôles du créateur (TDD)
+        run: node --test tests/gens_capture_v2_adventure_progression_access_v1.test.mjs
 
       - name: Aventure V2 — choix créateur progression du héros sans XP par défaut (TDD)
         run: node --test tests/gens_capture_v2_adventure_hero_progression_v1.test.mjs

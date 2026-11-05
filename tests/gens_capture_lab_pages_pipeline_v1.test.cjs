@@ -28,20 +28,23 @@ test('Pages release resolves the single immutable official Combat and visual SHA
  assert.ok(standalone.includes('node tools/stage_capture_lab_delivery.mjs combat-lab combat-assets _site'));
 });
 
-test('Pages uses same verified payload publisher AFTER site preparation and BEFORE upload',()=>{
+test('Pages transports ONLY the Capture V2 preview and rejects legacy full-lab duplicate',()=>{
  const y=read('.github/workflows/main.yml');
  const at=s=>y.indexOf(s);
- const staging='node tools/stage_capture_lab_delivery.mjs combat-lab combat-assets _site';
- const verify='node --test tests/gens_capture_lab_delivery_v1.test.cjs';
+ const staging='node tools/stage_capture_v2_pages_preview.mjs';
+ const verify='node --test tests/gensrpg_pages_no_legacy_combat_copy.test.cjs';
  const guard='node --test tests/gens_capture_lab_pages_pipeline_v1.test.cjs';
  const publish='uses: actions/upload-pages-artifact@v3';
  for(const item of ['- name: Préparer le site',staging,verify,guard,publish]){
   assert.ok(at(item)>=0,'Pages workflow missing '+item);
  }
  assert.ok(at('- name: Préparer le site')<at(staging),'stage only after copying the site');
- assert.ok(at(staging)<at(verify)&&at(verify)<at(publish),'never publish unverified vendor');
- assert.ok(at(guard)<at(publish),'guard before release artifact');
- assert.ok(y.includes("if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'"),'only production main may deploy, never a PR or candidate branch');
+ assert.ok(at(staging)<at(verify)&&at(verify)<at(guard)&&at(guard)<at(publish),
+  'verify only the source-owned V2 preview and absence of redundant full Lab before artifact');
+ assert.ok(!y.includes('run: node tools/stage_capture_lab_delivery.mjs combat-lab combat-assets _site'),
+  'historical audit-only release must NOT be copied into canonical public Pages');
+ assert.ok(y.includes("if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'"),
+  'only production main may deploy, never a PR or candidate branch');
 });
 
 test('staged payload stays dormant; historic public index, SW and real profiles unchanged',()=>{

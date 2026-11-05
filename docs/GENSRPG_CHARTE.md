@@ -10,6 +10,8 @@
 4. **Source distincte du déploiement** : le `main` du laboratoire est une autorité de code, pas une licence de copier ou supprimer aveuglément `gh-pages` ou l'historique. Les travaux auteur sont réconciliés par contrats et PR ciblées ; ne jamais importer une ancienne branche divergente en bloc.
 5. **Gate permanent** : un unique publisher par site, métriques et contrôle de duplication avant `upload-pages-artifact`, tests navigateur et liens, checkpoint avant/après, CI du SHA exact, preuve HTTPS après publication. **Aucune fusion quand le poids, les imports ou la publication sont rouges.** Aucun original, média auteur, sauvegarde ou branche ne doit être effacé par un nettoyage de build.
 
+**Exception temporaire vérifiée (5 novembre 2026)** : `capture-world-2v2-test.html`, URL déjà publiée, consomme encore la bibliothèque Combat V1 épinglée et `runtime-data/author-inputs.json`. Ne pas retirer son transport tant qu'une migration fonctionnelle équivalente vers V2, démontrée dans le vrai navigateur et dans le smoke HTTPS, n'a pas été certifiée. Cette dépendance utile et documentée doit être mesurée au même budget ; ce n'est pas une autorisation de multiplier les previews ni de conserver des paquets inutilisés.
+
 Cette règle prime sur les workflows historiques, même s'ils étaient autrefois verts.
 
 

@@ -1,0 +1,11 @@
+{
+  "schema": "gensrpg-pages-release-budget-v1",
+  "version": 1,
+  "maxUncompressedBytes": 943718400,
+  "maxPhysicalCaptureAssetRoots": 1,
+  "requiredPreview": "preview/capture-v2-pr225",
+  "forbiddenLegacyRoots": [
+    "vendor/combat-lab",
+    "assets/gensrpg/capture/runtime-data"
+  ]
+}

@@ -33,8 +33,8 @@ test('packaged native encounter has a single immutable source per owner and offi
  const manifest=JSON.parse(read('bridge-transport-manifest.v1.json'));
  const release=JSON.parse(read('release-provenance.v1.json'));
  assert.equal(manifest.schema,'gensrpg-capture-v2-native-encounter-transport-v1');
- assert.equal(manifest.combat.sha,'46b4efede522f3410778271fddec872a36f1c54b');
- assert.equal(manifest.exploration.sha,'4e7abd15d7b57909524ba697b74f63a193fce839');
+ assert.equal(manifest.combat.sha,'dd15e3e2df0d36d039a554e89e094aba28b43dff');
+ assert.equal(manifest.exploration.sha,'2b27339a5706fcdb436558aeebd4f8b6b0ce9d85');
  assert.match(manifest.assets.sha,/^[0-9a-f]{40}$/);
  assert.equal(release.encounterBridgeManifestSha256,digest(read('bridge-transport-manifest.v1.json')));
  const catalog=JSON.parse(read('vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json'));

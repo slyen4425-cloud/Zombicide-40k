@@ -51,11 +51,17 @@ export function writeAdventurePlayingPartyV1({
   throw new RangeError('Saved creature level must be between 1 and 100');
  if(saved.hp!==null&&(!Number.isFinite(saved.hp)||saved.hp<0||saved.hp>Number.MAX_SAFE_INTEGER))
   throw new RangeError('Saved creature HP must be null or a finite nonnegative number');
+ const multiplier=session.rules?.combat?.hpMultiplier ?? 1;
+ if(typeof multiplier!=='number'||!Number.isFinite(multiplier)||multiplier<=0||multiplier>1)
+  throw new RangeError('Adventure combatHpMultiplier must be in (0,1]');
  const data=Object.freeze({
   schema:ADVENTURE_PLAYING_PARTY_SCHEMA_V1,version:1,
   sessionId,worldId,combatSha:grant.combatSha,
   partyRef:'adventure-party:'+sessionId,
-  active:Object.freeze({instanceId,speciesId,level:saved.level,hp:saved.hp})
+  active:Object.freeze({instanceId,speciesId,level:saved.level,hp:saved.hp}),
+  // A whole-game policy, NOT a second source of creature or persisted HP.
+  // Older saves without combat policy keep full HP in real battles.
+  combatHpMultiplier:multiplier
  });
  storage.setItem(ADVENTURE_PLAYING_PARTY_SCHEMA_V1+':'+sessionId,
   JSON.stringify(data));

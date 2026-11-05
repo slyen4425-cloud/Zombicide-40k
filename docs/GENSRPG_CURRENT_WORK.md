@@ -1,3 +1,11 @@
+## 2026-11-05 — Source unique Exploration main recertifiée après drift vérifié (lot de synchronisation distinct)
+
+- **RED prouvé** sur le lot du plafond libre, PR #262 : [Clean Root Chromium #41946323011](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/41946323011) : les tests `clean-authority` passent, mais `root-browser` rejette strictement `Uncertified exploration main drift`. Interdiction de neutraliser la sentinelle ou de réutiliser le vieux SHA 4e7 comme s'il était le main actuel.
+- **START** `checkpoint/gensrpg-start-exploration-main-sync-for-free-cap-2026-11-05` au dernier code du lot #262 `a63c5a55a20cf52ddfb842b650529cb84737f884`. Branche dédiée `work/gensrpg-exploration-main-sync-for-free-cap-2026-11-05`, superposée sur #262.
+- **Autorité** : Exploration main vérifié `2b27339a5706fcdb436558aeebd4f8b6b0ce9d85`, CI [#41945445069](https://github.com/slyen4425-cloud/laboratoire_dynamique_exploration-/actions/runs/41945445069) SUCCESS **3/3**. Source-pins unique : mettre à jour `exploration.sha` et `certifiedCiRun` seulement, `combat.sha=dd15e3e2...`, `legacyCaptureRuntime=false`, aucune règle gameplay modifiée.
+- **Validation** : rejouer full clean + Chromium Root et vérifier CI de provenance. Cette synchronisation n'introduit pas encore le futur lecteur de niveau >100 de la PR Exploration #370, qui sera livré uniquement après CI et publication officielle de son propriétaire. **Pas de publication automatique** ni double source d'autorité. Aucun bug de gameplay n'est masqué : toutes les prochaines dérives restent bloquantes.
+---
+
 # 2026-11-05 — Plafond de niveau entièrement configurable, sans 100 implicite
 - **START** : `checkpoint/gensrpg-start-free-level-cap-2026-11-05` depuis `cb34b43fd76f8d3c801c9b67f0972c0d9e8d24a1` (PR #259, 4/4 CI), branche `work/gensrpg-free-level-cap-2026-11-05`. Objectif auteur : 100 demeure seulement le **preset vitrine**, plafond créature et héros libre à l'édition et sauvegardé par partie.
 - **Cause racine / RED** : le contrat Aventure limitait `maxLevel`, `heroProgression.maxLevel`, `xpBands.throughLevel` et `hero.progression.level` à 100 ; le formulaire, les rangées XP, le grant de groupe et les lecteurs officiels Combat/Exploration refusaient >100. TDD RED `tests/gens_capture_v2_adventure_free_level_cap_v1.test.mjs` avant correctifs.

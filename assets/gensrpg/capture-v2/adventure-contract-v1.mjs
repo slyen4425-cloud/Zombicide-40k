@@ -21,6 +21,8 @@ export const DEFAULT_ADVENTURE_RULES_V1=freeze({
  },
  progression:{xpCurveMode:'linear',xpPerLevel:1000,maxLevel:100},
  loot:{currencyPerVictory:0,items:[],drops:[]},
+ // Default applies only to a NEW game, and remains editable by the creator.
+ combat:{hpMultiplier:0.25},
  // A Capture hero is a travel avatar with NO level by default. A game's
  // creator can explicitly enable its independent progression and talent
  // points; this never steals or changes a creature's victory XP.
@@ -90,7 +92,11 @@ function iso(value,field){
 export function normalizeAdventureRulesV1(input){
  // Additive optional policy: historical v1 rules have no heroProgression.
  // Their precise old representation remains legal, and never enables hero XP.
- const {heroProgression:heroRaw,...legacy}=object(input,'AdventureRules');
+ const {heroProgression:heroRaw,combat:combatRaw,...legacy}=object(input,'AdventureRules');
+ // Old saves were authored without this policy: never quarter their HP on load.
+ const combat=combatRaw===undefined?{hpMultiplier:1}:
+  exact(combatRaw,['hpMultiplier'],'combat');
+ number(combat.hpMultiplier,'combat.hpMultiplier',Number.EPSILON,1);
  const rule=exact(legacy,['schema','version','xp','progression','loot'],'AdventureRules');
  const hero=heroRaw===undefined?DEFAULT_ADVENTURE_RULES_V1.heroProgression:
   exact(heroRaw,['enabled','xpGainPercent','xpPerLevel','maxLevel',
@@ -172,6 +178,7 @@ export function normalizeAdventureRulesV1(input){
     ...(pointsRaw===undefined?{}:{statPointsPerLevel:pointsRaw}),
     ...(bands===undefined?{}:{xpBands:bands})},
   loot:{currencyPerVictory:loot.currencyPerVictory,items,drops},
+  combat:{hpMultiplier:combat.hpMultiplier},
   heroProgression:{enabled:hero.enabled,xpGainPercent:hero.xpGainPercent,
    xpPerLevel:hero.xpPerLevel,maxLevel:hero.maxLevel,
    talentPointsPerLevel:hero.talentPointsPerLevel}

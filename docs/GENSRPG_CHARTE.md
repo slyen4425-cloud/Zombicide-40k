@@ -1,5 +1,19 @@
 # GenSrpG — Charte permanente de développement
 
+## RÈGLE 0 — CRITIQUE : publication unique et sans bibliothèque recopiée (5 novembre 2026)
+
+**Règle bloquante pour GenSrpg, Labo Combat et Labo Exploration, chacun sur son dépôt propriétaire.** Aucune règle de ce chapitre n'autorise un dépôt à modifier les sources privées d'un autre.
+
+1. **Une bibliothèque canonique par site** : ne jamais copier la bibliothèque Combat/Capture, sprites, musiques ou atlas en intégralité dans plusieurs previews. Toute prévisualisation ancienne peut conserver un lien compatible, mais pas reconstituer sans justification une seconde bibliothèque lourde. Ne pas placer les ZIP sources dans l'artefact navigateur sans usage réel démontré.
+2. **Preuve de poids avant déploiement** : mesurer les octets réels de l'artefact Pages non compressé, les ressources par sous-arbre et le nombre de copies. Budget initial **900 Mio non compressés**, à adapter uniquement dans une modification explicite de cette charte accompagnée d'un test ; ne jamais seulement augmenter timeout/retries pour masquer un site trop lourd.
+3. **Préservation des contrats** : garder les URL des éditeurs, l'unique source de jeu, les importations ESM réelles, les vrais assets, les sauvegardes et les scopes PWA. Les anciennes URL doivent être redirigées explicitement si leur contenu est retiré ; une redirection ne prouve pas que l'ancienne version fonctionne toujours. Tester HTTPS, SHA, Android paysage et PC avant GREEN.
+4. **Source distincte du déploiement** : le `main` du laboratoire est une autorité de code, pas une licence de copier ou supprimer aveuglément `gh-pages` ou l'historique. Les travaux auteur sont réconciliés par contrats et PR ciblées ; ne jamais importer une ancienne branche divergente en bloc.
+5. **Gate permanent** : un unique publisher par site, métriques et contrôle de duplication avant `upload-pages-artifact`, tests navigateur et liens, checkpoint avant/après, CI du SHA exact, preuve HTTPS après publication. **Aucune fusion quand le poids, les imports ou la publication sont rouges.** Aucun original, média auteur, sauvegarde ou branche ne doit être effacé par un nettoyage de build.
+
+Cette règle prime sur les workflows historiques, même s'ils étaient autrefois verts.
+
+
+
 Cette charte est la référence obligatoire avant chaque travail sur GenSrpG. Elle s’applique à toutes les branches, tous les fils de discussion et toutes les futures versions.
 
 Objectif : empêcher les régressions, l’empilement de correctifs, le mélange entre modes, les doubles sources de vérité et les fonctions globales qui reprennent l’autorité sur des systèmes déjà validés.

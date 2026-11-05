@@ -1,16 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
 import {SHOWCASE_ADVENTURE_RULES_V1} from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 import {createAdventureRulesDraftStoreV1,ADVENTURE_RULES_DRAFT_KEY_V1} from '../assets/gensrpg/capture-v2/adventure-rules-draft-v1.mjs';
 
+// Inject the REAL GenSRPG Core Storage owner, not a reimplemented fake JSON API.
+const source=fs.readFileSync(new URL('../assets/gensrpg/core/storage-v1.js',import.meta.url),'utf8');
+const context={};
+vm.runInNewContext(source,context);
+const canonicalCoreStorage=context.GensStorageV1;
 function fixture(){
  const db=new Map();
  const storage={getItem:k=>db.get(k)??null,setItem:(k,v)=>db.set(k,String(v))};
- const coreStorage={
-  readJson(s,k,fallback){const raw=s.getItem(k);return raw===null?fallback:JSON.parse(raw);},
-  writeJson(s,k,v){s.setItem(k,JSON.stringify(v));}
- };
- return {storage,coreStorage};
+ return {storage,coreStorage:canonicalCoreStorage};
 }
 test('creator rules can be saved BEFORE creating a game, then read after browser reload',()=>{
  const {storage,coreStorage}=fixture();
@@ -42,4 +45,16 @@ test('draft storage cannot use an alternate Core or mutate published game save',
  storage.setItem('gensrpg.capture.v2.adventure.save.v1',oldSave);
  createAdventureRulesDraftStoreV1({storage,coreStorage}).save(SHOWCASE_ADVENTURE_RULES_V1);
  assert.equal(storage.getItem('gensrpg.capture.v2.adventure.save.v1'),oldSave);
+});
+
+test('real Core Storage rejects malformed or incompatible draft without erasing it',()=>{
+ const {storage,coreStorage}=fixture();
+ const draft=createAdventureRulesDraftStoreV1({storage,coreStorage});
+ storage.setItem(ADVENTURE_RULES_DRAFT_KEY_V1,'{');
+ assert.throws(()=>draft.load(),/invalid|invalide/i);
+ assert.equal(storage.getItem(ADVENTURE_RULES_DRAFT_KEY_V1),'{');
+ const incompatible=JSON.stringify({...SHOWCASE_ADVENTURE_RULES_V1,version:99});
+ storage.setItem(ADVENTURE_RULES_DRAFT_KEY_V1,incompatible);
+ assert.throws(()=>draft.load(),/schema|version/i);
+ assert.equal(storage.getItem(ADVENTURE_RULES_DRAFT_KEY_V1),incompatible);
 });

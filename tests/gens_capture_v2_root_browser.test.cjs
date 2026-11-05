@@ -86,6 +86,25 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   // destinations preserve the original native URLs and fullscreen.
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
   const adventureFrame=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
+  // Native Adventure is a type=module iframe; its DOM can exist BEFORE
+  // the module has loaded the published Bestiary and initialized rules.
+  // Wait for the real official catalog before validating its preset values.
+  try {
+    await adventureFrame.locator('#adventure-create:not([disabled])')
+     .waitFor({timeout:25000});
+  } catch(error) {
+    // Preserve the strict real-catalogue gate. Its true failure reason must be
+    // visible in CI rather than reduced to an unhelpful 25-second timeout.
+    const observed=await adventureFrame.locator('body').evaluate(body=>({
+      status:body.querySelector('#adventure-status')?.textContent,
+      statusError:body.querySelector('#adventure-status')?.dataset.error,
+      bestiary:body.querySelector('#adventure-bestiary-count')?.textContent,
+      starterOptions:[...body.querySelectorAll('#adventure-starter option')]
+       .map(o=>({value:o.value,disabled:o.disabled,label:o.textContent})).slice(0,12)
+    })).catch(e=>({frameError:String(e)}));
+    throw new Error('Official Bestiary starter never became playable: '+
+      JSON.stringify({observed,pageErrors:errors})+'; '+String(error));
+  }
   assert.equal(await adventureFrame.locator('#adventure-rules-panel').getAttribute('open'),null,
    'new game opens without developer settings exposed by default');
   assert.equal(await adventureFrame.locator('#adventure-loot-panel').getAttribute('open'),null);
@@ -106,22 +125,6 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   // Real published Bestiary data must populate this UI, not a mock species
   // registry. Create and reopen a native Capture-only save from the genuine
   // (SHA-pinned) Combat catalogue. The old Tester is not a game session.
-  try {
-    await adventureFrame.locator('#adventure-create:not([disabled])')
-     .waitFor({timeout:25000});
-  } catch(error) {
-    // Preserve the strict real-catalogue gate. Its true failure reason must be
-    // visible in CI rather than reduced to an unhelpful 25-second timeout.
-    const observed=await adventureFrame.locator('body').evaluate(body=>({
-      status:body.querySelector('#adventure-status')?.textContent,
-      statusError:body.querySelector('#adventure-status')?.dataset.error,
-      bestiary:body.querySelector('#adventure-bestiary-count')?.textContent,
-      starterOptions:[...body.querySelectorAll('#adventure-starter option')]
-       .map(o=>({value:o.value,disabled:o.disabled,label:o.textContent})).slice(0,12)
-    })).catch(e=>({frameError:String(e)}));
-    throw new Error('Official Bestiary starter never became playable: '+
-      JSON.stringify({observed,pageErrors:errors})+'; '+String(error));
-  }
   const species=await adventureFrame.locator('#adventure-starter option:not([disabled])').count();
   assert.ok(species>=1,'at least one official Bestiary creature is playable');
 

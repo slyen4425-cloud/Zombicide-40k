@@ -9,12 +9,36 @@ function configObject(config){
   return config&&typeof config==="object"?config:{};
 }
 
+// Compact editor-owned XP bands are interpreted by the existing Core, without
+// materializing one threshold entry per level. Custom historical threshold
+// tables still follow their original path below.
+function progressInBands(xp,config,maxLevel){
+  const bands=config.xpBands;
+  let level=1,remaining=xp,previous=1;
+  for(const band of bands){
+    if(!Number.isSafeInteger(band?.throughLevel)||
+       !Number.isSafeInteger(band?.xpPerLevel)||
+       band.throughLevel<=previous||band.xpPerLevel<1)
+      throw new RangeError("Invalid Core progression XP band");
+    const end=Math.min(maxLevel,band.throughLevel);
+    const steps=Math.min(end-level,Math.floor(remaining/band.xpPerLevel));
+    if(steps>0){level+=steps;remaining-=steps*band.xpPerLevel;}
+    if(level<end)return {level,remaining};
+    if(level===maxLevel)return {level,remaining};
+    previous=band.throughLevel;
+  }
+  if(level<maxLevel)throw new RangeError("XP bands do not cover the configured maximum level");
+  return {level,remaining};
+}
+
 function levelFromXp(xp,progressionConfig){
   const p=configObject(progressionConfig);
   const value=Math.max(0,Number(xp)||0);
   const max=Math.max(1,Number(p.maxLevel)||100);
 
   if((p.xpCurveMode||"linear")==="custom"){
+    if(Array.isArray(p.xpBands))
+      return progressInBands(value,p,max).level;
     let level=1;
     const per=Math.max(1,Number(p.xpPerLevel)||10);
     const thresholds=p.xpThresholds&&typeof p.xpThresholds==="object"?p.xpThresholds:{};
@@ -38,6 +62,8 @@ function xpIntoLevel(xp,progressionConfig,fallbackXpPerLevel){
     return value%per;
   }
 
+  if(Array.isArray(p.xpBands))
+    return progressInBands(value,p,Math.max(1,Number(p.maxLevel)||100)).remaining;
   const level=levelFromXp(value,p);
   const thresholds=p.xpThresholds&&typeof p.xpThresholds==="object"?p.xpThresholds:{};
   const start=Math.max(0,Number(thresholds[level])||0);

@@ -5,7 +5,7 @@ import {commitAdventureCombatResultV1} from './adventure-combat-commit-v1.mjs';
 export const ADVENTURE_COMBAT_REQUEST_V1='gensrpg.capture.v2.adventure-combat-commit.v1';
 
 export function connectAdventureCombatHostV1({
- frame,playUrl,sessionId,worldId,store,locks,readPending,refreshParty,bestiaryCards,progressionCore
+ frame,playUrl,sessionId,worldId,store,locks,readPending,refreshParty,bestiaryCards,progressionCore,onCommitted
 }){
  const expected=new URL(playUrl);
  function assertPlayLocation(value){
@@ -34,10 +34,16 @@ export function connectAdventureCombatHostV1({
    const envelope=readPending();
    if(!envelope?.result)throw new Error('Aucun résultat de combat en attente pour cette partie.');
    assertPlayLocation(envelope.returnState.returnUrl);
-   const {applied,session}=commitAdventureCombatResultV1({
+   const {applied,session,award}=commitAdventureCombatResultV1({
     store,envelope,bestiaryCards,progressionCore,random:Math.random,now:new Date().toISOString()
    });
    refreshParty(session);
+   // Only a confirmed, persisted NEW result may trigger the optional display.
+   // UI failures are nonfatal: the Explorer must still receive its receipt.
+   if(applied&&typeof onCommitted==='function'){
+    try{onCommitted(Object.freeze({session,award}));}
+    catch(error){console.error('Unable to display committed Adventure award',error);}
+   }
    const key=envelope.snapshot.encounterId+':'+envelope.snapshot.returnToken;
    return {receipt:{persisted:true,applied,session:{sessionId,processedEncounterKeys:[key]}}};
   });

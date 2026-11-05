@@ -395,8 +395,18 @@ $('adventure-resume').addEventListener('click',guarded(()=>{
  const state=store.load();
  if(!state)throw new Error('Aucune partie enregistrée à charger');
  rules=normalizeAdventureRulesV1(state.rules);
- setFields(rules);renderItemRules();showSave();updatePreview();
+ setFields(rules);setSessionControlFields(state);
+ renderItemRules();showSave();updatePreview();
  stateMessage('Sauvegarde chargée sans modifier les données.');
+}));
+$('adventure-save-control').addEventListener('click',guarded(()=>{
+ const session=store.load();
+ if(!session)throw new Error('Crée une partie avant d’enregistrer les permissions.');
+ const updated=updateAdventureSessionControlV1({
+  session,settings:sessionControlFromFields(),now:new Date().toISOString()
+ });
+ store.save(updated);setSessionControlFields(updated);showSave();
+ stateMessage('Choix du créateur/MJ enregistrés. La connexion des invités et les actions MJ seront raccordées ultérieurement.');
 }));
 $('adventure-save-rules').addEventListener('click',guarded(()=>{
  rules=fromFields();
@@ -440,6 +450,7 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   fillPublicSpecies();
   const active=store.load();
   if(active){rules=normalizeAdventureRulesV1(active.rules);setFields(rules);}
+  setSessionControlFields(active);
   renderItemRules();showSave();updatePreview();
   stateMessage(published.length+' créatures officielles publiées, aucune créature de brouillon chargée.');
  }catch(error){

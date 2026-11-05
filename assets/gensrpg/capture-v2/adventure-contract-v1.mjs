@@ -27,6 +27,21 @@ export const DEFAULT_ADVENTURE_RULES_V1=freeze({
  heroProgression:{enabled:false,xpGainPercent:100,xpPerLevel:1000,
   maxLevel:100,talentPointsPerLevel:0}
 });
+// The showcase is an explicit NEW-GAME preset; historical linear saves keep
+// their exact existing progression and do not gain retroactive stat points.
+export const SHOWCASE_ADVENTURE_RULES_V1=freeze({
+ ...DEFAULT_ADVENTURE_RULES_V1,
+ progression:{
+  xpCurveMode:'custom',xpPerLevel:2000,maxLevel:100,statPointsPerLevel:20,
+  xpBands:[
+   {throughLevel:20,xpPerLevel:2000},
+   {throughLevel:40,xpPerLevel:4000},
+   {throughLevel:60,xpPerLevel:6000},
+   {throughLevel:80,xpPerLevel:8000},
+   {throughLevel:100,xpPerLevel:10000}
+  ]
+ }
+});
 function object(value,label){
  if(!value||typeof value!=='object'||Array.isArray(value))
   throw new TypeError(label+' must be an object');
@@ -97,11 +112,33 @@ export function normalizeAdventureRulesV1(input){
  number(xp.globalMultiplier,'globalMultiplier',0,100);
  if(xp.distribution!=='active')
   throw new RangeError('xp.distribution active is the only implemented participant policy');
- const p=exact(rule.progression,['xpCurveMode','xpPerLevel','maxLevel'],'progression');
- if(p.xpCurveMode!=='linear')
-  throw new RangeError('Custom progression thresholds require a separate explicit contract');
+ const {xpBands:bandsRaw,statPointsPerLevel:pointsRaw,...baseProgression}=
+  object(rule.progression,'progression');
+ const p=exact(baseProgression,['xpCurveMode','xpPerLevel','maxLevel'],'progression');
+ if(p.xpCurveMode!=='linear'&&p.xpCurveMode!=='custom')
+  throw new RangeError('Unknown Adventure XP curve mode');
  integer(p.xpPerLevel,'xpPerLevel',1,1000000000);
  integer(p.maxLevel,'maxLevel',1,100);
+ if(pointsRaw!==undefined)integer(pointsRaw,'statPointsPerLevel',0,1000);
+ if(p.xpCurveMode==='linear'&&bandsRaw!==undefined)
+  throw new RangeError('Linear XP curve cannot declare custom bands');
+ let bands;
+ if(p.xpCurveMode==='custom'){
+  if(!Array.isArray(bandsRaw)||bandsRaw.length===0||bandsRaw.length>100)
+   throw new RangeError('Custom XP bands must be a non-empty list');
+  let previous=1;
+  bands=bandsRaw.map((entry,i)=>{
+   const raw=exact(entry,['throughLevel','xpPerLevel'],'xpBands['+i+']');
+   const throughLevel=integer(raw.throughLevel,'xpBands.throughLevel',2,100);
+   const xpPerLevel=integer(raw.xpPerLevel,'xpBands.xpPerLevel',1,1000000000);
+   if(throughLevel<=previous)
+    throw new RangeError('XP band end levels must increase');
+   previous=throughLevel;return {throughLevel,xpPerLevel};
+  });
+  if(previous<p.maxLevel)
+   throw new RangeError('XP bands must cover maxLevel');
+  coreAdventureProgressionConfigV1({...p,xpBands:bands});
+ }
  const loot=exact(rule.loot,['currencyPerVictory','items','drops'],'loot');
  integer(loot.currencyPerVictory,'currencyPerVictory',0,100000000);
  if(!Array.isArray(loot.items)||!Array.isArray(loot.drops))
@@ -131,13 +168,123 @@ export function normalizeAdventureRulesV1(input){
   xp:{baseVictoryXp:xp.baseVictoryXp,higherEnemyBonusPercent:xp.higherEnemyBonusPercent,
    higherAllyPenaltyPercent:xp.higherAllyPenaltyPercent,
    globalMultiplier:xp.globalMultiplier,distribution:'active'},
-  progression:{xpCurveMode:'linear',xpPerLevel:p.xpPerLevel,maxLevel:p.maxLevel},
+  progression:{xpCurveMode:p.xpCurveMode,xpPerLevel:p.xpPerLevel,maxLevel:p.maxLevel,
+    ...(pointsRaw===undefined?{}:{statPointsPerLevel:pointsRaw}),
+    ...(bands===undefined?{}:{xpBands:bands})},
   loot:{currencyPerVictory:loot.currencyPerVictory,items,drops},
   heroProgression:{enabled:hero.enabled,xpGainPercent:hero.xpGainPercent,
    xpPerLevel:hero.xpPerLevel,maxLevel:hero.maxLevel,
    talentPointsPerLevel:hero.talentPointsPerLevel}
  });
 }
+// Convert creator-friendly XP intervals to the threshold table accepted by
+// the existing GenSRPG Core Progression. The CORE alone calculates levels.
+export function coreAdventureProgressionConfigV1(input){
+ const p=object(input,'progression');
+ if(p.xpCurveMode==='linear')
+  return freeze({xpCurveMode:'linear',xpPerLevel:p.xpPerLevel,maxLevel:p.maxLevel});
+ if(p.xpCurveMode!=='custom'||!Array.isArray(p.xpBands))
+  throw new RangeError('Custom Adventure XP bands are required');
+ const xpThresholds={};let cumulative=0;
+ for(let next=2;next<=p.maxLevel;next++){
+  const bracket=p.xpBands.find(b=>next<=b.throughLevel);
+  if(!bracket)throw new RangeError('XP bands do not cover level '+next);
+  cumulative+=bracket.xpPerLevel;
+  if(!Number.isSafeInteger(cumulative))
+   throw new RangeError('Total XP threshold overflow');
+  xpThresholds[next]=cumulative;
+ }
+ return freeze({xpCurveMode:'custom',xpPerLevel:p.xpPerLevel,
+  maxLevel:p.maxLevel,xpThresholds});
+}
+// These declarations belong to the AdventureSession, not to a fabricated
+// multiplayer server or a second exploration Game Master runtime.
+export const DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1=freeze({
+ editProgression:false,editRewards:false,editWorld:false,
+ allocateOwnCreatureStats:true
+});
+function normalizeAdventureSessionControlV1(raw){
+ const value=exact(raw,['creatorId','hostIsGameMaster','joinEnabled','guestPermissions'],
+  'AdventureSessionControl');
+ const guest=exact(value.guestPermissions,
+  ['editProgression','editRewards','editWorld','allocateOwnCreatureStats'],
+  'guestPermissions');
+ if(typeof value.hostIsGameMaster!=='boolean'||typeof value.joinEnabled!=='boolean')
+  throw new TypeError('AdventureSessionControl flags must be boolean');
+ for(const [name,allowed] of Object.entries(guest))
+  if(typeof allowed!=='boolean')
+   throw new TypeError('guestPermissions.'+name+' must be boolean');
+ return freeze({creatorId:identity(value.creatorId,'creatorId'),
+  hostIsGameMaster:value.hostIsGameMaster,joinEnabled:value.joinEnabled,
+  guestPermissions:{...guest}});
+}
+function statWallet(actor,progression){
+ const allocations=actor.statAllocations??{};
+ object(allocations,'Creature statAllocations');
+ let spent=0;
+ for(const [statId,amount] of Object.entries(allocations)){
+  identity(statId,'statId');
+  spent+=integer(amount,'statAllocations.'+statId,0,100000);
+  if(!Number.isSafeInteger(spent))throw new RangeError('Stat point sum overflow');
+ }
+ const earned=(actor.level-1)*(progression.statPointsPerLevel??0);
+ if(!Number.isSafeInteger(earned)||spent>earned)
+  throw new RangeError('Creature stat points spent exceed earned level budget');
+ return {spent,earned};
+}
+export function availableAdventureStatPointsV1(session){
+ const v=assertSession(session);
+ const wallet=statWallet(v.party.active,normalizeAdventureRulesV1(v.rules).progression);
+ return wallet.earned-wallet.spent;
+}
+// The actual stat IDs come ONLY from Combat's published registry. This stores
+// bonus allocations, not a second authority for stat effects or base values.
+export function allocateAdventureStatPointsV1({session,registry,statId,points,now}={}){
+ const v=assertSession(session);
+ const id=identity(statId,'statId');
+ if(registry?.schema!=='capture-stat-registry-v1'||!Array.isArray(registry.stats)||
+    !registry.stats.some(entry=>entry.id===id))
+  throw new RangeError('Stat absent du registre officiel Combat');
+ const amount=integer(points,'points to allocate',1,100000);
+ if(amount>availableAdventureStatPointsV1(v))
+  throw new RangeError('Not enough available creature stat points');
+ const actor=v.party.active;
+ const statAllocations={...(actor.statAllocations??{})};
+ statAllocations[id]=(statAllocations[id]??0)+amount;
+ const updated=freeze({...v,updatedAt:iso(now??v.updatedAt,'now'),
+  party:{...v.party,active:{...actor,statAllocations}}});
+ assertSession(updated);
+ return updated;
+}
+// Historical saves intentionally remain unchanged on load. A visible owner
+// action can attach the creator/MJ policy once, with a fresh generated ID.
+export function initializeAdventureSessionControlV1({session,creatorId,settings,now}={}){
+ const v=assertSession(session);
+ if(Object.hasOwn(v,'sessionControl'))
+  throw new Error('Existing creator control cannot be replaced');
+ const input=exact(settings,['hostIsGameMaster','joinEnabled','guestPermissions'],
+  'session control settings');
+ const sessionControl=normalizeAdventureSessionControlV1({
+  ...input,creatorId:identity(creatorId,'creatorId')
+ });
+ const updated=freeze({...v,updatedAt:iso(now??v.updatedAt,'now'),sessionControl});
+ assertSession(updated);
+ return updated;
+}
+export function updateAdventureSessionControlV1({session,settings,now}={}){
+ const v=assertSession(session);
+ if(!v.sessionControl)
+  throw new Error('Legacy session requires an explicit creator-control migration');
+ const input=exact(settings,['hostIsGameMaster','joinEnabled','guestPermissions'],
+  'session control settings');
+ const sessionControl=normalizeAdventureSessionControlV1({
+  ...input,creatorId:v.sessionControl.creatorId
+ });
+ const updated=freeze({...v,updatedAt:iso(now??v.updatedAt,'now'),sessionControl});
+ assertSession(updated);
+ return updated;
+}
+
 // This function NEVER decides if a draft is published: the official Combat
 // captureBestiaryCardsV1 already made that decision with face/back/icon assets.
 // Using the identical result preserves the Bestiary's publication predicate.
@@ -155,7 +302,7 @@ export function publishedAdventureSpeciesV1(officialBestiaryCards){
 export function calculateAdventureXpV1({rules,allyLevel,enemyLevel}){
  const rule=normalizeAdventureRulesV1(rules);
  const local=integer(allyLevel,'allyLevel',1,rule.progression.maxLevel);
- const enemy=integer(enemyLevel,'enemyLevel',1,rule.progression.maxLevel);
+ const enemy=integer(enemyLevel,'enemyLevel',1,100);
  const gap=enemy-local;
  const multiplier=gap>=0
   ?(1+rule.xp.higherEnemyBonusPercent/100)**gap
@@ -179,6 +326,9 @@ function assertSession(session){
  identity(actor.speciesId,'party.active.speciesId');
  integer(actor.level,'party.active.level',1,v.rules.progression.maxLevel);
  integer(actor.xp,'party.active.xp');
+ statWallet(actor,normalizeAdventureRulesV1(v.rules).progression);
+ if(Object.hasOwn(v,'sessionControl'))
+  normalizeAdventureSessionControlV1(v.sessionControl);
  if(actor.hp!==null)number(actor.hp,'party.active.hp');
  if(Object.hasOwn(v,'hero')){
   const hasDefinition=Object.hasOwn(v.hero,'definitionId');
@@ -221,7 +371,13 @@ export function createAdventureSessionV1({
  return freeze({
   schema:ADVENTURE_SAVE_SCHEMA_V1,version:1,sessionId,
   status:'configured',createdAt:timestamp,updatedAt:timestamp,rules:settings,
-  party:{active:{instanceId,speciesId:starter.id,level:1,xp:0,hp:null}},
+  party:{active:{instanceId,speciesId:starter.id,level:1,xp:0,hp:null,
+   ...(settings.progression.statPointsPerLevel===undefined?{}:{statAllocations:{}})}},
+  sessionControl:{
+   creatorId:identity(ids?.creatorId??'owner-'+sessionId,'creatorId'),
+   hostIsGameMaster:false,joinEnabled:false,
+   guestPermissions:{...DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1}
+  },
   hero:{
    ...(heroDefinitionId===null?{}:{definitionId:officialAdventureHeroDefinitionIdV1(heroDefinitionId)}),
    progression:settings.heroProgression.enabled
@@ -275,7 +431,8 @@ export function applyAdventureCombatResultV1({
   ?calculateAdventureXpV1({rules:state.rules,allyLevel:before,enemyLevel:enemy.level}).xp:0;
  const total=state.party.active.xp+amount;
  integer(total,'new accumulated XP');
- const level=progressionCore.levelFromXp(total,state.rules.progression);
+ const level=progressionCore.levelFromXp(total,
+  coreAdventureProgressionConfigV1(normalizeAdventureRulesV1(state.rules).progression));
  integer(level,'Core progression level',1,state.rules.progression.maxLevel);
  const currency=result.outcome==='victory'?state.rules.loot.currencyPerVictory:0;
  const itemCounts={...state.inventory.items};

@@ -12,8 +12,12 @@ import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
 import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
 import {writeAdventurePlayingPartyV1} from './adventure-playing-party-grant-v1.mjs';
 import {
- DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
- createAdventureSessionV1,createAdventureStoreV1,publishedAdventureSpeciesV1
+ DEFAULT_ADVENTURE_RULES_V1,SHOWCASE_ADVENTURE_RULES_V1,
+ DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
+ createAdventureSessionV1,createAdventureStoreV1,publishedAdventureSpeciesV1,
+ coreAdventureProgressionConfigV1,availableAdventureStatPointsV1,
+ allocateAdventureStatPointsV1,updateAdventureSessionControlV1,
+ initializeAdventureSessionControlV1
 } from './adventure-contract-v1.mjs';
 
 const $=id=>document.getElementById(id);
@@ -21,14 +25,15 @@ const status=$('adventure-status');
 const idField={
  base:'adventure-xp-base',bonus:'adventure-xp-bonus',penalty:'adventure-xp-penalty',
  global:'adventure-xp-global',level:'adventure-xp-level',max:'adventure-level-max',
+ statPoints:'adventure-stat-points-per-level',xpMode:'adventure-xp-mode',
  currency:'adventure-currency',
  heroEnabled:'adventure-hero-xp-enabled',heroShare:'adventure-hero-xp-share',
  heroXpLevel:'adventure-hero-xp-per-level',heroMax:'adventure-hero-max-level',
  heroTalent:'adventure-hero-talent-points'
 };
-let rules=normalizeAdventureRulesV1(DEFAULT_ADVENTURE_RULES_V1);
+let rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
 let published=[];
-let officialCombatSha=null;
+let officialCombatSha=null,officialStatRegistry=null;
 let store;
 const text=(node,value)=>{node.textContent=String(value);};
 const stateMessage=(message,error=false)=>{
@@ -39,6 +44,109 @@ const numberFrom=id=>{
  if(!raw)throw new RangeError(id+' : renseigne une valeur');
  return Number(raw);
 };
+function readXpBandRows(){
+ return [...$('adventure-xp-bands').querySelectorAll('.xp-band-row')].map(row=>{
+  const throughLevel=Number(row.querySelector('[data-xp-band-to]').value);
+  const xpPerLevel=Number(row.querySelector('[data-xp-band-cost]').value);
+  return {throughLevel,xpPerLevel};
+ });
+}
+function renderXpBandRows(bands){
+ const host=$('adventure-xp-bands');host.replaceChildren();
+ for(const band of bands){
+  const row=document.createElement('div');row.className='xp-band-row';
+  const end=document.createElement('label');end.textContent="Jusqu'au niveau";
+  const upper=document.createElement('input');upper.type='number';upper.min=2;upper.max=100;
+  upper.step=1;upper.value=band.throughLevel;upper.dataset.xpBandTo='1';
+  const cost=document.createElement('label');cost.textContent="XP par niveau";
+  const xp=document.createElement('input');xp.type='number';xp.min=1;xp.max=1000000000;
+  xp.step=1;xp.value=band.xpPerLevel;xp.dataset.xpBandCost='1';
+  const remove=document.createElement('button');remove.type='button';
+  remove.textContent='Retirer';remove.disabled=bands.length===1;
+  remove.addEventListener('click',()=>{
+   if(host.querySelectorAll('.xp-band-row').length<=1)return;
+   row.remove();
+   const remaining=host.querySelectorAll('.xp-band-row');
+   for(const other of remaining)
+    other.querySelector('button').disabled=remaining.length<=1;
+   updatePreview();
+  });
+  upper.addEventListener('input',updatePreview);
+  xp.addEventListener('input',updatePreview);
+  end.append(upper);cost.append(xp);
+  row.append(end,cost,remove);host.append(row);
+ }
+}
+function toggleXpMode(){
+ const custom=$(idField.xpMode).value==='custom';
+ $('adventure-xp-bands-panel').hidden=!custom;
+ $(idField.level).disabled=custom;
+}
+function setSessionControlFields(saved){
+ const value=saved?.sessionControl;
+ const permissions=value?.guestPermissions??DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1;
+ $('adventure-gm-enabled').checked=value?.hostIsGameMaster??false;
+ $('adventure-join-enabled').checked=value?.joinEnabled??false;
+ $('adventure-guest-edit-progression').checked=permissions.editProgression;
+ $('adventure-guest-edit-rewards').checked=permissions.editRewards;
+ $('adventure-guest-edit-world').checked=permissions.editWorld;
+ $('adventure-guest-allocate-stats').checked=permissions.allocateOwnCreatureStats;
+ $('adventure-save-control').disabled=!saved;
+ $('adventure-save-control').textContent=value?'Enregistrer les choix du créateur'
+  :'Activer les choix créateur/MJ pour cette partie';
+}
+function sessionControlFromFields(){
+ return {
+  hostIsGameMaster:$('adventure-gm-enabled').checked,
+  joinEnabled:$('adventure-join-enabled').checked,
+  guestPermissions:{
+   editProgression:$('adventure-guest-edit-progression').checked,
+   editRewards:$('adventure-guest-edit-rewards').checked,
+   editWorld:$('adventure-guest-edit-world').checked,
+   allocateOwnCreatureStats:$('adventure-guest-allocate-stats').checked
+  }
+ };
+}
+function renderStatWallet(){
+ const rows=$('adventure-stat-rows'),availableLabel=$('adventure-stat-points-left');
+ rows.replaceChildren();
+ const current=store?.load();
+ if(!current){
+  text(availableLabel,'Crée une partie pour connaître tes points disponibles.');
+  return;
+ }
+ if(officialStatRegistry?.schema!=='capture-stat-registry-v1'||
+    !Array.isArray(officialStatRegistry.stats))
+  throw new Error('Registre officiel Combat indisponible pour la répartition');
+ const available=availableAdventureStatPointsV1(current);
+ text(availableLabel,available+' point(s) disponibles · '+
+  (current.rules.progression.statPointsPerLevel??0)+' par niveau');
+ for(const stat of officialStatRegistry.stats){
+  const line=document.createElement('div');line.className='rule-row';
+  const value=current.party.active.statAllocations?.[stat.id]??0;
+  const label=document.createElement('span');
+  label.textContent=stat.label+' · +'+value;
+  const actions=document.createElement('div');actions.className='actions';
+  for(const points of [1,5]){
+   const button=document.createElement('button');button.type='button';
+   button.textContent='+'+points;
+   button.disabled=available<points;
+   button.setAttribute('aria-label','Attribuer '+points+' point(s) en '+stat.label);
+   button.addEventListener('click',guarded(()=>{
+    const saved=store.load();
+    const changed=allocateAdventureStatPointsV1({
+     session:saved,registry:officialStatRegistry,statId:stat.id,
+     points,now:new Date().toISOString()
+    });
+    store.save(changed);
+    showSave();
+    stateMessage(points+' point(s) attribués en '+stat.label+'. Sauvegarde mise à jour.');
+   }));
+   actions.append(button);
+  }
+  line.append(label,actions);rows.append(line);
+ }
+}
 function setFields(value){
  $(idField.base).value=value.xp.baseVictoryXp;
  $(idField.bonus).value=value.xp.higherEnemyBonusPercent;
@@ -46,7 +154,11 @@ function setFields(value){
  $(idField.global).value=value.xp.globalMultiplier;
  $(idField.level).value=value.progression.xpPerLevel;
  $(idField.max).value=value.progression.maxLevel;
+ $(idField.xpMode).value=value.progression.xpCurveMode;
+ $(idField.statPoints).value=value.progression.statPointsPerLevel??0;
  $(idField.currency).value=value.loot.currencyPerVictory;
+ renderXpBandRows(value.progression.xpBands??SHOWCASE_ADVENTURE_RULES_V1.progression.xpBands);
+ toggleXpMode();
  $(idField.heroEnabled).checked=value.heroProgression.enabled;
  $(idField.heroShare).value=value.heroProgression.xpGainPercent;
  $(idField.heroXpLevel).value=value.heroProgression.xpPerLevel;
@@ -60,8 +172,10 @@ function fromFields(){
    higherEnemyBonusPercent:numberFrom(idField.bonus),
    higherAllyPenaltyPercent:numberFrom(idField.penalty),
    globalMultiplier:numberFrom(idField.global)},
-  progression:{...rules.progression,xpPerLevel:numberFrom(idField.level),
-   maxLevel:numberFrom(idField.max)},
+  progression:{xpCurveMode:$(idField.xpMode).value,
+   xpPerLevel:numberFrom(idField.level),maxLevel:numberFrom(idField.max),
+   statPointsPerLevel:numberFrom(idField.statPoints),
+   ...($(idField.xpMode).value==='custom'?{xpBands:readXpBandRows()}: {})},
   loot:{...rules.loot,currencyPerVictory:numberFrom(idField.currency)},
   heroProgression:{...rules.heroProgression,
    enabled:$(idField.heroEnabled).checked,
@@ -98,7 +212,8 @@ async function fetchPublishedBestiary(){
    skillTransfers:bundle.skillTransfers,
    assetCatalog:assets,statRegistry:stats,nativeSkills:skills.entries??[]
   })),
-  combatSha:delivery.combat.sha
+  combatSha:delivery.combat.sha,
+  statRegistry:stats
  });
 }
 function option(value,caption,disabled=false){
@@ -160,6 +275,7 @@ function showSave(){
   if(!state){
    text($('adventure-save-summary'),'Aucune partie créée.');
    $('adventure-play').disabled=true;
+   renderStatWallet();
    return;
   }
   $('adventure-play').disabled=false;
@@ -176,6 +292,7 @@ function showSave(){
     :' · Héros sans niveau')+
    (reward?' · Dernier combat : '+reward.outcome+' ('+reward.xp+' XP)':'')+
    ' · statut : '+(state.status==='configured'?'configuration enregistrée':'en cours'));
+  renderStatWallet();
  }catch(error){
   $('adventure-play').disabled=true;
   stateMessage('Sauvegarde protégée : '+error.message,true);
@@ -203,18 +320,35 @@ function guarded(callback){
  };
 }
 setFields(rules);
+setSessionControlFields(null);
 for(const field of Object.values(idField))$(field).addEventListener('input',updatePreview);
+$(idField.xpMode).addEventListener('change',()=>{toggleXpMode();updatePreview();});
+$('adventure-xp-band-add').addEventListener('click',guarded(()=>{
+ const bands=readXpBandRows();
+ if(!bands.length)throw new Error('Conserve au moins un palier de niveaux.');
+ const last=bands.at(-1),previous=bands.at(-2)?.throughLevel??1;
+ if(last.throughLevel-previous<2)
+  throw new Error('Diminue la borne du dernier palier avant d’en ajouter un.');
+ const middle=Math.floor((last.throughLevel+previous)/2);
+ bands.splice(bands.length-1,0,{throughLevel:middle,xpPerLevel:last.xpPerLevel});
+ renderXpBandRows(bands);updatePreview();
+}));
 $('adventure-enemy').addEventListener('change',updatePreview);
 $('adventure-starter').addEventListener('change',updatePreview);
 $('adventure-create').addEventListener('click',guarded(()=>{
  if(!published.length)throw new Error('Bestiaire officiel indisponible; aucun contenu fictif ne sera utilisé');
  rules=fromFields();
  const id=()=>crypto.randomUUID();
+ const now=new Date().toISOString();
  const state=createAdventureSessionV1({
   bestiaryCards:published,starterId:$('adventure-starter').value,
-  rules,ids:{sessionId:id(),instanceId:id()},now:new Date().toISOString()
+  rules,ids:{sessionId:id(),instanceId:id(),creatorId:id()},now
  });
- store.create(state);
+ const configured=updateAdventureSessionControlV1({
+  session:state,settings:sessionControlFromFields(),now
+ });
+ store.create(configured);
+ setSessionControlFields(configured);
  stateMessage('Partie sauvegardée. Tu peux entrer dans le monde si une carte est disponible dans le World Builder GenSRPG.');
  showSave();updatePreview();
 }));
@@ -271,8 +405,21 @@ $('adventure-resume').addEventListener('click',guarded(()=>{
  const state=store.load();
  if(!state)throw new Error('Aucune partie enregistrée à charger');
  rules=normalizeAdventureRulesV1(state.rules);
- setFields(rules);renderItemRules();showSave();updatePreview();
+ setFields(rules);setSessionControlFields(state);
+ renderItemRules();showSave();updatePreview();
  stateMessage('Sauvegarde chargée sans modifier les données.');
+}));
+$('adventure-save-control').addEventListener('click',guarded(()=>{
+ const session=store.load();
+ if(!session)throw new Error('Crée une partie avant d’enregistrer les permissions.');
+ const settings=sessionControlFromFields(),now=new Date().toISOString();
+ const updated=session.sessionControl
+  ?updateAdventureSessionControlV1({session,settings,now})
+  :initializeAdventureSessionControlV1({
+    session,settings,creatorId:crypto.randomUUID(),now
+   });
+ store.save(updated);setSessionControlFields(updated);showSave();
+ stateMessage('Choix du créateur/MJ enregistrés. La connexion des invités et les actions MJ seront raccordées ultérieurement.');
 }));
 $('adventure-save-rules').addEventListener('click',guarded(()=>{
  rules=fromFields();
@@ -312,9 +459,11 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   store=createAdventureStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
   const official=await fetchPublishedBestiary();
   published=official.cards;officialCombatSha=official.combatSha;
+  officialStatRegistry=official.statRegistry;
   fillPublicSpecies();
   const active=store.load();
   if(active){rules=normalizeAdventureRulesV1(active.rules);setFields(rules);}
+  setSessionControlFields(active);
   renderItemRules();showSave();updatePreview();
   stateMessage(published.length+' créatures officielles publiées, aucune créature de brouillon chargée.');
  }catch(error){

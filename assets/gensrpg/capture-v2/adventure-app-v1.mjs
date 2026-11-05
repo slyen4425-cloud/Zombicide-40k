@@ -8,6 +8,7 @@ import {
 } from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
 import {readCombatHandoff} from '../../../vendor/exploration-lab/src/encounters/combat-handoff-store.js';
 import {connectAdventureCombatHostV1} from './adventure-combat-host-v1.mjs';
+import {presentAdventureCombatAwardV1} from './adventure-combat-result-ui-v1.mjs';
 import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
 import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
 import {writeAdventurePlayingPartyV1} from './adventure-playing-party-grant-v1.mjs';
@@ -334,6 +335,15 @@ function guarded(callback){
 }
 setFields(rules);
 setSessionControlFields(null);
+const closeBattleResult=()=>{
+ $('adventure-battle-result').hidden=true;
+ // Explorer owns the actual battle return. Only dismiss this read-only UI.
+ $('adventure-play-frame').focus();
+};
+$('adventure-battle-result-continue').addEventListener('click',closeBattleResult);
+$('adventure-battle-result').addEventListener('keydown',event=>{
+ if(event.key==='Escape'){event.preventDefault();closeBattleResult();}
+});
 for(const field of Object.values(idField))$(field).addEventListener('input',updatePreview);
 $(idField.xpMode).addEventListener('change',()=>{toggleXpMode();updatePreview();});
 $(idField.max).addEventListener('change',extendFinalXpBandToCap);
@@ -409,7 +419,16 @@ $('adventure-play').addEventListener('click',guarded(()=>{
  connectAdventureCombatHostV1({
   frame,playUrl:url.href,sessionId,worldId:world.id,store,locks:window.navigator.locks,
   readPending:()=>readCombatHandoff(window.localStorage,{sessionId}),
-  refreshParty,bestiaryCards:published,progressionCore:window.GensProgressionV1
+  refreshParty,bestiaryCards:published,progressionCore:window.GensProgressionV1,
+  onCommitted:({session,award})=>{
+   presentAdventureCombatAwardV1({
+    dialog:$('adventure-battle-result'),
+    heading:$('adventure-battle-result-heading'),
+    summary:$('adventure-battle-result-summary'),
+    session,award
+   });
+   $('adventure-battle-result-continue').focus();
+  }
  });
  // Keep the Aventure owner mounted while the native Exploration frame runs.
  frame.src=url.href;

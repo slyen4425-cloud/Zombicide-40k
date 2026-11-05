@@ -34,7 +34,8 @@ test('only official real Adventure member instance, creature level and HP enter 
   schema:'gensrpg.capture.v2.active-party.v1',version:1,
   sessionId:'session-1',worldId:'world-1',combatSha:SHA,
   partyRef:'adventure-party:session-1',
-  active:{instanceId:'member-1',speciesId:'official-ready',level:12,hp:73}
+  active:{instanceId:'member-1',speciesId:'official-ready',level:12,hp:73},
+  combatHpMultiplier:0.25
  });
  assert.equal(Object.isFrozen(grant.active),true);
  assert.deepEqual(JSON.parse(f.storage.getItem('gensrpg.capture.v2.active-party.v1:session-1')),grant);

@@ -21,7 +21,7 @@ const status=$('adventure-status');
 const idField={
  base:'adventure-xp-base',bonus:'adventure-xp-bonus',penalty:'adventure-xp-penalty',
  global:'adventure-xp-global',level:'adventure-xp-level',max:'adventure-level-max',
- currency:'adventure-currency',
+ currency:'adventure-currency',hpPercent:'adventure-combat-hp-percent',
  heroEnabled:'adventure-hero-xp-enabled',heroShare:'adventure-hero-xp-share',
  heroXpLevel:'adventure-hero-xp-per-level',heroMax:'adventure-hero-max-level',
  heroTalent:'adventure-hero-talent-points'
@@ -47,6 +47,7 @@ function setFields(value){
  $(idField.level).value=value.progression.xpPerLevel;
  $(idField.max).value=value.progression.maxLevel;
  $(idField.currency).value=value.loot.currencyPerVictory;
+ $(idField.hpPercent).value=100*value.combat.hpMultiplier;
  $(idField.heroEnabled).checked=value.heroProgression.enabled;
  $(idField.heroShare).value=value.heroProgression.xpGainPercent;
  $(idField.heroXpLevel).value=value.heroProgression.xpPerLevel;
@@ -63,6 +64,7 @@ function fromFields(){
   progression:{...rules.progression,xpPerLevel:numberFrom(idField.level),
    maxLevel:numberFrom(idField.max)},
   loot:{...rules.loot,currencyPerVictory:numberFrom(idField.currency)},
+  combat:{hpMultiplier:numberFrom(idField.hpPercent)/100},
   heroProgression:{...rules.heroProgression,
    enabled:$(idField.heroEnabled).checked,
    xpGainPercent:numberFrom(idField.heroShare),

@@ -1,39 +1,48 @@
 'use strict';
-// Pages release C2: retire the historical PASSIVE Capture V1 payload from the
-// canonical public site. Keep its standalone review-only CI workflow separate.
+// Pages dedupe + compatibility guard. The legacy 2v2 demo must not silently
+// break while its verified author source is migrated to the official V2 entry.
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const site=path.resolve(process.env.GENSRPG_PAGES_SITE||'_site');
-const workflow=fs.readFileSync(path.join(root,'.github/workflows/main.yml'),'utf8');
-test('the public publisher never repackages the old full Combat lab',()=>{
- assert.doesNotMatch(workflow,/^\s*run:\s*node tools\/stage_capture_lab_delivery\.mjs\b/m,
-  'the inactive historical full Lab transport must not be copied into Pages');
- assert.doesNotMatch(workflow,/^\s*node --test tests\/gens_capture_lab_delivery_v1\.test\.cjs\s*$/m,
-  'the old package-only gate must be kept only in its standalone, non-publishing CI');
- const manual=fs.readFileSync(path.join(root,'.github/workflows/capture-lab-delivery.yml'),'utf8');
+const read=name=>fs.readFileSync(path.join(root,name),'utf8');
+const workflow=read('.github/workflows/main.yml');
+test('publisher has exactly one live legacy 2v2 compatibility package and one official V2 preview',()=>{
+ const legacy='node tools/stage_capture_lab_delivery.mjs combat-lab combat-assets _site';
+ const native='node tools/stage_capture_v2_pages_preview.mjs';
+ assert.equal(workflow.split(legacy).length,2,'the original 2v2 active transport may appear only once');
+ assert.equal(workflow.split(native).length,2,'official V2 preview should be assembled once');
+ assert.ok(workflow.indexOf(legacy)<workflow.indexOf(native),
+  'the legacy test should be validated before staging the current V2 subsite');
+ assert.match(workflow,/node --test tests\/gensrpg_pages_release_budget\.test\.cjs/);
+ const manual=read('.github/workflows/capture-lab-delivery.yml');
  assert.match(manual,/stage_capture_lab_delivery\.mjs/);
  const triggers=manual.split(/\npermissions:/)[0];
  assert.match(triggers,/on:\s*\n  workflow_dispatch:/);
  assert.doesNotMatch(triggers,/\n  (?:push|pull_request):/,
-  'retired full-Lab artifact job must not be generated automatically for PRs or pushes');
- assert.doesNotMatch(manual,/actions\/deploy-pages@|actions\/upload-pages-artifact@/,
-  'manual legacy package may be audited as an artifact, never published as another site');
+  'full historical artifact must not be produced twice on every PR');
+ assert.doesNotMatch(manual,/actions\/deploy-pages@|actions\/upload-pages-artifact@/);
 });
-test('public site has no root-level historical vendor/author-data duplicate',()=>{
- for(const rel of ['vendor/combat-lab','assets/gensrpg/capture/runtime-data']){
-  assert.equal(fs.existsSync(path.join(site,rel)),false,
-   'obsolete full legacy copy shipped in Pages: '+rel);
+test('published original 2v2 button still has its tested owner transport until migrated',()=>{
+ const html=read('capture-world-2v2-test.html');
+ assert.match(html,/prepareCapture2v2Preview/);
+ assert.match(html,/vendor\/combat-lab\//);
+ assert.match(html,/runtime-data\/author-inputs\.json/);
+ const smoke=read('.github/workflows/capture-2v2-pages-public-smoke.yml');
+ assert.match(smoke,/capture-world-2v2-test\.html/);
+ assert.match(smoke,/runtime-data\/author-inputs\.json/);
+});
+test('assembled site retains both explicitly owned live experiences without 2v2 404s',()=>{
+ if(!fs.existsSync(site)){
+  if(process.env.GENSRPG_REQUIRE_PAGES_SITE==='1')throw Error('Pages site missing in release');
+  return;
  }
-});
-test('single Pages owner and isolated official V2 preview remain',()=>{
- assert.match(workflow,/node tools\/stage_capture_v2_pages_preview\.mjs/);
- assert.match(workflow,/actions\/upload-pages-artifact@v3/);
- assert.match(workflow,/actions\/deploy-pages@v4/);
- assert.match(workflow,/node --test tests\/gensrpg_pages_no_legacy_combat_copy\.test\.cjs/);
- const rel='preview/capture-v2-pr225/vendor/combat-lab/examples/dom-demo/capture-editor-v2.html';
- if(fs.existsSync(path.join(site,'preview/capture-v2-pr225')))
-  assert.equal(fs.existsSync(path.join(site,rel)),true,'published V2 entry must remain intact');
+ for(const rel of ['capture-world-2v2-test.html',
+  'assets/gensrpg/capture/runtime-data/author-inputs.json',
+  'vendor/combat-lab/src/contracts/capture-creature-transfer-v1.js',
+  'preview/capture-v2-pr225/vendor/combat-lab/examples/dom-demo/capture-editor-v2.html']){
+  assert.ok(fs.statSync(path.join(site,rel)).isFile(),rel+' must remain served');
+ }
 });

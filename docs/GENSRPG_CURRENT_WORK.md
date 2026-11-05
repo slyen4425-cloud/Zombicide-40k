@@ -1,3 +1,13 @@
+## 2026-11-05 — Dépendance Combat main officielle dd15, déblocage des gates Jouer (CI EN COURS)
+
+- **Problème prouvé** : la CI Root Browser du candidat Aventure refuse la source épinglée `46b4efed` car le `main` Combat a avancé au merge certifié `dd15e3e2df0d36d039a554e89e094aba28b43dff` (PR Combat #249 : projection PV aventure explicite et Tester inchangé). Cette divergence doit bloquer CI tant que la synchronisation n'est pas validée, jamais supprimer/assouplir la sentinelle `Uncertified combat main drift`.
+- **Source certifiée** : [CI officielle Combat #41941322932](https://github.com/slyen4425-cloud/GenSrpg_labo_combat_dynamique/actions/runs/41941322932) `completed/success` au **SHA exact dd15** : 5 jobs Laboratoire SUCCESS. Main Exploration inchangé `4e7abd15`.
+- **START / périmètre** : checkpoint `checkpoint/gensrpg-start-combat-main-dd15-sync-2026-11-05`, base `379cd2aa3051ce553f9e034e0cd544a4aef9f4bb`; branche unique `work/gensrpg-combat-main-dd15-sync-2026-11-05`. Tests TDD RED d'abord dans `tests/gens_capture_v2_official_combat_levels_pin_v1.test.mjs` commit `cdfd00d` (ancienne source est rejetée) puis pin officiel `assets/gensrpg/capture-v2/source-pins-v1.json` `6559829`. **Aucun moteur/équipement/compétence modifié**, aucune promotion de laboratoire global-assets, aucune copie de Combat source dans GenSRPG, aucun changement de publisher `main`.
+- **Gates** : valider Core / clean-authority / vrai Chromium Root avec le nouveau Combat main, official native release et sentinelles exact HEAD; vérifier les différences de PV avec la projection explicite `hpMultiplier`, ne pas appliquer de coefficients implicites. Lorsque ce contrat est GREEN, le lot Aventure #259 peut consommer exactement ce pin dans sa propre branche et rejouer toute la CI. Un lot de publication Pages distinct devra mettre à jour les pins de son workflow `main.yml` seulement après validation bout en bout.
+- **Interdits** : pas de nouveau Bestiaire source, pas de `main` direct, pas de saut de gates, pas de présentation de la prévisualisation publique comme utilisant dd15 tant que le publisher n'a pas été recertifié.
+
+---
+
 ## 2026-11-04 — Monster Capture : vrai menu de jeu et suppression des doublons Exploration (CI À CERTIFIER)
 
 - **Demande auteur** : remplacer les neuf boutons de laboratoires alignés par un menu de jeu lisible `Jouer` / `Éditeurs`, réunir les outils de monde au même endroit, enlever les descriptions techniques inutiles dans l'écran de partie. Artworks et refonte graphique plus poussée restent **hors lot**, après validation de l'ergonomie.

@@ -1,3 +1,12 @@
+## 2026-11-05 — Sentinelle mobile quatre modes : nouveau menu Éditeurs (C1 TEST-ONLY)
+
+- **START** : `checkpoint/gensrpg-start-capture-four-mode-sentinel-menu-2026-11-05` @ `e9166639aefbb18cf526d677622420c66594cd91` (candidat Aventure HP + plafond libre validé), branche unique `work/gensrpg-capture-four-mode-sentinel-menu-2026-11-05` ; dernier checkpoint vert `checkpoint/gensrpg-adventure-hp-freecap-integration-green-2026-11-05`.
+- **RED source inchangée** : ticket #267 et workflow #41970023730 du parent #264 ; `tests/gens_capture_v2_four_mode_noninterference_v1.test.cjs:77` recherche le raccourci direct `[data-capture-v2-view="creature"]` invisible car le shell certifié affiche `Jouer/Éditeurs`. Aucune fonction de gameplay à modifier pour satisfaire le test.
+- **Périmètre** : conserver intégralement la traversée Survie → Dungeon → PvP → Capture ×2, vérification de non-interférence des clés de stockage et de fermeture iframe, mais ouvrir l'éditeur Combat **par le nouveau menu Éditeurs** puis groupe Combat. TDD réel navigateur, preuve de préservation des autres modes. Uniquement fichier de test et ce journal ; ni root/index, ni Shell, ni Combat/Exploration, ni SW/PWA/publisher.
+- **Gates et repli** : CI architecture/browser au SHA exact et contrôle du diff ; ce lot ne se confond pas avec PR #265 de publication. Refuser GREEN si le navigateur échoue ou s'il existe une régression vraie. Rollback checkpoint START ci-dessus.
+
+---
+
 ## 2026-11-05 — Intégration indépendante PV vitrine + plafond libre (C2, NON PUBLIÉ)
 
 - **START réel** : `checkpoint/gensrpg-start-adventure-hp-freecap-integration-2026-11-05` @ `7455165c5bcbe921b218f3e0fb7f3a1d53fb6691` (PR #264, 4/4 CI SUCCESS). Branche unique `work/gensrpg-adventure-hp-freecap-integration-2026-11-05`. Dernier vert : PR #264, CI Clean Browser #41950711141 et Native #41950711399.

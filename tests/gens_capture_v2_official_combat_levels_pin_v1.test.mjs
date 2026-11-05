@@ -13,9 +13,9 @@ test('GenSRPG consumer explicitly pins certified Combat main owner commit with p
  assert.equal(pins.combat.sha,'954f38e6b84e842bc8bf6d8515d5c77b93aca5f1');
  assert.equal(pins.combat.certifiedCiRun,42036361285);
  assert.equal(pins.exploration.ref,'main');
- assert.equal(pins.exploration.sha,'7155516b51db9892183cc043837037c4c87a0315',
+ assert.equal(pins.exploration.sha,'4bfb15a3092455bec879d3c5ad6098398759d0d3',
   'Exploration pin must be the certified official main, including real HP policy and exact Adventure duel');
- assert.equal(pins.exploration.certifiedCiRun,41949196778);
+ assert.equal(pins.exploration.certifiedCiRun,42056822806);
 });
 test('a true owned starter level 1 and an enemy level 3 project independently through official Combat',()=>{
  const levels=resolveCaptureCombatCreatureLevelsV1({

@@ -138,6 +138,17 @@
  </div>
 </main>
 <iframe id="adventure-play-frame" title="Monster Capture · Jouer" allow="fullscreen; autoplay" allowfullscreen hidden></iframe>
+<section id="adventure-battle-result" class="adventure-result-overlay" role="dialog"
+ aria-modal="true" aria-labelledby="adventure-battle-result-heading" hidden>
+ <div class="adventure-result-content">
+  <p class="eyebrow">MONSTER CAPTURE · RÉSULTAT OFFICIEL</p>
+  <h2 id="adventure-battle-result-heading">Résultat du combat</h2>
+  <p id="adventure-battle-result-summary" aria-live="polite"></p>
+  <div class="actions">
+   <button type="button" id="adventure-battle-result-continue">Continuer l'aventure</button>
+  </div>
+ </div>
+</section>
 <script src="../core/storage-v1.js"></script>
 <script src="../core/progression-v1.js"></script>
 <script type="module" src="./adventure-app-v1.mjs"></script>

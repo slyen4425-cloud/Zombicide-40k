@@ -306,10 +306,23 @@ jobs:
           index.write_text(html, encoding="utf-8")
           PY
 
-      # Historical Capture V1 packaging is available only in its isolated,
-      # non-deploying capture-lab-delivery workflow for audit/rollback.
-      # Do NOT stage its full Combat Lab in canonical Pages: Monster Capture V2
-      # already assembles the official source graph in its isolated preview.
+      # Compatibility exception: this older test-only 2v2 URL still uses
+      # the pinned author-inputs and Combat ESM graph. A separate migration
+      # must validate a V2-only replacement before this delivery can retire.
+      - name: Construire la livraison Capture officielle passive depuis le publisher unique
+        run: node tools/stage_capture_lab_delivery.mjs combat-lab combat-assets _site
+
+      - name: Vérifier les bytes, SHA, propriétaire et non-activation de la livraison Pages
+        env:
+          COMBAT_LAB_ROOT: ${{ github.workspace }}/combat-lab
+          COMBAT_ASSETS_ROOT: ${{ github.workspace }}/combat-assets
+          CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
+        run: |
+          node --test tests/gens_capture_lab_pages_pipeline_v1.test.cjs
+          node --test tests/gens_capture_lab_delivery_v1.test.cjs
+          node --test tests/gens_capture_lab_pages_site_v1.test.cjs
+          node --test tests/gens_capture_official_hub_composition_v1.test.cjs
+          node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs
 
       - name: Tester le chargement réel mur HD et pions adaptatifs Dungeon
         run: node tests/dungeon_wall_visual_v167866.test.cjs _site/index.html

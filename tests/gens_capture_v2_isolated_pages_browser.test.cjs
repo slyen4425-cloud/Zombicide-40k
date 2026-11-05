@@ -51,6 +51,8 @@ test('Adventure starts from the Pages menu and saves a native encounter once at 
   await start();
   const adventure=page.frameLocator('#gensCaptureV2Root iframe');
   const starter=adventure.locator('#adventure-starter:not([disabled])');
+  assert.equal(await adventure.locator('#adventure-combat-hp-percent').inputValue(),'25',
+   'a new Adventure defaults to 25% HP while the advanced setting stays optional');
   await starter.selectOption('crea_lumilo');
   await adventure.locator('#adventure-create').tap();
   // Use the real world authoring APIs for a plain, walkable area with a
@@ -93,6 +95,14 @@ test('Adventure starts from the Pages menu and saves a native encounter once at 
    }),{cause:error});
   }
   assert.equal(await fight.locator('[data-combat-skill]').count(),1,'only the true level-one skill is available');
+  const activeParty=await page.evaluate(()=>{
+   const saved=JSON.parse(localStorage.getItem('gensrpg.capture.v2.adventure.save.v1')??'null');
+   if(!saved?.sessionId)return null;
+   return JSON.parse(sessionStorage.getItem('gensrpg.capture.v2.active-party.v1:'+saved.sessionId)??'null');
+  });
+  assert.equal(activeParty?.combatHpMultiplier,0.25,
+   'native Encounter must receive the saved 25% real-game policy');
+  assert.equal(activeParty?.active?.level,1,'the transported player is still level one');
   await fight.locator('[data-encounter-flee]').tap();
   await battle.waitFor({state:'detached'});
   const saveKey='gensrpg.capture.v2.adventure.save.v1';

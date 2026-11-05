@@ -4,8 +4,9 @@
   "maxUncompressedBytes": 943718400,
   "maxPhysicalCaptureAssetRoots": 1,
   "requiredPreview": "preview/capture-v2-pr225",
-  "forbiddenLegacyRoots": [
-    "vendor/combat-lab",
-    "assets/gensrpg/capture/runtime-data"
+  "forbiddenLegacyRoots": [],
+  "requiredLegacy2v2Roots": [
+    "vendor/combat-lab/src/contracts/capture-creature-transfer-v1.js",
+    "assets/gensrpg/capture/runtime-data/author-inputs.json"
   ]
 }

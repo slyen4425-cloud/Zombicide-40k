@@ -1,3 +1,14 @@
+## 2026-11-05 — Monster Capture Aventure : afficher le résultat officiel de combat après sauvegarde (C2 DÉBUT, NON PUBLIÉ)
+
+- **Source** : la nouvelle prévisualisation Monster Capture vient d'être publiée dans le seul sous-dossier `/preview/capture-v2-pr225/` depuis GenSRPG main `e2124541f4f023695c50ddd90125aa752a792718`, source de jeu certifiée `bd9c16213cb93e9681282c733418c6660bc54a00` (4/4 CI de source, vrai Browser et Native, combinaison Combat main `954f38e6`, Exploration main `4bfb15a3`). Publisher PR #276 main CI Pages #42073032932 SUCCESS, HTTPS vérifié, racine et SW préservés.
+- **START** : `checkpoint/gensrpg-start-adventure-combat-result-screen-2026-11-05` depuis ce SHA de la source de jeu certifiée ; branche unique `work/gensrpg-adventure-combat-result-screen-2026-11-05` (candidat superposé à la source PR #273, pas une branche labo).
+- **Cause/résultat** : XP, niveaux, PV, monnaie et loot sont déjà validés, calculés et sauvegardés une seule fois par le propriétaire Monster Capture après le vrai `CaptureCombatResult` dans `commitAdventureCombatResultV1`. Cependant la page de jeu masque la fiche Aventure sous l'iframe Exploration pendant les combats, et le joueur ne dispose pas d'un récapitulatif lisible immédiatement après un retour gagnant/perdant/fuite.
+- **Périmètre** : affichage **après** la confirmation `persisted:true` de l'unique sauvegarde Core ; overlay accessible sur smartphone paysage, victoire/défaite/fuite, XP obtenue, palier atteint, monnaie/drops effectivement enregistrés, PV restant, continuer l'exploration. Aucun lancer de butin côté UI, aucune compétence ou objet supplémentaire, aucune altération de la réponse Combat/Exploration, de la sauvegarde ou du Tester. Les doublons de résultats ne doivent jamais afficher un second écran comme un nouvel award.
+- **TDD** : RED sur l'absence de port d'affichage `onCommitted` et de la présentation à partir de la sauvegarde authentique, puis GREEN avec tests unitaires d'événement persistant, idempotence, échec de stockage, encodage de texte sûr ; vrais tests de non-régression Clean Root + parcours navigateur et CI. Checkpoint GREEN avant promotion du nouveau source SHA dans un lot publisher DISTINCT.
+- **Rappel** : Dungeon, Survie, PvP et l'éditeur d'objets futur (Monster Capture seulement) restent hors de ce lot. Aucune modification de main, des Labs ou du lien public déjà certifié avant réussite complète.
+
+---
+
 ## 2026-11-05 — Monster Capture : allocations réelles de statistiques dans une AdventureSession (C2 EN COURS, PAS ENCORE PUBLIÉ)
 
 - **Choix de périmètre utilisateur** : GenSRPG reste une application multi-modes. Les règles, les objets/loot et le futur éditeur d'objets appartiennent au **module Monster Capture**, réutilisable par chaque jeu créé ; aucune activation dans Dungeon/Survie/PvP. Le chantier Dungeon est explicitement différé jusqu'à une partie Monster Capture complète et vérifiée.

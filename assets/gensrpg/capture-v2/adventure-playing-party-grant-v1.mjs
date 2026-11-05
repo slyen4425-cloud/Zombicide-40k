@@ -47,8 +47,10 @@ export function writeAdventurePlayingPartyV1({
  const speciesId=safeId(saved?.speciesId,'speciesId');
  if(!grant.allowedCreatureIds.includes(speciesId))
   throw new RangeError('Owned playing species not published/ready in official Bestiaire');
- if(!Number.isSafeInteger(saved.level)||saved.level<1||saved.level>100)
-  throw new RangeError('Saved creature level must be between 1 and 100');
+ if(!Number.isSafeInteger(saved.level)||saved.level<1||
+    !Number.isSafeInteger(session.rules?.progression?.maxLevel)||
+    saved.level>session.rules.progression.maxLevel)
+  throw new RangeError('Saved creature level exceeds the creator-configured Adventure cap');
  if(saved.hp!==null&&(!Number.isFinite(saved.hp)||saved.hp<0||saved.hp>Number.MAX_SAFE_INTEGER))
   throw new RangeError('Saved creature HP must be null or a finite nonnegative number');
  const data=Object.freeze({

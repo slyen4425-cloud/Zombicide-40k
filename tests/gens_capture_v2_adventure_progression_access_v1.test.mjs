@@ -101,7 +101,7 @@ test('official Combat stat IDs may be allocated without overspending or replacin
  assert.throws(()=>allocateAdventureStatPointsV1({session:plus,registry,statId:'ghost',points:1}),/stat|officiel|unknown/i);
  assert.throws(()=>allocateAdventureStatPointsV1({session:plus,registry,statId:'health',points:-1}),/points|range/i);
  assert.throws(()=>allocateAdventureStatPointsV1({session:plus,registry,statId:'health',points:1.5}),/points|integer/i);
- assert.equal(g.party.active.statAllocations,undefined,'allocation must be immutable and owner-local');
+ assert.deepEqual(g.party.active.statAllocations,{},'allocation must preserve original session and base stat wallet');
 });
 test('creator/MJ and guest choices persist with the AdventureSession; never grant spawn or network authority by UI alone',()=>{
  const start=game();

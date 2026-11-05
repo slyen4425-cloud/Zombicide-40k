@@ -43,7 +43,7 @@ test('real Core Adventure level 250 passes same-origin official Exploration and 
  const snapshot={
   schema:'gensrpg-capture-adventure-save-v1',version:1,status:'playing',sessionId:id,
   world:{mapRef:worldId,position:null},
-  rules:{progression:{maxLevel:250}},
+  rules:{progression:{maxLevel:250},combat:{hpMultiplier:0.25}},
   party:{active:{instanceId:'owned-creature-1',speciesId:species,level:250,hp:35.5}}
  };
  const storage=new Map();
@@ -57,12 +57,14 @@ test('real Core Adventure level 250 passes same-origin official Exploration and 
   storage:disk,session:snapshot,world:{id:worldId},publicationGrant:grant,combatSha:pins.combat.sha
  });
  assert.equal(write.active.level,250);
+ assert.equal(write.combatHpMultiplier,0.25,'GenSRPG emits a single game-wide HP rule');
  const loaded=readScopedAdventurePlayingPartyV1({
   storage:disk,sessionId:id,worldId,authorSha:pins.combat.sha,engineSha:pins.combat.sha,
   allowedCreatureIds:grant.allowedCreatureIds
  });
  assert.equal(loaded.active.level,250,'native Exploration reads authored instance level without clamp');
- assert.equal(loaded.active.hp,35.5);
+ assert.equal(loaded.active.hp,35.5,'exact persisted HP is never quartered again');
+ assert.equal(loaded.combatHpMultiplier,0.25,'official Exploration accepts the native HP policy at level 250');
  const levels=resolveCaptureCombatCreatureLevelsV1({
   localCreatureIds:[species],opponentCreatureIds:['published.enemy'],
   creatureLevelsById:{[species]:loaded.active.level,'published.enemy':1}

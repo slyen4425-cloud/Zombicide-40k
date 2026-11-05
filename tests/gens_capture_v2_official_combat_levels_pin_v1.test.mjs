@@ -4,16 +4,18 @@ import fs from 'node:fs';
 import {resolveCaptureCombatCreatureLevelsV1} from '../_site/vendor/combat-lab/src/ui/capture-editor-combat-test-v1.js';
 import {readScopedAdventurePlayingPartyV1} from '../_site/vendor/exploration-lab/src/encounters/adventure-playing-party-v1.js';
 import {writeAdventurePlayingPartyV1} from '../assets/gensrpg/capture-v2/adventure-playing-party-grant-v1.mjs';
+import {projectCaptureEncounterOwnedStatsV1} from '../_site/vendor/combat-lab/src/adapters/input/capture/capture-encounter-owned-stats-v1.js';
+import {createAdventureSessionV1,SHOWCASE_ADVENTURE_RULES_V1} from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 
 const pins=JSON.parse(fs.readFileSync(new URL('../assets/gensrpg/capture-v2/source-pins-v1.json',import.meta.url),'utf8'));
 test('GenSRPG consumer explicitly pins certified Combat main owner commit with per-creature levels',()=>{
  assert.equal(pins.combat.ref,'main');
- assert.equal(pins.combat.sha,'53890e1383b33f7a0ec5bb2fafed59acf1d7a163');
- assert.equal(pins.combat.certifiedCiRun,41948369881);
+ assert.equal(pins.combat.sha,'954f38e6b84e842bc8bf6d8515d5c77b93aca5f1');
+ assert.equal(pins.combat.certifiedCiRun,42036361285);
  assert.equal(pins.exploration.ref,'main');
- assert.equal(pins.exploration.sha,'7155516b51db9892183cc043837037c4c87a0315',
+ assert.equal(pins.exploration.sha,'4bfb15a3092455bec879d3c5ad6098398759d0d3',
   'Exploration pin must be the certified official main, including real HP policy and exact Adventure duel');
- assert.equal(pins.exploration.certifiedCiRun,41949196778);
+ assert.equal(pins.exploration.certifiedCiRun,42056822806);
 });
 test('a true owned starter level 1 and an enemy level 3 project independently through official Combat',()=>{
  const levels=resolveCaptureCombatCreatureLevelsV1({
@@ -75,4 +77,49 @@ test('real Core Adventure level 250 passes same-origin official Exploration and 
  assert.throws(()=>writeAdventurePlayingPartyV1({
   storage:disk,session:invalid,world:{id:worldId},publicationGrant:grant,combatSha:pins.combat.sha
  }),/cap|level/i,'never write a party exceeding the creator configuration');
+});
+
+test('real GenSRPG wallet travels through official Exploration into official Combat per-instance stats',()=>{
+ const sessionId='owned-wallet-game-1',worldId='authored-world-1',speciesId='lumilo';
+ const statRegistry={schema:'capture-stat-registry-v1',stats:[
+  {id:'health',label:'Santé',maxHpPerPoint:1},
+  {id:'custom_focus',label:'Focus',outgoingDamagePctPerPoint:1.5}
+ ]};
+ const cards=[{id:speciesId,name:'Lumilo',skills:[{state:'ready'}]}];
+ const initial=createAdventureSessionV1({
+  bestiaryCards:cards,starterId:speciesId,rules:SHOWCASE_ADVENTURE_RULES_V1,
+  ids:{sessionId,instanceId:'owned-member-1'},now:'2026-11-05T14:00:00Z'
+ });
+ const session={...initial,status:'playing',world:{mapRef:worldId,position:null},
+  party:{active:{...initial.party.active,level:2,xp:2000,
+   statAllocations:{health:7,custom_focus:13}}}};
+ const disk=new Map(),storage={getItem:key=>disk.get(key)??null,setItem:(k,v)=>disk.set(k,v)};
+ const grant={schema:'gensrpg.capture.v2.published-encounters.v1',version:1,
+  sessionId,worldId,combatSha:pins.combat.sha,allowedCreatureIds:[speciesId]};
+ const input=writeAdventurePlayingPartyV1({
+  storage,session,world:{id:worldId},publicationGrant:grant,
+  combatSha:pins.combat.sha,statRegistry
+ });
+ assert.deepEqual(input.active.statAllocations,{health:7,custom_focus:13});
+ assert.equal(input.combatHpMultiplier,0.25);
+ const loaded=readScopedAdventurePlayingPartyV1({
+  storage,sessionId,worldId,authorSha:pins.combat.sha,engineSha:pins.combat.sha,
+  allowedCreatureIds:grant.allowedCreatureIds
+ });
+ assert.deepEqual(loaded.active.statAllocations,input.active.statAllocations,
+  'official Exploration preserves exact game wallet rather than computing stats');
+ assert.equal(loaded.active.level,2);
+ const authored={draft:{id:speciesId},statValues:{
+  schema:'capture-creature-stat-values-v1',creatureId:speciesId,
+  values:{health:100,custom_focus:4}
+ }};
+ const records=new Map([[speciesId,authored]]);
+ const nativeRecords=projectCaptureEncounterOwnedStatsV1({
+  configuredCreatures:records,statRegistry,speciesId:loaded.active.speciesId,
+  statAllocations:loaded.active.statAllocations
+ });
+ assert.equal(nativeRecords.get(speciesId).statValues.values.health,107);
+ assert.equal(nativeRecords.get(speciesId).statValues.values.custom_focus,17);
+ assert.equal(records.get(speciesId).statValues.values.health,100,
+  'official authored species values must never be overwritten');
 });

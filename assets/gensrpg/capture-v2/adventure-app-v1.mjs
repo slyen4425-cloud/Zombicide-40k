@@ -395,7 +395,8 @@ $('adventure-play').addEventListener('click',guarded(()=>{
  // Exploration owns encounter activation and consumes the projection.
  const refreshParty=session=>writeAdventurePlayingPartyV1({
   storage:window.sessionStorage,session,world,
-  publicationGrant:officialGrant,combatSha:officialCombatSha
+  publicationGrant:officialGrant,combatSha:officialCombatSha,
+   statRegistry:officialStatRegistry
  });
  refreshParty(result.session);
  const url=new URL('../../../vendor/exploration-lab/sculpt-lab.html',import.meta.url);

@@ -1,3 +1,15 @@
+## 2026-11-05 — Monster Capture : allocations réelles de statistiques dans une AdventureSession (C2 EN COURS, PAS ENCORE PUBLIÉ)
+
+- **Choix de périmètre utilisateur** : GenSRPG reste une application multi-modes. Les règles, les objets/loot et le futur éditeur d'objets appartiennent au **module Monster Capture**, réutilisable par chaque jeu créé ; aucune activation dans Dungeon/Survie/PvP. Le chantier Dungeon est explicitement différé jusqu'à une partie Monster Capture complète et vérifiée.
+- **START** : `checkpoint/gensrpg-start-adventure-owned-stats-grant-2026-11-05` sur source de jeu certifiée `e9166639aefbb18cf526d677622420c66594cd91`, publiée comme prévisualisation séparée par GenSRPG main #265 ; branche `work/gensrpg-adventure-owned-stats-grant-2026-11-05`. Dernier publisher GREEN `checkpoint/gensrpg-freecap-hp-pages-preview-green-2026-11-05`. Aucune écriture directe de main ou du site racine.
+- **Cause** : `AdventureSession.party.active.statAllocations` sauvegarde des points validés par le budget configurable (20/niveau vitrine), mais `writeAdventurePlayingPartyV1` projette seulement instance, espèce, niveau, PV et politique HP. Le consommateur n'a donc aucun bonus.
+- **Responsabilité** : GenSRPG valide et sauvegarde le portefeuille puis transmet une **copie éphémère et optionnelle** `active.statAllocations`. Exploration transporte seulement; Combat officiel projette les statistiques, coefficients, PV, dégâts et timing. Jamais de deuxième source de vérité ni de calcul dans le Shell.
+- **TDD prévu** : tests RED sur vrai grant sans bonus, puis transport des allocations, validation du portefeuille par la fonction existante `availableAdventureStatPointsV1`, rejet avant toute écriture si dépassement ou falsification, ancien grant sans champ préservé, PV exacts/défense/Tester inchangés, même espèce adverse non boostée dans le Lab officiel. CI + navigateur mobile paysage et test de reprise. Aucun changement du portefeuille sérialisé d'origine.
+- **Dépendances** : Combat PR #251 fusionnée sur main seulement après 5/5 tests, Exploration PR #371 transport lecteur optionnel, chacun avec sa CI de main et SHA immuable. Les pins officiels du candidat ne bougeront **qu'après** la certification des deux mains. Puis publication de la nouvelle source sur le publisher isolé au moyen d'une PR distincte et smoke HTTPS ; prévisualisation précédente conservée comme rollback.
+- **Prochaine étape** : tests RED sur projection, correction propriétaire puis CI, statut réel séparé de la livraison Pages. Hors périmètre : système objets Monster Capture (lot ultérieur), arènes, jeu réseau, Dungeon.
+
+---
+
 ## 2026-11-05 — Intégration indépendante PV vitrine + plafond libre (C2, NON PUBLIÉ)
 
 - **START réel** : `checkpoint/gensrpg-start-adventure-hp-freecap-integration-2026-11-05` @ `7455165c5bcbe921b218f3e0fb7f3a1d53fb6691` (PR #264, 4/4 CI SUCCESS). Branche unique `work/gensrpg-adventure-hp-freecap-integration-2026-11-05`. Dernier vert : PR #264, CI Clean Browser #41950711141 et Native #41950711399.

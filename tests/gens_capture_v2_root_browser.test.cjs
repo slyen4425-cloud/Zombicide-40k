@@ -259,12 +259,32 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   });
   assert.ok(authored&&authored.includes('gen-ci-capture-world'),'canonical WorldDocument was not saved');
   await resumed.locator('#adventure-play').tap();
-  await page.waitForFunction(()=>{
-    const f=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument?.querySelector('#adventure-play-frame');
-    try{return !!f?.contentWindow?.__sculptPlayProbe?.().active &&
-      f.contentWindow.__sculptPlayProbe().playing &&
-      f.contentDocument.querySelector('#sculpt-canvas')?.width>300;}catch{return false;}
-  },null,{timeout:15000});
+  // Preserve the real-world assertion; if it fails, log the native iframe
+  // state instead of guessing whether this is a slow boot or a contract error.
+  try{
+    await page.waitForFunction(()=>{
+      const f=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument?.querySelector('#adventure-play-frame');
+      try{return !!f?.contentWindow?.__sculptPlayProbe?.().active &&
+        f.contentWindow.__sculptPlayProbe().playing &&
+        f.contentDocument.querySelector('#sculpt-canvas')?.width>300;}catch{return false;}
+    },null,{timeout:15000});
+  }catch(error){
+    const state=await page.evaluate(()=>{
+      const doc=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument;
+      const native=doc?.querySelector('#adventure-play-frame');
+      let probe=null,href=null,canvas=null;
+      try{probe=native?.contentWindow?.__sculptPlayProbe?.()??null;
+        href=native?.contentWindow?.location?.href??null;
+        canvas=native?.contentDocument?.querySelector('#sculpt-canvas')?.width??null;
+      }catch(failure){probe={error:String(failure)};}
+      return {playExists:!!native,playSrc:native?.getAttribute('src')??null,
+        href,probe,canvas,
+        adventureStatus:doc?.querySelector('#adventure-status')?.textContent??null,
+        adventureSave:doc?.querySelector('#adventure-save-summary')?.textContent??null};
+    });
+    throw new Error('Real scoped Adventure map never started: '+JSON.stringify(state)+
+      ' / page errors '+JSON.stringify(errors)+' / '+error.message);
+  }
   const launched=await resumed.locator('#adventure-play-frame').evaluate(frame=>{
     const w=frame.contentWindow;
     return {session:new URL(w.location.href).searchParams.get('adventureSession'),

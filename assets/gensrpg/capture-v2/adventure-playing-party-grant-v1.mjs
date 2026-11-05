@@ -1,7 +1,7 @@
 // Capture Aventure owns the saved party. This emits a short-lived, versioned
 // PROJECTION of its actual member to the first-party Exploration runtime.
 // It never creates an actor, battle, level, creature definition or XP source.
-import {ADVENTURE_SAVE_SCHEMA_V1} from './adventure-contract-v1.mjs';
+import {ADVENTURE_SAVE_SCHEMA_V1,availableAdventureStatPointsV1} from './adventure-contract-v1.mjs';
 import {ADVENTURE_PUBLISHED_GRANT_SCHEMA_V1} from './adventure-publication-grant-v1.mjs';
 
 export const ADVENTURE_PLAYING_PARTY_SCHEMA_V1='gensrpg.capture.v2.active-party.v1';
@@ -18,7 +18,7 @@ function exact(value,keys,label){
  return value;
 }
 export function writeAdventurePlayingPartyV1({
- storage,session,world,publicationGrant,combatSha
+ storage,session,world,publicationGrant,combatSha,statRegistry=null
 }={}){
  if(typeof storage?.setItem!=='function'||typeof storage?.getItem!=='function')
   throw new TypeError('Official same-origin sessionStorage required');
@@ -53,6 +53,33 @@ export function writeAdventurePlayingPartyV1({
   throw new RangeError('Saved creature level exceeds the creator-configured Adventure cap');
  if(saved.hp!==null&&(!Number.isFinite(saved.hp)||saved.hp<0||saved.hp>Number.MAX_SAFE_INTEGER))
   throw new RangeError('Saved creature HP must be null or a finite nonnegative number');
+ // The Core is the only owner of spent/earned stat budgets. Combat's
+ // published registry is the only owner of stat IDs and their effects.
+ // This projection is an optional, short-lived COPY, never a source value.
+ const hasStatAllocations=Object.hasOwn(saved,'statAllocations');
+ let statAllocations=null;
+ if(hasStatAllocations){
+  const raw=saved.statAllocations;
+  if(!raw||typeof raw!=='object'||Array.isArray(raw)||
+     Object.getPrototypeOf(raw)!==Object.prototype)
+   throw new TypeError('Adventure statAllocations must be a plain object');
+  availableAdventureStatPointsV1(session);
+  const entries=Object.entries(raw);
+  if(entries.length){
+   if(statRegistry?.schema!=='capture-stat-registry-v1'||
+      !Array.isArray(statRegistry.stats))
+    throw new TypeError('Official Combat statRegistry required for allocations');
+   const allowed=new Set(statRegistry.stats.map(x=>x.id));
+   for(const [id,points] of entries){
+    safeId(id,'statId');
+    if(!allowed.has(id))
+     throw new RangeError('Stat absent du registre officiel Combat: '+id);
+    if(typeof points!=='number'||!Number.isSafeInteger(points)||points<0)
+     throw new RangeError('Invalid Adventure stat allocation points');
+   }
+  }
+  statAllocations=Object.freeze(Object.fromEntries(entries));
+ }
  // Project only the creator's game-wide combat policy; preserve real saved HP.
  const multiplier=session.rules?.combat?.hpMultiplier ?? 1;
  if(typeof multiplier!=='number'||!Number.isFinite(multiplier)||multiplier<=0||multiplier>1)
@@ -61,7 +88,8 @@ export function writeAdventurePlayingPartyV1({
   schema:ADVENTURE_PLAYING_PARTY_SCHEMA_V1,version:1,
   sessionId,worldId,combatSha:grant.combatSha,
   partyRef:'adventure-party:'+sessionId,
-  active:Object.freeze({instanceId,speciesId,level:saved.level,hp:saved.hp}),
+  active:Object.freeze({instanceId,speciesId,level:saved.level,hp:saved.hp,
+   ...(hasStatAllocations?{statAllocations}:{})}),
   combatHpMultiplier:multiplier
  });
  storage.setItem(ADVENTURE_PLAYING_PARTY_SCHEMA_V1+':'+sessionId,

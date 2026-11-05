@@ -40,3 +40,33 @@ output{display:block;overflow-wrap:anywhere}
 @media(orientation:landscape) and (max-height:550px){.adventure-head{margin-bottom:8px}.adventure-columns>section,.adventure-columns>details{padding:10px}}
 
 #adventure-play-frame{position:fixed;inset:0;width:100%;height:100%;border:0}
+
+/* Creator presets remain collapsible; on mobile the stat wallet and tier
+   editor remain usable without a developer-only full-width command ribbon. */
+.xp-bands-panel[hidden]{display:none!important}
+.xp-bands{display:grid;gap:8px;margin:10px 0}
+.xp-band-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;
+ gap:8px;align-items:end;padding:8px 10px;border:1px solid #345965;
+ border-radius:10px;background:#102a35}
+.xp-band-row label{margin:0;min-width:0}
+.xp-band-row input{min-width:0}
+.xp-band-row button{min-height:40px;padding:8px}
+.adventure-stat-wallet{margin:10px 0;padding:12px;border:1px solid #306861;
+ border-radius:10px;background:#112c32}
+#adventure-stat-points-left{font-size:15px;font-weight:750;color:#a3ead0;margin:6px 0 10px}
+.adventure-stat-wallet .rule-row{gap:6px;flex-wrap:wrap}
+.adventure-stat-wallet .rule-row>.actions{margin:0;gap:5px}
+.adventure-stat-wallet .rule-row>.actions button{min-width:48px}
+.adventure-options label:has(input[type=checkbox]){
+ display:flex;justify-content:space-between;align-items:center;gap:10px}
+.adventure-options label input[type=checkbox]{
+ flex:0 0 auto;width:20px;height:20px;accent-color:#75d6b7}
+@media(orientation:landscape) and (max-height:550px){
+ .xp-band-row{padding:6px;gap:5px}
+ .xp-band-row input{height:36px}
+ .adventure-stat-wallet{padding:8px}
+}
+@media(max-width:580px){
+ .xp-band-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .xp-band-row button{grid-column:1/-1}
+}

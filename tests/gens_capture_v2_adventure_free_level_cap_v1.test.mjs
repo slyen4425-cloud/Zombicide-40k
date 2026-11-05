@@ -66,7 +66,7 @@ test('same-origin Adventure party grant never clamps a valid saved level to 100'
  const grant=writeAdventurePlayingPartyV1({
   storage:{setItem:(k,v)=>writes.set(k,v),getItem:k=>writes.get(k)??null},
   session,world:{id:'world-1'},combatSha:'a'.repeat(40),
-  publicationGrant:{schema:'gensrpg.capture.v2.published-encounter.v1',version:1,
+  publicationGrant:{schema:'gensrpg.capture.v2.published-encounters.v1',version:1,
    sessionId:session.sessionId,worldId:'world-1',combatSha:'a'.repeat(40),
    allowedCreatureIds:['lumilo']}
  });

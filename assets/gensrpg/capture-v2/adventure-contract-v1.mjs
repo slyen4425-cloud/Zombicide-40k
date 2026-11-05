@@ -177,6 +177,99 @@ export function normalizeAdventureRulesV1(input){
    talentPointsPerLevel:hero.talentPointsPerLevel}
  });
 }
+// Convert creator-friendly XP intervals to the threshold table accepted by
+// the existing GenSRPG Core Progression. The CORE alone calculates levels.
+export function coreAdventureProgressionConfigV1(input){
+ const p=object(input,'progression');
+ if(p.xpCurveMode==='linear')
+  return freeze({xpCurveMode:'linear',xpPerLevel:p.xpPerLevel,maxLevel:p.maxLevel});
+ if(p.xpCurveMode!=='custom'||!Array.isArray(p.xpBands))
+  throw new RangeError('Custom Adventure XP bands are required');
+ const xpThresholds={};let cumulative=0;
+ for(let next=2;next<=p.maxLevel;next++){
+  const bracket=p.xpBands.find(b=>next<=b.throughLevel);
+  if(!bracket)throw new RangeError('XP bands do not cover level '+next);
+  cumulative+=bracket.xpPerLevel;
+  if(!Number.isSafeInteger(cumulative))
+   throw new RangeError('Total XP threshold overflow');
+  xpThresholds[next]=cumulative;
+ }
+ return freeze({xpCurveMode:'custom',xpPerLevel:p.xpPerLevel,
+  maxLevel:p.maxLevel,xpThresholds});
+}
+// These declarations belong to the AdventureSession, not to a fabricated
+// multiplayer server or a second exploration Game Master runtime.
+export const DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1=freeze({
+ editProgression:false,editRewards:false,editWorld:false,
+ allocateOwnCreatureStats:true
+});
+function normalizeAdventureSessionControlV1(raw){
+ const value=exact(raw,['creatorId','hostIsGameMaster','joinEnabled','guestPermissions'],
+  'AdventureSessionControl');
+ const guest=exact(value.guestPermissions,
+  ['editProgression','editRewards','editWorld','allocateOwnCreatureStats'],
+  'guestPermissions');
+ if(typeof value.hostIsGameMaster!=='boolean'||typeof value.joinEnabled!=='boolean')
+  throw new TypeError('AdventureSessionControl flags must be boolean');
+ for(const [name,allowed] of Object.entries(guest))
+  if(typeof allowed!=='boolean')
+   throw new TypeError('guestPermissions.'+name+' must be boolean');
+ return freeze({creatorId:identity(value.creatorId,'creatorId'),
+  hostIsGameMaster:value.hostIsGameMaster,joinEnabled:value.joinEnabled,
+  guestPermissions:{...guest}});
+}
+function statWallet(actor,progression){
+ const allocations=actor.statAllocations??{};
+ object(allocations,'Creature statAllocations');
+ let spent=0;
+ for(const [statId,amount] of Object.entries(allocations)){
+  identity(statId,'statId');
+  spent+=integer(amount,'statAllocations.'+statId,0,100000);
+  if(!Number.isSafeInteger(spent))throw new RangeError('Stat point sum overflow');
+ }
+ const earned=(actor.level-1)*(progression.statPointsPerLevel??0);
+ if(!Number.isSafeInteger(earned)||spent>earned)
+  throw new RangeError('Creature stat points spent exceed earned level budget');
+ return {spent,earned};
+}
+export function availableAdventureStatPointsV1(session){
+ const v=assertSession(session);
+ const wallet=statWallet(v.party.active,normalizeAdventureRulesV1(v.rules).progression);
+ return wallet.earned-wallet.spent;
+}
+// The actual stat IDs come ONLY from Combat's published registry. This stores
+// bonus allocations, not a second authority for stat effects or base values.
+export function allocateAdventureStatPointsV1({session,registry,statId,points,now}={}){
+ const v=assertSession(session);
+ const id=identity(statId,'statId');
+ if(registry?.schema!=='capture-stat-registry-v1'||!Array.isArray(registry.stats)||
+    !registry.stats.some(entry=>entry.id===id))
+  throw new RangeError('Stat absent du registre officiel Combat');
+ const amount=integer(points,'points to allocate',1,100000);
+ if(amount>availableAdventureStatPointsV1(v))
+  throw new RangeError('Not enough available creature stat points');
+ const actor=v.party.active;
+ const statAllocations={...(actor.statAllocations??{})};
+ statAllocations[id]=(statAllocations[id]??0)+amount;
+ const updated=freeze({...v,updatedAt:iso(now??v.updatedAt,'now'),
+  party:{...v.party,active:{...actor,statAllocations}}});
+ assertSession(updated);
+ return updated;
+}
+export function updateAdventureSessionControlV1({session,settings,now}={}){
+ const v=assertSession(session);
+ if(!v.sessionControl)
+  throw new Error('Legacy session requires an explicit creator-control migration');
+ const input=exact(settings,['hostIsGameMaster','joinEnabled','guestPermissions'],
+  'session control settings');
+ const sessionControl=normalizeAdventureSessionControlV1({
+  ...input,creatorId:v.sessionControl.creatorId
+ });
+ const updated=freeze({...v,updatedAt:iso(now??v.updatedAt,'now'),sessionControl});
+ assertSession(updated);
+ return updated;
+}
+
 // This function NEVER decides if a draft is published: the official Combat
 // captureBestiaryCardsV1 already made that decision with face/back/icon assets.
 // Using the identical result preserves the Bestiary's publication predicate.

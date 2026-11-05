@@ -15,6 +15,10 @@ test('the public publisher never repackages the old full Combat lab',()=>{
   'the old package-only gate must be kept only in its standalone, non-publishing CI');
  const manual=fs.readFileSync(path.join(root,'.github/workflows/capture-lab-delivery.yml'),'utf8');
  assert.match(manual,/stage_capture_lab_delivery\.mjs/);
+ const triggers=manual.split(/\npermissions:/)[0];
+ assert.match(triggers,/on:\s*\n  workflow_dispatch:/);
+ assert.doesNotMatch(triggers,/\n  (?:push|pull_request):/,
+  'retired full-Lab artifact job must not be generated automatically for PRs or pushes');
  assert.doesNotMatch(manual,/actions\/deploy-pages@|actions\/upload-pages-artifact@/,
   'manual legacy package may be audited as an artifact, never published as another site');
 });

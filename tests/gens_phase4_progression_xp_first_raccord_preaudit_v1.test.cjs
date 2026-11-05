@@ -17,10 +17,12 @@ const sw=read('service-worker.js');
 const owners=read('docs/GENSRPG_PHASE2_INLINE_GLOBAL_LAST_OWNERS.tsv');
 
 const indexBlob=crypto.createHash('sha1').update(Buffer.from('blob '+indexBuf.length+'\0')).update(indexBuf).digest('hex');
-const coreBlob=crypto.createHash('sha1').update(Buffer.from('blob '+coreBuf.length+'\0')).update(coreBuf).digest('hex');
 assert.equal(indexBuf.length,8165438,'first-raccord preaudit must track the exact current Phase 7 Dungeon generated Boss policy index');
 assert.equal(indexBlob,'1a61147d5a32889fa85e6a09e846049103b9f0bf','index blob drifted from the Phase 7 Dungeon generated Boss policy baseline');
-assert.equal(coreBlob,'3cca29084ce436a8dcae95e5d6d745edd4afa3cf','current Core Progression contract blob drifted');
+// The phase-4 source hash was retired by the certified, compatible Core XP-band
+// extension. Guard the public behavior below instead of freezing obsolete bytes.
+assert.match(coreSource,/function progressInBands\(/,
+  'only the existing Core Progression may interpret compact creator XP bands');
 
 function scriptBody(id){
   const marker='<script id="'+id+'">';
@@ -71,6 +73,31 @@ function runtime({profile=null,rules={xpPerLevel:10}}={}){
   vm.runInContext(coreSource,ctx,{filename:corePath});
   vm.runInContext(core044,ctx,{filename:'dungeonCore044HeroProgression'});
   return ctx;
+}
+
+// Core owner extension: the real compact progression is tested at cost changes,
+// on optional high-level caps, and on the original single-source Core API.
+// No per-level threshold materialization or alternate UI XP calculator is allowed.
+{
+  const ctx=runtime();
+  const p={xpCurveMode:'custom',xpPerLevel:2000,maxLevel:250,
+    xpBands:[{throughLevel:20,xpPerLevel:2000},{throughLevel:250,xpPerLevel:4000}]};
+  for(const [xp,level,remaining] of [
+    [0,1,0],[37999,19,1999],[38000,20,0],[41999,20,3999],
+    [42000,21,0],[37999+230*4000,249,3999],[38000+230*4000,250,0]
+  ]){
+    assert.equal(ctx.GensProgressionV1.levelFromXp(xp,p),level,
+      'Core levelFromXp: compact XP bands must honor creator thresholds');
+    assert.equal(ctx.GensProgressionV1.xpIntoLevel(xp,p),remaining,
+      'Core xpIntoLevel: compact XP bands must preserve exact within-level XP');
+  }
+  const large={xpCurveMode:'custom',xpPerLevel:5,maxLevel:1_000_000,
+    xpBands:[{throughLevel:1_000_000,xpPerLevel:5}]};
+  assert.equal(ctx.GensProgressionV1.levelFromXp(4_999_995,large),1_000_000);
+  assert.equal(ctx.GensProgressionV1.xpIntoLevel(4_999_994,large),4);
+  assert.throws(()=>ctx.GensProgressionV1.levelFromXp(100,{
+    xpCurveMode:'custom',maxLevel:250,xpBands:[{throughLevel:100,xpPerLevel:0}]
+  }),/XP band/,'invalid editor bands must fail rather than silently grant XP');
 }
 
 // Profile-active branch: exact Core parity across linear/custom/coercion cases.

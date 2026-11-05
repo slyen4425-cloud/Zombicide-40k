@@ -287,7 +287,7 @@ export function publishedAdventureSpeciesV1(officialBestiaryCards){
 export function calculateAdventureXpV1({rules,allyLevel,enemyLevel}){
  const rule=normalizeAdventureRulesV1(rules);
  const local=integer(allyLevel,'allyLevel',1,rule.progression.maxLevel);
- const enemy=integer(enemyLevel,'enemyLevel',1,rule.progression.maxLevel);
+ const enemy=integer(enemyLevel,'enemyLevel',1,100);
  const gap=enemy-local;
  const multiplier=gap>=0
   ?(1+rule.xp.higherEnemyBonusPercent/100)**gap
@@ -311,6 +311,9 @@ function assertSession(session){
  identity(actor.speciesId,'party.active.speciesId');
  integer(actor.level,'party.active.level',1,v.rules.progression.maxLevel);
  integer(actor.xp,'party.active.xp');
+ statWallet(actor,normalizeAdventureRulesV1(v.rules).progression);
+ if(Object.hasOwn(v,'sessionControl'))
+  normalizeAdventureSessionControlV1(v.sessionControl);
  if(actor.hp!==null)number(actor.hp,'party.active.hp');
  if(Object.hasOwn(v,'hero')){
   const hasDefinition=Object.hasOwn(v.hero,'definitionId');
@@ -353,7 +356,13 @@ export function createAdventureSessionV1({
  return freeze({
   schema:ADVENTURE_SAVE_SCHEMA_V1,version:1,sessionId,
   status:'configured',createdAt:timestamp,updatedAt:timestamp,rules:settings,
-  party:{active:{instanceId,speciesId:starter.id,level:1,xp:0,hp:null}},
+  party:{active:{instanceId,speciesId:starter.id,level:1,xp:0,hp:null,
+   ...(settings.progression.statPointsPerLevel===undefined?{}:{statAllocations:{}})}},
+  sessionControl:{
+   creatorId:identity(ids?.creatorId??'owner-'+sessionId,'creatorId'),
+   hostIsGameMaster:false,joinEnabled:false,
+   guestPermissions:{...DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1}
+  },
   hero:{
    ...(heroDefinitionId===null?{}:{definitionId:officialAdventureHeroDefinitionIdV1(heroDefinitionId)}),
    progression:settings.heroProgression.enabled
@@ -407,7 +416,8 @@ export function applyAdventureCombatResultV1({
   ?calculateAdventureXpV1({rules:state.rules,allyLevel:before,enemyLevel:enemy.level}).xp:0;
  const total=state.party.active.xp+amount;
  integer(total,'new accumulated XP');
- const level=progressionCore.levelFromXp(total,state.rules.progression);
+ const level=progressionCore.levelFromXp(total,
+  coreAdventureProgressionConfigV1(normalizeAdventureRulesV1(state.rules).progression));
  integer(level,'Core progression level',1,state.rules.progression.maxLevel);
  const currency=result.outcome==='victory'?state.rules.loot.currencyPerVictory:0;
  const itemCounts={...state.inventory.items};

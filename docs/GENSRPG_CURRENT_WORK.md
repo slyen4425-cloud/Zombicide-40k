@@ -1,3 +1,12 @@
+## 2026-11-05 — Prévisualisation isolée Monster Capture : PV x0,25 en Jouer (PUBLIER SEULEMENT APRÈS CI)
+
+- **Propriétaire de publication unique** : `.github/workflows/main.yml` sur le dépôt GenSrpG, uniquement dans `/preview/capture-v2-pr225/`. BASE `main@187f388ac4741ccb8e5f1ed5d5a64cfebe9a5448`, START `checkpoint/gensrpg-start-adventure-hp-pages-2026-11-05`, WORK `work/gensrpg-adventure-hp-pages-2026-11-05`. Ancien pin public de retour arrière : `379cd2aa3051ce553f9e034e0cd544a4aef9f4bb`.
+- **Candidat source figé** : `work/gensrpg-adventure-hp-policy-2026-11-05@4a80860ab682323be6b32fd97aab24436688f05c` (GenSrpG PR #260) ; contenant le contrat Aventure 25 % configurable, le pin Combat officiel `main@dd15e3e2df0d36d039a554e89e094aba28b43dff` (CI 41941322932), Exploration officiel `main@2b27339a5706fcdb436558aeebd4f8b6b0ce9d85` (CI main 41945445069 **à certifier**), et la même source visuelle `global-assets@aded6a9b`.
+- **Périmètre exclusif** : nouveau `tools/capture_v2_pages_preview_pin.json` et attentes de SHA exacts de la CI Publisher ; tests du paquet réellement assemblé, vrai navigateur de menu Jouer/Combat/Exploration et transport du réglage global ; documentation. Ne toucher **ni** à `index.html` production, ni service worker root, caches, profils PWA, règles des Labos, moteur Aventure ou sauvegardes. Aucune deuxième autorité de PV.
+- **Gate immuable avant merge** : CI complète du candidat 4a80860, CI Exploration main #41945445069, TDD/CI du package `_site` et navigateur 932x430, sentinelles production, contrôle des versions/nom de cache, checkpoint GREEN sur SHA exact de la PR publisher et approbation de publication. Après fusion, Pages doit déployer **le SHA du publisher et le SHA du candidat** et vérifier HTTP + provenance. En cas d'échec, laisser PR draft, pas de publication prématurée.
+
+---
+
 ## 2026-11-04 — Publier le menu de jeu Monster Capture dans la prévisualisation HTTPS (CI / PUBLICATION NON ENCORE VALIDÉES)
 
 - **Propriétaire** : publisher unique GenSRPG `main`, sauvegarde et PWA racine protégés. Départ au `main@a981a5cd39f23e14c2b9c2161aa29f7d62188866` après la livraison Work #255, checkpoint `checkpoint/gensrpg-start-capture-game-menu-pages-2026-11-04`, branche unique `work/gensrpg-capture-game-menu-pages-2026-11-04`. Aucun changement du `main` sans PR, tests et revue, aucun autre publisher.

@@ -265,6 +265,7 @@ function showSave(){
   if(!state){
    text($('adventure-save-summary'),'Aucune partie créée.');
    $('adventure-play').disabled=true;
+   renderStatWallet();
    return;
   }
   $('adventure-play').disabled=false;
@@ -281,6 +282,7 @@ function showSave(){
     :' · Héros sans niveau')+
    (reward?' · Dernier combat : '+reward.outcome+' ('+reward.xp+' XP)':'')+
    ' · statut : '+(state.status==='configured'?'configuration enregistrée':'en cours'));
+  renderStatWallet();
  }catch(error){
   $('adventure-play').disabled=true;
   stateMessage('Sauvegarde protégée : '+error.message,true);
@@ -308,18 +310,35 @@ function guarded(callback){
  };
 }
 setFields(rules);
+setSessionControlFields(null);
 for(const field of Object.values(idField))$(field).addEventListener('input',updatePreview);
+$(idField.xpMode).addEventListener('change',()=>{toggleXpMode();updatePreview();});
+$('adventure-xp-band-add').addEventListener('click',guarded(()=>{
+ const bands=readXpBandRows();
+ if(!bands.length)throw new Error('Conserve au moins un palier de niveaux.');
+ const last=bands.at(-1),previous=bands.at(-2)?.throughLevel??1;
+ if(last.throughLevel-previous<2)
+  throw new Error('Diminue la borne du dernier palier avant d’en ajouter un.');
+ const middle=Math.floor((last.throughLevel+previous)/2);
+ bands.splice(bands.length-1,0,{throughLevel:middle,xpPerLevel:last.xpPerLevel});
+ renderXpBandRows(bands);updatePreview();
+}));
 $('adventure-enemy').addEventListener('change',updatePreview);
 $('adventure-starter').addEventListener('change',updatePreview);
 $('adventure-create').addEventListener('click',guarded(()=>{
  if(!published.length)throw new Error('Bestiaire officiel indisponible; aucun contenu fictif ne sera utilisé');
  rules=fromFields();
  const id=()=>crypto.randomUUID();
+ const now=new Date().toISOString();
  const state=createAdventureSessionV1({
   bestiaryCards:published,starterId:$('adventure-starter').value,
-  rules,ids:{sessionId:id(),instanceId:id()},now:new Date().toISOString()
+  rules,ids:{sessionId:id(),instanceId:id(),creatorId:id()},now
  });
- store.create(state);
+ const configured=updateAdventureSessionControlV1({
+  session:state,settings:sessionControlFromFields(),now
+ });
+ store.create(configured);
+ setSessionControlFields(configured);
  stateMessage('Partie sauvegardée. Tu peux entrer dans le monde si une carte est disponible dans le World Builder GenSRPG.');
  showSave();updatePreview();
 }));

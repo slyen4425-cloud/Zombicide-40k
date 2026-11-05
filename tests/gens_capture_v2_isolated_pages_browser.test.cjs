@@ -362,6 +362,9 @@ test('real HTTPS Jouer on mobile landscape saves creator cap 250, 33 stat points
    assert.equal(await page.locator('[data-xp-band-to]').last().inputValue(),'250',
     'last creator-defined XP band should expand visibly, not silently cap at 100');
    await page.locator('#adventure-stat-points-per-level').fill('33');
+   assert.equal(await page.locator('#adventure-combat-hp-percent').inputValue(),'25',
+    'new game must start with creator-editable 25 percent HP, not Tester HP');
+   await page.locator('#adventure-combat-hp-percent').fill('40');
    await page.locator('#adventure-hero-xp-enabled').check();
    await page.locator('#adventure-hero-max-level').fill('350');
    await page.locator('#adventure-create').tap();
@@ -373,6 +376,7 @@ test('real HTTPS Jouer on mobile landscape saves creator cap 250, 33 stat points
    let saved=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)),key);
    assert.equal(saved.rules.progression.maxLevel,250);
    assert.equal(saved.rules.progression.statPointsPerLevel,33);
+   assert.equal(saved.rules.combat.hpMultiplier,0.4,'creator controls HP through the game rule');
    assert.equal(saved.rules.progression.xpBands.at(-1).throughLevel,250);
    assert.equal(saved.rules.heroProgression.maxLevel,350);
    assert.equal(saved.rules.heroProgression.enabled,true);
@@ -383,6 +387,8 @@ test('real HTTPS Jouer on mobile landscape saves creator cap 250, 33 stat points
    await page.locator('#adventure-resume').tap();
    assert.equal(await page.locator('#adventure-level-max').inputValue(),'250');
    assert.equal(await page.locator('#adventure-stat-points-per-level').inputValue(),'33');
+   assert.equal(await page.locator('#adventure-combat-hp-percent').inputValue(),'40',
+    'resume displays saved creator HP policy without resetting to 25');
    assert.equal(await page.locator('#adventure-hero-max-level').inputValue(),'350');
    assert.equal(await page.locator('#adventure-gm-enabled').isChecked(),true);
    assert.equal(await page.locator('#adventure-join-enabled').isChecked(),true);

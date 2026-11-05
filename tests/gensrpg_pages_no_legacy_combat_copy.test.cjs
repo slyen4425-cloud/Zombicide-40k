@@ -13,7 +13,12 @@ test('publisher has exactly one live legacy 2v2 compatibility package and one of
  const legacy='node tools/stage_capture_lab_delivery.mjs combat-lab combat-assets _site';
  const native='node tools/stage_capture_v2_pages_preview.mjs';
  assert.equal(workflow.split(legacy).length,2,'the original 2v2 active transport may appear only once');
- assert.equal(workflow.split(native).length,2,'official V2 preview should be assembled once');
+ const reviewBoundary=workflow.indexOf('\n  capture-preview-review:');
+ assert.ok(reviewBoundary>0,'single non-publishing review job must stay separate');
+ const pagesBuild=workflow.slice(0,reviewBoundary);
+ const reviewBuild=workflow.slice(reviewBoundary);
+ assert.equal(pagesBuild.split(native).length,2,'public Pages builder must stage the V2 preview exactly once');
+ assert.equal(reviewBuild.split(native).length,2,'independent review builder stages the same pinned preview once');
  assert.ok(workflow.indexOf(legacy)<workflow.indexOf(native),
   'the legacy test should be validated before staging the current V2 subsite');
  assert.match(workflow,/node --test tests\/gensrpg_pages_release_budget\.test\.cjs/);

@@ -135,3 +135,22 @@ test('historical adventure saves without progression bands, stat wallets or host
  assert.deepEqual(store.load(),legacy);
  assert.equal(Object.hasOwn(store.load(),'sessionControl'),false);
 });
+
+test('showcase settings expose real game creation, 5 editable XP brackets and official-stat wallet',()=>{
+ const html=fs.readFileSync(new URL('../assets/gensrpg/capture-v2/adventure.html',import.meta.url),'utf8');
+ const script=fs.readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ for(const id of ['adventure-xp-mode','adventure-xp-bands','adventure-xp-band-add',
+  'adventure-stat-points-per-level','adventure-stat-wallet','adventure-stat-points-left',
+  'adventure-creator-panel','adventure-gm-enabled','adventure-join-enabled',
+  'adventure-guest-edit-progression','adventure-guest-edit-rewards',
+  'adventure-guest-edit-world','adventure-guest-allocate-stats','adventure-save-control']){
+   assert.ok(html.includes('id="'+id+'"'),'missing game setting/owner UI '+id);
+ }
+ assert.match(script,/SHOWCASE_ADVENTURE_RULES_V1/);
+ assert.match(script,/availableAdventureStatPointsV1/);
+ assert.match(script,/allocateAdventureStatPointsV1/);
+ assert.match(script,/updateAdventureSessionControlV1/);
+ assert.match(script,/officialStatRegistry/);
+ assert.match(script,/fetchJson\('\.\.\/\.\.\/\.\.\/vendor\/combat-lab\/data\/capture\/monster-capture-stat-registry\.v1\.json'\)/);
+ assert.doesNotMatch(script,/const AVAILABLE_STATS=\[/,'Combat registry is the sole stat authority');
+});

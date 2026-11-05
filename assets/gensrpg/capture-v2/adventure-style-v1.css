@@ -70,3 +70,25 @@ output{display:block;overflow-wrap:anywhere}
  .xp-band-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
  .xp-band-row button{grid-column:1/-1}
 }
+
+/* Result of the REAL persisted Monster Capture CombatResult. Kept outside
+   the Explorer iframe: no mutation of a Lab DOM or fullscreen battle UI. */
+#adventure-battle-result[hidden]{display:none!important}
+#adventure-battle-result{
+ position:fixed;inset:0;z-index:40;display:grid;place-items:center;
+ padding:clamp(10px,3vw,24px);background:rgba(3,12,17,.90);
+ overflow:auto;overscroll-behavior:contain
+}
+.adventure-result-content{
+ width:min(100%,560px);max-height:calc(100dvh - 20px);
+ overflow:auto;border:1px solid #5a9b92;border-radius:16px;
+ background:linear-gradient(140deg,#123f42,#102531);
+ box-shadow:0 14px 42px rgba(0,0,0,.45);
+ padding:clamp(12px,3vw,24px)
+}
+#adventure-battle-result-summary{font-size:clamp(13px,2.7vw,17px);line-height:1.55;overflow-wrap:anywhere}
+#adventure-battle-result-continue{background:#1b705c;border-color:#73d8b4;min-height:44px}
+@media(orientation:landscape) and (max-height:550px){
+ #adventure-battle-result{padding:8px}
+ .adventure-result-content{max-height:calc(100dvh - 16px);padding:12px}
+}

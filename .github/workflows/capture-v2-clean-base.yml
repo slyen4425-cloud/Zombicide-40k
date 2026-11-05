@@ -12,6 +12,7 @@ on:
       - 'tests/gens_capture_v2_game_menu_v1.test.cjs'
       - 'tests/gens_capture_v2_adventure_hero_progression_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_progression_access_v1.test.mjs'
+      - 'tests/gens_capture_v2_adventure_hp_policy_20261105.test.mjs'
       - 'tests/gens_capture_v2_generic_profile_owner.test.cjs'
       - 'tests/gens_capture_v2_root_browser.test.cjs'
       - 'tests/gens_capture_v2_pwa_cache_owner_v1.test.cjs'
@@ -62,6 +63,9 @@ jobs:
 
       - name: Aventure V2 — choix créateur progression du héros sans XP par défaut (TDD)
         run: node --test tests/gens_capture_v2_adventure_hero_progression_v1.test.mjs
+
+      - name: Aventure — PV 25 % configurable, sauvegardes anciennes intactes et niveaux libres (TDD)
+        run: node --test tests/gens_capture_v2_adventure_hp_policy_20261105.test.mjs
 
       - name: Aventure V2 — projection de l'instance réelle avant le Combat (TDD)
         run: node --test tests/gens_capture_v2_adventure_playing_party_grant_v1.test.mjs

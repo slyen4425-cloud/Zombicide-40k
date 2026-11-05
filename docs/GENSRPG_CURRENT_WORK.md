@@ -1,3 +1,15 @@
+## 2026-11-05 — Règle globale PV réels = 25 %, Tester = 100 % (CANDIDAT AVENTURE, NON PUBLIÉ)
+
+- **Signal utilisateur :** fiches de créatures à PV élevés pour la prévisualisation niveau 20 du Labo Combat ; en vraie partie débutant niveau 1 avec une seule capacité, les combats sont trop longs. Le jeu vitrine doit utiliser 25 % des PV maximum **des deux camps**, sans configurer chaque créature. Le mode `Tester` conserve l'intégralité des PV et des niveaux de test.
+- **Base du jeu Aventure** : candidat déjà certifié par PR #257 `379cd2aa3051ce553f9e034e0cd544a4aef9f4bb` ; START `checkpoint/gensrpg-start-adventure-hp-policy-2026-11-05`, WORK `work/gensrpg-adventure-hp-policy-2026-11-05`. Brancher sur le candidat Monster Capture, **pas sur la racine main** ni dans un second moteur.
+- **Propriétaire de la règle** : `assets/gensrpg/capture-v2/adventure-contract-v1.mjs`, unique `rules.combat.hpMultiplier=0.25` pour les **nouvelles parties**. Le créateur peut régler une seule fois le pourcentage dans « Progression » (1 % à 100 %), en section repliée. Une sauvegarde ancienne dépourvue du paramètre garde **100 %** des PV d'origine ; aucune migration destructrice.
+- **Chaîne unique** : `adventure-playing-party-grant-v1.mjs` transporte `combatHpMultiplier` avec la vraie instance, sans réécrire `active.hp` ou les fiches ; Exploration lit/valide le contrat et demande au **Labo Combat main** la projection sur son seul builder natif. Les PV restants exacts postcombat ne sont jamais divisés une seconde fois.
+- **Dépendances certifiables** : Combat PR #249 fusion `dd15e3e2df0d36d039a554e89e094aba28b43dff` après CI 5/5 ; Exploration PR #369 (pas encore fusionnée) ; le pin fournisseur actuel reste Combat `46b4efed` / Exploration `4e7abd15` **tant que cette seconde dépendance n'est pas GREEN**. Aucune recopie de code ou pin Work/gh-pages.
+- **TDD** : `tests/gens_capture_v2_adventure_hp_policy_20261105.test.mjs` vérifie le défaut 25 %, valeurs valides, sauvegardes historiques et HP fractionnaires inchangés ; tests anciens du grant protégés. **Ne pas déclarer livré** avant pin Combat main/Exploration main, tests du site assemblé réel, CI native + navigateur, checkpoint exact, nouveau paquet Pages et recette Android.
+- **Périmètre** : contrat Aventure, transport party, UI avancée, tests, documentation et ensuite pins officiels (sous un lot certifié). Interdits : fiches auteurs, Core stats, Combat / Exploration copiés, PWA production, anciens donjons, prototypes de Tester.
+
+---
+
 ## 2026-11-04 — Monster Capture : vrai menu de jeu et suppression des doublons Exploration (CI À CERTIFIER)
 
 - **Demande auteur** : remplacer les neuf boutons de laboratoires alignés par un menu de jeu lisible `Jouer` / `Éditeurs`, réunir les outils de monde au même endroit, enlever les descriptions techniques inutiles dans l'écran de partie. Artworks et refonte graphique plus poussée restent **hors lot**, après validation de l'ergonomie.

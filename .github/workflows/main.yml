@@ -306,20 +306,10 @@ jobs:
           index.write_text(html, encoding="utf-8")
           PY
 
-      - name: Construire la livraison Capture officielle passive depuis le publisher unique
-        run: node tools/stage_capture_lab_delivery.mjs combat-lab combat-assets _site
-
-      - name: Vérifier les bytes, SHA, propriétaire et non-activation de la livraison Pages
-        env:
-          COMBAT_LAB_ROOT: ${{ github.workspace }}/combat-lab
-          COMBAT_ASSETS_ROOT: ${{ github.workspace }}/combat-assets
-          CAPTURE_LAB_DELIVERY_SITE: ${{ github.workspace }}/_site
-        run: |
-          node --test tests/gens_capture_lab_pages_pipeline_v1.test.cjs
-          node --test tests/gens_capture_lab_delivery_v1.test.cjs
-          node --test tests/gens_capture_lab_pages_site_v1.test.cjs
-          node --test tests/gens_capture_official_hub_composition_v1.test.cjs
-          node tests/gens_phase9_capture_exit_gate_evidence_v1.test.cjs
+      # Historical Capture V1 packaging is available only in its isolated,
+      # non-deploying capture-lab-delivery workflow for audit/rollback.
+      # Do NOT stage its full Combat Lab in canonical Pages: Monster Capture V2
+      # already assembles the official source graph in its isolated preview.
 
       - name: Tester le chargement réel mur HD et pions adaptatifs Dungeon
         run: node tests/dungeon_wall_visual_v167866.test.cjs _site/index.html
@@ -464,6 +454,11 @@ jobs:
           node tools/stage_capture_v2_pages_preview.mjs capture-v2-source preview-combat-lab preview-exploration-lab _site preview-combat-assets
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
           node --test tests/gens_capture_v2_encounter_bridge_site.test.cjs
+
+      - name: Refuser toute seconde copie historique du Labo Combat dans Pages
+        run: |
+          node --test tests/gensrpg_pages_no_legacy_combat_copy.test.cjs
+          node --test tests/gens_capture_lab_pages_pipeline_v1.test.cjs
 
       - name: Install Chromium for real nested Capture V2 browser proof
         run: |

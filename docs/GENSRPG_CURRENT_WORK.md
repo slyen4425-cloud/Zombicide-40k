@@ -1,3 +1,12 @@
+## 2026-11-05 — Sentinelle Phase 4 Core Progression : préserver l'invariant fonctionnel (C1 TEST-ONLY)
+
+- **START** : `checkpoint/gensrpg-start-core-progression-historical-sentinel-2026-11-05` @ `e9166639aefbb18cf526d677622420c66594cd91` (candidat Aventure certifié), branche `work/gensrpg-core-progression-historical-sentinel-2026-11-05`. Dernier checkpoint source vert `checkpoint/gensrpg-adventure-hp-freecap-integration-green-2026-11-05`.
+- **RED préalable** : issue #268 et CI architecture #41970023730 sur la base source inchangée : `tests/gens_phase4_progression_xp_first_raccord_preaudit_v1.test.cjs` attend l'ancien blob Core `3cca2908` alors que la vraie version introduit, par PR #262, le support propriétaire des bandes XP compactes (`77c3d765`). Ne pas modifier le Core ou falsifier les SHAs.
+- **Changement unique** : dans le test historique, remplacer la comparaison d'octets Core désormais obsolète par des assertions comportementales Core `levelFromXp` / `xpIntoLevel` pour paliers personnalisés, frontières de tranches, ancienne table `xpThresholds`, niveaux libres et grandes plages sans million de seuils. Conserver la comparaison d'empreinte `index.html` issue de l'archive Phase 7 et toutes les validations de l'isolation Dungeon.
+- **Gates** : reproductibilité du RED sur parent, GREEN au vrai test Node historique et architecture CI au SHA exact (si un autre test indépendant échoue, le déclarer non GREEN). Aucun changement gameplay, Shell, publisher, SW, données/sauvegardes ou moteurs Lab. Ne fusionner ce lot ni le confondre avec le publisher #265 ; rollback START précité.
+
+---
+
 ## 2026-11-05 — Intégration indépendante PV vitrine + plafond libre (C2, NON PUBLIÉ)
 
 - **START réel** : `checkpoint/gensrpg-start-adventure-hp-freecap-integration-2026-11-05` @ `7455165c5bcbe921b218f3e0fb7f3a1d53fb6691` (PR #264, 4/4 CI SUCCESS). Branche unique `work/gensrpg-adventure-hp-freecap-integration-2026-11-05`. Dernier vert : PR #264, CI Clean Browser #41950711141 et Native #41950711399.

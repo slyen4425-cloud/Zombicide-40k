@@ -8,7 +8,7 @@ const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 test('only an approved Combat main can cause a source update',()=>{
  const y=read('.github/workflows/gensrpg-capture-combat-main-autosync.yml');
  const runner=read('tools/run_capture_combat_main_autosync.mjs');
- assert.match(y,/schedule:/);
+ assert.doesNotMatch(y,/\bschedule:/,'legacy V1 cannot auto-merge when new Combat main advances');
  assert.match(y,/workflow_dispatch:/);
  assert.match(y,/pull-requests: write/);
  assert.match(y,/concurrency:/);

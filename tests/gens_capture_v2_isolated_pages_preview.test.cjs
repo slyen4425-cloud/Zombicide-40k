@@ -162,3 +162,34 @@ test('the physical published preview contains the single native 2.5D destination
  assert.match(game,/<details id="adventure-rules-panel"/);
  assert.match(game,/<details id="adventure-loot-panel"/);
 });
+
+
+test('isolated HTTPS Jouer has creator-owned unlimited level caps, Core XP bands and the real Combat stat budget',()=>{
+ const game=read(trial,'assets/gensrpg/capture-v2/adventure.html').toString('utf8');
+ const app=read(trial,'assets/gensrpg/capture-v2/adventure-app-v1.mjs').toString('utf8');
+ const contract=read(trial,'assets/gensrpg/capture-v2/adventure-contract-v1.mjs').toString('utf8');
+ const core=read(trial,'assets/gensrpg/core/progression-v1.js').toString('utf8');
+ const playing=read(trial,'assets/gensrpg/capture-v2/adventure-playing-party-grant-v1.mjs').toString('utf8');
+ const exploration=read(trial,'vendor/exploration-lab/src/encounters/adventure-playing-party-v1.js').toString('utf8');
+ const combat=read(trial,'vendor/combat-lab/src/ui/capture-encounter-combat-source-v1.js').toString('utf8');
+ assert.match(game,/id="adventure-level-max"/);
+ assert.match(game,/id="adventure-hero-max-level"/);
+ for(const id of ['adventure-level-max','adventure-hero-max-level']){
+  const field=game.match(new RegExp('<input[^>]+id="'+id+'"[^>]*>'))?.[0];
+  assert.ok(field,'creator must see '+id);
+  assert.doesNotMatch(field,/max="100"/,'no 100 hard cap on '+id);
+ }
+ for(const id of ['adventure-xp-bands','adventure-stat-points-per-level','adventure-stat-wallet','adventure-gm-enabled'])
+  assert.ok(game.includes('id="'+id+'"'),'real game creator setting missing: '+id);
+ assert.match(contract,/SHOWCASE_ADVENTURE_RULES_V1/);
+ assert.match(core,/progressInBands/);
+ assert.match(app,/extendFinalXpBandToCap/);
+ assert.doesNotMatch(app,/upper\.max\s*=\s*100\b/);
+ assert.match(playing,/saved\.level>session\.rules\.progression\.maxLevel/);
+ assert.doesNotMatch(exploration,/active\.level\s*>\s*100\b/);
+ assert.doesNotMatch(combat,/participant\.level\s*>\s*100\b/);
+ const pins=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
+ assert.equal(json(trial,'release-provenance.v1.json').source.commit,previewSha);
+ assert.equal(pins.exploration.sha,explorationSha);
+ assert.equal(pins.combat.sha,combatSha);
+});

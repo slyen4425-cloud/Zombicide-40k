@@ -43,6 +43,100 @@ const numberFrom=id=>{
  if(!raw)throw new RangeError(id+' : renseigne une valeur');
  return Number(raw);
 };
+function readXpBandRows(){
+ return [...$('adventure-xp-bands').querySelectorAll('.xp-band-row')].map(row=>{
+  const throughLevel=Number(row.querySelector('[data-xp-band-to]').value);
+  const xpPerLevel=Number(row.querySelector('[data-xp-band-cost]').value);
+  return {throughLevel,xpPerLevel};
+ });
+}
+function renderXpBandRows(bands){
+ const host=$('adventure-xp-bands');host.replaceChildren();
+ for(const band of bands){
+  const row=document.createElement('div');row.className='xp-band-row';
+  const end=document.createElement('label');end.textContent="Jusqu'au niveau";
+  const upper=document.createElement('input');upper.type='number';upper.min=2;upper.max=100;
+  upper.step=1;upper.value=band.throughLevel;upper.dataset.xpBandTo='1';
+  const cost=document.createElement('label');cost.textContent="XP par niveau";
+  const xp=document.createElement('input');xp.type='number';xp.min=1;xp.max=1000000000;
+  xp.step=1;xp.value=band.xpPerLevel;xp.dataset.xpBandCost='1';
+  const remove=document.createElement('button');remove.type='button';
+  remove.textContent='Retirer';remove.disabled=bands.length===1;
+  remove.addEventListener('click',()=>{row.remove();updatePreview();});
+  upper.addEventListener('input',updatePreview);
+  xp.addEventListener('input',updatePreview);
+  end.append(upper);cost.append(xp);
+  row.append(end,cost,remove);host.append(row);
+ }
+}
+function toggleXpMode(){
+ const custom=$(idField.xpMode).value==='custom';
+ $('adventure-xp-bands-panel').hidden=!custom;
+ $(idField.level).disabled=custom;
+}
+function setSessionControlFields(saved){
+ const value=saved?.sessionControl;
+ const permissions=value?.guestPermissions??DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1;
+ $('adventure-gm-enabled').checked=value?.hostIsGameMaster??false;
+ $('adventure-join-enabled').checked=value?.joinEnabled??false;
+ $('adventure-guest-edit-progression').checked=permissions.editProgression;
+ $('adventure-guest-edit-rewards').checked=permissions.editRewards;
+ $('adventure-guest-edit-world').checked=permissions.editWorld;
+ $('adventure-guest-allocate-stats').checked=permissions.allocateOwnCreatureStats;
+ $('adventure-save-control').disabled=!value;
+}
+function sessionControlFromFields(){
+ return {
+  hostIsGameMaster:$('adventure-gm-enabled').checked,
+  joinEnabled:$('adventure-join-enabled').checked,
+  guestPermissions:{
+   editProgression:$('adventure-guest-edit-progression').checked,
+   editRewards:$('adventure-guest-edit-rewards').checked,
+   editWorld:$('adventure-guest-edit-world').checked,
+   allocateOwnCreatureStats:$('adventure-guest-allocate-stats').checked
+  }
+ };
+}
+function renderStatWallet(){
+ const rows=$('adventure-stat-rows'),availableLabel=$('adventure-stat-points-left');
+ rows.replaceChildren();
+ const current=store?.load();
+ if(!current){
+  text(availableLabel,'Crée une partie pour connaître tes points disponibles.');
+  return;
+ }
+ if(officialStatRegistry?.schema!=='capture-stat-registry-v1'||
+    !Array.isArray(officialStatRegistry.stats))
+  throw new Error('Registre officiel Combat indisponible pour la répartition');
+ const available=availableAdventureStatPointsV1(current);
+ text(availableLabel,available+' point(s) disponibles · '+
+  (current.rules.progression.statPointsPerLevel??0)+' par niveau');
+ for(const stat of officialStatRegistry.stats){
+  const line=document.createElement('div');line.className='rule-row';
+  const value=current.party.active.statAllocations?.[stat.id]??0;
+  const label=document.createElement('span');
+  label.textContent=stat.label+' · +'+value;
+  const actions=document.createElement('div');actions.className='actions';
+  for(const points of [1,5]){
+   const button=document.createElement('button');button.type='button';
+   button.textContent='+'+points;
+   button.disabled=available<points;
+   button.setAttribute('aria-label','Attribuer '+points+' point(s) en '+stat.label);
+   button.addEventListener('click',guarded(()=>{
+    const saved=store.load();
+    const changed=allocateAdventureStatPointsV1({
+     session:saved,registry:officialStatRegistry,statId:stat.id,
+     points,now:new Date().toISOString()
+    });
+    store.save(changed);
+    showSave();
+    stateMessage(points+' point(s) attribués en '+stat.label+'. Sauvegarde mise à jour.');
+   }));
+   actions.append(button);
+  }
+  line.append(label,actions);rows.append(line);
+ }
+}
 function setFields(value){
  $(idField.base).value=value.xp.baseVictoryXp;
  $(idField.bonus).value=value.xp.higherEnemyBonusPercent;

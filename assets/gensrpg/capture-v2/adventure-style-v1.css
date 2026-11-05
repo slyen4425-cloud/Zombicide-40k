@@ -70,3 +70,31 @@ output{display:block;overflow-wrap:anywhere}
  .xp-band-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
  .xp-band-row button{grid-column:1/-1}
 }
+
+
+/* Capture-owned in-game sheet, above the native Exploration iframe.
+   The browser's dialog top layer owns focus and Escape handling. */
+#adventure-play-hud[hidden]{display:none!important}
+#adventure-play-hud{position:fixed;z-index:15;top:max(8px,env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left))}
+#adventure-open-sheet{background:#125b4d;border:2px solid #8be5ca;min-height:44px;box-shadow:0 2px 14px #051016bb}
+#adventure-play-sheet{width:min(760px,calc(100vw - 24px));max-height:calc(100dvh - 18px);
+ margin:auto;border:1px solid #6cb7ad;border-radius:14px;color:#eafff6;
+ background:#102632;box-shadow:0 12px 35px #000b;padding:12px;overscroll-behavior:contain}
+#adventure-play-sheet::backdrop{background:#050f18c4}
+#adventure-play-sheet .sheet-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+#adventure-play-sheet h2{margin:3px 0 8px}
+#adventure-close-sheet{flex-shrink:0;min-height:44px;background:#1b705c}
+.sheet-tabs{display:flex;gap:5px;overflow-x:auto;padding:6px 0 9px}
+.sheet-tabs button{flex:1 0 auto;min-height:44px;padding:7px}
+.sheet-tabs button[aria-selected=true]{background:#1d6656;border-color:#8de3bd}
+#adventure-sheet-content{overflow-y:auto;max-height:min(54dvh,410px);min-height:82px}
+#adventure-sheet-content .rule-row{background:#102f39}
+#adventure-sheet-content .rule-row>span{min-width:0;overflow-wrap:anywhere}
+#adventure-sheet-content .actions{margin:3px;flex-shrink:0}
+#adventure-sheet-status{font-size:12px;color:#9be9ca;padding-top:6px}
+#adventure-sheet-status[data-error=true]{color:#ffb2a4}
+@media(orientation:landscape) and (max-height:550px){
+ #adventure-play-sheet{max-height:calc(100dvh - 8px);padding:8px}
+ #adventure-sheet-content{max-height:calc(100dvh - 147px);min-height:48px}
+ .sheet-tabs{padding:3px 0}
+}

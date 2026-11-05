@@ -70,6 +70,6 @@ test('editable percentage remains in the same compact Aventure UI without hardca
  assert.match(app,/combat:\{hpMultiplier:numberFrom\(idField\.hpPercent\)\/100\}/);
  assert.match(app,/idField\.hpPercent\)\.value=100\*value\.combat\.hpMultiplier/);
  const cap=html.match(/<input[^>]*id="adventure-level-max"[^>]*>/)?.[0];
- assert.ok(cap,'the creator's free creature cap remains editable');
+ assert.ok(cap,"the creator\'s free creature cap remains editable");
  assert.doesNotMatch(cap,/max="100"/,'100 is only the showcase preset');
 });

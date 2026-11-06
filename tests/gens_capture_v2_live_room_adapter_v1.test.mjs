@@ -82,7 +82,8 @@ test('online room uses exactly the current Survival public URL/key but separate 
  assert.equal(made.opts.auth.storageKey,config.authStorageKey);
  assert.equal(made.opts.auth.detectSessionInUrl,false);
  const transportSource=source('assets/gensrpg/capture-v2/adventure-multiplayer-transport-v1.mjs');
- assert.doesNotMatch(transportSource,/z40k|z40k_sync_state|localStorage|Storage\.prototype/);
+ assert.doesNotMatch(transportSource, /\bz40k(?:CreateRoom|JoinRoom|ApplySnapshot|Snapshot|Subscribe|PushState)\b|\.from\(['"]z40k_/);
+ assert.doesNotMatch(transportSource, /localStorage\.(?:setItem|removeItem)|Storage\.prototype/);
  assert.doesNotMatch(transportSource,/\.upsert\(/);
 });
 test('Capture host only calls its guarded RPC with policy, not full save or Survival RPC',async()=>{

@@ -11,14 +11,14 @@ import {
 
 const when='2026-11-06T17:00:00.000Z';
 const participant=(id,name)=>({id,name});
-const host=participant('creator-a','Créateur');
+const host=participant('auth-host-a','Créateur');
 const guest=participant('guest-b','Invité B');
 const guest2=participant('guest-c','Invité C');
 const makeSession=({joinEnabled=true,editRewards=false}={})=>{
  const base=createAdventureSessionV1({
   bestiaryCards:[{id:'lumilo',name:'Lumilo',skills:[{state:'ready'}]}],
   starterId:'lumilo',rules:SHOWCASE_ADVENTURE_RULES_V1,
-  ids:{sessionId:'capture-game-a',instanceId:'creature-a',creatorId:host.id},
+  ids:{sessionId:'capture-game-a',instanceId:'creature-a',creatorId:'local-game-creator'},
   now:when
  });
  return updateAdventureSessionControlV1({session:base,now:when,settings:{
@@ -43,11 +43,12 @@ test('two actual identities join one Capture lobby; only references, never a sec
  const lobby=setup();
  assert.equal(lobby.schema,'gensrpg-capture-multiplayer-lobby-v1');
  assert.equal(lobby.sessionId,'capture-game-a');
+ assert.equal(lobby.ownerId,'auth-host-a','authenticated network identity is distinct from the locally generated save creatorId');
  assert.equal(lobby.maxPlayers,2);
- assert.deepEqual(lobby.participants.map(p=>p.id),['creator-a']);
+ assert.deepEqual(lobby.participants.map(p=>p.id),['auth-host-a']);
  const second=join(lobby);
  assert.equal(second.revision,1);
- assert.deepEqual(second.participants.map(p=>p.id),['creator-a','guest-b']);
+ assert.deepEqual(second.participants.map(p=>p.id),['auth-host-a','guest-b']);
  assert.equal(second.participants[1].role,'guest');
  assert.equal(Object.hasOwn(second,'party'),false);
  assert.equal(Object.hasOwn(second,'inventory'),false);
@@ -55,7 +56,7 @@ test('two actual identities join one Capture lobby; only references, never a sec
  assert.equal(Object.hasOwn(second,'world'),false);
  assert.equal(Object.hasOwn(second,'hero'),false);
  assert.equal(Object.hasOwn(second,'save'),false);
- assert.deepEqual(lobby.participants.map(p=>p.id),['creator-a'],'original immutable');
+ assert.deepEqual(lobby.participants.map(p=>p.id),['auth-host-a'],'original immutable');
  assert.ok(Object.isFrozen(second));
  assert.ok(Object.isFrozen(second.participants));
 });
@@ -63,7 +64,7 @@ test('two actual identities join one Capture lobby; only references, never a sec
 test('closed invites, wrong code, duplicate identities and full room all fail closed',()=>{
  const denied=makeSession({joinEnabled:false});
  assert.throws(()=>createCaptureLobbyV1({session:denied,host,maxPlayers:2,inviteCode:'ABC234XY',now:when}),/invit|rejoind|désactiv|join/i);
- assert.throws(()=>createCaptureLobbyV1({session:makeSession(),host:guest,maxPlayers:2,inviteCode:'ABC234XY',now:when}),/creator|propriétaire|owner/i);
+ assert.throws(()=>createCaptureLobbyV1({session:makeSession(),host:{id:'',name:'Anonyme'},maxPlayers:2,inviteCode:'ABC234XY',now:when}),/authenticat|identity/i);
  const lobby=setup();
  assert.throws(()=>join(lobby,guest,'BADCODE'),/code|invit/i);
  assert.throws(()=>join(lobby,host),/déjà|already|présent/i);

@@ -104,11 +104,8 @@ function sessionPolicy(session){
   hostIsGameMaster:policy.hostIsGameMaster,joinEnabled:policy.joinEnabled,
   guestPermissions:policy.guestPermissions
  });
- return {
-  creatorId:identity(policy.creatorId,'session creator id'),
-  sessionId:identity(session.sessionId,'session id'),
-  settings
- };
+ identity(policy.creatorId,'local session creator id');
+ return {sessionId:identity(session.sessionId,'session id'),settings};
 }
 // Cryptographic randomness is obligatory. No Math.random fallback, no generated
 // IDs in the UI. The authenticated backend must enforce code uniqueness.
@@ -126,8 +123,9 @@ export function createCaptureInviteCodeV1({cryptoProvider=globalThis.crypto,leng
 export function createCaptureLobbyV1({session,host,maxPlayers,inviteCode,now}={}){
  const source=sessionPolicy(session);
  const person=member(host);
- if(person.id!==source.creatorId)
-  throw new Error('Only the AdventureSession creator/owner may host');
+ // creatorId in a saved AdventureSession is LOCAL and randomly generated.
+ // The online host identity is supplied by server-verified authentication;
+ // never assume those two different identity namespaces match.
  if(!source.settings.joinEnabled)
   throw new Error('Joining this AdventureSession is disabled by its creator');
  return freeze({

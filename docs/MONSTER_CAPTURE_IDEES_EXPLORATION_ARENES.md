@@ -1,5 +1,17 @@
 # Monster Capture — Idées d'assets d'exploration 2,5D et d'arènes
-> **Brainstorming documenté le 3 novembre 2026 — aucune implémentation ni validation de gameplay.** Propriétaire décor/map : **Labo Exploration** ; identité, progression et état de champion : **Monster Capture / GenSrpg** ; IA et résolution des combats : **Labo Combat** ; duel de joueurs en direct : futur contrat PvP. Respecter la [charte](GENSRPG_CHARTE.md) et éviter toute seconde autorité.
+> **Idées documentées le 3 novembre ; état corrigé par le créateur le 6 novembre 2026.** Les visuels neige et arènes sont livrés ; les mécaniques d'arène et l'ensemble port/navigation ne sont pas développés. Propriétaire décor/map : **Labo Exploration** ; identité, progression et état de champion : **Monster Capture / GenSrpg** ; IA et résolution des combats : **Labo Combat** ; duel de joueurs en direct : futur contrat PvP. Respecter la [charte](GENSRPG_CHARTE.md) et éviter toute seconde autorité.
+
+
+## État officiel déclaré par le créateur — 6 novembre 2026
+| Chantier | Visuels | Système / gameplay | Suite |
+|---|---|---|---|
+| Maisons enneigées | **FAITS ET LIVRÉS** | Aucun travail supplémentaire demandé | **CLOS**, ne pas recréer |
+| Arbres enneigés | **FAITS ET LIVRÉS** | Aucun travail supplémentaire demandé | **CLOS**, ne pas recréer |
+| Arènes élémentaires | **VISUELS FAITS** | **NON FAIT** : champion PNJ initial, conquête, titre persistant, invitation PvP, IA défensive et équipe enregistrée | Concevoir et développer les mécaniques plus tard |
+| Ports et bâtiments portuaires | **RIEN DE FAIT** | **RIEN DE FAIT** | Créer assets, interactions et ports |
+| Navigation / bateaux | **RIEN DE FAIT** | **RIEN DE FAIT** | Étudier et développer système de navigation en lien avec ports (bateaux, embarquement, déplacement, débarquement, transitions) |
+
+Ce statut provient de la confirmation explicite du créateur, sans nouvel audit technique des fichiers. Ne pas confondre « visuels d'arènes réalisés » et « gameplay d'arène implémenté ». Pour les ports, le chantier visuel et la navigation constituent un **même futur axe**, à cadrer ensemble. Aucun développement lancé par cette mise à jour documentaire.
 
 ## Intention
 Les cartes possèdent déjà notamment des maisons, ponts, arbres, cascades et décors. L'objectif n'est pas d'empiler des objets : chaque nouvel asset doit créer un lieu **reconnaissable, visitable et potentiellement interactif**, utilisable dans le World Builder. Exemples inspirants : **Pokémon GO** (défense d'arènes), **Temtem** (dojos à conquérir et défense par équipe enregistrée), villages et points d'intérêt de RPG d'exploration. Ne copier aucun visuel ou univers propriétaire.
@@ -60,6 +72,6 @@ Les cartes possèdent déjà notamment des maisons, ponts, arbres, cascades et d
 - [Temtem — Dojo Park](https://temtem.wiki.gg/wiki/Dojo_Park) : adversaires IA reprenant les équipes utilisées par les défenseurs.
 
 ## Prochaine étape souhaitable, **non lancée**
-Pour les assets, proposer au créateur un premier **lot à prévisualiser** : (1) maison + arbre enneigés, (2) quai + capitainerie + phare, (3) façade d'arène feu/glace. D'abord validation des silhouettes et orientation 2,5D, puis déclinaisons et intégration par le Labo Exploration. Pour le gameplay, consacrer un cadrage séparé à l'arène avant toute implémentation ou connexion au PvP.
+Les maisons et arbres enneigés sont livrés et les visuels d'arènes sont réalisés : **ne pas les recréer**. Prochain lot visuel à concevoir : quai, capitainerie, phare, embarcations et accessoires portuaires ; cadrer simultanément la mécanique de navigation/bateaux (embarquement, traversée, débarquement, transitions et sauvegarde). Séparément, concevoir puis développer le gameplay des champions d'arène sans supposer le PvP existant.
 
 Liens associés : [Backlog Monster Capture V2 #230](https://github.com/slyen4425-cloud/Zombicide-40k/issues/230) · [Point d'entrée](GENSRPG_POINT_ENTREE.md).

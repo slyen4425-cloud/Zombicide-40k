@@ -121,8 +121,8 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
 
 /* Real RPG profile presentation, not raw rows of IDs. */
 #adventure-play-sheet{
- width:min(930px,calc(100vw - 16px));max-height:calc(100dvh - 12px);
- padding:clamp(8px,1.5vw,16px);overflow:hidden;
+ width:min(800px,calc(100vw - 22px));max-height:calc(100dvh - 16px);
+ padding:clamp(8px,1.1vw,13px);overflow:hidden;
  border-radius:18px;border:1px solid #6aafae;
  background:linear-gradient(140deg,#15323e,#0d1b29 72%);
  box-shadow:0 20px 65px #000d
@@ -139,9 +139,9 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
 }
 .sheet-profile{overflow:hidden;border-radius:16px;
  border:1px solid #315b65;background:#102630}
-.sheet-profile-top{display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr);
- gap:clamp(12px,2.2vw,24px);align-items:center;
- padding:clamp(12px,2.2vw,20px);
+.sheet-profile-top{display:grid;grid-template-columns:minmax(92px,150px) minmax(0,1fr);
+ gap:clamp(10px,1.7vw,17px);align-items:center;
+ padding:clamp(9px,1.5vw,14px);
  background:radial-gradient(ellipse at top left,#224957,#122e38 72%)}
 .sheet-portrait-frame{
  position:relative;display:grid;place-items:center;overflow:hidden;
@@ -162,7 +162,7 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
  text-shadow:0 2px 4px #000;z-index:3}
 .sheet-overline{color:#82ddbc;letter-spacing:.16em;
  font-size:10px;font-weight:800}
-.sheet-display-name{font-size:clamp(20px,3.8vw,30px)!important;
+.sheet-display-name{font-size:clamp(19px,3.2vw,27px)!important;
  line-height:1.15;margin:5px 0 7px;color:#f0fff7}
 .sheet-profile-subtitle{font-size:12px;color:#b5d3d2;margin:0 0 10px}
 .sheet-elements{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 10px}
@@ -170,36 +170,36 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
  border:1px solid #628b8d;background:#1f4750;color:#dffbec;
  font-size:11px;font-weight:800}
 .sheet-vitals{display:flex;flex-wrap:wrap;gap:7px}
-.sheet-vital{min-width:82px;display:grid;gap:3px;
- padding:8px 11px;border:1px solid #406972;border-radius:10px;
+.sheet-vital{min-width:74px;display:grid;gap:3px;
+ padding:6px 9px;border:1px solid #406972;border-radius:10px;
  background:#102b38}
 .sheet-vital-label{font-size:10px;color:#a6c9c8}
 .sheet-vital strong{font-size:17px;color:#fff}
-.sheet-stats-panel{border-top:1px solid #315665;padding:14px}
+.sheet-stats-panel{border-top:1px solid #315665;padding:10px}
 .sheet-section-title{display:flex;flex-wrap:wrap;
  align-items:center;justify-content:space-between;gap:6px;margin-bottom:12px}
 .sheet-section-title h4{font-size:15px;color:#e2f9ef;margin:0}
 .sheet-points{font-size:12px;color:#acedd5;font-weight:800}
-.sheet-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:9px}
+.sheet-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:7px}
 .sheet-stat-card{display:flex;flex-direction:column;gap:5px;
- min-width:0;padding:11px;border-radius:11px;
+ min-width:0;padding:8px;border-radius:10px;
  border:1px solid #345e67;background:#142e39}
 .sheet-stat-name{font-size:11px;color:#c3dfdd}
-.sheet-stat-value{font-size:clamp(21px,3vw,27px);color:#f3fff8}
+.sheet-stat-value{font-size:clamp(18px,2.6vw,24px);color:#f3fff8}
 .sheet-stat-bonus{font-size:10px;color:#a9c9cf;overflow-wrap:anywhere}
 .sheet-stat-actions{display:flex;gap:6px;margin-top:5px}
 .sheet-stat-actions button{flex:1;min-height:40px;padding:5px;
  background:#236956;border-color:#73b99b}
 .sheet-hint{font-size:12px;color:#abc9cc;margin:12px 6px;line-height:1.4}
-.sheet-inventory{border-radius:14px;border:1px solid #315b65;
- padding:16px;background:#112834}
+.sheet-inventory{border-radius:12px;border:1px solid #315b65;
+ padding:11px;background:#112834}
 .sheet-inventory-heading{display:flex;justify-content:space-between;
  flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:15px}
 .sheet-inventory-heading h3{font-size:20px;color:#f3fff8;margin:0}
 .sheet-currency{font-size:15px;font-weight:800;color:#ffe8a4;
  padding:8px 12px;border-radius:10px;background:#463c24;
  border:1px solid #776d42}
-.sheet-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.sheet-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
 .sheet-item{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 12px;
  padding:12px;border-radius:10px;border:1px solid #3c626f;background:#183542}
 .sheet-item-name{font-size:13px;font-weight:700;color:#e4fff7}

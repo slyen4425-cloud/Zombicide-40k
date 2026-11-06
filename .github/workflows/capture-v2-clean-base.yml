@@ -12,6 +12,7 @@ on:
       - 'tests/gens_capture_v2_game_menu_v1.test.cjs'
       - 'tests/gens_capture_v2_adventure_hero_progression_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_portfolio_v1.test.mjs'
+      - 'tests/gens_capture_v2_compact_rpg_sheet_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_progression_access_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_rules_draft_persistence_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_creator_draft_v1.test.mjs'
@@ -93,6 +94,9 @@ jobs:
 
       - name: Correction avant publication — sauvegardes multiples, migration additive et sélection de la partie
         run: node --test tests/gens_capture_v2_adventure_portfolio_v1.test.mjs
+
+      - name: Fiches RPG héros et créatures — réduction sans perte des portraits ou des zones tactiles
+        run: node --test tests/gens_capture_v2_compact_rpg_sheet_v1.test.mjs
 
       - name: TDD GenSRPG Aventure → Exploration Jouer session corrélée (RED puis GREEN)
         run: node --test tests/gens_capture_v2_native_play_handoff_v1.test.mjs

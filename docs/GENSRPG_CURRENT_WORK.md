@@ -1,3 +1,12 @@
+## 2026-11-06 — Monster Capture : fiches RPG compactes avant publication (C8 START / NON GREEN)
+
+- **Retour utilisateur** : réduire légèrement la fenêtre, les boutons, les portraits et cases statistiques des fiches héros/créatures en cours de partie, sans revenir aux listes brutes ni cacher les portraits/les valeurs officielles. Préserver l'ergonomie tactile paysage (touch targets >=40 px) et l'accès aux quatre onglets.
+- **Base** : GenSrpg C5 PR #297 @ `3cfb093f26af1b32cd1cc6f54162f85256231c4d` (CI non certifiée à l'ouverture de C8). START `checkpoint/gensrpg-start-capture-rpg-sheet-compact-2026-11-06` au même SHA, branche `work/gensrpg-capture-rpg-sheet-compact-2026-11-06`.
+- **Périmètre isolé** : uniquement présentation CSS du dialogue `#adventure-play-sheet` et composants `.sheet-*`. État, calculs statistiques, portraits officiels, choix de héros, moteur de combat, progression, mondes, Supabase, navigation, historiques, autres modules et `index.html` inchangés. Ne pas ajouter d'overlay ni de listener.
+- **TDD / sortie** : garde structurelle CSS (dialogue max ~800px, portraits ~150px, grille stats resserrée, boutons >=40px), navigateur réel paysage 932x430 (onglets, portrait, vue du monde et retour), sentinelles habituelles. C8 NON GREEN tant que 7/7 CI exact SHA et tests visuels ne sont pas obtenus ; pas de main avant les autres corrections et le vrai multijoueur.
+
+---
+
 ## 2026-11-06 — Monster Capture : plusieurs sauvegardes de parties (LOT CORRECTIONS C5, START / NON GREEN)
 
 - **Demande avant publication main** : une sauvegarde en cours ne bloque plus la création d'une autre partie ; l'utilisateur sélectionne une aventure existante, peut en créer une nouvelle, et aucune sauvegarde n'est écrasée sans autorisation. Les mondes enregistrés, rencontres et ergonomie sont des lots séparés à réaliser AVANT toute publication de l'ensemble.

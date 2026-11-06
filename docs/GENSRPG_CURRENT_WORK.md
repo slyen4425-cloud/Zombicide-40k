@@ -1,3 +1,13 @@
+## 2026-11-06 — Monster Capture : fondation multijoueur de session (C2, EN COURS)
+
+- **Base source certifiée** : `7d7f1f20eb16f10fc28f75f15b68d287954f2a13` (source Aventure illustrée, CI complète SUCCESS), distincte de `main@916099fa5c7466361592b4655e72571bb259b29f` publié. START `checkpoint/gensrpg-start-capture-session-multiplayer-contract-2026-11-06` ; branche `work/gensrpg-capture-session-multiplayer-contract-2026-11-06`. Publication Pages et pin stable **inchangés** pendant ce lot.
+- **Périmètre** : contrat versionné d'un salon Monster Capture propre à une AdventureSession : propriétaire créateur, invitation, 1 invité ou plus selon capacité configurable, présence, autorisations, refus du remplacement de sauvegarde, messages d'intention contrôlés et fermeture. Transport réseau éventuel fourni séparément, jamais via le vieux snapshot global Supabase ni via PvP.
+- **Propriétaire** : Monster Capture (session et permissions) ; Core Storage seul écrit les sauvegardes ; Combat main seul résout les combats et Exploration main seul déplace les acteurs. Le lobby est un état éphémère **distinct de l'AdventureSave**.
+- **TDD** : test RED indépendant sur invitation/capacité, permissions créateur/invité, anti-usurpation de membres, séquences/replays et refus de partager inventaire/sauvegardes ; GREEN avec module pur. À ce stade ni jeu en ligne revendiqué, ni changement des sources Labs, ni `main`, ni données personnelles synchronisées.
+- **Risque à lever avant jeu en ligne** : Supabase existant inactif lors de l'audit ; toute connexion effective devra passer par authentification serveur/RLS, tests à deux navigateurs réels et autorité hôte ; jamais de confiance accordée aux seuls contrôles UI.
+
+---
+
 ## 2026-11-06 — Monster Capture : fiches visuelles et Jouer plein écran (C2, TDD RED)
 
 - **Retour utilisateur Pages** : les fiches en jeu sont des tableaux textuels sans portraits officiels, le héros s'affiche par un ID et Jouer ne semble plus en plein écran. Correction UI, pas de nouveau gameplay.

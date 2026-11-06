@@ -8,6 +8,15 @@
 
 ---
 
+## 2026-11-06 — Intégration Aventure : permissions créateur/MJ et fiche pendant Exploration (candidat non publié)
+
+- **START** : checkpoint `checkpoint/gensrpg-start-adventure-combined-ui-2026-11-06` @ `7108fe01bae10c29f6869ff0a2eb811664254dc8`, branche `work/gensrpg-adventure-combined-ui-2026-11-06`.
+- **Périmètre** : fusion de travail des lots propriétaires PR #281 (brouillon des permissions) et PR #282 (fiche en partie), sur la base de la persistance PR #279 et des pins Labos PR #280 ; chaque mécanisme, ses tests RED et ses journaux sont conservés. Pas de deuxième autorité d'inventaire/progression, la session active Core prime, le laboratoire Exploration garde carte/caméra, Combat garde les stats et règles.
+- **CI intégration** : deux suites propriétaire + navigateur réel vérifient dans la même exécution : sauvegarder droits/règles avant première partie → fermer/rouvrir, puis jouer → fiche personnage, inventaire, équipe et points sans masquer Menu natif. HUD en haut à droite pour dégager le menu Exploration en haut à gauche. Tests de sécurité et livraison native obligatoires.
+- **Sortie** : NON GREEN avant 4/4 CI au SHA de cette branche, revue et contrôle du publisher ; ni publication ni modification des fichiers auteur Mur de glace/Gorice.
+
+---
+
 ## 2026-11-05 — Aventure : permissions créateur/MJ conservées avant première partie (C2, TDD RED)
 
 - **START** : checkpoint `checkpoint/gensrpg-start-adventure-creator-draft-2026-11-05` au SHA candidat Capture `e0d06515c74698739a1dba733565d54dc15abc92` (PR #279, 4/4 CI SUCCESS). Branche `work/gensrpg-adventure-creator-draft-2026-11-05`, isolée ; dépend du repin Exploration #280 puis de la persistance #279. Aucune fusion vers main.
@@ -16,6 +25,18 @@
 - **TDD RED** : scénario d'aller-retour Core Storage et UI navigateur réelle : enregistrer droits avant partie → fermer iframe → rouvrir → retrouver les cases cochées → créer partie avec la même politique → recharger session ; invalide/futur conservé et signalé, pas de migration silencieuse.
 - **Gates et sortie** : Node propriétaire, Chromium réel, livraison native, V113, Builder et revue. GREEN uniquement au SHA exact avec CI complète, suivi des tests utilisateur Pixel et publication distincte. Aucune simulation multijoueur ni autorisation réseau inventée.
 - **Suite** : obtenir RED, corriger dans le seul propriétaire Capture, rejouer CI puis checkpoint de candidat. Après ce lot : interface en partie personnage/inventaire/équipe/statistiques via propriétaire de session, en lot distinct.
+
+---
+
+## 2026-11-05 — Monster Capture : fiche de partie pendant Exploration (C2, TDD RED)
+
+- **START** : checkpoint `checkpoint/gensrpg-start-capture-play-sheet-2026-11-05` @ `e0d06515c74698739a1dba733565d54dc15abc92`, dernier candidat CI 4/4 SUCCESS (PR #279 sur #280). Branche `work/gensrpg-capture-play-sheet-2026-11-05` indépendante du lot de permissions créateur #281.
+- **Problème** : en vrai mode Jouer, l'iframe Exploration masque entièrement l'écran Aventure ; le joueur n'a aucun bouton donnant accès à sa fiche, aux stats, à son inventaire ou à ses créatures.
+- **Propriétaires** : GenSRPG Capture V2 reste seul propriétaire de `AdventureSession` et du panneau de consultation ; Core Storage garde la sauvegarde, Core progression/stat wallet garde le budget, Combat définit les statIds et créatures publiées, Exploration garde le mouvement/la carte. Le panneau n'édite pas le moteur Combat/Exploration.
+- **Périmètre** : barre d'accès en cours de jeu + vrai dialogue focalisé affichant héros, équipe active, inventaire, stats et budget issu d'AdventureSession ; modification autorisée uniquement via `allocateAdventureStatPointsV1`, persistance Core et re-projection officielle vers Exploration, verrou partagé avec la transaction de combat. Un seul monstre actif aujourd'hui, aucune équipe/réserve inventée.
+- **Tests** : TDD Node modèle vue pur (aucun calcul moteur), erreur fermée sans source officielle ; navigateur vrai démarrage Exploration, menu de partie accessible en paysage, ouverture/fermeture sans recharger la carte ni perdre sauvegarde ; allocation points en jeu et retour à l'état de jeu.
+- **Hors lot** : modifier des objets sans système d'objets publié, remplacer le visuel Héros, multi-joueurs, équipe/réserve non encore écrite, PWA/ServiceWorker, `index.html` (§26), Dungeon/Survie/PvP.
+- **Statut** : NON GREEN jusqu'aux suites propres, navigateur et revue ; aucun déploiement. Suite : finaliser uniquement sur sa branche puis certification PR et promotion de la chaîne de dépendances.
 
 ---
 

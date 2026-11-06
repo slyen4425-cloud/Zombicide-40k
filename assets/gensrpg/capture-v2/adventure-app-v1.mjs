@@ -14,6 +14,8 @@ import {adventurePlaySheetSnapshotV1} from './adventure-play-sheet-v1.mjs';
 import {publishedCapturePortraitUrlV1} from './adventure-sheet-visual-v1.mjs';
 import {renderAdventureSheetViewV1} from './adventure-play-sheet-view-v1.mjs';
 import {createAdventureCreatorDraftStoreV1} from './adventure-creator-draft-v1.mjs';
+import {createCaptureRoomTransportV1} from './adventure-multiplayer-transport-v1.mjs';
+import {createCaptureSupabaseClientV1} from './adventure-multiplayer-provider-v1.mjs';
 import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
 import {writeAdventurePlayingPartyV1} from './adventure-playing-party-grant-v1.mjs';
 import {writeAdventureHeroSelectionGrantV1} from './adventure-hero-selection-grant-v1.mjs';
@@ -320,6 +322,7 @@ function renderItemRules(){
 function showSave(){
  try{
   const state=store.load();
+  $('adventure-room-host').disabled=!!activeCaptureRoom||!state?.sessionControl?.joinEnabled;
   if(!state){
    $('adventure-hero-choice').disabled=false;
    text($('adventure-save-summary'),'Aucune partie créée.');
@@ -375,6 +378,95 @@ function guardedAsync(callback){
   catch(error){stateMessage(error.message,true);}
  };
 }
+// A separate Capture-only Supabase Auth namespace protects Survival players.
+// The real network is started by an explicit player click, never during
+// adventure boot or legacy shell startup.
+let captureRoomTransport=null,activeCaptureRoom=null;
+function onlineRoomStatus(message,error=false){
+ const output=$('adventure-room-status');
+ output.textContent=message;output.dataset.error=String(error);
+}
+function captureRoomProvider(){
+ if(captureRoomTransport)return captureRoomTransport;
+ let factory;
+ try{
+  // The parent GenSRPG Shell already loads the official Supabase SDK.
+  // No second network runtime is installed into the Survival Shell.
+  const sdk=window.supabase??(window.parent!==window?window.parent.supabase:null);
+  factory=sdk?.createClient?.bind(sdk);
+ }catch{factory=null;}
+ if(!factory)throw new Error(
+  'Client réseau indisponible dans cette vue. Ouvre Monster Capture depuis le Hub GenSRPG.');
+ const client=createCaptureSupabaseClientV1({factory});
+ captureRoomTransport=createCaptureRoomTransportV1({client});
+ return captureRoomTransport;
+}
+function renderCaptureRoomMembers(state){
+ const host=$('adventure-room-members');host.replaceChildren();
+ if(!state){
+  onlineRoomStatus('Salon fermé ou accès expiré ; aucune sauvegarde modifiée.',true);
+  return;
+ }
+ for(const member of state.members){
+  const item=document.createElement('div');item.className='rule-row';
+  item.textContent=(member.role==='host'?'👑 ':'👤 ')+member.name;
+  host.append(item);
+ }
+ onlineRoomStatus('CODE '+state.code+' · '+state.members.length+
+  ' / '+state.maxPlayers+' joueur(s) · '+(state.open?'Salon ouvert':'Salon fermé'));
+}
+async function connectCaptureRoom(response){
+ const transport=captureRoomProvider();
+ // Separate authorization: the server already validated this user and the
+ // room. The view receives only projected membership and never an AdventureSave.
+ activeCaptureRoom=response;
+ $('adventure-room-code').value=response.code;
+ $('adventure-room-host').disabled=true;
+ $('adventure-room-join').disabled=true;
+ $('adventure-room-leave').disabled=false;
+ await transport.observe({
+  roomId:response.roomId,userId:response.userId,
+  onChange:renderCaptureRoomMembers,
+  onStatus:message=>{if(message!=='Salon connecté')onlineRoomStatus(message,true);}
+ });
+ const state=await transport.inspectRoom(response.roomId);
+ renderCaptureRoomMembers(state);
+}
+$('adventure-room-host').addEventListener('click',guardedAsync(async()=>{
+ if(activeCaptureRoom)throw new Error('Quitte le salon actif avant d’en créer un autre.');
+ const session=store?.load();
+ if(!session)throw new Error('Crée une partie Monster Capture avant de l’héberger.');
+ onlineRoomStatus('Création du salon Monster Capture…');
+ const response=await captureRoomProvider().create({
+  session,name:$('adventure-player-alias').value,
+  maxPlayers:Number($('adventure-room-capacity').value)
+ });
+ await connectCaptureRoom(response);
+}));
+$('adventure-room-join').addEventListener('click',guardedAsync(async()=>{
+ if(activeCaptureRoom)throw new Error('Quitte le salon actif avant d’en rejoindre un autre.');
+ onlineRoomStatus('Connexion au salon Monster Capture…');
+ const response=await captureRoomProvider().join({
+  code:$('adventure-room-code').value,name:$('adventure-player-alias').value
+ });
+ await connectCaptureRoom(response);
+}));
+$('adventure-room-leave').addEventListener('click',guardedAsync(async()=>{
+ const room=activeCaptureRoom;
+ if(!room)return;
+ await captureRoomProvider().leave({roomId:room.roomId});
+ activeCaptureRoom=null;
+ $('adventure-room-members').replaceChildren();
+ $('adventure-room-leave').disabled=true;
+ $('adventure-room-join').disabled=false;
+ $('adventure-room-host').disabled=!store?.load()?.sessionControl?.joinEnabled;
+ onlineRoomStatus('Salon quitté. Ta sauvegarde locale Monster Capture est intacte.');
+}));
+window.addEventListener('pagehide',()=>{
+ // Merely detach Realtime; no snapshot, destructive disconnect or remote save.
+ void captureRoomTransport?.dispose().catch(()=>{});
+});
+
 // The Exploration iframe remains mounted; only this Capture-owned view
 // consumes the already persisted AdventureSession. No second player state.
 let activePlayingSheet=null;

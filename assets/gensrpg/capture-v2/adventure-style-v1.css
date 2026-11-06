@@ -223,3 +223,31 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
  .sheet-vital{min-width:60px;padding:6px}
  .sheet-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* The Capture network lobby is a compact, mobile-landscape-friendly panel.
+   No Survival/Dungeon selectors or CSS owners are modified. */
+#adventure-multiplayer-panel{border-color:#3a7a76;background:#0e282d}
+#adventure-multiplayer-panel .hint{margin:4px 0 12px}
+#adventure-multiplayer-panel .fields{grid-template-columns:repeat(3,minmax(0,1fr))}
+#adventure-room-code{text-transform:uppercase;letter-spacing:.12em;font-weight:750}
+#adventure-room-host{background:#206550;border-color:#69ba97}
+#adventure-room-join{background:#224d69;border-color:#7cb6d2}
+#adventure-room-leave{background:#452b32;border-color:#b9878b}
+#adventure-room-status{font-size:12px;line-height:1.5;color:#acebd0;
+ padding:9px;border:1px solid #345863;border-radius:9px;background:#102a32}
+#adventure-room-status[data-error="true"]{color:#ffb2a4}
+#adventure-multiplayer-panel #adventure-room-members{
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+ gap:6px;margin:9px 0 0}
+#adventure-multiplayer-panel #adventure-room-members>.rule-row{min-height:35px}
+@media(max-width:680px){
+ #adventure-multiplayer-panel .fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(orientation:landscape) and (max-height:550px){
+ #adventure-multiplayer-panel{padding:9px}
+ #adventure-multiplayer-panel .fields{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #adventure-multiplayer-panel .actions{margin:7px 0}
+}
+@media(max-width:480px){
+ #adventure-multiplayer-panel .fields{grid-template-columns:minmax(0,1fr)}
+}

@@ -52,7 +52,7 @@ test('Capture SQL migration cannot modify Survival schema, rooms, sync or sessio
  assert.match(migration,/on realtime\.messages/i);
  assert.match(migration,/realtime\.messages\.private is true/i);
  assert.match(migration,/security invoker/i,'public Capture RPC must never bypass RLS');
- assert.match(migration,/gensrpg_capture_room:/,'only scoped Capture Realtime topics');
+ assert.match(migration,/gensrpg-capture-room:/,'only scoped Capture Realtime topics');
  assert.doesNotMatch(migration,/\b(?:alter|update|delete\s+from|insert\s+into|drop|truncate|create\s+or\s+replace\s+function)\s+(?:table\s+|function\s+|policy\s+[^;]*?\s+on\s+)?(?:public\.)?z40k_/i,
   'Survival schema and functions must remain read-only from Capture migrations');
  for(const forbidden of ['z40k_sync_state','z40kApplySnapshot','z40kPushState']){

@@ -251,3 +251,20 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
 @media(max-width:480px){
  #adventure-multiplayer-panel .fields{grid-template-columns:minmax(0,1fr)}
 }
+
+/* C3: read-only online position receipts; not a second actor renderer. */
+#adventure-room-positions{
+ display:block;margin:8px 0 2px;font-size:11px;color:#9dccd1;
+ overflow-wrap:anywhere
+}
+#adventure-play-remote-status{
+ position:fixed;left:8px;bottom:max(8px,env(safe-area-inset-bottom));
+ max-width:min(250px,50vw);z-index:9;pointer-events:none;
+ padding:6px 8px;border-radius:8px;border:1px solid #345d67;
+ background:#102832d9;color:#c0e9df;font-size:10px;
+ line-height:1.2;box-shadow:0 1px 7px #03101566
+}
+#adventure-play-hud[hidden] #adventure-play-remote-status{display:none}
+@media(orientation:landscape) and (max-height:550px){
+ #adventure-play-remote-status{max-width:min(200px,38vw);font-size:9px;padding:4px 6px}
+}

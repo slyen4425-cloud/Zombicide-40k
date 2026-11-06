@@ -493,10 +493,10 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(scopedAfter.sessionId,stored.sessionId);
   assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg.world-assembler.document.v1')),authored,
     'native game cannot mutate the World Builder authored document');
-  const playingSave=await page.evaluate(()=>{
-    const raw=localStorage.getItem('gensrpg.capture.v2.adventure.save.v1');
+  const playingSave=await page.evaluate(id=>{
+    const raw=localStorage.getItem('gensrpg.capture.v2.adventure.slot.v1:'+id);
     return raw?JSON.parse(raw):null;
-  });
+  },stored.sessionId);
   assert.equal(playingSave?.status,'playing');
   assert.equal(playingSave?.world?.mapRef,'gen-ci-capture-world');
   assert.equal(playingSave?.world?.position,null,'Exploration alone owns coordinates');
@@ -547,7 +547,9 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(port.grant.active.hp,17);
   assert.equal(port.pending,'fled','only Exploration may consume its journal');
   assert.equal(port.consumed,'fled');
-  const battleSave=await page.evaluate(()=>JSON.parse(localStorage.getItem('gensrpg.capture.v2.adventure.save.v1')));
+  const battleSave=await page.evaluate(id=>JSON.parse(
+    localStorage.getItem('gensrpg.capture.v2.adventure.slot.v1:'+id)
+  ),stored.sessionId);
   assert.equal(battleSave.party.active.hp,17);
   assert.equal(battleSave.party.active.xp,0);
   assert.deepEqual(battleSave.processedEncounterKeys,['browser-result-1:browser-return-1']);

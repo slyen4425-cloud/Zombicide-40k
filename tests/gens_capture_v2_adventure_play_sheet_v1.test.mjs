@@ -80,7 +80,8 @@ test('in-game sheet has illustrated native profile, accessible fullscreen action
  assert.match(html,/id="adventure-fullscreen"/,'game needs a fullscreen touch action');
  assert.match(app,/requestFullscreen\(/,'game entry must offer browser fullscreen on a real gesture');
  assert.match(app,/createUserHeroStoreV1/,'hero portrait must read the original Exploration owner, not a local duplicate');
- assert.match(app,/data-capture-official-portrait/,'the actual published creature portrait must render');
+ const view=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-play-sheet-view-v1.mjs',import.meta.url),'utf8');
+ assert.match(view,/data-capture-official-portrait/,'the actual published creature portrait must render');
  assert.match(css,/#adventure-play-frame\s*\{[^}]*100dvh/s,'play iframe must fill dynamic viewport height');
  assert.match(css,/\.sheet-profile/,'character and creature should have an illustrated profile layout');
  assert.doesNotMatch(app,/location\.reload\(/);

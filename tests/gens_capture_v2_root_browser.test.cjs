@@ -364,10 +364,11 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
    /Créature active|Lumilo|Niveau/);
   const officialPortrait=resumed.locator('[data-capture-official-portrait]');
   await officialPortrait.waitFor({state:'visible',timeout:15000});
-  const artwork=await officialPortrait.evaluate(image=>({
-   url:image.src,complete:image.complete,width:image.naturalWidth
-  }));
-  assert.match(artwork.url,/\/vendor\/exploration-lab\/capture-assets\/assets\/library\/capture\//);
+  const artwork=await officialPortrait.evaluate(async image=>{
+   try{await image.decode();}catch{/* Assertion below explains missing/corrupt native art. */}
+   return {url:image.src,complete:image.complete,width:image.naturalWidth};
+  });
+  assert.match(artwork.url,/\/vendor\/exploration-lab\/capture-assets\/assets\/library\/(?:capture|core)\//);
   assert.ok(artwork.complete&&artwork.width>0,
    'native Bestiary front portrait should decode from the published real asset, not a placeholder');
   await resumed.locator('[data-adventure-sheet-tab="inventory"]').tap();

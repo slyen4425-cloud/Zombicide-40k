@@ -4,7 +4,7 @@
 import {captureBestiaryCardsV1} from '../../../vendor/combat-lab/src/ui/capture-bestiary-cards-v1.js';
 import {readWorldAssemblerDraft} from '../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js';
 import {
- createNewExplorationPlay,readExplorationPlay
+ createNewExplorationPlay,readExplorationPlay,playWorldFingerprint
 } from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
 import {readCombatHandoff} from '../../../vendor/exploration-lab/src/encounters/combat-handoff-store.js';
 import {connectAdventureCombatHostV1} from './adventure-combat-host-v1.mjs';
@@ -16,6 +16,8 @@ import {renderAdventureSheetViewV1} from './adventure-play-sheet-view-v1.mjs';
 import {createAdventureCreatorDraftStoreV1} from './adventure-creator-draft-v1.mjs';
 import {createCaptureRoomTransportV1} from './adventure-multiplayer-transport-v1.mjs';
 import {createCaptureSupabaseClientV1} from './adventure-multiplayer-provider-v1.mjs';
+import {preflightCaptureOnlineWorldV1,publishCaptureInitialPositionV1
+} from './adventure-multiplayer-play-bridge-v1.mjs';
 import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
 import {writeAdventurePlayingPartyV1} from './adventure-playing-party-grant-v1.mjs';
 import {writeAdventureHeroSelectionGrantV1} from './adventure-hero-selection-grant-v1.mjs';
@@ -645,10 +647,24 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  const heroRecord=savedHeroId?await (await officialHeroStore()).get(savedHeroId):null;
  if(savedHeroId&&!heroRecord)
   throw new Error('Le héros de cette partie n’existe plus dans la bibliothèque Exploration. La sauvegarde reste intacte.');
+ // Bound worlds are immutable for this room. Refuse an alien/world-mismatched
+ // guest BEFORE touching their local AdventureSession or Exploration checkpoint.
+ const onlineContext=await preflightCaptureOnlineWorldV1({
+  room:activeCaptureRoom,transport:captureRoomTransport,
+  world,officialFingerprint:playWorldFingerprint,
+  sessionId:store.load()?.sessionId
+ });
  const result=startAdventureExplorationV1({
   store,storage:window.localStorage,world,
   navigation:{createNewExplorationPlay,readExplorationPlay},
   now:new Date().toISOString()
+ });
+ // Initial peer position comes from the SAME official Exploration checkpoint.
+ // Future movement must wait for a documented Exploration change event,
+ // not monkey-patching Storage or a duplicate navigation loop.
+ await publishCaptureInitialPositionV1({
+  context:onlineContext,transport:captureRoomTransport,
+  navigation:result.navigation
  });
  // Native Exploration consumes the original selected HeroDefinition by ID only.
  writeAdventureHeroSelectionGrantV1({storage:window.sessionStorage,

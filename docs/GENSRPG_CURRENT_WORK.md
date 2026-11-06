@@ -1,3 +1,12 @@
+## 2026-11-06 — Promotion Aventure V2 pour test utilisateur via le publisher officiel (C2, NON GREEN)
+
+- **START immuable** : `checkpoint/gensrpg-start-capture-v2-adventure-main-release-2026-11-06` @ `5dcccaf6b8084a5662698e5a462a3178afe641bf` (dernier `main` réellement publié), branche dédiée `work/gensrpg-capture-v2-adventure-main-release-2026-11-06`. Source candidate intégrée `f37cbe75288402a9e7c5a68349fe6bac729ba423` issue de PR #289 sur #287, CI architecture #42209723742 SUCCESS ; CINQ workflows au SHA source SUCCESS. Labs main source inchangés : Combat `ebaea5dc40c4803add76563029a9dff67b964d55`, Exploration `a2db1825f0a1a833fadcd02d7804f887c864a1d2`.
+- **But autorisé par l'utilisateur** : arrêter la prévisualisation ZIP inutilisable et livrer une version browser via GitHub Pages `main` après CI, puis test manuel et corrections. Le produit publié `main` garde son index et son 2v2 legacy compatibles, ses sauvegardes, son SW et son budget de 900 Mio ; **ne jamais remplacer le root par le vieux index de la branche Aventure divergente de 94 commits**.
+- **Changement de publication minimal** : faire consommer au seul publisher `main.yml` le candidat Aventure V2 exactement certifié, via `tools/capture_v2_pages_preview_pin.json`, à la même URL stable `/preview/capture-v2-pr225/`. Aucun second publisher, aucune duplication d'assets ni fork de moteur. Source Aventure : fiche joueur/équipe active/inventaire/stats, brouillons de règles et permissions créateur ; LABS main seuls propriétaires Combat/Exploration.
+- **Tests exigés avant fusion et déploiement** : CI Pages `build` et `capture-preview-review` au SHA exact, tests navigateur réels paysage sur `_site/preview/capture-v2-pr225`, source labs strictement sur leur `main`, provenance sha, PWA cache isolé, conservation 2v2 et budget. CI `main` et contrôle HTTPS publiquement servi après merge. **GREEN interdit tant qu'un seul contrôle pertinent est rouge.** Aucun travail sur arènes/PNJ/quêtes/objets dans cette publication.
+
+---
+
 ## 2026-11-05 — Revue bloquante #283 : conserver le 2v2 historique réellement utilisé (correction du lot)
 
 - **Fait prouvé** : revue Codex de PR #283 (`c10ab2a`) a trouvé que `capture-world-2v2-test.html` appelle réellement `prepareCapture2v2Preview`, importe `vendor/combat-lab/src/*` et charge `assets/gensrpg/capture/runtime-data/author-inputs.json`. L'ancien nettoyage détruisait ces deux chemins et cassait « Préparer la rencontre 2v2 ». Le smoke de publication `capture-2v2-pages-public-smoke.yml` le confirme.

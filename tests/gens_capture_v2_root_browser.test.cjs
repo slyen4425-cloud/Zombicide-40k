@@ -341,6 +341,37 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.match(launched.src,/vendor\/exploration-lab\/sculpt-lab\.html$/);
   assert.equal(launched.probe.editorHidden,true);
 
+  // A game in progress must expose the official GenSRPG character sheet without
+  // unmounting or restarting the native Exploration play frame.
+  await resumed.locator('#adventure-open-sheet').tap();
+  await resumed.locator('#adventure-play-sheet').waitFor({state:'visible'});
+  assert.match(await resumed.locator('#adventure-sheet-content').textContent(),
+   /Héros|Progression/);
+  await resumed.locator('[data-adventure-sheet-tab="team"]').tap();
+  assert.match(await resumed.locator('#adventure-sheet-content').textContent(),
+   /Créature active|Lumilo|Niveau/);
+  await resumed.locator('[data-adventure-sheet-tab="inventory"]').tap();
+  assert.match(await resumed.locator('#adventure-sheet-content').textContent(),
+   /Monnaie|inventaire/);
+  await resumed.locator('[data-adventure-sheet-tab="stats"]').tap();
+  assert.match(await resumed.locator('#adventure-sheet-content').textContent(),
+   /Points à répartir/);
+  assert.equal(await resumed.locator('#adventure-sheet-content button:enabled').count(),0,
+   'no free stats may be assigned at creature level one');
+  const sameWhileOpen=await resumed.locator('#adventure-play-frame').evaluate(frame=>({
+    current:frame.contentWindow.location.href,
+    playing:frame.contentWindow.__sculptPlayProbe?.().playing
+  }));
+  assert.equal(sameWhileOpen.playing,true,'opening sheet must not stop Exploration');
+  await resumed.locator('#adventure-close-sheet').tap();
+  assert.equal(await resumed.locator('#adventure-play-sheet').isVisible(),false);
+  const sameAfterClose=await resumed.locator('#adventure-play-frame').evaluate(frame=>({
+    current:frame.contentWindow.location.href,
+    playing:frame.contentWindow.__sculptPlayProbe?.().playing
+  }));
+  assert.deepEqual(sameAfterClose,sameWhileOpen,
+   'returning to world must keep the original native Exploration session');
+
   // Read the transient grant with the REAL Exploration main reader, not a
   // duplicate GenSRPG validity check. The sender must use the identical
   // published Combat Bestiary cards and never enable an unpublished species.

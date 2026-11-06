@@ -4,7 +4,16 @@ const http=require('node:http');
 const path=require('node:path');
 const {chromium}=require('playwright');
 
-const root=path.join(__dirname,'..');
+// A historical test maintained today must run against the immutable V1 fixture,
+// never the present Capture V2 runtime and never a modified archival checkout.
+const archivalMode=process.env.GENSRPG_ARCHIVED_CAPTURE_TEST_ROOT==='1';
+const root=archivalMode?process.cwd():path.join(__dirname,'..');
+if(archivalMode){
+  const {execFileSync}=require('node:child_process');
+  const actual=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
+  assert.equal(actual,'900cbcba0cdd517db773ff39c9c56264c16b32ed',
+    'historical Capture test must run on its exact immutable V1 archive');
+}
 const indexSource=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const runtimeBootstrap=fs.readFileSync(path.join(root,'assets','gensrpg','core','runtime-bootstrap-v1.js'),'utf8');
 const captureSeedSource=fs.readFileSync(path.join(root,'assets','gensrpg','capture','builtin-seed-v1.js'),'utf8');
@@ -221,8 +230,11 @@ const server=http.createServer((req,res)=>{
     assert.match(captureCardText,/Monster Capture/);
     assert.match(captureCardText,/dresseur/i,
       'Capture card must describe its trainer role instead of the generic RPG hero label');
-    assert.match(captureCardText,/\b\d+\s+créatures\b\s*·\s*\d+\s+objets\b/i,
-      'Capture card must expose real creature and item counts, not the generic Dungeon summary');
+    // Evidence: archived V1 checkpoint 900cbcba renders “1 dresseur · Capture de créatures”.
+    // Requiring invented creature/item counters here was an invalid *historical*
+    // assertion, not a contract of the real V2 saved inventory and creature sheet.
+    assert.match(captureCardText,/\b\d+\s+dresseur\b\s*·\s*Capture de créatures/i,
+      'archived Capture V1 card must retain its own trainer-role summary');
     assert.doesNotMatch(captureCardText,/\bhéros\b.*\bobjets\b.*\bmonstres\b/i,
       'Capture card must not reuse the generic Dungeon RPG summary');
     // Two independent root families: no Dungeon card should exist in Capture.

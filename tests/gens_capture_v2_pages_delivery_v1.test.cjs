@@ -102,6 +102,39 @@ test('Aventure loads byte-identical public-certified Combat visuals, never a flo
  assert.equal(catalog.catalogId,'gensrpg-global-visual-assets');
  assert.ok(catalog.assets.length>0);
 });
+test('official published creature front portraits are physically present, immutable and not duplicated',()=>{
+ const catalog=JSON.parse(fs.readFileSync(path.join(site,
+  'vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json'),'utf8'));
+ const bundle=JSON.parse(fs.readFileSync(path.join(site,
+  'vendor/exploration-lab/combat-preview/data/capture/showcase/encounter-bundle.v1.json'),'utf8'));
+ const byId=new Map(catalog.assets.map(asset=>[asset.id,asset]));
+ const expected=new Set();
+ for(const transfer of bundle.creatureTransfers){
+  const id=transfer?.draft?.presentation?.visual?.front?.assetId;
+  const asset=byId.get(id);
+  if(!asset||asset.mediaType!=='image'||
+     !['sprite','portrait'].includes(asset.assetType)||
+     Number(asset.resource?.frameCount??1)!==1)continue;
+  const file=asset.resource?.file;
+  const allowedPath = /^(?:capture|core)\/[A-Za-z0-9_./-]+\.(?:png|webp|jpg|jpeg)$/i;
+  if(typeof file!=='string'||!allowedPath.test(file)||
+   file.split('/').includes('..'))throw Error('Unsafe published portrait resource');
+  expected.add(file);
+ }
+ assert.ok(expected.size>0,'published Bestiary must have at least one ready portrait');
+ const mediaRoot=path.join(site,'vendor/exploration-lab/capture-assets/assets/library');
+ for(const file of expected){
+  const original=fs.readFileSync(path.join(root,'approved-adventure-visuals/assets/library',file));
+  const shipped=fs.readFileSync(path.join(mediaRoot,file));
+  assert.ok(shipped.byteLength>0,'published portrait must not be an empty placeholder');
+  assert.deepEqual(shipped,original,'published Combat portrait must match its immutable author');
+ }
+ const list=dir=>fs.existsSync(dir)?fs.readdirSync(dir,{recursive:true,withFileTypes:true})
+  .filter(item=>item.isFile()).map(item=>item.name):[];
+ assert.ok(list(mediaRoot).length<=Math.max(expected.size*2,expected.size+8),
+  'no full duplicated asset library may be shipped for a small portrait selection');
+});
+
 test('actual Pages root has ONLY Capture V2 entry and its existing four-mode Shell',()=>{
  const page=published('index.html');
  const origin=source('index.html');

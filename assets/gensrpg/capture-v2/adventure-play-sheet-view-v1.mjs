@@ -1,0 +1,149 @@
+// Monster Capture presentation only. Read-only from the canonical sheet projection.
+// All numbers and art URLs arrive from their authoritative owners.
+const elementLabel={fire:'Feu',water:'Eau',earth:'Terre',air:'Air',electric:'Électricité',
+ light:'Lumière',shadow:'Ombre',nature:'Nature',ice:'Glace',poison:'Poison',
+ steel:'Acier',spirit:'Esprit',physical:'Physique'};
+function node(tag,klass,text){
+ const e=document.createElement(tag);
+ if(klass)e.className=klass;
+ if(text!==undefined)e.textContent=String(text);
+ return e;
+}
+function detail(label,value){
+ const term=node('div','sheet-vital');
+ term.append(node('span','sheet-vital-label',label),node('strong','',value));
+ return term;
+}
+function hint(text){
+ return node('p','sheet-hint',text);
+}
+function portraitFrame({url,alt,caption}){
+ const frame=node('figure','sheet-portrait-frame');
+ const placeholder=node('span','sheet-portrait-placeholder','◈');
+ placeholder.setAttribute('aria-hidden','true');
+ frame.append(placeholder);
+ if(url){
+  const img=document.createElement('img');
+  img.alt=alt;
+  img.loading='eager';img.decoding='async';
+  img.setAttribute('data-capture-official-portrait','');
+  img.addEventListener('load',()=>{placeholder.hidden=true});
+  img.addEventListener('error',()=>{
+   img.remove();placeholder.hidden=false;
+   frame.append(node('figcaption','sheet-art-status','Illustration indisponible'));
+  },{once:true});
+  img.src=url;frame.append(img);
+ }else{
+  frame.append(node('figcaption','sheet-art-status',caption??'Aucun portrait sélectionné'));
+ }
+ return frame;
+}
+function profile({kind,name,subtitle,imageUrl,artCaption,vitals=[],elements=[]}){
+ const card=node('article','sheet-profile');
+ card.dataset.sheetProfile=kind;
+ const top=node('div','sheet-profile-top');
+ top.append(portraitFrame({url:imageUrl,alt:'Portrait de '+name,caption:artCaption}));
+ const info=node('div','sheet-profile-info');
+ info.append(node('span','sheet-overline',kind==='hero'?'PERSONNAGE':'CRÉATURE ACTIVE'));
+ info.append(node('h3','sheet-display-name',name));
+ if(subtitle)info.append(node('p','sheet-profile-subtitle',subtitle));
+ if(elements.length){
+  const chips=node('div','sheet-elements');
+  for(const element of elements)
+   chips.append(node('span','sheet-element',elementLabel[element]??element));
+  info.append(chips);
+ }
+ const bars=node('div','sheet-vitals');
+ for(const [key,value] of vitals)bars.append(detail(key,value));
+ info.append(bars);top.append(info);card.append(top);
+ return card;
+}
+function statGrid(stats,{availablePoints=null,onAllocate=null}={}){
+ const area=node('section','sheet-stats-panel');
+ const title=node('div','sheet-section-title');
+ title.append(node('h4','', 'Caractéristiques'));
+ if(availablePoints!==null)title.append(node('span','sheet-points',
+  'Points à répartir : '+availablePoints));
+ area.append(title);
+ const grid=node('div','sheet-stat-grid');
+ for(const stat of stats){
+  const cell=node('div','sheet-stat-card');
+  cell.append(node('span','sheet-stat-name',stat.label));
+  cell.append(node('strong','sheet-stat-value',
+   stat.baseValue===null?'—':stat.baseValue));
+  cell.append(node('span','sheet-stat-bonus',
+   'Points attribués : +'+stat.allocated));
+  if(onAllocate){
+   const buttons=node('div','sheet-stat-actions');
+   for(const count of [1,5]){
+    const button=node('button','', '+'+count);
+    button.type='button';
+    button.disabled=availablePoints<count;
+    button.setAttribute('aria-label','Attribuer '+count+' point(s) : '+stat.label);
+    button.addEventListener('click',()=>onAllocate(stat.id,count));
+    buttons.append(button);
+   }
+   cell.append(buttons);
+  }
+  grid.append(cell);
+ }
+ area.append(grid);
+ return area;
+}
+export function renderAdventureSheetViewV1({
+ host,snapshot,tab,portraitUrl=null,heroVisual=null,onAllocate=null
+}={}){
+ if(!host||!snapshot)throw new TypeError('A valid active Capture sheet and host are required');
+ const content=[];
+ if(tab==='hero'){
+  const selected=Boolean(snapshot.hero.definitionId);
+  const name=heroVisual?.name??(selected?'Héros sélectionné':'Aucun héros sélectionné');
+  content.push(profile({kind:'hero',name,
+   subtitle:selected?'Portrait de la bibliothèque officielle Exploration':
+    'Choisis un héros dans l’éditeur officiel Exploration',
+   imageUrl:heroVisual?.url??null,
+   artCaption:selected?'Visuel du héros indisponible':'Héros non sélectionné',
+   vitals:[['Progression',snapshot.hero.progressionEnabled?'Activée':'Non activée'],
+    ...(snapshot.hero.progressionEnabled?
+     [['Niveau',snapshot.hero.level],['XP',snapshot.hero.xp],
+      ['Points de talent',snapshot.hero.talentPoints]]:[])]
+  }));
+  if(!selected)content.push(hint('Le héros n’a pas encore été choisi pour cette partie. Aucun portrait fictif n’est affiché.'));
+ }else if(tab==='team'||tab==='stats'){
+  const c=snapshot.creature;
+  const card=profile({kind:'creature',name:c.name,
+   subtitle:'Créature de ton équipe',imageUrl:portraitUrl,
+   artCaption:'Aucun portrait officiel disponible',
+   elements:c.elements,
+   vitals:[['Niveau',c.level],['PV actuels',c.hp===null?'Non renseignés':c.hp],['XP',c.xp]]
+  });
+  card.append(statGrid(c.stats,{
+   availablePoints:c.availablePoints,
+   onAllocate:tab==='stats'?onAllocate:null
+  }));
+  content.push(card);
+  if(tab==='team')content.push(hint('Équipe actuelle : une créature active. La réserve sera ajoutée quand Monster Capture la prendra en charge.'));
+ }else if(tab==='inventory'){
+  const section=node('section','sheet-inventory');
+  const heading=node('div','sheet-inventory-heading');
+  heading.append(node('h3','','Mon sac'),node('span','sheet-currency',
+   '◈ '+snapshot.inventory.currency+' pièces'));
+  section.append(heading);
+  if(!snapshot.inventory.items.length){
+   section.append(hint('Ton inventaire est vide pour le moment.'));
+  }else{
+   const grid=node('div','sheet-items');
+   for(const item of snapshot.inventory.items){
+    const row=node('div','sheet-item');
+    row.append(node('span','sheet-item-name',item.name),
+     node('strong','sheet-item-quantity','× '+item.quantity));
+    if(item.saleValue!==null)row.append(node('small','sheet-item-value',
+     item.saleValue+' pièces / unité'));
+    grid.append(row);
+   }
+   section.append(grid);
+  }
+  content.push(section);
+ }else throw new RangeError('Rubrique de fiche inconnue');
+ host.replaceChildren(...content);
+}

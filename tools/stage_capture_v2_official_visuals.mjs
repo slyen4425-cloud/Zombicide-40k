@@ -34,3 +34,44 @@ if(!fs.readFileSync(dest).equals(original))
  throw Error('Capture V2 visual catalogue drift during staging');
 console.log('Capture V2: immutable visual catalogue '+owner.sha+
  ' staged byte-identically ('+catalog.assets.length+' assets)');
+
+
+// User-facing Capture sheet uses the front portrait of each officially
+// published Combat creature. Stage exactly those immutable files, not the
+// entire (large) author asset library. The Bestiary has already checked the
+// publication contract; this transport must never synthesize missing art.
+const bundleRel='vendor/exploration-lab/combat-preview/data/capture/showcase/encounter-bundle.v1.json';
+const bundle=JSON.parse(fs.readFileSync(path.join(site,bundleRel),'utf8'));
+if(bundle.schema!=='capture-author-encounter-bundle-v1')throw Error('No official Combat Showcase for portraits');
+const byId=new Map(catalog.assets.map(entry=>[entry.id,entry]));
+const names=new Set();
+for(const transfer of bundle.creatureTransfers??[]){
+ const frontId=transfer?.draft?.presentation?.visual?.front?.assetId;
+ if(typeof frontId!=='string'||!frontId)continue;
+ const asset=byId.get(frontId);
+ // Draft-only creatures are intentionally excluded by the Combat Bestiary.
+ if(!asset||asset.mediaType!=='image'||
+    !['sprite','portrait'].includes(asset.assetType)||
+    Number(asset.resource?.frameCount??1)!==1)continue;
+ const file=asset.resource?.file;
+ if(typeof file!=='string'||
+   !/^(?:capture|core)\/[\w./-]+\.(?:png|webp|jpg|jpeg)$/i.test(file)||
+   file.split('/').includes('..'))throw Error('Unsafe Combat portrait path');
+ names.add(file);
+}
+if(!names.size)throw Error('No official creature front portraits to transport');
+const patterns=['/data/assets/catalog/*',
+ ...[...names].sort().map(file=>'/assets/library/'+file)];
+execFileSync('git',['-C',visual,'sparse-checkout','set','--no-cone',...patterns],
+ {encoding:'utf8',timeout:180000,maxBuffer:4*1024*1024});
+const mediaRoot=path.join(site,'vendor/exploration-lab/capture-assets/assets/library');
+for(const file of [...names].sort()){
+ const from=path.join(visual,'assets/library',file),to=path.join(mediaRoot,file);
+ if(!fs.existsSync(from)||!fs.statSync(from).isFile())
+  throw Error('Missing certified Combat front portrait: '+file);
+ fs.mkdirSync(path.dirname(to),{recursive:true});
+ fs.copyFileSync(from,to);
+ if(!fs.readFileSync(to).equals(fs.readFileSync(from)))
+  throw Error('Portrait bytes drifted during official transport: '+file);
+}
+console.log('Capture V2: '+names.size+' immutable front portraits physically staged from '+owner.sha);

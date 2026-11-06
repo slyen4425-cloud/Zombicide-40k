@@ -17,7 +17,9 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
  const stats=frozen(statRegistry.stats.map(stat=>{
   if(typeof stat?.id!=='string'||typeof stat?.label!=='string')
    throw new TypeError('Statistique officielle incomplète');
-  return frozen({id:stat.id,label:stat.label,allocated:active.statAllocations?.[stat.id]??0});
+  const measure=Array.isArray(card.measures)?card.measures.find(m=>m.key===stat.id):null;
+  return frozen({id:stat.id,label:stat.label,allocated:active.statAllocations?.[stat.id]??0,
+   baseValue:typeof measure?.value==='number'&&Number.isFinite(measure.value)?measure.value:null});
  }));
  const catalog=new Map(rules.loot.items.map(item=>[item.id,item]));
  const items=frozen(Object.entries(session.inventory.items).map(([id,quantity])=>{
@@ -26,7 +28,9 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
  }));
  const creature=frozen({
   instanceId:active.instanceId,speciesId:active.speciesId,name:card.name,
-  level:active.level,xp:active.xp,hp:active.hp,availablePoints:available,stats
+  level:active.level,xp:active.xp,hp:active.hp,availablePoints:available,stats,
+  portrait:card.portrait??null,
+  elements:frozen(Array.isArray(card.elements)?card.elements.slice():[])
  });
  const heroState=session.hero?.progression;
  const hero=frozen({

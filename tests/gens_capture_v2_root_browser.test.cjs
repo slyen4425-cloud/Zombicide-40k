@@ -340,6 +340,18 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(launched.session,stored.sessionId);
   assert.match(launched.src,/vendor\/exploration-lab\/sculpt-lab\.html$/);
   assert.equal(launched.probe.editorHidden,true);
+  const playArea=await resumed.locator('#adventure-play-frame').evaluate(frame=>{
+    const rect=frame.getBoundingClientRect();
+    return {x:rect.x,y:rect.y,width:rect.width,height:rect.height,
+     vw:innerWidth,vh:innerHeight};
+  });
+  assert.ok(Math.abs(playArea.x)<=2&&Math.abs(playArea.y)<=2,
+   'Exploration must start at the full viewport origin');
+  assert.ok(Math.abs(playArea.width-playArea.vw)<=3&&
+   Math.abs(playArea.height-playArea.vh)<=3,
+   'native Exploration gameplay must fill the mobile landscape viewport');
+  assert.equal(await resumed.locator('#adventure-fullscreen').isVisible(),true,
+   'manual fullscreen action must remain accessible in native gameplay');
 
   // A game in progress must expose the official GenSRPG character sheet without
   // unmounting or restarting the native Exploration play frame.
@@ -350,9 +362,18 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await resumed.locator('[data-adventure-sheet-tab="team"]').tap();
   assert.match(await resumed.locator('#adventure-sheet-content').textContent(),
    /Créature active|Lumilo|Niveau/);
+  const officialPortrait=resumed.locator('[data-capture-official-portrait]');
+  await officialPortrait.waitFor({state:'visible',timeout:15000});
+  const artwork=await officialPortrait.evaluate(async image=>{
+   try{await image.decode();}catch{/* Assertion below explains missing/corrupt native art. */}
+   return {url:image.src,complete:image.complete,width:image.naturalWidth};
+  });
+  assert.match(artwork.url,/\/vendor\/exploration-lab\/capture-assets\/assets\/library\/(?:capture|core)\//);
+  assert.ok(artwork.complete&&artwork.width>0,
+   'native Bestiary front portrait should decode from the published real asset, not a placeholder');
   await resumed.locator('[data-adventure-sheet-tab="inventory"]').tap();
   assert.match(await resumed.locator('#adventure-sheet-content').textContent(),
-   /Monnaie|inventaire/);
+   /Mon sac|pièces|inventaire/);
   await resumed.locator('[data-adventure-sheet-tab="stats"]').tap();
   assert.match(await resumed.locator('#adventure-sheet-content').textContent(),
    /Points à répartir/);

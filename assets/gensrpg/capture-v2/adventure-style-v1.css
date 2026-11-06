@@ -99,3 +99,127 @@ output{display:block;overflow-wrap:anywhere}
  #adventure-sheet-content{max-height:calc(100dvh - 147px);min-height:48px}
  .sheet-tabs{padding:3px 0}
 }
+
+
+/* V2 in-play view: native Exploration fills the entire available viewport.
+   A denied browser fullscreen request is never allowed to shrink gameplay. */
+html:has(body[data-adventure-playing="true"]),body[data-adventure-playing="true"]{
+ width:100%;height:100%;margin:0;overflow:hidden}
+body[data-adventure-playing="true"]{background:#08131c}
+main[hidden],#adventure-play-frame[hidden]{display:none!important}
+#adventure-play-frame{
+ position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;
+ border:0;border-radius:0;margin:0;padding:0;display:block;z-index:0;
+ background:#08131c
+}
+#adventure-play-hud{display:flex;align-items:center;justify-content:flex-end;
+ gap:6px;max-width:min(470px,80vw);z-index:12}
+#adventure-play-hud #adventure-open-sheet{flex:1 1 auto;min-width:0;
+ white-space:normal;line-height:1.12}
+#adventure-fullscreen{flex:0 0 auto;min-height:44px;background:#173c4a;
+ border-color:#82acbd;box-shadow:0 2px 12px #051016aa}
+
+/* Real RPG profile presentation, not raw rows of IDs. */
+#adventure-play-sheet{
+ width:min(930px,calc(100vw - 16px));max-height:calc(100dvh - 12px);
+ padding:clamp(8px,1.5vw,16px);overflow:hidden;
+ border-radius:18px;border:1px solid #6aafae;
+ background:linear-gradient(140deg,#15323e,#0d1b29 72%);
+ box-shadow:0 20px 65px #000d
+}
+#adventure-play-sheet .sheet-header{padding:0 2px}
+#adventure-play-sheet .sheet-header h2{font-size:clamp(17px,2.4vw,23px)}
+.sheet-tabs button{background:#15343f;color:#b9d1d7}
+.sheet-tabs button[aria-selected="true"]{background:#276755;
+ border-color:#9fe9bd;color:#fff;box-shadow:inset 0 -2px #87dfb0}
+#adventure-sheet-content{
+ overflow-y:auto;overflow-x:hidden;min-height:0;
+ max-height:calc(100dvh - 170px);padding:3px 2px 8px;
+ scrollbar-width:thin;overscroll-behavior:contain
+}
+.sheet-profile{overflow:hidden;border-radius:16px;
+ border:1px solid #315b65;background:#102630}
+.sheet-profile-top{display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr);
+ gap:clamp(12px,2.2vw,24px);align-items:center;
+ padding:clamp(12px,2.2vw,20px);
+ background:radial-gradient(ellipse at top left,#224957,#122e38 72%)}
+.sheet-portrait-frame{
+ position:relative;display:grid;place-items:center;overflow:hidden;
+ margin:0;width:100%;aspect-ratio:1/1;
+ border-radius:14px;border:1px solid #56858b;
+ background:radial-gradient(circle at 50% 36%,#34686a,#122c38 72%);
+ box-shadow:inset 0 0 30px #0d1c2980
+}
+.sheet-portrait-frame img{
+ display:block;position:relative;width:100%;height:100%;
+ object-fit:contain;object-position:center;z-index:2
+}
+.sheet-portrait-placeholder{font-size:clamp(45px,8vw,80px);
+ line-height:1;color:#78bab5;opacity:.5}
+.sheet-portrait-placeholder[hidden]{display:none}
+.sheet-art-status{position:absolute;bottom:6px;left:5px;right:5px;
+ text-align:center;font-size:10px;color:#d3e6e4;
+ text-shadow:0 2px 4px #000;z-index:3}
+.sheet-overline{color:#82ddbc;letter-spacing:.16em;
+ font-size:10px;font-weight:800}
+.sheet-display-name{font-size:clamp(20px,3.8vw,30px)!important;
+ line-height:1.15;margin:5px 0 7px;color:#f0fff7}
+.sheet-profile-subtitle{font-size:12px;color:#b5d3d2;margin:0 0 10px}
+.sheet-elements{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 10px}
+.sheet-element{display:inline-flex;padding:4px 10px;border-radius:999px;
+ border:1px solid #628b8d;background:#1f4750;color:#dffbec;
+ font-size:11px;font-weight:800}
+.sheet-vitals{display:flex;flex-wrap:wrap;gap:7px}
+.sheet-vital{min-width:82px;display:grid;gap:3px;
+ padding:8px 11px;border:1px solid #406972;border-radius:10px;
+ background:#102b38}
+.sheet-vital-label{font-size:10px;color:#a6c9c8}
+.sheet-vital strong{font-size:17px;color:#fff}
+.sheet-stats-panel{border-top:1px solid #315665;padding:14px}
+.sheet-section-title{display:flex;flex-wrap:wrap;
+ align-items:center;justify-content:space-between;gap:6px;margin-bottom:12px}
+.sheet-section-title h4{font-size:15px;color:#e2f9ef;margin:0}
+.sheet-points{font-size:12px;color:#acedd5;font-weight:800}
+.sheet-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:9px}
+.sheet-stat-card{display:flex;flex-direction:column;gap:5px;
+ min-width:0;padding:11px;border-radius:11px;
+ border:1px solid #345e67;background:#142e39}
+.sheet-stat-name{font-size:11px;color:#c3dfdd}
+.sheet-stat-value{font-size:clamp(21px,3vw,27px);color:#f3fff8}
+.sheet-stat-bonus{font-size:10px;color:#a9c9cf;overflow-wrap:anywhere}
+.sheet-stat-actions{display:flex;gap:6px;margin-top:5px}
+.sheet-stat-actions button{flex:1;min-height:40px;padding:5px;
+ background:#236956;border-color:#73b99b}
+.sheet-hint{font-size:12px;color:#abc9cc;margin:12px 6px;line-height:1.4}
+.sheet-inventory{border-radius:14px;border:1px solid #315b65;
+ padding:16px;background:#112834}
+.sheet-inventory-heading{display:flex;justify-content:space-between;
+ flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:15px}
+.sheet-inventory-heading h3{font-size:20px;color:#f3fff8;margin:0}
+.sheet-currency{font-size:15px;font-weight:800;color:#ffe8a4;
+ padding:8px 12px;border-radius:10px;background:#463c24;
+ border:1px solid #776d42}
+.sheet-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.sheet-item{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 12px;
+ padding:12px;border-radius:10px;border:1px solid #3c626f;background:#183542}
+.sheet-item-name{font-size:13px;font-weight:700;color:#e4fff7}
+.sheet-item-quantity{font-size:16px;color:#fff}
+.sheet-item-value{grid-column:1/-1;color:#b6ced0;font-size:11px}
+@media (orientation:landscape) and (max-height:550px){
+ #adventure-play-sheet{max-height:calc(100dvh - 6px);border-radius:10px;padding:7px}
+ #adventure-sheet-content{max-height:calc(100dvh - 120px)}
+ .sheet-profile-top{grid-template-columns:minmax(78px,118px) minmax(0,1fr);
+  padding:8px 10px;gap:12px}
+ .sheet-display-name{font-size:20px!important;margin:3px 0 4px}
+ .sheet-vital{padding:5px 9px}
+ .sheet-vital strong{font-size:14px}
+ .sheet-stats-panel{padding:10px}
+ .sheet-stat-card{padding:8px}
+ #adventure-play-hud button{font-size:11px;padding:5px 9px}
+}
+@media(max-width:480px){
+ .sheet-profile-top{grid-template-columns:105px minmax(0,1fr);gap:9px;padding:9px}
+ .sheet-display-name{font-size:18px!important}
+ .sheet-vital{min-width:60px;padding:6px}
+ .sheet-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}

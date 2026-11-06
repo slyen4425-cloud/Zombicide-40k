@@ -22,7 +22,18 @@ export function resolveSelectedAdventureWorldV1({session,worldLibrary,selectedWo
  const allowed=worldLibrary.list();
  if(!allowed.some(entry=>entry.id===selectedWorldId))
   throw new Error('Monde de partie introuvable dans la bibliothèque Exploration');
- // The official Exploration owner refuses replacing an unsaved/corrupted
- // active WorldDocument. GenSrpg never bypasses that protection.
+ // Read-only preflight: network host/guest WorldDocument matching MUST
+ // succeed before any active Builder draft or AdventureSave is changed.
+ const document=worldLibrary.load(selectedWorldId);
+ if(!document||document.id!==selectedWorldId)
+  throw new Error('WorldDocument officiel sélectionné introuvable ou corrompu');
+ return document;
+}
+export function activateSelectedAdventureWorldV1({worldLibrary,selectedWorldId}={}){
+ if(!worldLibrary||typeof worldLibrary.activate!=='function'||
+  !identifier(selectedWorldId))
+  throw new TypeError('Exploration World Builder officiel requis');
+ // After online preflight, the owner still refuses replacing any unsaved or
+ // corrupt author draft. Capture NEVER reimplements that protection.
  return worldLibrary.activate(selectedWorldId);
 }

@@ -66,6 +66,16 @@ Les cartes possèdent déjà notamment des maisons, ponts, arbres, cascades et d
 - Récompenses, badges, rang, éventuel bonus de champion, durée de possession, rotation ou remise à zéro : **aucune règle figée pour l'instant**.
 - **Dépendance bloquante :** le PvP jouable en direct n'est pas développé ; planifier séparément de l'architecture PvP existante. L'IA défensive et les combats doivent réutiliser les propriétaires du Labo Combat, pas un second système.
 
+
+## E. Idée combat à cadrer — retour forcé d'une créature KO (6 novembre 2026)
+**Statut : idée de gameplay confirmée par le créateur, à étudier ; non développée, aucun taux de risque ni règle définitive validés.**
+
+- Permettre au joueur de **forcer le retour au combat d'une créature déjà KO**, en acceptant un **risque de perte définitive de cette créature**.
+- Prévoir un avertissement explicite et une confirmation avant le choix irréversible ; ne jamais déclencher automatiquement la perte.
+- À décider : conditions d'activation, probabilité du risque, durée et limites du retour, PV/énergie au retour, déclencheur exact de la perte définitive, interaction avec victoire/défaite, protection des créatures spéciales, options MJ et sauvegardes.
+- Préserver l'autorité du Labo Combat pour les états et le combat ; GenSrpg / Monster Capture pour l'identité, l'inventaire et la persistance de la créature. Éviter un second moteur.
+- **Recherche préalable** : retrouver une éventuelle note historique plus détaillée avant de figer ces paramètres ; la présente note consolide uniquement le principe explicitement rappelé par le créateur.
+
 ## Inspiration documentée
 - [Pokémon GO — défendre une arène](https://niantic.helpshift.com/hc/en/6-pokemon-go/faq/383-earning-the-defender-bonus/?l=en) : défense persistante au-delà de la présence du joueur.
 - [Temtem — Dojo Wars](https://temtem.wiki.gg/wiki/Dojo_Wars) : contrôle de dojos par des joueurs et défense organisée.

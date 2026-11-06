@@ -218,9 +218,11 @@ export const DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1=freeze({
  editProgression:false,editRewards:false,editWorld:false,
  allocateOwnCreatureStats:true
 });
-function normalizeAdventureSessionControlV1(raw){
- const value=exact(raw,['creatorId','hostIsGameMaster','joinEnabled','guestPermissions'],
-  'AdventureSessionControl');
+// One policy validator for the creator draft AND an active AdventureSession.
+// No creator identity exists until a real game is explicitly created.
+export function normalizeAdventureSessionControlSettingsV1(raw){
+ const value=exact(raw,['hostIsGameMaster','joinEnabled','guestPermissions'],
+  'AdventureSessionControl settings');
  const guest=exact(value.guestPermissions,
   ['editProgression','editRewards','editWorld','allocateOwnCreatureStats'],
   'guestPermissions');
@@ -229,9 +231,16 @@ function normalizeAdventureSessionControlV1(raw){
  for(const [name,allowed] of Object.entries(guest))
   if(typeof allowed!=='boolean')
    throw new TypeError('guestPermissions.'+name+' must be boolean');
- return freeze({creatorId:identity(value.creatorId,'creatorId'),
-  hostIsGameMaster:value.hostIsGameMaster,joinEnabled:value.joinEnabled,
+ return freeze({hostIsGameMaster:value.hostIsGameMaster,joinEnabled:value.joinEnabled,
   guestPermissions:{...guest}});
+}
+function normalizeAdventureSessionControlV1(raw){
+ const value=exact(raw,['creatorId','hostIsGameMaster','joinEnabled','guestPermissions'],
+  'AdventureSessionControl');
+ const settings=normalizeAdventureSessionControlSettingsV1({
+  hostIsGameMaster:value.hostIsGameMaster,joinEnabled:value.joinEnabled,
+  guestPermissions:value.guestPermissions});
+ return freeze({creatorId:identity(value.creatorId,'creatorId'),...settings});
 }
 function statWallet(actor,progression){
  const allocations=actor.statAllocations??{};

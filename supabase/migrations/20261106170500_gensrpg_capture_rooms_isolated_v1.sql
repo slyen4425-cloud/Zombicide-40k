@@ -20,7 +20,12 @@ create table if not exists public.gensrpg_capture_rooms (
     and jsonb_typeof(guest_permissions->'editRewards') = 'boolean'
     and jsonb_typeof(guest_permissions->'editWorld') = 'boolean'
     and jsonb_typeof(guest_permissions->'allocateOwnCreatureStats') = 'boolean'
-    and jsonb_object_length(guest_permissions) = 4
+    and guest_permissions = jsonb_build_object(
+      'editProgression',coalesce(guest_permissions->'editProgression','null'::jsonb),
+      'editRewards',coalesce(guest_permissions->'editRewards','null'::jsonb),
+      'editWorld',coalesce(guest_permissions->'editWorld','null'::jsonb),
+      'allocateOwnCreatureStats',coalesce(guest_permissions->'allocateOwnCreatureStats','null'::jsonb)
+    )
   ),
   open boolean not null default true,
   revision bigint not null default 0 check (revision >= 0),
@@ -110,7 +115,7 @@ begin
    v_tries := v_tries+1;
    if v_tries > 10 then raise exception 'Could not allocate unique room code'; end if;
    v_code := '';
-   v_random := gen_random_bytes(10);
+   v_random := extensions.gen_random_bytes(10);
    for v_i in 0..9 loop
      v_code := v_code || substr(v_alphabet,1+(get_byte(v_random,v_i)%32),1);
    end loop;

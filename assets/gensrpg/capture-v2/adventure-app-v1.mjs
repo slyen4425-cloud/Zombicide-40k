@@ -16,6 +16,7 @@ import {renderAdventureSheetViewV1} from './adventure-play-sheet-view-v1.mjs';
 import {createAdventureCreatorDraftStoreV1} from './adventure-creator-draft-v1.mjs';
 import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
 import {writeAdventurePlayingPartyV1} from './adventure-playing-party-grant-v1.mjs';
+import {writeAdventureHeroSelectionGrantV1} from './adventure-hero-selection-grant-v1.mjs';
 import {
  DEFAULT_ADVENTURE_RULES_V1,SHOWCASE_ADVENTURE_RULES_V1,
  DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
@@ -234,6 +235,35 @@ async function fetchPublishedBestiary(){
   statRegistry:stats
  });
 }
+// Only the original Exploration IndexedDB is authoritative for user HeroDefinition images.
+async function officialHeroStore(){
+ const {createUserHeroStoreV1}=await import(
+  '../../../vendor/exploration-lab/src/storage/user-hero-store-v1.js');
+ return createUserHeroStoreV1();
+}
+async function fillHeroChoices(savedHeroId=null){
+ const picker=$('adventure-hero-choice'),notice=$('adventure-hero-choice-status');
+ picker.disabled=true;
+ try{
+  const records=await (await officialHeroStore()).list();
+  picker.replaceChildren(option('','Aucun héros personnalisé'),
+   ...records.map(hero=>option(hero.id,hero.name)));
+  if(savedHeroId&&records.some(hero=>hero.id===savedHeroId))picker.value=savedHeroId;
+  else if(savedHeroId){
+   picker.append(option(savedHeroId,'Héros enregistré indisponible',true));
+   picker.value=savedHeroId;
+  }
+  text(notice,records.length
+   ?records.length+' héros enregistrés dans la bibliothèque Exploration.'
+   :'Aucun héros créé : ajoute-en un depuis l’éditeur officiel Exploration.');
+ }catch(error){
+  picker.replaceChildren(option('','Bibliothèque héros indisponible'));
+  text(notice,'Bibliothèque du héros indisponible : '+error.message+
+   '. Tu peux créer une partie sans héros personnalisé.');
+ }
+ picker.disabled=!!store?.load();
+}
+
 function option(value,caption,disabled=false){
  const o=document.createElement('option');
  o.value=value;o.textContent=caption;o.disabled=disabled;return o;
@@ -291,11 +321,13 @@ function showSave(){
  try{
   const state=store.load();
   if(!state){
+   $('adventure-hero-choice').disabled=false;
    text($('adventure-save-summary'),'Aucune partie créée.');
    $('adventure-play').disabled=true;
    renderStatWallet();
    return;
   }
+  $('adventure-hero-choice').disabled=true;
   $('adventure-play').disabled=false;
   $('adventure-play').textContent=state.status==='playing'?'Continuer la partie':'Entrer dans le monde';
   const card=published.find(c=>c.id===state.party.active.speciesId);
@@ -335,6 +367,12 @@ function updatePreview(){
 function guarded(callback){
  return ()=>{
   try{callback();}catch(error){stateMessage(error.message,true);}
+ };
+}
+function guardedAsync(callback){
+ return ()=>{
+  try{void Promise.resolve(callback()).catch(error=>stateMessage(error.message,true));}
+  catch(error){stateMessage(error.message,true);}
  };
 }
 // The Exploration iframe remains mounted; only this Capture-owned view
@@ -466,7 +504,8 @@ $('adventure-create').addEventListener('click',guarded(()=>{
  const now=new Date().toISOString();
  const state=createAdventureSessionV1({
   bestiaryCards:published,starterId:$('adventure-starter').value,
-  rules,ids:{sessionId:id(),instanceId:id(),creatorId:id()},now
+  rules,ids:{sessionId:id(),instanceId:id(),creatorId:id()},now,
+  heroDefinitionId:$('adventure-hero-choice').value||null
  });
  const configured=updateAdventureSessionControlV1({
   session:state,settings:sessionControlFromFields(),now
@@ -508,13 +547,20 @@ $('adventure-fullscreen').addEventListener('click',()=>{
 document.addEventListener('fullscreenchange',syncFullscreenControl);
 syncFullscreenControl();
 
-$('adventure-play').addEventListener('click',guarded(()=>{
+$('adventure-play').addEventListener('click',guardedAsync(async()=>{
  const world=readWorldAssemblerDraft(window.localStorage);
+ const savedHeroId=store.load()?.hero?.definitionId??null;
+ const heroRecord=savedHeroId?await (await officialHeroStore()).get(savedHeroId):null;
+ if(savedHeroId&&!heroRecord)
+  throw new Error('Le héros de cette partie n’existe plus dans la bibliothèque Exploration. La sauvegarde reste intacte.');
  const result=startAdventureExplorationV1({
   store,storage:window.localStorage,world,
   navigation:{createNewExplorationPlay,readExplorationPlay},
   now:new Date().toISOString()
  });
+ // Native Exploration consumes the original selected HeroDefinition by ID only.
+ writeAdventureHeroSelectionGrantV1({storage:window.sessionStorage,
+  session:result.session,world,heroRecord});
  // GenSRPG owns the one transient permission to encounter Combat-published
  // species. The real Exploration main independently validates it against its
  // authoritative Showcase bundle before ever considering wild encounters.
@@ -626,6 +672,7 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   else {const draft=draftStore.load();if(draft){rules=draft;setFields(rules);}}
   setSessionControlFields(active);
   renderItemRules();showSave();updatePreview();
+  await fillHeroChoices(active?.hero?.definitionId??null);
   stateMessage(published.length+' créatures officielles publiées, aucune créature de brouillon chargée.');
  }catch(error){
   stateMessage('Aventure indisponible : '+error.message,true);

@@ -117,6 +117,29 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await adventureFrame.locator('#adventure-xp-bands .xp-band-row').count(),5);
   assert.equal(await adventureFrame.locator('#adventure-xp-bands .xp-band-row').first()
    .locator('[data-xp-band-cost]').inputValue(),'2000');
+  // Full real-browser regression: before a first game exists, edit and SAVE
+  // creator settings, close the official nested Adventure UI and reopen it.
+  // In-memory form state disappears at iframe teardown. Only Core Storage
+  // may recover the authored rules; there must still be no playable save.
+  await adventureFrame.locator('#adventure-xp-base').fill('733');
+  await adventureFrame.locator('#adventure-loot-panel > summary').tap();
+  await adventureFrame.locator('#adventure-save-rules').tap();
+  const pregameDraft=await adventureFrame.locator('#adventure-save-rules').evaluate(()=>{
+    const draft=localStorage.getItem('gensrpg.capture.v2.adventure.rules-draft.v1');
+    const game=localStorage.getItem('gensrpg.capture.v2.adventure.save.v1');
+    return {draft:draft?JSON.parse(draft):null,game};
+  });
+  assert.equal(pregameDraft.draft?.xp?.baseVictoryXp,733,
+   'creator draft must be written to existing Core Storage before first game');
+  assert.equal(pregameDraft.game,null,
+   'a saved settings draft must never create or overwrite a playable game');
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
+  await adventureFrame.locator('#adventure-create:not([disabled])').waitFor({timeout:25000});
+  assert.equal(await adventureFrame.locator('#adventure-xp-base').inputValue(),'733',
+   'pre-game creator settings must survive actual iframe teardown and re-entry');
+  await adventureFrame.locator('#adventure-rules-panel > summary').tap();
   await adventureFrame.locator('#adventure-creator-panel > summary').tap();
   await adventureFrame.locator('#adventure-gm-enabled').check();
   await adventureFrame.locator('#adventure-join-enabled').check();

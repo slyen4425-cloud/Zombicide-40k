@@ -124,6 +124,23 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await adventureFrame.locator('#adventure-xp-base').fill('733');
   await adventureFrame.locator('#adventure-loot-panel > summary').tap();
   await adventureFrame.locator('#adventure-save-rules').tap();
+  // Creator choices must be saved independently before any game, on the REAL
+  // nested Adventure screen, not via a helper that bypasses its button.
+  await adventureFrame.locator('#adventure-creator-panel > summary').tap();
+  await adventureFrame.locator('#adventure-gm-enabled').check();
+  await adventureFrame.locator('#adventure-join-enabled').check();
+  await adventureFrame.locator('#adventure-guest-edit-progression').check();
+  await adventureFrame.locator('#adventure-guest-edit-rewards').check();
+  await adventureFrame.locator('#adventure-guest-allocate-stats').uncheck();
+  await adventureFrame.locator('#adventure-save-control').tap();
+  const pregameCreator=await adventureFrame.locator('#adventure-save-control').evaluate(()=>{
+    const raw=localStorage.getItem('gensrpg.capture.v2.adventure.creator-draft.v1');
+    return raw?JSON.parse(raw):null;
+  });
+  assert.equal(pregameCreator?.settings?.hostIsGameMaster,true);
+  assert.equal(pregameCreator?.settings?.joinEnabled,true);
+  assert.equal(pregameCreator?.settings?.guestPermissions?.editRewards,true);
+  assert.equal(pregameCreator?.settings?.guestPermissions?.allocateOwnCreatureStats,false);
   const pregameDraft=await adventureFrame.locator('#adventure-save-rules').evaluate(()=>{
     const draft=localStorage.getItem('gensrpg.capture.v2.adventure.rules-draft.v1');
     const game=localStorage.getItem('gensrpg.capture.v2.adventure.save.v1');
@@ -140,6 +157,11 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await adventureFrame.locator('#adventure-xp-base').inputValue(),'733',
    'pre-game creator settings must survive actual iframe teardown and re-entry');
   await adventureFrame.locator('#adventure-rules-panel > summary').tap();
+  assert.equal(await adventureFrame.locator('#adventure-gm-enabled').isChecked(),true,
+   'creator MJ preference must survive real iframe teardown before first game');
+  assert.equal(await adventureFrame.locator('#adventure-join-enabled').isChecked(),true);
+  assert.equal(await adventureFrame.locator('#adventure-guest-edit-rewards').isChecked(),true);
+  assert.equal(await adventureFrame.locator('#adventure-guest-allocate-stats').isChecked(),false);
   await adventureFrame.locator('#adventure-creator-panel > summary').tap();
   await adventureFrame.locator('#adventure-gm-enabled').check();
   await adventureFrame.locator('#adventure-join-enabled').check();
@@ -235,6 +257,8 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(stored?.sessionControl?.hostIsGameMaster,true);
   assert.equal(stored?.sessionControl?.joinEnabled,true);
   assert.equal(stored?.sessionControl?.guestPermissions?.editProgression,true);
+  assert.equal(stored?.sessionControl?.guestPermissions?.editRewards,true);
+  assert.equal(stored?.sessionControl?.guestPermissions?.allocateOwnCreatureStats,false);
   assert.equal(stored?.party?.active?.statAllocations?.health,undefined);
   assert.equal(stored?.hero?.progression?.level,1);
   assert.equal(stored?.hero?.progression?.xp,0);

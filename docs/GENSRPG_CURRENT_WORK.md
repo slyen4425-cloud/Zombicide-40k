@@ -8,6 +8,17 @@
 
 ---
 
+## 2026-11-05 — Aventure : permissions créateur/MJ conservées avant première partie (C2, TDD RED)
+
+- **START** : checkpoint `checkpoint/gensrpg-start-adventure-creator-draft-2026-11-05` au SHA candidat Capture `e0d06515c74698739a1dba733565d54dc15abc92` (PR #279, 4/4 CI SUCCESS). Branche `work/gensrpg-adventure-creator-draft-2026-11-05`, isolée ; dépend du repin Exploration #280 puis de la persistance #279. Aucune fusion vers main.
+- **Problème** : avant la première partie, l'UI `adventure-save-control` désactivait le bouton et ne stockait pas les choix créateur/MJ. Les réglages prépartie étaient perdus au retour de l'écran, même lorsque les règles XP avaient été sauvegardées.
+- **Périmètre** : configuration préparatoire des droits créateur/MJ appartenant au module Capture V2 uniquement. Réutiliser le validateur canonique `AdventureSessionControl` ; brouillon séparé de l'état de partie, sauvegardé via `GensStorageV1` sans remplacer les sauvegardes existantes. `index.html`, les Labos, PWA et autres modules intacts.
+- **TDD RED** : scénario d'aller-retour Core Storage et UI navigateur réelle : enregistrer droits avant partie → fermer iframe → rouvrir → retrouver les cases cochées → créer partie avec la même politique → recharger session ; invalide/futur conservé et signalé, pas de migration silencieuse.
+- **Gates et sortie** : Node propriétaire, Chromium réel, livraison native, V113, Builder et revue. GREEN uniquement au SHA exact avec CI complète, suivi des tests utilisateur Pixel et publication distincte. Aucune simulation multijoueur ni autorisation réseau inventée.
+- **Suite** : obtenir RED, corriger dans le seul propriétaire Capture, rejouer CI puis checkpoint de candidat. Après ce lot : interface en partie personnage/inventaire/équipe/statistiques via propriétaire de session, en lot distinct.
+
+---
+
 ## 2026-11-05 — Aventure Monster Capture : persistance du brouillon de règles avant création de partie (candidat NON GREEN)
 
 - **Signalement** : issue #278 ; l'interface annonçait « réglages prêts : crée une partie pour les sauvegarder » lorsque `store.load()===null`, mais ne persistait aucune configuration. À la réouverture, le preset vitrine remplaçait les valeurs auteur. Défaut démontré par inspection du vrai handler, sans prétendre avoir reproduit le navigateur physique.

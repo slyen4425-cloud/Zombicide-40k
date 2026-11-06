@@ -1,43 +1,8 @@
 name: Capture official release payload (not public activation)
+# Historic V1 full-Lab payload is audit/rollback-only. Do not generate it
+# automatically on every Capture PR; the current V2 has a separate owner.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'work/gensrpg-capture-official-delivery-package-*'
-      - 'work/gensrpg-capture-official-hub-composition-*'
-      - 'work/gensrpg-capture-pages-pinned-delivery-*'
-      - 'work/gensrpg-capture-official-battle-view-*'
-      - 'work/gensrpg-capture-real-wild-button-*'
-      - 'work/gensrpg-capture-world-paired-encounters-playable-*'
-      - 'work/gensrpg-capture-offline-verified-media-cache-*'
-  pull_request:
-    paths:
-      - 'tools/stage_capture_lab_delivery.mjs'
-      - '.github/workflows/main.yml'
-      - 'tests/gens_capture_lab_pages_pipeline_v1.test.cjs'
-      - 'tests/gens_capture_lab_pages_site_v1.test.cjs'
-      - 'tests/gens_capture_lab_delivery_v1.test.cjs'
-      - 'tests/gens_capture_kitsune_author_12_gate_v1.test.cjs'
-      - 'tests/gens_capture_official_hub_composition_v1.test.cjs'
-      - 'tests/gens_capture_official_hub_composition_browser_v1.test.cjs'
-      - 'tests/gens_capture_official_battle_view_v1.test.cjs'
-      - 'tests/gens_capture_official_battle_view_2v2_browser_v1.test.cjs'
-      - 'assets/gensrpg/capture/capture-official-battle-view-v1.mjs'
-      - 'assets/gensrpg/capture/capture-official-hub-composition-v1.mjs'
-      - 'assets/gensrpg/capture/capture-official-wild-entry-v1.mjs'
-      - 'assets/gensrpg/capture/legacy-monolith-functions-v1.js'
-      - 'tests/gens_capture_real_wild_button_v1.test.cjs'
-      - 'tests/gens_capture_real_wild_button_browser_v1.test.cjs'
-      - 'tests/gens_capture_public_world_2v2_browser_v1.test.cjs'
-      - 'tests/gens_capture_native_lab_scene_v1.test.cjs'
-      - 'assets/gensrpg/capture/capture-native-lab-*.mjs'
-      - '.github/workflows/capture-lab-delivery.yml'
-      - 'service-worker.js'
-      - 'tests/gens_capture_pwa_offline_pinned_media_v1.test.cjs'
-      - 'tests/gens_capture_pwa_offline_pinned_media_browser_v1.test.cjs'
-      - 'tools/build_capture_lab_preview.mjs'
-      - 'tools/prepare_capture_lab_authored_preview.mjs'
-      - 'docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json'
 permissions:
   contents: read
 jobs:

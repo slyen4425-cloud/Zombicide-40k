@@ -306,6 +306,9 @@ jobs:
           index.write_text(html, encoding="utf-8")
           PY
 
+      # Compatibility exception: this older test-only 2v2 URL still uses
+      # the pinned author-inputs and Combat ESM graph. A separate migration
+      # must validate a V2-only replacement before this delivery can retire.
       - name: Construire la livraison Capture officielle passive depuis le publisher unique
         run: node tools/stage_capture_lab_delivery.mjs combat-lab combat-assets _site
 
@@ -464,6 +467,14 @@ jobs:
           node tools/stage_capture_v2_pages_preview.mjs capture-v2-source preview-combat-lab preview-exploration-lab _site preview-combat-assets
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
           node --test tests/gens_capture_v2_encounter_bridge_site.test.cjs
+
+      - name: Auditer taille réelle et duplication du site avant toute publication
+        env:
+          GENSRPG_REQUIRE_PAGES_SITE: '1'
+        run: |
+          node --test tests/gensrpg_pages_no_legacy_combat_copy.test.cjs
+          node --test tests/gensrpg_pages_release_budget.test.cjs
+          node --test tests/gens_capture_lab_pages_pipeline_v1.test.cjs
 
       - name: Install Chromium for real nested Capture V2 browser proof
         run: |

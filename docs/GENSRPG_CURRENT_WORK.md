@@ -1,3 +1,15 @@
+## 2026-11-06 — Monster Capture C3 : présence des joueurs dans Exploration (START / TDD À FAIRE)
+
+- **Jalon précédent** : C2 backend salon Capture isolé `checkpoint/gensrpg-capture-lobby-green-2026-11-06` @ `b3683c1c84757d55076d4fe876df64e5584e019b`, 7 suites CI SUCCESS exact SHA (dont architecture et navigateur). Vrai jeu à plusieurs non encore démontré / non publié.
+- **Nouveau checkpoint START** : `checkpoint/gensrpg-start-capture-world-presence-2026-11-06` sur le même SHA `b3683c1c84757d55076d4fe876df64e5584e019b` ; branche dédiée `work/gensrpg-capture-world-presence-2026-11-06`. Base de PR destinée à être C2 work branch, **pas `main`**.
+- **Objectif C3 limité** : projection de position des participants, uniquement après déplacement *accepté* par l'Exploration officiel, messages versionnés sans sauvegardes ni contrôle du moteur; refus d'une autre session, autre monde, ID d'acteur injecté, replay et coordonnées invalides. Pas de combat entre joueurs dans ce lot.
+- **Propriétaires** : Explore officiel main seul décide zone/XY/collisions/portails et dessine avatars ; GenSRPG Capture possède l'identité et la session ; Core Storage écrit le seul AdventureSave ; serveur Supabase authentifie l'acteur; Survie et Dungeon/PvP intouchés.
+- **Invariants interdits** : pas d'interception globale de `Storage.prototype`, pas de lecture de sauvegardes distantes, pas d'écriture distante dans les checkpoints, pas de second renderer, pas de `postMessage('*')`, pas de rétrofit `index.html`, pas de copie du Labo Exploration.
+- **Constat** : pin Exploration `main@a2db1825f0a1a833fadcd02d7804f887c864a1d2` expose `createExplorationPlayProgressWriter` mais **aucun événement officiel exporté** vers le parent. Le raccord doit attendre ou faire ajouter un pont propriétaire officiel; ne pas écouter arbitrairement les `localStorage` depuis GenSRPG.
+- **Tests et sortie** : TDD RED, validateurs de message stricts, canal de salle Capture authentifié, séparation de familles, cycles install/dispose, deux pages / deux identités / une carte; sentinelles CI du jeu et navigateur. Rester DRAFT tant que pont réel Exploration et tests à deux joueurs ne sont pas validés.
+
+---
+
 ## 2026-11-06 — Monster Capture C2 : transport de salon Supabase séparé (BACKEND ACTIF / PUBLICATION EN ATTENTE)
 
 - **Périmètre et checkpoint** : source `work/gensrpg-capture-session-multiplayer-contract-2026-11-06` ; START `checkpoint/gensrpg-start-capture-session-multiplayer-contract-2026-11-06` @ `7d7f1f20eb16f10fc28f75f15b68d287954f2a13` ; PR [#294](https://github.com/slyen4425-cloud/Zombicide-40k/pull/294) DRAFT, non publiée. Aucune modification du `main` GenSRPG ni de son service worker.

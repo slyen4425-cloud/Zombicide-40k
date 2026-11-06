@@ -75,7 +75,8 @@ output{display:block;overflow-wrap:anywhere}
 /* Capture-owned in-game sheet, above the native Exploration iframe.
    The browser's dialog top layer owns focus and Escape handling. */
 #adventure-play-hud[hidden]{display:none!important}
-#adventure-play-hud{position:fixed;z-index:15;top:max(8px,env(safe-area-inset-top));left:max(8px,env(safe-area-inset-left))}
+/* Preserve the native Exploration play menu at top-left; HUD belongs to the opposite corner. */
+#adventure-play-hud{position:fixed;z-index:15;top:max(8px,env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));left:auto;max-width:min(235px,45vw)}
 #adventure-open-sheet{background:#125b4d;border:2px solid #8be5ca;min-height:44px;box-shadow:0 2px 14px #051016bb}
 #adventure-play-sheet{width:min(760px,calc(100vw - 24px));max-height:calc(100dvh - 18px);
  margin:auto;border:1px solid #6cb7ad;border-radius:14px;color:#eafff6;

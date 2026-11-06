@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createAdventureSessionV1,DEFAULT_ADVENTURE_RULES_V1}
  from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
-import {withSelectedAdventureWorldV1,resolveSelectedAdventureWorldV1}
+import {withSelectedAdventureWorldV1,resolveSelectedAdventureWorldV1,
+ activateSelectedAdventureWorldV1}
  from '../assets/gensrpg/capture-v2/adventure-world-choice-v1.mjs';
 
 const cards=[{id:'monster-a',name:'Creature',level:1,
@@ -39,6 +40,8 @@ test('selected world matches stored adventure identity and activates official Ex
  const s=withSelectedAdventureWorldV1(session(),'neige-1'),lib=library();
  const actual=resolveSelectedAdventureWorldV1({session:s,worldLibrary:lib,selectedWorldId:'neige-1'});
  assert.equal(actual.id,'neige-1');
+ assert.deepEqual(lib.opened,[],'read-only world validation never changes editor storage');
+ assert.equal(activateSelectedAdventureWorldV1({worldLibrary:lib,selectedWorldId:'neige-1'}).id,'neige-1');
  assert.deepEqual(lib.opened,['neige-1']);
  assert.throws(()=>resolveSelectedAdventureWorldV1({session:s,worldLibrary:lib,selectedWorldId:'foret-1'}),/monde|partie/i);
  assert.deepEqual(lib.opened,['neige-1'],'mismatched world cannot activate any document');

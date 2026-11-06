@@ -116,7 +116,8 @@ test('official published creature front portraits are physically present, immuta
      !['sprite','portrait'].includes(asset.assetType)||
      Number(asset.resource?.frameCount??1)!==1)continue;
   const file=asset.resource?.file;
-  if(typeof file!=='string'||!/^(?:capture|core)\\/[\\w./-]+\\.(?:png|webp|jpg|jpeg)$/i.test(file)||
+  const allowedPath = /^(?:capture|core)\/[A-Za-z0-9_./-]+\.(?:png|webp|jpg|jpeg)$/i;
+  if(typeof file!=='string'||!allowedPath.test(file)||
    file.split('/').includes('..'))throw Error('Unsafe published portrait resource');
   expected.add(file);
  }

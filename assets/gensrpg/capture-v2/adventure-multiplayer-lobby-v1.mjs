@@ -100,7 +100,10 @@ function sessionPolicy(session){
    !session.sessionControl)
   throw new TypeError('Existing canonical AdventureSession with creator policy required');
  const policy=session.sessionControl;
- const settings=normalizeAdventureSessionControlSettingsV1(policy);
+ const settings=normalizeAdventureSessionControlSettingsV1({
+  hostIsGameMaster:policy.hostIsGameMaster,joinEnabled:policy.joinEnabled,
+  guestPermissions:policy.guestPermissions
+ });
  return {
   creatorId:identity(policy.creatorId,'session creator id'),
   sessionId:identity(session.sessionId,'session id'),

@@ -1,3 +1,12 @@
+## 2026-11-06 — Aventure combinée : réparation des deux sentinelles historiques (C1, NON GREEN)
+
+- **START vérifié** : `checkpoint/gensrpg-start-adventure-integration-sentinels-2026-11-06` @ `9cb518650ddee2c3b83142f0b184df375632d5c1`, branche indépendante `work/gensrpg-adventure-integration-sentinels-2026-11-06`. Dernière publication main vérifiée : `5dcccaf6b8084a5662698e5a462a3178afe641bf` ; **le candidat intégré n'est pas GREEN ni publié**.
+- **RED au SHA exact** : Architecture #42165312791 : navigateur quatre modules échoue sur le raccourci direct Capture `[data-capture-v2-view="creature"]` masqué par le menu Jouer/Éditeurs ; sentinelle Phase 4 exige l'ancien blob Core `3cca2908` alors que le contrat officiel XP par paliers a changé. Les contrôles Firefox et Tactical de ce SHA sont SUCCESS ; architecture reste FAILURE.
+- **Correction ciblée, sans cacher de régression** : réutiliser les solutions TEST-ONLY déjà relues de PR #269 (traversée du vrai menu Éditeurs/Combat, conservation des 4 modes, iframe et stockages) et PR #270 (tests comportementaux sur paliers XP du Core plutôt qu'une empreinte périmée, conservation de l'empreinte Dungeon historique). **Aucun changement de moteur**, de Shell, d'iframe, de données auteurs, de PWA, de publisher, de laboratoires, ni d'autres modules.
+- **Gates de sortie** : revue du diff des deux sentinelles, CI architecture sur le SHA résultant, tests Aventure créateur/MJ + fiche et navigateur paysage, 4/4 tests source et contrôles des pins officiels. Si rouge : diagnostic, pas de GREEN ni fusion. Ce lot ne promeut pas automatiquement la chaîne #280/#279/#281/#282 ; la publication est une étape distincte.
+
+---
+
 ## 2026-11-06 — Synchronisation exacte Capture V2 avec les deux Labos main après nettoyage Pages (NON GREEN tant que la CI candidate n'a pas conclu)
 
 - **START** : checkpoint `checkpoint/gensrpg-capture-v2-pre-dual-main-repin-2026-11-06` @ `dfc595a1db0cda38daeabedaa7fdcbd9df7eaf02`, branche dédiée `work/gensrpg-capture-v2-exploration-main-repin-2026-11-05` issue du lot #280. Charte source unique : Combat et Exploration consommés uniquement sur `main`.

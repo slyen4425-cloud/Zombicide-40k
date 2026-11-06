@@ -54,7 +54,7 @@ export function createCaptureRoomTransportV1({client}={}){
  if(!client?.auth?.getSession||!client?.auth?.signInAnonymously||
    !client?.rpc||!client?.from||!client?.channel||!client?.removeChannel)
   throw new TypeError('Client Supabase authentifié requis');
- let channel=null, activeRoomId=null;
+ let channel=null, activeRoomId=null,subscriptionGeneration=0;
  async function authenticatedUserId(){
   let session=result(await client.auth.getSession(),'Session Supabase')?.session;
   if(!session){
@@ -186,35 +186,74 @@ export function createCaptureRoomTransportV1({client}={}){
    ownActorId:user,previousSequences
   });
  }
- async function observe({roomId,userId,onChange,onStatus}={}){
+ async function observe({roomId,userId,onChange,onStatus,onPositions}={}){
   const id=checkUuid(roomId),user=checkUuid(userId);
   if(typeof onChange!=='function')throw new TypeError('Callback salle requis');
+  if(onPositions!==undefined&&typeof onPositions!=='function')
+   throw new TypeError('Le lecteur des positions doit être un callback');
   await dispose();
   activeRoomId=id;
+  const generation=subscriptionGeneration;
+  const current=()=>activeRoomId===id&&subscriptionGeneration===generation;
+  let sequences=Object.create(null),dirty=false,running=false;
   const update=()=>{void inspectRoom(id).then(state=>{
-   if(activeRoomId===id)onChange(state);
-  }).catch(error=>onStatus?.('Erreur lecture salon : '+error.message));};
+   if(current())onChange(state);
+  }).catch(error=>{if(current())onStatus?.('Erreur lecture salon : '+error.message);});};
+  // Realtime is only a wake-up signal. Every coordinate is fetched via
+  // authenticated RLS and accepted only if its server revision advanced.
+  // Coalesce overlapping signals without losing the latest notification.
+  async function flushPositions(){
+   if(running||!current()||typeof onPositions!=='function')return;
+   running=true;
+   try{
+    while(dirty&&current()){
+     dirty=false;
+     try{
+      const update=await inspectPositions({
+       roomId:id,ownActorId:user,previousSequences:sequences
+      });
+      if(!current())return;
+      sequences=update.sequences;
+      if(update.actors.length)onPositions(update);
+     }catch(error){
+      if(current())onStatus?.('Lecture des positions refusée : '+error.message);
+     }
+    }
+   }finally{running=false;}
+  }
+  const updatePositions=()=>{
+   if(!current()||typeof onPositions!=='function')return;
+   dirty=true;
+   void flushPositions();
+  };
   const next=client.channel(ROOM_TOPIC+id,{
    config:{private:true,presence:{key:user}}
   });
   channel=next;
-  next.on('presence',{event:'sync'},update);
-  next.on('broadcast',{event:'capture-room-refresh-v1'},update);
-  // Untrusted notification contains NO coordinates or player identities:
-  // the only authority is the RLS-protected Capture peer table read.
-  next.on('broadcast',{event:'capture-peer-position-changed-v1'},update);
+  next.on('presence',{event:'sync'},()=>{
+   if(!current())return;
+   update();updatePositions();
+  });
+  next.on('broadcast',{event:'capture-room-refresh-v1'},()=>{
+   if(!current())return;
+   update();updatePositions();
+  });
+  // Never trust positions in Broadcast payloads. The room member's RLS
+  // SELECT is the ONLY source of received coordinates, area and revision.
+  next.on('broadcast',{event:'capture-peer-position-changed-v1'},updatePositions);
   next.subscribe(status=>{
-   if(activeRoomId!==id)return;
+   if(!current())return;
    if(status==='SUBSCRIBED'){
     onStatus?.('Salon connecté');
-    update();
-    void next.track({ready:true}).catch(error=>
-     onStatus?.('Présence indisponible : '+error.message));
+    update();updatePositions();
+    void next.track({ready:true}).catch(error=>{
+     if(current())onStatus?.('Présence indisponible : '+error.message);
+    });
    }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
     onStatus?.('Connexion salon interrompue : '+status);
    }
   });
-  update();
+  update();updatePositions();
   return Object.freeze({roomId:id,topic:ROOM_TOPIC+id});
  }
  async function leave({roomId}={}){
@@ -224,6 +263,7 @@ export function createCaptureRoomTransportV1({client}={}){
   finally{await dispose();}
  }
  async function dispose(){
+  ++subscriptionGeneration;
   activeRoomId=null;
   const previous=channel;channel=null;
   if(previous)await client.removeChannel(previous);

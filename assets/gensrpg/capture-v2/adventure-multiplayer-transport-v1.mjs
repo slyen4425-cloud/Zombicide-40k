@@ -5,6 +5,9 @@
 import {
  ADVENTURE_SAVE_SCHEMA_V1,normalizeAdventureSessionControlSettingsV1
 } from './adventure-contract-v1.mjs';
+import {
+ capturePeerPositionFromOfficialNavigationV1,capturePeerPositionListV1
+} from './adventure-peer-position-v1.mjs';
 
 const ROOM_TABLE='gensrpg_capture_rooms';
 const MEMBERS_TABLE='gensrpg_capture_room_members';
@@ -64,7 +67,7 @@ export function createCaptureRoomTransportV1({client}={}){
  async function inspectRoom(roomId){
   const id=checkUuid(roomId);
   const room=result(await client.from(ROOM_TABLE).select(
-   'id,code,owner_id,adventure_session_id,max_players,join_enabled,host_is_game_master,guest_permissions,open,revision'
+   'id,code,owner_id,adventure_session_id,max_players,join_enabled,host_is_game_master,guest_permissions,open,revision,world_id,world_fingerprint'
   ).eq('id',id).maybeSingle(),'Lecture salle Monster Capture');
   if(!room)return null;
   const members=result(await client.from(MEMBERS_TABLE).select(
@@ -74,6 +77,7 @@ export function createCaptureRoomTransportV1({client}={}){
   if(!Array.isArray(members))throw new Error('Liste de joueurs indisponible');
   return Object.freeze({roomId:id,code:room.code,ownerId:room.owner_id,
    sessionId:room.adventure_session_id,maxPlayers:room.max_players,
+   worldId:room.world_id??null,worldFingerprint:room.world_fingerprint??null,
    open:room.open,revision:room.revision,joinEnabled:room.join_enabled,
    members:members.map(m=>Object.freeze({id:m.user_id,name:m.display_name,role:m.role}))});
  }
@@ -100,6 +104,77 @@ export function createCaptureRoomTransportV1({client}={}){
   }),'Rejoindre le salon Capture'));
   return Object.freeze({...reply,userId,role:'guest'});
  }
+ // This operation is host-only on the server. It does not serialize the
+ // WorldDocument, only its canonical identity/fingerprint from Exploration.
+ async function bindWorld({roomId,navigation}={}){
+  const id=checkUuid(roomId),room=await inspectRoom(id);
+  if(!room||!room.open)throw new Error('Salon Monster Capture introuvable ou fermé');
+  const userId=await authenticatedUserId();
+  if(room.ownerId!==userId)throw new Error('Seul le créateur du salon fixe le monde');
+  const position=capturePeerPositionFromOfficialNavigationV1({
+   navigation,sessionId:room.sessionId,
+   worldId:navigation?.worldId,worldFingerprint:navigation?.worldFingerprint
+  });
+  if(room.worldId&&(room.worldId!==position.worldId||
+    room.worldFingerprint!==position.worldFingerprint))
+   throw new Error('Un autre WorldDocument est déjà associé à ce salon');
+  result(await client.rpc('gensrpg_capture_bind_world',{
+   p_room:id,p_world_id:position.worldId,
+   p_world_fingerprint:position.worldFingerprint
+  }),'Associer le monde Exploration au salon');
+  if(activeRoomId===id&&typeof channel?.send==='function'){
+   try{await channel.send({type:'broadcast',
+    event:'capture-room-refresh-v1',payload:{}});}
+   catch{ /* Canonical server binding succeeded; notification is best-effort. */ }
+  }
+  return Object.freeze({roomId:id,
+   worldId:position.worldId,worldFingerprint:position.worldFingerprint});
+ }
+ // The only accepted position is read from the official Exploration
+ // checkpoint/event. Actor identity is NOT sent: PostgreSQL uses auth.uid().
+ async function reportPosition({roomId,navigation,expectedSeq=0}={}){
+  const id=checkUuid(roomId);
+  if(!Number.isSafeInteger(expectedSeq)||expectedSeq<0)
+   throw new RangeError('Compteur de position invalide');
+  const room=await inspectRoom(id);
+  if(!room?.open||!room.worldId||!room.worldFingerprint)
+   throw new Error('Le monde du salon n’est pas encore défini');
+  const position=capturePeerPositionFromOfficialNavigationV1({
+   navigation,sessionId:navigation?.sessionId,
+   worldId:room.worldId,worldFingerprint:room.worldFingerprint
+  });
+  const seq=Number(result(await client.rpc('gensrpg_capture_report_position',{
+   p_room:id,p_world_id:position.worldId,
+   p_world_fingerprint:position.worldFingerprint,
+   p_area_id:position.areaId,p_x:position.x,p_y:position.y,
+   p_expected_seq:expectedSeq
+  }),'Publier la position officielle Exploration'));
+  if(!Number.isSafeInteger(seq)||seq!==expectedSeq+1)
+   throw new Error('Révision de position serveur inattendue');
+  if(activeRoomId===id&&typeof channel?.send==='function'){
+   try{await channel.send({type:'broadcast',
+    event:'capture-peer-position-changed-v1',payload:{}});}
+   catch{ /* No rollback: authenticated server position is already durable. */ }
+  }
+  return seq;
+ }
+ async function inspectPositions({roomId,ownActorId,previousSequences={}}={}){
+  const id=checkUuid(roomId),user=checkUuid(ownActorId);
+  const room=await inspectRoom(id);
+  if(!room?.open||!room.worldId||!room.worldFingerprint)
+   return Object.freeze({actors:Object.freeze([]),
+    sequences:Object.freeze({...previousSequences})});
+  const rows=result(await client.from('gensrpg_capture_peer_positions').select(
+   'room_id,user_id,world_id,world_fingerprint,area_id,x,y,seq,updated_at'
+  ).eq('room_id',id).order('updated_at',{ascending:true}),
+   'Lecture des joueurs du même monde');
+  return capturePeerPositionListV1({
+   rows,roomId:id,worldId:room.worldId,
+   worldFingerprint:room.worldFingerprint,
+   participants:room.members.map(member=>member.id),
+   ownActorId:user,previousSequences
+  });
+ }
  async function observe({roomId,userId,onChange,onStatus}={}){
   const id=checkUuid(roomId),user=checkUuid(userId);
   if(typeof onChange!=='function')throw new TypeError('Callback salle requis');
@@ -114,6 +189,9 @@ export function createCaptureRoomTransportV1({client}={}){
   channel=next;
   next.on('presence',{event:'sync'},update);
   next.on('broadcast',{event:'capture-room-refresh-v1'},update);
+  // Untrusted notification contains NO coordinates or player identities:
+  // the only authority is the RLS-protected Capture peer table read.
+  next.on('broadcast',{event:'capture-peer-position-changed-v1'},update);
   next.subscribe(status=>{
    if(activeRoomId!==id)return;
    if(status==='SUBSCRIBED'){
@@ -139,5 +217,6 @@ export function createCaptureRoomTransportV1({client}={}){
   const previous=channel;channel=null;
   if(previous)await client.removeChannel(previous);
  }
- return Object.freeze({authenticatedUserId,create,join,inspectRoom,observe,leave,dispose});
+ return Object.freeze({authenticatedUserId,create,join,inspectRoom,
+  bindWorld,reportPosition,inspectPositions,observe,leave,dispose});
 }

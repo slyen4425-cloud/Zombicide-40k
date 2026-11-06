@@ -8,6 +8,18 @@
 
 ---
 
+## 2026-11-05 — Monster Capture : fiche de partie pendant Exploration (C2, TDD RED)
+
+- **START** : checkpoint `checkpoint/gensrpg-start-capture-play-sheet-2026-11-05` @ `e0d06515c74698739a1dba733565d54dc15abc92`, dernier candidat CI 4/4 SUCCESS (PR #279 sur #280). Branche `work/gensrpg-capture-play-sheet-2026-11-05` indépendante du lot de permissions créateur #281.
+- **Problème** : en vrai mode Jouer, l'iframe Exploration masque entièrement l'écran Aventure ; le joueur n'a aucun bouton donnant accès à sa fiche, aux stats, à son inventaire ou à ses créatures.
+- **Propriétaires** : GenSRPG Capture V2 reste seul propriétaire de `AdventureSession` et du panneau de consultation ; Core Storage garde la sauvegarde, Core progression/stat wallet garde le budget, Combat définit les statIds et créatures publiées, Exploration garde le mouvement/la carte. Le panneau n'édite pas le moteur Combat/Exploration.
+- **Périmètre** : barre d'accès en cours de jeu + vrai dialogue focalisé affichant héros, équipe active, inventaire, stats et budget issu d'AdventureSession ; modification autorisée uniquement via `allocateAdventureStatPointsV1`, persistance Core et re-projection officielle vers Exploration, verrou partagé avec la transaction de combat. Un seul monstre actif aujourd'hui, aucune équipe/réserve inventée.
+- **Tests** : TDD Node modèle vue pur (aucun calcul moteur), erreur fermée sans source officielle ; navigateur vrai démarrage Exploration, menu de partie accessible en paysage, ouverture/fermeture sans recharger la carte ni perdre sauvegarde ; allocation points en jeu et retour à l'état de jeu.
+- **Hors lot** : modifier des objets sans système d'objets publié, remplacer le visuel Héros, multi-joueurs, équipe/réserve non encore écrite, PWA/ServiceWorker, `index.html` (§26), Dungeon/Survie/PvP.
+- **Statut** : NON GREEN jusqu'aux suites propres, navigateur et revue ; aucun déploiement. Suite : finaliser uniquement sur sa branche puis certification PR et promotion de la chaîne de dépendances.
+
+---
+
 ## 2026-11-05 — Aventure Monster Capture : persistance du brouillon de règles avant création de partie (candidat NON GREEN)
 
 - **Signalement** : issue #278 ; l'interface annonçait « réglages prêts : crée une partie pour les sauvegarder » lorsque `store.load()===null`, mais ne persistait aucune configuration. À la réouverture, le preset vitrine remplaçait les valeurs auteur. Défaut démontré par inspection du vrai handler, sans prétendre avoir reproduit le navigateur physique.

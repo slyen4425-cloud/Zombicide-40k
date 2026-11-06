@@ -138,6 +138,25 @@
  </div>
 </main>
 <iframe id="adventure-play-frame" title="Monster Capture · Jouer" allow="fullscreen; autoplay" allowfullscreen hidden></iframe>
+<div id="adventure-play-hud" hidden>
+ <button type="button" id="adventure-open-sheet" aria-haspopup="dialog" aria-controls="adventure-play-sheet">
+  Personnage · Équipe · Sac
+ </button>
+</div>
+<dialog id="adventure-play-sheet" aria-labelledby="adventure-play-sheet-title">
+ <header class="sheet-header">
+  <div><span class="eyebrow">AVENTURE EN COURS</span><h2 id="adventure-play-sheet-title">Ma fiche</h2></div>
+  <button type="button" id="adventure-close-sheet" aria-label="Fermer la fiche et retourner au monde">Retour au monde</button>
+ </header>
+ <nav class="sheet-tabs" role="tablist" aria-label="Rubriques de la partie">
+  <button type="button" role="tab" data-adventure-sheet-tab="hero" aria-selected="true">Personnage</button>
+  <button type="button" role="tab" data-adventure-sheet-tab="team" aria-selected="false">Créatures</button>
+  <button type="button" role="tab" data-adventure-sheet-tab="stats" aria-selected="false">Statistiques</button>
+  <button type="button" role="tab" data-adventure-sheet-tab="inventory" aria-selected="false">Inventaire</button>
+ </nav>
+ <div id="adventure-sheet-content" role="tabpanel" aria-live="polite"></div>
+ <output id="adventure-sheet-status" role="status" aria-live="polite"></output>
+</dialog>
 <script src="../core/storage-v1.js"></script>
 <script src="../core/progression-v1.js"></script>
 <script type="module" src="./adventure-app-v1.mjs"></script>

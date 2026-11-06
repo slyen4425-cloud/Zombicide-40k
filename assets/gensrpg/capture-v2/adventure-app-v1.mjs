@@ -386,6 +386,8 @@ function guardedAsync(callback){
 // The real network is started by an explicit player click, never during
 // adventure boot or legacy shell startup.
 let captureRoomTransport=null,activeCaptureRoom=null,activeCaptureExplorationEvents=null;
+// Display-only peer projections. Never persisted and never used for movement.
+const captureRemotePositions=new Map();
 function onlineRoomStatus(message,error=false){
  const output=$('adventure-room-status');
  output.textContent=message;output.dataset.error=String(error);
@@ -408,6 +410,7 @@ function captureRoomProvider(){
 function renderCaptureRoomMembers(state){
  const host=$('adventure-room-members');host.replaceChildren();
  if(!state){
+  captureRemotePositions.clear();renderCaptureRemotePositions();
   onlineRoomStatus('Salon fermé ou accès expiré ; aucune sauvegarde modifiée.',true);
   return;
  }
@@ -418,12 +421,38 @@ function renderCaptureRoomMembers(state){
  }
  onlineRoomStatus('CODE '+state.code+' · '+state.members.length+
   ' / '+state.maxPlayers+' joueur(s) · '+(state.open?'Salon ouvert':'Salon fermé'));
+ const members=new Set(state.members.map(p=>p.id));
+ for(const id of captureRemotePositions.keys()){
+  if(!members.has(id))captureRemotePositions.delete(id);
+ }
+ renderCaptureRemotePositions();
+}
+function updateCaptureRemotePositions(snapshot){
+ if(!activeCaptureRoom||!Array.isArray(snapshot?.actors))return;
+ for(const actor of snapshot.actors){
+  // Server projection has already been validated against room membership,
+  // world fingerprint and monotonic revision by the Capture transport.
+  if(typeof actor?.actorId!=='string')continue;
+  captureRemotePositions.set(actor.actorId,actor);
+ }
+ renderCaptureRemotePositions();
+}
+function renderCaptureRemotePositions(){
+ const total=captureRemotePositions.size;
+ const statement=total+' autre(s) joueur(s) avec position reçue';
+ // C3 intentionally DOES NOT claim an avatar has been drawn. Exploration
+ // alone will later display the validated peers using its official renderer.
+ text($('adventure-room-positions'),'Positions reçues : '+statement+
+  ' · avatars distants pas encore affichés.');
+ text($('adventure-play-remote-status'),'Positions reçues : '+total+
+  ' · affichage des avatars à raccorder');
 }
 async function connectCaptureRoom(response){
  const transport=captureRoomProvider();
  // Separate authorization: the server already validated this user and the
  // room. The view receives only projected membership and never an AdventureSave.
  activeCaptureRoom=response;
+ captureRemotePositions.clear();renderCaptureRemotePositions();
  $('adventure-room-code').value=response.code;
  $('adventure-room-host').disabled=true;
  $('adventure-room-join').disabled=true;
@@ -431,6 +460,7 @@ async function connectCaptureRoom(response){
  await transport.observe({
   roomId:response.roomId,userId:response.userId,
   onChange:renderCaptureRoomMembers,
+  onPositions:updateCaptureRemotePositions,
   onStatus:message=>{if(message!=='Salon connecté')onlineRoomStatus(message,true);}
  });
  const state=await transport.inspectRoom(response.roomId);
@@ -461,6 +491,7 @@ $('adventure-room-leave').addEventListener('click',guardedAsync(async()=>{
  activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
  await captureRoomProvider().leave({roomId:room.roomId});
  activeCaptureRoom=null;
+ captureRemotePositions.clear();renderCaptureRemotePositions();
  $('adventure-room-members').replaceChildren();
  $('adventure-room-leave').disabled=true;
  $('adventure-room-join').disabled=false;
@@ -470,6 +501,7 @@ $('adventure-room-leave').addEventListener('click',guardedAsync(async()=>{
 window.addEventListener('pagehide',()=>{
  // No globally persistent heartbeat and no shared save mutation.
  activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
+ captureRemotePositions.clear();
  void captureRoomTransport?.dispose().catch(()=>{});
 });
 

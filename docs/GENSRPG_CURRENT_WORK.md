@@ -5,6 +5,8 @@
 - **Correction ciblée, sans cacher de régression** : réutiliser les solutions TEST-ONLY déjà relues de PR #269 (traversée du vrai menu Éditeurs/Combat, conservation des 4 modes, iframe et stockages) et PR #270 (tests comportementaux sur paliers XP du Core plutôt qu'une empreinte périmée, conservation de l'empreinte Dungeon historique). **Aucun changement de moteur**, de Shell, d'iframe, de données auteurs, de PWA, de publisher, de laboratoires, ni d'autres modules.
 - **Gates de sortie** : revue du diff des deux sentinelles, CI architecture sur le SHA résultant, tests Aventure créateur/MJ + fiche et navigateur paysage, 4/4 tests source et contrôles des pins officiels. Si rouge : diagnostic, pas de GREEN ni fusion. Ce lot ne promeut pas automatiquement la chaîne #280/#279/#281/#282 ; la publication est une étape distincte.
 
+
+- **Continuation 2026-11-06 (RED restant)** : après le succès du browser V2 au SHA `4117f85f` (run #42205408702), l'architecture révèle un **troisième** test historique `gens_phase4_progression_xp_next_seam_preaudit_v1.test.cjs` encore couplé au blob Core obsolète `3cca2908`. Correction sur la même branche : conserver l'empreinte exacte Dungeon Phase 7, remplacer uniquement la comparaison Core par preuve d'autorité et tests des frontières XP compactes dans le véritable délégué Dungeon. **Non GREEN jusqu'à CI au SHA du correctif.**
 ---
 
 ## 2026-11-06 — Synchronisation exacte Capture V2 avec les deux Labos main après nettoyage Pages (NON GREEN tant que la CI candidate n'a pas conclu)

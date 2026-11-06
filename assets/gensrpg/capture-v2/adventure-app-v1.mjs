@@ -4,7 +4,7 @@
 import {captureBestiaryCardsV1} from '../../../vendor/combat-lab/src/ui/capture-bestiary-cards-v1.js';
 import {readWorldAssemblerDraft} from '../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js';
 import {
- createNewExplorationPlay,readExplorationPlay
+ createNewExplorationPlay,readExplorationPlay,playWorldFingerprint
 } from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
 import {readCombatHandoff} from '../../../vendor/exploration-lab/src/encounters/combat-handoff-store.js';
 import {connectAdventureCombatHostV1} from './adventure-combat-host-v1.mjs';
@@ -16,6 +16,12 @@ import {renderAdventureSheetViewV1} from './adventure-play-sheet-view-v1.mjs';
 import {createAdventureCreatorDraftStoreV1} from './adventure-creator-draft-v1.mjs';
 import {createCaptureRoomTransportV1} from './adventure-multiplayer-transport-v1.mjs';
 import {createCaptureSupabaseClientV1} from './adventure-multiplayer-provider-v1.mjs';
+import {preflightCaptureOnlineWorldV1,publishCaptureInitialPositionV1
+} from './adventure-multiplayer-play-bridge-v1.mjs';
+import {attachCaptureExplorationPositionEventsV1
+} from './adventure-multiplayer-exploration-events-v1.mjs';
+import {attachCapturePeerFrameRelayV1
+} from './adventure-multiplayer-peer-frame-relay-v1.mjs';
 import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
 import {writeAdventurePlayingPartyV1} from './adventure-playing-party-grant-v1.mjs';
 import {writeAdventureHeroSelectionGrantV1} from './adventure-hero-selection-grant-v1.mjs';
@@ -381,7 +387,10 @@ function guardedAsync(callback){
 // A separate Capture-only Supabase Auth namespace protects Survival players.
 // The real network is started by an explicit player click, never during
 // adventure boot or legacy shell startup.
-let captureRoomTransport=null,activeCaptureRoom=null;
+let captureRoomTransport=null,activeCaptureRoom=null,activeCaptureExplorationEvents=null;
+let activeCapturePeerRelay=null;
+// Display-only peer projections. Never persisted and never used for movement.
+const captureRemotePositions=new Map();
 function onlineRoomStatus(message,error=false){
  const output=$('adventure-room-status');
  output.textContent=message;output.dataset.error=String(error);
@@ -404,6 +413,7 @@ function captureRoomProvider(){
 function renderCaptureRoomMembers(state){
  const host=$('adventure-room-members');host.replaceChildren();
  if(!state){
+  captureRemotePositions.clear();renderCaptureRemotePositions();
   onlineRoomStatus('Salon fermé ou accès expiré ; aucune sauvegarde modifiée.',true);
   return;
  }
@@ -414,12 +424,39 @@ function renderCaptureRoomMembers(state){
  }
  onlineRoomStatus('CODE '+state.code+' · '+state.members.length+
   ' / '+state.maxPlayers+' joueur(s) · '+(state.open?'Salon ouvert':'Salon fermé'));
+ const members=new Set(state.members.map(p=>p.id));
+ for(const id of captureRemotePositions.keys()){
+  if(!members.has(id))captureRemotePositions.delete(id);
+ }
+ renderCaptureRemotePositions();
+}
+function updateCaptureRemotePositions(snapshot){
+ if(!activeCaptureRoom||!Array.isArray(snapshot?.actors))return;
+ for(const actor of snapshot.actors){
+  // Server projection has already been validated against room membership,
+  // world fingerprint and monotonic revision by the Capture transport.
+  if(typeof actor?.actorId!=='string')continue;
+  captureRemotePositions.set(actor.actorId,actor);
+ }
+ renderCaptureRemotePositions();
+}
+function renderCaptureRemotePositions(){
+ const total=captureRemotePositions.size;
+ const statement=total+' autre(s) joueur(s) avec position reçue';
+ // C3 intentionally DOES NOT claim an avatar has been drawn. Exploration
+ // alone will later display the validated peers using its official renderer.
+ text($('adventure-room-positions'),'Positions reçues : '+statement+
+  ' · avatars distants pas encore affichés.');
+ text($('adventure-play-remote-status'),'Positions reçues : '+total+
+  ' · '+(activeCapturePeerRelay?'envoi au renderer Exploration':'affichage des avatars à raccorder'));
+ activeCapturePeerRelay?.publish([...captureRemotePositions.values()]);
 }
 async function connectCaptureRoom(response){
  const transport=captureRoomProvider();
  // Separate authorization: the server already validated this user and the
  // room. The view receives only projected membership and never an AdventureSave.
  activeCaptureRoom=response;
+ captureRemotePositions.clear();renderCaptureRemotePositions();
  $('adventure-room-code').value=response.code;
  $('adventure-room-host').disabled=true;
  $('adventure-room-join').disabled=true;
@@ -427,6 +464,7 @@ async function connectCaptureRoom(response){
  await transport.observe({
   roomId:response.roomId,userId:response.userId,
   onChange:renderCaptureRoomMembers,
+  onPositions:updateCaptureRemotePositions,
   onStatus:message=>{if(message!=='Salon connecté')onlineRoomStatus(message,true);}
  });
  const state=await transport.inspectRoom(response.roomId);
@@ -454,8 +492,11 @@ $('adventure-room-join').addEventListener('click',guardedAsync(async()=>{
 $('adventure-room-leave').addEventListener('click',guardedAsync(async()=>{
  const room=activeCaptureRoom;
  if(!room)return;
+ activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
+ activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
  await captureRoomProvider().leave({roomId:room.roomId});
  activeCaptureRoom=null;
+ captureRemotePositions.clear();renderCaptureRemotePositions();
  $('adventure-room-members').replaceChildren();
  $('adventure-room-leave').disabled=true;
  $('adventure-room-join').disabled=false;
@@ -463,7 +504,10 @@ $('adventure-room-leave').addEventListener('click',guardedAsync(async()=>{
  onlineRoomStatus('Salon quitté. Ta sauvegarde locale Monster Capture est intacte.');
 }));
 window.addEventListener('pagehide',()=>{
- // Merely detach Realtime; no snapshot, destructive disconnect or remote save.
+ // No globally persistent heartbeat and no shared save mutation.
+ activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
+ activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
+ captureRemotePositions.clear();
  void captureRoomTransport?.dispose().catch(()=>{});
 });
 
@@ -645,10 +689,24 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  const heroRecord=savedHeroId?await (await officialHeroStore()).get(savedHeroId):null;
  if(savedHeroId&&!heroRecord)
   throw new Error('Le héros de cette partie n’existe plus dans la bibliothèque Exploration. La sauvegarde reste intacte.');
+ // Bound worlds are immutable for this room. Refuse an alien/world-mismatched
+ // guest BEFORE touching their local AdventureSession or Exploration checkpoint.
+ const onlineContext=await preflightCaptureOnlineWorldV1({
+  room:activeCaptureRoom,transport:captureRoomTransport,
+  world,officialFingerprint:playWorldFingerprint,
+  sessionId:store.load()?.sessionId
+ });
  const result=startAdventureExplorationV1({
   store,storage:window.localStorage,world,
   navigation:{createNewExplorationPlay,readExplorationPlay},
   now:new Date().toISOString()
+ });
+ // Initial peer position comes from the SAME official Exploration checkpoint.
+ // Future movement must wait for a documented Exploration change event,
+ // not monkey-patching Storage or a duplicate navigation loop.
+ await publishCaptureInitialPositionV1({
+  context:onlineContext,transport:captureRoomTransport,
+  navigation:result.navigation
  });
  // Native Exploration consumes the original selected HeroDefinition by ID only.
  writeAdventureHeroSelectionGrantV1({storage:window.sessionStorage,
@@ -683,6 +741,31 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  });
  // Keep the Aventure owner mounted while the native Exploration frame runs.
  activePlayingSheet={sessionId,refreshParty};
+ activeCaptureExplorationEvents?.dispose();
+ activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
+ activeCaptureExplorationEvents=onlineContext
+  ?attachCaptureExplorationPositionEventsV1({
+    frame,roomId:onlineContext.room.roomId,transport:captureRoomTransport,
+    sessionId,worldId:onlineContext.worldId,
+    worldFingerprint:onlineContext.worldFingerprint,
+    origin:window.location.origin,
+    onStatus:message=>onlineRoomStatus(message)
+   })
+  :null;
+ // READ-ONLY remote peers. Rendering and perspective remain owned by the
+ // official Exploration MapActor renderer; network transports never mutate
+ // a navigation checkpoint. The scoped receiver may not yet be published.
+ activeCapturePeerRelay=onlineContext
+  ?attachCapturePeerFrameRelayV1({
+    frame,origin:window.location.origin,sessionId,
+    worldId:onlineContext.worldId,
+    worldFingerprint:onlineContext.worldFingerprint,
+    ownActorId:onlineContext.room.userId,
+    onReady:()=>onlineRoomStatus('Affichage des joueurs distants raccordé à Exploration')
+   })
+  :null;
+ activeCapturePeerRelay?.publish([...captureRemotePositions.values()]);
+ // No fake fallback if pinned Exploration main lacks the official API.
  frame.src=url.href;
  frame.hidden=false;
  document.querySelector('[data-adventure-app]').hidden=true;

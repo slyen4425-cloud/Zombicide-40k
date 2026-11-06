@@ -1,3 +1,12 @@
+## 2026-11-06 — Monster Capture : fiches visuelles et Jouer plein écran (C2, TDD RED)
+
+- **Retour utilisateur Pages** : les fiches en jeu sont des tableaux textuels sans portraits officiels, le héros s'affiche par un ID et Jouer ne semble plus en plein écran. Correction UI, pas de nouveau gameplay.
+- **START exact** : `checkpoint/gensrpg-start-capture-play-card-fullscreen-2026-11-06` @ `f37cbe75288402a9e7c5a68349fe6bac729ba423`, branche `work/gensrpg-capture-play-card-fullscreen-2026-11-06`. Production `main@342ef34d2f31c50b40046bc6f0aceb06af6b335b` inchangée.
+- **Périmètre** : le Bestiaire Combat reste propriétaire des portraits et mesures ; l'éditeur HeroDefinition et ses Blob IndexedDB restent dans Exploration ; Core garde sauvegardes/statistiques. Afficher des cartes portraits + stats d'origine, responsive paysage ; vrai écran Jouer plein viewport + geste Fullscreen API ; aucune mutation de moteur, Shell, Dungeon, Survie, PvP ni Lab. Ne pas inventer un héros non sélectionné ni une statistique calculée.
+- **Tests requis** : TDD portrait sain et lien image provenant de la publication immuable, chargement auteur via vrai store Exploration sans déplacer ses Blobs, affichage portable/paysage, maintien du frame de jeu à la fermeture, retour et permission fullscreen, navigateur réel, CI Capture V2 et budget Pages, non-interférence. **NON GREEN** avant CI SHA exact et contrôle HTTPS si publié.
+
+---
+
 ## 2026-11-06 — Sentinelle navigateur Capture V1 sur checkpoint immuable : contrat de carte obsolète (C1, NON GREEN)
 
 - **START réel** : `checkpoint/gensrpg-start-capture-v1-archive-sentinel-2026-11-06` @ `4117f85f692ef682be28db6db002afe4a0097720` (branche intégration des tests #287, **pas encore GREEN**), branche dédiée `work/gensrpg-capture-v1-archive-sentinel-2026-11-06`. Dernier `main` publié : `5dcccaf6`. Retour possible au START ; aucun merge/publication tant que CI non verte.

@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {attachCapturePeerFrameRelayV1,
  CAPTURE_PEER_FRAME_SNAPSHOT_V1,CAPTURE_PEER_FRAME_READY_V1
 } from '../assets/gensrpg/capture-v2/adventure-multiplayer-peer-frame-relay-v1.mjs';
@@ -82,10 +83,13 @@ test('rejects foreign world, foreign iframe, own avatar and forged save/inventor
  f.relay.dispose();
 });
 test('Adventure owner wires official iframe relay only during active online play',()=>{
- const s=awaitImportNotNeeded();
- function awaitImportNotNeeded(){return (awaitStatic());}
- function awaitStatic(){
-  return new String(''); // Placeholder replaced by static source inspection below.
- }
- assert.ok(s);
+ const s=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',
+  import.meta.url),'utf8');
+ assert.match(s,/attachCapturePeerFrameRelayV1/);
+ assert.match(s,/activeCapturePeerRelay\?\.dispose\(\)/);
+ assert.match(s,/activeCapturePeerRelay\?\.publish\(/);
+ const create=s.indexOf('activeCapturePeerRelay=onlineContext');
+ const navigate=s.indexOf('frame.src=url.href;');
+ assert.ok(create>0&&navigate>create,'relay must exist before iframe navigation');
+ assert.doesNotMatch(s,/z40kApplySnapshot|z40kPushState|z40kSubscribe/);
 });

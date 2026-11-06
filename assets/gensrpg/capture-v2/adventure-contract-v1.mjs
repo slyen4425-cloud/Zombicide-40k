@@ -513,11 +513,15 @@ export function applyAdventureCombatResultV1({
  assertSession(updated);
  return {applied:true,session:updated,award};
 }
-export function createAdventureStoreV1({storage,coreStorage}){
+export function createAdventureStoreV1({storage,coreStorage,key=ADVENTURE_STORAGE_KEY_V1}){
  if(!storage||typeof storage.getItem!=='function'||typeof storage.setItem!=='function'||
     !coreStorage||typeof coreStorage.readJson!=='function'||typeof coreStorage.writeJson!=='function')
   throw new TypeError('The existing injected Core Storage service is required');
- const key=ADVENTURE_STORAGE_KEY_V1;
+ // Reuse the exact same Core AdventureSave serializer for each Capture slot.
+ // No arbitrary keys: other modules, especially Survie, remain untouched.
+ if(key!==ADVENTURE_STORAGE_KEY_V1&&
+    (typeof key!=='string'||!/^gensrpg\.capture\.v2\.adventure\.slot\.v1:[A-Za-z0-9][A-Za-z0-9_:.-]{0,129}$/.test(key)))
+  throw new TypeError('Clé de sauvegarde étrangère au module Monster Capture');
  const load=()=>{
   if(storage.getItem(key)===null)return null;
   const data=coreStorage.readJson(storage,key,null);

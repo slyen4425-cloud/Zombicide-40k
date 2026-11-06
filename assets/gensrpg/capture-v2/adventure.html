@@ -16,7 +16,15 @@
  <div class="adventure-columns">
   <section aria-labelledby="adventure-game-heading">
    <h2 id="adventure-game-heading">Ma partie</h2>
-   <p class="hint">Choisis ta première créature.</p>
+   <p class="hint">Chaque nouvelle partie est conservée séparément. Sélectionne une sauvegarde pour la reprendre, ou crée une autre aventure sans écraser les précédentes.</p>
+   <label for="adventure-save-select">Mes parties enregistrées</label>
+   <div class="adventure-save-picker">
+    <select id="adventure-save-select" aria-label="Choisir une sauvegarde Monster Capture">
+     <option value="">Aucune partie enregistrée</option>
+    </select>
+    <button type="button" id="adventure-save-load">Charger cette partie</button>
+   </div>
+   <p class="hint">Pour créer une nouvelle partie, choisis sa créature de départ et son héros. Les parties déjà créées restent intactes.</p>
    <label for="adventure-starter">Créature de départ</label>
    <select id="adventure-starter" aria-label="Créature de départ publiée" disabled>
     <option value="">Chargement du Bestiaire…</option>
@@ -28,7 +36,7 @@
    </select>
    <p id="adventure-hero-choice-status" class="hint">Chargement des héros enregistrés dans Exploration…</p>
    <div class="actions">
-    <button type="button" id="adventure-create" disabled>Créer une partie</button>
+    <button type="button" id="adventure-create" disabled>Créer une nouvelle partie</button>
     <button type="button" id="adventure-resume">Afficher la sauvegarde</button>
     <button type="button" id="adventure-play" disabled>Entrer dans le monde</button>
    </div>

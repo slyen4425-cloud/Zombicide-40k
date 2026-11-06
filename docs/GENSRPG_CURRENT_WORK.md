@@ -1,3 +1,14 @@
+## 2026-11-06 — Monster Capture : plusieurs sauvegardes de parties (LOT CORRECTIONS C5, START / NON GREEN)
+
+- **Demande avant publication main** : une sauvegarde en cours ne bloque plus la création d'une autre partie ; l'utilisateur sélectionne une aventure existante, peut en créer une nouvelle, et aucune sauvegarde n'est écrasée sans autorisation. Les mondes enregistrés, rencontres et ergonomie sont des lots séparés à réaliser AVANT toute publication de l'ensemble.
+- **Base C3** : SHA exact `205ef3dae31a774020d62dac7ab25d65974e07da` (GenSrpg PR #296, DRAFT, CI C3 encore en contrôle au départ) ; checkpoint `checkpoint/gensrpg-start-capture-multi-saves-2026-11-06` ; branche `work/gensrpg-capture-multi-saves-2026-11-06`. Ne pas appeler la base « GREEN » si les sentinelles encore en cours ne sont pas validées. Main GenSrpg et l'ancien stockage Survie restent inchangés.
+- **Propriétaire** : GenSrpg Capture `adventure-contract-v1.mjs` + Core Storage injecté. L'ancien `gensrpg.capture.v2.adventure.save.v1` reste intact et lisible (pas de copie ni suppression silencieuse). Ajouter un catalogue de sessions strictement Capture indexé par identifiants opaques et une clé par save, un choix actif explicite, une migration additive et idempotente, le refus des anciennes ou mauvaises sessions et la protection de corruption.
+- **Hors périmètre C5** : WorldDocument/import/export/collisions restent au Labo Exploration ; Combat officiel ne change pas ; Supabase, réseau, états Survie/Dungeon/PvP, index.html, service worker, ancienne partie et cache PWA ne changent pas ; ne pas dupliquer le moteur ou d'assets.
+- **Tests** : TDD RED avec ancienne save, nouvelle partie alors qu'une première existe, sélection/reprise d'une session spécifique, deux parties indépendantes et mêmes identifiants impossibles, erreurs d'écriture et données corrompues, refus écriture inter-partie, workflow Capture et sentinelles moteur/navigateur ; checkpoint GREEN seulement sur SHA exact 7/7 et chemin réel testé.
+- **Suite conditionnelle** : lots officiels Exploration pour bibliothèque de mondes sauvegardés puis sélection explicite depuis l'aventure, diagnostic rencontres 0 %/carte vierge, correction ergonomie fiches ; recette mobile paysage et 2 sessions réseau, puis seulement PR de livraison main protégée par la charte.
+
+---
+
 ## 2026-11-06 — Capture C3 : émission des snapshots des pairs vers l'Exploration officiel (CANDIDAT / NON PUBLIÉ)
 
 - **Branche autorisée** : `work/gensrpg-capture-world-presence-2026-11-06` de PR #296. Le précédent SHA `4d9c3f2faeb5ccab7ec8578efe1ffafe6342a380` a obtenu 7/7 workflows SUCCESS, sans être une preuve de jeu partagé ni de publication. Pas de main, pas de changements Survie/PvP/Dungeon, pas de seconde copie des laboratoires.

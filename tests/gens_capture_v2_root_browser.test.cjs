@@ -241,7 +241,9 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.match(saved,/niveau 1.*0 XP.*configuration enregistrée/,
    'a real Capture-owned save must be created, not just an editor test');
   const stored=await adventureFrame.locator('#adventure-create').evaluate(()=>{
-   const saved=localStorage.getItem('gensrpg.capture.v2.adventure.save.v1');
+   const index=JSON.parse(localStorage.getItem('gensrpg.capture.v2.adventure.portfolio.v1')||'null');
+   if(!index?.selectedSessionId)return null;
+   const saved=localStorage.getItem('gensrpg.capture.v2.adventure.slot.v1:'+index.selectedSessionId);
    return saved?JSON.parse(saved):null;
   });
   assert.equal(stored?.schema,'gensrpg-capture-adventure-save-v1');
@@ -265,6 +267,29 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(stored?.party?.active?.speciesId,
    await adventureFrame.locator('#adventure-starter').inputValue());
   assert.ok(stored?.party?.active?.instanceId);
+  // Real web app smoke: a second adventure MUST NOT overwrite the first,
+  // and loading an earlier save must restore its exact saved rules.
+  const firstSession=stored.sessionId;
+  const firstOriginal=await adventureFrame.locator('#adventure-create').evaluate(id=>
+   localStorage.getItem('gensrpg.capture.v2.adventure.slot.v1:'+id),firstSession);
+  await adventureFrame.locator('#adventure-xp-base').fill('123');
+  await adventureFrame.locator('#adventure-create').tap();
+  const second=await adventureFrame.locator('#adventure-create').evaluate(()=>{
+   const index=JSON.parse(localStorage.getItem('gensrpg.capture.v2.adventure.portfolio.v1'));
+   return JSON.parse(localStorage.getItem(
+    'gensrpg.capture.v2.adventure.slot.v1:'+index.selectedSessionId));
+  });
+  assert.notEqual(second.sessionId,firstSession,'new game requires a new unique session');
+  assert.equal(second.rules.xp.baseVictoryXp,123);
+  const unchanged=await adventureFrame.locator('#adventure-create').evaluate(id=>
+   localStorage.getItem('gensrpg.capture.v2.adventure.slot.v1:'+id),firstSession);
+  assert.equal(unchanged,firstOriginal,'second game must never mutate the first save bytes');
+  await adventureFrame.locator('#adventure-save-select').selectOption(firstSession);
+  await adventureFrame.locator('#adventure-save-load').tap();
+  assert.equal(await adventureFrame.locator('#adventure-xp-base').inputValue(),'777');
+  const restored=await adventureFrame.locator('#adventure-create').evaluate(()=>
+   JSON.parse(localStorage.getItem('gensrpg.capture.v2.adventure.portfolio.v1')).selectedSessionId);
+  assert.equal(restored,firstSession);
   const adventureSrc=await page.locator('#gensCaptureV2Root iframe').getAttribute('src');
   assert.match(adventureSrc,/assets\/gensrpg\/capture-v2\/adventure\.html$/,
     'GenSrpg owns the Adventure configuration, not the Combat/Exploration Labs');
@@ -468,10 +493,10 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(scopedAfter.sessionId,stored.sessionId);
   assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg.world-assembler.document.v1')),authored,
     'native game cannot mutate the World Builder authored document');
-  const playingSave=await page.evaluate(()=>{
-    const raw=localStorage.getItem('gensrpg.capture.v2.adventure.save.v1');
+  const playingSave=await page.evaluate(id=>{
+    const raw=localStorage.getItem('gensrpg.capture.v2.adventure.slot.v1:'+id);
     return raw?JSON.parse(raw):null;
-  });
+  },stored.sessionId);
   assert.equal(playingSave?.status,'playing');
   assert.equal(playingSave?.world?.mapRef,'gen-ci-capture-world');
   assert.equal(playingSave?.world?.position,null,'Exploration alone owns coordinates');
@@ -522,7 +547,9 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(port.grant.active.hp,17);
   assert.equal(port.pending,'fled','only Exploration may consume its journal');
   assert.equal(port.consumed,'fled');
-  const battleSave=await page.evaluate(()=>JSON.parse(localStorage.getItem('gensrpg.capture.v2.adventure.save.v1')));
+  const battleSave=await page.evaluate(id=>JSON.parse(
+    localStorage.getItem('gensrpg.capture.v2.adventure.slot.v1:'+id)
+  ),stored.sessionId);
   assert.equal(battleSave.party.active.hp,17);
   assert.equal(battleSave.party.active.xp,0);
   assert.deepEqual(battleSave.processedEncounterKeys,['browser-result-1:browser-return-1']);

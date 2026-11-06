@@ -14,6 +14,7 @@ import {adventurePlaySheetSnapshotV1} from './adventure-play-sheet-v1.mjs';
 import {publishedCapturePortraitUrlV1} from './adventure-sheet-visual-v1.mjs';
 import {renderAdventureSheetViewV1} from './adventure-play-sheet-view-v1.mjs';
 import {createAdventureCreatorDraftStoreV1} from './adventure-creator-draft-v1.mjs';
+import {createAdventurePortfolioStoreV1} from './adventure-portfolio-store-v1.mjs';
 import {createCaptureRoomTransportV1} from './adventure-multiplayer-transport-v1.mjs';
 import {createCaptureSupabaseClientV1} from './adventure-multiplayer-provider-v1.mjs';
 import {preflightCaptureOnlineWorldV1,publishCaptureInitialPositionV1
@@ -48,7 +49,7 @@ const idField={
 let rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
 let published=[];
 let officialCombatSha=null,officialStatRegistry=null;
-let store,draftStore,creatorDraftStore;
+let store,portfolio,draftStore,creatorDraftStore;
 const text=(node,value)=>{node.textContent=String(value);};
 const stateMessage=(message,error=false)=>{
  text(status,message);status.dataset.error=String(error);
@@ -269,7 +270,7 @@ async function fillHeroChoices(savedHeroId=null){
   text(notice,'Bibliothèque du héros indisponible : '+error.message+
    '. Tu peux créer une partie sans héros personnalisé.');
  }
- picker.disabled=!!store?.load();
+ picker.disabled=false;
 }
 
 function option(value,caption,disabled=false){
@@ -325,8 +326,22 @@ function renderItemRules(){
     renderItemRules();
    })): [document.createTextNode('Aucun drop : aucune récompense aléatoire implicite.')]));
 }
+function renderPortfolioOptions(){
+ if(!portfolio)return;
+ const select=$('adventure-save-select'),saved=portfolio.list();
+ const active=portfolio.activeId();
+ select.replaceChildren(...(saved.length?saved.map(entry=>
+  option(entry.sessionId,'Partie '+entry.sessionId.slice(0,8)+
+   ' · '+(published.find(c=>c.id===entry.speciesId)?.name??entry.speciesId)+
+   ' niv. '+entry.level+(entry.status==='playing'?' · en cours':' · prête')))
+   :[option('','Aucune partie enregistrée')]));
+ select.disabled=!saved.length;
+ $('adventure-save-load').disabled=!saved.length;
+ if(active&&saved.some(entry=>entry.sessionId===active))select.value=active;
+}
 function showSave(){
  try{
+  renderPortfolioOptions();
   const state=store.load();
   $('adventure-room-host').disabled=!!activeCaptureRoom||!state?.sessionControl?.joinEnabled;
   if(!state){
@@ -336,7 +351,8 @@ function showSave(){
    renderStatWallet();
    return;
   }
-  $('adventure-hero-choice').disabled=true;
+  // The picker affects the NEXT new game, not the already saved hero.
+  $('adventure-hero-choice').disabled=false;
   $('adventure-play').disabled=false;
   $('adventure-play').textContent=state.status==='playing'?'Continuer la partie':'Entrer dans le monde';
   const card=published.find(c=>c.id===state.party.active.speciesId);
@@ -646,9 +662,9 @@ $('adventure-create').addEventListener('click',guarded(()=>{
  const configured=updateAdventureSessionControlV1({
   session:state,settings:sessionControlFromFields(),now
  });
- store.create(configured);
+ portfolio.create(configured);
  setSessionControlFields(configured);
- stateMessage('Partie sauvegardée. Tu peux entrer dans le monde si une carte est disponible dans le World Builder GenSRPG.');
+ stateMessage('Nouvelle partie enregistrée séparément. Les anciennes sauvegardes sont conservées.');
  showSave();updatePreview();
 }));
 $('adventure-world-builder').addEventListener('click',guarded(()=>{
@@ -776,6 +792,16 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  // physically blocks the parent Shell's real "Retour à Monster Capture" button.
  // The viewport-filling CSS is the standard default and keeps touch navigation.
 }));
+$('adventure-save-load').addEventListener('click',guardedAsync(async()=>{
+ const chosen=$('adventure-save-select').value;
+ if(!chosen)throw new Error('Sélectionne une partie enregistrée.');
+ const loaded=portfolio.select(chosen);
+ rules=normalizeAdventureRulesV1(loaded.rules);
+ setFields(rules);setSessionControlFields(loaded);
+ renderItemRules();showSave();updatePreview();
+ await fillHeroChoices(loaded.hero?.definitionId??null);
+ stateMessage('Partie '+chosen.slice(0,8)+' chargée. Les autres sauvegardes restent intactes.');
+}));
 $('adventure-resume').addEventListener('click',guarded(()=>{
  const state=store.load();
  if(!state)throw new Error('Aucune partie enregistrée à charger');
@@ -837,7 +863,11 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
 }));
 (async()=>{
  try{
-  store=createAdventureStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
+  const legacyStore=createAdventureStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
+  portfolio=createAdventurePortfolioStoreV1({
+   storage:window.localStorage,coreStorage:window.GensStorageV1,legacyStore
+  });
+  store=portfolio;
   draftStore=createAdventureRulesDraftStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
   creatorDraftStore=createAdventureCreatorDraftStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
   const official=await fetchPublishedBestiary();

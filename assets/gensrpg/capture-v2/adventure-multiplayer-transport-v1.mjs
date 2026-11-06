@@ -130,11 +130,22 @@ export function createCaptureRoomTransportV1({client}={}){
   return Object.freeze({roomId:id,
    worldId:position.worldId,worldFingerprint:position.worldFingerprint});
  }
+ async function ownPositionSequence(roomId){
+  const id=checkUuid(roomId),user=await authenticatedUserId();
+  const position=result(await client.from('gensrpg_capture_peer_positions')
+   .select('seq').eq('room_id',id).eq('user_id',user).maybeSingle(),
+   'Lecture révision de la position du joueur');
+  const seq=Number(position?.seq??0);
+  if(!Number.isSafeInteger(seq)||seq<0)throw new Error('Révision serveur de position invalide');
+  return seq;
+ }
  // The only accepted position is read from the official Exploration
  // checkpoint/event. Actor identity is NOT sent: PostgreSQL uses auth.uid().
- async function reportPosition({roomId,navigation,expectedSeq=0}={}){
+ async function reportPosition({roomId,navigation,expectedSeq}={}){
   const id=checkUuid(roomId);
-  if(!Number.isSafeInteger(expectedSeq)||expectedSeq<0)
+  const previous=expectedSeq===undefined
+   ?await ownPositionSequence(id):expectedSeq;
+  if(!Number.isSafeInteger(previous)||previous<0)
    throw new RangeError('Compteur de position invalide');
   const room=await inspectRoom(id);
   if(!room?.open||!room.worldId||!room.worldFingerprint)
@@ -147,9 +158,9 @@ export function createCaptureRoomTransportV1({client}={}){
    p_room:id,p_world_id:position.worldId,
    p_world_fingerprint:position.worldFingerprint,
    p_area_id:position.areaId,p_x:position.x,p_y:position.y,
-   p_expected_seq:expectedSeq
+   p_expected_seq:previous
   }),'Publier la position officielle Exploration'));
-  if(!Number.isSafeInteger(seq)||seq!==expectedSeq+1)
+  if(!Number.isSafeInteger(seq)||seq!==previous+1)
    throw new Error('Révision de position serveur inattendue');
   if(activeRoomId===id&&typeof channel?.send==='function'){
    try{await channel.send({type:'broadcast',
@@ -218,5 +229,5 @@ export function createCaptureRoomTransportV1({client}={}){
   if(previous)await client.removeChannel(previous);
  }
  return Object.freeze({authenticatedUserId,create,join,inspectRoom,
-  bindWorld,reportPosition,inspectPositions,observe,leave,dispose});
+  bindWorld,ownPositionSequence,reportPosition,inspectPositions,observe,leave,dispose});
 }

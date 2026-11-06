@@ -15,7 +15,8 @@ import {publishedCapturePortraitUrlV1} from './adventure-sheet-visual-v1.mjs';
 import {renderAdventureSheetViewV1} from './adventure-play-sheet-view-v1.mjs';
 import {createAdventureCreatorDraftStoreV1} from './adventure-creator-draft-v1.mjs';
 import {createAdventurePortfolioStoreV1} from './adventure-portfolio-store-v1.mjs';
-import {withSelectedAdventureWorldV1,resolveSelectedAdventureWorldV1}
+import {withSelectedAdventureWorldV1,resolveSelectedAdventureWorldV1,
+ activateSelectedAdventureWorldV1}
  from './adventure-world-choice-v1.mjs';
 import {createCaptureRoomTransportV1} from './adventure-multiplayer-transport-v1.mjs';
 import {createCaptureSupabaseClientV1} from './adventure-multiplayer-provider-v1.mjs';
@@ -759,6 +760,13 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
   world,officialFingerprint:playWorldFingerprint,
   sessionId:store.load()?.sessionId
  });
+ if(worldLibrary&&selectedWorldId){
+  const activated=activateSelectedAdventureWorldV1({
+   worldLibrary,selectedWorldId
+  });
+  if(playWorldFingerprint(activated)!==playWorldFingerprint(world))
+   throw new Error('Le monde archivé a changé avant son activation : partie conservée.');
+ }
  if(selectedWorldId&&beforeWorldSession?.world?.mapRef===null){
   store.save(withSelectedAdventureWorldV1(beforeWorldSession,selectedWorldId));
  }

@@ -1,3 +1,13 @@
+## 2026-11-06 — Synchronisation exacte Capture V2 avec les deux Labos main après nettoyage Pages (NON GREEN tant que la CI candidate n'a pas conclu)
+
+- **START** : checkpoint `checkpoint/gensrpg-capture-v2-pre-dual-main-repin-2026-11-06` @ `dfc595a1db0cda38daeabedaa7fdcbd9df7eaf02`, branche dédiée `work/gensrpg-capture-v2-exploration-main-repin-2026-11-05` issue du lot #280. Charte source unique : Combat et Exploration consommés uniquement sur `main`.
+- **Cause** : les PR #272 (Combat, règle anti-copies) et #380 (Exploration, publication allégée) ont modifié les SHAs main officiels. Les tests Browser de #282 et le consommateur Capture ne pouvaient plus passer la vérification de drift, même si leurs changements de gameplay étaient indépendants.
+- **Preuve de provenance** : Combat PR HEAD `34734d1e` → merge `main@ebaea5dc40c4803add76563029a9dff67b964d55` : comparaison 1 merge commit, 0 fichier diff ; CI Laboratoire #42113199995 SUCCESS 5/5 au HEAD. Exploration PR #380 HEAD `80d70555` → merge `main@a2db1825f0a1a833fadcd02d7804f887c864a1d2` : comparaison 1 merge commit, 0 fichier diff ; CI Exploration #42111392258 SUCCESS et assemblage Pages #42111392257 SUCCESS au HEAD. Ces runs **ne sont pas les CI exactes des SHAs de fusion main** : conserver cette réserve et exiger CI du candidat consommateur et publication HTTPS avant promotion.
+- **TDD** : sentinelle de pins modifiée avant manifeste (RED sur ancien pin), manifeste versionné mis à jour sans toucher aux autres sources ni au fichier `index.html`, sans copie d'assets et sans modifier une règle de combat. Les workflows #280 doivent prouver l'intégration native exacte, le vrai navigateur et les niveaux/HP ; une CI rouge bloque le lot.
+- **Dépendances** : PR #279 sauvegarde des réglages, PR #281 droits MJ, PR #282 fiche active restent séparées, ne pas publier tant que leurs propres tests ne sont pas rejoués sur la présente base et que la charte GREEN n'est pas atteinte.
+
+---
+
 ## 2026-11-05 — Capture V2 / Exploration main : réépinglage candidat pour débloquer la CI (#279 ; NON GREEN)
 
 - **START** : SHA source GenSRPG officiel `bd9c16213cb93e9681282c733418c6660bc54a00` (tronc candidat Aventure certifié/publisher #276), checkpoint `checkpoint/gensrpg-start-capture-v2-exploration-main-repin-2026-11-05`, branche `work/gensrpg-capture-v2-exploration-main-repin-2026-11-05`.

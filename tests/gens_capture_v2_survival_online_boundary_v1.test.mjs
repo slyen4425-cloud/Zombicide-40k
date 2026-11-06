@@ -43,3 +43,19 @@ test('Survival six-character server room codes are not silently equated with Cap
  assert.match(doc,/6 caractères/);
  assert.match(doc,/8–12 caractères/);
 });
+
+test('Capture SQL migration cannot modify Survival schema, rooms, sync or session identities',()=>{
+ const migration=read('supabase/migrations/20261106170500_gensrpg_capture_rooms_isolated_v1.sql');
+ assert.match(migration,/create table if not exists public\.gensrpg_capture_rooms\b/i);
+ assert.match(migration,/create table if not exists public\.gensrpg_capture_room_members\b/i);
+ assert.match(migration,/create policy capture_room_read_members_v1/i);
+ assert.match(migration,/on realtime\.messages/i);
+ assert.match(migration,/realtime\.messages\.private is true/i);
+ assert.match(migration,/security invoker/i,'public Capture RPC must never bypass RLS');
+ assert.match(migration,/gensrpg_capture_room:/,'only scoped Capture Realtime topics');
+ assert.doesNotMatch(migration,/\b(?:alter|update|delete\s+from|insert\s+into|drop|truncate|create\s+or\s+replace\s+function)\s+(?:table\s+|function\s+|policy\s+[^;]*?\s+on\s+)?(?:public\.)?z40k_/i,
+  'Survival schema and functions must remain read-only from Capture migrations');
+ for(const forbidden of ['z40k_sync_state','z40kApplySnapshot','z40kPushState']){
+  assert.ok(!migration.includes(forbidden),'No legacy Survival sync API in Capture SQL');
+ }
+});

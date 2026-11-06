@@ -2,9 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const sha='bd9c16213cb93e9681282c733418c6660bc54a00';
+// The immutable Adventure candidate passed architecture, browser, Combat, Runtime and Builder gates.
+// PR #289 composes the original full Aventure UI with the verified archival guard.
+const sha='f37cbe75288402a9e7c5a68349fe6bac729ba423';
 const file=JSON.parse(fs.readFileSync(new URL('../tools/capture_v2_pages_preview_pin.json',import.meta.url),'utf8'));
-test('this specific Monster Capture release pins the exact FOUR-GREEN candidate, not a moving branch',()=>{
+test('Monster Capture Adventure in-game sheet release pins the exact certified candidate, not a moving branch',()=>{
  assert.equal(file.schema,'gensrpg-capture-v2-pages-source-pin-v1');
  assert.equal(file.repository,'slyen4425-cloud/Zombicide-40k');
  assert.equal(file.sha,sha,'Do not republish stale gameplay');

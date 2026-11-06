@@ -20,6 +20,7 @@ on:
       - 'tests/gens_capture_v2_live_room_adapter_v1.test.mjs'
       - 'tests/gens_capture_v2_peer_position_contract_v1.test.mjs'
       - 'tests/gens_capture_v2_peer_transport_v1.test.mjs'
+      - 'tests/gens_capture_v2_peer_live_subscription_v1.test.mjs'
       - 'tests/gens_capture_v2_peer_play_bridge_v1.test.mjs'
       - 'tests/gens_capture_v2_exploration_position_events_v1.test.mjs'
       - 'supabase/migrations/20261106195000_gensrpg_capture_peer_presence_v1.sql'
@@ -68,6 +69,9 @@ jobs:
 
       - name: Capture C3 — client Auth réel & RPC de position avec identité serveur
         run: node --test tests/gens_capture_v2_peer_transport_v1.test.mjs
+
+      - name: Capture C3 — notifications Realtime vers positions serveur garanties par RLS (RED/GREEN)
+        run: node --test tests/gens_capture_v2_peer_live_subscription_v1.test.mjs
 
       - name: Capture C3 — vraie entrée Aventure, monde partagé validé avant sauvegarde
         run: node --test tests/gens_capture_v2_peer_play_bridge_v1.test.mjs

@@ -118,6 +118,28 @@
    <div id="adventure-drops" class="rules-list"></div>
    <div class="actions"><button id="adventure-save-rules" type="button">Enregistrer les paramètres</button></div>
   </details>
+  <section id="adventure-multiplayer-panel" class="adventure-options" aria-labelledby="adventure-multiplayer-heading">
+   <h2 id="adventure-multiplayer-heading">Partie en ligne · Monster Capture</h2>
+   <p class="hint">Crée un salon ou rejoins un ami avec son code. Les joueurs gardent leurs propres sauvegardes. Les déplacements partagés et les combats entre joueurs nécessitent encore le raccord Exploration/Combat.</p>
+   <div class="fields">
+    <label for="adventure-player-alias">Mon pseudo
+     <input id="adventure-player-alias" type="text" maxlength="48" autocomplete="nickname" placeholder="Joueur">
+    </label>
+    <label for="adventure-room-capacity">Nombre maximal de joueurs
+     <input id="adventure-room-capacity" type="number" min="2" max="32" step="1" value="2">
+    </label>
+    <label for="adventure-room-code">Code reçu d'un ami
+     <input id="adventure-room-code" type="text" minlength="10" maxlength="10" spellcheck="false" autocapitalize="characters" placeholder="10 caractères">
+    </label>
+   </div>
+   <div class="actions">
+    <button id="adventure-room-host" type="button" disabled>Héberger ma partie</button>
+    <button id="adventure-room-join" type="button">Rejoindre par code</button>
+    <button id="adventure-room-leave" type="button" disabled>Quitter le salon</button>
+   </div>
+   <output id="adventure-room-status" role="status" aria-live="polite">Pas encore connecté à un salon.</output>
+   <div id="adventure-room-members" class="rules-list" aria-label="Joueurs dans le salon"></div>
+  </section>
   <details id="adventure-creator-panel" class="adventure-options">
    <summary>Créateur et maître du jeu</summary>
    <p class="hint">Prépare les règles de cette partie. Les droits seront repris lorsque les joueurs pourront rejoindre une même session ; le réseau et les actions MJ arriveront ensuite.</p>

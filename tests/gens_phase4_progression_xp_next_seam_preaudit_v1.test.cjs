@@ -18,7 +18,11 @@ const gitBlob=buf=>crypto.createHash('sha1')
 
 assert.equal(indexBuf.length,8165438,'next-seam preaudit must run on exact current Phase 7 Dungeon generated Boss policy index');
 assert.equal(gitBlob(indexBuf),'1a61147d5a32889fa85e6a09e846049103b9f0bf','next-seam preaudit Phase 7 generated Boss policy index blob drifted');
-assert.equal(gitBlob(coreBuf),'3cca29084ce436a8dcae95e5d6d745edd4afa3cf','current Core Progression contract blob drifted');
+// The exact Phase 7 Dungeon archive is still verified above. The active Core
+// contract subsequently gained compact XP bands; its *behavior* is the stable
+// authority, not its retired blob SHA. Keep the original Dungeon seam tests.
+assert.match(coreSource,/function progressInBands\(/,
+  'canonical Core must continue owning compact creator XP bands');
 
 function scriptBody(id){
   const marker='<script id="'+id+'">';
@@ -134,6 +138,23 @@ function runtime({profile=null,rules={xpPerLevel:10}}={}){
   for(const [xp,expected] of cases){
     r.reset();assert.equal(r.ctx.dungeonRpgXpIntoLevel(xp),expected,'custom xp='+String(xp));
     assert.equal(r.levelCalls(),0,'later Core raccord must remove the redundant global level-seam round trip');
+  }
+}
+
+// Current Core band extension: the historic Dungeon delegate must honor the
+// same canonical boundaries without introducing a second XP calculator.
+{
+  const profile={xpCurveMode:'custom',xpPerLevel:2000,maxLevel:250,
+    xpBands:[{throughLevel:20,xpPerLevel:2000},{throughLevel:250,xpPerLevel:4000}]};
+  const r=runtime({profile,rules:{xpPerLevel:25}});
+  for(const [xp,level,into] of [
+    [0,1,0],[37999,19,1999],[38000,20,0],
+    [41999,20,3999],[42000,21,0],[38000+230*4000,250,0]
+  ]){
+    assert.equal(r.ctx.GensProgressionV1.levelFromXp(xp,profile),level,
+      'single-owner Core levelFromXp, band threshold '+xp);
+    assert.equal(r.ctx.dungeonRpgXpIntoLevel(xp),into,
+      'historic Dungeon consumer delegates compact creator bands '+xp);
   }
 }
 

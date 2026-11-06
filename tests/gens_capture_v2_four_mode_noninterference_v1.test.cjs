@@ -74,7 +74,11 @@ test('real Shell: Survie, Dungeon, PvP and clean Capture remain isolated through
     assert.equal(await page.locator('#pregameSetup:visible').count(),0);
     assert.equal(await page.evaluate(()=>window.GensShellModuleLaunchV1.activeModule()),'capture');
     assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().active),true);
-    await page.locator('#gensCaptureV2Root [data-capture-v2-view="creature"]').tap();
+    // The real V2 Shell no longer exposes raw editor buttons on the game home.
+    // Traverse its visible Jouer / Éditeurs menu; do not restore the retired shortcut.
+    await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+    assert.equal(await page.locator('#gensCaptureV2Root').getAttribute('data-menu'),'editors');
+    await page.locator('#gensCaptureV2Root [data-editor-group="combat"] [data-capture-v2-view="creature"]').tap();
     const frame=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
     await frame.waitFor({state:'attached'});
     assert.match(await frame.getAttribute('src'),
@@ -83,6 +87,8 @@ test('real Shell: Survie, Dungeon, PvP and clean Capture remain isolated through
       'the old hub must not consume a native tool viewport');
     assert.equal(await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').isVisible(),true);
     await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+    assert.equal(await page.locator('#gensCaptureV2Root').getAttribute('data-menu'),'main',
+      'native Back returns to the real Jouer / Éditeurs menu');
     assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),true);
     assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0,'native iframe disposed');
     await page.getByRole('button',{name:'Quitter le mode'}).tap();

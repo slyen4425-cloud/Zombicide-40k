@@ -76,6 +76,18 @@ Les cartes possèdent déjà notamment des maisons, ponts, arbres, cascades et d
 - Préserver l'autorité du Labo Combat pour les états et le combat ; GenSrpg / Monster Capture pour l'identité, l'inventaire et la persistance de la créature. Éviter un second moteur.
 - **Recherche préalable** : retrouver une éventuelle note historique plus détaillée avant de figer ces paramètres ; la présente note consolide uniquement le principe explicitement rappelé par le créateur.
 
+
+## F. World Builder — tableau des zones et intérieurs hiérarchisés (demande du 6 novembre 2026)
+**Statut : demande UX à concevoir, non développée. Propriétaire : Labo Exploration / World Builder.**
+
+1. **Tableau des zones réorganisable :** pouvoir glisser-déposer les cartes de zones (ex. Area 1 au centre, zones reliées en haut, à droite, à gauche), pour organiser visuellement le monde. La position des cartes sur le tableau est une **aide à l'auteur**, indépendante des coordonnées et déplacements du jeu. Sauvegarder/restaurer cet agencement d'édition sans altérer les connexions réelles.
+2. **Deux niveaux de lecture :** au niveau global, afficher uniquement les **zones extérieures** et leurs connexions interzones (flèches utiles) ; ne plus afficher comme zones globales les intérieurs de maisons, arènes ou donjons.
+3. **Détails locaux d'une zone :** un clic sur la carte d'une zone (ex. Area 1 avec trois maisons et une arène) ouvre un panneau/page de cette zone, listant les bâtiments et sous-lieux associés avec leurs paramètres : intérieurs, entrées, sorties, points de passage et liens locaux. Les connexions des sous-lieux sont gérées **dans cette vue**, sans flèches traversant le tableau global.
+4. **Préservation des données :** ne pas supprimer les vrais intérieurs ni leurs identifiants/liaisons, ne pas modifier la logique de téléportation, les sauvegardes ni le runtime. Il s'agit d'une **refonte de représentation et d'ergonomie**, avec migration d'affichage non destructive.
+5. **Validation attendue :** tests de création de zones, glisser-déposer tactile et souris, sauvegarde/rechargement de disposition, ouverture de la fiche Area 1, trois maisons et une arène, entrées/sorties aller-retour, export/import sans perte, absence de flèches locales au niveau global, lisibilité smartphone paysage. Charte : RED, checkpoint, CI GREEN avant intégration.
+
+**À ne pas confondre :** placement visuel d'une carte dans le dashboard ≠ déplacement de sa géographie en jeu ; masquer les flèches d'intérieurs ≠ casser les connexions fonctionnelles.
+
 ## Inspiration documentée
 - [Pokémon GO — défendre une arène](https://niantic.helpshift.com/hc/en/6-pokemon-go/faq/383-earning-the-defender-bonus/?l=en) : défense persistante au-delà de la présence du joueur.
 - [Temtem — Dojo Wars](https://temtem.wiki.gg/wiki/Dojo_Wars) : contrôle de dojos par des joueurs et défense organisée.

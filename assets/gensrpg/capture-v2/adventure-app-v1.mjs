@@ -20,6 +20,8 @@ import {preflightCaptureOnlineWorldV1,publishCaptureInitialPositionV1
 } from './adventure-multiplayer-play-bridge-v1.mjs';
 import {attachCaptureExplorationPositionEventsV1
 } from './adventure-multiplayer-exploration-events-v1.mjs';
+import {attachCapturePeerFrameRelayV1
+} from './adventure-multiplayer-peer-frame-relay-v1.mjs';
 import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
 import {writeAdventurePlayingPartyV1} from './adventure-playing-party-grant-v1.mjs';
 import {writeAdventureHeroSelectionGrantV1} from './adventure-hero-selection-grant-v1.mjs';
@@ -386,6 +388,7 @@ function guardedAsync(callback){
 // The real network is started by an explicit player click, never during
 // adventure boot or legacy shell startup.
 let captureRoomTransport=null,activeCaptureRoom=null,activeCaptureExplorationEvents=null;
+let activeCapturePeerRelay=null;
 // Display-only peer projections. Never persisted and never used for movement.
 const captureRemotePositions=new Map();
 function onlineRoomStatus(message,error=false){
@@ -445,7 +448,8 @@ function renderCaptureRemotePositions(){
  text($('adventure-room-positions'),'Positions reçues : '+statement+
   ' · avatars distants pas encore affichés.');
  text($('adventure-play-remote-status'),'Positions reçues : '+total+
-  ' · affichage des avatars à raccorder');
+  ' · '+(activeCapturePeerRelay?'envoi au renderer Exploration':'affichage des avatars à raccorder'));
+ activeCapturePeerRelay?.publish([...captureRemotePositions.values()]);
 }
 async function connectCaptureRoom(response){
  const transport=captureRoomProvider();
@@ -489,6 +493,7 @@ $('adventure-room-leave').addEventListener('click',guardedAsync(async()=>{
  const room=activeCaptureRoom;
  if(!room)return;
  activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
+ activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
  await captureRoomProvider().leave({roomId:room.roomId});
  activeCaptureRoom=null;
  captureRemotePositions.clear();renderCaptureRemotePositions();
@@ -501,6 +506,7 @@ $('adventure-room-leave').addEventListener('click',guardedAsync(async()=>{
 window.addEventListener('pagehide',()=>{
  // No globally persistent heartbeat and no shared save mutation.
  activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
+ activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
  captureRemotePositions.clear();
  void captureRoomTransport?.dispose().catch(()=>{});
 });
@@ -736,6 +742,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  // Keep the Aventure owner mounted while the native Exploration frame runs.
  activePlayingSheet={sessionId,refreshParty};
  activeCaptureExplorationEvents?.dispose();
+ activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
  activeCaptureExplorationEvents=onlineContext
   ?attachCaptureExplorationPositionEventsV1({
     frame,roomId:onlineContext.room.roomId,transport:captureRoomTransport,
@@ -745,8 +752,20 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
     onStatus:message=>onlineRoomStatus(message)
    })
   :null;
- // Only the official Exploration owner can emit movement commits. The
- // pinned main version currently sends no such events; no fake fallback.
+ // READ-ONLY remote peers. Rendering and perspective remain owned by the
+ // official Exploration MapActor renderer; network transports never mutate
+ // a navigation checkpoint. The scoped receiver may not yet be published.
+ activeCapturePeerRelay=onlineContext
+  ?attachCapturePeerFrameRelayV1({
+    frame,origin:window.location.origin,sessionId,
+    worldId:onlineContext.worldId,
+    worldFingerprint:onlineContext.worldFingerprint,
+    ownActorId:onlineContext.room.userId,
+    onReady:()=>onlineRoomStatus('Affichage des joueurs distants raccordé à Exploration')
+   })
+  :null;
+ activeCapturePeerRelay?.publish([...captureRemotePositions.values()]);
+ // No fake fallback if pinned Exploration main lacks the official API.
  frame.src=url.href;
  frame.hidden=false;
  document.querySelector('[data-adventure-app]').hidden=true;

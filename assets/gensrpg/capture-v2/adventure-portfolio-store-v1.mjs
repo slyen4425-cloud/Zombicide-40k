@@ -37,7 +37,7 @@ export function createAdventurePortfolioStoreV1({storage,coreStorage,legacyStore
      data.slotIds.some(id=>!validId(id))||
      new Set(data.slotIds).size!==data.slotIds.length||
      (data.selectedSessionId!==null&&!validId(data.selectedSessionId)))
-   throw new Error('Catalogue des sauvegardes Monster Capture corrompu : aucune réinitialisation automatique');
+   throw new Error('Liste des sauvegardes Monster Capture corrompue : aucune réinitialisation automatique');
   return data;
  }
  function writeIndex(value){
@@ -109,8 +109,10 @@ export function createAdventurePortfolioStoreV1({storage,coreStorage,legacyStore
   // slot. Persist it BEFORE the index: if the second write fails the slot is
   // discoverable and untouched, not lost or overwritten.
   slot(id).create(value);
+  // indexedIds() already discovers the just-written slot: do not append
+  // it a second time or the strict schema correctly rejects the index.
   writeIndex({...index,selectedSessionId:id,
-   slotIds:[...indexedIds(index),id]});
+   slotIds:indexedIds(index)});
   return value;
  }
  function save(value){

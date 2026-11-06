@@ -9,6 +9,7 @@ import {
 import {readCombatHandoff} from '../../../vendor/exploration-lab/src/encounters/combat-handoff-store.js';
 import {connectAdventureCombatHostV1} from './adventure-combat-host-v1.mjs';
 import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
+import {createAdventureRulesDraftStoreV1} from './adventure-rules-draft-v1.mjs';
 import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
 import {writeAdventurePlayingPartyV1} from './adventure-playing-party-grant-v1.mjs';
 import {
@@ -34,7 +35,7 @@ const idField={
 let rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
 let published=[];
 let officialCombatSha=null,officialStatRegistry=null;
-let store;
+let store,draftStore;
 const text=(node,value)=>{node.textContent=String(value);};
 const stateMessage=(message,error=false)=>{
  text(status,message);status.dataset.error=String(error);
@@ -440,8 +441,9 @@ $('adventure-save-rules').addEventListener('click',guarded(()=>{
  rules=fromFields();
  const current=store.load();
  if(current)store.save({...current,rules,updatedAt:new Date().toISOString()});
+ else draftStore.save(rules);
  renderItemRules();showSave();updatePreview();
- stateMessage(current?'Règles de la partie enregistrées.':'Réglages prêts : crée une partie pour les sauvegarder.');
+ stateMessage(current?'Règles de la partie enregistrées.':'Brouillon de réglages enregistré : il sera restauré après rechargement.');
 }));
 $('adventure-item-add').addEventListener('click',guarded(()=>{
  const name=$('adventure-item-name').value.trim();
@@ -472,12 +474,14 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
 (async()=>{
  try{
   store=createAdventureStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
+  draftStore=createAdventureRulesDraftStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
   const official=await fetchPublishedBestiary();
   published=official.cards;officialCombatSha=official.combatSha;
   officialStatRegistry=official.statRegistry;
   fillPublicSpecies();
   const active=store.load();
   if(active){rules=normalizeAdventureRulesV1(active.rules);setFields(rules);}
+  else {const draft=draftStore.load();if(draft){rules=draft;setFields(rules);}}
   setSessionControlFields(active);
   renderItemRules();showSave();updatePreview();
   stateMessage(published.length+' créatures officielles publiées, aucune créature de brouillon chargée.');

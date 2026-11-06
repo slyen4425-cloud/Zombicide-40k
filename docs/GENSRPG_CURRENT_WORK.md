@@ -8,6 +8,19 @@
 
 ---
 
+## 2026-11-05 — Aventure Monster Capture : persistance du brouillon de règles avant création de partie (candidat NON GREEN)
+
+- **Signalement** : issue #278 ; l'interface annonçait « réglages prêts : crée une partie pour les sauvegarder » lorsque `store.load()===null`, mais ne persistait aucune configuration. À la réouverture, le preset vitrine remplaçait les valeurs auteur. Défaut démontré par inspection du vrai handler, sans prétendre avoir reproduit le navigateur physique.
+- **START** : dernier candidat source officiel certifié `bd9c16213cb93e9681282c733418c6660bc54a00` (source de preview attestée dans PR #277). Checkpoint `checkpoint/gensrpg-start-adventure-rules-draft-persistence-2026-11-05`, branche `work/gensrpg-adventure-rules-draft-persistence-2026-11-05` depuis ce SHA. Main publié, autres PR actives et Labs intacts.
+- **Propriétaire** : configuration auteur GenSRPG Capture V2, stockage via `GensStorageV1` existant ; nouvelle clé versionnée pour **brouillon de règles sans partie**, jamais un deuxième état de jeu. Le vrai `AdventureSession` conserve l'autorité dès sa création et au rechargement ; ancien contenu invalidé/corrompu non supprimé automatiquement. `index.html` inchangé (§26).
+- **TDD** : test ajouté avant implémentation `tests/gens_capture_v2_adventure_rules_draft_persistence_v1.test.mjs` : modification niveau/loot, vrai aller-retour Core Storage et nouvel objet store, JSON corrompu, non-altération de l'ancienne clé de partie. Câblé à `capture-v2-clean-base.yml` ; GREEN non revendiqué avant CI exacte, navigateur et revue.
+- **Limites explicites** : les choix MJ/permissions pré-partie et la fiche personnage/inventaire en partie sont des sujets séparés restant ouverts dans #278. Aucun déploiement, merge, validation Pixel ni changement des simulations Combat/Exploration dans ce lot.
+- **CI observée** : le candidat d3e1068 a passé `clean-authority` et V113, mais les jobs `root-browser` et `official-static-delivery` échouent **avant** le navigateur, car le SHA Exploration `main` a changé de `4bfb15a3` à `c6432654` (PR Exploration #378). Le garde-fou de drift ne doit pas être supprimé. L'évolution du laboratoire nécessite son propre chantier de repin et de certification main. Aucune preuve GREEN globale ni publication.
+- **Test renforcé** : le scénario dans `tests/gens_capture_v2_root_browser.test.cjs` clique le bouton réel, enregistre avant toute partie, démonte et remonte la véritable iframe Aventure, vérifie valeur restaurée et absence de partie fantôme ; il sera exécuté dès que les pins certifiés pourront passer le gate. Le test Node du brouillon utilise désormais les vraies fonctions de `assets/gensrpg/core/storage-v1.js`, y compris l'échec fermé sur JSON invalide.
+- **Suite** : valider les suites CI SHA exact et test navigateur de l'édition avant partie → enregistrer → recharger → créer la partie → reprendre ; inspecter éventuellement les permissions dans lot dédié avant publication. Ne promouvoir que via le publisher de prévisualisation après certification de la source.
+
+---
+
 ## 2026-11-05 — Capture V2 / Exploration main : réépinglage candidat pour débloquer la CI (#279 ; NON GREEN)
 
 - **START** : SHA source GenSRPG officiel `bd9c16213cb93e9681282c733418c6660bc54a00` (tronc candidat Aventure certifié/publisher #276), checkpoint `checkpoint/gensrpg-start-capture-v2-exploration-main-repin-2026-11-05`, branche `work/gensrpg-capture-v2-exploration-main-repin-2026-11-05`.

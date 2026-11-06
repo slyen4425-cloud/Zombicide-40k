@@ -18,6 +18,8 @@ on:
       - 'tests/gens_capture_v2_multiplayer_lobby_v1.test.mjs'
       - 'tests/gens_capture_v2_survival_online_boundary_v1.test.mjs'
       - 'tests/gens_capture_v2_live_room_adapter_v1.test.mjs'
+      - 'tests/gens_capture_v2_peer_position_contract_v1.test.mjs'
+      - 'supabase/migrations/20261106195000_gensrpg_capture_peer_presence_v1.sql'
       - 'supabase/migrations/20261106170500_gensrpg_capture_rooms_isolated_v1.sql'
       - 'tests/gens_capture_v2_adventure_hp_policy_20261105.test.mjs'
       - 'tests/gens_capture_v2_adventure_owned_stats_grant_v1.test.mjs'
@@ -57,6 +59,9 @@ jobs:
 
       - name: Monster Capture — authentification isolée et vrais boutons héberger/rejoindre/quitter
         run: node --test tests/gens_capture_v2_live_room_adapter_v1.test.mjs
+
+      - name: TDD Capture C3 — projection de position Exploration & anti-replay, RED puis GREEN
+        run: node --test tests/gens_capture_v2_peer_position_contract_v1.test.mjs
 
       - name: Aventure V2 — contrat XP, loot, bestiaire publié, sauvegarde et résultat unique (TDD)
         run: node --test tests/gens_capture_v2_adventure_contract_v1.test.mjs

@@ -520,7 +520,7 @@ export function createAdventureStoreV1({storage,coreStorage,key=ADVENTURE_STORAG
  // Reuse the exact same Core AdventureSave serializer for each Capture slot.
  // No arbitrary keys: other modules, especially Survie, remain untouched.
  if(key!==ADVENTURE_STORAGE_KEY_V1&&
-    (typeof key!=='string'||!/^gensrpg\\.capture\\.v2\\.adventure\\.slot\\.v1:[A-Za-z0-9][A-Za-z0-9_:.-]{0,129}$/.test(key)))
+    (typeof key!=='string'||!/^gensrpg\.capture\.v2\.adventure\.slot\.v1:[A-Za-z0-9][A-Za-z0-9_:.-]{0,129}$/.test(key)))
   throw new TypeError('Clé de sauvegarde étrangère au module Monster Capture');
  const load=()=>{
   if(storage.getItem(key)===null)return null;

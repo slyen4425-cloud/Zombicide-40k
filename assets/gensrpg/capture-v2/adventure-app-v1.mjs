@@ -18,6 +18,8 @@ import {createCaptureRoomTransportV1} from './adventure-multiplayer-transport-v1
 import {createCaptureSupabaseClientV1} from './adventure-multiplayer-provider-v1.mjs';
 import {preflightCaptureOnlineWorldV1,publishCaptureInitialPositionV1
 } from './adventure-multiplayer-play-bridge-v1.mjs';
+import {attachCaptureExplorationPositionEventsV1
+} from './adventure-multiplayer-exploration-events-v1.mjs';
 import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
 import {writeAdventurePlayingPartyV1} from './adventure-playing-party-grant-v1.mjs';
 import {writeAdventureHeroSelectionGrantV1} from './adventure-hero-selection-grant-v1.mjs';
@@ -383,7 +385,7 @@ function guardedAsync(callback){
 // A separate Capture-only Supabase Auth namespace protects Survival players.
 // The real network is started by an explicit player click, never during
 // adventure boot or legacy shell startup.
-let captureRoomTransport=null,activeCaptureRoom=null;
+let captureRoomTransport=null,activeCaptureRoom=null,activeCaptureExplorationEvents=null;
 function onlineRoomStatus(message,error=false){
  const output=$('adventure-room-status');
  output.textContent=message;output.dataset.error=String(error);
@@ -456,6 +458,7 @@ $('adventure-room-join').addEventListener('click',guardedAsync(async()=>{
 $('adventure-room-leave').addEventListener('click',guardedAsync(async()=>{
  const room=activeCaptureRoom;
  if(!room)return;
+ activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
  await captureRoomProvider().leave({roomId:room.roomId});
  activeCaptureRoom=null;
  $('adventure-room-members').replaceChildren();
@@ -465,7 +468,8 @@ $('adventure-room-leave').addEventListener('click',guardedAsync(async()=>{
  onlineRoomStatus('Salon quitté. Ta sauvegarde locale Monster Capture est intacte.');
 }));
 window.addEventListener('pagehide',()=>{
- // Merely detach Realtime; no snapshot, destructive disconnect or remote save.
+ // No globally persistent heartbeat and no shared save mutation.
+ activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
  void captureRoomTransport?.dispose().catch(()=>{});
 });
 
@@ -699,6 +703,18 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  });
  // Keep the Aventure owner mounted while the native Exploration frame runs.
  activePlayingSheet={sessionId,refreshParty};
+ activeCaptureExplorationEvents?.dispose();
+ activeCaptureExplorationEvents=onlineContext
+  ?attachCaptureExplorationPositionEventsV1({
+    frame,roomId:onlineContext.room.roomId,transport:captureRoomTransport,
+    sessionId,worldId:onlineContext.worldId,
+    worldFingerprint:onlineContext.worldFingerprint,
+    origin:window.location.origin,
+    onStatus:message=>onlineRoomStatus(message)
+   })
+  :null;
+ // Only the official Exploration owner can emit movement commits. The
+ // pinned main version currently sends no such events; no fake fallback.
  frame.src=url.href;
  frame.hidden=false;
  document.querySelector('[data-adventure-app]').hidden=true;

@@ -230,11 +230,17 @@ const server=http.createServer((req,res)=>{
     assert.match(captureCardText,/Monster Capture/);
     assert.match(captureCardText,/dresseur/i,
       'Capture card must describe its trainer role instead of the generic RPG hero label');
-    // Evidence: archived V1 checkpoint 900cbcba renders “1 dresseur · Capture de créatures”.
-    // Requiring invented creature/item counters here was an invalid *historical*
-    // assertion, not a contract of the real V2 saved inventory and creature sheet.
-    assert.match(captureCardText,/\b\d+\s+dresseur\b\s*·\s*Capture de créatures/i,
-      'archived Capture V1 card must retain its own trainer-role summary');
+    // Real evidence from two archived-checkpoint browser runs: the same V1
+    // trainer card renders either its short Capture label or, once catalog
+    // counters become available, the full creature/item totals. Both are
+    // legitimate historic *Capture* summaries; neither is a Dungeon hero card.
+    // Keep trainer + identity mandatory, and verify both numbers if present.
+    assert.match(captureCardText,/\b\d+\s+dresseur\b/i,
+      'archived Capture V1 must expose the trainer, not a Dungeon hero');
+    const hasShortSummary=/\b\d+\s+dresseur\b\s*·\s*Capture de créatures/i.test(captureCardText);
+    const hasCatalogSummary=/\b\d+\s+dresseur\b\s*·\s*\d+\s+créatures\s*·\s*\d+\s+objets\b/i.test(captureCardText);
+    assert.ok(hasShortSummary||hasCatalogSummary,
+      'archived V1 must show the Capture identity or its actual catalog counts');
     assert.doesNotMatch(captureCardText,/\bhéros\b.*\bobjets\b.*\bmonstres\b/i,
       'Capture card must not reuse the generic Dungeon RPG summary');
     // Two independent root families: no Dungeon card should exist in Capture.

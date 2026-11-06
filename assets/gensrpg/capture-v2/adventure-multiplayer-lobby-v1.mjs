@@ -58,6 +58,13 @@ function currentLobby(raw){
  if(!raw||typeof raw!=='object'||raw.schema!==CAPTURE_LOBBY_SCHEMA_V1||
    raw.version!==1)
   throw new TypeError('Unknown Capture lobby schema/version');
+ const keys=['schema','version','sessionId','ownerId','inviteCode',
+  'maxPlayers','revision','open','hostIsGameMaster','joinEnabled',
+  'permissions','participants','createdAt','updatedAt'];
+ if(Object.keys(raw).length!==keys.length||
+   Object.keys(raw).some(key=>!keys.includes(key)))
+  throw new TypeError('Unexpected room fields; AdventureSave cannot be transported');
+ timestamp(raw.createdAt);timestamp(raw.updatedAt);
  identity(raw.ownerId,'room owner id');
  identity(raw.sessionId,'room session id');
  code(raw.inviteCode);capacity(raw.maxPlayers);revision(raw.revision);
@@ -67,6 +74,10 @@ function currentLobby(raw){
   throw new RangeError('Room capacity exceeded');
  const ids=new Set();
  for(const p of raw.participants){
+  if(!p||Object.keys(p).length!==4||
+     Object.keys(p).some(k=>!['id','name','role','joinedAt'].includes(k)))
+   throw new TypeError('Unexpected room participant fields');
+  timestamp(p.joinedAt);
   const m=member(p);
   if(ids.has(m.id))throw new Error('Duplicate participant');
   ids.add(m.id);

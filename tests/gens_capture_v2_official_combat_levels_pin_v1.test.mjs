@@ -10,12 +10,12 @@ import {createAdventureSessionV1,SHOWCASE_ADVENTURE_RULES_V1} from '../assets/ge
 const pins=JSON.parse(fs.readFileSync(new URL('../assets/gensrpg/capture-v2/source-pins-v1.json',import.meta.url),'utf8'));
 test('GenSRPG consumer explicitly pins certified Combat main owner commit with per-creature levels',()=>{
  assert.equal(pins.combat.ref,'main');
- assert.equal(pins.combat.sha,'954f38e6b84e842bc8bf6d8515d5c77b93aca5f1');
- assert.equal(pins.combat.certifiedCiRun,42036361285);
+ assert.equal(pins.combat.sha,'ebaea5dc40c4803add76563029a9dff67b964d55');
+ assert.equal(pins.combat.certifiedCiRun,42113199995);
  assert.equal(pins.exploration.ref,'main');
- assert.equal(pins.exploration.sha,'c6432654cb86cb57f75995e3be6460cbb888f286',
+ assert.equal(pins.exploration.sha,'a2db1825f0a1a833fadcd02d7804f887c864a1d2',
   'Exploration pin must be the certified official main, including real HP policy and exact Adventure duel');
- assert.equal(pins.exploration.certifiedCiRun,42074641375);
+ assert.equal(pins.exploration.certifiedCiRun,42111392258);
  // PR #378 tested its HEAD; the merge commit still requires exact main-CI proof before promotion.
 });
 test('a true owned starter level 1 and an enemy level 3 project independently through official Combat',()=>{

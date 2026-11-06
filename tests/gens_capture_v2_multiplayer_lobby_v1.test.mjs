@@ -133,3 +133,17 @@ test('leaving room removes one guest only; host departure closes room without wr
  assert.deepEqual(closed.participants,[]);
  assert.throws(()=>join(closed),/ferm|closed/i);
 });
+
+test('lobby transport rejects injected save fields and tampered participants before projecting anything',()=>{
+ const lobby=setup(3);
+ const forged={...lobby,inventory:{currency:999},world:{mapRef:'secret'}};
+ assert.throws(()=>joinCaptureLobbyV1({lobby:forged,authenticatedActor:guest,
+  inviteCode:'ABC234XY',expectedRevision:0,now:when}),/unexpected|inconnu|field|schema/i);
+ const fakeMember={...lobby,participants:[...lobby.participants,
+  {id:guest.id,name:guest.name,role:'host',joinedAt:when}]};
+ assert.throws(()=>joinCaptureLobbyV1({lobby:fakeMember,authenticatedActor:guest2,
+  inviteCode:'ABC234XY',expectedRevision:0,now:when}),/role|host|propriétaire/i);
+ const forgedSettings={...lobby,permissions:{...lobby.permissions,editWorld:'yes'}};
+ assert.equal(authorizeCaptureLobbyActionV1({lobby:forgedSettings,authenticatedActorId:guest.id,
+  action:'editWorld'}),false,'invalid persisted permission must never grant access');
+});

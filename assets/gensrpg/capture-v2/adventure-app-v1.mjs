@@ -10,6 +10,7 @@ import {readCombatHandoff} from '../../../vendor/exploration-lab/src/encounters/
 import {connectAdventureCombatHostV1} from './adventure-combat-host-v1.mjs';
 import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
 import {createAdventureRulesDraftStoreV1} from './adventure-rules-draft-v1.mjs';
+import {createAdventureCreatorDraftStoreV1} from './adventure-creator-draft-v1.mjs';
 import {writeAdventurePublishedEncounterGrantV1} from './adventure-publication-grant-v1.mjs';
 import {writeAdventurePlayingPartyV1} from './adventure-playing-party-grant-v1.mjs';
 import {
@@ -35,7 +36,7 @@ const idField={
 let rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
 let published=[];
 let officialCombatSha=null,officialStatRegistry=null;
-let store,draftStore;
+let store,draftStore,creatorDraftStore;
 const text=(node,value)=>{node.textContent=String(value);};
 const stateMessage=(message,error=false)=>{
  text(status,message);status.dataset.error=String(error);
@@ -95,7 +96,7 @@ function toggleXpMode(){
  $(idField.level).disabled=custom;
 }
 function setSessionControlFields(saved){
- const value=saved?.sessionControl;
+ const value=saved?.sessionControl??(!saved?creatorDraftStore?.load():null);
  const permissions=value?.guestPermissions??DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1;
  $('adventure-gm-enabled').checked=value?.hostIsGameMaster??false;
  $('adventure-join-enabled').checked=value?.joinEnabled??false;
@@ -103,9 +104,9 @@ function setSessionControlFields(saved){
  $('adventure-guest-edit-rewards').checked=permissions.editRewards;
  $('adventure-guest-edit-world').checked=permissions.editWorld;
  $('adventure-guest-allocate-stats').checked=permissions.allocateOwnCreatureStats;
- $('adventure-save-control').disabled=!saved;
- $('adventure-save-control').textContent=value?'Enregistrer les choix du créateur'
-  :'Activer les choix créateur/MJ pour cette partie';
+ $('adventure-save-control').disabled=false;
+ $('adventure-save-control').textContent=saved?'Enregistrer les choix du créateur'
+  :'Enregistrer les choix avant la première partie';
 }
 function sessionControlFromFields(){
  return {
@@ -427,8 +428,13 @@ $('adventure-resume').addEventListener('click',guarded(()=>{
 }));
 $('adventure-save-control').addEventListener('click',guarded(()=>{
  const session=store.load();
- if(!session)throw new Error('Crée une partie avant d’enregistrer les permissions.');
  const settings=sessionControlFromFields(),now=new Date().toISOString();
+ if(!session){
+  creatorDraftStore.save(settings);
+  setSessionControlFields(null);
+  stateMessage('Choix créateur/MJ enregistrés avant la partie. Ils seront restaurés à la réouverture.');
+  return;
+ }
  const updated=session.sessionControl
   ?updateAdventureSessionControlV1({session,settings,now})
   :initializeAdventureSessionControlV1({
@@ -475,6 +481,7 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
  try{
   store=createAdventureStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
   draftStore=createAdventureRulesDraftStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
+  creatorDraftStore=createAdventureCreatorDraftStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
   const official=await fetchPublishedBestiary();
   published=official.cards;officialCombatSha=official.combatSha;
   officialStatRegistry=official.statRegistry;

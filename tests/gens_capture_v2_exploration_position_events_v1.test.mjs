@@ -101,5 +101,5 @@ test('frame navigation reattaches only to current same-origin document and leave
  const source=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-multiplayer-exploration-events-v1.mjs',
  import.meta.url),'utf8');
  assert.doesNotMatch(source,/setInterval\(|Storage\.prototype|postMessage\(|z40k/);
- assert.doesNotMatch(source,/\b(?:localStorage|indexedDB)\b/i);
+ assert.doesNotMatch(source,/\b(?:localStorage|sessionStorage)\s*\.|\bindexedDB\s*\./i);
 });

@@ -80,9 +80,23 @@ test('in-game sheet has illustrated native profile, accessible fullscreen action
  assert.match(html,/id="adventure-fullscreen"/,'game needs a fullscreen touch action');
  assert.match(app,/requestFullscreen\(/,'game entry must offer browser fullscreen on a real gesture');
  assert.match(app,/createUserHeroStoreV1/,'hero portrait must read the original Exploration owner, not a local duplicate');
+ assert.match(html,/id="adventure-hero-choice"/,'the actual player must select from the original Explorer hero library');
+ assert.match(app,/writeAdventureHeroSelectionGrantV1/,'the native Exploration engine must receive the chosen HeroDefinition');
+ assert.match(app,/heroDefinitionId:\$\('adventure-hero-choice'\)\.value\|\|null/,'new saves must persist the selected official hero identity');
  const view=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-play-sheet-view-v1.mjs',import.meta.url),'utf8');
  assert.match(view,/data-capture-official-portrait/,'the actual published creature portrait must render');
  assert.match(css,/#adventure-play-frame\s*\{[^}]*100dvh/s,'play iframe must fill dynamic viewport height');
  assert.match(css,/\.sheet-profile/,'character and creature should have an illustrated profile layout');
  assert.doesNotMatch(app,/location\.reload\(/);
+});
+
+test('a saved AdventureSession retains a selected canonical Exploration HeroDefinition ID',()=>{
+ const heroId='hero.user.12345678-1234-1234-1234-123456789abc';
+ const session=createAdventureSessionV1({
+  bestiaryCards:published,starterId:'lumilo',rules:SHOWCASE_ADVENTURE_RULES_V1,
+  ids:{sessionId:'session-with-hero',instanceId:'creature-with-hero',creatorId:'creator-with-hero'},
+  now:'2026-11-06T14:08:00Z',heroDefinitionId:heroId
+ });
+ assert.equal(session.hero.definitionId,heroId);
+ assert.equal(session.hero.progression,null,'choosing a portrait never enables hero XP implicitly');
 });

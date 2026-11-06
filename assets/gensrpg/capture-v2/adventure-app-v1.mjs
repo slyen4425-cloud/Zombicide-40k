@@ -15,6 +15,8 @@ import {publishedCapturePortraitUrlV1} from './adventure-sheet-visual-v1.mjs';
 import {renderAdventureSheetViewV1} from './adventure-play-sheet-view-v1.mjs';
 import {createAdventureCreatorDraftStoreV1} from './adventure-creator-draft-v1.mjs';
 import {createAdventurePortfolioStoreV1} from './adventure-portfolio-store-v1.mjs';
+import {withSelectedAdventureWorldV1,resolveSelectedAdventureWorldV1}
+ from './adventure-world-choice-v1.mjs';
 import {createCaptureRoomTransportV1} from './adventure-multiplayer-transport-v1.mjs';
 import {createCaptureSupabaseClientV1} from './adventure-multiplayer-provider-v1.mjs';
 import {preflightCaptureOnlineWorldV1,publishCaptureInitialPositionV1
@@ -49,7 +51,7 @@ const idField={
 let rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
 let published=[];
 let officialCombatSha=null,officialStatRegistry=null;
-let store,portfolio,draftStore,creatorDraftStore;
+let store,portfolio,draftStore,creatorDraftStore,worldLibrary=null;
 const text=(node,value)=>{node.textContent=String(value);};
 const stateMessage=(message,error=false)=>{
  text(status,message);status.dataset.error=String(error);
@@ -338,6 +340,38 @@ function renderPortfolioOptions(){
  select.disabled=!saved.length;
  $('adventure-save-load').disabled=!saved.length;
  if(active&&saved.some(entry=>entry.sessionId===active))select.value=active;
+}
+function refreshWorldChoices(saved=null){
+ const picker=$('adventure-world-select'),notice=$('adventure-world-status');
+ if(!worldLibrary){
+  picker.disabled=true;
+  text(notice,'Bibliothèque officielle Exploration pas encore raccordée au main publié. Le monde local actuel reste disponible.');
+  return;
+ }
+ const worlds=worldLibrary.list();
+ const previous=picker.value;
+ picker.replaceChildren(option('','Monde local actuel (compatibilité)'),
+  ...worlds.map(w=>option(w.id,w.id+' · '+w.areaCount+' zone(s)')));
+ picker.disabled=false;
+ if(saved?.world?.mapRef&&worlds.some(w=>w.id===saved.world.mapRef))
+  picker.value=saved.world.mapRef;
+ else if(worlds.some(w=>w.id===previous))picker.value=previous;
+ text(notice,worlds.length
+  ?worlds.length+' monde(s) enregistrés. Choisis celui de ton aventure avant de jouer.'
+  :'Aucun monde archivé : enregistre d’abord ton monde dans le World Builder officiel.');
+}
+async function installOfficialWorldLibrary(){
+ try{
+  // The official Lab owns archive/WorldDocument import/export and activation.
+  // Before its API is on certified main, never create a second codec.
+  const owner=await import(
+   '../../../vendor/exploration-lab/src/builder/exploration-world-document-library-v1.js');
+  worldLibrary=owner.createExplorationWorldDocumentLibraryV1({storage:window.localStorage});
+ }catch(error){
+  worldLibrary=null;
+  console.info('Bibliothèque multi-mondes en attente de main Exploration',error.message);
+ }
+ refreshWorldChoices(store?.load()??null);
 }
 function showSave(){
  try{
@@ -662,8 +696,10 @@ $('adventure-create').addEventListener('click',guarded(()=>{
  const configured=updateAdventureSessionControlV1({
   session:state,settings:sessionControlFromFields(),now
  });
- portfolio.create(configured);
- setSessionControlFields(configured);
+ const worldId=$('adventure-world-select').value;
+ const created=worldId?withSelectedAdventureWorldV1(configured,worldId):configured;
+ portfolio.create(created);
+ setSessionControlFields(created);
  stateMessage('Nouvelle partie enregistrée séparément. Les anciennes sauvegardes sont conservées.');
  showSave();updatePreview();
 }));
@@ -700,7 +736,18 @@ document.addEventListener('fullscreenchange',syncFullscreenControl);
 syncFullscreenControl();
 
 $('adventure-play').addEventListener('click',guardedAsync(async()=>{
- const world=readWorldAssemblerDraft(window.localStorage);
+ const selectedWorldId=$('adventure-world-select').value;
+ let world=readWorldAssemblerDraft(window.localStorage);
+ const beforeWorldSession=store.load();
+ if(worldLibrary&&selectedWorldId){
+  world=resolveSelectedAdventureWorldV1({
+   session:beforeWorldSession,worldLibrary,selectedWorldId
+  });
+ }else if(beforeWorldSession?.world?.mapRef&&
+  beforeWorldSession.world.mapRef!==world?.id){
+  throw new Error('Cette partie exige son WorldDocument '+beforeWorldSession.world.mapRef+
+   '. Charge le monde officiel avant de reprendre la partie.');
+ }
  const savedHeroId=store.load()?.hero?.definitionId??null;
  const heroRecord=savedHeroId?await (await officialHeroStore()).get(savedHeroId):null;
  if(savedHeroId&&!heroRecord)
@@ -712,6 +759,9 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
   world,officialFingerprint:playWorldFingerprint,
   sessionId:store.load()?.sessionId
  });
+ if(selectedWorldId&&beforeWorldSession?.world?.mapRef===null){
+  store.save(withSelectedAdventureWorldV1(beforeWorldSession,selectedWorldId));
+ }
  const result=startAdventureExplorationV1({
   store,storage:window.localStorage,world,
   navigation:{createNewExplorationPlay,readExplorationPlay},
@@ -792,13 +842,19 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  // physically blocks the parent Shell's real "Retour à Monster Capture" button.
  // The viewport-filling CSS is the standard default and keeps touch navigation.
 }));
+$('adventure-world-select').addEventListener('change',()=>{
+ text($('adventure-world-status'),'Monde sélectionné pour la prochaine entrée en jeu. Une sauvegarde existante conserve son monde lié.');
+});
 $('adventure-save-load').addEventListener('click',guardedAsync(async()=>{
  const chosen=$('adventure-save-select').value;
  if(!chosen)throw new Error('Sélectionne une partie enregistrée.');
+ if(activeCaptureRoom)
+  throw new Error('Quitte le salon réseau actif avant de changer de sauvegarde.');
  const loaded=portfolio.select(chosen);
  rules=normalizeAdventureRulesV1(loaded.rules);
  setFields(rules);setSessionControlFields(loaded);
  renderItemRules();showSave();updatePreview();
+ refreshWorldChoices(loaded);
  await fillHeroChoices(loaded.hero?.definitionId??null);
  stateMessage('Partie '+chosen.slice(0,8)+' chargée. Les autres sauvegardes restent intactes.');
 }));
@@ -880,6 +936,7 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   setSessionControlFields(active);
   renderItemRules();showSave();updatePreview();
   await fillHeroChoices(active?.hero?.definitionId??null);
+  await installOfficialWorldLibrary();
   stateMessage(published.length+' créatures officielles publiées, aucune créature de brouillon chargée.');
  }catch(error){
   stateMessage('Aventure indisponible : '+error.message,true);

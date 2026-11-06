@@ -1,3 +1,17 @@
+## 2026-11-06 — Sentinelle navigateur Capture V1 sur checkpoint immuable : contrat de carte obsolète (C1, NON GREEN)
+
+- **START réel** : `checkpoint/gensrpg-start-capture-v1-archive-sentinel-2026-11-06` @ `4117f85f692ef682be28db6db002afe4a0097720` (branche intégration des tests #287, **pas encore GREEN**), branche dédiée `work/gensrpg-capture-v1-archive-sentinel-2026-11-06`. Dernier `main` publié : `5dcccaf6`. Retour possible au START ; aucun merge/publication tant que CI non verte.
+- **RED prouvé** : #42199833759, navigateur de l'archive `900cbcba0cdd517db773ff39c9c56264c16b32ed` affiche « 1 dresseur · Capture de créatures » ; le test historique exigait « N créatures · N objets », inexistant dans cet affichage. Ticket #288. Ce défaut s'exécute sur un worktree à SHA immuable ; **pas de régression Aventure V2 démontrée**.
+- **Périmètre exclusivement TEST-ONLY** : ne modifier ni l'archive ni le code produit. Faire tourner le test browser maintenu par le chantier actuel **sur les assets exacts du worktree historique**, expliciter la seule attente erronée des compteurs historiques, conserver les validations de profil Capture, Dungeon, Survie/PvP, lancement, sauvegarde/reprise et erreurs du navigateur. Vérifier par SHA que le test pointe sur l'archive, jamais V2. Aucune copie lourde/aucun vendor ; la version V2 garde ses propres tests inventaire/équipe sur Core.
+- **Gates** : comparaison diff (test et CI uniquement), exécution vraie Chromium historique au SHA actuel, architecture + préaudit + navigateur V2, tests créateur/MJ, fiche et pins officiels. Aucune désactivation ni monkey-patch. Ticket #288 réévaluable 2026-11-07 ; statuer GREEN uniquement avec preuve, conserver toute rouge non résolue.
+
+
+- **Continuation 2026-11-06 (CI #42206200546)** : le navigateur historique a confirmé une deuxième présentation valide de la même carte Capture V1 avec compteur catalogué `1 dresseur · 110 créatures · 4 objets` (en plus du libellé court `1 dresseur · Capture de créatures` déjà observé). Le test maintenu, exécuté sur le checkpoint de produit immuable, exige désormais l'identité dresseur et **une des deux variantes effectivement observées** sans accepter une carte Dungeon. Aucune modification de l'archive ni du gameplay. CI exacte du nouveau SHA encore requise ; rester DRAFT.
+
+- **Composition contrôlée des lots (test uniquement)** : intégration candidate des huit sentinelles Core XP de #287 avec les deux assertions historiques observées et le navigateur du checkpoint de #289. Le produit V1 reste exactement au SHA historique. Les moteurs, `main` et le publisher restent inchangés. La fusion de branches **ne constitue pas** un GREEN ni une livraison ; suites CI complètes obligatoires sur ce commit.
+
+---
+
 ## 2026-11-06 — Aventure combinée : réparation des deux sentinelles historiques (C1, NON GREEN)
 
 - **START vérifié** : `checkpoint/gensrpg-start-adventure-integration-sentinels-2026-11-06` @ `9cb518650ddee2c3b83142f0b184df375632d5c1`, branche indépendante `work/gensrpg-adventure-integration-sentinels-2026-11-06`. Dernière publication main vérifiée : `5dcccaf6b8084a5662698e5a462a3178afe641bf` ; **le candidat intégré n'est pas GREEN ni publié**.

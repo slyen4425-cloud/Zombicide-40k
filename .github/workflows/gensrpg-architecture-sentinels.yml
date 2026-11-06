@@ -1321,7 +1321,9 @@ jobs:
         run: node tests/gens_pvp_placeholder_shell_browser_v11411.test.cjs
 
       - name: Vérifier Monster Capture actuel par le vrai Shell (checkpoint historique V1)
-        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_capture_current_shell_browser_v11411.test.cjs
+        # Test source remains maintained at the branch head; the V1 product fixture
+        # stays EXACTLY 900cbcba in the original detached worktree, unchanged.
+        run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh env GENSRPG_ARCHIVED_CAPTURE_TEST_ROOT=1 node "$GITHUB_WORKSPACE/tests/gens_capture_current_shell_browser_v11411.test.cjs"
 
       - name: Exiger le routage Shell Capture sans identité Dungeon historique (checkpoint historique V1)
         run: bash tools/run_gensrpg_legacy_capture_checkpoint_test.sh node tests/gens_phase9_capture_seed_without_dungeon_style_browser_characterization_v1.test.cjs

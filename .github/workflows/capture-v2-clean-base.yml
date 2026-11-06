@@ -20,6 +20,7 @@ on:
       - 'tests/gens_capture_v2_live_room_adapter_v1.test.mjs'
       - 'tests/gens_capture_v2_peer_position_contract_v1.test.mjs'
       - 'tests/gens_capture_v2_peer_transport_v1.test.mjs'
+      - 'tests/gens_capture_v2_peer_play_bridge_v1.test.mjs'
       - 'supabase/migrations/20261106195000_gensrpg_capture_peer_presence_v1.sql'
       - 'supabase/migrations/20261106170500_gensrpg_capture_rooms_isolated_v1.sql'
       - 'tests/gens_capture_v2_adventure_hp_policy_20261105.test.mjs'
@@ -66,6 +67,9 @@ jobs:
 
       - name: Capture C3 — client Auth réel & RPC de position avec identité serveur
         run: node --test tests/gens_capture_v2_peer_transport_v1.test.mjs
+
+      - name: Capture C3 — vraie entrée Aventure, monde partagé validé avant sauvegarde
+        run: node --test tests/gens_capture_v2_peer_play_bridge_v1.test.mjs
 
       - name: Aventure V2 — contrat XP, loot, bestiaire publié, sauvegarde et résultat unique (TDD)
         run: node --test tests/gens_capture_v2_adventure_contract_v1.test.mjs

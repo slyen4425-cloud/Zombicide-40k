@@ -49,10 +49,10 @@ for(const transfer of bundle.creatureTransfers??[]){
  const frontId=transfer?.draft?.presentation?.visual?.front?.assetId;
  if(typeof frontId!=='string'||!frontId)continue;
  const asset=byId.get(frontId);
+ // Draft-only creatures are intentionally excluded by the Combat Bestiary.
  if(!asset||asset.mediaType!=='image'||
     !['sprite','portrait'].includes(asset.assetType)||
-    Number(asset.resource?.frameCount??1)!==1)
-  throw Error('Official Bestiary portrait missing for '+String(transfer.draft?.id));
+    Number(asset.resource?.frameCount??1)!==1)continue;
  const file=asset.resource?.file;
  if(typeof file!=='string'||
    !/^(?:capture|core)\/[\w./-]+\.(?:png|webp|jpg|jpeg)$/i.test(file)||

@@ -1,3 +1,13 @@
+## 2026-11-06 — Capture C9 : choisir le monde officiel de la partie (START / NON GREEN)
+
+- **Besoin avant publication main** : sélectionner un WorldDocument enregistré au moment de lancer une nouvelle aventure, retrouver exactement ce même monde lors de la reprise, pouvoir changer de sauvegarde sans écraser la carte ou la partie des autres. Le créateur peut toujours démarrer la configuration d'une partie avant de terminer son monde.
+- **Base** : GenSrpg C8 PR #298 candidat `6ae8a3eec86d0906e8c7e6bc7b6663a3eedb24fb` (CI non encore GREEN au START), checkpoint `checkpoint/gensrpg-start-capture-world-choose-2026-11-06`, branche `work/gensrpg-capture-world-choose-2026-11-06`. Exploration PR #383 (bibliothèque de WorldDocuments) doit obtenir CI puis être fusionnée sur **son main officiel** avant de modifier le pin GenSrpg; ne jamais pinner une branche labo de travail.
+- **Propriétaire** : Capture ne conserve que le choix `AdventureSession.world.mapRef` et le sélecteur UI; Exploration reste unique propriétaire de `WorldDocument`, import/export, restauration/activation et validation des cartes. Aucun JSON WorldDocument recopié dans les AdventureSaves, aucun autre catalogue ou éditeur.
+- **Sécurité** : lecture lazy de l'API bibliothèque officielle (pas de fallback qui duplique le moteur); si l'API ne fait pas encore partie du main Exploration figé, afficher « indisponible avant raccord officiel » sans erreur et garder le mode existant; l'entrée Jouer suit le monde autorisé et ne remplace jamais un brouillon non enregistré. Le monde choisi appartient à la save ciblée; changement de salon/sauvegarde vérifié.
+- **Sortie** : tests stricts bibliothèque officialisée, plusieurs saves et mondes, un seul checkpoint par session; contrat UI + parcours navigateur deux sessions. NON GREEN, NON PUBLIÉ tant que la dépendance LE main et tous tests ne sont pas verts, avant remise de la version main à l'utilisateur.
+
+---
+
 ## 2026-11-06 — Monster Capture : fiches RPG compactes avant publication (C8 START / NON GREEN)
 
 - **Retour utilisateur** : réduire légèrement la fenêtre, les boutons, les portraits et cases statistiques des fiches héros/créatures en cours de partie, sans revenir aux listes brutes ni cacher les portraits/les valeurs officielles. Préserver l'ergonomie tactile paysage (touch targets >=40 px) et l'accès aux quatre onglets.

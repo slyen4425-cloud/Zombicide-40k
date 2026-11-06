@@ -596,8 +596,10 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  document.querySelector('[data-adventure-app]').hidden=true;
  document.body.dataset.adventurePlaying='true';
  $('adventure-play-hud').hidden=false;
- // This gesture may be denied by a browser; the CSS fallback still fills the viewport.
- void requestAdventureFullscreen();
+ // Fullscreen API is ONLY requested through the explicit touch button above.
+ // Auto fullscreen inside a nested iframe captures the browser top layer and
+ // physically blocks the parent Shell's real "Retour à Monster Capture" button.
+ // The viewport-filling CSS is the standard default and keeps touch navigation.
 }));
 $('adventure-resume').addEventListener('click',guarded(()=>{
  const state=store.load();

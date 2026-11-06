@@ -5,6 +5,8 @@
 - **Périmètre exclusivement TEST-ONLY** : ne modifier ni l'archive ni le code produit. Faire tourner le test browser maintenu par le chantier actuel **sur les assets exacts du worktree historique**, expliciter la seule attente erronée des compteurs historiques, conserver les validations de profil Capture, Dungeon, Survie/PvP, lancement, sauvegarde/reprise et erreurs du navigateur. Vérifier par SHA que le test pointe sur l'archive, jamais V2. Aucune copie lourde/aucun vendor ; la version V2 garde ses propres tests inventaire/équipe sur Core.
 - **Gates** : comparaison diff (test et CI uniquement), exécution vraie Chromium historique au SHA actuel, architecture + préaudit + navigateur V2, tests créateur/MJ, fiche et pins officiels. Aucune désactivation ni monkey-patch. Ticket #288 réévaluable 2026-11-07 ; statuer GREEN uniquement avec preuve, conserver toute rouge non résolue.
 
+
+- **Continuation 2026-11-06 (CI #42206200546)** : le navigateur historique a confirmé une deuxième présentation valide de la même carte Capture V1 avec compteur catalogué `1 dresseur · 110 créatures · 4 objets` (en plus du libellé court `1 dresseur · Capture de créatures` déjà observé). Le test maintenu, exécuté sur le checkpoint de produit immuable, exige désormais l'identité dresseur et **une des deux variantes effectivement observées** sans accepter une carte Dungeon. Aucune modification de l'archive ni du gameplay. CI exacte du nouveau SHA encore requise ; rester DRAFT.
 ---
 
 ## 2026-11-06 — Aventure combinée : réparation des deux sentinelles historiques (C1, NON GREEN)

@@ -1,3 +1,15 @@
+# 2026-11-07 — Mise en ligne contrôlée des corrections sauvegarde / KO Monster Capture
+
+- **BASE production** : `main@2a3456fb14e26c805012f72a7304a78db5aec7c0`, START `checkpoint/gensrpg-start-capture-ko-save-pages-release-2026-11-07`, branche `work/gensrpg-capture-ko-save-pages-release-2026-11-07`.
+- **Source du lot** : branche GenSRPG Capture V2 `work/gensrpg-capture-save-defeat-2026-11-07`, START `checkpoint/gensrpg-start-capture-save-defeat-2026-11-07` depuis `4b7c3ff9940b4a68bcc0a031a75e5e9ce2a54086` ; code épinglé immuablement `d58677893322d6eb4ebefc6b2bc0acbfe866388a`.
+- **TDD** : fichier de tests du **code source épinglé**, exécuté au build et dans le contrôle PR Pages : suppression ciblée, ancien slot intact, KO conservé, politique de rétablissement, fin de partie uniquement sur le résultat officiel de défaite, anciennes sauvegardes KO ; ajoute les tests préexistants du portefeuille et du contrat.
+- **Règles** : nouvelle partie `restore` par défaut pour la testabilité ; `keep-ko` conserve les 0 PV pour de futurs objets de soin, `game-over` termine seulement après résultat officiel `defeat` de Combat. GenSrpg ne prétend pas déterminer seul la défaite d'une équipe de plusieurs créatures ; le contrat de roster et le déclenchement restent la seule autorité Labo Combat.
+- **Gemmor** (`crea_crys_2`) et **Gorice** sont présents côté Combat `gh-pages` mais pas sur `main`, Mur de glace idem : **non ajoutés artificiellement** au jeu ici. Un lot distinct Combat doit promouvoir les auteurs/assets et mécanismes avec ses propres CI.
+- **Préservation** : publisher unique, pas de média dupliqué, aucune modification de la racine, Combat officiel `ebaea5dc40c4803add76563029a9dff67b964d55`, Exploration officiel `66ec19c6da9124a936702d96915d6c89b6b4d31c`, URL preview inchangée.
+- **Statut** : PR à tester, ne pas déclarer vert sans Pages CI et HTTPS release-provenance au SHA exact.
+
+---
+
 ## 2026-11-07 — Livraison de test Monster Capture : mondes, sauvegardes, fiches (C2, NON GREEN)
 
 - **Base réelle** : main publié `916099fa5c7466361592b4655e72571bb259b29f` (Pages #42246370902 SUCCESS). Checkpoint de départ AVANT modification : `checkpoint/gensrpg-start-capture-weekend-test-release-2026-11-07` sur ce SHA ; branche dédiée `work/gensrpg-capture-weekend-test-release-2026-11-07` depuis le même SHA.

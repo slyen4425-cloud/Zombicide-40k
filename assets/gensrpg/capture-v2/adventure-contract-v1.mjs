@@ -523,6 +523,18 @@ export function applyAdventureCombatResultV1({
  assertSession(updated);
  return {applied:true,session:updated,award};
 }
+// Recovery of historical saved KO states only after a real, correlated defeat.
+// Never heal a manual HP=0 edit or another outcome; never change the bestiary.
+export function recoverAdventureDefeatedPartyV1({session,now}={}){
+ const state=assertSession(session);
+ if(state.status!=='playing'||state.party.active.hp!==0||
+    state.lastAward?.outcome!=='defeat'||
+    normalizeAdventureRulesV1(state.rules).combat.defeatPolicy!=='restore')return state;
+ const updated=freeze({...state,updatedAt:iso(now??state.updatedAt,'now'),
+  party:{...state.party,active:{...state.party.active,hp:null}}});
+ assertSession(updated);
+ return updated;
+}
 export function createAdventureStoreV1({storage,coreStorage,key=ADVENTURE_STORAGE_KEY_V1}){
  if(!storage||typeof storage.getItem!=='function'||typeof storage.setItem!=='function'||
     !coreStorage||typeof coreStorage.readJson!=='function'||typeof coreStorage.writeJson!=='function')

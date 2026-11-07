@@ -73,6 +73,7 @@ test('automation may create a DRAFT review PR but must never auto-merge or deplo
   assert.match(source,/draft=true|draft: true/);
   assert.match(source,/source-pins-v1\.json/);
   assert.match(source,/capture_v2_pages_preview_pin\.json/);
-  assert.doesNotMatch(source,/gh\('pr','merge'|gh\('workflow','run'/);
+  assert.doesNotMatch(source,/gh\('pr','merge'/);
+  assert.match(source,/gh\('workflow','run'/,'default GITHUB_TOKEN PRs must explicitly dispatch independent CI runs');
   assert.doesNotMatch(workflow,/deploy-pages|upload-pages-artifact/);
 });

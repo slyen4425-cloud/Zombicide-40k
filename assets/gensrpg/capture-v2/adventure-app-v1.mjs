@@ -8,6 +8,7 @@ import {
 } from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
 import {readCombatHandoff} from '../../../vendor/exploration-lab/src/encounters/combat-handoff-store.js';
 import {connectAdventureCombatHostV1} from './adventure-combat-host-v1.mjs';
+import {projectAdventureCombatAwardV1} from './adventure-result-presentation-v1.mjs';
 import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
 import {createAdventureRulesDraftStoreV1} from './adventure-rules-draft-v1.mjs';
 import {adventurePlaySheetSnapshotV1} from './adventure-play-sheet-v1.mjs';
@@ -16,7 +17,7 @@ import {renderAdventureSheetViewV1} from './adventure-play-sheet-view-v1.mjs';
 import {createAdventureCreatorDraftStoreV1} from './adventure-creator-draft-v1.mjs';
 import {createAdventurePortfolioStoreV1} from './adventure-portfolio-store-v1.mjs';
 import {withSelectedAdventureWorldV1,resolveSelectedAdventureWorldV1,
- activateSelectedAdventureWorldV1}
+ activateSelectedAdventureWorldV1,checkAdventureWorldArchiveV1}
  from './adventure-world-choice-v1.mjs';
 import {createCaptureRoomTransportV1} from './adventure-multiplayer-transport-v1.mjs';
 import {createCaptureSupabaseClientV1} from './adventure-multiplayer-provider-v1.mjs';
@@ -571,7 +572,30 @@ window.addEventListener('pagehide',()=>{
 
 // The Exploration iframe remains mounted; only this Capture-owned view
 // consumes the already persisted AdventureSession. No second player state.
-let activePlayingSheet=null;
+let activePlayingSheet=null,activeCombatHost=null;
+function showAdventureCombatResult({session,award}){
+ const view=projectAdventureCombatAwardV1({session,award,bestiaryCards:published});
+ text($('adventure-result-title'),view.title);
+ const host=$('adventure-result-rows');
+ host.replaceChildren(...view.rows.map(entry=>{
+  const row=document.createElement('div');row.className='rule-row';
+  const label=document.createElement('span');label.textContent=entry.label;
+  const value=document.createElement('strong');value.textContent=entry.value;
+  row.append(label,value);return row;
+ }));
+ $('adventure-open-last-result').hidden=false;
+ const dialog=$('adventure-result-dialog');
+ if(!dialog.open)dialog.showModal();
+ $('adventure-result-close').focus();
+}
+$('adventure-open-last-result').addEventListener('click',guarded(()=>{
+ const session=store?.load();
+ if(!session?.lastAward)throw new Error('Aucun résultat de combat enregistré');
+ showAdventureCombatResult({session,award:session.lastAward});
+}));
+$('adventure-result-close').addEventListener('click',()=>{
+ $('adventure-result-dialog').close();
+});
 let currentSheetTab='hero';
 let currentHeroVisual=null;
 let heroImageEpoch=0;
@@ -751,6 +775,12 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
   world=resolveSelectedAdventureWorldV1({
    session:beforeWorldSession,worldLibrary,selectedWorldId
   });
+  const draft=readWorldAssemblerDraft(window.localStorage);
+  if(checkAdventureWorldArchiveV1({
+   activeWorld:draft,archivedWorld:world,selectedWorldId,
+   fingerprint:playWorldFingerprint
+  }).stale)
+   throw new Error('Ce monde a des modifications non archivées dans Exploration (passages, zones ou terrain). Ouvre le World Builder, enregistre ce monde dans Mes mondes, puis reprends cette partie. La sauvegarde reste intacte.');
  }else if(beforeWorldSession?.world?.mapRef&&
   beforeWorldSession.world.mapRef!==world?.id){
   throw new Error('Cette partie exige son WorldDocument '+beforeWorldSession.world.mapRef+
@@ -815,11 +845,14 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  if(url.origin!==window.location.origin)
   throw new Error('Jouer doit utiliser le moteur Exploration officiel de la même origine');
  const frame=$('adventure-play-frame');
- connectAdventureCombatHostV1({
+ activeCombatHost?.dispose();
+ activeCombatHost=connectAdventureCombatHostV1({
   frame,playUrl:url.href,sessionId,worldId:world.id,store,locks:window.navigator.locks,
   readPending:()=>readCombatHandoff(window.localStorage,{sessionId}),
   refreshParty,bestiaryCards:published,progressionCore:window.GensProgressionV1,
+  onCombatResult:showAdventureCombatResult,
   onGameOver:()=>{
+   activeCombatHost?.dispose();activeCombatHost=null;
    activePlayingSheet=null;
    activeCaptureExplorationEvents?.dispose();
    activeCaptureExplorationEvents=null;
@@ -834,6 +867,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  });
  // Keep the Aventure owner mounted while the native Exploration frame runs.
  activePlayingSheet={sessionId,refreshParty};
+ $('adventure-open-last-result').hidden=!result.session.lastAward;
  activeCaptureExplorationEvents?.dispose();
  activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
  activeCaptureExplorationEvents=onlineContext

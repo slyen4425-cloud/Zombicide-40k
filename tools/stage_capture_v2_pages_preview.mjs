@@ -69,7 +69,12 @@ const stagedPwa=releasePreviewPwaForCommit(
   publisherCommit
 );
 fs.writeFileSync(path.join(trial,'service-worker.js'),stagedPwa.worker);
-fs.writeFileSync(path.join(trial,'index.html'),enableAutomaticPreviewActivation(stagedPwa.html));
+const previewHtml=enableAutomaticPreviewActivation(stagedPwa.html);
+const handoffTag='<script src="assets/gensrpg/shell/capture-v2-from-main-entry-v1.js"></script>';
+if(previewHtml.split('</body>').length!==2||previewHtml.includes(handoffTag))
+  throw Error('Official Capture V2 preview must expose exactly one main-app arrival seam');
+fs.writeFileSync(path.join(trial,'index.html'),
+  previewHtml.replace('</body>',handoffTag+'\n</body>'));
 for(const filename of fs.readdirSync(source).filter(x=>/^sound_.*\.mp3$/.test(x)))
   copyFile(filename);
 for(const filename of ['icon-192.png','icon-512.png']){
@@ -89,6 +94,13 @@ fs.cpSync(assetsRoot,path.join(trial,'assets'),{
     return rel!=='gensrpg/capture'&&!rel.startsWith('gensrpg/capture/');
   }
 });
+// One tiny Shell handoff is staged from the CURRENT main publisher. No Lab
+// bundle, source owner, game state or second Capture engine is copied.
+const mainEntrySource=path.resolve(path.dirname(fileURLToPath(import.meta.url)),
+  '../assets/gensrpg/shell/capture-v2-from-main-entry-v1.js');
+const mainEntryTarget=path.join(trial,'assets/gensrpg/shell/capture-v2-from-main-entry-v1.js');
+if(fs.existsSync(mainEntryTarget))throw Error('Duplicate main Capture V2 handoff owner');
+fs.copyFileSync(mainEntrySource,mainEntryTarget);
 const exploreDest=path.join(trial,'vendor/exploration-lab');
 fs.mkdirSync(exploreDest,{recursive:true});
 for(const folder of ['src','assets'])

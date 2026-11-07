@@ -1,3 +1,11 @@
+## 2026-11-07 — GenSRPG main : raccord du bouton Monster Capture au runtime V2 (C2 NON GREEN)
+- START: main `a46b1104e56cf6c60a1eae9bd4829b181e9a3c08`, checkpoint `checkpoint/gensrpg-start-gensrpg-capture-v2-root-entry-2026-11-07`, branche `work/gensrpg-capture-v2-root-entry-2026-11-07`.
+- Le Shell **publié** ne doit plus lancer l'ancien module Capture : entrée unique vers le V2 déjà transporté par le publisher sous /preview/capture-v2-pr225/, sans dupliquer combat/exploration, sans modifier sauvegardes, Survie ou Dungeon.
+- TDD et preuve Chromium depuis le vrai root + retour, intégrité HTTPS et budget 900 Mio requis. TANT QUE NON GREEN aucun remplacement certifié.
+- Décision utilisateur : version visible/testée uniquement sur `main`; branches/checkpoints pour CI et rollback, pas de versions produit concurrentes `gh-pages`. Cette première étape ne supprime pas encore physiquement tout le V1 ni ne migre la source V2 immuable vers main ; chantier séparé obligatoire. Détails : `docs/GENSRPG_CAPTURE_V2_MAIN_ENTRY_2026-11-07.md`.
+
+---
+
 ## 2026-11-07 — PWA automatique pour tous les déploiements Capture V2 (TDD)
 - Retour : après nouvelle installation Capture V2 utilisable, obligation de mise à jour automatique au prochain lancement pour tous, sans désinstallation ni bouton manuel.
 - Cause : le cache du SW V2 sous /preview/capture-v2-pr225/ était estampillé avec le SHA immuable du candidat Capture et les 2 marqueurs de version HTML restaient figés. Le SW ne changeait pas si seul main GenSRPG republiait.

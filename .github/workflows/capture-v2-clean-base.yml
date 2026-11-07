@@ -69,6 +69,9 @@ jobs:
       - name: Monster Capture — authentification isolée et vrais boutons héberger/rejoindre/quitter
         run: node --test tests/gens_capture_v2_live_room_adapter_v1.test.mjs
 
+      - name: RED/GREEN — hébergement immédiat et état de salon visible
+        run: node --test tests/gens_capture_v2_room_host_creation_20261107.test.mjs
+
       - name: TDD Capture C3 — projection de position Exploration & anti-replay, RED puis GREEN
         run: node --test tests/gens_capture_v2_peer_position_contract_v1.test.mjs
 

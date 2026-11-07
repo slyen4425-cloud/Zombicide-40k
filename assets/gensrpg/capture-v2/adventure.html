@@ -141,10 +141,10 @@
   </details>
   <section id="adventure-multiplayer-panel" class="adventure-options" aria-labelledby="adventure-multiplayer-heading">
    <h2 id="adventure-multiplayer-heading">Partie en ligne · Monster Capture</h2>
-   <p class="hint">Crée un salon ou rejoins un ami avec son code. Les joueurs gardent leurs propres sauvegardes. Les déplacements partagés et les combats entre joueurs nécessitent encore le raccord Exploration/Combat.</p>
+   <p class="hint">Pour héberger : crée d’abord une partie dans « Mes parties », puis appuie sur « Créer un salon ». Le jeu autorisera automatiquement les invités et affichera ton code. Pour rejoindre, indique le code d’un ami. Déplacements et combats partagés restent en développement.</p>
    <div class="fields">
     <label for="adventure-player-alias">Mon pseudo
-     <input id="adventure-player-alias" type="text" maxlength="48" autocomplete="nickname" placeholder="Joueur">
+     <input id="adventure-player-alias" type="text" maxlength="48" autocomplete="nickname" placeholder="Joueur" value="Joueur">
     </label>
     <label for="adventure-room-capacity">Nombre maximal de joueurs
      <input id="adventure-room-capacity" type="number" min="2" max="32" step="1" value="2">
@@ -154,7 +154,7 @@
     </label>
    </div>
    <div class="actions">
-    <button id="adventure-room-host" type="button" disabled>Héberger ma partie</button>
+    <button id="adventure-room-host" type="button">Créer un salon pour ma partie</button>
     <button id="adventure-room-join" type="button">Rejoindre par code</button>
     <button id="adventure-room-leave" type="button" disabled>Quitter le salon</button>
    </div>

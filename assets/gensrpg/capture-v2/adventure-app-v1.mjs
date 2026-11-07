@@ -34,7 +34,7 @@ import {writeAdventureHeroSelectionGrantV1} from './adventure-hero-selection-gra
 import {
  DEFAULT_ADVENTURE_RULES_V1,SHOWCASE_ADVENTURE_RULES_V1,
  DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
- createAdventureSessionV1,createAdventureStoreV1,publishedAdventureSpeciesV1,
+ createAdventureSessionV1,createAdventureStoreV1,updateAdventureCameraPolicyV1,publishedAdventureSpeciesV1,
  coreAdventureProgressionConfigV1,availableAdventureStatPointsV1,
  allocateAdventureStatPointsV1,chooseAdventureActiveCreatureV1,updateAdventureSessionControlV1,
  initializeAdventureSessionControlV1
@@ -122,6 +122,7 @@ function setSessionControlFields(saved){
  $('adventure-guest-edit-rewards').checked=permissions.editRewards;
  $('adventure-guest-edit-world').checked=permissions.editWorld;
  $('adventure-guest-allocate-stats').checked=permissions.allocateOwnCreatureStats;
+ $('adventure-creator-camera-angle').value=String(saved?.cameraPolicy?.angleDeg??55);
  $('adventure-save-control').disabled=false;
  $('adventure-save-control').textContent=saved?'Enregistrer les choix du créateur'
   :'Enregistrer les choix avant la première partie';
@@ -819,7 +820,8 @@ $('adventure-create').addEventListener('click',guarded(()=>{
   bestiaryCards:published,starterId:starterIds[0],starterIds,
   rules,ids:{sessionId:id(),instanceId:id(),
    reserveInstanceIds:starterIds.slice(1).map(()=>id()),creatorId:id()},now,
-  heroDefinitionId:$('adventure-hero-choice').value||null
+  heroDefinitionId:$('adventure-hero-choice').value||null,
+  cameraAngle:Number($('adventure-creator-camera-angle').value)
  });
  const configured=updateAdventureSessionControlV1({
   session:state,settings:sessionControlFromFields(),now
@@ -938,6 +940,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  const sessionId=result.session.sessionId;
  url.searchParams.set('play','1');
  url.searchParams.set('adventureSession',sessionId);
+ url.searchParams.set('cameraAngle',String(result.session.cameraPolicy?.angleDeg??55));
  if(url.origin!==window.location.origin)
   throw new Error('Jouer doit utiliser le moteur Exploration officiel de la même origine');
  const frame=$('adventure-play-frame');
@@ -1053,11 +1056,15 @@ $('adventure-save-control').addEventListener('click',guarded(()=>{
   stateMessage('Choix créateur/MJ enregistrés avant la partie. Ils seront restaurés à la réouverture.');
   return;
  }
- const updated=session.sessionControl
+ const saved=session.sessionControl
   ?updateAdventureSessionControlV1({session,settings,now})
   :initializeAdventureSessionControlV1({
     session,settings,creatorId:crypto.randomUUID(),now
    });
+ // Same AdventureSession owns creator settings and the camera policy.
+ const updated=updateAdventureCameraPolicyV1({
+  session:saved,angleDeg:Number($('adventure-creator-camera-angle').value),now
+ });
  store.save(updated);setSessionControlFields(updated);showSave();
  stateMessage('Choix du créateur/MJ enregistrés. La connexion des invités et les actions MJ seront raccordées ultérieurement.');
 }));

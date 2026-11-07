@@ -22,7 +22,7 @@ export const DEFAULT_ADVENTURE_RULES_V1=freeze({
  progression:{xpCurveMode:'linear',xpPerLevel:1000,maxLevel:100},
  loot:{currencyPerVictory:0,items:[],drops:[]},
  // Default applies only to a NEW game, and remains editable by the creator.
- combat:{hpMultiplier:0.25},
+ combat:{hpMultiplier:0.25,defeatPolicy:'restore'},
  // A Capture hero is a travel avatar with NO level by default. A game's
  // creator can explicitly enable its independent progression and talent
  // points; this never steals or changes a creature's victory XP.
@@ -94,9 +94,13 @@ export function normalizeAdventureRulesV1(input){
  // Their precise old representation remains legal, and never enables hero XP.
  const {heroProgression:heroRaw,combat:combatRaw,...legacy}=object(input,'AdventureRules');
  // Old saves were authored without this policy: never quarter their HP on load.
- const combat=combatRaw===undefined?{hpMultiplier:1}:
-  exact(combatRaw,['hpMultiplier'],'combat');
+ // Old saves keep their HP policy; absent defeat policy means recovery, not game over.
+ const inputCombat=combatRaw===undefined?{hpMultiplier:1}:object(combatRaw,'combat');
+ const {defeatPolicy='restore',...combatBase}=inputCombat;
+ const combat=exact(combatBase,['hpMultiplier'],'combat');
  number(combat.hpMultiplier,'combat.hpMultiplier',Number.EPSILON,1);
+ if(defeatPolicy!=='restore'&&defeatPolicy!=='game-over')
+  throw new RangeError('combat.defeatPolicy must be restore or game-over');
  const rule=exact(legacy,['schema','version','xp','progression','loot'],'AdventureRules');
  const hero=heroRaw===undefined?DEFAULT_ADVENTURE_RULES_V1.heroProgression:
   exact(heroRaw,['enabled','xpGainPercent','xpPerLevel','maxLevel',
@@ -178,7 +182,7 @@ export function normalizeAdventureRulesV1(input){
     ...(pointsRaw===undefined?{}:{statPointsPerLevel:pointsRaw}),
     ...(bands===undefined?{}:{xpBands:bands})},
   loot:{currencyPerVictory:loot.currencyPerVictory,items,drops},
-  combat:{hpMultiplier:combat.hpMultiplier},
+  combat:{hpMultiplier:combat.hpMultiplier,defeatPolicy},
   heroProgression:{enabled:hero.enabled,xpGainPercent:hero.xpGainPercent,
    xpPerLevel:hero.xpPerLevel,maxLevel:hero.maxLevel,
    talentPointsPerLevel:hero.talentPointsPerLevel}
@@ -342,7 +346,7 @@ function assertSession(session){
   throw new RangeError('Invalid AdventureSave schema/version; cannot silently migrate');
  identity(v.sessionId,'sessionId');
  iso(v.createdAt,'createdAt');iso(v.updatedAt,'updatedAt');
- if(v.status!=='configured'&&v.status!=='playing')
+ if(v.status!=='configured'&&v.status!=='playing'&&v.status!=='finished')
   throw new RangeError('Unknown Adventure save status');
  normalizeAdventureRulesV1(v.rules);
  const actor=object(object(v.party,'party').active,'party.active');
@@ -501,10 +505,16 @@ export function applyAdventureCombatResultV1({
   encounterId,enemyId,outcome:result.outcome,xp:amount,
   levelBefore:before,levelAfter:level,currency,drops,heroXp
  });
+ // The creator chooses recovery or terminal game over in the save's rules.
+ // Recovery uses Combat's own max HP for the next encounter (null snapshot).
+ const defeatPolicy=normalizeAdventureRulesV1(state.rules).combat.defeatPolicy;
+ const defeated=result.outcome==='defeat';
+ const recover=defeated&&defeatPolicy==='restore';
+ const gameOver=defeated&&defeatPolicy==='game-over';
  const updated=freeze({
-  ...state,updatedAt:timestamp,
+  ...state,status:gameOver?'finished':state.status,updatedAt:timestamp,
   party:{active:{...state.party.active,level,xp:total,
-   hp:hp==null?state.party.active.hp:hp}},
+   hp:recover?null:gameOver?0:hp==null?state.party.active.hp:hp}},
   ...(heroState===undefined?{}:{hero:heroState}),
   inventory:{currency:state.inventory.currency+currency,items:itemCounts},
   processedEncounterKeys:[...state.processedEncounterKeys,key],

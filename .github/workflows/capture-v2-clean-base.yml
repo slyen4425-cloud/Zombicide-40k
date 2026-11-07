@@ -120,6 +120,9 @@ jobs:
       - name: Aventure — XP par paliers, stats officielles 20 points, rôles du créateur (TDD)
         run: node --test tests/gens_capture_v2_adventure_progression_access_v1.test.mjs
 
+      - name: Préparation Aventure sans répartition de stats, fiche jeu propriétaire (TDD)
+        run: node --test tests/gens_capture_v2_preparation_stats_owner_20261107.test.mjs
+
       - name: Aventure — réglages sauvegardés avant une première partie, recharge sans perte (TDD)
         run: node --test tests/gens_capture_v2_adventure_rules_draft_persistence_v1.test.mjs
 

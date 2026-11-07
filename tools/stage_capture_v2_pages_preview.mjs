@@ -9,6 +9,7 @@ import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {assertOfficialMainHistoryPin} from './verify_official_main_pin.mjs';
 import {stageOfficialCaptureEncounterBridge} from './stage_capture_v2_encounter_bridge.mjs';
+import {releasePreviewPwaForCommit,enableAutomaticPreviewActivation} from './capture_v2_pwa_release.mjs';
 
 const [sourceArg,combatArg,explorationArg,siteArg,visualsArg]=process.argv.slice(2);
 if(!sourceArg||!combatArg||!explorationArg||!siteArg||!visualsArg)
@@ -57,27 +58,18 @@ const copyFile=(rel,dst=rel)=>{
 };
 for(const rel of ['index.html','service-worker.js','manifest.webmanifest'])
   copyFile(rel);
-// The preview is a separate SW scope on the SAME origin as the real app.
-// CacheStorage names are ORIGIN-wide, not scoped by service worker. If we copy
-// the root worker byte-for-byte, its activate handler will evict the installed
-// production PWA's caches. Configure ONLY this staged worker's cache namespace;
-// the single canonical source worker and the production build remain untouched.
-const productionWorker=bytes(source,'service-worker.js').toString('utf8');
-const canonicalCacheLine=/^const CACHE_NAME = "gensrpg-cache-[^"]+";$/m;
-const productionCleanup='name.startsWith("gensrpg-cache-")&&name!==CACHE_NAME';
-if(!canonicalCacheLine.test(productionWorker)||
-   productionWorker.split(productionCleanup).length!==2)
-  throw Error('Canonical root PWA cache contract drift: review required before isolated preview release');
-const isolatedCacheName='gensrpg-preview-capture-v2-'+expectedPreviewSha.slice(0,12);
-const scopedWorker=productionWorker
- .replace(canonicalCacheLine,'const CACHE_NAME = "'+isolatedCacheName+'";')
- .replace(productionCleanup,
-  'name.startsWith("gensrpg-preview-capture-v2-")&&name!==CACHE_NAME');
-if(scopedWorker===productionWorker||
-   scopedWorker.includes(productionCleanup)||
-   !scopedWorker.includes(isolatedCacheName))
-  throw Error('Preview PWA cache namespace isolation failed');
-fs.writeFileSync(path.join(trial,'service-worker.js'),scopedWorker);
+// The immutable Capture source is NOT the release version. Every main or PR
+// deploy must install a new worker and publish matching HTML version markers
+// even if tools/capture_v2_pages_preview_pin.json is unchanged. Cache scopes
+// remain isolated on the shared github.io origin (no other PWA's cache deletion).
+const publisherCommit=process.env.GITHUB_SHA;
+const stagedPwa=releasePreviewPwaForCommit(
+  bytes(source,'service-worker.js').toString('utf8'),
+  bytes(source,'index.html').toString('utf8'),
+  publisherCommit
+);
+fs.writeFileSync(path.join(trial,'service-worker.js'),stagedPwa.worker);
+fs.writeFileSync(path.join(trial,'index.html'),enableAutomaticPreviewActivation(stagedPwa.html));
 for(const filename of fs.readdirSync(source).filter(x=>/^sound_.*\.mp3$/.test(x)))
   copyFile(filename);
 for(const filename of ['icon-192.png','icon-512.png']){
@@ -141,6 +133,7 @@ const bridge=stageOfficialCaptureEncounterBridge({
 const provenance={
   schema:'gensrpg-capture-v2-isolated-pages-preview-v1',
   publicPath:previewPin.publicPath,
+  publisherCommit,
   source:{repository:'slyen4425-cloud/Zombicide-40k',
     ref:'approved-immutable-commit',commit:expectedPreviewSha},
   combat:{repository:sourcePin.combat.repository,ref:'main',sha:sourcePin.combat.sha},

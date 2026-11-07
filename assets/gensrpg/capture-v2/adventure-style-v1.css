@@ -58,7 +58,6 @@ output{display:block;overflow-wrap:anywhere}
 @media(orientation:landscape) and (max-height:550px){
  .xp-band-row{padding:6px;gap:5px}
  .xp-band-row input{height:36px}
- .adventure-stat-wallet{padding:8px}
 }
 @media(max-width:580px){
  .xp-band-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}

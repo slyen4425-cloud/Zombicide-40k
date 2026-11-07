@@ -54,14 +54,6 @@ function renderGensFamilyGamesIfVisible(){
 }
 
 function openGensFamily(family){
-  // The published MAIN Shell delegates Capture to its single official V2
-  // runtime. Never start the old Capture UI if that published route fails to load.
-  // Source-only historical characterizations remain on their archived path.
-  if(family==="capture"&&document.querySelector('script[data-gensrpg-main-capture-route="v2"]')){
-    if(typeof window.GensCaptureMainEntryV1?.open!=="function")
-      throw new Error("Official Monster Capture V2 main entry is unavailable");
-    return window.GensCaptureMainEntryV1.open();
-  }
   gensSelectedFamily=family;
   document.body.classList.remove("gensCapturePregame","gensAdventurePregame");
   if(family!=="adventure")document.body.classList.remove("gensDungeonTheme");

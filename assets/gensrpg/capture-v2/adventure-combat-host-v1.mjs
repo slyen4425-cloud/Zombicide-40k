@@ -50,6 +50,12 @@ export function connectAdventureCombatHostV1({
   event.preventDefault(); // Claim the cancellable request before the asynchronous Core write.
   void handle(request).then(
    response=>{
+    // The READY handshake is required to arm wild encounters in Exploration.
+    // Do not replace it with a CombatResult receipt when no combat happened.
+    if(response.ready===true){
+     request.respond({ready:true});
+     return;
+    }
     // Only the official receipt is sent to Exploration; saved XP and drops
     // stay in the parent UI, with no parallel reward or storage owner.
     request.respond({receipt:response.receipt,gameOver:response.gameOver});

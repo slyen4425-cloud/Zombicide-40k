@@ -47,7 +47,7 @@ test('public main Capture click opens the ONE V2 owner, Jouer is native, return 
     !!document.querySelector('script[data-gensrpg-main-capture-route="v2"]'),
     null,{timeout:30000});
   await page.locator('button.gensRootModeCard.capture').tap();
-  await page.waitForURL(/\\/preview\\/capture-v2-pr225\\/index\\.html\\?entry=gensrpg-main$/,{timeout:60000});
+  await page.waitForURL(/\/preview\/capture-v2-pr225\/index\.html\?entry=gensrpg-main$/,{timeout:60000});
   const capture=page.locator('#gensCaptureV2Root');
   await capture.waitFor({state:'visible',timeout:30000});
   assert.equal(await page.locator('#gensCaptureV2Root').count(),1);

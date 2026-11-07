@@ -26,6 +26,23 @@ const server=http.createServer(async(request,response)=>{
  }catch(e){response.writeHead(404).end('Missing _site resource');}
 });
 
+// Read the real currently selected Adventure through its production Core +
+// portfolio owner. New games are independent slots; the legacy single-save
+// key deliberately stays untouched for pre-existing user sessions.
+const readSelectedAdventureSave=async element=>element.evaluate(async()=>{
+ const [{createAdventureStoreV1},{createAdventurePortfolioStoreV1}]=await Promise.all([
+  import('./adventure-contract-v1.mjs'),import('./adventure-portfolio-store-v1.mjs')
+ ]);
+ const storage=localStorage,coreStorage=window.GensStorageV1;
+ if(!coreStorage)throw new Error('Official Core Storage missing in real Adventure');
+ const legacyStore=createAdventureStoreV1({storage,coreStorage});
+ const portfolio=createAdventurePortfolioStoreV1({storage,coreStorage,legacyStore});
+ const selected=portfolio.load();
+ if(!selected||selected.sessionId!==portfolio.activeId())
+  throw new Error('Selected Adventure save missing after real user action');
+ return selected;
+});
+
 test('Adventure starts from the Pages menu and saves a native encounter once at the exact map point',
  {timeout:180000},async()=>{
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
@@ -95,8 +112,7 @@ test('Adventure starts from the Pages menu and saves a native encounter once at 
   assert.equal(await fight.locator('[data-combat-skill]').count(),1,'only the true level-one skill is available');
   await fight.locator('[data-encounter-flee]').tap();
   await battle.waitFor({state:'detached'});
-  const saveKey='gensrpg.capture.v2.adventure.save.v1';
-  const save=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),saveKey);
+  const save=await readSelectedAdventureSave(adventure.locator('#adventure-play'));
   assert.equal(save.party.active.level,1);
   assert.equal(save.party.active.xp,0);
   assert.equal(save.lastAward.outcome,'fled');
@@ -106,7 +122,8 @@ test('Adventure starts from the Pages menu and saves a native encounter once at 
   await adventure.locator('#adventure-play').tap();
   await map.locator('#play-menu-button:visible').waitFor();
   assert.deepEqual(await canvas.evaluate(()=>window.__sculptPlayProbe().actor),point);
-  const reopened=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),saveKey);
+  const reopened=await readSelectedAdventureSave(adventure.locator('#adventure-play'));
+  assert.equal(reopened.sessionId,save.sessionId,'resume the same selected independent save');
   assert.deepEqual(reopened.processedEncounterKeys,save.processedEncounterKeys);
   assert.equal(reopened.lastAward.outcome,'fled');
  }finally{
@@ -372,8 +389,7 @@ test('real HTTPS Jouer on mobile landscape saves creator cap 250, 33 stat points
    await page.locator('#adventure-gm-enabled').check();
    await page.locator('#adventure-join-enabled').check();
    await page.locator('#adventure-save-control').tap();
-   const key='gensrpg.capture.v2.adventure.save.v1';
-   let saved=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)),key);
+   const saved=await readSelectedAdventureSave(page.locator('#adventure-save-control'));
    assert.equal(saved.rules.progression.maxLevel,250);
    assert.equal(saved.rules.progression.statPointsPerLevel,33);
    assert.equal(saved.rules.combat.hpMultiplier,0.4,'creator controls HP through the game rule');

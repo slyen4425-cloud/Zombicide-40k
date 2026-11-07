@@ -191,6 +191,7 @@
  <button type="button" id="adventure-open-sheet" aria-haspopup="dialog" aria-controls="adventure-play-sheet">
   Personnage · Équipe · Sac
  </button>
+ <button type="button" id="adventure-open-last-result" hidden>Dernier combat</button>
  <button type="button" id="adventure-fullscreen" aria-pressed="false" aria-label="Activer ou quitter le plein écran">Plein écran</button>
  <output id="adventure-play-remote-status" aria-live="polite">Positions reçues : 0 · affichage des avatars à raccorder</output>
 </div>
@@ -207,6 +208,12 @@
  </nav>
  <div id="adventure-sheet-content" role="tabpanel" aria-live="polite"></div>
  <output id="adventure-sheet-status" role="status" aria-live="polite"></output>
+</dialog>
+<dialog id="adventure-result-dialog" aria-labelledby="adventure-result-title">
+ <h2 id="adventure-result-title">Résultat du combat</h2>
+ <p id="adventure-result-subtitle" class="hint">XP et récompenses enregistrés dans ta partie.</p>
+ <div id="adventure-result-rows" class="rules-list" aria-live="polite"></div>
+ <div class="actions"><button id="adventure-result-close" type="button">Continuer l'aventure</button></div>
 </dialog>
 <script src="../core/storage-v1.js"></script>
 <script src="../core/progression-v1.js"></script>

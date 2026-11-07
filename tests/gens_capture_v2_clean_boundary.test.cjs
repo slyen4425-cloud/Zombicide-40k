@@ -95,8 +95,14 @@ test('Pages pipeline stages the UNMODIFIED Exploration main owner, not its gh-pa
  assert.match(workflow,/repository: slyen4425-cloud\/laboratoire_dynamique_exploration-/);
  assert.match(workflow,/ref: \$\{\{ steps\.capture_pages_pins\.outputs\.exploration \}\}/,
   'Exploration must resolve from the one canonical pin rather than a second hardcoded SHA');
- assert.match(workflow,/refs\/heads\/main/);
- assert.match(workflow,/actual!==entry\.sha/,'refuse upstream SHA drift before shipping');
+ const releaseProof=text('tools/verify_capture_official_lab_pins_v1.mjs');
+ const officialHistory=text('tools/verify_official_main_pin.mjs');
+ assert.match(workflow,/node tools\/verify_capture_official_lab_pins_v1\.mjs/);
+ assert.match(releaseProof,/assertOfficialMainHistoryPin/);
+ assert.match(officialHistory,/refs\/heads\/main/,
+  'reject branch-only or gh-pages pins, without vetoing certified earlier main commits');
+ assert.doesNotMatch(workflow,/actual!==entry\.sha/,
+  'a moving Lab HEAD must not invalidate a certified immutable main ancestor');
  assert.match(workflow,/cp -a exploration-lab\/src exploration-lab\/assets _site\/vendor\/exploration-lab\//);
  assert.match(workflow,/node tools\/stage_capture_v2_labs\.mjs combat-lab exploration-lab _site/);
  assert.match(workflow,/rsync -a --exclude='\/gensrpg\/capture\/'/,

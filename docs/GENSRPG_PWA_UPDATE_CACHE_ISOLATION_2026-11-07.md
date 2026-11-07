@@ -8,6 +8,8 @@
 - Risque C2 : migration du cache en application installée sur Android, multi-PWA sur même origine.
 - Test RED : `tests/gensrpg_pwa_cache_isolation_20261107.test.cjs`, validant qu'un worker racine actif ne détruit plus les caches de prévisualisation ni ceux d'autres applications et relance `registration.update()` sur navigation.
 - Correctif : nom de cache versionné et suppression limitée aux seuls caches `gensrpg-cache-*`. Le namespace existant du preview `gensrpg-preview-capture-v2-*` reste indépendant.
+- Mise à jour automatique durable : `tools/version_pwa_release_worker.mjs` inscrit le SHA exact du commit de chaque livraison Pages dans le **service worker construit sous `_site/` seulement**, sans mutation du fichier source ni IndexedDB. Deux déploiements différents possèdent désormais des caches distincts ; aucun numéro manuel de version à maintenir.
+- TDD complémentaire : `tests/gensrpg_pwa_release_stamp_20261107.test.mjs` vérifie la différence de SHA, le seul propriétaire du cache, les entrées malformées et le raccord réel du workflow.
 - Test de non-régression existant : `tests/gens_capture_pwa_offline_pinned_media_v1.test.cjs`; les images immuables restent servies depuis le cache réseau/hors-ligne.
 - Pipeline : test RED/GREEN ajouté au build Pages principal. Ne pas passer GREEN sans CI exacte, Pages et preuve HTTPS.
 - Aucune suppression de sauvegardes, de branches, d'assets auteur, ni d'anciens liens.

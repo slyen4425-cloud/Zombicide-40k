@@ -1,3 +1,12 @@
+## 2026-11-08 — Caméra créateur dans Capture V2 au-dessus de l'équipe 1–6 (NON PUBLIABLE tant que Exploration #388 n'est pas GREEN)
+- START : Capture candidate `7c2a79882388113334aeb36e4dc63f92c7f92779` déjà corrigée des stats de préparation ; checkpoint `checkpoint/gensrpg-start-capture-camera-over-roster-2026-11-08`, branche `work/gensrpg-capture-camera-over-roster-2026-11-08`.
+- Réapplique uniquement le contrat caméra #312 : `cameraPolicy.angleDeg` sauvegardé dans l'AdventureSession (35–90°, pas de 5°), réglage dans Créateur/MJ, transmis par URL native dans Exploration Jouer. Aucun second moteur, aucun réglage caché ni donnée utilisateur réécrite à la lecture.
+- Le roster 1–6 (PR #319) reste intact, tout comme le retrait du panneau de statistiques en préparation (PR #316), l'onglet Stats en partie, les anciens mondes, les règles KO et les sauvegardes.
+- **Dépendance stricte** : Exploration #388 doit passer l'intégralité de sa CI PC/mobile et être fusionné sur main, puis le source pin Exploration sera certifié dans un lot distinct avant toute livraison publique du réglage caméra. Aucune fausse option de caméra non fonctionnelle en production.
+- Tests source `tests/gens_capture_v2_creator_game_camera_20261107.test.mjs` et sentinelles complets exigés avant promotion.
+
+---
+
 ## 2026-11-08 — Capture V2 : équipe initiale 1–6 sur la source corrigée, sans régression préparation (C2 à certifier)
 - START : source Capture V2 officielle publiée `5e5fa6ada3afff8364c2937a73c185e0a3fdc6f8`, checkpoint `checkpoint/gensrpg-start-capture-team-1to6-rebase-2026-11-08`, branche `work/gensrpg-capture-team-1to6-rebase-2026-11-08`. Fusion sélective depuis l'ancien travail #311, sans emprunter l'ancien panneau de statistiques ni l'ancienne logique d'hébergement #310.
 - Choix 1 à 6 créatures jouables publiées du Bestiaire Combat, une instance unique par créature, `party.active` et `party.reserve` conservées dans la seule AdventureSession du Core Storage. Choix de la créature active en préparation ; refus d'activer une KO ; après défaite, l'équipe restante n'est pas effacée. Pas de nouvelle source de créatures, pas d'ID manuelle.

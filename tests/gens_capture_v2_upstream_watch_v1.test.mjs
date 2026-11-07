@@ -64,15 +64,18 @@ test('reject invalid release path, unknown owner, floating ref or reactivated le
   }
   assert.throws(()=>planCaptureV2UpstreamReviews({release:{...release,sha:'main'},pins,labs:oldLabs}));
 });
-test('scheduled V2 watcher only proposes reviewed changes; legacy V1 updater must be manual-only',()=>{
+test('scheduled V2 watcher proposes draft pinned review PRs only; legacy V1 updater stays manual-only',()=>{
   const watcher=fs.readFileSync(new URL('../.github/workflows/gensrpg-capture-v2-main-watch.yml',import.meta.url),'utf8');
   const legacy=fs.readFileSync(new URL('../.github/workflows/gensrpg-capture-combat-main-autosync.yml',import.meta.url),'utf8');
   assert.match(watcher,/schedule:/);
   assert.match(watcher,/workflow_dispatch:/);
   assert.match(watcher,/issues: write/);
-  assert.match(watcher,/contents: read/);
+  assert.match(watcher,/contents: write/);
+  assert.match(watcher,/pull-requests: write/);
+  assert.match(watcher,/actions: write/);
   assert.match(watcher,/node --test tests\/gens_capture_v2_upstream_watch_v1\.test\.mjs/);
-  assert.doesNotMatch(watcher,/pull-requests: write|gh pr merge|merge_pull_request/);
+  assert.match(watcher,/node --test tests\/gens_capture_v2_certified_autopropose_20261107\.test\.mjs/);
+  assert.doesNotMatch(watcher,/gh pr merge|merge_pull_request|deploy-pages/);
   assert.doesNotMatch(legacy,/\bschedule:/,'old updater must not auto-merge obsolete runtime');
   assert.match(legacy,/workflow_dispatch:/);
 });

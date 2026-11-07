@@ -14,8 +14,12 @@ test('the active Pages pipeline admits only two EXACT main pins, without the old
  for(const owner of ['combat','exploration']){
   assert.equal(pins[owner].ref,'main');
   assert.match(pins[owner].sha,/^[a-f0-9]{40}$/);
-  assert.match(y,/refs\/heads\/main/,'must check the upstream main ref');
-  assert.match(y,/actual!==entry\.sha/,'must fail on upstream SHA drift');
+  assert.match(y,/node tools\/verify_capture_official_lab_pins_v1\.mjs/,
+   'the release must use the single certified main-history proof');
+  assert.match(read('tools/verify_official_main_pin.mjs'),/refs\/heads\/main/,
+   'the official verifier must fetch only main history');
+  assert.doesNotMatch(y,/actual!==entry\.sha/,
+   'Lab main advancing must not invalidate a previously certified immutable pin');
   assert.match(y,/actual!==pins\[name\]\.sha/,'must verify checkout SHA before packaging');
  }
  assert.match(y,/source-pins-v1\.json/);
@@ -27,8 +31,11 @@ test('the active Pages pipeline admits only two EXACT main pins, without the old
 });
 test('the new Capture V2 delivery refuses moving branches and checks BOTH main SHA pins',()=>{
  const y=read('.github/workflows/capture-lab-delivery.yml');
- assert.match(y,/refs\/heads\/main/);
- assert.match(y,/sha!==entry\.sha/);
+ assert.match(y,/node tools\/verify_capture_official_lab_pins_v1\.mjs/,
+  'delivery checks both canonical main-history proofs');
+ assert.match(read('tools/verify_capture_official_lab_pins_v1.mjs'),/assertOfficialMainHistoryPin/);
+ assert.doesNotMatch(y,/sha!==entry\.sha/,
+  'a legitimate pinned main ancestor must not be treated as drift');
  assert.match(y,/stage_capture_v2_labs\.mjs/);
  assert.match(y,/gens_capture_v2_pages_delivery_v1\.test\.cjs/);
  assert.match(y,/gens_capture_v2_root_browser\.test\.cjs/);

@@ -483,6 +483,7 @@ jobs:
           node --test capture-v2-source/tests/gens_capture_v2_result_world_archive_20261107.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_portfolio_v1.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_contract_v1.test.mjs
+          node --test tests/gens_capture_v2_auto_update_20261107.test.mjs
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
           node --test tests/gens_capture_v2_encounter_bridge_site.test.cjs
 
@@ -601,6 +602,7 @@ jobs:
           node --test capture-v2-source/tests/gens_capture_v2_result_world_archive_20261107.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_portfolio_v1.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_contract_v1.test.mjs
+          node --test tests/gens_capture_v2_auto_update_20261107.test.mjs
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
           node --test tests/gens_capture_v2_encounter_bridge_site.test.cjs
       - name: Install Chromium and verify the real nested site

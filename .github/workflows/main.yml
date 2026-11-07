@@ -81,6 +81,7 @@ jobs:
           node --test tests/gensrpg_pwa_cache_isolation_20261107.test.cjs
           node --test tests/gensrpg_pwa_release_stamp_20261107.test.mjs
           node --test tests/gensrpg_pwa_visible_release_20261107.test.mjs
+          node --test tests/gens_capture_v2_root_main_entry_20261107.test.cjs
 
       - name: Tester les caractéristiques RPG dynamiques propres V16.78.73
         run: node tests/gens_clean_dynamic_stats_v167873.test.cjs
@@ -300,6 +301,7 @@ jobs:
               (Path("_site/assets/gensrpg/gens-rpg-stats-clean-167874.js"), '<script src="assets/gensrpg/gens-rpg-stats-clean-167874.js?v=167874"></script>', "GenSrpG clean dynamic RPG stat module missing"),
               (Path("_site/assets/gensrpg/gens-dungeon-hero-art-repair-167874.js"), '<script src="assets/gensrpg/gens-dungeon-hero-art-repair-167874.js?v=167874"></script>', "Dungeon built-in hero art repair missing"),
               (Path("_site/assets/gensrpg/gens-mobile-combat-performance-16781022.js"), '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>', "GenSrpG mobile combat performance module missing"),
+              (Path("_site/assets/gensrpg/shell/capture-v2-main-entry-v1.js"), '<script data-gensrpg-main-capture-route="v2" src="assets/gensrpg/shell/capture-v2-main-entry-v1.js"></script>', "GenSrpG official main Capture V2 route missing"),
               (Path("_site/assets/gensrpg/shell/module-launch-final-authority-v1.js"), '<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>', "GenSrpG final Shell module launch authority missing"),
           ]
           html = index.read_text(encoding="utf-8")
@@ -502,6 +504,9 @@ jobs:
 
       - name: Test real native Combat arena and Exploration 2.5D at Pages nested URL
         run: node --test tests/gens_capture_v2_isolated_pages_browser.test.cjs
+
+      - name: Tester MAIN → Capture V2 officiel → Jouer natif → MAIN en Chromium mobile
+        run: node --test tests/gens_capture_v2_root_main_entry_browser_20261107.test.cjs
 
       - name: Tester checkout de la preuve HTTPS dans le runner Pages distinct
         run: node --test tests/gens_capture_v2_pages_deploy_checkout.test.cjs
@@ -711,6 +716,10 @@ jobs:
           const html=bytes('preview/index.html').toString('utf8');
           if(!html.includes('assets/gensrpg/capture-v2/shell-entry-v1.js'))
             throw Error('Live Capture V2 shell unavailable');
+          if(!rootHtml.includes('data-gensrpg-main-capture-route="v2"')||
+             !rootHtml.includes('assets/gensrpg/shell/capture-v2-main-entry-v1.js')||
+             !html.includes('assets/gensrpg/shell/capture-v2-from-main-entry-v1.js'))
+            throw Error('LIVE HTTPS main-to-V2 routing is absent or not single-owned');
           console.log('VERIFIED live same-origin preview:',release.publicPath,
             'Capture:',release.source.commit,
             'Combat:',release.combat.sha,

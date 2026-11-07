@@ -80,6 +80,7 @@ jobs:
         run: |
           node --test tests/gensrpg_pwa_cache_isolation_20261107.test.cjs
           node --test tests/gensrpg_pwa_release_stamp_20261107.test.mjs
+          node --test tests/gensrpg_pwa_visible_release_20261107.test.mjs
 
       - name: Tester les caractéristiques RPG dynamiques propres V16.78.73
         run: node tests/gens_clean_dynamic_stats_v167873.test.cjs
@@ -217,6 +218,10 @@ jobs:
             # Nouveau worker à CHAQUE déploiement, jamais de branche mouvante.
             # _site est seul modifié ; aucun cache IndexedDB ni code source muté.
             node tools/version_pwa_release_worker.mjs _site/service-worker.js "$GITHUB_SHA"
+
+          # The existing installed-PWA update banner compares the public HTML
+          # release marker; stamp the TWO existing markers, not the source.
+          node tools/version_pwa_release_shell.mjs _site/index.html "$GITHUB_SHA"
           fi
 
           mkdir -p _site/icons

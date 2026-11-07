@@ -1,5 +1,5 @@
-# Single review-only observer for the published Capture V2 preview.
-# Never builds, repins, merges, or deploys Lab code without a dedicated PR.
+# Single certified-main observer with isolated candidate + DRAFT publisher PR.
+# Only minimal pinned manifests are proposed: never merge or deploy.
 name: Capture V2 watch certified Combat and Exploration main
 on:
   pull_request:
@@ -7,6 +7,7 @@ on:
     paths:
       - 'tools/watch_capture_v2_official_main.mjs'
       - 'tests/gens_capture_v2_upstream_watch_v1.test.mjs'
+      - 'tests/gens_capture_v2_certified_autopropose_20261107.test.mjs'
       - '.github/workflows/gensrpg-capture-v2-main-watch.yml'
       - '.github/workflows/gensrpg-capture-combat-main-autosync.yml'
       - 'tests/gens_capture_combat_autosync_workflow_20261030.test.cjs'
@@ -15,9 +16,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
   issues: write
-  actions: read
+  actions: write
 
 concurrency:
   group: capture-v2-official-main-watch-${{ github.ref }}
@@ -32,11 +34,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify official V2 release boundaries (no second runtime)
+      - name: Verify certified draft proposal and immutable single-owner boundaries
         run: |
           node --test tests/gens_capture_v2_upstream_watch_v1.test.mjs
+          node --test tests/gens_capture_v2_certified_autopropose_20261107.test.mjs
           node --test tests/gens_capture_combat_autosync_workflow_20261030.test.cjs
-      - name: Detect BOTH certified main sources; open review issue only, never merge or deploy
+      - name: Detect certified Lab mains; stage draft publisher PR or fallback review issue (never merge or deploy)
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}

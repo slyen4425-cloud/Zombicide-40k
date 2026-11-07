@@ -268,3 +268,23 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
 @media(orientation:landscape) and (max-height:550px){
  #adventure-play-remote-status{max-width:min(200px,38vw);font-size:9px;padding:4px 6px}
 }
+
+/* The combat owner has already committed rewards; only present its receipt. */
+#adventure-open-last-result[hidden]{display:none!important}
+#adventure-open-last-result{min-height:44px;background:#204d60;border-color:#86c2d0}
+#adventure-result-dialog{
+ width:min(460px,calc(100vw - 18px));max-height:calc(100dvh - 16px);
+ margin:auto;overflow:auto;padding:clamp(12px,2vw,20px);
+ border-radius:14px;border:2px solid #8bd9bc;
+ color:#eafff5;background:#102a34;box-shadow:0 15px 45px #000b;
+ overscroll-behavior:contain
+}
+#adventure-result-dialog::backdrop{background:#061219d9}
+#adventure-result-dialog h2{font-size:clamp(18px,2.7vw,24px);margin:0 0 9px}
+#adventure-result-dialog .rule-row{gap:14px}
+#adventure-result-dialog .rule-row strong{text-align:right;overflow-wrap:anywhere}
+#adventure-result-close{min-height:44px;background:#236b55;border-color:#91e6c2}
+@media(orientation:landscape) and (max-height:550px){
+ #adventure-result-dialog{padding:10px;max-height:calc(100dvh - 10px)}
+ #adventure-result-dialog .rule-row{padding:5px 8px}
+}

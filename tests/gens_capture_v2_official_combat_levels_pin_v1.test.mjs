@@ -11,10 +11,14 @@ import {createAdventureSessionV1,SHOWCASE_ADVENTURE_RULES_V1} from '../assets/ge
 const pins=JSON.parse(fs.readFileSync(new URL('../assets/gensrpg/capture-v2/source-pins-v1.json',import.meta.url),'utf8'));
 test('GenSRPG consumer explicitly pins certified Combat main owner commit with per-creature levels',()=>{
  assert.equal(pins.combat.ref,'main');
- assert.equal(pins.combat.sha,'ebaea5dc40c4803add76563029a9dff67b964d55');
- assert.equal(pins.combat.certifiedCiRun,42113199995);
+ assert.equal(pins.combat.sha,'8f29e32c57792ea0e39063223bd61250e91b8433',
+  'certified main includes official Gorice and Gemmor author transfers');
+ assert.equal(pins.combat.certifiedCiRun,42423563886);
  assert.equal(pins.exploration.repository,'slyen4425-cloud/laboratoire_dynamique_exploration-');
  assert.equal(pins.exploration.ref,'main');
+ assert.equal(pins.exploration.sha,'d9f90f5bf48b8c42699f0db2f2f797f1ebf17fa1',
+  'native creator camera requires certified Exploration main');
+ assert.equal(pins.exploration.certifiedCiRun,42426636928);
  assert.match(pins.exploration.sha,/^[a-f0-9]{40}$/,
   'Exploration must be an immutable published main commit, never a floating ref');
  assert.ok(Number.isSafeInteger(pins.exploration.certifiedCiRun)&&

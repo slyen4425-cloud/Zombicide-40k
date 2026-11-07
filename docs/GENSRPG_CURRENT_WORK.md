@@ -1,3 +1,13 @@
+## 2026-11-08 — Capture V2 : Gorice, Gemmor et caméra officielle sur l'équipe 1–6 (C2)
+- Base/source START : Capture `28fa76b457d12998334f01946c0cfcadbb9d47ee`, checkpoint `checkpoint/gensrpg-start-capture-official-creatures-camera-2026-11-08`, branche `work/gensrpg-capture-official-creatures-camera-2026-11-08`.
+- Cause racine des créatures absentes : `source-pins-v1.json` conservait Combat main `ebaea5dc`, qui ne contenait pas les transferts ni les entrées dans `capture-showcase-creature-presets-v1.js` pour `gorice` et `crea_crys_2` (Gemmor). Le Bestiaire V2 dépend exclusivement de ce pin et du bundle Showcase de Combat. Les portraits/poches iconographiques sont déjà présents dans l'autorité de médias globale certifiée utilisée par le publisher ; aucun recopiage.
+- Nouveau pin Combat main `8f29e32c57792ea0e39063223bd61250e91b8433`, CI propriétaire GREEN #42423563886 ; Exploration main `d9f90f5bf48b8c42699f0db2f2f797f1ebf17fa1`, CI propriétaire GREEN #42426636928, après PR native caméra #388 fusionnée.
+- Garantie : les options équipe 1–6 (#319) et caméra réglable (#321) sont dans la même source Capture, toujours sans statistiques de créature sur le menu de préparation (#316), sans branche `gh-pages` ni duplicata.
+- Nouveau TDD `tests/gens_capture_v2_official_gorice_gemmor_20261108.test.mjs` : bundle d'auteur officiel, cartes réellement visibles/jouables via `captureBestiaryCardsV1`, portraits officiels, caméra Exploration native. Test d'ancien pin réconcilié avec le SHA/CI exact.
+- Publication par le SEUL publisher `main`, après CI source, CI édition/Chromium/poids de l'artefact, puis preuve HTTPS et PWA. Ne pas confondre présence d'une créature dans le dépôt Combat et disponibilité publique.
+
+---
+
 ## 2026-11-08 — Caméra créateur dans Capture V2 au-dessus de l'équipe 1–6 (NON PUBLIABLE tant que Exploration #388 n'est pas GREEN)
 - START : Capture candidate `7c2a79882388113334aeb36e4dc63f92c7f92779` déjà corrigée des stats de préparation ; checkpoint `checkpoint/gensrpg-start-capture-camera-over-roster-2026-11-08`, branche `work/gensrpg-capture-camera-over-roster-2026-11-08`.
 - Réapplique uniquement le contrat caméra #312 : `cameraPolicy.angleDeg` sauvegardé dans l'AdventureSession (35–90°, pas de 5°), réglage dans Créateur/MJ, transmis par URL native dans Exploration Jouer. Aucun second moteur, aucun réglage caché ni donnée utilisateur réécrite à la lecture.

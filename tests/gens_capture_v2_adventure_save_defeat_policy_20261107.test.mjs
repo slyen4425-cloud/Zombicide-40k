@@ -70,6 +70,32 @@ test('a previously saved KO session is repaired only after real defeat with reco
  const noDefeat={...before,lastAward:{outcome:'victory'}};
  assert.equal(recoverAdventureDefeatedPartyV1({session:noDefeat}),noDefeat);
 });
+test('keep-ko persists 0 HP without auto healing, preserving later item recovery',()=>{
+ const rules=normalizeAdventureRulesV1({...DEFAULT_ADVENTURE_RULES_V1,
+  combat:{hpMultiplier:0.25,defeatPolicy:'keep-ko'}});
+ const state={...session('keep-ko',rules),status:'playing'};
+ const ko=result(state);
+ assert.equal(ko.session.party.active.hp,0);
+ assert.equal(ko.session.status,'playing');
+ assert.equal(ko.award.outcome,'defeat');
+ assert.equal(ko.session.lastAward.outcome,'defeat');
+ assert.equal(ko.session.party.active.xp,0);
+ assert.equal(recoverAdventureDefeatedPartyV1({session:ko.session}),ko.session);
+});
+test('an individual 0 HP is NOT a game over without an official team defeat',()=>{
+ const rules=normalizeAdventureRulesV1({...DEFAULT_ADVENTURE_RULES_V1,
+  combat:{hpMultiplier:0.25,defeatPolicy:'game-over'}});
+ const base={...session('team-continue',rules),status:'playing'};
+ const envelope=defeat('team-encounter');
+ envelope.result.outcome='fled'; // Combat team did not report defeat.
+ const outcome=result(base,envelope);
+ assert.equal(outcome.session.party.active.hp,0);
+ assert.equal(outcome.session.status,'playing');
+ assert.equal(outcome.award.outcome,'fled');
+ assert.equal(outcome.award.xp,0);
+ // Future multi-creature roster handling stays in official Combat, never
+ // guessed from the first actor HP in GenSRPG.
+});
 test('creator can choose an explicit terminal game over, and old rules remain recoverable',()=>{
  const custom=normalizeAdventureRulesV1({...DEFAULT_ADVENTURE_RULES_V1,
   combat:{hpMultiplier:0.25,defeatPolicy:'game-over'}});

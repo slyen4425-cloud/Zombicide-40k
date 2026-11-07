@@ -310,8 +310,10 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
    'host MJ choice must be restored from saved Core, not just input state');
   assert.equal(await resumed.locator('#adventure-join-enabled').isChecked(),true);
   assert.equal(await resumed.locator('#adventure-guest-edit-progression').isChecked(),true);
-  assert.match(await resumed.locator('#adventure-stat-points-left').textContent(),
-   /0 point\(s\) disponibles/,'Level 1 cannot grant level-up points');
+  assert.equal(await resumed.locator('#adventure-stat-wallet').count(),0,
+   'preparing an adventure must never expose creature stat allocation');
+  assert.equal(await resumed.locator('[data-adventure-sheet-tab="stats"]').count(),1,
+   'the existing in-game sheet alone must keep the stats tab');
 
   // Native game handoff — no made-up map, no reused Tester. First prove the
   // actual GenSRPG origin has no WorldDocument and will not create a fake one.

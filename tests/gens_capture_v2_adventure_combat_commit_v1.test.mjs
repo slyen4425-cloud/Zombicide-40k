@@ -124,14 +124,26 @@ test('wrong session partyRef or preview Tester party cannot award XP',()=>{
   assert.equal(JSON.stringify(fx.store.load()),before);
  }
 });
-test('failed and fled authentic combat returns update HP only, never XP or loot',()=>{
+test('defeat recovers according to the creator policy, while fleeing preserves Combat HP; neither grants XP',()=>{
  for(const outcome of ['defeat','fled']){
   const fx=fixture();
   const saved=commit(fx.store,envelope({outcome}));
   assert.equal(saved.award.xp,0);
   assert.equal(fx.store.load().party.active.xp,0);
-  assert.equal(fx.store.load().party.active.hp,81);
+  // Default creator policy is restore: the native Combat engine supplies
+  // max HP at the next encounter (null), not a second local healing formula.
+  assert.equal(fx.store.load().party.active.hp,outcome==='defeat'?null:81);
  }
+});
+test('creator keep-ko preserves authentic Combat 0 HP after defeat, with no XP or loot',()=>{
+ const fx=fixture();
+ const start=fx.store.load();
+ fx.store.save({...start,rules:{...start.rules,combat:{...start.rules.combat,defeatPolicy:'keep-ko'}}});
+ const saved=commit(fx.store,envelope({outcome:'defeat',hp:0}));
+ assert.equal(saved.award.xp,0);
+ assert.equal(fx.store.load().party.active.hp,0);
+ assert.equal(fx.store.load().status,'playing');
+ assert.equal(fx.store.load().party.active.xp,0);
 });
 test('missing or untrusted combat result must fail before touching storage or guessing a win',()=>{
  for(const bad of [

@@ -99,19 +99,7 @@ jobs:
       - name: Résoudre les deux seules autorités officielles depuis leurs main exacts
         id: capture_pages_pins
         run: |
-          node --input-type=module - <<'JS' >> "$GITHUB_OUTPUT"
-          import fs from 'node:fs';
-          import {execFileSync} from 'node:child_process';
-          const pins=JSON.parse(fs.readFileSync('assets/gensrpg/capture-v2/source-pins-v1.json','utf8'));
-          if(pins.legacyCaptureRuntime!==false)throw Error('Historical Capture engine must not be published');
-          for(const owner of ['combat','exploration']){
-            const entry=pins[owner];
-            if(entry.ref!=='main'||!/^[0-9a-f]{40}$/.test(entry.sha))throw Error('Invalid main-only source pin: '+owner);
-            const actual=execFileSync('git',['ls-remote','https://github.com/'+entry.repository+'.git','refs/heads/main'],{encoding:'utf8'}).trim().split(/\s+/)[0];
-            if(actual!==entry.sha)throw Error(owner+' main has changed: recertify the new version before shipping');
-            console.log(owner+'='+entry.sha);
-          }
-          JS
+          node tools/verify_capture_official_lab_pins_v1.mjs >> "$GITHUB_OUTPUT"
 
       - name: Charger uniquement les modules officiels Capture au SHA épinglé
         uses: actions/checkout@v4

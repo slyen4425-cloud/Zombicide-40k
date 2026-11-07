@@ -1,3 +1,16 @@
+## 2026-11-07 — Monster Capture V2 : aucune répartition de points dans la préparation (C1, en validation)
+- Retour Pixel paysage : le panneau "Points de statistiques de la créature" apparaît indûment sous la sauvegarde en préparation du jeu.
+- Cause : le même domaine d'allocation était rendu par `renderStatWallet` dans la préparation, alors que la fiche en jeu possède déjà l'onglet Statistiques officiel et une attribution validée par Core Storage.
+- Base exact du jeu actuellement livré : source Capture V2 `96231cf16b134f8944bce741aec8d6265679bac8`, distincte du publisher `main` (le Shell ne porte pas la logique d'attribution).
+- START : `checkpoint/gensrpg-start-capture-setup-stats-owner-2026-11-07` sur ce SHA. Travail : `work/gensrpg-capture-setup-stats-owner-2026-11-07`. Propriétaire : UI Aventure Capture V2 uniquement.
+- Correction soustractive : supprimer le panneau, son renderer, ses deux appels et les styles orphelins. Règles MJ de points/niveau, vrais compteurs, données et l'onglet Statistiques en jeu restent en place. Ne pas modifier Core, Combat, Exploration, saves, PWA ni l'ancien HTML racine.
+- TDD : `tests/gens_capture_v2_preparation_stats_owner_20261107.test.mjs` ajouté d'abord en RED, test historique de progression adapté à la frontière correcte, gate CI Capture. Ne pas annoncer GREEN ou publication sans tests du SHA exact, browser si pertinent, et repin indépendant sur l'unique publisher main.
+- **Déblocage de certification sans dérive** : les workflows refusaient le SHA Combat déjà publié dès que le laboratoire avançait sur son main (même lorsque la version épinglée restait un ancêtre certifié). La règle de contrôle ciblée vérifie maintenant **l'immuabilité du pin, sa provenance main et son ascendance dans le main actuel** via le vérificateur canonique `tools/verify_official_main_pin.mjs` (historique de `refs/heads/main` uniquement) ; elle refuse rollback, branches divergentes, provenance absente et requête réseau indisponible. Aucun changement de pin ni adoption du Combat main plus récent tant que sa CI propriétaire n'est pas GREEN. TDD : `tests/gens_capture_v2_official_pin_lineage_20261107.test.mjs`, garde commune des trois workflows producteurs. Cela répare la cause racine du blocage d'une livraison de simple UI tout en conservant le contrôle strict.
+- Deux anciennes assertions de tests indépendantes étaient périmées : défaite en mode récupération = PV sauvegardés `null` (rechargement HP natifs Combat), fuite = conservation PV ; test ajouté pour `keep-ko` à 0 PV ; HP configurable et politique de défaite passent ensemble à l'éditeur. Aucun calcul gameplay modifié.
+
+
+---
+
 # 2026-11-07 — Capture V2 : affichage des résultats officiels et archive de monde périmée (source C2)
 
 - **Raccord officiel ajouté pour la publication commune** : le manifeste `source-pins-v1.json` épingle maintenant **Exploration `main@c18b34cacf6d9d157d62e7e507c4c155d6e1b11c`**, issu de PR #387. Labo Exploration : **CI main #42361421441 SUCCESS** (trois jobs), **Pages #42361421429 SUCCESS**, HTTP HTTPS vérifié ; aucun code d'Exploration recopié ou remplacé.

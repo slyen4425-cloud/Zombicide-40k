@@ -57,6 +57,9 @@ jobs:
         run: |
           node --test tests/gens_capture_v2_clean_boundary.test.cjs
           node --test tests/gens_capture_v2_pwa_cache_owner_v1.test.cjs
+
+      - name: Certified immutable Lab main ancestry guard (TDD)
+        run: node --test tests/gens_capture_v2_official_pin_lineage_20261107.test.mjs
       - name: Menu de jeu Capture — groupes Monde/Combat et entrée 2.5D unique (TDD)
         run: node --test tests/gens_capture_v2_game_menu_v1.test.cjs
 
@@ -120,6 +123,9 @@ jobs:
       - name: Aventure — XP par paliers, stats officielles 20 points, rôles du créateur (TDD)
         run: node --test tests/gens_capture_v2_adventure_progression_access_v1.test.mjs
 
+      - name: Préparation Aventure sans répartition de stats, fiche jeu propriétaire (TDD)
+        run: node --test tests/gens_capture_v2_preparation_stats_owner_20261107.test.mjs
+
       - name: Aventure — réglages sauvegardés avant une première partie, recharge sans perte (TDD)
         run: node --test tests/gens_capture_v2_adventure_rules_draft_persistence_v1.test.mjs
 
@@ -155,19 +161,7 @@ jobs:
       - name: Resolve and certify both published main pins
         id: pins
         run: |
-          node --input-type=module - <<'JS' >> "$GITHUB_OUTPUT"
-          import fs from 'node:fs';
-          import {execFileSync} from 'node:child_process';
-          const sources=JSON.parse(fs.readFileSync('assets/gensrpg/capture-v2/source-pins-v1.json','utf8'));
-          if(sources.legacyCaptureRuntime!==false)throw Error('Legacy Capture is forbidden');
-          for(const name of ['combat','exploration']){
-            const owner=sources[name];
-            if(owner.ref!=='main'||!/^[a-f0-9]{40}$/.test(owner.sha))throw Error('Missing main-only pin');
-            const current=execFileSync('git',['ls-remote','https://github.com/'+owner.repository+'.git','refs/heads/main'],{encoding:'utf8'}).trim().split(/\s+/)[0];
-            if(current!==owner.sha)throw Error('Uncertified '+name+' main drift');
-            console.log(name+'='+owner.sha);
-          }
-          JS
+          node tools/verify_capture_official_lab_pins_v1.mjs >> "$GITHUB_OUTPUT"
       - name: Read official Combat from main at its certified SHA
         uses: actions/checkout@v4
         with:

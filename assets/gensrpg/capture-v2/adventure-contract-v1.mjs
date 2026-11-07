@@ -355,6 +355,24 @@ export function calculateAdventureXpV1({rules,allyLevel,enemyLevel}){
  return freeze({xp,base:rule.xp.baseVictoryXp,globalMultiplier:rule.xp.globalMultiplier,
   levelGap:gap,levelFactor:multiplier,distribution:rule.xp.distribution});
 }
+// The angle is a saved creator preference only. The official Exploration
+// sculpt-camera-projection.js remains the single renderer/camera authority.
+export function normalizeAdventureCameraPolicyV1(value){
+ const camera=object(value,'Adventure camera policy');
+ const angle=camera.angleDeg;
+ if(!Number.isSafeInteger(angle)||angle<35||angle>90||(angle-35)%5!==0||
+    Object.keys(camera).length!==1)
+  throw new RangeError('Angle de caméra : 35 à 90 degrés, par pas de 5.');
+ return freeze({angleDeg:angle});
+}
+export function updateAdventureCameraPolicyV1({session,angleDeg,now}={}){
+ const saved=assertSession(session);
+ const cameraPolicy=normalizeAdventureCameraPolicyV1({angleDeg});
+ const updated=freeze({...saved,cameraPolicy,
+  updatedAt:iso(now??saved.updatedAt,'now')});
+ assertSession(updated);
+ return updated;
+}
 function assertSession(session){
  const v=object(session,'AdventureSession');
  if(v.schema!==ADVENTURE_SAVE_SCHEMA_V1||v.version!==1)
@@ -364,6 +382,7 @@ function assertSession(session){
  if(v.status!=='configured'&&v.status!=='playing'&&v.status!=='finished')
   throw new RangeError('Unknown Adventure save status');
  normalizeAdventureRulesV1(v.rules);
+ if(Object.hasOwn(v,'cameraPolicy'))normalizeAdventureCameraPolicyV1(v.cameraPolicy);
  const party=object(v.party,'party');
  const actor=object(party.active,'party.active');
  const roster=[actor,...(party.reserve??[])];
@@ -410,7 +429,7 @@ function assertSession(session){
 }
 export function createAdventureSessionV1({
  bestiaryCards,starterId,starterIds=null,rules=DEFAULT_ADVENTURE_RULES_V1,ids,now,
- heroDefinitionId=null
+ heroDefinitionId=null,cameraAngle=55
 }){
  const cards=publishedAdventureSpeciesV1(bestiaryCards);
  const selected=starterIds===null?[starterId]:starterIds;
@@ -438,6 +457,7 @@ export function createAdventureSessionV1({
  return freeze({
   schema:ADVENTURE_SAVE_SCHEMA_V1,version:1,sessionId,
   status:'configured',createdAt:timestamp,updatedAt:timestamp,rules:settings,
+  cameraPolicy:normalizeAdventureCameraPolicyV1({angleDeg:cameraAngle}),
   party:{active:members[0],reserve:members.slice(1)},
   sessionControl:{
    creatorId:identity(ids?.creatorId??'owner-'+sessionId,'creatorId'),

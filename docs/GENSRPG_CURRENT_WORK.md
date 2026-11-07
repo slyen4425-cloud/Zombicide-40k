@@ -1,3 +1,12 @@
+## 2026-11-07 — Capture V2 : angle caméra auteur fixé en Jouer (PR #312)
+- **Source / START** : source Capture branch from team @83cb67de8dd46c4b3364ade10f06cb1327da3e0c, checkpoint/gensrpg-start-capture-creator-game-camera-2026-11-07, branche work/gensrpg-capture-creator-game-camera-2026-11-07.
+- **Propriétaire Aventure** : règle caméra créateur `cameraPolicy.angleDeg` dans une seule AdventureSession Core, entre 35 et 90 degrés par pas de 5 ; éditeur dans les paramètres créateur/MJ, sauvegarde, reprise, et URL Jouer native contenant la valeur effective.
+- **Propriétaire Exploration** : PR #388 distincte, `cameraAngleFromAdventurePlayUrlV1` consommée uniquement en `play=1` avec `adventureSession`, angle verrouillé même lors de transitions intérieures ; zoom 100–240 % conservé par l'UI Exploration. Aucune manipulation DOM cross-iframe.
+- **TDD** : test RED `tests/gens_capture_v2_creator_game_camera_20261107.test.mjs` dans CI Capture ; les tests propriétaire LE sont dans PR #388. Aucune duplication de moteur ou de WorldDocument.
+- **Dépendance** : ne pas déclarer ce raccord validé tant que PR #388 n'est pas publiée sur main Exploration, que le pin Capture ne consomme pas ce SHA officiel certifié et qu'un vrai navigateur a confirmé angle fixe/zoom libre.
+
+---
+
 ## 2026-11-07 — Capture V2 : hébergement accessible sans étape cachée (PR #310)
 - **Retour de test** : option « rejoindre » visible mais « héberger » inaccessible même après activation manuelle des invités. Le panneau ne présentait pas les échecs Supabase dans son propre état.
 - **START** : checkpoint/gensrpg-start-capture-host-room-ux-2026-11-07 sur la source Capture V2 immuable 96231cf16b134f8944bce741aec8d6265679bac8 ; branche work/gensrpg-capture-host-room-ux-2026-11-07 ; PR #310.

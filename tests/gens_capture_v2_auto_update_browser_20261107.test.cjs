@@ -86,9 +86,9 @@ test('existing installed Capture V2 auto-updates on reopening its SAME URL, no u
    // Chromium can transiently report an activated worker while another
    // update/install is pending. The old cache may briefly reappear during
    // that transition. Require a STABLE, fully installed/activated final
-   // worker with cache isolation for an extended actual browser observation
-   // window.  A 1.2s "stable" interval was insufficient: a late old
-   // pre-cache fetch could reopen the retired cache AFTER the first pass.
+   // worker with cache isolation for SEVEN ACTUAL seconds of continuous
+   // stability. Fast polling alone could return in less than two seconds,
+   // allowing an in-flight old pre-cache fetch to resurrect the old cache.
    // Keep the same 60s ceiling and the strict final cache assertions.
    await after.waitForFunction(async()=>{
      const names=await caches.keys();
@@ -98,9 +98,12 @@ test('existing installed Capture V2 auto-updates on reopening its SAME URL, no u
        names.includes('gensrpg-cache-release-root-keep') &&
        names.includes('gensrpg-preview-capture-v2-bbbbbbbbbbbb') &&
        !names.includes('gensrpg-preview-capture-v2-aaaaaaaaaaaa');
-     window.__captureStableAutoUpdateChecks=stable
-       ? (window.__captureStableAutoUpdateChecks||0)+1 : 0;
-     return window.__captureStableAutoUpdateChecks>=40;
+     // Browser polling frequency can burst while a worker changes state;
+     // sample *elapsed wall time*, not the number of callback invocations.
+     if(!stable){window.__captureStableAutoUpdateSince=0;return false;}
+     if(!window.__captureStableAutoUpdateSince)
+       window.__captureStableAutoUpdateSince=Date.now();
+     return Date.now()-window.__captureStableAutoUpdateSince>=7000;
    },null,{polling:150,timeout:60000});
    const diagnostics=await after.evaluate(async()=>{
      const samples=[];

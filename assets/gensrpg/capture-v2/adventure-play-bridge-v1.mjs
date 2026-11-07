@@ -1,7 +1,7 @@
 // The Capture-owned AdventureSession decides whether a game may start;
 // ONLY the existing Exploration module owns the WorldDocument, navigation,
 // collisions, camera and checkpoint. No alternative play engine or world save.
-import {ADVENTURE_SAVE_SCHEMA_V1} from './adventure-contract-v1.mjs';
+import {ADVENTURE_SAVE_SCHEMA_V1,recoverAdventureDefeatedPartyV1} from './adventure-contract-v1.mjs';
 
 function requireService(value,methods,label){
  if(!value||methods.some(name=>typeof value[name]!=='function'))
@@ -35,7 +35,12 @@ export function startAdventureExplorationV1({
    throw new Error('Checkpoint Exploration de la partie introuvable : reprise bloquée, sauvegarde conservée.');
   if(existing.sessionId!==session.sessionId||existing.worldId!==world.id)
    throw new Error('Checkpoint Exploration appartenant à une autre session ou un autre monde');
-  return Object.freeze({session,navigation:existing});
+  // Pre-policy saves could be stuck with 0 HP after losing a combat.
+  // Only the Adventure owner can recover its stored HP, and only once the
+  // official Exploration checkpoint has been verified for the same world.
+  const recovered=recoverAdventureDefeatedPartyV1({session,now});
+  if(recovered!==session)store.save(recovered);
+  return Object.freeze({session:recovered,navigation:existing});
  }
  if(session.status!=='configured')
   throw new Error('Statut de partie Aventure incompatible');

@@ -33,8 +33,15 @@ test('root Capture destination is the only approved same-origin V2 release and n
  const source=read('assets/gensrpg/shell/capture-v2-main-entry-v1.js');
  assert.doesNotMatch(source,/captureStartBattleAutomatic|legacy-monolith|CombatRules|localStorage|indexedDB/);
  const urls=[];
- const location={origin:'https://slyen4425-cloud.github.io',assign:v=>urls.push(v)};
- const window={document:{baseURI:'https://slyen4425-cloud.github.io/Zombicide-40k/index.html'},location};
+ const location={origin:'https://slyen4425-cloud.github.io'};
+ const document={
+   baseURI:'https://slyen4425-cloud.github.io/Zombicide-40k/index.html',
+   createElement:tag=>{
+     assert.equal(tag,'a','native Shell navigation is an actual link');
+     return {href:'',click(){urls.push(this.href)}};
+   }
+ };
+ const window={document,location};
  vm.runInNewContext(source,{window,URL});
  assert.equal(window.GensCaptureMainEntryV1.open(),true);
  assert.deepEqual(urls,['https://slyen4425-cloud.github.io/Zombicide-40k/preview/capture-v2-pr225/index.html?entry=gensrpg-main']);

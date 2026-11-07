@@ -800,3 +800,11 @@ Lot 01: contrat inerte et tests; pas de chargement en production, pas de changem
 - **Prochaine action** : retirer tentative RED de délégation par le rendu ; implémenter contrat explicite de création Core200 → propriétaire Core051, puis repasser la sentinelle navigateur exigeante et CI au SHA exact. Conserver NON GREEN si écart. Créer un checkpoint final GREEN uniquement lorsque tous les contrôles obligatoires passent, sinon conserver NON GREEN et préciser le blocage.
 
 Références : `docs/GENSRPG_CHARTE.md` §§1–5 et 12–26, `docs/GENSRPG_CHECKPOINT_POLICY.md`, `docs/GENSRPG_PHASE12_DUNGEON_CHEST_LIFECYCLE_GREEN_2026-10-21.md`.
+
+---
+
+2026-11-07 — C2 PWA isolation cache (PR #304 DRAFT)
+- START main 9537ee28a626522246b7be16c690375cd8e4e164 ; checkpoint/gensrpg-start-pwa-cache-isolation-2026-11-07.
+- Owner service-worker.js ; RED/GREEN tests/gensrpg_pwa_cache_isolation_20261107.test.cjs ; cache versionné gensrpg-cache-* ; preview préservé ; jamais d'effacement IndexedDB.
+- Gate C2 : CI exacte, publication Pages et contrôle PWA installée Android ; NON GREEN avant preuve.
+- Détails : docs/GENSRPG_PWA_UPDATE_CACHE_ISOLATION_2026-11-07.md.

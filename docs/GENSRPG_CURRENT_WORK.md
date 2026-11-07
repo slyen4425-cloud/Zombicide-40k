@@ -1,3 +1,16 @@
+# 2026-11-07 — Publication contrôlée : résultats XP/loot après combat et monde archivé
+
+- **BASE site publié** : `main@9537ee28a626522246b7be16c690375cd8e4e164`, checkpoint START `checkpoint/gensrpg-start-capture-combat-awards-pages-2026-11-07`, branche `work/gensrpg-capture-combat-awards-pages-2026-11-07`.
+- **Source GenSRPG Capture V2 immuable** : `96231cf16b134f8944bce741aec8d6265679bac8`, développée sur `work/gensrpg-capture-results-world-links-2026-11-07` depuis le checkpoint START `d58677893322d6eb4ebefc6b2bc0acbfe866388a`; contrat Combat/Exploration officiel inchangé.
+- **Concret** : GenSRPG affiche la *projection en lecture seule* du `lastAward` qui vient d'être calculé et persisté par le Core Aventure, après réception de l'unique CombatResult officiel : XP créature, niveaux avant/après, XP héros, monnaie, objets. Aucun XP inventé ni calcul de récompense dans l'UI. Bouton Dernier combat en jeu. Dispose les anciens ports de Combat lors d'une ré-entrée pour éviter plusieurs récepteurs.
+- **Cause racine corrigée en test navigateur :** le nouvel adaptateur parent renvoyait uniquement le reçu `commit` et supprimait l'accusé `{ready:true}` lors du pré-contrôle `ready`. Conséquence : Exploration gardait `scopedEncounter` désarmé et aucune rencontre sauvage ne se déclenchait malgré une carte à 100 %. Le contrat `ready` d'origine est rétabli, avec un nouveau test de handshake dans `tests/gens_capture_v2_result_world_archive_20261107.test.mjs`; ne pas inventer de rencontre ni retoucher la chance pour masquer ce défaut.
+- **Monde** : comparer le WorldDocument archivé choisi au brouillon de World Builder avec l'empreinte `playWorldFingerprint` propriétaire Exploration ; si même World ID mais modifications non archivées, refuser explicitement de lancer une version obsolète, sans sauvegarde perdue et sans réimplémenter les liens Portal/Spawn.
+- **Preuves pré-publication requises** : tests exacts de la source épinglée `tests/gens_capture_v2_result_world_archive_20261107.test.mjs`, suites Aventure précédentes, test réel Chromium `tests/gens_capture_v2_isolated_pages_browser.test.cjs` qui exige un panneau XP visible après un vrai combat ; checks PWA, compatibilité modes historiques, single publisher, 900 MiB ; CI build et review Pages SHA exact, puis HTTPS provenance au SHA source exact.
+- **Exploration certifié et raccordé** : correctif Portal / 3 Spawns propriétaire Labo Exploration, PR #387 fusionnée `main@c18b34cacf6d9d157d62e7e507c4c155d6e1b11c` ; **CI main #42361421441 SUCCESS**, **Pages #42361421429 SUCCESS avec HTTPS et SHA exact**. La source Capture ne consomme que ce `main` via son manifeste ; aucune bibliothèque complète dupliquée, aucune branche de labo de travail.
+- **État du nouveau candidat** : source `96231cf16b134f8944bce741aec8d6265679bac8`, publisher CI du SHA courant à revalider (build, review Chromium, sentinelles). PR #303 DRAFT tant que ces gates ne sont pas verts ; ensuite fusion `main`, preuve Pages HTTPS et checkpoint final exact. Les succès de l'ancien pin ne suffisent pas.
+
+---
+
 # 2026-11-07 — Mise en ligne contrôlée des corrections sauvegarde / KO Monster Capture
 
 - **BASE production** : `main@2a3456fb14e26c805012f72a7304a78db5aec7c0`, START `checkpoint/gensrpg-start-capture-ko-save-pages-release-2026-11-07`, branche `work/gensrpg-capture-ko-save-pages-release-2026-11-07`.

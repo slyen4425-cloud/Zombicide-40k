@@ -92,8 +92,19 @@ test('Adventure starts from the Pages menu and saves a native encounter once at 
   await map.locator('#play-menu-button:visible').waitFor();
   await canvas.evaluate(()=>window.focus());
   await page.keyboard.down('ArrowRight');
-  try{await map.locator('#sculpt-encounter-preview:visible').waitFor({timeout:18000});}
-  finally{await page.keyboard.up('ArrowRight');}
+  try{
+   await map.locator('#sculpt-encounter-preview:visible').waitFor({timeout:18000});
+  }catch(error){
+   const diagnostic=await canvas.evaluate(()=>({
+    play:window.__sculptPlayProbe?.(),encounter:window.__sculptEncounterProbe?.(),
+    map:window.__sculptWorldProbe?.(),movement:document.getElementById('navigation-status')?.textContent,
+    error:document.getElementById('play-start-error-message')?.textContent,
+    playErrorVisible:document.body.classList.contains('sculpt-play-unavailable'),
+    sessionGrants:Object.fromEntries(Object.keys(sessionStorage).filter(k=>k.startsWith('gensrpg.capture.v2.')).map(k=>[k,sessionStorage.getItem(k)?.slice(0,1500)])),
+    worldEncounters:(()=>{const raw=localStorage.getItem('gensrpg.world-assembler.document.v1');if(!raw)return null;const w=JSON.parse(raw);return {areas:w.areas.map(a=>({id:a.id,encounters:a.encounters})),plain:w.encounterConfig?.families?.find(a=>a.terrainFamilyId==='plain')}})()
+   })).catch(e=>({exception:e.message}));
+   throw new Error('Official native Adventure encounter failed: '+JSON.stringify(diagnostic),{cause:error});
+  }finally{await page.keyboard.up('ArrowRight');}
   const point=await canvas.evaluate(()=>window.__sculptPlayProbe().actor);
   assert.equal(await canvas.evaluate(()=>window.__sculptEncounterProbe().creatureId),'crea_ombre_2');
   await map.locator('#sculpt-encounter-combat').tap();
@@ -112,6 +123,17 @@ test('Adventure starts from the Pages menu and saves a native encounter once at 
   assert.equal(await fight.locator('[data-combat-skill]').count(),1,'only the true level-one skill is available');
   await fight.locator('[data-encounter-flee]').tap();
   await battle.waitFor({state:'detached'});
+  // Real CombatResult is committed in GenSRPG Core before this UI receipt.
+  const resultDialog=adventure.locator('#adventure-result-dialog:visible');
+  await resultDialog.waitFor({timeout:15000});
+  assert.equal(await adventure.locator('#adventure-result-title').textContent(),'Fuite');
+  const receipt=await adventure.locator('#adventure-result-rows').innerText();
+  assert.match(receipt,/XP créature/);
+  assert.match(receipt,/\+0 XP/);
+  assert.match(receipt,/XP du héros/);
+  assert.match(receipt,/Objets/);
+  await adventure.locator('#adventure-result-close').tap();
+  await resultDialog.waitFor({state:'hidden'});
   const save=await readSelectedAdventureSave(adventure.locator('#adventure-play'));
   assert.equal(save.party.active.level,1);
   assert.equal(save.party.active.xp,0);

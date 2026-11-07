@@ -90,6 +90,20 @@ test('existing installed Capture V2 auto-updates on reopening its SAME URL, no u
        names.includes('gensrpg-preview-capture-v2-bbbbbbbbbbbb') &&
        !names.includes('gensrpg-preview-capture-v2-aaaaaaaaaaaa');
    },null,{timeout:60000});
+   const diagnostics=await after.evaluate(async()=>{
+     const samples=[];
+     for(let i=0;i<6;i++){
+       const reg=await navigator.serviceWorker.getRegistration();
+       samples.push({keys:await caches.keys(),
+         active:reg?.active?.state||null,
+         waiting:reg?.waiting?.state||null,
+         installing:reg?.installing?.state||null,
+         controlled:!!navigator.serviceWorker.controller});
+       await new Promise(resolve=>setTimeout(resolve,120));
+     }
+     return samples;
+   });
+   console.log('CAPTURE_AUTO_UPDATE_SW_DIAGNOSTICS '+JSON.stringify(diagnostics));
    const cachesAfter=await after.evaluate(()=>caches.keys());
    assert.ok(cachesAfter.includes('gensrpg-cache-release-root-keep'));
    assert.ok(!cachesAfter.includes('gensrpg-preview-capture-v2-aaaaaaaaaaaa'),

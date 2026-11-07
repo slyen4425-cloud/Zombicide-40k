@@ -99,7 +99,9 @@ test('Adventure starts from the Pages menu and saves a native encounter once at 
     play:window.__sculptPlayProbe?.(),encounter:window.__sculptEncounterProbe?.(),
     map:window.__sculptWorldProbe?.(),movement:document.getElementById('navigation-status')?.textContent,
     error:document.getElementById('play-start-error-message')?.textContent,
-    playErrorVisible:document.body.classList.contains('sculpt-play-unavailable')
+    playErrorVisible:document.body.classList.contains('sculpt-play-unavailable'),
+    sessionGrants:Object.fromEntries(Object.keys(sessionStorage).filter(k=>k.startsWith('gensrpg.capture.v2.')).map(k=>[k,sessionStorage.getItem(k)?.slice(0,1500)])),
+    worldEncounters:(()=>{const raw=localStorage.getItem('gensrpg.world-assembler.document.v1');if(!raw)return null;const w=JSON.parse(raw);return {areas:w.areas.map(a=>({id:a.id,encounters:a.encounters})),plain:w.encounterConfig?.families?.find(a=>a.terrainFamilyId==='plain')}})()
    })).catch(e=>({exception:e.message}));
    throw new Error('Official native Adventure encounter failed: '+JSON.stringify(diagnostic),{cause:error});
   }finally{await page.keyboard.up('ArrowRight');}

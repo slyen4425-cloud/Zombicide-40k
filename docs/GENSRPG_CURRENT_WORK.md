@@ -1,5 +1,8 @@
 # 2026-11-07 — Capture V2 : affichage des résultats officiels et archive de monde périmée (source C2)
 
+- **Raccord officiel ajouté pour la publication commune** : le manifeste `source-pins-v1.json` épingle maintenant **Exploration `main@c18b34cacf6d9d157d62e7e507c4c155d6e1b11c`**, issu de PR #387. Labo Exploration : **CI main #42361421441 SUCCESS** (trois jobs), **Pages #42361421429 SUCCESS**, HTTP HTTPS vérifié ; aucun code d'Exploration recopié ou remplacé.
+- **Gate source en cours** : changement du seul pin après le correctif déjà testé XP / Combat READY / archives ; le SHA final de cette branche doit repasser toutes ses sentinelles avant promotion du publisher GenSRPG. Ne pas confondre ancien succès source `86b5bbd5` et nouveau candidat ; GenSRPG main reste inchangé.
+
 - **BASE immuable** : source Capture V2 publiée `d58677893322d6eb4ebefc6b2bc0acbfe866388a` ; START `checkpoint/gensrpg-start-capture-results-world-links-2026-11-07` ; travail `work/gensrpg-capture-results-world-links-2026-11-07`.
 - **Propriétaire** : Aventure GenSRPG affiche seulement `applyAdventureCombatResultV1` déjà committé ; Combat garde les outcomes, Exploration garde les Portal/Spawn/WorldDocument/positions. Zéro calcul d'XP ou loot dans l'UI, aucune nouvelle base, aucun média copié.
 - **RED utilisateur** : après le combat, seul un message de reprise est visible alors que `lastAward` XP/niveau/loot a déjà été enregistré ; une carte testée récemment dans Exploration peut différer de sa version archivée choisie dans Capture ; les anciens listeners de retour de combat peuvent rester montés après réentrée en partie.

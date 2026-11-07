@@ -1,7 +1,7 @@
-// Capture V2 read-only upstream certification watcher.
-// This is NOT a repinner or publisher: official Lab updates require a new
-// immutable GenSRPG source candidate, its full CI, a separate release PR and
-// a public Pages/Android check. No legacy Capture V1 runtime is touched.
+// Capture V2 official-main certification watcher + draft PR proposer.
+// It stages immutable, minimal manifest-only source candidates and a separate
+// review-only publisher PR. Never merges or deploys; C2 CI, HTTPS and Android
+// checks are mandatory before a human promotes a candidate. Legacy V1 unchanged.
 import fs from 'node:fs';
 import {execFileSync} from 'node:child_process';
 
@@ -56,6 +56,19 @@ export function planCaptureV2UpstreamReviews({release,pins,labs}){
     }));
   }
   return proposals;
+}
+
+// One immutable candidate for all independently certified upstream changes.
+// Preserve the other Lab, gameplay data, legacy flag and every user-facing rule.
+export function planCertifiedCaptureV2SourceUpdate({release,pins,labs}){
+  const proposals=planCaptureV2UpstreamReviews({release,pins,labs});
+  if(!proposals.length)return null;
+  const nextPins=JSON.parse(JSON.stringify(pins));
+  for(const change of proposals){
+    nextPins[change.lab].sha=change.officialSha;
+    nextPins[change.lab].certifiedCiRun=change.certifiedCiRun;
+  }
+  return Object.freeze({proposals,nextPins});
 }
 
 function gh(...args){
@@ -116,6 +129,112 @@ function issueBody(p){
   ].join('\n');
 }
 
+// Each Git tree update targets a new dedicated branch; production main is
+// checked before and after staging. The only source code touched is one
+// versioned manifest. No binary assets, duplicate engine or IndexedDB writes.
+function readContents(path,ref){
+  const file=api('repos/'+OWN+'/contents/'+path+'?ref='+ref);
+  ensure(file.encoding==='base64' && isSha(file.sha) &&
+    typeof file.content==='string','Cannot read immutable file '+path);
+  return {sha:file.sha,text:Buffer.from(file.content.replace(/\s/g,''),'base64').toString('utf8')};
+}
+function createRef(branch,sha){
+  ensure(isSha(sha) && /^automation\/capture-v2-labs-[a-z0-9-]+$/.test(branch),
+    'Unexpected automated ref');
+  apiPost('repos/'+OWN+'/git/refs',
+    ['-f','ref=refs/heads/'+branch,'-f','sha='+sha]);
+}
+function apiPost(endpoint,fields){
+  return JSON.parse(gh('api',endpoint,'--method','POST',...fields));
+}
+function putFile(path,branch,sha,content,message){
+  const result=JSON.parse(gh('api','repos/'+OWN+'/contents/'+path,
+    '--method','PUT','-f','branch='+branch,'-f','sha='+sha,
+    '-f','message='+message,
+    '-f','content='+Buffer.from(content,'utf8').toString('base64')));
+  ensure(isSha(result?.commit?.sha),'GitHub rejected immutable update to '+path);
+  return result.commit.sha;
+}
+function planBranchNames(release,nextPins){
+  const label=[release.sha.slice(0,8),nextPins.combat.sha.slice(0,8),
+    nextPins.exploration.sha.slice(0,8)].join('-');
+  return Object.freeze({
+    source:'automation/capture-v2-labs-source-'+label,
+    publisher:'automation/capture-v2-labs-publish-'+label
+  });
+}
+function stageCertifiedDraftPR({release,pins,proposals,nextPins,initial}){
+  const branches=planBranchNames(release,nextPins);
+  const open=api('repos/'+OWN+'/pulls?state=open&per_page=100');
+  ensure(Array.isArray(open)&&open.length<100,'Review PR census is incomplete');
+  if(open.some(pr=>pr.head?.ref===branches.publisher)){
+    console.log('ALREADY OPEN review PR '+branches.publisher);
+    return;
+  }
+  ensure(mainSha(OWN)===initial,'Publisher main moved before candidate staging');
+  for(const p of proposals)
+    ensure(mainSha(p.repository)===p.officialSha,
+      p.lab+' main changed after certification');
+  const sourcePath='assets/gensrpg/capture-v2/source-pins-v1.json';
+  const originalSource=readContents(sourcePath,release.sha);
+  ensure(JSON.stringify(JSON.parse(originalSource.text))===JSON.stringify(pins),
+    'Current published source differs from certified read');
+  const releasePath='tools/capture_v2_pages_preview_pin.json';
+  const originalRelease=readContents(releasePath,initial);
+  ensure(JSON.parse(originalRelease.text).sha===release.sha,
+    'Publisher main release pin changed during review');
+  createRef(branches.source,release.sha);
+  const sourceSha=putFile(sourcePath,branches.source,originalSource.sha,
+    JSON.stringify(nextPins,null,2)+'\n',
+    'build(capture): pin certified official Combat and Exploration mains');
+  ensure(mainSha(OWN)===initial,'Publisher main moved after source candidate');
+  for(const p of proposals)
+    ensure(mainSha(p.repository)===p.officialSha,
+      p.lab+' main moved after source candidate');
+  createRef(branches.publisher,initial);
+  const updatedRelease=JSON.parse(originalRelease.text);
+  updatedRelease.sha=sourceSha;
+  const publisherSha=putFile(releasePath,branches.publisher,originalRelease.sha,
+    JSON.stringify(updatedRelease,null,2)+'\n',
+    'chore(capture): propose immutable certified Lab source for review');
+  ensure(mainSha(OWN)===initial,
+    'Publisher main moved during proposal; review must rebase');
+  const title='[Capture V2] Intégration automatique proposée '+nextPins.combat.sha.slice(0,8)+' / '+nextPins.exploration.sha.slice(0,8);
+  const body=[
+    '## Proposition automatique, jamais une publication',
+    '',
+    '- Base publisher main exacte : '+initial,
+    '- Source Capture précédente : '+release.sha,
+    '- Candidat source, manifest-only : '+sourceSha,
+    '- Branche de source isolée : '+branches.source,
+    '- Combat officiel main GREEN : '+nextPins.combat.sha+' (run '+nextPins.combat.certifiedCiRun+')',
+    '- Exploration officiel main GREEN : '+nextPins.exploration.sha+' (run '+nextPins.exploration.certifiedCiRun+')',
+    '',
+    'Cette PR ne modifie que tools/capture_v2_pages_preview_pin.json ; le candidat source ne modifie que ses SHA/provenances officielles.',
+    'Aucune mutation du root, du service worker, des données de jeu, des sprites ni des sauvegardes.',
+    '',
+    'NE PAS FUSIONNER sans CI intégration complète au SHA '+publisherSha+
+    ', contrôle Pages HTTPS et essai Android/PWA ; aucun auto-merge ni déploiement de ce robot.'
+  ].join('\n');
+  const pr=apiPost('repos/'+OWN+'/pulls',
+    ['-f','head='+branches.publisher,'-f','base=main',
+     '-f','title='+title,'-f','body='+body,'-F','draft=true']);
+  ensure(pr.draft===true && typeof pr.html_url==='string',
+    'A draft review PR was not created');
+  console.log('AUTOMATIC DRAFT PR '+pr.html_url);
+  // A PR created by the default GITHUB_TOKEN does NOT trigger pull_request
+  // workflows. Explicit dispatch is mandatory; never deploy from this bot.
+  for(const workflow of [
+    'main.yml','gensrpg-architecture-sentinels.yml',
+    'gensrpg-firefox-wall-sentinel.yml',
+    'gensrpg-tactical-dock-sentinel.yml',
+    'capture-lab-runtime.yml','capture-lab-delivery.yml'
+  ]){
+    gh('workflow','run',workflow,'--ref',branches.publisher);
+  }
+  console.log('DISPATCHED independent C2 review gates on '+publisherSha);
+}
+
 async function main(){
   ensure(process.env.GITHUB_REPOSITORY===OWN && process.env.GITHUB_REF==='refs/heads/main',
     'Run only from published GenSRPG main');
@@ -139,24 +258,28 @@ async function main(){
       }
     }
   }
-  const proposals=planCaptureV2UpstreamReviews({release,pins,labs});
-  if(!proposals.length){
-    console.log('NOOP: both official main sources unchanged or no new certified fast-forward');
+  const plan=planCertifiedCaptureV2SourceUpdate({release,pins,labs});
+  if(!plan){
+    console.log('NOOP: official Lab main sources unchanged or not certified');
     return;
   }
-  const titles=existingIssueTitles();
-  for(const proposal of proposals){
-    ensure(mainSha(OWN)===initial,
-      'Publisher main changed during observation: no issue created');
-    ensure(mainSha(proposal.repository)===proposal.officialSha,
-      proposal.lab+' main changed after certification: no issue created');
-    const title=titleFor(proposal);
-    if(titles.has(title)){console.log('ALREADY OPEN '+title);continue}
-    const created=JSON.parse(gh('api','repos/'+OWN+'/issues','--method','POST',
-      '-f','title='+title,'-f','body='+issueBody(proposal)));
-    ensure(Boolean(created.html_url),'Could not create review issue');
-    titles.add(title);
-    console.log('UPSTREAM REVIEW '+proposal.lab+' '+created.html_url);
+  try{
+    stageCertifiedDraftPR({release,pins,...plan,initial});
+  }catch(error){
+    // GitHub Actions installations may deny workflow-created PRs. Fail safe:
+    // never merge, never update main, and record a bounded actionable issue.
+    console.error('::warning::Automatic review PR could not be staged: '+error.message);
+    const titles=existingIssueTitles();
+    for(const p of plan.proposals){
+      const title=titleFor(p);
+      if(titles.has(title)){console.log('ALREADY OPEN '+title);continue}
+      const issue=apiPost('repos/'+OWN+'/issues',
+        ['-f','title='+title,'-f','body='+issueBody(p)+
+          '\n\nAutomated PR attempt failed: '+error.message]);
+      ensure(Boolean(issue.html_url),'Could not create fallback review issue');
+      titles.add(title);
+      console.log('FALLBACK REVIEW '+issue.html_url);
+    }
   }
 }
 

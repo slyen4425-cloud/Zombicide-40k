@@ -1,3 +1,12 @@
+## 2026-11-08 — Capture V2 : équipe initiale 1–6 sur la source corrigée, sans régression préparation (C2 à certifier)
+- START : source Capture V2 officielle publiée `5e5fa6ada3afff8364c2937a73c185e0a3fdc6f8`, checkpoint `checkpoint/gensrpg-start-capture-team-1to6-rebase-2026-11-08`, branche `work/gensrpg-capture-team-1to6-rebase-2026-11-08`. Fusion sélective depuis l'ancien travail #311, sans emprunter l'ancien panneau de statistiques ni l'ancienne logique d'hébergement #310.
+- Choix 1 à 6 créatures jouables publiées du Bestiaire Combat, une instance unique par créature, `party.active` et `party.reserve` conservées dans la seule AdventureSession du Core Storage. Choix de la créature active en préparation ; refus d'activer une KO ; après défaite, l'équipe restante n'est pas effacée. Pas de nouvelle source de créatures, pas d'ID manuelle.
+- La préparation **n'affiche toujours pas** de répartition des points : celle-ci appartient à l'onglet Statistiques de la fiche en jeu (correctif #316). Les règles du créateur, anciennes sauvegardes, Combat et Exploration restent leurs propriétaires officiels.
+- TDD : `tests/gens_capture_v2_initial_party_1to6_20261107.test.mjs` ajouté au même gate Capture propre et tests antérieurs #316 conservés. GREEN CI du SHA exact, vérification réelle navigateur, puis publication separate du pin par main seulement si certifié. Aucun doublon de runtime ou moteur.
+- La caméra créateur (#312) reste distincte et dépend du module Exploration #388 NON GREEN. Ne pas prétendre caméra en jeu tant que la dépendance n'est pas intégrée.
+
+---
+
 ## 2026-11-07 — Monster Capture V2 : aucune répartition de points dans la préparation (C1, en validation)
 - Retour Pixel paysage : le panneau "Points de statistiques de la créature" apparaît indûment sous la sauvegarde en préparation du jeu.
 - Cause : le même domaine d'allocation était rendu par `renderStatWallet` dans la préparation, alors que la fiche en jeu possède déjà l'onglet Statistiques officiel et une attribution validée par Core Storage.

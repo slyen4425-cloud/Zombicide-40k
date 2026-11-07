@@ -284,6 +284,21 @@ export function allocateAdventureStatPointsV1({session,registry,statId,points,no
  assertSession(updated);
  return updated;
 }
+// AdventureSession owns active/reserve. No second Creature or Battle owner.
+export function chooseAdventureActiveCreatureV1({session,instanceId,now}={}){
+ const v=assertSession(session),id=identity(instanceId,'instanceId');
+ if(v.status==='finished')throw new Error('Partie terminée : équipe non modifiable.');
+ if(v.party.active.instanceId===id)return v;
+ const reserve=v.party.reserve??[];
+ const index=reserve.findIndex(actor=>actor.instanceId===id);
+ if(index<0)throw new RangeError('Créature absente de ton équipe');
+ if(reserve[index].hp===0)throw new RangeError('Créature KO : impossible de la sélectionner');
+ const swapped=reserve.slice();swapped[index]=v.party.active;
+ const updated=freeze({...v,updatedAt:iso(now??v.updatedAt,'now'),
+  party:{...v.party,active:reserve[index],reserve:swapped}});
+ assertSession(updated);
+ return updated;
+}
 // Historical saves intentionally remain unchanged on load. A visible owner
 // action can attach the creator/MJ policy once, with a fresh generated ID.
 export function initializeAdventureSessionControlV1({session,creatorId,settings,now}={}){
@@ -349,15 +364,25 @@ function assertSession(session){
  if(v.status!=='configured'&&v.status!=='playing'&&v.status!=='finished')
   throw new RangeError('Unknown Adventure save status');
  normalizeAdventureRulesV1(v.rules);
- const actor=object(object(v.party,'party').active,'party.active');
- identity(actor.instanceId,'party.active.instanceId');
- identity(actor.speciesId,'party.active.speciesId');
- integer(actor.level,'party.active.level',1,v.rules.progression.maxLevel);
- integer(actor.xp,'party.active.xp');
- statWallet(actor,normalizeAdventureRulesV1(v.rules).progression);
+ const party=object(v.party,'party');
+ const actor=object(party.active,'party.active');
+ const roster=[actor,...(party.reserve??[])];
+ if(!Array.isArray(party.reserve??[])||roster.length<1||roster.length>6)
+  throw new RangeError('Une équipe Aventure doit compter de 1 à 6 créatures.');
+ const instances=new Set();
+ for(const [index,entry] of roster.entries()){
+  const field=index===0?'party.active':'party.reserve['+(index-1)+']';
+  const owned=object(entry,field),instanceId=identity(owned.instanceId,field+'.instanceId');
+  if(instances.has(instanceId))throw new RangeError('Duplicate creature instance in Adventure party');
+  instances.add(instanceId);
+  identity(owned.speciesId,field+'.speciesId');
+  integer(owned.level,field+'.level',1,v.rules.progression.maxLevel);
+  integer(owned.xp,field+'.xp');
+  statWallet(owned,normalizeAdventureRulesV1(v.rules).progression);
+  if(owned.hp!==null)number(owned.hp,field+'.hp');
+ }
  if(Object.hasOwn(v,'sessionControl'))
   normalizeAdventureSessionControlV1(v.sessionControl);
- if(actor.hp!==null)number(actor.hp,'party.active.hp');
  if(Object.hasOwn(v,'hero')){
   const hasDefinition=Object.hasOwn(v.hero,'definitionId');
   const hero=exact(v.hero,hasDefinition?['progression','definitionId']:['progression'],'hero');
@@ -384,23 +409,36 @@ function assertSession(session){
  return v;
 }
 export function createAdventureSessionV1({
- bestiaryCards,starterId,rules=DEFAULT_ADVENTURE_RULES_V1,ids,now,
+ bestiaryCards,starterId,starterIds=null,rules=DEFAULT_ADVENTURE_RULES_V1,ids,now,
  heroDefinitionId=null
 }){
  const cards=publishedAdventureSpeciesV1(bestiaryCards);
- const starter=cards.find(c=>c.id===starterId);
- if(!starter)throw new RangeError('Créature absente du Bestiaire publié: '+starterId);
- if(!Array.isArray(starter.skills)||!starter.skills.some(s=>s.state==='ready'))
-  throw new RangeError('Créature sans compétence jouable publiée: '+starterId);
+ const selected=starterIds===null?[starterId]:starterIds;
+ if(!Array.isArray(selected)||selected.length<1||selected.length>6)
+  throw new RangeError('Équipe de départ : choisir entre 1 et 6 créatures.');
+ if(starterId!==selected[0])
+  throw new RangeError('La première créature doit être active.');
  const settings=normalizeAdventureRulesV1(rules);
  const sessionId=identity(ids?.sessionId,'sessionId');
- const instanceId=identity(ids?.instanceId,'instanceId');
+ const rawIds=[ids?.instanceId,...(ids?.reserveInstanceIds??[])];
+ if(rawIds.length!==selected.length)
+  throw new RangeError('Une instance distincte est requise pour chaque créature.');
+ const instanceIds=rawIds.map((id,i)=>identity(id,'instanceId['+i+']'));
+ if(new Set(instanceIds).size!==instanceIds.length)
+  throw new RangeError('Duplicate creature instance in Adventure party');
+ const members=selected.map((speciesId,index)=>{
+  const card=cards.find(c=>c.id===speciesId);
+  if(!card)throw new RangeError('Créature absente du Bestiaire publié: '+speciesId);
+  if(!Array.isArray(card.skills)||!card.skills.some(s=>s.state==='ready'))
+   throw new RangeError('Créature sans compétence jouable publiée: '+speciesId);
+  return freeze({instanceId:instanceIds[index],speciesId:card.id,level:1,xp:0,hp:null,
+   ...(settings.progression.statPointsPerLevel===undefined?{}:{statAllocations:{}})});
+ });
  const timestamp=iso(now,'now');
  return freeze({
   schema:ADVENTURE_SAVE_SCHEMA_V1,version:1,sessionId,
   status:'configured',createdAt:timestamp,updatedAt:timestamp,rules:settings,
-  party:{active:{instanceId,speciesId:starter.id,level:1,xp:0,hp:null,
-   ...(settings.progression.statPointsPerLevel===undefined?{}:{statAllocations:{}})}},
+  party:{active:members[0],reserve:members.slice(1)},
   sessionControl:{
    creatorId:identity(ids?.creatorId??'owner-'+sessionId,'creatorId'),
    hostIsGameMaster:false,joinEnabled:false,
@@ -514,9 +552,19 @@ export function applyAdventureCombatResultV1({
  const recover=defeated&&defeatPolicy==='restore';
  const gameOver=defeated&&defeatPolicy==='game-over';
  const updated=freeze({
-  ...state,status:gameOver?'finished':state.status,updatedAt:timestamp,
-  party:{active:{...state.party.active,level,xp:total,
-   hp:recover?null:gameOver?0:hp==null?state.party.active.hp:hp}},
+  ...state,status:gameOver&&!(state.party.reserve??[]).some(member=>member.hp!==0)
+   ?'finished':state.status,updatedAt:timestamp,
+  party:(()=>{
+   const available=state.party.reserve??[];
+   const replacement=defeated?available.findIndex(member=>member.hp!==0):-1;
+   const knockedOut={...state.party.active,level,xp:total,
+    hp:replacement>=0?0:recover?null:gameOver?0:hp==null?state.party.active.hp:hp};
+   if(replacement>=0){
+    const reserve=available.slice(),next=reserve.splice(replacement,1)[0];
+    return {...state.party,active:next,reserve:[knockedOut,...reserve]};
+   }
+   return {...state.party,active:knockedOut};
+  })(),
   ...(heroState===undefined?{}:{hero:heroState}),
   inventory:{currency:state.inventory.currency+currency,items:itemCounts},
   processedEncounterKeys:[...state.processedEncounterKeys,key],

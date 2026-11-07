@@ -31,10 +31,20 @@
     <option value="">Chargement des mondes officiels…</option>
    </select>
    <output id="adventure-world-status" role="status" aria-live="polite">Les mondes sont enregistrés dans le World Builder Exploration.</output>
-   <label for="adventure-starter">Créature de départ</label>
+   <label for="adventure-starter-count">Nombre de créatures de départ</label>
+   <select id="adventure-starter-count" aria-label="Nombre de créatures au début de l'aventure">
+    <option value="1" selected>1 créature</option>
+    <option value="2">2 créatures</option>
+    <option value="3">3 créatures</option>
+    <option value="4">4 créatures</option>
+    <option value="5">5 créatures</option>
+    <option value="6">6 créatures</option>
+   </select>
+   <label for="adventure-starter">Créature active de départ</label>
    <select id="adventure-starter" aria-label="Créature de départ publiée" disabled>
     <option value="">Chargement du Bestiaire…</option>
    </select>
+   <div id="adventure-starter-reserve" class="fields" aria-label="Créatures de réserve initiales"></div>
    <p id="adventure-bestiary-count" class="hint"></p>
    <label for="adventure-hero-choice">Héros (bibliothèque Exploration)</label>
    <select id="adventure-hero-choice" aria-label="Héros officiel de la partie">
@@ -49,6 +59,11 @@
    <section class="save-state" aria-labelledby="adventure-save-heading">
     <h3 id="adventure-save-heading">Sauvegarde en cours</h3>
     <output id="adventure-save-summary">Aucune partie créée.</output>
+    <div class="fields">
+     <label for="adventure-active-creature">Créature active de mon équipe</label>
+     <select id="adventure-active-creature" disabled></select>
+     <button type="button" id="adventure-select-active" disabled>Activer la créature</button>
+    </div>
    </section>
    <div class="actions"><button type="button" id="adventure-world-builder">🌍 Créer ou modifier le monde</button></div>
   </section>

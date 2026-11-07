@@ -35,7 +35,7 @@ import {
  DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
  createAdventureSessionV1,createAdventureStoreV1,publishedAdventureSpeciesV1,
  coreAdventureProgressionConfigV1,
- allocateAdventureStatPointsV1,updateAdventureSessionControlV1,
+ allocateAdventureStatPointsV1,chooseAdventureActiveCreatureV1,updateAdventureSessionControlV1,
  initializeAdventureSessionControlV1
 } from './adventure-contract-v1.mjs';
 
@@ -246,6 +246,40 @@ function option(value,caption,disabled=false){
 function eligibleForNewGame(card){
  return Array.isArray(card.skills)&&card.skills.some(s=>s.state==='ready');
 }
+function renderStarterReserveSelectors(){
+ const count=Number($('adventure-starter-count').value);
+ if(!Number.isSafeInteger(count)||count<1||count>6)
+  throw new RangeError('Choisis entre 1 et 6 créatures de départ.');
+ const host=$('adventure-starter-reserve');
+ const previous=[...host.querySelectorAll('select')].map(node=>node.value);
+ const ready=published.filter(eligibleForNewGame);
+ host.replaceChildren();
+ for(let i=1;i<count;i++){
+  const label=document.createElement('label');
+  label.textContent='Créature '+(i+1)+' (réserve)';
+  const choice=document.createElement('select');
+  choice.dataset.starterSlot=String(i);
+  choice.setAttribute('aria-label','Créature de départ '+(i+1));
+  choice.append(option('','Choisis une créature publiée…'));
+  for(const card of published)
+   choice.append(option(card.id,card.name,!eligibleForNewGame(card)));
+  choice.value=ready.some(card=>card.id===previous[i-1])
+   ?previous[i-1]:(ready[i%ready.length]?.id??'');
+  label.append(choice);host.append(label);
+ }
+}
+function getStarterSpeciesIds(){
+ const chosen=[$('adventure-starter').value,
+  ...[...$('adventure-starter-reserve').querySelectorAll('[data-starter-slot]')]
+   .map(select=>select.value)];
+ if(chosen.length!==Number($('adventure-starter-count').value)||
+    chosen.length<1||chosen.length>6)
+  throw new RangeError('Choix de créatures de départ incomplet.');
+ for(const id of chosen)
+  if(!published.some(card=>card.id===id&&eligibleForNewGame(card)))
+   throw new RangeError('Sélectionne une créature publiée et jouable pour chaque emplacement.');
+ return chosen;
+}
 function fillPublicSpecies(){
  const starters=$('adventure-starter'),enemies=$('adventure-enemy'),drops=$('adventure-drop-species');
  starters.replaceChildren(option('','Choisir une créature publiée…'));
@@ -262,6 +296,7 @@ function fillPublicSpecies(){
  starters.disabled=enemies.disabled=drops.disabled=published.length===0;
  $('adventure-create').disabled=allowed===0;
  if(allowed)starters.value=published.find(eligibleForNewGame).id;
+ renderStarterReserveSelectors();
 }
 function row(caption,remove){
  const holder=document.createElement('div');holder.className='rule-row';
@@ -339,6 +374,36 @@ async function installOfficialWorldLibrary(){
  }
  refreshWorldChoices(store?.load()??null);
 }
+function renderPartyActiveChoices(){
+ const select=$('adventure-active-creature');
+ const current=store?.load();
+ select.replaceChildren();
+ if(!current){
+  select.append(option('','Crée une partie pour choisir une créature.'));
+  select.disabled=true;$('adventure-select-active').disabled=true;
+  return;
+ }
+ const actors=[current.party.active,...(current.party.reserve??[])];
+ for(const actor of actors){
+  const name=published.find(card=>card.id===actor.speciesId)?.name??actor.speciesId;
+  select.append(option(actor.instanceId,name+(actor.hp===0?' · KO':''),actor.hp===0));
+ }
+ select.value=current.party.active.instanceId;
+ select.disabled=actors.length===1||current.status==='finished';
+ $('adventure-select-active').disabled=select.disabled;
+}
+$('adventure-select-active').addEventListener('click',guarded(()=>{
+ if(document.body.dataset.adventurePlaying==='true')
+  throw new Error('Quitte le jeu avant de changer la créature active.');
+ const saved=store?.load();
+ const selected=chooseAdventureActiveCreatureV1({
+  session:saved,instanceId:$('adventure-active-creature').value,
+  now:new Date().toISOString()
+ });
+ if(selected!==saved)store.save(selected);
+ showSave();
+ stateMessage('Créature active de ton équipe enregistrée.');
+}));
 function showSave(){
  try{
   renderPortfolioOptions();
@@ -348,6 +413,7 @@ function showSave(){
    $('adventure-hero-choice').disabled=false;
    text($('adventure-save-summary'),'Aucune partie créée.');
    $('adventure-play').disabled=true;
+   renderPartyActiveChoices();
    return;
   }
   // The picker affects the NEXT new game, not the already saved hero.
@@ -360,7 +426,8 @@ function showSave(){
   const reward=state.lastAward;
   text($('adventure-save-summary'),
    'Partie '+state.sessionId.slice(0,8)+' · '+(card?.name??a.speciesId)+
-   ' · niveau '+a.level+' · '+a.xp+' XP · '+state.inventory.currency+' pièces'+
+   ' · niveau '+a.level+' · '+(1+(state.party.reserve?.length??0))+
+   ' créature(s) · '+a.xp+' XP · '+state.inventory.currency+' pièces'+
    (a.hp===0?' · KO : 0 PV, soins ou réanimation nécessaires':'')+
    (state.rules.heroProgression?.enabled===true
     ?' · Héros niv. '+(state.hero?.progression?.level??1)+' · '+
@@ -369,6 +436,7 @@ function showSave(){
    (reward?' · Dernier combat : '+reward.outcome+' ('+reward.xp+' XP)':'')+
    ' · statut : '+(state.status==='configured'?'configuration enregistrée':
      state.status==='finished'?'terminée après défaite':'en cours'));
+  renderPartyActiveChoices();
  }catch(error){
   $('adventure-play').disabled=true;
   stateMessage('Sauvegarde protégée : '+error.message,true);
@@ -673,14 +741,17 @@ $('adventure-xp-band-add').addEventListener('click',guarded(()=>{
 }));
 $('adventure-enemy').addEventListener('change',updatePreview);
 $('adventure-starter').addEventListener('change',updatePreview);
+$('adventure-starter-count').addEventListener('change',guarded(renderStarterReserveSelectors));
 $('adventure-create').addEventListener('click',guarded(()=>{
  if(!published.length)throw new Error('Bestiaire officiel indisponible; aucun contenu fictif ne sera utilisé');
  rules=fromFields();
  const id=()=>crypto.randomUUID();
  const now=new Date().toISOString();
+ const starterIds=getStarterSpeciesIds();
  const state=createAdventureSessionV1({
-  bestiaryCards:published,starterId:$('adventure-starter').value,
-  rules,ids:{sessionId:id(),instanceId:id(),creatorId:id()},now,
+  bestiaryCards:published,starterId:starterIds[0],starterIds,
+  rules,ids:{sessionId:id(),instanceId:id(),
+   reserveInstanceIds:starterIds.slice(1).map(()=>id()),creatorId:id()},now,
   heroDefinitionId:$('adventure-hero-choice').value||null
  });
  const configured=updateAdventureSessionControlV1({

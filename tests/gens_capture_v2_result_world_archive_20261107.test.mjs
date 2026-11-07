@@ -77,3 +77,29 @@ test('every re-entry can dispose the previous CombatResult listener without touc
  second.dispose();
  assert.equal(listeners.get(ADVENTURE_COMBAT_REQUEST_V1).size,0);
 });
+
+test('native READY request is acknowledged verbatim before any encounter can arm',async()=>{
+ const listeners=new Map();
+ const playUrl='https://capture.invalid/vendor/exploration-lab/sculpt-lab.html?play=1&adventureSession=game-1';
+ const frame={isConnected:true,contentWindow:{location:{href:playUrl}},
+  addEventListener:(name,fn)=>listeners.set(name,fn),
+  removeEventListener:(name,fn)=>{if(listeners.get(name)===fn)listeners.delete(name)}};
+ const store={load:()=>({status:'playing',sessionId:'game-1',world:{mapRef:'world-one'}})};
+ const host=connectAdventureCombatHostV1({
+  frame,playUrl,sessionId:'game-1',worldId:'world-one',store,locks:{request:()=>{}},
+  readPending:()=>{throw Error('No battle should have been read before READY');},
+  refreshParty:()=>{},bestiaryCards:[],progressionCore:null
+ });
+ const acknowledged=await new Promise((resolve,reject)=>{
+  let claimed=false;
+  listeners.get(ADVENTURE_COMBAT_REQUEST_V1)({
+   target:frame,detail:{kind:'ready',sessionId:'game-1',respond:resolve},
+   preventDefault(){claimed=true;}
+  });
+  queueMicrotask(()=>{if(!claimed)reject(Error('Native READY handshake was not claimed'));});
+ });
+ assert.deepEqual(acknowledged,{ready:true},
+  'Exploration must receive exact READY before arming its native EncounterController');
+ host.dispose();
+ assert.equal(listeners.size,0);
+});

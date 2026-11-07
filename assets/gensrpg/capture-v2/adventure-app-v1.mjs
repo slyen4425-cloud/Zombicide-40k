@@ -34,7 +34,7 @@ import {
  DEFAULT_ADVENTURE_RULES_V1,SHOWCASE_ADVENTURE_RULES_V1,
  DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
  createAdventureSessionV1,createAdventureStoreV1,publishedAdventureSpeciesV1,
- coreAdventureProgressionConfigV1,availableAdventureStatPointsV1,
+ coreAdventureProgressionConfigV1,
  allocateAdventureStatPointsV1,updateAdventureSessionControlV1,
  initializeAdventureSessionControlV1
 } from './adventure-contract-v1.mjs';
@@ -136,46 +136,6 @@ function sessionControlFromFields(){
    allocateOwnCreatureStats:$('adventure-guest-allocate-stats').checked
   }
  };
-}
-function renderStatWallet(){
- const rows=$('adventure-stat-rows'),availableLabel=$('adventure-stat-points-left');
- rows.replaceChildren();
- const current=store?.load();
- if(!current){
-  text(availableLabel,'Crée une partie pour connaître tes points disponibles.');
-  return;
- }
- if(officialStatRegistry?.schema!=='capture-stat-registry-v1'||
-    !Array.isArray(officialStatRegistry.stats))
-  throw new Error('Registre officiel Combat indisponible pour la répartition');
- const available=availableAdventureStatPointsV1(current);
- text(availableLabel,available+' point(s) disponibles · '+
-  (current.rules.progression.statPointsPerLevel??0)+' par niveau');
- for(const stat of officialStatRegistry.stats){
-  const line=document.createElement('div');line.className='rule-row';
-  const value=current.party.active.statAllocations?.[stat.id]??0;
-  const label=document.createElement('span');
-  label.textContent=stat.label+' · +'+value;
-  const actions=document.createElement('div');actions.className='actions';
-  for(const points of [1,5]){
-   const button=document.createElement('button');button.type='button';
-   button.textContent='+'+points;
-   button.disabled=available<points;
-   button.setAttribute('aria-label','Attribuer '+points+' point(s) en '+stat.label);
-   button.addEventListener('click',guarded(()=>{
-    const saved=store.load();
-    const changed=allocateAdventureStatPointsV1({
-     session:saved,registry:officialStatRegistry,statId:stat.id,
-     points,now:new Date().toISOString()
-    });
-    store.save(changed);
-    showSave();
-    stateMessage(points+' point(s) attribués en '+stat.label+'. Sauvegarde mise à jour.');
-   }));
-   actions.append(button);
-  }
-  line.append(label,actions);rows.append(line);
- }
 }
 function setFields(value){
  $(idField.base).value=value.xp.baseVictoryXp;
@@ -388,7 +348,6 @@ function showSave(){
    $('adventure-hero-choice').disabled=false;
    text($('adventure-save-summary'),'Aucune partie créée.');
    $('adventure-play').disabled=true;
-   renderStatWallet();
    return;
   }
   // The picker affects the NEXT new game, not the already saved hero.
@@ -410,7 +369,6 @@ function showSave(){
    (reward?' · Dernier combat : '+reward.outcome+' ('+reward.xp+' XP)':'')+
    ' · statut : '+(state.status==='configured'?'configuration enregistrée':
      state.status==='finished'?'terminée après défaite':'en cours'));
-  renderStatWallet();
  }catch(error){
   $('adventure-play').disabled=true;
   stateMessage('Sauvegarde protégée : '+error.message,true);

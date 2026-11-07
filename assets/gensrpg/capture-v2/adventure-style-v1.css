@@ -51,12 +51,6 @@ output{display:block;overflow-wrap:anywhere}
 .xp-band-row label{margin:0;min-width:0}
 .xp-band-row input{min-width:0}
 .xp-band-row button{min-height:40px;padding:8px}
-.adventure-stat-wallet{margin:10px 0;padding:12px;border:1px solid #306861;
- border-radius:10px;background:#112c32}
-#adventure-stat-points-left{font-size:15px;font-weight:750;color:#a3ead0;margin:6px 0 10px}
-.adventure-stat-wallet .rule-row{gap:6px;flex-wrap:wrap}
-.adventure-stat-wallet .rule-row>.actions{margin:0;gap:5px}
-.adventure-stat-wallet .rule-row>.actions button{min-width:48px}
 .adventure-options label:has(input[type=checkbox]){
  display:flex;justify-content:space-between;align-items:center;gap:10px}
 .adventure-options label input[type=checkbox]{

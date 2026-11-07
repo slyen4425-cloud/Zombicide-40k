@@ -76,6 +76,9 @@ jobs:
       - name: Bloquer les régressions d'interface et de cache
         run: node tests/gens_ui_recovery_v167843.test.cjs
 
+      - name: Tester la mise à jour PWA Android et l'isolation des caches sans perte des sauvegardes
+        run: node --test tests/gensrpg_pwa_cache_isolation_20261107.test.cjs
+
       - name: Tester les caractéristiques RPG dynamiques propres V16.78.73
         run: node tests/gens_clean_dynamic_stats_v167873.test.cjs
 

@@ -92,8 +92,17 @@ test('Adventure starts from the Pages menu and saves a native encounter once at 
   await map.locator('#play-menu-button:visible').waitFor();
   await canvas.evaluate(()=>window.focus());
   await page.keyboard.down('ArrowRight');
-  try{await map.locator('#sculpt-encounter-preview:visible').waitFor({timeout:18000});}
-  finally{await page.keyboard.up('ArrowRight');}
+  try{
+   await map.locator('#sculpt-encounter-preview:visible').waitFor({timeout:18000});
+  }catch(error){
+   const diagnostic=await canvas.evaluate(()=>({
+    play:window.__sculptPlayProbe?.(),encounter:window.__sculptEncounterProbe?.(),
+    map:window.__sculptWorldProbe?.(),movement:document.getElementById('navigation-status')?.textContent,
+    error:document.getElementById('play-start-error-message')?.textContent,
+    playErrorVisible:document.body.classList.contains('sculpt-play-unavailable')
+   })).catch(e=>({exception:e.message}));
+   throw new Error('Official native Adventure encounter failed: '+JSON.stringify(diagnostic),{cause:error});
+  }finally{await page.keyboard.up('ArrowRight');}
   const point=await canvas.evaluate(()=>window.__sculptPlayProbe().actor);
   assert.equal(await canvas.evaluate(()=>window.__sculptEncounterProbe().creatureId),'crea_ombre_2');
   await map.locator('#sculpt-encounter-combat').tap();

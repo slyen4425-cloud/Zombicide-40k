@@ -415,6 +415,36 @@ async function installOfficialWorldLibrary(){
  }
  refreshWorldChoices(store?.load()??null);
 }
+function renderPartyActiveChoices(){
+ const select=$('adventure-active-creature');
+ const current=store?.load();
+ select.replaceChildren();
+ if(!current){
+  select.append(option('','Crée une partie pour choisir une créature.'));
+  select.disabled=true;$('adventure-select-active').disabled=true;
+  return;
+ }
+ const actors=[current.party.active,...(current.party.reserve??[])];
+ for(const actor of actors){
+  const name=published.find(card=>card.id===actor.speciesId)?.name??actor.speciesId;
+  select.append(option(actor.instanceId,name+(actor.hp===0?' · KO':''),actor.hp===0));
+ }
+ select.value=current.party.active.instanceId;
+ select.disabled=actors.length===1||current.status==='finished';
+ $('adventure-select-active').disabled=select.disabled;
+}
+$('adventure-select-active').addEventListener('click',guarded(()=>{
+ if(document.body.dataset.adventurePlaying==='true')
+  throw new Error('Quitte le jeu avant de changer la créature active.');
+ const saved=store?.load();
+ const selected=chooseAdventureActiveCreatureV1({
+  session:saved,instanceId:$('adventure-active-creature').value,
+  now:new Date().toISOString()
+ });
+ if(selected!==saved)store.save(selected);
+ showSave();
+ stateMessage('Créature active de ton équipe enregistrée.');
+}));
 function showSave(){
  try{
   renderPortfolioOptions();
@@ -424,7 +454,7 @@ function showSave(){
    $('adventure-hero-choice').disabled=false;
    text($('adventure-save-summary'),'Aucune partie créée.');
    $('adventure-play').disabled=true;
-   renderStatWallet();
+   renderStatWallet();renderPartyActiveChoices();
    return;
   }
   // The picker affects the NEXT new game, not the already saved hero.
@@ -447,7 +477,7 @@ function showSave(){
    (reward?' · Dernier combat : '+reward.outcome+' ('+reward.xp+' XP)':'')+
    ' · statut : '+(state.status==='configured'?'configuration enregistrée':
      state.status==='finished'?'terminée après défaite':'en cours'));
-  renderStatWallet();
+  renderStatWallet();renderPartyActiveChoices();
  }catch(error){
   $('adventure-play').disabled=true;
   stateMessage('Sauvegarde protégée : '+error.message,true);

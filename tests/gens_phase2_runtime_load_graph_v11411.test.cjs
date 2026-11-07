@@ -241,10 +241,24 @@ for(const rel of savedHubPreviewScripts){
   assert.equal(reachable.has(rel),false,'preview-only fake identity cannot load in production');
 }
 const captureLabOptInSet=new Set([...captureLabOptInServices,...savedHubPreviewScripts]);
-const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel)&&!phase10Set.has(rel)&&!phase12Set.has(rel)&&!captureLabOptInSet.has(rel));
+// C2 public Pages release appends precisely TWO tiny route-only Capture V2
+// modules. The historical root index.html source (Phase 2 baseline) is
+// intentionally byte-identical; a single publisher composes the published
+// entry from these new files without adding an alternate Capture runtime.
+// Keep them explicitly OUTSIDE the historical source graph cartography.
+const publishedCaptureEntryFiles=[
+  'assets/gensrpg/shell/capture-v2-from-main-entry-v1.js',
+  'assets/gensrpg/shell/capture-v2-main-entry-v1.js'
+];
+const publishedCaptureEntrySet=new Set(publishedCaptureEntryFiles);
+for(const rel of publishedCaptureEntryFiles){
+  assert.equal(allJs.includes(rel),true,'certified public navigation entry must physically exist: '+rel);
+  assert.equal(reachable.has(rel),false,'historical root source must not load the Pages-composed entry: '+rel);
+}
+const phase2Js=allJs.filter(rel=>!phase3Set.has(rel)&&!phase4Set.has(rel)&&!phase5Set.has(rel)&&!phase9Set.has(rel)&&!phase10Set.has(rel)&&!phase12Set.has(rel)&&!captureLabOptInSet.has(rel)&&!publishedCaptureEntrySet.has(rel));
 const notReachablePhase2=phase2Js.filter(rel=>!reachable.has(rel));
 
-assert.equal(allJs.length,160,'physical inventory includes ten Capture/Lab opt-in services, isolated preview owner and Core profile repair prelude');
+assert.equal(allJs.length,162,'physical inventory includes the two public V2 navigation-only modules while preserving all 160 historical services');
 assert.equal(phase2Js.length,82,'Phase 2 baseline JS inventory must drop the retired legacy Survival/Dungeon guard');
 assert.equal(reachable.size,135,'production graph must include the profile repair prelude and existing Capture owners');
 const connectedPhaseEntrypoints=new Set([

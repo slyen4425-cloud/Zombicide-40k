@@ -1,3 +1,15 @@
+# 2026-11-07 — Correctifs des retours terrain Monster Capture (sauvegardes / KO)
+
+- **START immuable** : `checkpoint/gensrpg-start-capture-save-defeat-2026-11-07` au code Source Capture V2 `4b7c3ff9940b4a68bcc0a031a75e5e9ce2a54086`, branche `work/gensrpg-capture-save-defeat-2026-11-07`.
+- **Périmètre** : seulement les sauvegardes Aventure, les règles de défaite éditables et le retour Combat vers l'interface ; GenSrpg est propriétaire de la session/portefeuille. Labo Combat reste seul propriétaire des PV maximum, compétences, vitesses, énergie et bestiaire. Labo Exploration reste seul propriétaire de la navigation/rencontres.
+- **RED utilisateur** : aucun bouton de suppression par sauvegarde ; un CombatResult "defeat" stocke le PV officiel 0 sans politique de reprise, laissant une créature KO. Les anciennes sauvegardes de test doivent rester récupérables sans migration massive ni perte.
+- **Solution ciblée** : confirmation de suppression de l'ID choisi (index mis à jour avant suppression physique, autre sauvegarde sélectionnée, aucun WorldDocument supprimé) ; règle `combat.defeatPolicy=restore|game-over` éditable par partie, par défaut `restore` ; `restore` remet le snapshot HP à `null`, signifiant que Combat initialisera lui-même le maximum, `game-over` arrête la session avec état terminé et conserve le dernier résultat ; reprise des anciennes KO=0 réparée seulement après vérification du vrai checkpoint Exploration.
+- **Contrats protégés** : ancienne sauvegarde intacte sans acte utilisateur, XP/loot/statistiques et CombatResult de Combat inchangés ; autres modes, publication principale et médias inchangés ; aucune duplication de runtime ni de bibliothèque.
+- **Tests** : `tests/gens_capture_v2_adventure_save_defeat_policy_20261107.test.mjs` + existants `gens_capture_v2_adventure_*`, sentinelles navigateur/CI. Ne pas publier avant GREEN et revue du SHA exact.
+- **Hors lot, audits séparés** : liaison des réglages Combat énergie/vitesse, réconciliation des créatures Gorice/Germou/Mur de glace encore absentes du `main` officiel du Labo Combat. Pas d'import non certifié depuis `gh-pages`.
+
+---
+
 ## 2026-11-06 — Capture C9 : choisir le monde officiel de la partie (START / NON GREEN)
 
 - **Besoin avant publication main** : sélectionner un WorldDocument enregistré au moment de lancer une nouvelle aventure, retrouver exactement ce même monde lors de la reprise, pouvoir changer de sauvegarde sans écraser la carte ou la partie des autres. Le créateur peut toujours démarrer la configuration d'une partie avant de terminer son monde.

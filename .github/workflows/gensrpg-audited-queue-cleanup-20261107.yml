@@ -1,0 +1,162 @@
+# GenSrpg charter (2026-10-30) § prevention des files GitHub Actions.
+# One-shot audited cleanup of superseded CI runs ONLY. This workflow lives on
+# its own checkpoint-based maintenance branch; never merge into main.
+# Source owner: Zombicide-40k. Never delete branches, commits, assets or artifacts.
+name: GenSrpg one-shot audited obsolete CI queue cleanup 2026-11-07
+
+on:
+  push:
+    branches:
+      - work/gensrpg-actions-queue-cleanup-2026-11-07
+    paths:
+      - '.github/workflows/gensrpg-audited-queue-cleanup-20261107.yml'
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: write
+
+concurrency:
+  group: gensrpg-one-shot-ci-cleanup-20261107
+  cancel-in-progress: false
+
+jobs:
+  cancel-obsolete-exact-runs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Verify current main and both PR heads before a single cancellation
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner='slyen4425-cloud', repo='Zombicide-40k';
+            const base='9537ee28a626522246b7be16c690375cd8e4e164';
+            const expectedBranch='refs/heads/work/gensrpg-actions-queue-cleanup-2026-11-07';
+            if(context.repo.owner!==owner || context.repo.repo!==repo ||
+               context.ref!==expectedBranch || context.eventName!=='push')
+              throw Error('Ref/repository/event unexpected. Nothing cancelled.');
+            const groups=[
+              {
+                pr:304,branch:'work/gensrpg-pwa-cache-isolation-2026-11-07',
+                head:'d51db6fb0816ebaeb7210aad38f6a6138b76dc83',
+                oldShas:[
+                  'd7aa5328d469f3194e299e834e5b2c8643b962bc',
+                  '643069d51e0ceaec42fc577eb414a71298879cea',
+                  'f5cdff7a547cc00b0417d1e4d2861dbc1dbbd3e2',
+                  'fe837d61293fab295585b2992337de18fa05c3fc',
+                  'd34e01cb7f78e5db3aabd0646373f8d40d8649d5',
+                  '441856dd00c3d628ef4cd0c81349c1dce63495c1',
+                  'a2603ae2e052d6751674f971493aa864f463e712',
+                  '550bb398d94cf4d66d36017b364b52a4dd79e4f4',
+                  '76c09aa940a93f21b128cc109f57836af99c1b09'
+                ],
+                ids:[
+                  42361378562,42361378492,42361374589,42361374627,
+                  42361344849,42361344884,42361340515,42361340482,
+                  42361327435,42361327545,42361324073,42361324058,
+                  42361304804,42361304813,42361301121,42361301166,
+                  42361145946,42361145933,42361142579,42361142568,
+                  42360590325,42360571293,42360542574,42360503180,
+                  42360485853
+                ]
+              },
+              {
+                pr:305,branch:'work/gensrpg-capture-v2-certified-autopropose-2026-11-07',
+                head:'1fe064d5cf7855867781ead639080058bfb81ec8',
+                oldShas:[
+                  '55a58b9ff7eaecbcd2bbb44fc147d3f44603cdea',
+                  '6b4e0e1628a47f0720defec514a8973c28159184',
+                  'f07edd3d5cec75cde45476a3c2f969f17605040e',
+                  'bb9d920d0e96d8aefb68bc74fd23ed9ff0684232',
+                  'df68d3dd069ce913b94cbc489ad02da5ef4ff521',
+                  'f54c9b2ad09eea86102a4e4617435e9cc7a7eef6'
+                ],
+                ids:[
+                  42361162339,42361145785,42361145771,
+                  42361089654,42361089636,42361042319,42361042300,
+                  42361027184,42361027194,42361001376,42360889925
+                ]
+              }
+            ];
+            const exactIds=groups.flatMap(g=>g.ids);
+            if(new Set(exactIds).size!==exactIds.length || exactIds.length!==36)
+              throw Error('Audited exact-run list changed; no cancellation.');
+            const main=await github.rest.git.getRef({owner,repo,ref:'heads/main'});
+            if(main.data.object.sha!==base)
+              throw Error('Publisher main changed; no cancellation.');
+            for(const g of groups){
+              const pr=await github.rest.pulls.get({owner,repo,pull_number:g.pr});
+              if(pr.data.state!=='open'||!pr.data.draft||
+                 pr.data.base.ref!=='main'||pr.data.head.ref!==g.branch||
+                 pr.data.head.sha!==g.head)
+                throw Error('PR #'+g.pr+' changed since audit; no cancellation.');
+              const ref=await github.rest.git.getRef({owner,repo,ref:'heads/'+g.branch});
+              if(ref.data.object.sha!==g.head)
+                throw Error('PR #'+g.pr+' branch moved; no cancellation.');
+            }
+            const active=new Set(['queued','pending','waiting','requested','in_progress']);
+            const safeNames=new Set([
+              'GenSrpG architecture sentinels',
+              'GenSrpG Tactical dock sentinel'
+            ]);
+            const journal=[];
+            for(const g of groups){
+              const shaSet=new Set(g.oldShas);
+              for(const id of g.ids){
+                const item=(await github.rest.actions.getWorkflowRun({owner,repo,run_id:id})).data;
+                const link='https://github.com/'+owner+'/'+repo+'/actions/runs/'+id;
+                let reason='';
+                if(item.head_branch!==g.branch || !shaSet.has(item.head_sha) ||
+                   item.head_sha===base || item.head_sha===g.head)
+                  reason='HEAD/branch not in approved superseded set';
+                else if(!safeNames.has(item.name) ||
+                        !['pull_request','push'].includes(item.event))
+                  reason='protected workflow or manually dispatched run';
+                else if(!active.has(item.status))
+                  reason='run has already finished';
+                if(reason){
+                  console.log('SKIP '+id+' '+reason+' '+link);
+                  journal.push({id,pr:g.pr,status:'SKIP',reason});
+                  continue;
+                }
+                // Each action targets the exact audited run ID. Never touch
+                // an active release, latest PR head, checkpoint, or main CI.
+                try{
+                  const result=await github.rest.actions.cancelWorkflowRun({
+                    owner,repo,run_id:id
+                  });
+                  if(result.status!==202)
+                    throw Error('Unexpected cancellation response '+result.status);
+                  console.log('CANCEL ACCEPTED '+id+' PR #'+g.pr+' '+item.head_sha+
+                    ' '+item.name+' '+link);
+                  journal.push({id,pr:g.pr,status:'CANCEL_ACCEPTED',
+                    reason:'superseded PR SHA, exact audited ID'});
+                }catch(error){
+                  if(error.status===409 || error.status===404){
+                    console.log('SKIP '+id+' completed during check: '+error.status);
+                    journal.push({id,pr:g.pr,status:'SKIP',
+                      reason:'already completed during cancellation'});
+                  }else{
+                    console.error('CANCEL FAILED '+id+' '+error.message);
+                    journal.push({id,pr:g.pr,status:'ERROR',reason:String(error.message)});
+                  }
+                }
+              }
+            }
+            const accepted=journal.filter(x=>x.status==='CANCEL_ACCEPTED');
+            const errors=journal.filter(x=>x.status==='ERROR');
+            await core.summary.addHeading('GenSrpg — audited Actions queue cleanup')
+              .addRaw('Protected: main '+base+'; PR #304 '+groups[0].head+
+                '; PR #305 '+groups[1].head+'.',true)
+              .addRaw('Exact audited runs: '+exactIds.length+
+                '; cancellation requests accepted: '+accepted.length+
+                '; skipped: '+journal.filter(x=>x.status==='SKIP').length+
+                '; errors: '+errors.length+'.',true)
+              .addTable([[
+                {data:'Run ID',header:true},{data:'PR',header:true},
+                {data:'Result',header:true},{data:'Reason',header:true}
+              ],...journal.map(x=>[
+                String(x.id),String(x.pr),x.status,x.reason
+              ])]).write();
+            if(errors.length)
+              throw Error(errors.length+' cancellation requests failed; see run journal.');

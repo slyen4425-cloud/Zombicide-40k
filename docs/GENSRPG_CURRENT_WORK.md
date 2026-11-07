@@ -822,3 +822,11 @@ Références : `docs/GENSRPG_CHARTE.md` §§1–5 et 12–26, `docs/GENSRPG_CHEC
 - TDD tests/gens_capture_v2_certified_autopropose_20261107.test.mjs ; six C2 workflows explicitement relancés via workflow_dispatch. Fallback issue si GitHub refuse les PR.
 - Gate : NON GREEN sans CI exacte, vraie publication Pages et tests sur Android ; pas de changement du mode Jouer.
 - Détails : docs/GENSRPG_CAPTURE_V2_LAB_AUTO_PROPOSALS_2026-11-07.md.
+
+---
+
+2026-11-07 — C2 PWA isolation cache (PR #304 DRAFT)
+- START main 9537ee28a626522246b7be16c690375cd8e4e164 ; checkpoint/gensrpg-start-pwa-cache-isolation-2026-11-07.
+- Owner service-worker.js ; RED/GREEN tests/gensrpg_pwa_cache_isolation_20261107.test.cjs ; cache versionné gensrpg-cache-* ; preview préservé ; jamais d'effacement IndexedDB.
+- Gate C2 : CI exacte, publication Pages et contrôle PWA installée Android ; NON GREEN avant preuve.
+- Détails : docs/GENSRPG_PWA_UPDATE_CACHE_ISOLATION_2026-11-07.md.

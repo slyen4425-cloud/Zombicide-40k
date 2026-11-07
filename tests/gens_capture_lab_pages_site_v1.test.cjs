@@ -28,11 +28,19 @@ test('final Pages build contains pinned official modules and exact signed author
   assert.equal(hash(bytes),entry.sha256,entry.path+' signature');
  }
 });
-test('real public Shell unchanged, no alternate Combat runtime or premature PWA precache',()=>{
+test('real public Shell unchanged, no alternate Combat runtime or premature PWA precache',async()=>{
  const html=rel(site,'index.html').toString('utf8');
  const source=rel(root,'index.html').toString('utf8');
  const sw=rel(site,'service-worker.js');
- assert.deepEqual(sw,rel(root,'service-worker.js'),'never rewrite the PWA cache during dormant delivery');
+ // The SINGLE publisher stamps only the root cache version at build time.
+ // Compare the entire worker byte-for-byte after the canonical SHA stamp;
+ // this still rejects any other code change or a second Capture runtime.
+ const {stampWorkerForCommit}=await import('../tools/version_pwa_release_worker.mjs');
+ const releaseSha=process.env.GITHUB_SHA;
+ assert.match(releaseSha||'',/^[0-9a-f]{40}$/,'release must have an immutable build SHA');
+ const expectedWorker=stampWorkerForCommit(rel(root,'service-worker.js').toString('utf8'),releaseSha);
+ assert.deepEqual(sw,Buffer.from(expectedWorker,'utf8'),
+   'PWA built output may change ONLY the single root cache version for this exact release');
  // Exact script tags from the user-certified index (Git blob
  // 17ba8e6f1faf6f8a0be8cdec68c4515d538ff646). World and roster are
  // deliberately versioned ?v=1; the live Pages output must preserve both

@@ -136,18 +136,20 @@ test('historical adventure saves without progression bands, stat wallets or host
  assert.equal(Object.hasOwn(store.load(),'sessionControl'),false);
 });
 
-test('showcase settings expose real game creation, 5 editable XP brackets and official-stat wallet',()=>{
+test('showcase setup exposes progression configuration while stat allocation belongs to in-game sheet',()=>{
  const html=fs.readFileSync(new URL('../assets/gensrpg/capture-v2/adventure.html',import.meta.url),'utf8');
  const script=fs.readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
  for(const id of ['adventure-xp-mode','adventure-xp-bands','adventure-xp-band-add',
-  'adventure-stat-points-per-level','adventure-stat-wallet','adventure-stat-points-left',
+  'adventure-stat-points-per-level',
   'adventure-creator-panel','adventure-gm-enabled','adventure-join-enabled',
   'adventure-guest-edit-progression','adventure-guest-edit-rewards',
   'adventure-guest-edit-world','adventure-guest-allocate-stats','adventure-save-control']){
    assert.ok(html.includes('id="'+id+'"'),'missing game setting/owner UI '+id);
  }
  assert.match(script,/SHOWCASE_ADVENTURE_RULES_V1/);
- assert.match(script,/availableAdventureStatPointsV1/);
+ const sheet=fs.readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-play-sheet-view-v1.mjs',import.meta.url),'utf8');
+ assert.match(sheet,/onAllocate:tab==='stats'\\?onAllocate:null/);
+ assert.doesNotMatch(html,/id="adventure-stat-wallet"/);
  assert.match(script,/allocateAdventureStatPointsV1/);
  assert.match(script,/updateAdventureSessionControlV1/);
  assert.match(script,/officialStatRegistry/);

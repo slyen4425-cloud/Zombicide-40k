@@ -1,3 +1,12 @@
+## 2026-11-07 — Publication du correctif écran de préparation Monster Capture V2 (C2, candidat)
+- Base publiable unique : `main@f173b46fc4122311b33b9dfa86368630cb9dbb69`, checkpoint START `checkpoint/gensrpg-start-capture-preparation-publish-2026-11-07`, branche de publication `work/gensrpg-capture-preparation-publish-2026-11-07`.
+- Source Capture V2 : PR #316, correction de propriétaire dans `assets/gensrpg/capture-v2/adventure.html`, suppression du panneau de distribution pendant la préparation, allocation conservée dans la fiche en jeu. SHA de source candidat : `5e5fa6ada3afff8364c2937a73c185e0a3fdc6f8` (doit être GREEN sur SHA exact avant fusion de la PR ou promotion finale).
+- Un seul publisher : mise à jour du seul `tools/capture_v2_pages_preview_pin.json`, prévisualisation sous le chemin existant du site, et test TDD du vrai HTML construit `tests/gens_capture_v2_preparation_publish_20261107.test.mjs` dans les jobs build et review. Aucun moteur, fichier `index.html` historique, cache ou sauvegarde modifié.
+- Sources officielles Combat/Exploration **inchangées** dans la source Capture. Le publisher conserve les contrôles canoniques `resolve_capture_v2_preview_sources.mjs` et `verify_official_main_pin.mjs`; ne pas introduire de second vérificateur ni reprendre un `main` Combat en cours non certifié.
+- Gate requis : CI source incluant préparation, contrats, CI des labos immuables et vrai navigateur ; CI publisher exacte (assemblage, budget 900 Mio, origine, CSS/HTML, Chromium), Pages SUCCESS et HTTP(S) provenance. Aucune publication GREEN avant ces preuves.
+
+---
+
 ## 2026-11-07 — GenSRPG main : raccord du bouton Monster Capture au runtime V2 (C2 NON GREEN)
 - START: main `a46b1104e56cf6c60a1eae9bd4829b181e9a3c08`, checkpoint `checkpoint/gensrpg-start-gensrpg-capture-v2-root-entry-2026-11-07`, branche `work/gensrpg-capture-v2-root-entry-2026-11-07`.
 - Le Shell **publié** ne doit plus lancer l'ancien module Capture : entrée unique vers le V2 déjà transporté par le publisher sous /preview/capture-v2-pr225/, sans dupliquer combat/exploration, sans modifier sauvegardes, Survie ou Dungeon.
@@ -859,3 +868,4 @@ Références : `docs/GENSRPG_CHARTE.md` §§1–5 et 12–26, `docs/GENSRPG_CHEC
 - Owner service-worker.js ; RED/GREEN tests/gensrpg_pwa_cache_isolation_20261107.test.cjs ; cache versionné gensrpg-cache-* ; preview préservé ; jamais d'effacement IndexedDB.
 - Gate C2 : CI exacte, publication Pages et contrôle PWA installée Android ; NON GREEN avant preuve.
 - Détails : docs/GENSRPG_PWA_UPDATE_CACHE_ISOLATION_2026-11-07.md.
+

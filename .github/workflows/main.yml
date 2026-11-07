@@ -487,11 +487,19 @@ jobs:
           node tools/stage_capture_v2_pages_preview.mjs capture-v2-source preview-combat-lab preview-exploration-lab _site preview-combat-assets
           # Execute the unit tests from the EXACT pinned Capture source, not the old main.
           node --test capture-v2-source/tests/gens_capture_v2_adventure_save_defeat_policy_20261107.test.mjs
+          node --test capture-v2-source/tests/gens_capture_v2_preparation_stats_owner_20261107.test.mjs
+          node --test capture-v2-source/tests/gens_capture_v2_adventure_progression_access_v1.test.mjs
+          node --test capture-v2-source/tests/gens_capture_v2_adventure_hp_policy_20261105.test.mjs
+          node --test capture-v2-source/tests/gens_capture_v2_adventure_combat_commit_v1.test.mjs
+          node --test capture-v2-source/tests/gens_capture_v2_official_pin_lineage_20261107.test.mjs
+          node --test capture-v2-source/tests/gens_capture_v2_clean_boundary.test.cjs
+          node --test capture-v2-source/tests/gens_capture_combat_main_only_guard_20261030.test.cjs
           node --test capture-v2-source/tests/gens_capture_v2_result_world_archive_20261107.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_portfolio_v1.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_contract_v1.test.mjs
           node --test tests/gens_capture_v2_auto_update_20261107.test.mjs
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
+          node --test tests/gens_capture_v2_preparation_publish_20261107.test.mjs
           node --test tests/gens_capture_v2_encounter_bridge_site.test.cjs
 
       - name: Auditer taille réelle et duplication du site avant toute publication
@@ -614,6 +622,7 @@ jobs:
           node --test capture-v2-source/tests/gens_capture_v2_adventure_contract_v1.test.mjs
           node --test tests/gens_capture_v2_auto_update_20261107.test.mjs
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
+          node --test tests/gens_capture_v2_preparation_publish_20261107.test.mjs
           node --test tests/gens_capture_v2_encounter_bridge_site.test.cjs
       - name: Install Chromium and verify the real nested site
         run: |

@@ -67,7 +67,9 @@ test('editable percentage remains in the same compact Aventure UI without hardca
  const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
  assert.match(html,/id="adventure-combat-hp-percent"[^>]*min="1"[^>]*max="100"/);
  assert.match(app,/hpPercent:'adventure-combat-hp-percent'/);
- assert.match(app,/combat:\{hpMultiplier:numberFrom\(idField\.hpPercent\)\/100\}/);
+ // Recovery/KO policy is an additional real field of the SAME Combat rule.
+ // Reject a missing HP multiplier or missing defeat policy, not that extension.
+ assert.match(app,/combat:\{hpMultiplier:numberFrom\(idField\.hpPercent\)\/100,\s*defeatPolicy:\$\('adventure-defeat-policy'\)\.value\}/);
  assert.match(app,/idField\.hpPercent\)\.value=100\*value\.combat\.hpMultiplier/);
  const cap=html.match(/<input[^>]*id="adventure-level-max"[^>]*>/)?.[0];
  assert.ok(cap,"the creator\'s free creature cap remains editable");

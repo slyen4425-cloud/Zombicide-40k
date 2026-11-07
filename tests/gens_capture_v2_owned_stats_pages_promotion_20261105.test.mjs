@@ -13,12 +13,12 @@ test('Monster Capture release pins one immutable candidate and proves the select
  assert.match(file.sha,/^[0-9a-f]{40}$/,'approved candidate must be an immutable Git commit SHA');
  assert.equal(file.publicPath,'/preview/capture-v2-pr225/');
  const workflow=fs.readFileSync(new URL('../.github/workflows/main.yml',import.meta.url),'utf8');
- assert.equal((workflow.match(/ref: \\$\\{\\{ steps\\.preview_pin\\.outputs\\.sha \\}\\}/g)||[]).length,2,
+ assert.equal((workflow.match(/ref: \$\{\{ steps\.preview_pin\.outputs\.sha \}\}/g)||[]).length,2,
   'build and review must both checkout the single source pin');
  const stage=fs.readFileSync(new URL('../tools/stage_capture_v2_pages_preview.mjs',import.meta.url),'utf8');
- assert.match(stage,/if\\(head\\(source\\)!==expectedPreviewSha\\)/,
+ assert.match(stage,/if\(head\(source\)!==expectedPreviewSha\)/,
   'the real staged checkout must match the selected candidate exactly');
- assert.match(stage,/release-provenance\\.v1\\.json/,
+ assert.match(stage,/release-provenance\.v1\.json/,
   'publish the selected SHA in the inspectable release manifest');
 });
 test('published Monster Capture stays isolated and retains exact certified original visual author',()=>{

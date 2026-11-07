@@ -45,6 +45,10 @@ test('actual assembled preview uses GitHub Pages publisher SHA, not the pinned s
  assert.ok(html.includes('<meta name="z40k-app-version" content="gensrpg-release-'+sha.slice(0,12)+'">'));
  assert.ok(html.includes('const Z40K_APP_VERSION = "gensrpg-release-'+sha.slice(0,12)+'";'));
  assert.equal(provenance.publisherCommit,sha);
+ assert.match(html,/reg\.waiting\.postMessage\(\{type:'SKIP_WAITING'\}\)/,
+   'installed preview must activate any already waiting release automatically');
+ assert.match(html,/worker\.postMessage\(\{type:'SKIP_WAITING'\}\)/,
+   'installed preview must activate a new worker as soon as it installs');
  assert.equal(manifest.id,'./');
  assert.equal(manifest.scope,'./');
  assert.equal(manifest.start_url,'./');

@@ -9,7 +9,7 @@ import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {assertOfficialMainHistoryPin} from './verify_official_main_pin.mjs';
 import {stageOfficialCaptureEncounterBridge} from './stage_capture_v2_encounter_bridge.mjs';
-import {releasePreviewPwaForCommit} from './capture_v2_pwa_release.mjs';
+import {releasePreviewPwaForCommit,enableAutomaticPreviewActivation} from './capture_v2_pwa_release.mjs';
 
 const [sourceArg,combatArg,explorationArg,siteArg,visualsArg]=process.argv.slice(2);
 if(!sourceArg||!combatArg||!explorationArg||!siteArg||!visualsArg)
@@ -69,7 +69,7 @@ const stagedPwa=releasePreviewPwaForCommit(
   publisherCommit
 );
 fs.writeFileSync(path.join(trial,'service-worker.js'),stagedPwa.worker);
-fs.writeFileSync(path.join(trial,'index.html'),stagedPwa.html);
+fs.writeFileSync(path.join(trial,'index.html'),enableAutomaticPreviewActivation(stagedPwa.html));
 for(const filename of fs.readdirSync(source).filter(x=>/^sound_.*\.mp3$/.test(x)))
   copyFile(filename);
 for(const filename of ['icon-192.png','icon-512.png']){

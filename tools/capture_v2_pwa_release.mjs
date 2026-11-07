@@ -42,3 +42,28 @@ export function releasePreviewPwaForCommit(sourceWorker,sourceHtml,releaseSha){
   const html=stampShellForCommit(sourceHtml,releaseSha);
   return Object.freeze({cacheName,worker,html});
 }
+
+
+/** Reuse the existing Shell service-worker registration; no extra controller.
+ * The old UI surfaced a button when a new worker was WAITING. Preview V2
+ * instead activates it automatically, leaving an active session's DOM intact
+ * until the next normal navigation/reopen (network-first documents).
+ */
+export function enableAutomaticPreviewActivation(sourceHtml){
+  if(typeof sourceHtml!=='string')throw Error('Invalid preview PWA Shell');
+  const waiting=`      if(reg.waiting){
+        z40kWaitingWorker=reg.waiting;
+        z40kShowUpdateBanner();
+      }`;
+  const installed=`          if(worker.state==='installed' && navigator.serviceWorker.controller){
+            z40kWaitingWorker=worker;
+            z40kShowUpdateBanner();
+          }`;
+  if(sourceHtml.split(waiting).length!==2||sourceHtml.split(installed).length!==2)
+    throw Error('Existing PWA Shell activation seam not uniquely identified');
+  return sourceHtml
+    .replace(waiting,waiting.replace('z40kShowUpdateBanner();',
+      "reg.waiting.postMessage({type:'SKIP_WAITING'});"))
+    .replace(installed,installed.replace('z40kShowUpdateBanner();',
+      "worker.postMessage({type:'SKIP_WAITING'});"));
+}

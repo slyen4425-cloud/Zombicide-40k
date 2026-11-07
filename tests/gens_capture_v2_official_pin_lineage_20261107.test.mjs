@@ -1,53 +1,49 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {verifyCaptureOfficialLabPinsV1,EXPECTED_LAB_REPOS}
- from '../tools/verify_capture_official_lab_pins_v1.mjs';
-const sha=x=>x.repeat(40);
-const pinned={schema:'gensrpg-capture-v2-official-main-pins-v1',legacyCaptureRuntime:false,
- combat:{repository:EXPECTED_LAB_REPOS.combat,ref:'main',sha:sha('a'),certifiedCiRun:11},
- exploration:{repository:EXPECTED_LAB_REPOS.exploration,ref:'main',sha:sha('b'),certifiedCiRun:22}};
-const currentPins=()=>JSON.parse(JSON.stringify(pinned));
+import {verifyCaptureOfficialLabPinsV1} from '../tools/verify_capture_official_lab_pins_v1.mjs';
+const sha=c=>c.repeat(40);
+const pins={schema:'gensrpg-capture-v2-official-main-pins-v1',legacyCaptureRuntime:false,
+ combat:{repository:'slyen4425-cloud/GenSrpg_labo_combat_dynamique',ref:'main',
+  sha:sha('a'),path:'vendor/combat-lab/',certifiedCiRun:11},
+ exploration:{repository:'slyen4425-cloud/laboratoire_dynamique_exploration-',ref:'main',
+  sha:sha('b'),path:'vendor/exploration-lab/',certifiedCiRun:22}};
+const fresh=()=>JSON.parse(JSON.stringify(pins));
+const actualProof=({repository,sha})=>({repository,pin:sha,ref:'refs/heads/main',
+ main:sha('c')});
 
-test('certified immutable SHA on current main is accepted without remote compare',async()=>{
- let compares=0;
- const result=await verifyCaptureOfficialLabPinsV1({pins:currentPins(),
-  headFor:async n=>pinned[n].sha,
-  compare:async()=>{compares++;return null;}});
- assert.equal(compares,0);
+test('a certified old Lab SHA is handed unchanged to the single canonical main-history authority',()=>{
+ const accepted=[];
+ const result=verifyCaptureOfficialLabPinsV1({pins:fresh(),assertHistory:arg=>{
+  accepted.push(arg);return {repository:arg.repository,pin:arg.sha,ref:'refs/heads/main',main:sha('c')};
+ }});
+ assert.deepEqual(accepted,[{repository:pins.combat.repository,sha:sha('a')},
+  {repository:pins.exploration.repository,sha:sha('b')}]);
  assert.deepEqual(result,{combat:sha('a'),exploration:sha('b')});
 });
-test('an older certified main SHA remains valid when current main advances without altering its ancestry',async()=>{
- const result=await verifyCaptureOfficialLabPinsV1({pins:currentPins(),
-  headFor:async n=>n==='combat'?sha('c'):sha('b'),
-  compare:async()=>({status:'ahead',ahead_by:12,behind_by:0,merge_base_commit:{sha:sha('a')}})});
- assert.equal(result.combat,sha('a'),'no silent upgrade to new Combat HEAD');
-});
-test('divergence, rollback, unrelated history and missing certification always fail closed',async()=>{
- for(const proof of [
-  {status:'diverged',ahead_by:2,behind_by:1,merge_base_commit:{sha:sha('f')}},
-  {status:'behind',ahead_by:0,behind_by:2,merge_base_commit:{sha:sha('c')}},
-  {status:'ahead',ahead_by:12,behind_by:0,merge_base_commit:{sha:sha('f')}}
+test('missing official ancestry proof or fake source identity is rejected without selecting latest Lab main',()=>{
+ for(const invalid of [
+  ({repository,sha:pin})=>({repository,pin:sha('f'),ref:'refs/heads/main'}),
+  ({repository,sha:pin})=>({repository,pin,ref:'refs/heads/gh-pages'}),
+  ()=>null
  ]){
-  await assert.rejects(verifyCaptureOfficialLabPinsV1({pins:currentPins(),
-    headFor:async n=>n==='combat'?sha('c'):sha('b'),compare:async()=>proof}),
-    /main lineage/);
+  assert.throws(()=>verifyCaptureOfficialLabPinsV1({pins:fresh(),assertHistory:invalid}),
+   /not proven/);
  }
- for(const mutation of [p=>{p.combat.certifiedCiRun=0},p=>{p.combat.ref='gh-pages'},
-  p=>{p.combat.repository='other/repository'},p=>{p.legacyCaptureRuntime=true}]){
-  const changed=currentPins();mutation(changed);
-  await assert.rejects(verifyCaptureOfficialLabPinsV1({pins:changed,
-   headFor:async n=>pinned[n].sha,compare:async()=>null}),/pin|ownership/i);
+ for(const edit of [p=>p.combat.ref='gh-pages',p=>p.combat.certifiedCiRun=0,
+  p=>p.combat.sha='main',p=>p.combat.repository='other/repo',p=>p.legacyCaptureRuntime=true]){
+  const bad=fresh();edit(bad);
+  assert.throws(()=>verifyCaptureOfficialLabPinsV1({pins:bad,assertHistory:actualProof}),
+    /Uncertified|manifest/i);
  }
- await assert.rejects(verifyCaptureOfficialLabPinsV1({pins:currentPins(),
-  headFor:async n=>n==='combat'?sha('c'):sha('b'),
-  compare:async()=>{throw Error('HTTP 429');}}),/HTTP 429/);
 });
-test('all official workflows reuse this one verified main-pin contract instead of the moving-tip equality',()=>{
- for(const path of ['.github/workflows/capture-v2-clean-base.yml',
+test('source CI workflows reuse canonical, immutable main-history proof',()=>{
+ const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+ const facade=read('tools/verify_capture_official_lab_pins_v1.mjs');
+ assert.match(facade,/import \{assertOfficialMainHistoryPin\} from '\.\/verify_official_main_pin\.mjs'/);
+ assert.doesNotMatch(facade,/compare\//,'do not reimplement ancestry in Capture');
+ for(const p of ['.github/workflows/capture-v2-clean-base.yml',
   '.github/workflows/capture-lab-delivery.yml','.github/workflows/main.yml']){
-  const yml=readFileSync(new URL('../'+path,import.meta.url),'utf8');
-  assert.match(yml,/node tools\/verify_capture_official_lab_pins_v1\.mjs/);
-  assert.doesNotMatch(yml,/main moved: approved consumer|main has changed: recertify|Uncertified .* main drift/);
+  assert.match(read(p),/node tools\/verify_capture_official_lab_pins_v1\.mjs/);
  }
 });

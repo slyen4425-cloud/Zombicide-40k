@@ -1,3 +1,14 @@
+# 2026-11-07 — Capture V2 : affichage des résultats officiels et archive de monde périmée (source C2)
+
+- **BASE immuable** : source Capture V2 publiée `d58677893322d6eb4ebefc6b2bc0acbfe866388a` ; START `checkpoint/gensrpg-start-capture-results-world-links-2026-11-07` ; travail `work/gensrpg-capture-results-world-links-2026-11-07`.
+- **Propriétaire** : Aventure GenSRPG affiche seulement `applyAdventureCombatResultV1` déjà committé ; Combat garde les outcomes, Exploration garde les Portal/Spawn/WorldDocument/positions. Zéro calcul d'XP ou loot dans l'UI, aucune nouvelle base, aucun média copié.
+- **RED utilisateur** : après le combat, seul un message de reprise est visible alors que `lastAward` XP/niveau/loot a déjà été enregistré ; une carte testée récemment dans Exploration peut différer de sa version archivée choisie dans Capture ; les anciens listeners de retour de combat peuvent rester montés après réentrée en partie.
+- **Correction** : une présentation modalisée affiche exactement `session.lastAward` (XP actifs/héros, niveau, pièces, items), boutons de consultation et fermeture ; source publique projetée par `projectAdventureCombatAwardV1`. Le Host Combat fournit une callback lecture seule et un `dispose()` appelé avant tout remontage. Comparaison des empreintes WorldDocument officielles avant activation et message de sauvegarde explicite, sans reconstituer le graphe ni écraser la bibliothèque Explorer.
+- **Tests** : TDD `tests/gens_capture_v2_result_world_archive_20261107.test.mjs`, vérifier le CombatResult réel et le modal dans le navigateur Pages à la vraie URL imbriquée ; l'audit des passages en jeu reste chez Exploration.
+- **Protections** : saves indépendantes, WorldDocument, Combat main, Exploration main, Dungeon, Survie, PvP et PWA inchangés. Pas de publication avant CI source et PR promotion Pages exacte.
+
+---
+
 # 2026-11-07 — Correctifs des retours terrain Monster Capture (sauvegardes / KO)
 
 - **START immuable** : `checkpoint/gensrpg-start-capture-save-defeat-2026-11-07` au code Source Capture V2 `4b7c3ff9940b4a68bcc0a031a75e5e9ce2a54086`, branche `work/gensrpg-capture-save-defeat-2026-11-07`.

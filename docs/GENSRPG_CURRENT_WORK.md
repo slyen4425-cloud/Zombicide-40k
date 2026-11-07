@@ -1,9 +1,9 @@
-## 2026-11-08 — Livraison équipe initiale 1–6 créatures depuis la source V2 corrigée (C2)
-- START : `main@db2c2c72bef714e501ddf14c4ce537be573696ac` ; checkpoint `checkpoint/gensrpg-start-capture-team-1to6-publish-2026-11-08` ; branche `work/gensrpg-capture-team-1to6-publish-2026-11-08`.
-- Source immuable sélectionnée : `7c2a79882388113334aeb36e4dc63f92c7f92779` (#319), intégration des 1 à 6 créatures via la seule AdventureSession et les identités Bestiaire Combat, à promouvoir uniquement après CI source GREEN.
-- Un seul changement de version sur le publisher `tools/capture_v2_pages_preview_pin.json` (mêmes main Combat et Exploration, mêmes médias). Nouveau test dans `tests/gens_capture_v2_preparation_publish_20261107.test.mjs` : choix 1–6, sélecteur de créature active, jeu sans panneau de répartition des stats sur l'écran de préparation.
-- Aucune modification du moteur Exploration ou de caméra ; le chantier créateur d'angle dépend d'Exploration #388 et restera distinct jusqu'à GREEN. PWA, sauvegardes existantes, autres modes et graphiques officiels inchangés.
-- Critères : CI source #319, build/review Pages avec vrai navigateur, budget, preuve HTTPS et commit exact sur `main`. DRAFT avant GREEN.
+## 2026-11-08 — Livraison unique équipe 1–6, caméra auteur, Gorice et Gemmor dans la PWA (C2 candidat)
+- Publisher officiel `main@db2c2c72bef714e501ddf14c4ce537be573696ac`, checkpoint `checkpoint/gensrpg-start-capture-team-1to6-publish-2026-11-08`, PR #320. Un seul changement de `tools/capture_v2_pages_preview_pin.json` sélectionne la source Capture immuable `d446bb2104dec8bad5725d9000df54e268e00012` (#322), après l'équipe 1–6 (#319), le réglage caméra (#321), la disparition de la répartition hors-jeu (#316).
+- **Cause Gemmor/Gorice absents** : ancien pin Combat `ebaea5dc` sans les deux transferts/entrées de la liste d'auteur. Source finale pointe sur Combat main certifié `8f29e32c57792ea0e39063223bd61250e91b8433`, CI #42423563886 GREEN. Aucun transfert copié dans GenSRPG : import depuis le Bestiaire et le bundle officiels.
+- Caméra de partie : Exploration main `d9f90f5bf48b8c42699f0db2f2f797f1ebf17fa1`, CI #42426636928 GREEN ; seul Exploration contrôle l'angle et le zoom ; le créateur sauvegarde son choix dans AdventureSession Core.
+- Visuels : ancien catalogue officiel global-assets `aded6a9b` excluait le déplacement 12f de Gorice ; nouveau pin **immuable et certifié** `f61191afb001807955bccf3c5b2b5e292c76fc52` (CI #42036930914 GREEN), source unique, aucune copie inventée.
+- Garde `tests/gens_capture_v2_preparation_publish_20261107.test.mjs` étendue au **site réellement assemblé** : 1–6 créatures, Gemmor/Gorice Bestiaire jouables, assets physiques, caméra native, stats uniquement en partie, provenance exacte, budget 900 Mio, Chromium / SW/PWA. Ne déclarer GREEN/public qu'après CI source exacte et CI publisher, Pages HTTPS et preuve SHA. Sauvegardes/Survie/Dungeon inchangés.
 
 ---
 

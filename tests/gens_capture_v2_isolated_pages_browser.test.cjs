@@ -112,6 +112,17 @@ test('Adventure starts from the Pages menu and saves a native encounter once at 
   assert.equal(await fight.locator('[data-combat-skill]').count(),1,'only the true level-one skill is available');
   await fight.locator('[data-encounter-flee]').tap();
   await battle.waitFor({state:'detached'});
+  // Real CombatResult is committed in GenSRPG Core before this UI receipt.
+  const resultDialog=adventure.locator('#adventure-result-dialog:visible');
+  await resultDialog.waitFor({timeout:15000});
+  assert.equal(await adventure.locator('#adventure-result-title').textContent(),'Fuite');
+  const receipt=await adventure.locator('#adventure-result-rows').innerText();
+  assert.match(receipt,/XP créature/);
+  assert.match(receipt,/\+0 XP/);
+  assert.match(receipt,/XP du héros/);
+  assert.match(receipt,/Objets/);
+  await adventure.locator('#adventure-result-close').tap();
+  await resultDialog.waitFor({state:'hidden'});
   const save=await readSelectedAdventureSave(adventure.locator('#adventure-play'));
   assert.equal(save.party.active.level,1);
   assert.equal(save.party.active.xp,0);

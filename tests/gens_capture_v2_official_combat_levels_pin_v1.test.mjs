@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
 import {resolveCaptureCombatCreatureLevelsV1} from '../_site/vendor/combat-lab/src/ui/capture-editor-combat-test-v1.js';
 import {readScopedAdventurePlayingPartyV1} from '../_site/vendor/exploration-lab/src/encounters/adventure-playing-party-v1.js';
 import {writeAdventurePlayingPartyV1} from '../assets/gensrpg/capture-v2/adventure-playing-party-grant-v1.mjs';
@@ -12,11 +13,25 @@ test('GenSRPG consumer explicitly pins certified Combat main owner commit with p
  assert.equal(pins.combat.ref,'main');
  assert.equal(pins.combat.sha,'ebaea5dc40c4803add76563029a9dff67b964d55');
  assert.equal(pins.combat.certifiedCiRun,42113199995);
+ assert.equal(pins.exploration.repository,'slyen4425-cloud/laboratoire_dynamique_exploration-');
  assert.equal(pins.exploration.ref,'main');
- assert.equal(pins.exploration.sha,'a2db1825f0a1a833fadcd02d7804f887c864a1d2',
-  'Exploration pin must be the certified official main, including real HP policy and exact Adventure duel');
- assert.equal(pins.exploration.certifiedCiRun,42111392258);
- // PR #378 tested its HEAD; the merge commit still requires exact main-CI proof before promotion.
+ assert.match(pins.exploration.sha,/^[a-f0-9]{40}$/,
+  'Exploration must be an immutable published main commit, never a floating ref');
+ assert.ok(Number.isSafeInteger(pins.exploration.certifiedCiRun)&&
+  pins.exploration.certifiedCiRun>0,'Missing exact Exploration main CI certification');
+ // The parent release workflow has already verified refs/heads/main against
+ // the immutable candidate pin, and checked out this exact official commit.
+ // Requiring AN OLD hardcoded SHA here would veto every legitimate update.
+ // Verify the CHECKED OUT bytes instead of maintaining a second authority.
+ const realExploration=execFileSync('git',
+  ['-C','exploration-lab','rev-parse','HEAD'],{encoding:'utf8'}).trim();
+ assert.equal(realExploration,pins.exploration.sha,
+  'Native Exploration source MUST be the exact certified main checkout');
+ const delivery=JSON.parse(fs.readFileSync(new URL(
+  '../_site/assets/gensrpg/capture-v2/delivery-manifest.json',import.meta.url),'utf8'));
+ assert.equal(delivery.exploration.sha,pins.exploration.sha,
+  'The staged Adventure must use exactly the same official Exploration bytes');
+ assert.equal(delivery.exploration.ref,'main');
 });
 test('a true owned starter level 1 and an enemy level 3 project independently through official Combat',()=>{
  const levels=resolveCaptureCombatCreatureLevelsV1({

@@ -25,3 +25,20 @@ test('the deployed provenance stays pinned to the exact candidate, not a duplica
  assert.equal(prov.publicPath,pinned.publicPath);
  assert.equal(prov.legacyCaptureRuntime,false);
 });
+
+test('the published preparation offers 1–6 real starter creatures without restoring the removed stat wallet',()=>{
+ const html=read(assembled+'assets/gensrpg/capture-v2/adventure.html');
+ const app=read(assembled+'assets/gensrpg/capture-v2/adventure-app-v1.mjs');
+ const contract=read(assembled+'assets/gensrpg/capture-v2/adventure-contract-v1.mjs');
+ assert.match(html,/id="adventure-starter-count"/);
+ for(let n=1;n<=6;n++)assert.ok(html.includes('<option value="'+n+'"'),'starter count '+n+' missing');
+ assert.match(html,/id="adventure-starter-reserve"/);
+ assert.match(html,/id="adventure-active-creature"/);
+ assert.match(html,/id="adventure-select-active"/);
+ assert.match(app,/getStarterSpeciesIds\(\)/);
+ assert.match(app,/chooseAdventureActiveCreatureV1\(/);
+ assert.match(contract,/reserveInstanceIds/);
+ assert.match(contract,/new Set\(instanceIds\)\.size!==instanceIds\.length/);
+ assert.doesNotMatch(html,/id="adventure-stat-wallet"/);
+ assert.doesNotMatch(app,/renderStatWallet\(/);
+});

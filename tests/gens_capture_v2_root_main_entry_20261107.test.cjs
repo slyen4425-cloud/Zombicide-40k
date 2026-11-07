@@ -11,13 +11,20 @@ const read=p=>fs.readFileSync(path.join(root,p),'utf8');
 
 test('main Shell chooses exactly one Capture V2 route before the legacy Capture menu',()=>{
  const hub=read('assets/gensrpg/shell/legacy-hub-family-ui-v1.js');
+ const {stage}=require('../tools/stage_capture_v2_main_root_entry.cjs');
+ const published=stage(hub);
  const marker='data-gensrpg-main-capture-route="v2"';
- assert.ok(hub.indexOf('GensCaptureMainEntryV1.open')>0,'Shell must delegate to the official Capture entry');
- assert.ok(hub.indexOf('GensCaptureMainEntryV1.open')<hub.indexOf('gensSelectedFamily=family'),
+ assert.doesNotMatch(hub,/GensCaptureMainEntryV1\.open/,'preserve byte-exact archived Shell source');
+ assert.ok(published.indexOf('GensCaptureMainEntryV1.open')>0,
+  'assembled public Shell must delegate to the official Capture entry');
+ assert.ok(published.indexOf('GensCaptureMainEntryV1.open')<published.indexOf('gensSelectedFamily=family'),
   'public route must run before any legacy Capture state or UI is activated');
- assert.match(hub,/data-gensrpg-main-capture-route/,'main route must be an explicit published entry');
- assert.match(hub,/throw new Error\(/,'fail closed if the published authoritative module is not loaded');
+ assert.match(published,/data-gensrpg-main-capture-route/,'route must be explicit in the published artifact');
+ assert.match(published,/throw new Error\(/,'fail closed if the published authoritative module is not loaded');
+ assert.throws(()=>stage(published),/drift or duplicate/,'never compile a second Capture route');
  const workflow=read('.github/workflows/main.yml');
+ assert.match(workflow,/node tools\/stage_capture_v2_main_root_entry\.cjs _site\/assets\/gensrpg\/shell\/legacy-hub-family-ui-v1\.js/,
+  'publisher must stage the EXACT root owner file, never the historical source');
  assert.ok(workflow.includes(marker),'single main publisher must inject the routing entry');
  assert.ok(workflow.includes('capture-v2-main-entry-v1.js'),'main router must ship its exact owner');
 });

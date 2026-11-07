@@ -300,8 +300,8 @@ jobs:
               (Path("_site/assets/gensrpg/core/stats-snapshot-v1.js"), '<script src="assets/gensrpg/core/stats-snapshot-v1.js?v=1"></script>', "GenSrpG Core Stats snapshot missing"),
               (Path("_site/assets/gensrpg/gens-rpg-stats-clean-167874.js"), '<script src="assets/gensrpg/gens-rpg-stats-clean-167874.js?v=167874"></script>', "GenSrpG clean dynamic RPG stat module missing"),
               (Path("_site/assets/gensrpg/gens-dungeon-hero-art-repair-167874.js"), '<script src="assets/gensrpg/gens-dungeon-hero-art-repair-167874.js?v=167874"></script>', "Dungeon built-in hero art repair missing"),
-              (Path("_site/assets/gensrpg/gens-mobile-combat-performance-16781022.js"), '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>', "GenSrpG mobile combat performance module missing"),
               (Path("_site/assets/gensrpg/shell/capture-v2-main-entry-v1.js"), '<script data-gensrpg-main-capture-route="v2" src="assets/gensrpg/shell/capture-v2-main-entry-v1.js"></script>', "GenSrpG official main Capture V2 route missing"),
+              (Path("_site/assets/gensrpg/gens-mobile-combat-performance-16781022.js"), '<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>', "GenSrpG mobile combat performance module missing"),
               (Path("_site/assets/gensrpg/shell/module-launch-final-authority-v1.js"), '<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>', "GenSrpG final Shell module launch authority missing"),
           ]
           html = index.read_text(encoding="utf-8")

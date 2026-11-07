@@ -249,6 +249,9 @@ jobs:
       - name: Capture V2 — véritable Combat main et niveaux 1 uniques, pas de fallback Tester (TDD)
         run: node --test tests/gens_capture_v2_official_combat_levels_pin_v1.test.mjs
 
+      - name: Gorice et Gemmor du vrai Bestiaire Combat, caméra Exploration certifiée (TDD)
+        run: node --test tests/gens_capture_v2_official_gorice_gemmor_20261108.test.mjs
+
       - name: Install browser test dependencies
         run: |
           npm install --no-save --no-package-lock playwright@1.57.0 pngjs@7.0.0

@@ -192,8 +192,14 @@ test('isolated HTTPS Jouer has creator-owned unlimited level caps, Core XP bands
   assert.ok(field,'creator must see '+id);
   assert.doesNotMatch(field,/max="100"/,'no 100 hard cap on '+id);
  }
- for(const id of ['adventure-xp-bands','adventure-stat-points-per-level','adventure-stat-wallet','adventure-gm-enabled','adventure-combat-hp-percent'])
+ for(const id of ['adventure-xp-bands','adventure-stat-points-per-level','adventure-gm-enabled','adventure-combat-hp-percent'])
   assert.ok(game.includes('id="'+id+'"'),'real game creator setting missing: '+id);
+ assert.doesNotMatch(game,/id="adventure-stat-wallet"/,
+  'stat allocation belongs to the playing sheet, never to game setup');
+ assert.match(game,/data-adventure-sheet-tab="stats"/,
+  'the in-game creature stat allocation tab remains available');
+ assert.match(app,/allocatePlayingSheetStat/,
+  'the original Core-backed in-game allocation owner remains active');
  assert.match(contract,/SHOWCASE_ADVENTURE_RULES_V1/);
  assert.match(core,/progressInBands/);
  assert.match(app,/extendFinalXpBandToCap/);

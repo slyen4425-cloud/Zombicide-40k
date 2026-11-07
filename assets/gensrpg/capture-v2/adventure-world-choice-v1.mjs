@@ -37,3 +37,17 @@ export function activateSelectedAdventureWorldV1({worldLibrary,selectedWorldId}=
  // corrupt author draft. Capture NEVER reimplements that protection.
  return worldLibrary.activate(selectedWorldId);
 }
+
+// Only compare the TWO official Exploration WorldDocuments. This detects
+// unsaved author edits without interpreting Portal geometry in GenSRPG.
+export function checkAdventureWorldArchiveV1({
+ activeWorld,archivedWorld,selectedWorldId,fingerprint
+}={}){
+ if(typeof fingerprint!=='function')
+  throw new TypeError('Empreinte officielle du monde Exploration requise');
+ if(!identifier(selectedWorldId)||archivedWorld?.id!==selectedWorldId)
+  throw new Error('WorldDocument archivé non conforme à la sélection');
+ const stale=activeWorld?.id===selectedWorldId&&
+  fingerprint(activeWorld)!==fingerprint(archivedWorld);
+ return Object.freeze({stale});
+}

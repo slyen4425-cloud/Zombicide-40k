@@ -148,7 +148,7 @@ test('showcase setup exposes progression configuration while stat allocation bel
  }
  assert.match(script,/SHOWCASE_ADVENTURE_RULES_V1/);
  const sheet=fs.readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-play-sheet-view-v1.mjs',import.meta.url),'utf8');
- assert.match(sheet,/onAllocate:tab==='stats'\\?onAllocate:null/);
+ assert.match(sheet,/onAllocate:tab==='stats'\?onAllocate:null/);
  assert.doesNotMatch(html,/id="adventure-stat-wallet"/);
  assert.match(script,/allocateAdventureStatPointsV1/);
  assert.match(script,/updateAdventureSessionControlV1/);

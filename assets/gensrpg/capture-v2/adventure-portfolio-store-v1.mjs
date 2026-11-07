@@ -1,6 +1,7 @@
 // Capture-only portfolio selector around the EXISTING AdventureStore + Core
 // Storage serializer. Not a second save engine, no AdventureSave conversion.
-// The historical one-save key is never moved, renamed, copied or deleted.
+// The historical one-save key is never moved, renamed or copied.
+// Deletion requires an explicit user action targeting this exact session.
 import {createAdventureStoreV1,ADVENTURE_STORAGE_KEY_V1}
  from './adventure-contract-v1.mjs';
 export const ADVENTURE_PORTFOLIO_KEY_V1=
@@ -122,8 +123,25 @@ export function createAdventurePortfolioStoreV1({storage,coreStorage,legacyStore
   if(id===legacyId())return legacyStore.save(value);
   return slot(id).save(value);
  }
+ function deleteSave(id){
+  // Explicitly selected Capture-only save. Never delete a WorldDocument,
+  // other module data, or a different session's checkpoint.
+  if(typeof storage.removeItem!=='function')
+   throw new Error('Suppression des sauvegardes indisponible dans ce stockage');
+  const index=readIndex();
+  byId(id,index); // Reject unknown/corrupt saves BEFORE any mutation.
+  const remaining=list().filter(entry=>entry.sessionId!==id);
+  const selected=selectedId(index);
+  const fallback=selected===id?(remaining[0]?.sessionId??null):selected;
+  // Index first: if the removal is interrupted, the original slot survives
+  // and indexedIds rediscovers it. Never silently erase an orphaned save.
+  writeIndex({...index,selectedSessionId:fallback,
+   slotIds:indexedIds(index).filter(entry=>entry!==id)});
+  storage.removeItem(id===legacyId()?ADVENTURE_STORAGE_KEY_V1:ADVENTURE_SLOT_PREFIX_V1+id);
+  return load();
+ }
  return Object.freeze({
-  key:ADVENTURE_PORTFOLIO_KEY_V1,load,save,create,list,select,
+  key:ADVENTURE_PORTFOLIO_KEY_V1,load,save,create,list,select,delete:deleteSave,
   activeId:()=>selectedId(readIndex())
  });
 }

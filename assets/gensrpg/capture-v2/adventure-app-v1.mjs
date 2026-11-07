@@ -187,6 +187,7 @@ function setFields(value){
  $(idField.statPoints).value=value.progression.statPointsPerLevel??0;
  $(idField.currency).value=value.loot.currencyPerVictory;
  $(idField.hpPercent).value=100*value.combat.hpMultiplier;
+ $('adventure-defeat-policy').value=value.combat.defeatPolicy??'restore';
  renderXpBandRows(value.progression.xpBands??SHOWCASE_ADVENTURE_RULES_V1.progression.xpBands);
  toggleXpMode();
  $(idField.heroEnabled).checked=value.heroProgression.enabled;
@@ -207,7 +208,8 @@ function fromFields(){
    statPointsPerLevel:numberFrom(idField.statPoints),
    ...($(idField.xpMode).value==='custom'?{xpBands:readXpBandRows()}: {})},
   loot:{...rules.loot,currencyPerVictory:numberFrom(idField.currency)},
-  combat:{hpMultiplier:numberFrom(idField.hpPercent)/100},
+  combat:{hpMultiplier:numberFrom(idField.hpPercent)/100,
+    defeatPolicy:$('adventure-defeat-policy').value},
   heroProgression:{...rules.heroProgression,
    enabled:$(idField.heroEnabled).checked,
    xpGainPercent:numberFrom(idField.heroShare),
@@ -336,10 +338,12 @@ function renderPortfolioOptions(){
  select.replaceChildren(...(saved.length?saved.map(entry=>
   option(entry.sessionId,'Partie '+entry.sessionId.slice(0,8)+
    ' · '+(published.find(c=>c.id===entry.speciesId)?.name??entry.speciesId)+
-   ' niv. '+entry.level+(entry.status==='playing'?' · en cours':' · prête')))
+   ' niv. '+entry.level+(entry.status==='playing'?' · en cours':
+     entry.status==='finished'?' · fin de partie':' · prête')))
    :[option('','Aucune partie enregistrée')]));
  select.disabled=!saved.length;
  $('adventure-save-load').disabled=!saved.length;
+  $('adventure-save-delete').disabled=!saved.length;
  if(active&&saved.some(entry=>entry.sessionId===active))select.value=active;
 }
 function refreshWorldChoices(saved=null){
@@ -388,8 +392,9 @@ function showSave(){
   }
   // The picker affects the NEXT new game, not the already saved hero.
   $('adventure-hero-choice').disabled=false;
-  $('adventure-play').disabled=false;
-  $('adventure-play').textContent=state.status==='playing'?'Continuer la partie':'Entrer dans le monde';
+  $('adventure-play').disabled=state.status==='finished';
+  $('adventure-play').textContent=state.status==='finished'?'Partie terminée':
+   state.status==='playing'?'Continuer la partie':'Entrer dans le monde';
   const card=published.find(c=>c.id===state.party.active.speciesId);
   const a=state.party.active;
   const reward=state.lastAward;
@@ -401,7 +406,8 @@ function showSave(){
       (state.hero?.progression?.xp??0)+' XP'
     :' · Héros sans niveau')+
    (reward?' · Dernier combat : '+reward.outcome+' ('+reward.xp+' XP)':'')+
-   ' · statut : '+(state.status==='configured'?'configuration enregistrée':'en cours'));
+   ' · statut : '+(state.status==='configured'?'configuration enregistrée':
+     state.status==='finished'?'terminée après défaite':'en cours'));
   renderStatWallet();
  }catch(error){
   $('adventure-play').disabled=true;
@@ -865,6 +871,27 @@ $('adventure-save-load').addEventListener('click',guardedAsync(async()=>{
  refreshWorldChoices(loaded);
  await fillHeroChoices(loaded.hero?.definitionId??null);
  stateMessage('Partie '+chosen.slice(0,8)+' chargée. Les autres sauvegardes restent intactes.');
+}));
+$('adventure-save-delete').addEventListener('click',guardedAsync(async()=>{
+  const chosen=$('adventure-save-select').value;
+  if(!chosen)throw new Error('Sélectionne la sauvegarde à supprimer.');
+  if(activeCaptureRoom)
+   throw new Error('Quitte le salon réseau actif avant de supprimer une sauvegarde.');
+  if(activePlayingSheet)
+   throw new Error('Quitte le mode Jouer avant de supprimer une sauvegarde.');
+  const chosenEntry=portfolio.list().find(entry=>entry.sessionId===chosen);
+  if(!chosenEntry)throw new Error('Sauvegarde introuvable : aucune suppression.');
+  const description='Partie '+chosen.slice(0,8)+' · niveau '+chosenEntry.level;
+  if(!window.confirm('Supprimer définitivement '+description+' ?\\n' +
+   'Cette opération ne supprimera ni les autres parties ni les mondes.'))return;
+  portfolio.delete(chosen);
+  const remaining=store.load();
+  rules=normalizeAdventureRulesV1(remaining?.rules??draftStore.load()??SHOWCASE_ADVENTURE_RULES_V1);
+  setFields(rules);setSessionControlFields(remaining);
+  renderItemRules();showSave();updatePreview();
+  refreshWorldChoices(remaining);
+  await fillHeroChoices(remaining?.hero?.definitionId??null);
+  stateMessage(description+' supprimée. Les autres sauvegardes et mondes sont conservés.');
 }));
 $('adventure-resume').addEventListener('click',guarded(()=>{
  const state=store.load();

@@ -38,19 +38,7 @@ jobs:
       - name: Resolve the TWO exact, immutable Lab main SHAs
         id: pins
         run: |
-          node --input-type=module - <<'JS' >> "$GITHUB_OUTPUT"
-          import fs from 'node:fs';
-          import {execFileSync} from 'node:child_process';
-          const pins=JSON.parse(fs.readFileSync('assets/gensrpg/capture-v2/source-pins-v1.json','utf8'));
-          if(pins.legacyCaptureRuntime!==false)throw Error('Historical Capture is forbidden');
-          for(const owner of ['combat','exploration']){
-            const entry=pins[owner];
-            if(entry.ref!=='main'||!/^[0-9a-f]{40}$/.test(entry.sha))throw Error('Invalid Lab main-only source pin');
-            const sha=execFileSync('git',['ls-remote','https://github.com/'+entry.repository+'.git','refs/heads/main'],{encoding:'utf8'}).trim().split(/\s+/)[0];
-            if(sha!==entry.sha)throw Error(owner+' main moved: approved consumer release must be recertified');
-            console.log(owner+'='+entry.sha);
-          }
-          JS
+          node tools/verify_capture_official_lab_pins_v1.mjs >> "$GITHUB_OUTPUT"
       - name: Checkout Combat only from approved main
         uses: actions/checkout@v4
         with:

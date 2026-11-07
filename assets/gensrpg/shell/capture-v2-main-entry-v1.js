@@ -13,7 +13,11 @@
     return target.href;
   }
   function open(){
-    root.location.assign(destination());
+    // Standard in-scope navigation from the user's real Capture button click.
+    // No global location replacement, navigation monkey patch or second engine.
+    const link=root.document.createElement('a');
+    link.href=destination();
+    link.click();
     return true;
   }
   root.GensCaptureMainEntryV1=Object.freeze({open,destination});

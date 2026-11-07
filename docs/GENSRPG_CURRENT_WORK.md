@@ -1,3 +1,12 @@
+## 2026-11-07 — Capture V2 : hébergement accessible sans étape cachée (PR #310)
+- **Retour de test** : option « rejoindre » visible mais « héberger » inaccessible même après activation manuelle des invités. Le panneau ne présentait pas les échecs Supabase dans son propre état.
+- **START** : checkpoint/gensrpg-start-capture-host-room-ux-2026-11-07 sur la source Capture V2 immuable 96231cf16b134f8944bce741aec8d6265679bac8 ; branche work/gensrpg-capture-host-room-ux-2026-11-07 ; PR #310.
+- **TDD RED** : tests/gens_capture_v2_room_host_creation_20261107.test.mjs, CI initialement rouge. Root cause : le bouton n'était activé que si joinEnabled avait déjà été écrit par un accordéon MJ, même quand l'utilisateur venait de cocher et voulait héberger.
+- **Fix propriétaire** : le clic « Créer un salon » valide l'unique AdventureSession puis enregistre explicitement joinEnabled true avec updateAdventureSessionControlV1 ; pas de contournement serveur ni second modèle d'hébergement. Affichage des erreurs auth/RPC dans adventure-room-status, pseudo par défaut, capacités 2–32 contrôlées par le serveur.
+- **Gates** : tests Capture UI/transport, Supabase Auth réelle à deux appareils, HTTPS preview pin seulement après CI exacte et nouveau publisher. L'Exploration reste seul propriétaire des avatars/deplacements, pas de faux « multijoueur prêt ».
+
+---
+
 # 2026-11-07 — Capture V2 : affichage des résultats officiels et archive de monde périmée (source C2)
 
 - **Raccord officiel ajouté pour la publication commune** : le manifeste `source-pins-v1.json` épingle maintenant **Exploration `main@c18b34cacf6d9d157d62e7e507c4c155d6e1b11c`**, issu de PR #387. Labo Exploration : **CI main #42361421441 SUCCESS** (trois jobs), **Pages #42361421429 SUCCESS**, HTTP HTTPS vérifié ; aucun code d'Exploration recopié ou remplacé.

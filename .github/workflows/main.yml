@@ -695,6 +695,14 @@ jobs:
              release.exploration.sha!==delivery.exploration.sha||
              release.legacyCaptureRuntime!==false||delivery.legacyCaptureRuntime!==false)
             throw Error('LIVE HTTPS failed immutable Capture V2 and root integrity gate');
+          // The installed root PWA needs a changed LIVE marker to detect an update.
+          const rootHtml=bytes('root-index.html').toString('utf8');
+          const expectedRootVersion='gensrpg-release-'+process.env.GITHUB_SHA.slice(0,12);
+          if((rootHtml.match(/<meta name="z40k-app-version" content="([^"]+)">/g)||[]).length!==1||
+             (rootHtml.match(/const Z40K_APP_VERSION = "([^"]+)";/g)||[]).length!==1||
+             !rootHtml.includes('<meta name="z40k-app-version" content="'+expectedRootVersion+'">')||
+             !rootHtml.includes('const Z40K_APP_VERSION = "'+expectedRootVersion+'";'))
+            throw Error('LIVE HTTPS root PWA version is stale or not paired with its runtime');
           const html=bytes('preview/index.html').toString('utf8');
           if(!html.includes('assets/gensrpg/capture-v2/shell-entry-v1.js'))
             throw Error('Live Capture V2 shell unavailable');

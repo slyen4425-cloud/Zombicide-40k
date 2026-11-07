@@ -17,6 +17,29 @@ export function stampWorkerForCommit(source,sha){
   const name='gensrpg-cache-release-'+sha.slice(0,12);
   return source.replace(versions[0][0],'const CACHE_NAME = "'+name+'";');
 }
+
+/**
+ * Immutable public Shell release identity. The old installed PWA checks the
+ * HTTP <meta> against Z40K_APP_VERSION. They used to stay equal for every
+ * deployment, hiding the update banner despite a changed service worker.
+ *
+ * Change exactly those two EXISTING markers in the built _site HTML only.
+ * Never touch index.html source, a game module, its data or user storage.
+ */
+export function stampShellForCommit(source,sha){
+  if(typeof sha!=='string'||!/^[a-f0-9]{40}$/.test(sha))
+    throw Error('Invalid immutable shell release commit SHA');
+  if(typeof source!=='string')throw Error('Invalid PWA Shell version source');
+  const meta=[...source.matchAll(/<meta name="z40k-app-version" content="([^"]+)">/g)];
+  const runtime=[...source.matchAll(/const Z40K_APP_VERSION = "([^"]+)";/g)];
+  if(meta.length!==1||runtime.length!==1||meta[0][1]!==runtime[0][1])
+    throw Error('Exactly one matching pair of PWA Shell version markers is required');
+  const release='gensrpg-release-'+sha.slice(0,12);
+  return source
+    .replace(meta[0][0],'<meta name="z40k-app-version" content="'+release+'">')
+    .replace(runtime[0][0],'const Z40K_APP_VERSION = "'+release+'";');
+}
+
 if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href){
   try{
     if(process.argv.length!==4)

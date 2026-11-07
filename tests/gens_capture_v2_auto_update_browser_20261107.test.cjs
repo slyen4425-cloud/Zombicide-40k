@@ -86,8 +86,10 @@ test('existing installed Capture V2 auto-updates on reopening its SAME URL, no u
    // Chromium can transiently report an activated worker while another
    // update/install is pending. The old cache may briefly reappear during
    // that transition. Require a STABLE, fully installed/activated final
-   // worker with cache isolation for consecutive real browser polls.
-   // Keep the same 60s timeout and the strict final cache assertions.
+   // worker with cache isolation for an extended actual browser observation
+   // window.  A 1.2s "stable" interval was insufficient: a late old
+   // pre-cache fetch could reopen the retired cache AFTER the first pass.
+   // Keep the same 60s ceiling and the strict final cache assertions.
    await after.waitForFunction(async()=>{
      const names=await caches.keys();
      const reg=await navigator.serviceWorker.getRegistration();
@@ -98,7 +100,7 @@ test('existing installed Capture V2 auto-updates on reopening its SAME URL, no u
        !names.includes('gensrpg-preview-capture-v2-aaaaaaaaaaaa');
      window.__captureStableAutoUpdateChecks=stable
        ? (window.__captureStableAutoUpdateChecks||0)+1 : 0;
-     return window.__captureStableAutoUpdateChecks>=8;
+     return window.__captureStableAutoUpdateChecks>=40;
    },null,{polling:150,timeout:60000});
    const diagnostics=await after.evaluate(async()=>{
      const samples=[];

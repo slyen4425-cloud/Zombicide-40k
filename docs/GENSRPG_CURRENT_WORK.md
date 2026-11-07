@@ -800,3 +800,12 @@ Lot 01: contrat inerte et tests; pas de chargement en production, pas de changem
 - **Prochaine action** : retirer tentative RED de délégation par le rendu ; implémenter contrat explicite de création Core200 → propriétaire Core051, puis repasser la sentinelle navigateur exigeante et CI au SHA exact. Conserver NON GREEN si écart. Créer un checkpoint final GREEN uniquement lorsque tous les contrôles obligatoires passent, sinon conserver NON GREEN et préciser le blocage.
 
 Références : `docs/GENSRPG_CHARTE.md` §§1–5 et 12–26, `docs/GENSRPG_CHECKPOINT_POLICY.md`, `docs/GENSRPG_PHASE12_DUNGEON_CHEST_LIFECYCLE_GREEN_2026-10-21.md`.
+
+---
+
+2026-11-07 — C2 automatisation de propositions certifiées des labos (PR DRAFT)
+- START main 9537ee28a626522246b7be16c690375cd8e4e164 ; checkpoint/gensrpg-start-capture-v2-certified-autopropose-2026-11-07.
+- Owner unique tools/watch_capture_v2_official_main.mjs ; préparation de manifestes SHA officiels, source candidate et publisher review PR ; aucune fusion/déploiement automatique.
+- TDD tests/gens_capture_v2_certified_autopropose_20261107.test.mjs ; six C2 workflows explicitement relancés via workflow_dispatch. Fallback issue si GitHub refuse les PR.
+- Gate : NON GREEN sans CI exacte, vraie publication Pages et tests sur Android ; pas de changement du mode Jouer.
+- Détails : docs/GENSRPG_CAPTURE_V2_LAB_AUTO_PROPOSALS_2026-11-07.md.

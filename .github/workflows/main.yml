@@ -264,6 +264,11 @@ jobs:
           echo "========================================="
           ls -lh _site/sound_*.mp3 2>/dev/null || true
 
+      - name: Composer l'entrée Capture V2 officielle dans le Shell Pages sans modifier la source historique
+        run: |
+          node --check tools/stage_capture_v2_main_root_entry.cjs
+          node tools/stage_capture_v2_main_root_entry.cjs _site/assets/gensrpg/shell/legacy-hub-family-ui-v1.js
+
       - name: Charger les modules Dungeon externes
         run: |
           python3 - <<'PY'

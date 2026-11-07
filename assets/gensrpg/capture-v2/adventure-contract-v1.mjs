@@ -99,8 +99,8 @@ export function normalizeAdventureRulesV1(input){
  const {defeatPolicy='restore',...combatBase}=inputCombat;
  const combat=exact(combatBase,['hpMultiplier'],'combat');
  number(combat.hpMultiplier,'combat.hpMultiplier',Number.EPSILON,1);
- if(defeatPolicy!=='restore'&&defeatPolicy!=='game-over')
-  throw new RangeError('combat.defeatPolicy must be restore or game-over');
+ if(!['restore','keep-ko','game-over'].includes(defeatPolicy))
+  throw new RangeError('combat.defeatPolicy must be restore, keep-ko or game-over');
  const rule=exact(legacy,['schema','version','xp','progression','loot'],'AdventureRules');
  const hero=heroRaw===undefined?DEFAULT_ADVENTURE_RULES_V1.heroProgression:
   exact(heroRaw,['enabled','xpGainPercent','xpPerLevel','maxLevel',
@@ -508,6 +508,8 @@ export function applyAdventureCombatResultV1({
  // The creator chooses recovery or terminal game over in the save's rules.
  // Recovery uses Combat's own max HP for the next encounter (null snapshot).
  const defeatPolicy=normalizeAdventureRulesV1(state.rules).combat.defeatPolicy;
+ // Only Combat's official TEAM-level "defeat" can end an adventure.
+ // A single creature at 0 HP is not enough: no local roster defeat logic.
  const defeated=result.outcome==='defeat';
  const recover=defeated&&defeatPolicy==='restore';
  const gameOver=defeated&&defeatPolicy==='game-over';

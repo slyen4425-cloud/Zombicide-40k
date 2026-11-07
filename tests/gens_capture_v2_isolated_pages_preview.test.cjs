@@ -13,6 +13,8 @@ const rel='preview/capture-v2-pr225';
 const trial=path.join(site,rel);
 const previewPin=JSON.parse(fs.readFileSync(path.join(root,'tools/capture_v2_pages_preview_pin.json')));
 const previewSha=previewPin.sha;
+const publisherSha=process.env.GITHUB_SHA;
+assert.match(publisherSha||'',/^[a-f0-9]{40}$/,'Pages build release SHA is required');
 // Compare the release against its ONE immutable approved candidate,
  // not a second hardcoded list of older Lab SHAs that becomes stale.
 const candidateSources=JSON.parse(fs.readFileSync(
@@ -33,6 +35,7 @@ test('production root remains intact and preview exists ONLY in its isolated Pag
   const provenance=json(trial,'release-provenance.v1.json');
   assert.equal(provenance.schema,'gensrpg-capture-v2-isolated-pages-preview-v1');
   assert.equal(provenance.source.commit,previewSha);
+  assert.equal(provenance.publisherCommit,publisherSha,'public preview PWA must update for every Pages SHA');
   assert.equal(provenance.source.ref,'approved-immutable-commit');
   assert.equal(provenance.publicPath,'/'+rel+'/');
   assert.equal(provenance.productionRootSha256,sha256(read(site,'index.html')),
@@ -72,7 +75,7 @@ test('actual preview service worker activation cannot delete production caches',
  // installed stable PWA on the SAME origin.
  const vm=require('node:vm');
  const worker=read(trial,'service-worker.js').toString('utf8');
- const current='gensrpg-preview-capture-v2-'+previewSha.slice(0,12);
+ const current='gensrpg-preview-capture-v2-'+publisherSha.slice(0,12);
  const previous='gensrpg-preview-capture-v2-previous';
  const production='gensrpg-cache-16.78.118-capture-v2-scoped-cache-cleanup';
  const keys=[production,current,previous];

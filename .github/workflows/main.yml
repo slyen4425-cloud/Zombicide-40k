@@ -683,6 +683,7 @@ jobs:
           const bridge=JSON.parse(bridgeBytes);
           const pin=JSON.parse(fs.readFileSync('tools/capture_v2_pages_preview_pin.json','utf8'));
           if(release.schema!=='gensrpg-capture-v2-isolated-pages-preview-v1'||
+             release.publisherCommit!==process.env.GITHUB_SHA||
              release.source.commit!==pin.sha||
              release.productionRootSha256!==hash(bytes('root-index.html'))||
              release.previewIndexSha256!==hash(bytes('preview/index.html'))||

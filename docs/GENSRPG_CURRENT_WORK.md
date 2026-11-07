@@ -1,3 +1,13 @@
+## 2026-11-07 — PWA automatique pour tous les déploiements Capture V2 (TDD)
+- Retour : après nouvelle installation Capture V2 utilisable, obligation de mise à jour automatique au prochain lancement pour tous, sans désinstallation ni bouton manuel.
+- Cause : le cache du SW V2 sous /preview/capture-v2-pr225/ était estampillé avec le SHA immuable du candidat Capture et les 2 marqueurs de version HTML restaient figés. Le SW ne changeait pas si seul main GenSRPG republiait.
+- Checkpoint START : checkpoint/gensrpg-start-installed-capture-auto-update-2026-11-07 ; branche work/gensrpg-installed-capture-auto-update-2026-11-07 depuis main@113c5f87c1904eb365ae1c39962971336e128113.
+- Correction : un seul publisher Pages compose le service worker preview et les deux marqueurs Shell HTML au GITHUB_SHA exact. Même identité PWA/scope, seule version de livraison change ; SW actuel skipWaiting + clients.claim et navigation network-first au redémarrage.
+- Aucun moteur, règle, laboratoire, média ou monde cloné ; taille 900 Mio et caches hors scope inchangés. Les parties de développement sont jetables, mais ce lot ne procède à aucun effacement.
+- Tests : RED d'abord tests/gens_capture_v2_auto_update_20261107.test.mjs sur un helper absent ; après code, deux SHA donnent deux workers et deux shells, sortie _site exacte, cache SW isolé, provenance et contrôle HTTPS publisherCommit exact ; CI SHA propre, puis Pages main et test smartphone.
+- Limite : une installation PWA de l'URL racine a une autre identité et ouvre encore le menu Capture historique ; l'autoroute de navigation Capture V2 dans la racine est un chantier distinct et ne doit pas être confondu avec la mise à jour automatique de l'installation V2.
+
+---
 # 2026-11-07 — Régression PWA réelle : bandeau de mise à jour non déclenché (PR #308)
 - **Retour Pixel** : application installée toujours visiblement ancienne après la fusion PWA #304.
 - **Cause prouvée dans le Shell de `main@9b7abbf0`** : les deux indicateurs `z40k-app-version` et `Z40K_APP_VERSION` restent fixés à `16.168-DUNGEON-HERO-ITEM-ASSETS`. `z40kCheckPublishedVersion` les compare pour afficher « Nouvelle version disponible » : même si le worker de #304 change de SHA, le bandeau se masque.

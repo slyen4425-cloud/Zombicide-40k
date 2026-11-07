@@ -96,6 +96,9 @@ jobs:
       - name: Aventure V2 — contrat XP, loot, bestiaire publié, sauvegarde et résultat unique (TDD)
         run: node --test tests/gens_capture_v2_adventure_contract_v1.test.mjs
 
+      - name: RED/GREEN — 1 à 6 créatures de départ en Aventure
+        run: node --test tests/gens_capture_v2_initial_party_1to6_20261107.test.mjs
+
       - name: Correction avant publication — sauvegardes multiples, migration additive et sélection de la partie
         run: node --test tests/gens_capture_v2_adventure_portfolio_v1.test.mjs
 

@@ -81,8 +81,15 @@ test('existing installed Capture V2 auto-updates on reopening its SAME URL, no u
        'gensrpg-release-bbbbbbbbbbbb');
    assert.equal(await after.evaluate(()=>localStorage.getItem('gensrpg-v2-installed-identity')),
      'same-install');
-   await after.waitForFunction(async()=>
-     (await caches.keys()).includes('gensrpg-preview-capture-v2-bbbbbbbbbbbb'));
+   // Cache creation happens during install; eviction runs only once the NEW
+   // worker activates. Wait for both, not just the newly created cache.
+   await after.waitForFunction(async()=>{
+     const names=await caches.keys();
+     const reg=await navigator.serviceWorker.getRegistration();
+     return reg?.active?.state==='activated' &&
+       names.includes('gensrpg-preview-capture-v2-bbbbbbbbbbbb') &&
+       !names.includes('gensrpg-preview-capture-v2-aaaaaaaaaaaa');
+   },null,{timeout:60000});
    const cachesAfter=await after.evaluate(()=>caches.keys());
    assert.ok(cachesAfter.includes('gensrpg-cache-release-root-keep'));
    assert.ok(!cachesAfter.includes('gensrpg-preview-capture-v2-aaaaaaaaaaaa'),

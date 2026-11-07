@@ -1,3 +1,12 @@
+## 2026-11-07 — Réconciliation des sources officielles Capture V2, sans bibliothèque dupliquée
+- **START** : checkpoint/gensrpg-start-capture-official-pins-2026-11-07 sur source caméra @ed5c2f96e264596dea6a30571887b9dc2fe0b6e0 ; branche work/gensrpg-capture-official-pins-2026-11-07.
+- **Cause** : navigateur de la source Capture bloqué par le drift de `Combat main` après la publication d'un nouvel arbre, alors que le pin Capture indiquait encore `ebaea5dc`. Ne pas supprimer cette sentinelle.
+- **Combat propriétaire** : main@548f216ea1622a77fc137e502bc9321d305388ab ; Laboratory CI run #42391129952 SUCCESS. Pin exact et certifiedCiRun correspondants, `ref=main`, sans copie d'assets, de moteur ou de nouvelle autorité.
+- **Exploration** : main@c18b34cacf6d9d157d62e7e507c4c155d6e1b11c, CI #42361421441 certifiée conservée, en attente de la PR caméra propriétaire #388.
+- **Gates** : suite Capture source, test browser réel avec nouveaux Bestiaire/Showcase, CI SHA exact, 900 Mio, puis PR publication Pages séparée avant toute annonce d'accès joueur.
+
+---
+
 ## 2026-11-07 — Capture V2 : angle caméra auteur fixé en Jouer (PR #312)
 - **Source / START** : source Capture branch from team @83cb67de8dd46c4b3364ade10f06cb1327da3e0c, checkpoint/gensrpg-start-capture-creator-game-camera-2026-11-07, branche work/gensrpg-capture-creator-game-camera-2026-11-07.
 - **Propriétaire Aventure** : règle caméra créateur `cameraPolicy.angleDeg` dans une seule AdventureSession Core, entre 35 et 90 degrés par pas de 5 ; éditeur dans les paramètres créateur/MJ, sauvegarde, reprise, et URL Jouer native contenant la valeur effective.

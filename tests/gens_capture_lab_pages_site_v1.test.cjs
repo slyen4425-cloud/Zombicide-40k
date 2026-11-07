@@ -35,12 +35,23 @@ test('real public Shell unchanged, no alternate Combat runtime or premature PWA 
  // The SINGLE publisher stamps only the root cache version at build time.
  // Compare the entire worker byte-for-byte after the canonical SHA stamp;
  // this still rejects any other code change or a second Capture runtime.
- const {stampWorkerForCommit}=await import('../tools/version_pwa_release_worker.mjs');
+ const {stampWorkerForCommit,stampShellForCommit}=await import('../tools/version_pwa_release_worker.mjs');
  const releaseSha=process.env.GITHUB_SHA;
  assert.match(releaseSha||'',/^[0-9a-f]{40}$/,'release must have an immutable build SHA');
  const expectedWorker=stampWorkerForCommit(rel(root,'service-worker.js').toString('utf8'),releaseSha);
  assert.deepEqual(sw,Buffer.from(expectedWorker,'utf8'),
    'PWA built output may change ONLY the single root cache version for this exact release');
+ // Public HTML must announce its actual release rather than the old frozen
+ // 16.168 marker: an installed older PWA compares those existing markers.
+ const expectedRelease='gensrpg-release-'+releaseSha.slice(0,12);
+ assert.equal((html.match(/<meta name="z40k-app-version" content="([^"]+)">/g)||[]).length,1);
+ assert.equal((html.match(/const Z40K_APP_VERSION = "([^"]+)";/g)||[]).length,1);
+ assert.ok(html.includes('<meta name="z40k-app-version" content="'+expectedRelease+'">'));
+ assert.ok(html.includes('const Z40K_APP_VERSION = "'+expectedRelease+'";'));
+ assert.equal(html.replaceAll(expectedRelease,
+   source.match(/<meta name="z40k-app-version" content="([^"]+)">/)[1])
+   .includes('const Z40K_APP_VERSION = "'+source.match(/const Z40K_APP_VERSION = "([^"]+)";/)[1]+'";'),true);
+
  // Exact script tags from the user-certified index (Git blob
  // 17ba8e6f1faf6f8a0be8cdec68c4515d538ff646). World and roster are
  // deliberately versioned ?v=1; the live Pages output must preserve both

@@ -1,3 +1,14 @@
+# 2026-11-07 — Régression PWA réelle : bandeau de mise à jour non déclenché (PR #308)
+- **Retour Pixel** : application installée toujours visiblement ancienne après la fusion PWA #304.
+- **Cause prouvée dans le Shell de `main@9b7abbf0`** : les deux indicateurs `z40k-app-version` et `Z40K_APP_VERSION` restent fixés à `16.168-DUNGEON-HERO-ITEM-ASSETS`. `z40kCheckPublishedVersion` les compare pour afficher « Nouvelle version disponible » : même si le worker de #304 change de SHA, le bandeau se masque.
+- **START** : `checkpoint/gensrpg-start-pwa-visible-release-version-2026-11-07`, branche `work/gensrpg-pwa-visible-release-version-2026-11-07` (base SHA `9b7abbf02d408e26df0db0eb88bca89b670268ee`).
+- **Correctif C2 scoped** : un seul SHA GitHub immutable versionne la cache worker et les DEUX marqueurs du HTML construit `_site/index.html`, sans écrire dans `index.html` source et sans changer les engines, data, sauvegardes, manifestes d'identité ou URL.
+- **TDD** : nouveau test RED `tests/gensrpg_pwa_visible_release_20261107.test.mjs` et échec réel build #42371428393 avant code ; tests de perte d'un marqueur, comparaison HTML installée / nouvelle livraison, intégrité du publisher. Stage et Pages devront attester le SHA exact sur HTTPS.
+- **Limite explicitement maintenue** : Monster Capture V2 est encore une prévisualisation isolée à `/preview/capture-v2-pr225/` ; corriger le cache et le bandeau ne transforme pas le mode Capture historique de la racine en V2. Ne pas les fusionner par redirection masquée.
+- **Gate** : PR #308 DRAFT ; aucun GREEN sans CI test, Chromium, preuve d'intégrité root/preview et HTTPS. Vérification Pixel manuel sans désinstallation et sans effacer IndexedDB.
+
+---
+
 # 2026-11-07 — Publication contrôlée : résultats XP/loot après combat et monde archivé
 
 - **BASE site publié** : `main@9537ee28a626522246b7be16c690375cd8e4e164`, checkpoint START `checkpoint/gensrpg-start-capture-combat-awards-pages-2026-11-07`, branche `work/gensrpg-capture-combat-awards-pages-2026-11-07`.

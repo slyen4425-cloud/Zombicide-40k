@@ -5,7 +5,7 @@ import {commitAdventureCombatResultV1} from './adventure-combat-commit-v1.mjs';
 export const ADVENTURE_COMBAT_REQUEST_V1='gensrpg.capture.v2.adventure-combat-commit.v1';
 
 export function connectAdventureCombatHostV1({
- frame,playUrl,sessionId,worldId,store,locks,readPending,refreshParty,bestiaryCards,progressionCore
+ frame,playUrl,sessionId,worldId,store,locks,readPending,refreshParty,bestiaryCards,progressionCore,onGameOver
 }){
  const expected=new URL(playUrl);
  function assertPlayLocation(value){
@@ -37,9 +37,10 @@ export function connectAdventureCombatHostV1({
    const {applied,session}=commitAdventureCombatResultV1({
     store,envelope,bestiaryCards,progressionCore,random:Math.random,now:new Date().toISOString()
    });
-   refreshParty(session);
+   if(session.status==='playing')refreshParty(session);
    const key=envelope.snapshot.encounterId+':'+envelope.snapshot.returnToken;
-   return {receipt:{persisted:true,applied,session:{sessionId,processedEncounterKeys:[key]}}};
+   return {receipt:{persisted:true,applied,session:{sessionId,processedEncounterKeys:[key]}},
+    gameOver:session.status==='finished'};
   });
  }
  frame.addEventListener(ADVENTURE_COMBAT_REQUEST_V1,event=>{
@@ -47,7 +48,10 @@ export function connectAdventureCombatHostV1({
   if(event.target!==frame||typeof request?.respond!=='function')return;
   event.preventDefault(); // Claim the cancellable request before the asynchronous Core write.
   void handle(request).then(
-   response=>request.respond(response),
+   response=>{
+    request.respond(response);
+    if(response.gameOver&&typeof onGameOver==='function')onGameOver();
+   },
    error=>request.respond({error:error.message})
   );
  });

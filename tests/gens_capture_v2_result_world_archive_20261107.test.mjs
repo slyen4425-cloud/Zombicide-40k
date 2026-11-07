@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {projectAdventureCombatAwardV1} from '../assets/gensrpg/capture-v2/adventure-result-presentation-v1.mjs';
 import {checkAdventureWorldArchiveV1} from '../assets/gensrpg/capture-v2/adventure-world-choice-v1.mjs';
+import {connectAdventureCombatHostV1,ADVENTURE_COMBAT_REQUEST_V1} from '../assets/gensrpg/capture-v2/adventure-combat-host-v1.mjs';
 
 const rules={loot:{items:[{id:'plume',name:'Plume',saleValue:2}]}};
 const award={encounterId:'wild-1',enemyId:'creature-b',outcome:'victory',xp:1300,
@@ -54,4 +55,25 @@ test('Jouer displays an official saved result modal and checks archived world be
  assert.match(host,/onCombatResult/);
  assert.match(html,/id="adventure-result-dialog"/);
  assert.match(html,/id="adventure-result-close"/);
+});
+
+test('every re-entry can dispose the previous CombatResult listener without touching unrelated frames',()=>{
+ const listeners=new Map();
+ const playUrl='https://capture.invalid/vendor/exploration-lab/sculpt-lab.html?play=1&adventureSession=game-1';
+ const frame={isConnected:true,contentWindow:{location:{href:playUrl}},
+  addEventListener:(name,fn)=>{if(!listeners.has(name))listeners.set(name,new Set());listeners.get(name).add(fn);},
+  removeEventListener:(name,fn)=>listeners.get(name)?.delete(fn)};
+ const store={load:()=>({schema:'gensrpg-capture-adventure-save-v1',
+  status:'playing',sessionId:'game-1',world:{mapRef:'world-one'}})};
+ const options={frame,playUrl,sessionId:'game-1',worldId:'world-one',
+  store,locks:{request:()=>{}},readPending:()=>null,refreshParty:()=>{},
+  bestiaryCards:[],progressionCore:null};
+ const first=connectAdventureCombatHostV1(options);
+ assert.equal(listeners.get(ADVENTURE_COMBAT_REQUEST_V1).size,1);
+ first.dispose();
+ assert.equal(listeners.get(ADVENTURE_COMBAT_REQUEST_V1).size,0);
+ const second=connectAdventureCombatHostV1(options);
+ assert.equal(listeners.get(ADVENTURE_COMBAT_REQUEST_V1).size,1);
+ second.dispose();
+ assert.equal(listeners.get(ADVENTURE_COMBAT_REQUEST_V1).size,0);
 });

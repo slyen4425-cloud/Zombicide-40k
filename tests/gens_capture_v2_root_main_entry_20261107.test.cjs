@@ -40,13 +40,14 @@ test('published Capture V2 enters the native menu and offers a return to the SAM
  let onload, clicked=0, appended=[];
  const header={append:e=>appended.push(e)};
  const doc={
+   addEventListener:(event,cb)=>{if(event==='DOMContentLoaded')onload=cb},
    querySelector:s=>s==='button.gensRootModeCard.capture'?{click:()=>{clicked++}}:null,
    getElementById:id=>id==='gensCaptureV2Root'?{querySelector:s=>s==='header'?header:null}:null,
    createElement:t=>({tagName:t})
  };
  const window={
    location:{href:'https://slyen4425-cloud.github.io/Zombicide-40k/preview/capture-v2-pr225/index.html?entry=gensrpg-main',search:'?entry=gensrpg-main'},
-   document:doc,addEventListener:(event,cb)=>{if(event==='load')onload=cb}
+   document:doc
  };
  vm.runInNewContext(source,{window,URL,URLSearchParams});
  assert.equal(typeof onload,'function');

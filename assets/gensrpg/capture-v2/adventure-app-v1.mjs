@@ -817,7 +817,19 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  connectAdventureCombatHostV1({
   frame,playUrl:url.href,sessionId,worldId:world.id,store,locks:window.navigator.locks,
   readPending:()=>readCombatHandoff(window.localStorage,{sessionId}),
-  refreshParty,bestiaryCards:published,progressionCore:window.GensProgressionV1
+  refreshParty,bestiaryCards:published,progressionCore:window.GensProgressionV1,
+  onGameOver:()=>{
+   activePlayingSheet=null;
+   activeCaptureExplorationEvents?.dispose();
+   activeCaptureExplorationEvents=null;
+   activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
+   frame.hidden=true;
+   document.body.dataset.adventurePlaying='false';
+   $('adventure-play-hud').hidden=true;
+   document.querySelector('[data-adventure-app]').hidden=false;
+   showSave();
+   stateMessage('Défaite : partie terminée selon la règle du créateur. Sélectionne ou crée une autre sauvegarde.');
+  }
  });
  // Keep the Aventure owner mounted while the native Exploration frame runs.
  activePlayingSheet={sessionId,refreshParty};
@@ -877,7 +889,7 @@ $('adventure-save-delete').addEventListener('click',guardedAsync(async()=>{
   if(!chosen)throw new Error('Sélectionne la sauvegarde à supprimer.');
   if(activeCaptureRoom)
    throw new Error('Quitte le salon réseau actif avant de supprimer une sauvegarde.');
-  if(activePlayingSheet)
+  if(document.body.dataset.adventurePlaying==='true')
    throw new Error('Quitte le mode Jouer avant de supprimer une sauvegarde.');
   const chosenEntry=portfolio.list().find(entry=>entry.sessionId===chosen);
   if(!chosenEntry)throw new Error('Sauvegarde introuvable : aucune suppression.');

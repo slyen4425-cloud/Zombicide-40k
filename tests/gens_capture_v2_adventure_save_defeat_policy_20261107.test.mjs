@@ -4,7 +4,8 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import {
  DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,
- createAdventureSessionV1,applyAdventureCombatResultV1,createAdventureStoreV1,
+ createAdventureSessionV1,applyAdventureCombatResultV1,
+ recoverAdventureDefeatedPartyV1,createAdventureStoreV1,
  ADVENTURE_STORAGE_KEY_V1
 } from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 import {
@@ -56,6 +57,18 @@ test('showcase restores a KO creature by policy without erasing the defeat or gi
  assert.equal(first.session.party.active.xp,0);
  assert.equal(first.session.lastAward.outcome,'defeat');
  assert.equal(result(first.session).applied,false,'the same official result cannot be processed twice');
+});
+test('a previously saved KO session is repaired only after real defeat with recovery policy',()=>{
+ const before={...session('old-game'),status:'playing',
+  party:{active:{...session('old-game').party.active,hp:0}},
+  lastAward:{outcome:'defeat',xp:0}};
+ const healed=recoverAdventureDefeatedPartyV1({session:before,now:'2026-11-07T07:30:00Z'});
+ assert.equal(healed.party.active.hp,null);
+ assert.equal(healed.lastAward.outcome,'defeat');
+ assert.equal(before.party.active.hp,0);
+ assert.equal(recoverAdventureDefeatedPartyV1({session:healed}),healed);
+ const noDefeat={...before,lastAward:{outcome:'victory'}};
+ assert.equal(recoverAdventureDefeatedPartyV1({session:noDefeat}),noDefeat);
 });
 test('creator can choose an explicit terminal game over, and old rules remain recoverable',()=>{
  const custom=normalizeAdventureRulesV1({...DEFAULT_ADVENTURE_RULES_V1,

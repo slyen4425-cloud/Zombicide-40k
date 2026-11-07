@@ -401,6 +401,7 @@ function showSave(){
   text($('adventure-save-summary'),
    'Partie '+state.sessionId.slice(0,8)+' · '+(card?.name??a.speciesId)+
    ' · niveau '+a.level+' · '+a.xp+' XP · '+state.inventory.currency+' pièces'+
+   (a.hp===0?' · KO : 0 PV, soins ou réanimation nécessaires':'')+
    (state.rules.heroProgression?.enabled===true
     ?' · Héros niv. '+(state.hero?.progression?.level??1)+' · '+
       (state.hero?.progression?.xp??0)+' XP'

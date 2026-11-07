@@ -83,13 +83,23 @@ test('existing installed Capture V2 auto-updates on reopening its SAME URL, no u
      'same-install');
    // Cache creation happens during install; eviction runs only once the NEW
    // worker activates. Wait for both, not just the newly created cache.
+   // Chromium can transiently report an activated worker while another
+   // update/install is pending. The old cache may briefly reappear during
+   // that transition. Require a STABLE, fully installed/activated final
+   // worker with cache isolation for consecutive real browser polls.
+   // Keep the same 60s timeout and the strict final cache assertions.
    await after.waitForFunction(async()=>{
      const names=await caches.keys();
      const reg=await navigator.serviceWorker.getRegistration();
-     return reg?.active?.state==='activated' &&
+     const stable=reg?.active?.state==='activated' &&
+       !reg.installing && !reg.waiting &&
+       names.includes('gensrpg-cache-release-root-keep') &&
        names.includes('gensrpg-preview-capture-v2-bbbbbbbbbbbb') &&
        !names.includes('gensrpg-preview-capture-v2-aaaaaaaaaaaa');
-   },null,{timeout:60000});
+     window.__captureStableAutoUpdateChecks=stable
+       ? (window.__captureStableAutoUpdateChecks||0)+1 : 0;
+     return window.__captureStableAutoUpdateChecks>=8;
+   },null,{polling:150,timeout:60000});
    const diagnostics=await after.evaluate(async()=>{
      const samples=[];
      for(let i=0;i<6;i++){

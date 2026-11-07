@@ -611,6 +611,7 @@ jobs:
           npx playwright install chromium
           node --test tests/gens_capture_v2_isolated_pages_browser.test.cjs
           node --test tests/gensrpg_pwa_visible_release_browser_20261107.test.cjs
+          node --test tests/gens_capture_v2_auto_update_browser_20261107.test.cjs
       - name: Keep the self-contained tested preview as a review artifact only
         if: success()
         uses: actions/upload-artifact@v4

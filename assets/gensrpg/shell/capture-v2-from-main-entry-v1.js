@@ -3,7 +3,7 @@
 // already owns the Capture mode, game, editors, Lab routing and return controls.
 (function(root){
   if(new URLSearchParams(root.location.search).get('entry')!=='gensrpg-main')return;
-  root.addEventListener('load',()=>{
+  root.document.addEventListener('DOMContentLoaded',()=>{
     const doc=root.document;
     const mode=doc.querySelector('button.gensRootModeCard.capture');
     if(!mode)throw new Error('Published Capture V2 mode is missing');

@@ -23,6 +23,7 @@
      <option value="">Aucune partie enregistrée</option>
     </select>
     <button type="button" id="adventure-save-load">Charger cette partie</button>
+    <button type="button" id="adventure-save-delete" disabled>Supprimer cette sauvegarde</button>
    </div>
    <p class="hint">Pour créer une nouvelle partie, choisis sa créature de départ et son héros. Les parties déjà créées restent intactes.</p>
    <label for="adventure-world-select">Monde de l'aventure</label>
@@ -81,6 +82,12 @@
     </label>
     <label>PV en partie réelle (% des PV du Labo Combat)
      <input type="number" id="adventure-combat-hp-percent" min="1" max="100" step="1" value="25">
+    </label>
+    <label>Après une défaite
+     <select id="adventure-defeat-policy">
+      <option value="restore">Soigner la créature et poursuivre (conseillé)</option>
+      <option value="game-over">Fin définitive de cette partie</option>
+     </select>
     </label>
    </div>
    <div id="adventure-xp-bands-panel" class="xp-bands-panel">

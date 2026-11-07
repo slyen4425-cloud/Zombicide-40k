@@ -124,14 +124,25 @@ test('wrong session partyRef or preview Tester party cannot award XP',()=>{
   assert.equal(JSON.stringify(fx.store.load()),before);
  }
 });
-test('failed and fled authentic combat returns update HP only, never XP or loot',()=>{
+test('restore on defeat resets next-combat HP to native maximum; flee retains exact HP, no XP or loot',()=>{
  for(const outcome of ['defeat','fled']){
   const fx=fixture();
   const saved=commit(fx.store,envelope({outcome}));
   assert.equal(saved.award.xp,0);
   assert.equal(fx.store.load().party.active.xp,0);
-  assert.equal(fx.store.load().party.active.hp,81);
+  // Null is the versioned Combat-owned full-HP snapshot for policy 'restore'.
+  // It is not the 81 HP of the defeated fighter and not a client-made heal.
+  assert.equal(fx.store.load().party.active.hp,outcome==='defeat'?null:81);
  }
+});
+test('creator keep-ko policy really persists a KO without false game over or XP',()=>{
+ const fx=fixture(),before=fx.store.load();
+ fx.store.save({...before,rules:{...before.rules,combat:{...before.rules.combat,
+  defeatPolicy:'keep-ko'}}});
+ const saved=commit(fx.store,envelope({outcome:'defeat',hp:0}));
+ assert.equal(saved.award.xp,0);
+ assert.equal(fx.store.load().party.active.hp,0);
+ assert.equal(fx.store.load().status,'playing');
 });
 test('missing or untrusted combat result must fail before touching storage or guessing a win',()=>{
  for(const bad of [

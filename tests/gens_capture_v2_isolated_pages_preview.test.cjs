@@ -196,7 +196,10 @@ test('isolated HTTPS Jouer has creator-owned unlimited level caps, Core XP bands
  assert.match(app,/extendFinalXpBandToCap/);
  assert.doesNotMatch(app,/upper\.max\s*=\s*100\b/);
  assert.match(playing,/saved\.level>session\.rules\.progression\.maxLevel/);
- assert.match(contract,/combat:\{hpMultiplier:0\.25\}/,'showcase HP policy must be explicit and editable');
+ assert.match(contract,/combat:\{hpMultiplier:0\.25,defeatPolicy:'restore'\}/,
+  'showcase HP and defeat recovery policies must both be explicit and editable');
+ assert.match(game,/id="adventure-defeat-policy"/,'creator must be able to choose KO persistence');
+ assert.match(game,/<option value="keep-ko">/,'creator must be able to preserve KO for later healing items');
  assert.match(app,/hpPercent:'adventure-combat-hp-percent'/);
  assert.match(playing,/combatHpMultiplier:multiplier/,'native playing grant keeps the game-wide HP policy');
  assert.match(exploration,/combatHpMultiplier/,'official Exploration must carry the same rule');

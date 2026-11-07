@@ -1,3 +1,12 @@
+## 2026-11-08 — Livraison équipe initiale 1–6 créatures depuis la source V2 corrigée (C2)
+- START : `main@db2c2c72bef714e501ddf14c4ce537be573696ac` ; checkpoint `checkpoint/gensrpg-start-capture-team-1to6-publish-2026-11-08` ; branche `work/gensrpg-capture-team-1to6-publish-2026-11-08`.
+- Source immuable sélectionnée : `7c2a79882388113334aeb36e4dc63f92c7f92779` (#319), intégration des 1 à 6 créatures via la seule AdventureSession et les identités Bestiaire Combat, à promouvoir uniquement après CI source GREEN.
+- Un seul changement de version sur le publisher `tools/capture_v2_pages_preview_pin.json` (mêmes main Combat et Exploration, mêmes médias). Nouveau test dans `tests/gens_capture_v2_preparation_publish_20261107.test.mjs` : choix 1–6, sélecteur de créature active, jeu sans panneau de répartition des stats sur l'écran de préparation.
+- Aucune modification du moteur Exploration ou de caméra ; le chantier créateur d'angle dépend d'Exploration #388 et restera distinct jusqu'à GREEN. PWA, sauvegardes existantes, autres modes et graphiques officiels inchangés.
+- Critères : CI source #319, build/review Pages avec vrai navigateur, budget, preuve HTTPS et commit exact sur `main`. DRAFT avant GREEN.
+
+---
+
 ## 2026-11-07 — Publication du correctif écran de préparation Monster Capture V2 (C2, candidat)
 - Base publiable unique : `main@f173b46fc4122311b33b9dfa86368630cb9dbb69`, checkpoint START `checkpoint/gensrpg-start-capture-preparation-publish-2026-11-07`, branche de publication `work/gensrpg-capture-preparation-publish-2026-11-07`.
 - Source Capture V2 : PR #316, correction de propriétaire dans `assets/gensrpg/capture-v2/adventure.html`, suppression du panneau de distribution pendant la préparation, allocation conservée dans la fiche en jeu. SHA de source candidat : `5e5fa6ada3afff8364c2937a73c185e0a3fdc6f8` (doit être GREEN sur SHA exact avant fusion de la PR ou promotion finale).

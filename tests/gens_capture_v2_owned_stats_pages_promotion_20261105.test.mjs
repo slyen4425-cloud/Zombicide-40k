@@ -2,15 +2,24 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-// The immutable Adventure candidate passed architecture, browser, Combat, Runtime and Builder gates.
-// PR #289 composes the original full Aventure UI with the verified archival guard.
-const sha='7d7f1f20eb16f10fc28f75f15b68d287954f2a13';
+// The selected Capture candidate is an immutable commit, not a moving branch.
+// The actual CI-verified candidate is approved by the release PR; the existing
+// publisher checks out that exact SHA, validates Lab owners and proves HTTPS
+// provenance. Never hardcode a former release SHA as a second release authority.
 const file=JSON.parse(fs.readFileSync(new URL('../tools/capture_v2_pages_preview_pin.json',import.meta.url),'utf8'));
-test('Monster Capture illustrated in-game sheets and fullscreen release pins the exact certified candidate, not a moving branch',()=>{
+test('Monster Capture release pins one immutable candidate and proves the selected SHA throughout staging',()=>{
  assert.equal(file.schema,'gensrpg-capture-v2-pages-source-pin-v1');
  assert.equal(file.repository,'slyen4425-cloud/Zombicide-40k');
- assert.equal(file.sha,sha,'Do not republish stale gameplay');
+ assert.match(file.sha,/^[0-9a-f]{40}$/,'approved candidate must be an immutable Git commit SHA');
  assert.equal(file.publicPath,'/preview/capture-v2-pr225/');
+ const workflow=fs.readFileSync(new URL('../.github/workflows/main.yml',import.meta.url),'utf8');
+ assert.equal((workflow.match(/ref: \$\{\{ steps\.preview_pin\.outputs\.sha \}\}/g)||[]).length,2,
+  'build and review must both checkout the single source pin');
+ const stage=fs.readFileSync(new URL('../tools/stage_capture_v2_pages_preview.mjs',import.meta.url),'utf8');
+ assert.match(stage,/if\(head\(source\)!==expectedPreviewSha\)/,
+  'the real staged checkout must match the selected candidate exactly');
+ assert.match(stage,/release-provenance\.v1\.json/,
+  'publish the selected SHA in the inspectable release manifest');
 });
 test('published Monster Capture stays isolated and retains exact certified original visual author',()=>{
  assert.equal(file.officialVisuals.repository,'slyen4425-cloud/GenSrpg_labo_combat_dynamique');

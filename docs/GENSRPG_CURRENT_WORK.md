@@ -1,3 +1,14 @@
+## 2026-11-08 — Livraison unique cache Combat (iframe), équipe et caméra
+- **Incident reproduit sur Android :** « Combat indisponible : Adventure publication does not match official Combat author/engine sha » après entrée dans le monde ; le 3e loader (iframe Combat native) utilisait encore l'URL historique cacheable.
+- **Un seul correctif propriétaire :** Explorer main certifié `6915526c5ea2f96265bbd4cfbe6bd081ebea0ec2` PR #393 (Combat iframe au SHA cohérent, garde inchangée) + PR #394 (zoom de départ natif) ; CI `42475172293`, Pages `42475172283` SUCCESS.
+- **Source Capture :** PR #334 (caméra de préparation 45°/205 % et équipe 1–6 en jeu) + PR #335 (pin Explorer unique). Source versionnée **au SHA exact testé** `a5bca014bbcb35c9910dd25066f70dfd4615ff03` : clean boundary `42475451065`, native gate `42475451123`, runtime `42475451074`, builder `42475451108`, tous SUCCESS. PR #335 fusionnée au checkpoint sans deuxième autorité.
+- **START publisher :** main@`62a01635aea2560be1449c48f9a1e83dd6be718a`, checkpoint `checkpoint/gensrpg-start-adventure-camera-combat-release-2026-11-08`, branche `work/gensrpg-adventure-camera-combat-release-2026-11-08`. Cette PR ne modifie que le pin immuable, le gate d'assemblage du vrai combat et le journal de lot.
+- **Gates bloquants :** build GenSRPG Pages sous budget 900 Mio, vrai Chromium imbriqué, preuve HTTPS de l'artefact exact, smoke URL publique au SHA GenSRPG main. Aucun test Android validé sans retour utilisateur.
+- **Portée de l'équipe :** les 1–6 membres sont visibles dans le menu Équipe depuis la carte, mais aucune promesse de sprites suiveurs (fonctionnalité distincte). Combat reste 1v1, premier membre actif.
+- **Sauvegardes :** toutes conservées ; Monde, Combat, Dungeon, Survie, V80 et Assets globaux non modifiés, aucune duplication.
+
+---
+
 ## 2026-11-08 — Livraison Android C2 Partie indisponible / SHA Combat
 - **Constat mobile** : Bestiaire charge, mais Exploration bloque la partie à cause du SHA Combat auteur/moteur : le loader Explorer gardait une URL force-cache d'ancien JSON, face au Bestiaire fraîchement lu.
 - **Propriétaire corrigé** : Exploration PR #392 main f743ae9d0df5e1aa2c24ed009a551435e5cc8e04 ; relecture du même bundle officiel par URL UUID scoped, sans contournement de SHA ni source de données bis.

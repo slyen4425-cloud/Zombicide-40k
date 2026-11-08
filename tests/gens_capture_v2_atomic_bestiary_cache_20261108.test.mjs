@@ -8,7 +8,7 @@ const BASE='https://example.test/Zombicide-40k/preview/capture-v2-pr225/assets/g
 const BODY={schema:'capture-author-encounter-bundle-v1',
  authorSha:'a'.repeat(40),engineSha:'a'.repeat(40)};
 test('installed PWA cache-first JSON cannot mix old Combat transfers with current release',async()=>{
- const cache=new Map(),seen=[],keys=['old-cache','fresh-release'];
+ const cache=new Map(),seen=[],keys=['old-cache','fresh-release-uuid-20261108'];
  const paths=[
   './delivery-manifest.json',
   '../../../vendor/exploration-lab/combat-preview/data/capture/showcase/encounter-bundle.v1.json',
@@ -31,14 +31,14 @@ test('installed PWA cache-first JSON cannot mix old Combat transfers with curren
  assert.ok(out.every(x=>x.fresh===true),'all official inputs bypass cache-first old entries');
  assert.equal(out[1].authorSha,'a'.repeat(40));
  assert.equal(out[1].engineSha,'a'.repeat(40));
- assert.equal(seen.filter(x=>x.href.includes('_gens_capture_load=fresh-release')).length,5);
+ assert.equal(seen.filter(x=>x.href.includes('_gens_capture_load=fresh-release-uuid-20261108')).length,5);
  assert.ok(seen.every(x=>x.cache==='no-store'));
- const next=await fetchOfficialAdventureJsonV1(paths[1],BASE,'different-release',request);
+ const next=await fetchOfficialAdventureJsonV1(paths[1],BASE,'different-release-uuid-20261108',request);
  assert.equal(next.fresh,true,'a second app boot uses a distinct cache key');
 });
 test('unavailable or invalid official source fails closed; never tries historical data',async()=>{
  await assert.rejects(
-  fetchOfficialAdventureJsonV1('./delivery-manifest.json',BASE,'fresh-release',
+  fetchOfficialAdventureJsonV1('./delivery-manifest.json',BASE,'fresh-release-uuid-20261108',
    async()=>({ok:false,status:404})),
   /Source officielle indisponible \(HTTP 404\)/);
  await assert.rejects(

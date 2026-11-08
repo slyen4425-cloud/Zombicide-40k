@@ -27,7 +27,7 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
    allocated:active.statAllocations?.[stat.id]??0,
    baseValue:isGameHp?vitals.maxHp:
     (typeof measure?.value==='number'&&Number.isFinite(measure.value)?measure.value:null),
-   ...(isGameHp?{gameHp:true,authoredBaseHp:vitals.baseMaxHp}:{} )});
+   ...(isGameHp?{gameHp:true,authoredBaseHp:vitals.labMaxHp}:{} )});
  }));
  const catalog=new Map(rules.loot.items.map(item=>[item.id,item]));
  const items=frozen(Object.entries(session.inventory.items).map(([id,quantity])=>{
@@ -37,7 +37,7 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
  const creature=frozen({
   instanceId:active.instanceId,speciesId:active.speciesId,name:card.name,
   level:active.level,xp:active.xp,hp:vitals?vitals.currentHp:active.hp,
-  ...(vitals?{maxHp:vitals.maxHp,baseMaxHp:vitals.baseMaxHp,
+  ...(vitals?{maxHp:vitals.maxHp,baseMaxHp:vitals.baseMaxHp,labMaxHp:vitals.labMaxHp,
    hpPercent:vitals.hpPercent}:{}),
   availablePoints:available,stats,
   portrait:card.portrait??null,

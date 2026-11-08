@@ -52,7 +52,8 @@ const $=id=>document.getElementById(id);
 const status=$('adventure-status');
 const idField={
  base:'adventure-xp-base',bonus:'adventure-xp-bonus',penalty:'adventure-xp-penalty',
- global:'adventure-xp-global',level:'adventure-xp-level',max:'adventure-level-max',
+ global:'adventure-xp-global',distribution:'adventure-xp-distribution',
+ level:'adventure-xp-level',max:'adventure-level-max',
  statPoints:'adventure-stat-points-per-level',xpMode:'adventure-xp-mode',
  currency:'adventure-currency',hpPercent:'adventure-combat-hp-percent',
  moveSpeed:'adventure-move-speed',
@@ -156,6 +157,7 @@ function setFields(value){
  $(idField.bonus).value=value.xp.higherEnemyBonusPercent;
  $(idField.penalty).value=value.xp.higherAllyPenaltyPercent;
  $(idField.global).value=value.xp.globalMultiplier;
+ $(idField.distribution).value=value.xp.distribution;
  $(idField.level).value=value.progression.xpPerLevel;
  $(idField.max).value=value.progression.maxLevel;
  $(idField.xpMode).value=value.progression.xpCurveMode;
@@ -179,7 +181,8 @@ function fromFields(){
   xp:{...rules.xp,baseVictoryXp:numberFrom(idField.base),
    higherEnemyBonusPercent:numberFrom(idField.bonus),
    higherAllyPenaltyPercent:numberFrom(idField.penalty),
-   globalMultiplier:numberFrom(idField.global)},
+   globalMultiplier:numberFrom(idField.global),
+   distribution:$(idField.distribution).value},
   progression:{xpCurveMode:$(idField.xpMode).value,
    xpPerLevel:numberFrom(idField.level),maxLevel:numberFrom(idField.max),
    statPointsPerLevel:numberFrom(idField.statPoints),

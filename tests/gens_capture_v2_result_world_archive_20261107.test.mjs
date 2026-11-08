@@ -103,3 +103,28 @@ test('native READY request is acknowledged verbatim before any encounter can arm
  host.dispose();
  assert.equal(listeners.size,0);
 });
+
+test('shared XP receipt lists the actual saved instance owners, even after a KO swaps the active member',()=>{
+ const result={...award,xp:1001,distribution:'all',recipients:[
+  {instanceId:'owned-1',speciesId:'creature-a',xp:501,levelBefore:1,levelAfter:1},
+  {instanceId:'owned-2',speciesId:'creature-b',xp:500,levelBefore:1,levelAfter:1}
+ ]};
+ const session={lastAward:result,rules,party:{active:{instanceId:'owned-2',speciesId:'creature-b'},
+  reserve:[{instanceId:'owned-1',speciesId:'creature-a'}]}};
+ const view=projectAdventureCombatAwardV1({session,award:result,bestiaryCards:[
+  {id:'creature-a',name:'A'}, {id:'creature-b',name:'B'}
+ ]});
+ assert.ok(view.rows.some(entry=>entry.label.includes('owned-1')&&entry.value.includes('+501 XP')));
+ assert.ok(view.rows.some(entry=>entry.label.includes('owned-2')&&entry.value.includes('+500 XP')));
+ assert.throws(()=>projectAdventureCombatAwardV1({session,
+  award:{...result,recipients:[{...result.recipients[0],xp:999},result.recipients[1]]}
+ }),/identique|persisté/);
+});
+test('creation UI exposes the chosen XP distribution without imposing it on older saves',()=>{
+ const html=fs.readFileSync(new URL('../assets/gensrpg/capture-v2/adventure.html',import.meta.url),'utf8');
+ const code=fs.readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ assert.match(html,/id="adventure-xp-distribution"/);
+ assert.match(html,/<option value="all">/);
+ assert.match(html,/<option value="active">/);
+ assert.match(code,/distribution:\$\('adventure-xp-distribution'\)/);
+});

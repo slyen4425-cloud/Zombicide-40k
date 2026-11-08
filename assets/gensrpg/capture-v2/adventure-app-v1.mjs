@@ -2,6 +2,13 @@
 // Bestiary publication is computed by the SAME official Combat main function.
 // The only gameplay model lives in adventure-contract-v1.mjs (not DOM).
 import {captureBestiaryCardsV1} from '../../../vendor/combat-lab/src/ui/capture-bestiary-cards-v1.js';
+import {projectCaptureEncounterOwnedStatsV1}
+ from '../../../vendor/combat-lab/src/adapters/input/capture/capture-encounter-owned-stats-v1.js';
+import {projectCaptureStatEffectsV1}
+ from '../../../vendor/combat-lab/src/core/combat/capture-stat-effects-v1.js';
+import {projectCaptureEncounterMaxHpV1}
+ from '../../../vendor/combat-lab/src/ui/capture-encounter-combat-source-v1.js';
+import {createAdventureHpProjectorV1} from './adventure-hp-projection-v1.mjs';
 import {readWorldAssemblerDraft} from '../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js';
 import {
  createNewExplorationPlay,readExplorationPlay,playWorldFingerprint
@@ -53,6 +60,7 @@ const idField={
 let rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
 let published=[];
 let officialCombatSha=null,officialStatRegistry=null;
+let officialCombatVitalsProjector=null;
 let store,portfolio,draftStore,creatorDraftStore,worldLibrary=null;
 const text=(node,value)=>{node.textContent=String(value);};
 const stateMessage=(message,error=false)=>{
@@ -208,7 +216,7 @@ async function fetchPublishedBestiary(){
    assetCatalog:assets,statRegistry:stats,nativeSkills:skills.entries??[]
   })),
   combatSha:delivery.combat.sha,
-  statRegistry:stats
+  statRegistry:stats,creatureTransfers:bundle.creatureTransfers
  });
 }
 // Only the original Exploration IndexedDB is authoritative for user HeroDefinition images.
@@ -662,7 +670,8 @@ function renderPlayingSheet(){
  if(session?.sessionId!==activePlayingSheet.sessionId)
   throw new Error('La fiche ne correspond plus à la partie active');
  const snapshot=adventurePlaySheetSnapshotV1({
-  session,bestiaryCards:published,statRegistry:officialStatRegistry
+  session,bestiaryCards:published,statRegistry:officialStatRegistry,
+  projectCombatVitals:officialCombatVitalsProjector
  });
  for(const button of document.querySelectorAll('[data-adventure-sheet-tab]')){
   const selected=button.dataset.adventureSheetTab===currentSheetTab;
@@ -1047,6 +1056,12 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   const official=await fetchPublishedBestiary();
   published=official.cards;officialCombatSha=official.combatSha;
   officialStatRegistry=official.statRegistry;
+  officialCombatVitalsProjector=createAdventureHpProjectorV1({
+   creatureTransfers:official.creatureTransfers,statRegistry:officialStatRegistry,
+   projectOwnedStats:projectCaptureEncounterOwnedStatsV1,
+   projectStatEffects:projectCaptureStatEffectsV1,
+   projectMaxHp:projectCaptureEncounterMaxHpV1
+  });
   fillPublicSpecies();
   const active=store.load();
   if(active){rules=normalizeAdventureRulesV1(active.rules);setFields(rules);}

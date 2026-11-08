@@ -884,8 +884,15 @@ function syncFullscreenControl(){
 async function requestAdventureFullscreen(){
  if(document.fullscreenElement)return;
  if(!document.fullscreenEnabled||typeof document.documentElement.requestFullscreen!=='function')return;
- try{await document.documentElement.requestFullscreen();}
- catch{ /* Full viewport is maintained by CSS when the browser blocks fullscreen. */ }
+ try{
+  await document.documentElement.requestFullscreen({navigationUI:'hide'});
+  // The phone's landscape orientation is requested only after the trusted
+  // fullscreen gesture, never by overriding the creator's camera angle.
+  if(document.fullscreenElement&&typeof screen.orientation?.lock==='function'){
+   try{await screen.orientation.lock('landscape');}
+   catch{ /* Android/PWA may deny orientation lock; responsive CSS survives. */ }
+  }
+ }catch{ /* Full viewport is maintained by CSS when the browser blocks fullscreen. */ }
  syncFullscreenControl();
 }
 $('adventure-fullscreen').addEventListener('click',()=>{

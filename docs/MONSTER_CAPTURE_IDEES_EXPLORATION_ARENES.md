@@ -88,6 +88,11 @@ Les cartes possèdent déjà notamment des maisons, ponts, arbres, cascades et d
 
 **À ne pas confondre :** placement visuel d'une carte dans le dashboard ≠ déplacement de sa géographie en jeu ; masquer les flèches d'intérieurs ≠ casser les connexions fonctionnelles.
 
+## G. Cartes de combat par zone, bâtiment et salle (ajout 8 novembre 2026)
+**Statut : futur chantier documenté, non développé.** Chaque zone extérieure pourra choisir une carte de combat disponible ; bâtiments, arènes, donjons et salles pourront avoir un choix propre prioritaire, avec héritage hiérarchique **salle → intérieur/bâtiment → zone**. L'interface d'édition doit rester simple (sélecteur, aperçu, « Hériter de la zone », suppression de surcharge), sans recopier de moteur ni de cartes.
+
+La **spécification et les critères de test uniques** sont inscrits dans [le backlog Monster Capture V2 #230](https://github.com/slyen4425-cloud/Zombicide-40k/issues/230) sous « Nouveau chantier — cartes de combat par zone et intérieur (08/11/2026) ». Cette note n'en fait pas un deuxième suivi.
+
 ## Inspiration documentée
 - [Pokémon GO — défendre une arène](https://niantic.helpshift.com/hc/en/6-pokemon-go/faq/383-earning-the-defender-bonus/?l=en) : défense persistante au-delà de la présence du joueur.
 - [Temtem — Dojo Wars](https://temtem.wiki.gg/wiki/Dojo_Wars) : contrôle de dojos par des joueurs et défense organisée.

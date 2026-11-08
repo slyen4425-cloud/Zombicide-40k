@@ -941,6 +941,7 @@ window.addEventListener('pagehide',()=>detachShellFullscreen?.(),{once:true});
 syncFullscreenControl();
 
 const journeyLoading=$('adventure-launch-loading');
+let journeyLaunchEpoch=0;
 function showJourneyLoading(message){
  text($('adventure-launch-loading-status'),message);
  journeyLoading.hidden=false;
@@ -949,6 +950,7 @@ function dismissJourneyLoading(){
  journeyLoading.hidden=true;
 }
 function cancelPendingAdventureLaunch(){
+ ++journeyLaunchEpoch; // Explicit cancellation invalidates any still-pending async preflight.
  const frame=$('adventure-play-frame');
  activeCombatHost?.dispose();activeCombatHost=null;
  activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
@@ -987,6 +989,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  void requestAdventureFullscreen();
  if(!journeyLoading.hidden)return; // One authoritative launch at a time.
  showJourneyLoading('Chargement du monde et des sauvegardes…');
+ const launchEpoch=++journeyLaunchEpoch;
  try{
  const selectedWorldId=$('adventure-world-select').value;
  let world=readWorldAssemblerDraft(window.localStorage);
@@ -1021,6 +1024,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  }
  const savedHeroId=store.load()?.hero?.definitionId??null;
  const heroRecord=savedHeroId?await (await officialHeroStore()).get(savedHeroId):null;
+ if(launchEpoch!==journeyLaunchEpoch)return; // Closed during asynchronous HeroDefinition lookup.
  if(savedHeroId&&!heroRecord)
   throw new Error('Le héros de cette partie n’existe plus dans la bibliothèque Exploration. La sauvegarde reste intacte.');
  // Bound worlds are immutable for this room. Refuse an alien/world-mismatched
@@ -1030,6 +1034,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
   world,officialFingerprint:playWorldFingerprint,
   sessionId:store.load()?.sessionId
  });
+ if(launchEpoch!==journeyLaunchEpoch)return;
  if(worldLibrary&&selectedWorldId){
   const activated=activateSelectedAdventureWorldV1({
    worldLibrary,selectedWorldId
@@ -1052,6 +1057,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
   context:onlineContext,transport:captureRoomTransport,
   navigation:result.navigation
  });
+ if(launchEpoch!==journeyLaunchEpoch)return;
  // Native Exploration consumes the original selected HeroDefinition by ID only.
  writeAdventureHeroSelectionGrantV1({storage:window.sessionStorage,
   session:result.session,world,heroRecord});

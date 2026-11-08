@@ -3,16 +3,16 @@
   "combat": {
     "repository": "slyen4425-cloud/GenSrpg_labo_combat_dynamique",
     "ref": "main",
-    "sha": "ebaea5dc40c4803add76563029a9dff67b964d55",
+    "sha": "8f29e32c57792ea0e39063223bd61250e91b8433",
     "path": "vendor/combat-lab/",
-    "certifiedCiRun": 42113199995
+    "certifiedCiRun": 42423272458
   },
   "exploration": {
     "repository": "slyen4425-cloud/laboratoire_dynamique_exploration-",
     "ref": "main",
-    "sha": "c18b34cacf6d9d157d62e7e507c4c155d6e1b11c",
+    "sha": "d9f90f5bf48b8c42699f0db2f2f797f1ebf17fa1",
     "path": "vendor/exploration-lab/",
-    "certifiedCiRun": 42361421441
+    "certifiedCiRun": 42426636928
   },
   "legacyCaptureRuntime": false,
   "featuresDeferred": [

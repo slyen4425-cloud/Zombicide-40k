@@ -98,6 +98,12 @@
     <label>Bonus par niveau ennemi supérieur (%) <input type="number" id="adventure-xp-bonus" min="0" max="200" step="1"></label>
     <label>Malus par niveau allié supérieur (%) <input type="number" id="adventure-xp-penalty" min="0" max="100" step="1"></label>
     <label>Multiplicateur global <input type="number" id="adventure-xp-global" min="0" max="100" step="0.1"></label>
+    <label>Répartition des XP du combat
+     <select id="adventure-xp-distribution">
+      <option value="all">Équipe entière (XP divisés équitablement)</option>
+      <option value="active">Créature active au début (anciennes règles)</option>
+     </select>
+    </label>
     <label>Progression XP
      <select id="adventure-xp-mode">
       <option value="custom">Par paliers (conseillé)</option>

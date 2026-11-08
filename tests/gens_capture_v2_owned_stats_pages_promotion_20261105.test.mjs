@@ -30,6 +30,10 @@ test('published Monster Capture stays isolated and retains exact certified origi
  const workflow=fs.readFileSync(new URL('../.github/workflows/main.yml',import.meta.url),'utf8');
  assert.match(workflow,/steps\.preview_labs\.outputs\.combat/);
  assert.match(workflow,/steps\.preview_labs\.outputs\.exploration/);
+ assert.equal((workflow.match(/ref: \\$\\{\\{ steps\\.preview_pin\\.outputs\\.visuals \\$\\}\\}/g)||[]).length,2,
+  'Pages build and PR review must both consume the ONE certified visual SHA');
+ assert.doesNotMatch(workflow,/ref: aded6a9bc571dd1dd557889d35ad4e513f6f27dd/,
+  'an obsolete visual SHA must not survive independently in the workflow');
  assert.match(workflow,/node --test tests\/gens_capture_v2_owned_stats_pages_promotion_20261105\.test\.mjs/);
  assert.doesNotMatch(workflow,/ref: 53890e1383b33f7a0ec5bb2fafed59acf1d7a163|ref: 7155516b51db9892183cc043837037c4c87a0315/);
 });

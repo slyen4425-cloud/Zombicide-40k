@@ -101,15 +101,22 @@ test('a saved AdventureSession retains a selected canonical Exploration HeroDefi
  assert.equal(session.hero.progression,null,'choosing a portrait never enables hero XP implicitly');
 });
 
-test('native Play starts in full dynamic viewport without forcibly entering browser fullscreen above Shell return',()=>{
+test('native Play enters Capture-owned fullscreen from a tap and keeps Sac and title above Explorer',()=>{
  const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
  const start=app.indexOf("$('adventure-play').addEventListener");
  const end=app.indexOf("$('adventure-resume').addEventListener",start);
  assert.ok(start>=0&&end>start,'real launch handler must be present');
  const launch=app.slice(start,end);
  assert.match(launch,/document\.body\.dataset\.adventurePlaying='true'/);
- assert.doesNotMatch(launch,/requestAdventureFullscreen\s*\(/,
-  'auto fullscreen inside nested Capture iframe steals the Shell return touch target');
+ assert.match(launch,/void requestAdventureFullscreen\(\);/,
+  'the actual start tap requests fullscreen before any async world checks');
+ const html=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure.html',import.meta.url),'utf8');
+ assert.match(html,/id="adventure-play-frame"[^>]+allow="autoplay" hidden/,
+  'native Explorer frame may not hide the owner HUD in its own fullscreen layer');
+ assert.doesNotMatch(html,/id="adventure-play-frame"[^>]*allowfullscreen/,
+  'the parent owns fullscreen and all accessible Sac, equipe and title actions');
+ assert.match(launch,/adventure-play-hud'\)\.hidden=false/,
+  'Capture-owned HUD stays displayed while the map runs');
  assert.match(app,/adventure-fullscreen'\)\.addEventListener\('click'/,
   'browser fullscreen must remain an explicit player choice');
 });

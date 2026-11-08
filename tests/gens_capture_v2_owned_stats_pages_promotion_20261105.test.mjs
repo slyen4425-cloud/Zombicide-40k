@@ -24,8 +24,9 @@ test('Monster Capture release pins one immutable candidate and proves the select
 test('published Monster Capture stays isolated and retains exact certified original visual author',()=>{
  assert.equal(file.officialVisuals.repository,'slyen4425-cloud/GenSrpg_labo_combat_dynamique');
  assert.equal(file.officialVisuals.ref,'global-assets');
- assert.equal(file.officialVisuals.sha,'aded6a9bc571dd1dd557889d35ad4e513f6f27dd');
- assert.equal(file.officialVisuals.certifiedCiRun,41558880085);
+ assert.equal(file.officialVisuals.sha,'f61191afb001807955bccf3c5b2b5e292c76fc52',
+  'approved author library must contain Gorice movement sprites and Gemmor portraits');
+ assert.equal(file.officialVisuals.certifiedCiRun,42036930914);
  const workflow=fs.readFileSync(new URL('../.github/workflows/main.yml',import.meta.url),'utf8');
  assert.match(workflow,/steps\.preview_labs\.outputs\.combat/);
  assert.match(workflow,/steps\.preview_labs\.outputs\.exploration/);

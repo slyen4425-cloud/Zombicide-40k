@@ -880,10 +880,17 @@ function syncFullscreenControl(){
  control.setAttribute('aria-pressed',String(enabled));
 }
 async function requestAdventureFullscreen(){
- if(document.fullscreenElement)return;
- if(!document.fullscreenEnabled||typeof document.documentElement.requestFullscreen!=='function')return;
- try{await document.documentElement.requestFullscreen();}
- catch{ /* Full viewport is maintained by CSS when the browser blocks fullscreen. */ }
+ // Capture owns the fullscreen document, INCLUDING the Sac/Équipe HUD.
+ if(!document.fullscreenElement && document.fullscreenEnabled &&
+    typeof document.documentElement.requestFullscreen==='function'){
+  try{await document.documentElement.requestFullscreen();}
+  catch{ /* CSS 100dvh remains usable if browser fullscreen is denied. */ }
+ }
+ // Landscape phone orientation is distinct from creator-owned camera angle.
+ if(document.fullscreenElement&&typeof screen.orientation?.lock==='function'){
+  try{await screen.orientation.lock('landscape');}
+  catch{ /* Orientation is user/OS-controlled where lock is unsupported. */ }
+ }
  syncFullscreenControl();
 }
 $('adventure-fullscreen').addEventListener('click',()=>{
@@ -895,6 +902,10 @@ document.addEventListener('fullscreenchange',syncFullscreenControl);
 syncFullscreenControl();
 
 $('adventure-play').addEventListener('click',guardedAsync(async()=>{
+ // Awaiting world/hero/network preflight first would lose Android activation.
+ const fullscreenWasActive=Boolean(document.fullscreenElement);
+ const fullscreenRequest=requestAdventureFullscreen();
+ try{
  const selectedWorldId=$('adventure-world-select').value;
  let world=readWorldAssemblerDraft(window.localStorage);
  let beforeWorldSession=store.load();
@@ -1051,10 +1062,16 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  document.querySelector('[data-adventure-app]').hidden=true;
  document.body.dataset.adventurePlaying='true';
  $('adventure-play-hud').hidden=false;
- // Fullscreen API is ONLY requested through the explicit touch button above.
- // Auto fullscreen inside a nested iframe captures the browser top layer and
- // physically blocks the parent Shell's real "Retour à Monster Capture" button.
- // The viewport-filling CSS is the standard default and keeps touch navigation.
+ // Native Exploration remains inside this Capture HUD document.
+ await fullscreenRequest;
+ }catch(error){
+  // Failed play preflight must not strand preparation behind a fullscreen view.
+  if(!fullscreenWasActive){
+   await fullscreenRequest;
+   if(document.fullscreenElement)await document.exitFullscreen?.().catch(()=>{});
+  }
+  throw error;
+ }
 }));
 $('adventure-world-select').addEventListener('change',()=>{
  text($('adventure-world-status'),'Monde sélectionné pour la prochaine entrée en jeu. Une sauvegarde existante conserve son monde lié.');

@@ -1,3 +1,13 @@
+## 2026-11-08 — Incident Android « Bestiaire : transferts incompatibles » (C2)
+- **Constat utilisateur** : l'écran Jouer de Monster Capture reste bloqué avant Bestiaire/monde/héros. La garde `authorSha == engineSha == delivery.combat.sha` refuse de démarrer une session si deux générations de fichiers JSON sont mélangées ; elle doit rester stricte.
+- **Cause technique plausible et reproductible** : le SW PWA existant traite les fichiers `.json` en cache-first (`caches.match(request)`), ce qui peut ignorer `fetch(cache:'no-store')` et renvoyer des fichiers de versions différentes. L'assemblage certifie déjà les SHA identiques à l'origine.
+- **Source propriétaire** : PR #330 fusionnée dans checkpoint START Capture `64782ca7721c0ea79b9d6cf1f29ddf5ecea6586b`, source immuable testée `4fc9307d4f42c69f1c54ca08995b3cd8dd7d660f`, CI Capture clean `42468369430`, native `42468369441`, builder `42468369454`, runtime `42468369470` SUCCESS. Un token `crypto.randomUUID()` par ouverture est ajouté aux cinq URL JSON officielles pour contourner l'ancien cache installé ; aucune deuxième liste de créatures ni fallback.
+- **START publication** : `main@9dc631895c5ee7d2695975a00ed75ae9648f5455`, checkpoint `checkpoint/gensrpg-start-capture-bestiary-pwa-publish-2026-11-08`, branche `work/gensrpg-capture-bestiary-pwa-publish-2026-11-08`. Seul `tools/capture_v2_pages_preview_pin.json` sélectionne le nouveau source SHA ; le publisher unique exécute ce nouveau test dans build et revue.
+- **Protections** : Combat main `a182ebf252e4327692fc3515f2d261dcc7af4458`, Exploration main `7a4f4b3e198e6fe3b5707c4b5b6dfed5d17007b9` inchangés ; sauvegardes, stockage, PWA des autres modes, Survie et Dungeon préservés.
+- **Gates** : site assemblé / Chromium réel, budget ≤900 Mio, PR publisher CI GREEN, merge main, Pages SUCCESS et provenance HTTP SHA exact. Pas de déclaration livré avant validation post-déploiement.
+
+---
+
 ## 2026-11-08 — Livraison unique à préparer : menu titre, équipe et transitions Aventure (C2)
 - START publisher `main@e6ab7000e575cc57186abb4efeadf7b98cd92103` ; checkpoint `checkpoint/gensrpg-start-capture-play-ux-publish-2026-11-08`, branche dédiée `work/gensrpg-capture-play-ux-publish-2026-11-08`. Source propriétaire Capture v2 PR #327 fusionnée sur checkpoint (merge `815b24114ca8fdfca9cfb3b3b577797ab12d8639`), raccord propriétaire PR #328 toujours à certifier ; Exploration main PR #390 et correctif smoke PR #391, Combat main propriétaire inchangé.
 - Portée : seul pin immuable Capture V2 du publisher, tests ciblés sur le site réellement assemblé et journal. Aucun nouveau runtime, aucune copie intégrale de bibliothèque, aucune modification de sauvegarde, ni PWA/Survie/Dungeon.

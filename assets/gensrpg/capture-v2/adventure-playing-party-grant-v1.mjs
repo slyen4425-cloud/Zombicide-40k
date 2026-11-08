@@ -3,6 +3,7 @@
 // It never creates an actor, battle, level, creature definition or XP source.
 import {ADVENTURE_SAVE_SCHEMA_V1,availableAdventureStatPointsV1} from './adventure-contract-v1.mjs';
 import {ADVENTURE_PUBLISHED_GRANT_SCHEMA_V1} from './adventure-publication-grant-v1.mjs';
+import {assertOfficialAdventureWorldIdV1} from './adventure-world-choice-v1.mjs';
 
 export const ADVENTURE_PLAYING_PARTY_SCHEMA_V1='gensrpg.capture.v2.active-party.v1';
 const safeId=(v,field)=>{
@@ -26,7 +27,7 @@ export function writeAdventurePlayingPartyV1({
     session?.status!=='playing')
   throw new Error('Genuine playing AdventureSession required for native party');
  const sessionId=safeId(session.sessionId,'sessionId');
- const worldId=safeId(world?.id,'worldId');
+ const worldId=assertOfficialAdventureWorldIdV1(world?.id);
  if(session.world?.mapRef!==worldId)
   throw new Error('Adventure party world does not match saved WorldDocument');
  const grant=exact(publicationGrant,

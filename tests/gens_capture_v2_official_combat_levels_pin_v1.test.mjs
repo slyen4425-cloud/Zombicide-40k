@@ -11,14 +11,12 @@ import {createAdventureSessionV1,SHOWCASE_ADVENTURE_RULES_V1} from '../assets/ge
 const pins=JSON.parse(fs.readFileSync(new URL('../assets/gensrpg/capture-v2/source-pins-v1.json',import.meta.url),'utf8'));
 test('GenSRPG consumer explicitly pins certified Combat main owner commit with per-creature levels',()=>{
  assert.equal(pins.combat.ref,'main');
- assert.equal(pins.combat.sha,'8f29e32c57792ea0e39063223bd61250e91b8433',
-  'certified main includes official Gorice and Gemmor author transfers');
- assert.equal(pins.combat.certifiedCiRun,42423563886);
+ assert.match(pins.combat.sha,/^[a-f0-9]{40}$/);
+ assert.ok(Number.isSafeInteger(pins.combat.certifiedCiRun)&&pins.combat.certifiedCiRun>0,
+  'Combat must have a certified immutable main CI, never an author fork');
  assert.equal(pins.exploration.repository,'slyen4425-cloud/laboratoire_dynamique_exploration-');
  assert.equal(pins.exploration.ref,'main');
- assert.equal(pins.exploration.sha,'d9f90f5bf48b8c42699f0db2f2f797f1ebf17fa1',
-  'native creator camera requires certified Exploration main');
- assert.equal(pins.exploration.certifiedCiRun,42426636928);
+
  assert.match(pins.exploration.sha,/^[a-f0-9]{40}$/,
   'Exploration must be an immutable published main commit, never a floating ref');
  assert.ok(Number.isSafeInteger(pins.exploration.certifiedCiRun)&&
@@ -27,12 +25,18 @@ test('GenSRPG consumer explicitly pins certified Combat main owner commit with p
  // the immutable candidate pin, and checked out this exact official commit.
  // Requiring AN OLD hardcoded SHA here would veto every legitimate update.
  // Verify the CHECKED OUT bytes instead of maintaining a second authority.
+ const realCombat=execFileSync('git',
+  ['-C','combat-lab','rev-parse','HEAD'],{encoding:'utf8'}).trim();
+ assert.equal(realCombat,pins.combat.sha,
+  'Native Combat source MUST be the exact certified main checkout');
  const realExploration=execFileSync('git',
   ['-C','exploration-lab','rev-parse','HEAD'],{encoding:'utf8'}).trim();
  assert.equal(realExploration,pins.exploration.sha,
   'Native Exploration source MUST be the exact certified main checkout');
  const delivery=JSON.parse(fs.readFileSync(new URL(
   '../_site/assets/gensrpg/capture-v2/delivery-manifest.json',import.meta.url),'utf8'));
+ assert.equal(delivery.combat.sha,pins.combat.sha,
+  'Staged Adventure must consume the exact official Combat SHA');
  assert.equal(delivery.exploration.sha,pins.exploration.sha,
   'The staged Adventure must use exactly the same official Exploration bytes');
  assert.equal(delivery.exploration.ref,'main');

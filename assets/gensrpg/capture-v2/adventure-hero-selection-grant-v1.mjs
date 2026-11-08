@@ -4,6 +4,7 @@
 // Jouer; never copy creature data, actor imagery or XP into the grant.
 import {ADVENTURE_SAVE_SCHEMA_V1,officialAdventureHeroDefinitionIdV1}
  from './adventure-contract-v1.mjs';
+import {assertOfficialAdventureWorldIdV1} from './adventure-world-choice-v1.mjs';
 
 export const ADVENTURE_HERO_SELECTION_SCHEMA_V1='gensrpg.capture.v2.hero-selection.v1';
 
@@ -21,7 +22,7 @@ export function writeAdventureHeroSelectionGrantV1({
   session.status!=='playing')
   throw new Error('A real playing AdventureSession is required for hero selection');
  const sessionId=safeId(session.sessionId,'AdventureSession');
- const worldId=safeId(world?.id,'WorldDocument');
+ const worldId=assertOfficialAdventureWorldIdV1(world?.id);
  if(session.world?.mapRef!==worldId)
   throw new Error('Adventure hero selection world does not match the playing session');
  const requestedId=session.hero?.definitionId;

@@ -5,6 +5,7 @@
 import {
  ADVENTURE_SAVE_SCHEMA_V1,publishedAdventureSpeciesV1
 } from './adventure-contract-v1.mjs';
+import {assertOfficialAdventureWorldIdV1} from './adventure-world-choice-v1.mjs';
 
 export const ADVENTURE_PUBLISHED_GRANT_SCHEMA_V1=
  'gensrpg.capture.v2.published-encounters.v1';
@@ -29,7 +30,7 @@ export function writeAdventurePublishedEncounterGrantV1({
     session?.status!=='playing')
   throw new Error('A true playing GenSRPG AdventureSession is required');
  const sessionId=safeId(session.sessionId,'session');
- const worldId=safeId(world?.id,'world');
+ const worldId=assertOfficialAdventureWorldIdV1(world?.id);
  if(session.world?.mapRef!==worldId)
   throw new Error('Adventure game and World Builder world identity mismatch');
  const sha=officialSha(combatSha);

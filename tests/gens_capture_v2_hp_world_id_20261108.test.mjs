@@ -77,9 +77,10 @@ test('game HP, stat points, and team use one provided Combat projection, preserv
   [25,46,0,35,35],[25,19,0,35,19],[25,0,0,35,0],
   [25,null,0,35,35],[25,46,5,37,37],[40,46,0,56,46],
   [100,46,0,140,46]]){
-  const s=makeSession({percent,hp});
-  s.party.active.level=allocation?2:1;
-  s.party.active.statAllocations=allocation?{health:allocation}:{};
+  const original=makeSession({percent,hp});
+  const s={...original,party:{...original.party,
+   active:{...original.party.active,level:allocation?2:1,
+    statAllocations:allocation?{health:allocation}:{}}}};
   const before=JSON.stringify(s);
   const result=adventurePlaySheetSnapshotV1({
    session:s,bestiaryCards:cards,statRegistry:registry,

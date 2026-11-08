@@ -9,8 +9,19 @@ const published=[{id:'lumilo',name:'Lumilo',skills:[{state:'ready'}],
   elements:['light'],measures:[{key:'health',label:'Santé',value:60},{key:'speed',label:'Vitesse',value:18}]
 }];
 const registry={schema:'capture-stat-registry-v1',stats:[
-  {id:'health',label:'Santé'}, {id:'speed',label:'Vitesse'}
+  {id:'health',label:'Santé / PV',maxHpPerPoint:1}, {id:'speed',label:'Vitesse'}
 ]};
+// Unit test doubles are intentionally injected: the production caller passes
+// the certified Combat Core functions, tested again against the real _site.
+const nativeHealth={
+ projectCombatStatEffects:({statValues})=>Object.freeze({
+  hasMaxHpProjection:true,maxHp:statValues.values.health??0
+ }),
+ projectCombatMaxHp:(amount,ratio)=>amount===0?0:Math.max(1,Math.ceil(amount*ratio))
+};
+const sheet=session=>adventurePlaySheetSnapshotV1({
+ session,bestiaryCards:published,statRegistry:registry,...nativeHealth
+});
 const save=()=>{
  const basic=createAdventureSessionV1({
   bestiaryCards:published,starterId:'lumilo',rules:SHOWCASE_ADVENTURE_RULES_V1,
@@ -25,7 +36,7 @@ const save=()=>{
  };
 };
 test('active character sheet is only a projection of canonical current Capture session and published registry',()=>{
- const snapshot=adventurePlaySheetSnapshotV1({session:save(),bestiaryCards:published,statRegistry:registry});
+ const snapshot=sheet(save());
  assert.equal(snapshot.hero.level,null,'hero has no level unless creator enables it');
  assert.equal(snapshot.creature.speciesId,'lumilo');
  assert.equal(snapshot.creature.name,'Lumilo');
@@ -35,6 +46,13 @@ test('active character sheet is only a projection of canonical current Capture s
  assert.equal(snapshot.creature.portrait.file,'capture/lumilo/front.webp');
  assert.deepEqual(snapshot.creature.elements,['light']);
  assert.equal(snapshot.creature.stats[0].baseValue,60,'published Combat measure must be displayed without recalculation');
+ assert.equal(snapshot.creature.stats[0].effectiveValue,16,'in-game Santé displays the official 25% HP');
+ assert.deepEqual(snapshot.creature.gameHp,{
+  current:16,max:16,labMax:63,percent:25,
+  restoredOnNextCombat:true,savedHpExceedsMax:false
+ },'a null persisted HP means full native HP, never unknown 60/63');
+ assert.equal(snapshot.creature.hp,null,'the Core saved HP remains unmodified');
+
  assert.equal(snapshot.creature.stats[0].id,'health');
  assert.equal(snapshot.creature.stats[0].allocated,3);
  assert.equal(snapshot.inventory.currency,12);
@@ -45,9 +63,9 @@ test('active character sheet is only a projection of canonical current Capture s
  assert.equal(Object.hasOwn(snapshot,'reserve'),false,'never invent reserve party state');
 });
 test('unsupported or missing official stat registry fails closed',()=>{
- assert.throws(()=>adventurePlaySheetSnapshotV1({session:save(),bestiaryCards:published,statRegistry:null}),
+ assert.throws(()=>adventurePlaySheetSnapshotV1({session:save(),bestiaryCards:published,statRegistry:null,...nativeHealth}),
   /registry|officiel|stat/i);
- assert.throws(()=>adventurePlaySheetSnapshotV1({session:{...save(),status:'configured'},bestiaryCards:published,statRegistry:registry}),
+ assert.throws(()=>adventurePlaySheetSnapshotV1({session:{...save(),status:'configured'},bestiaryCards:published,statRegistry:registry,...nativeHealth}),
   /playing|partie|jeu/i);
 });
 test('the actual play view has one accessible sheet overlay, and no rival exploration engine',()=>{
@@ -112,4 +130,36 @@ test('native Play starts in full dynamic viewport without forcibly entering brow
   'auto fullscreen inside nested Capture iframe steals the Shell return touch target');
  assert.match(app,/adventure-fullscreen'\)\.addEventListener\('click'/,
   'browser fullscreen must remain an explicit player choice');
+});
+
+test('game-health readout follows each creator percentage and gained Santé points, never rewrites a save',()=>{
+ const original=save();
+ for(const [pct,expected] of [[25,16],[50,32],[100,63],[33,21]]){
+  const scoped={...original,rules:{...original.rules,
+   combat:{...original.rules.combat,hpMultiplier:pct/100}}};
+  const snap=sheet(scoped);
+  assert.equal(snap.creature.gameHp.max,expected,'incorrect in-game HP at '+pct+'%');
+  assert.equal(snap.creature.stats.find(st=>st.id==='health').effectiveValue,expected);
+  assert.equal(snap.creature.stats.find(st=>st.id==='health').baseValue,60);
+ }
+ const increased={...original,party:{...original.party,
+  active:{...original.party.active,statAllocations:{health:7}}}};
+ const grown=sheet(increased);
+ assert.equal(grown.creature.gameHp.labMax,67);
+ assert.equal(grown.creature.gameHp.max,17,'stat upgrade must be scaled by the same game policy');
+ const damaged={...original,party:{...original.party,
+  active:{...original.party.active,hp:10}}};
+ assert.equal(sheet(damaged).creature.gameHp.current,10,'remaining battle HP is never multiplied twice');
+ assert.equal(damaged.party.active.hp,10);
+});
+test('rendered sheet labels maximum and current PV as game values, with Lab source secondary',()=>{
+ const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ const view=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-play-sheet-view-v1.mjs',import.meta.url),'utf8');
+ assert.match(app,/projectCombatStatEffects:projectCaptureStatEffectsV1/);
+ assert.match(app,/projectCombatMaxHp:projectCaptureEncounterMaxHpV1/);
+ assert.match(view,/PV en jeu/);
+ assert.match(view,/c\.gameHp\.max/);
+ assert.match(view,/stat\.effectiveValue/);
+ assert.match(view,/Base Combat avec points/);
+ assert.doesNotMatch(view,/c\.hp===null\?'Non renseignés'/);
 });

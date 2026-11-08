@@ -90,21 +90,29 @@ test('existing installed Capture V2 auto-updates on reopening its SAME URL, no u
    // stability. Fast polling alone could return in less than two seconds,
    // allowing an in-flight old pre-cache fetch to resurrect the old cache.
    // Keep the same 60s ceiling and the strict final cache assertions.
-   await after.waitForFunction(async()=>{
-     const names=await caches.keys();
-     const reg=await navigator.serviceWorker.getRegistration();
-     const stable=reg?.active?.state==='activated' &&
-       !reg.installing && !reg.waiting &&
-       names.includes('gensrpg-cache-release-root-keep') &&
-       names.includes('gensrpg-preview-capture-v2-bbbbbbbbbbbb') &&
-       !names.includes('gensrpg-preview-capture-v2-aaaaaaaaaaaa');
-     // Browser polling frequency can burst while a worker changes state;
-     // sample *elapsed wall time*, not the number of callback invocations.
-     if(!stable){window.__captureStableAutoUpdateSince=0;return false;}
-     if(!window.__captureStableAutoUpdateSince)
-       window.__captureStableAutoUpdateSince=Date.now();
-     return Date.now()-window.__captureStableAutoUpdateSince>=7000;
-   },null,{polling:150,timeout:60000});
+   // Playwright waitForFunction must NEVER return an unresolved async Promise
+   // as a truthy polling result. Await the real CacheStorage/registration
+   // states inside the page and require a continuous seven-second steady state.
+   // This is a browser TEST only, never a game runtime retry or cache mutation.
+   await after.evaluate(async()=>{
+     const deadline=Date.now()+60000;
+     let stableSince=0;
+     while(Date.now()<deadline){
+       const names=await caches.keys();
+       const reg=await navigator.serviceWorker.getRegistration();
+       const stable=reg?.active?.state==='activated' &&
+         !reg.installing&&!reg.waiting &&
+         names.includes('gensrpg-cache-release-root-keep') &&
+         names.includes('gensrpg-preview-capture-v2-bbbbbbbbbbbb') &&
+         !names.includes('gensrpg-preview-capture-v2-aaaaaaaaaaaa');
+       if(stable){
+         stableSince||=Date.now();
+         if(Date.now()-stableSince>=7000)return;
+       }else stableSince=0;
+       await new Promise(resolve=>setTimeout(resolve,150));
+     }
+     throw Error('Installed Capture PWA never reached stable new-worker cache state in 60s');
+   });
    const diagnostics=await after.evaluate(async()=>{
      const samples=[];
      for(let i=0;i<6;i++){

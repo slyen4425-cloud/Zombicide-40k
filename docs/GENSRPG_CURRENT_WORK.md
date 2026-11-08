@@ -1,3 +1,13 @@
+## 2026-11-08 — Livraison unique à préparer : menu titre, équipe et transitions Aventure (C2)
+- START publisher `main@e6ab7000e575cc57186abb4efeadf7b98cd92103` ; checkpoint `checkpoint/gensrpg-start-capture-play-ux-publish-2026-11-08`, branche dédiée `work/gensrpg-capture-play-ux-publish-2026-11-08`. Source propriétaire Capture v2 PR #327 fusionnée sur checkpoint (merge `815b24114ca8fdfca9cfb3b3b577797ab12d8639`), raccord propriétaire PR #328 toujours à certifier ; Exploration main PR #390 et correctif smoke PR #391, Combat main propriétaire inchangé.
+- Portée : seul pin immuable Capture V2 du publisher, tests ciblés sur le site réellement assemblé et journal. Aucun nouveau runtime, aucune copie intégrale de bibliothèque, aucune modification de sauvegarde, ni PWA/Survie/Dungeon.
+- Invariants : équipe 1–6 avec ordre de premier combattant non KO, fiches/points individuels, retour au vrai titre après checkpoint natif, chargement des zones avec décors, vitesse 90 minimum par défaut et réglage 90–360 via Exploration.
+- SOURCES CERTIFIÉES : Capture PR #328 fusionnée dans checkpoint `40ffba25ab0fb4a0a672267f7f7f94d350ff0070`, commit immuable testé `a233ba44b73e9f056c56c9e753c9c8c9fd6b827f` (CI native `42462779561` + limite d'autorité `42462779559` SUCCESS) ; Exploration main `7a4f4b3e198e6fe3b5707c4b5b6dfed5d17007b9`, CI `42462411801` SUCCESS et Pages HTTPS `42462411800` SUCCESS. Combat main `a182ebf252e4327692fc3515f2d261dcc7af4458` inchangé.
+- GATE restant : publisher main PR C2 au SHA exact, budget 900 Mio/duplications, vrai navigateur root et Exploration/Combat, sans écraser Survie/Dungeon ni les sauvegardes ; vérifier Pages HTTPS/provenance et cache PWA après merge. Ne pas proclamer livré avant succès.
+
+
+---
+
 ## 2026-11-08 — Livraison unique : PV de partie visibles et WorldDocument « Test 1 »
 - **START publisher** : `main@55c67a63ab376815ccc26cc8f811e5a30124788f`, checkpoint `checkpoint/gensrpg-start-capture-hp-world-publish-2026-11-08`, branche `work/gensrpg-capture-hp-world-publish-2026-11-08`. Source Capture V2 dans lot indépendant `work/gensrpg-capture-hp-world-id-2026-11-08` démarré sur `d446bb2104dec8bad5725d9000df54e268e00012`.
 - Rendu jeu : `PV en jeu actuels / maximum` et `PV maximum au Labo` distincts. La valeur de santé est projetée depuis le **seul propriétaire Combat**, à partir de la stat de l'instance (points déjà attribués compris), sans mutation de fiches auteur, KO, inventaires, progression ni sauvegardes. Test parité source exacte (140→35 à 25 %, +5 Santé→37).

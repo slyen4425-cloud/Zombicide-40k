@@ -68,11 +68,17 @@ function statGrid(stats,{availablePoints=null,onAllocate=null}={}){
  const grid=node('div','sheet-stat-grid');
  for(const stat of stats){
   const cell=node('div','sheet-stat-card');
-  cell.append(node('span','sheet-stat-name',stat.label));
+  const isHp=stat.isHealthStat===true;
+  cell.append(node('span','sheet-stat-name',
+   isHp?stat.label+' · en jeu':stat.label));
   cell.append(node('strong','sheet-stat-value',
-   stat.baseValue===null?'—':stat.baseValue));
+   isHp?stat.effectiveValue+' PV':stat.baseValue===null?'—':stat.baseValue));
+  if(isHp)cell.append(node('small','sheet-stat-hp-source',
+   'Maximum du jeu : '+stat.hpPercent+' % · Base Combat avec points : '+
+    stat.labWithAllocations+' PV'));
   cell.append(node('span','sheet-stat-bonus',
-   'Points attribués : +'+stat.allocated));
+   'Points attribués : +'+stat.allocated+
+    (isHp?' · PV recalculés selon le réglage de partie':'')));
   if(onAllocate){
    const buttons=node('div','sheet-stat-actions');
    for(const count of [1,5]){
@@ -115,8 +121,12 @@ export function renderAdventureSheetViewV1({
    subtitle:'Créature de ton équipe',imageUrl:portraitUrl,
    artCaption:'Aucun portrait officiel disponible',
    elements:c.elements,
-   vitals:[['Niveau',c.level],['PV actuels',c.hp===null?'Non renseignés':c.hp],['XP',c.xp]]
+   vitals:[['Niveau',c.level],['PV en jeu',
+    Math.round(c.gameHp.current)+' / '+c.gameHp.max+' PV ('+c.gameHp.percent+' %)'],
+    ['XP',c.xp]]
   });
+  if(c.gameHp.savedHpExceedsMax)card.append(hint(
+   'PV sauvegardés supérieurs au maximum de la partie : valeur conservée, aucune correction silencieuse.'));
   card.append(statGrid(c.stats,{
    availablePoints:c.availablePoints,
    onAllocate:tab==='stats'?onAllocate:null

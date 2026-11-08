@@ -585,6 +585,37 @@ export function applyAdventureCombatResultV1({
  }
  const hp=result.partyState?.hp;
  if(hp!==undefined&&hp!==null)number(hp,'official battle HP');
+ // The native Combat RosterSession owns per-member HP. This is the only
+ // AdventureSave consumer of that correlated, strictly validated result.
+ // Legacy CombatResult without members remains byte-compatible.
+ const hasNativeMembers=Object.hasOwn(result.partyState??{},'members');
+ let nativeMembers=null;
+ if(hasNativeMembers){
+  const received=result.partyState.members;
+  const savedMembers=[state.party.active,...(state.party.reserve??[])];
+  if(!Array.isArray(received)||received.length!==savedMembers.length||
+     received.length<1||received.length>6)
+   throw new RangeError('Native Combat party members must match the saved Adventure roster');
+  const byId=new Map();
+  for(const raw of received){
+   const actor=exact(raw,['instanceId','speciesId','hp'],'native Combat member');
+   const id=identity(actor.instanceId,'native Combat instanceId');
+   if(byId.has(id))throw new RangeError('Duplicate native Combat member instanceId');
+   number(actor.hp,'native Combat member HP');
+   byId.set(id,actor);
+  }
+  nativeMembers=savedMembers.map(saved=>{
+   const entry=byId.get(saved.instanceId);
+   if(!entry||entry.speciesId!==saved.speciesId)
+    throw new RangeError('Native Combat roster differs from saved Adventure instances');
+   return entry;
+  });
+  if(byId.size!==nativeMembers.length)
+   throw new RangeError('Native Combat has an unknown Adventure instance');
+  if(result.outcome==='defeat'&&nativeMembers.some(member=>member.hp>0))
+   throw new RangeError('Native Combat team defeat conflicts with a living reserve');
+ }
+
  // Hero progression is optional, independent of Creature XP and computed by
  // existing Core Progression. No new stats, hero skill definitions or battle
  // simulation are created. Legacy saves without a hero property stay intact.
@@ -623,9 +654,31 @@ export function applyAdventureCombatResultV1({
  const recover=defeated&&defeatPolicy==='restore';
  const gameOver=defeated&&defeatPolicy==='game-over';
  const updated=freeze({
-  ...state,status:gameOver&&!(state.party.reserve??[]).some(member=>member.hp!==0)
-   ?'finished':state.status,updatedAt:timestamp,
+  ...state,
+  // A native defeat is a team result, never inferred from the first fighter.
+  status:gameOver&&(
+   nativeMembers!==null
+    ?nativeMembers.every(member=>member.hp===0)
+    :!(state.party.reserve??[]).some(member=>member.hp!==0))
+   ?'finished':state.status,
+  updatedAt:timestamp,
   party:(()=>{
+   if(nativeMembers!==null){
+    const [original,...reserves]=[state.party.active,...(state.party.reserve??[])]
+     .map((member,index)=>({...member,hp:nativeMembers[index].hp,
+       ...(index===0?{level,xp:total}:{})}));
+    const replacement=original.hp===0?reserves.findIndex(member=>member.hp>0):-1;
+    if(replacement>=0){
+     const next=reserves.splice(replacement,1)[0];
+     return {...state.party,active:next,reserve:[original,...reserves]};
+    }
+    // After a genuine defeat with no remaining reserves, use only the
+    // creator's existing restore/KO policy. No auto-revive on flee or win.
+    return {...state.party,
+      active:recover&&original.hp===0?{...original,hp:null}:original,
+      reserve:reserves};
+   }
+   // Historical 1v1 result path stays unchanged for saved old sessions.
    const available=state.party.reserve??[];
    const replacement=defeated?available.findIndex(member=>member.hp!==0):-1;
    const knockedOut={...state.party.active,level,xp:total,

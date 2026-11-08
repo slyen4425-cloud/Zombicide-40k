@@ -792,6 +792,10 @@ window.addEventListener('message',event=>{
  document.querySelector('[data-adventure-app]').hidden=false;
  if(document.fullscreenElement)void document.exitFullscreen?.().catch(()=>{});
  showSave();stateMessage('Retour au titre : position enregistrée, partie conservée.');
+ // In the official Shell, title means Monster Capture's real title/menu,
+ // not a second HTML menu or a temporary Exploration page.
+ const shell=window.parent!==window?window.parent.GensCaptureV2:null;
+ if(shell?.status?.().view==='adventure')shell.home();
 });
 $('adventure-close-sheet').addEventListener('click',()=>{
  $('adventure-play-sheet').close();$('adventure-open-sheet').focus();
@@ -945,11 +949,20 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  // The member instance/level/HP are projected from the SAME Core save.
  // Exploration may read this versioned envelope, never our private storage.
  // Exploration owns encounter activation and consumes the projection.
- const refreshParty=session=>writeAdventurePlayingPartyV1({
-  storage:window.sessionStorage,session,world,
-  publicationGrant:officialGrant,combatSha:officialCombatSha,
+ const refreshParty=session=>{
+  const grant=writeAdventurePlayingPartyV1({
+   storage:window.sessionStorage,session,world,
+   publicationGrant:officialGrant,combatSha:officialCombatSha,
    statRegistry:officialStatRegistry
- });
+  });
+  // Notify only the native Exploration consumer. This projection is still
+  // owned and persisted exclusively by the official AdventureSession.
+  $('adventure-play-frame').contentWindow?.postMessage({
+   schema:'gensrpg.capture.v2.party-refresh.v1',
+   sessionId:session.sessionId
+  },window.location.origin);
+  return grant;
+ };
  refreshParty(result.session);
  const url=new URL('../../../vendor/exploration-lab/sculpt-lab.html',import.meta.url);
  const sessionId=result.session.sessionId;

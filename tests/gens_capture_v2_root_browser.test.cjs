@@ -368,6 +368,8 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
       }
       return {playExists:!!native,playSrc:native?.getAttribute('src')??null,
         href,probe,canvas,worldStorage,
+        nativeStartError:native?.contentDocument?.querySelector('#play-start-error-message')?.textContent??null,
+        nativeStartErrorVisible:native?.contentDocument?.querySelector('#play-start-error')?.hidden===false,
         selectedWorldId:doc?.querySelector('#adventure-world-select')?.value??null,
         adventureStatus:doc?.querySelector('#adventure-status')?.textContent??null,
         adventureSave:doc?.querySelector('#adventure-save-summary')?.textContent??null};

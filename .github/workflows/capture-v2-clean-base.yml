@@ -19,6 +19,7 @@ on:
       - 'tests/gens_capture_v2_adventure_creator_draft_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_play_sheet_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_wild_reserve_20261108.test.mjs'
+      - 'tests/gens_capture_v2_adventure_xp_fullscreen_20261108.test.mjs'
       - 'tests/gens_capture_v2_play_team_ux_20261108.test.mjs'
       - 'tests/gens_capture_v2_camera_team_preplay_20261108.test.mjs'
       - 'tests/gens_capture_v2_atomic_bestiary_cache_20261108.test.mjs'
@@ -154,6 +155,8 @@ jobs:
 
       - name: Aventure sauvage — 1 à 6 créatures en réserve, KO et sauvegarde unique
         run: node --test tests/gens_capture_v2_adventure_wild_reserve_20261108.test.mjs
+      - name: Répartition XP des 1 à 6 créatures et sac visible en plein écran (TDD)
+        run: node --test tests/gens_capture_v2_adventure_xp_fullscreen_20261108.test.mjs
 
       - name: Aventure V2 — choix créateur progression du héros sans XP par défaut (TDD)
         run: node --test tests/gens_capture_v2_adventure_hero_progression_v1.test.mjs

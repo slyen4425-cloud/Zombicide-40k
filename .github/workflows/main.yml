@@ -505,6 +505,7 @@ jobs:
           node --test capture-v2-source/tests/gens_capture_v2_adventure_portfolio_v1.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_contract_v1.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_wild_reserve_20261108.test.mjs
+          node --test capture-v2-source/tests/gens_capture_v2_adventure_xp_fullscreen_20261108.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_atomic_bestiary_cache_20261108.test.mjs
           node --test tests/gens_capture_v2_auto_update_20261107.test.mjs
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
@@ -512,6 +513,7 @@ jobs:
           node --test tests/gens_capture_v2_play_ux_publish_20261108.test.mjs
           node --test tests/gens_capture_v2_encounter_bridge_site.test.cjs
           node --test tests/gens_capture_v2_wild_reserve_pages_20261108.test.mjs
+          node --test tests/gens_capture_v2_xp_fullscreen_pages_20261108.test.mjs
 
       - name: Auditer taille réelle et duplication du site avant toute publication
         env:
@@ -639,6 +641,7 @@ jobs:
           node --test capture-v2-source/tests/gens_capture_v2_adventure_portfolio_v1.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_contract_v1.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_wild_reserve_20261108.test.mjs
+          node --test capture-v2-source/tests/gens_capture_v2_adventure_xp_fullscreen_20261108.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_atomic_bestiary_cache_20261108.test.mjs
           node --test tests/gens_capture_v2_auto_update_20261107.test.mjs
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
@@ -646,6 +649,7 @@ jobs:
           node --test tests/gens_capture_v2_play_ux_publish_20261108.test.mjs
           node --test tests/gens_capture_v2_encounter_bridge_site.test.cjs
           node --test tests/gens_capture_v2_wild_reserve_pages_20261108.test.mjs
+          node --test tests/gens_capture_v2_xp_fullscreen_pages_20261108.test.mjs
       - name: Install Chromium and verify the real nested site
         run: |
           npm install --no-save --no-package-lock playwright@1.57.0 pngjs@7.0.0

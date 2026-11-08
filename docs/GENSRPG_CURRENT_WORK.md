@@ -1,3 +1,12 @@
+## 2026-11-08 — C2 source Combat : esquive sur les 15 créatures officielles
+- Signalement : Ailevent sans bouton Esquive dans la vraie PWA. Diagnostic confirmé : `GenSRPG` consomme Combat `a182ebf2`, alors que Combat main officiel `ef4e9315b40e2dc88e25c1a50b0cd2ce9fc3a15e` apporte `combat.reaction` à six créatures historiques, dont Ailevent (PR Combat #284), et laisse neuf réactions personnelles existantes intactes.
+- Source Capture de départ immuable : `a5bca014bbcb35c9910dd25066f70dfd4615ff03` ; checkpoint `checkpoint/gensrpg-start-capture-dodge-official-pin-2026-11-08` ; branche `work/gensrpg-capture-dodge-official-pin-2026-11-08` ; origine éditeur/équipe et Explorateur inchangée.
+- Source de vérité : une seule mise à jour du manifeste `assets/gensrpg/capture-v2/source-pins-v1.json`, avec Combat main exact `ef4e9315`, CI main exacte `42502747637`, Pages Combat `42502747387` tous SUCCESS. Aucun patch moteur ni bestiaire ni bibliothèque copiée.
+- Gate C2 : publication distincte à partir de `main` GenSRPG, test de son unique site assemblé, source Combat + Explorateur `main` immuables, vérification du bundle auteur SHA cohérent, vrai Chromium 1v1/Android, budget <=900 Mio et test public HTTPS/PWA. Aucune promesse de correction visible tant que le publisher GenSRPG n'a pas été repinné et validé.
+- Travail sur la réserve d'équipe (1–6) : **lot séparé** sur propriétaires AdventureSession/Exploration/Combat ; ne jamais résoudre par une deuxième liste de monstres dans la PWA. Le mode sauvage aura 1 actif et les autres dans la réserve native ; paramètres futurs 1v1/2v2 et rencontres scénarisées versionnés.
+
+---
+
 ## 2026-11-08 — Re-pin officiel Explorer caméra + Combat immutable
 - **Incident à résoudre complètement** : troisième message Combat SHA au clic combat, équipe 1–6 sur carte et réglages caméra plus bas/zoomés avant le lancement.
 - **Exploration propriétaire** : PR #393 et #394 fusionnées sur main `6915526c5ea2f96265bbd4cfbe6bd081ebea0ec2`; publication et CI exactes sont obligatoires avant promotion. Le pont Combat n'ajoute plus de module non transporté aux previews gelées.

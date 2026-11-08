@@ -128,7 +128,8 @@ test('Adventure starts from the Pages menu and saves a native encounter once at 
   await resultDialog.waitFor({timeout:15000});
   assert.equal(await adventure.locator('#adventure-result-title').textContent(),'Fuite');
   const receipt=await adventure.locator('#adventure-result-rows').innerText();
-  assert.match(receipt,/XP créature/);
+  assert.match(receipt,/XP de l’équipe/,'new Showcase games split XP across the saved team');
+  assert.match(receipt,/Créature 1 · Lumilo/,'the official native fighter must be identified individually');
   assert.match(receipt,/\+0 XP/);
   assert.match(receipt,/XP du héros/);
   assert.match(receipt,/Objets/);

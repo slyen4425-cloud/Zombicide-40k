@@ -1,7 +1,13 @@
 // GenSRPG Capture only chooses an official Exploration WorldDocument ID.
 // The entire WorldDocument and its active author draft belong to Exploration.
-const identifier=value=>typeof value==='string'&&value.length>0&&value.length<=130&&
+const identifier=value=>typeof value==='string'&&!!value.trim()&&value.length<=130&&
  !/[\u0000-\u001f\u007f]/.test(value);
+// Transport validation only: the WorldDocument is still owned by Exploration.
+// The archive explicitly allows space/accent world names such as "Test 1".
+export function assertOfficialAdventureWorldIdV1(value){
+ if(!identifier(value))throw new TypeError('Identifiant de WorldDocument officiel invalide');
+ return value;
+}
 export function withSelectedAdventureWorldV1(session,worldId){
  if(!session||typeof session!=='object'||!session.world||
    !identifier(worldId))

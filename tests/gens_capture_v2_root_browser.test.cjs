@@ -384,6 +384,12 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   // unmounting or restarting the native Exploration play frame.
   await resumed.locator('#adventure-open-sheet').tap();
   await resumed.locator('#adventure-play-sheet').waitFor({state:'visible'});
+  // Opening the in-map sheet now lands directly on the team, as requested.
+  // Keep the original Hero view regression by selecting its native tab.
+  assert.match(await resumed.locator('#adventure-sheet-content').textContent(),
+   /Équipe · ordre de départ au combat|CRÉATURE DE L’ÉQUIPE/);
+  assert.equal(await resumed.locator('[data-adventure-sheet-tab="team"]').getAttribute('aria-selected'),'true');
+  await resumed.locator('[data-adventure-sheet-tab="hero"]').tap();
   assert.match(await resumed.locator('#adventure-sheet-content').textContent(),
    /Héros|Progression/);
   await resumed.locator('[data-adventure-sheet-tab="team"]').tap();

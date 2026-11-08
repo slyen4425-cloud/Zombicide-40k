@@ -113,3 +113,15 @@ test('native Play starts in full dynamic viewport without forcibly entering brow
  assert.match(app,/adventure-fullscreen'\)\.addEventListener\('click'/,
   'browser fullscreen must remain an explicit player choice');
 });
+
+test('game start takes fullscreen from the Capture HUD owner and keeps bag available',()=>{
+ const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ const html=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure.html',import.meta.url),'utf8');
+ assert.match(html,/id="adventure-open-sheet"/);
+ assert.match(html,/id="adventure-play-hud"/);
+ assert.match(app,/const fullscreenRequest=requestAdventureFullscreen\(\)/);
+ assert.match(app,/screen\.orientation\.lock\('landscape'\)/);
+ assert.match(app,/frame\.src=url\.href/);
+ assert.match(app,/\$\('adventure-play-hud'\)\.hidden=false/);
+ assert.match(app,/await fullscreenRequest/);
+});

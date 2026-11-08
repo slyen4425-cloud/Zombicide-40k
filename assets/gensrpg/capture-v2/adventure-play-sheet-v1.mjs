@@ -4,27 +4,30 @@ import {
  availableAdventureStatPointsV1,publishedAdventureSpeciesV1,normalizeAdventureRulesV1
 } from './adventure-contract-v1.mjs';
 const frozen=value=>Object.freeze(value);
-export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry,projectCombatVitals=null}={}){
+export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry,projectCombatVitals=null,selectedInstanceId=null}={}){
  if(session?.status!=='playing')throw new Error('La fiche exige une partie Aventure en cours (playing)');
  if(statRegistry?.schema!=='capture-stat-registry-v1'||!Array.isArray(statRegistry.stats))
   throw new TypeError('Le registre officiel des statistiques Combat est requis');
  const published=publishedAdventureSpeciesV1(bestiaryCards);
  const active=session.party?.active;
- const card=published.find(entry=>entry.id===active?.speciesId);
- if(!card)throw new RangeError('Créature active absente du Bestiaire officiel ; aucune donnée inventée');
- const available=availableAdventureStatPointsV1(session); // Canonical session validation.
+ const members=[active,...(session.party?.reserve??[])];
+ const selected=selectedInstanceId===null?active:members.find(actor=>actor.instanceId===selectedInstanceId);
+ if(!selected)throw new RangeError('Créature sélectionnée absente de ton équipe');
+ const card=published.find(entry=>entry.id===selected.speciesId);
+ if(!card)throw new RangeError('Créature sélectionnée absente du Bestiaire officiel ; aucune donnée inventée');
+ const available=availableAdventureStatPointsV1(session,selected.instanceId);
  const rules=normalizeAdventureRulesV1(session.rules);
  const projectMember=actor=>projectCombatVitals===null?null:projectCombatVitals({
   actor,hpMultiplier:rules.combat.hpMultiplier
  });
- const vitals=projectMember(active);
+ const vitals=projectMember(selected);
  const stats=frozen(statRegistry.stats.map(stat=>{
   if(typeof stat?.id!=='string'||typeof stat?.label!=='string')
    throw new TypeError('Statistique officielle incomplète');
   const measure=Array.isArray(card.measures)?card.measures.find(m=>m.key===stat.id):null;
   const isGameHp=stat.id==='health'&&vitals!==null;
   return frozen({id:stat.id,label:isGameHp?'PV maximum en jeu':stat.label,
-   allocated:active.statAllocations?.[stat.id]??0,
+   allocated:selected.statAllocations?.[stat.id]??0,
    baseValue:isGameHp?vitals.maxHp:
     (typeof measure?.value==='number'&&Number.isFinite(measure.value)?measure.value:null),
    ...(isGameHp?{gameHp:true,authoredBaseHp:vitals.labMaxHp}:{} )});
@@ -35,8 +38,9 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
   return frozen({id,name:rule?.name??id,quantity,saleValue:rule?.saleValue??null});
  }));
  const creature=frozen({
-  instanceId:active.instanceId,speciesId:active.speciesId,name:card.name,
-  level:active.level,xp:active.xp,hp:vitals?vitals.currentHp:active.hp,
+  instanceId:selected.instanceId,speciesId:selected.speciesId,name:card.name,
+  level:selected.level,xp:selected.xp,hp:vitals?vitals.currentHp:selected.hp,
+  isActive:selected.instanceId===active.instanceId,
   ...(vitals?{maxHp:vitals.maxHp,baseMaxHp:vitals.baseMaxHp,labMaxHp:vitals.labMaxHp,
    hpPercent:vitals.hpPercent}:{}),
   availablePoints:available,stats,
@@ -56,12 +60,12 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
  const team=frozen([active,...(session.party.reserve??[])].map(actor=>{
   const memberCard=published.find(item=>item.id===actor.speciesId);
   if(!memberCard)throw new Error('Équipe : créature absente du Bestiaire officiel');
-  const shown=actor===active?vitals:projectMember(actor);
+  const shown=actor===selected?vitals:projectMember(actor);
   return frozen({instanceId:actor.instanceId,speciesId:actor.speciesId,
    name:memberCard.name,level:actor.level,
    hp:shown?shown.currentHp:actor.hp,
    ...(shown?{maxHp:shown.maxHp,hpPercent:shown.hpPercent}:{}),
-   isActive:actor===active});
+   isActive:actor===active,isSelected:actor===selected});
  }));
  return frozen({sessionId:session.sessionId,hero,creature,team,
   inventory:frozen({currency:session.inventory.currency,items})});

@@ -44,7 +44,7 @@ function profile({kind,name,subtitle,imageUrl,artCaption,vitals=[],elements=[]})
  const top=node('div','sheet-profile-top');
  top.append(portraitFrame({url:imageUrl,alt:'Portrait de '+name,caption:artCaption}));
  const info=node('div','sheet-profile-info');
- info.append(node('span','sheet-overline',kind==='hero'?'PERSONNAGE':'CRÉATURE ACTIVE'));
+ info.append(node('span','sheet-overline',kind==='hero'?'PERSONNAGE':'CRÉATURE DE L’ÉQUIPE'));
  info.append(node('h3','sheet-display-name',name));
  if(subtitle)info.append(node('p','sheet-profile-subtitle',subtitle));
  if(elements.length){
@@ -94,7 +94,8 @@ function statGrid(stats,{availablePoints=null,onAllocate=null}={}){
  return area;
 }
 export function renderAdventureSheetViewV1({
- host,snapshot,tab,portraitUrl=null,heroVisual=null,onAllocate=null
+ host,snapshot,tab,portraitUrl=null,heroVisual=null,onAllocate=null,
+ onSelectCreature=null,onMoveCreature=null,onMakeActive=null
 }={}){
  if(!host||!snapshot)throw new TypeError('A valid active Capture sheet and host are required');
  const content=[];
@@ -113,9 +114,39 @@ export function renderAdventureSheetViewV1({
   }));
   if(!selected)content.push(hint('Le héros n’a pas encore été choisi pour cette partie. Aucun portrait fictif n’est affiché.'));
  }else if(tab==='team'||tab==='stats'){
+  const selector=node('section','sheet-roster');
+  selector.append(node('h4','','Équipe · ordre de départ au combat'));
+  for(const [index,member] of snapshot.team.entries()){
+   const row=node('div','sheet-roster-row');
+   const choose=node('button','sheet-roster-pick',
+    (index+1)+'. '+member.name+(member.isActive?' · 1er combattant':'')+
+     (member.hp===0?' · KO':''));
+   choose.type='button';choose.setAttribute('aria-pressed',String(member.isSelected));
+   choose.addEventListener('click',()=>onSelectCreature?.(member.instanceId));
+   row.append(choose);
+   if(tab==='team'&&onMoveCreature){
+    for(const direction of ['up','down']){
+     const button=node('button','sheet-roster-move',direction==='up'?'↑':'↓');
+     button.type='button';button.disabled=(direction==='up'&&index===0)||
+      (direction==='down'&&index===snapshot.team.length-1)||
+      (direction==='up'&&index===1&&member.hp===0)||
+      (direction==='down'&&index===0&&snapshot.team[1]?.hp===0);
+     button.setAttribute('aria-label',(direction==='up'?'Monter ':'Descendre ')+member.name);
+     button.addEventListener('click',()=>onMoveCreature(member.instanceId,direction));
+     row.append(button);
+    }
+   }
+   if(tab==='team'&&!member.isActive&&member.hp!==0&&onMakeActive){
+    const active=node('button','sheet-roster-active','Commencer avec');
+    active.type='button';active.addEventListener('click',()=>onMakeActive(member.instanceId));
+    row.append(active);
+   }
+   selector.append(row);
+  }
+  content.push(selector);
   const c=snapshot.creature;
   const card=profile({kind:'creature',name:c.name,
-   subtitle:'Créature de ton équipe',imageUrl:portraitUrl,
+   subtitle:c.isActive?'Premier combattant':'Créature de réserve',imageUrl:portraitUrl,
    artCaption:'Aucun portrait officiel disponible',
    elements:c.elements,
    vitals:[['Niveau',c.level],
@@ -132,20 +163,8 @@ export function renderAdventureSheetViewV1({
   }));
   content.push(card);
   if(tab==='team'){
-   const reserve=snapshot.team.filter(member=>!member.isActive);
-   if(reserve.length){
-    const list=node('section','sheet-team-reserve');
-    list.append(node('h4','','Réserve · '+reserve.length+' créature(s)'));
-    for(const member of reserve){
-     const summary=Number.isFinite(member.maxHp)
-      ?member.hp+' / '+member.maxHp+' PV en jeu ('+member.hpPercent+' %)'
-      :(member.hp===null?'PV non renseignés':member.hp+' PV');
-     list.append(node('p','sheet-team-member',
-      member.name+' · niveau '+member.level+' · '+summary+
-       (member.hp===0?' · KO':'')));
-    }
-    content.push(list);
-   }else content.push(hint('Équipe actuelle : une seule créature.'));
+   content.push(hint('Sélectionne une créature, consulte sa fiche et modifie son ordre. '+
+    'La première créature non KO commencera le prochain combat. Les points sont individuels.'));
   }
  }else if(tab==='inventory'){
   const section=node('section','sheet-inventory');

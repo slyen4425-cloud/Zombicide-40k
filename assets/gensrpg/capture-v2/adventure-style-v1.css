@@ -281,3 +281,16 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
  #adventure-result-dialog{padding:10px;max-height:calc(100dvh - 10px)}
  #adventure-result-dialog .rule-row{padding:5px 8px}
 }
+
+/* Capture in-game roster: visible selection, ordering and safe title action. */
+.sheet-header-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+#adventure-return-title{min-height:44px;background:#25485a;border-color:#7da7b2}
+.sheet-roster{padding:8px;margin-bottom:9px;border:1px solid #345d64;border-radius:10px;background:#0d2831}
+.sheet-roster h4{font-size:13px;margin:0 0 7px;color:#d5f6eb}
+.sheet-roster-row{display:flex;align-items:stretch;gap:5px;margin-bottom:5px}
+.sheet-roster-row button{min-height:41px;padding:5px 8px;font-size:12px}
+.sheet-roster-pick{flex:1;min-width:0;text-align:left;overflow-wrap:anywhere}
+.sheet-roster-pick[aria-pressed=true]{background:#237663;border-color:#a4f4d4}
+.sheet-roster-move{flex:0 0 34px}
+.sheet-roster-active{flex:0 0 auto}
+@media(max-width:540px){.sheet-roster-row{flex-wrap:wrap}.sheet-roster-active{flex:1 1 100%}}

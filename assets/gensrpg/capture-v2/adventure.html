@@ -92,6 +92,10 @@
     <label>PV en partie réelle (% des PV du Labo Combat)
      <input type="number" id="adventure-combat-hp-percent" min="1" max="100" step="1" value="25">
     </label>
+    <label>Vitesse de déplacement en aventure (minimum 90)
+     <input type="range" id="adventure-move-speed" min="90" max="360" step="10" value="90">
+     <output id="adventure-move-speed-value" for="adventure-move-speed">90</output>
+    </label>
     <label>Après une défaite
      <select id="adventure-defeat-policy">
       <option value="restore">Récupération après défaite (pratique pour les tests)</option>
@@ -225,7 +229,10 @@
 <dialog id="adventure-play-sheet" aria-labelledby="adventure-play-sheet-title">
  <header class="sheet-header">
   <div><span class="eyebrow">AVENTURE EN COURS</span><h2 id="adventure-play-sheet-title">Ma fiche</h2></div>
-  <button type="button" id="adventure-close-sheet" aria-label="Fermer la fiche et retourner au monde">Retour au monde</button>
+  <div class="sheet-header-actions">
+   <button type="button" id="adventure-return-title" aria-label="Enregistrer et revenir à l'écran titre">Écran titre</button>
+   <button type="button" id="adventure-close-sheet" aria-label="Fermer la fiche et retourner au monde">Retour au monde</button>
+  </div>
  </header>
  <nav class="sheet-tabs" role="tablist" aria-label="Rubriques de la partie">
   <button type="button" role="tab" data-adventure-sheet-tab="hero" aria-selected="true">Personnage</button>

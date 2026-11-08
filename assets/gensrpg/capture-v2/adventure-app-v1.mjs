@@ -42,7 +42,8 @@ import {
  DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
  createAdventureSessionV1,createAdventureStoreV1,updateAdventureCameraPolicyV1,publishedAdventureSpeciesV1,
  coreAdventureProgressionConfigV1,
- allocateAdventureStatPointsV1,chooseAdventureActiveCreatureV1,updateAdventureSessionControlV1,
+ allocateAdventureStatPointsV1,chooseAdventureActiveCreatureV1,moveAdventurePartyMemberV1,
+ updateAdventureSessionControlV1,
  initializeAdventureSessionControlV1
 } from './adventure-contract-v1.mjs';
 
@@ -53,6 +54,7 @@ const idField={
  global:'adventure-xp-global',level:'adventure-xp-level',max:'adventure-level-max',
  statPoints:'adventure-stat-points-per-level',xpMode:'adventure-xp-mode',
  currency:'adventure-currency',hpPercent:'adventure-combat-hp-percent',
+ moveSpeed:'adventure-move-speed',
  heroEnabled:'adventure-hero-xp-enabled',heroShare:'adventure-hero-xp-share',
  heroXpLevel:'adventure-hero-xp-per-level',heroMax:'adventure-hero-max-level',
  heroTalent:'adventure-hero-talent-points'
@@ -157,6 +159,8 @@ function setFields(value){
  $(idField.statPoints).value=value.progression.statPointsPerLevel??0;
  $(idField.currency).value=value.loot.currencyPerVictory;
  $(idField.hpPercent).value=100*value.combat.hpMultiplier;
+ $(idField.moveSpeed).value=value.navigation?.moveSpeed??90;
+ $('adventure-move-speed-value').textContent=$(idField.moveSpeed).value;
  $('adventure-defeat-policy').value=value.combat.defeatPolicy??'restore';
  renderXpBandRows(value.progression.xpBands??SHOWCASE_ADVENTURE_RULES_V1.progression.xpBands);
  toggleXpMode();
@@ -180,6 +184,7 @@ function fromFields(){
   loot:{...rules.loot,currencyPerVictory:numberFrom(idField.currency)},
   combat:{hpMultiplier:numberFrom(idField.hpPercent)/100,
     defeatPolicy:$('adventure-defeat-policy').value},
+  navigation:{moveSpeed:numberFrom(idField.moveSpeed)},
   heroProgression:{...rules.heroProgression,
    enabled:$(idField.heroEnabled).checked,
    xpGainPercent:numberFrom(idField.heroShare),
@@ -631,7 +636,7 @@ $('adventure-open-last-result').addEventListener('click',guarded(()=>{
 $('adventure-result-close').addEventListener('click',()=>{
  $('adventure-result-dialog').close();
 });
-let currentSheetTab='hero';
+let currentSheetTab='hero',currentSheetCreatureId=null;
 let currentHeroVisual=null;
 let heroImageEpoch=0;
 function discardHeroVisual(){
@@ -669,9 +674,13 @@ function renderPlayingSheet(){
  const session=store.load();
  if(session?.sessionId!==activePlayingSheet.sessionId)
   throw new Error('La fiche ne correspond plus à la partie active');
+ if(![session.party.active,...(session.party.reserve??[])].some(actor=>
+     actor.instanceId===currentSheetCreatureId))
+  currentSheetCreatureId=session.party.active.instanceId;
  const snapshot=adventurePlaySheetSnapshotV1({
   session,bestiaryCards:published,statRegistry:officialStatRegistry,
-  projectCombatVitals:officialCombatVitalsProjector
+  projectCombatVitals:officialCombatVitalsProjector,
+  selectedInstanceId:currentSheetCreatureId
  });
  for(const button of document.querySelectorAll('[data-adventure-sheet-tab]')){
   const selected=button.dataset.adventureSheetTab===currentSheetTab;
@@ -682,15 +691,47 @@ function renderPlayingSheet(){
  renderAdventureSheetViewV1({
   host:$('adventure-sheet-content'),snapshot,tab:currentSheetTab,
   portraitUrl,heroVisual:currentHeroVisual,
+  onSelectCreature:instanceId=>{currentSheetCreatureId=instanceId;renderPlayingSheet();},
+  onMoveCreature:(instanceId,direction)=>{
+   void updatePlayingTeam(instanceId,'move',direction).catch(sheetActionError);
+  },
+  onMakeActive:instanceId=>{
+   void updatePlayingTeam(instanceId,'active').catch(sheetActionError);
+  },
   onAllocate:(statId,points)=>{
-   void allocatePlayingSheetStat(statId,points).catch(error=>{
+   void allocatePlayingSheetStat(statId,points,currentSheetCreatureId).catch(error=>{
     text($('adventure-sheet-status'),error.message);
     $('adventure-sheet-status').dataset.error='true';
    });
   }
  });
 }
-async function allocatePlayingSheetStat(statId,points){
+function sheetActionError(error){
+ text($('adventure-sheet-status'),error.message);
+ $('adventure-sheet-status').dataset.error='true';
+}
+async function updatePlayingTeam(instanceId,action,direction=null){
+ const play=activePlayingSheet;
+ if(!play)throw new Error('Aucune partie active');
+ const locks=window.navigator.locks;
+ if(typeof locks?.request!=='function')throw new Error('Verrou de sauvegarde indisponible');
+ await locks.request('gensrpg.capture.v2.adventure-combat:'+play.sessionId,()=>{
+  const session=store.load();
+  if(session?.status!=='playing'||session.sessionId!==play.sessionId)
+   throw new Error('La partie a changé ; modification refusée.');
+  if(readCombatHandoff(window.localStorage,{sessionId:play.sessionId}))
+   throw new Error('Termine d’abord le combat en cours pour modifier l’équipe.');
+  const changed=action==='active'
+   ?chooseAdventureActiveCreatureV1({session,instanceId,now:new Date().toISOString()})
+   :moveAdventurePartyMemberV1({session,instanceId,direction,now:new Date().toISOString()});
+  if(changed!==session){store.save(changed);play.refreshParty(changed);}
+ });
+ currentSheetCreatureId=instanceId;
+ showSave();renderPlayingSheet();
+ text($('adventure-sheet-status'),'Ordre de l’équipe enregistré pour le prochain combat.');
+ $('adventure-sheet-status').dataset.error='false';
+}
+async function allocatePlayingSheetStat(statId,points,instanceId){
  const play=activePlayingSheet;
  if(!play)throw new Error('Aucune partie active');
  const locks=window.navigator.locks;
@@ -702,7 +743,8 @@ async function allocatePlayingSheetStat(statId,points){
   if(session?.status!=='playing'||session.sessionId!==play.sessionId)
    throw new Error('La partie a changé ; attribution refusée.');
   const changed=allocateAdventureStatPointsV1({
-   session,registry:officialStatRegistry,statId,points,now:new Date().toISOString()
+   session,registry:officialStatRegistry,statId,points,instanceId,
+   now:new Date().toISOString()
   });
   store.save(changed); // Core Storage is the only persistent game owner.
   play.refreshParty(changed); // Exploration consumes the same authoritative member.
@@ -716,6 +758,7 @@ $('adventure-open-sheet').addEventListener('click',guarded(()=>{
  if(dialog.open)return;
  discardHeroVisual();
  currentSheetTab='hero';
+ currentSheetCreatureId=store.load()?.party?.active?.instanceId??null;
  renderPlayingSheet();
  text($('adventure-sheet-status'),'Fiche mise à jour depuis la partie sauvegardée.');
  $('adventure-sheet-status').dataset.error='false';
@@ -723,6 +766,37 @@ $('adventure-open-sheet').addEventListener('click',guarded(()=>{
  void loadSelectedHeroVisual();
  $('adventure-close-sheet').focus();
 }));
+$('adventure-return-title').addEventListener('click',()=>{
+ const frame=$('adventure-play-frame');
+ if(!activePlayingSheet||frame.hidden)return;
+ text($('adventure-sheet-status'),'Enregistrement de la position avant le retour au titre…');
+ frame.contentWindow?.postMessage({
+  schema:'gensrpg.capture.v2.save-and-title.v1',
+  sessionId:activePlayingSheet.sessionId
+ },window.location.origin);
+});
+window.addEventListener('message',event=>{
+ const frame=$('adventure-play-frame');
+ if(event.origin!==window.location.origin||event.source!==frame.contentWindow||
+    event.data?.schema!=='gensrpg.exploration.play.return-title.v1'||
+    event.data.sessionId!==activePlayingSheet?.sessionId)return;
+ if($('adventure-play-sheet').open)$('adventure-play-sheet').close();
+ discardHeroVisual();
+ activeCombatHost?.dispose();activeCombatHost=null;
+ activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
+ activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
+ activePlayingSheet=null;currentSheetCreatureId=null;
+ frame.hidden=true;frame.src='about:blank';
+ document.body.dataset.adventurePlaying='false';
+ $('adventure-play-hud').hidden=true;
+ document.querySelector('[data-adventure-app]').hidden=false;
+ if(document.fullscreenElement)void document.exitFullscreen?.().catch(()=>{});
+ showSave();stateMessage('Retour au titre : position enregistrée, partie conservée.');
+ // In the official Shell, title means Monster Capture's real title/menu,
+ // not a second HTML menu or a temporary Exploration page.
+ const shell=window.parent!==window?window.parent.GensCaptureV2:null;
+ if(shell?.status?.().view==='adventure')shell.home();
+});
 $('adventure-close-sheet').addEventListener('click',()=>{
  $('adventure-play-sheet').close();$('adventure-open-sheet').focus();
 });
@@ -737,6 +811,9 @@ for(const button of document.querySelectorAll('[data-adventure-sheet-tab]')){
 setFields(rules);
 setSessionControlFields(null);
 for(const field of Object.values(idField))$(field).addEventListener('input',updatePreview);
+$(idField.moveSpeed).addEventListener('input',()=>{
+ $('adventure-move-speed-value').textContent=$(idField.moveSpeed).value;
+});
 $(idField.xpMode).addEventListener('change',()=>{toggleXpMode();updatePreview();});
 $(idField.max).addEventListener('change',extendFinalXpBandToCap);
 $('adventure-xp-band-add').addEventListener('click',guarded(()=>{
@@ -872,17 +949,27 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  // The member instance/level/HP are projected from the SAME Core save.
  // Exploration may read this versioned envelope, never our private storage.
  // Exploration owns encounter activation and consumes the projection.
- const refreshParty=session=>writeAdventurePlayingPartyV1({
-  storage:window.sessionStorage,session,world,
-  publicationGrant:officialGrant,combatSha:officialCombatSha,
+ const refreshParty=session=>{
+  const grant=writeAdventurePlayingPartyV1({
+   storage:window.sessionStorage,session,world,
+   publicationGrant:officialGrant,combatSha:officialCombatSha,
    statRegistry:officialStatRegistry
- });
+  });
+  // Notify only the native Exploration consumer. This projection is still
+  // owned and persisted exclusively by the official AdventureSession.
+  $('adventure-play-frame').contentWindow?.postMessage({
+   schema:'gensrpg.capture.v2.party-refresh.v1',
+   sessionId:session.sessionId
+  },window.location.origin);
+  return grant;
+ };
  refreshParty(result.session);
  const url=new URL('../../../vendor/exploration-lab/sculpt-lab.html',import.meta.url);
  const sessionId=result.session.sessionId;
  url.searchParams.set('play','1');
  url.searchParams.set('adventureSession',sessionId);
  url.searchParams.set('cameraAngle',String(result.session.cameraPolicy?.angleDeg??55));
+ url.searchParams.set('moveSpeed',String(result.session.rules.navigation?.moveSpeed??90));
  if(url.origin!==window.location.origin)
   throw new Error('Jouer doit utiliser le moteur Exploration officiel de la même origine');
  const frame=$('adventure-play-frame');
@@ -908,6 +995,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  });
  // Keep the Aventure owner mounted while the native Exploration frame runs.
  activePlayingSheet={sessionId,refreshParty};
+ currentSheetCreatureId=result.session.party.active.instanceId;
  $('adventure-open-last-result').hidden=!result.session.lastAward;
  activeCaptureExplorationEvents?.dispose();
  activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;

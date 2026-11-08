@@ -355,7 +355,8 @@ function renderPortfolioOptions(){
  select.replaceChildren(...(saved.length?saved.map(entry=>
   option(entry.sessionId,'Partie '+entry.sessionId.slice(0,8)+
    ' · '+(published.find(c=>c.id===entry.speciesId)?.name??entry.speciesId)+
-   ' niv. '+entry.level+(entry.status==='playing'?' · en cours':
+   ' niv. '+entry.level+' · '+entry.partySize+' créature(s)'+
+   (entry.status==='playing'?' · en cours':
      entry.status==='finished'?' · fin de partie':' · prête')))
    :[option('','Aucune partie enregistrée')]));
  select.disabled=!saved.length;

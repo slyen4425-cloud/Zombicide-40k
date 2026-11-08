@@ -1,3 +1,11 @@
+## 2026-11-08 — Publication GenSRPG Capture V2 : esquive de toutes les créatures
+- **Départ :** GenSRPG main `5f6909f1aeb85758d4b18d1fcc400c281bdd5205`, checkpoint `checkpoint/gensrpg-start-publish-capture-dodge-2026-11-08`, branche `work/gensrpg-publish-capture-dodge-2026-11-08`.
+- **Unique changement de source officielle :** `tools/capture_v2_pages_preview_pin.json` pointe désormais sur le SHA immuable `52273fe93364db26122d477999f81a2f0cd5807d`, dont `assets/gensrpg/capture-v2/source-pins-v1.json` épingle Combat main certifié `ef4e9315b40e2dc88e25c1a50b0cd2ce9fc3a15e` (Laboratory CI `42502747637`, Pages `42502747387` SUCCESS). Exploration reste sur son SHA certifié `6915526c5ea2f96265bbd4cfbe6bd081ebea0ec2`. Aucune bibliothèque/moteur copié à la main, pas de publication `gh-pages` divergente.
+- **Contrôles C2 :** source PR #337 vert, CI Capture native, sentinelles d'architecture, Firefox, Tactical, puis publication unique Pages `main`, preuve HTTPS de `release-provenance` et test PWA Android. Contrôles du commit final du publisher obligatoires avant l'état GREEN utilisateur.
+- **À part :** réserves multi-créatures préparées en PR Combat #285, Exploration #395 et source Capture #338, non comprises dans ce lot d'esquive. Aucune altération de sauvegarde depuis l'éditeur de publication.
+
+---
+
 ## 2026-11-08 — Livraison unique cache Combat (iframe), équipe et caméra
 - **Incident reproduit sur Android :** « Combat indisponible : Adventure publication does not match official Combat author/engine sha » après entrée dans le monde ; le 3e loader (iframe Combat native) utilisait encore l'URL historique cacheable.
 - **Un seul correctif propriétaire :** Explorer main certifié `6915526c5ea2f96265bbd4cfbe6bd081ebea0ec2` PR #393 (Combat iframe au SHA cohérent, garde inchangée) + PR #394 (zoom de départ natif) ; CI `42475172293`, Pages `42475172283` SUCCESS.

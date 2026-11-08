@@ -236,6 +236,9 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await adventureFrame.locator('#adventure-hero-xp-per-level').fill('400');
   await adventureFrame.locator('#adventure-hero-talent-points').fill('2');
   await adventureFrame.locator('#adventure-xp-base').fill('777');
+  await adventureFrame.locator('#adventure-starter-count').selectOption('3');
+  assert.equal(await adventureFrame.locator('#adventure-starter-reserve select').count(),2,
+   'selecting three creatures must provide two genuine reserve choices');
   await adventureFrame.locator('#adventure-create').tap();
   const saved=await adventureFrame.locator('#adventure-save-summary').textContent();
   assert.match(saved,/niveau 1.*0 XP.*configuration enregistrée/,
@@ -267,6 +270,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(stored?.party?.active?.speciesId,
    await adventureFrame.locator('#adventure-starter').inputValue());
   assert.ok(stored?.party?.active?.instanceId);
+  assert.equal(stored?.party?.reserve?.length,2,'same canonical save must keep both reserve creatures');
   // Real web app smoke: a second adventure MUST NOT overwrite the first,
   // and loading an earlier save must restore its exact saved rules.
   const firstSession=stored.sessionId;
@@ -384,6 +388,18 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   // unmounting or restarting the native Exploration play frame.
   await resumed.locator('#adventure-open-sheet').tap();
   await resumed.locator('#adventure-play-sheet').waitFor({state:'visible'});
+  // Opening the in-map sheet now lands directly on the team, as requested.
+  // Keep the original Hero view regression by selecting its native tab.
+  assert.match(await resumed.locator('#adventure-sheet-content').textContent(),
+   /Équipe · ordre de départ au combat|CRÉATURE DE L’ÉQUIPE/);
+  assert.equal(await resumed.locator('[data-adventure-sheet-tab="team"]').getAttribute('aria-selected'),'true');
+  assert.equal(await resumed.locator('#adventure-sheet-content .sheet-roster-pick').count(),3,
+   'the native map team sheet must show all three saved creatures');
+  assert.match(await resumed.locator('#adventure-open-sheet').textContent(),/Équipe \(3\)/);
+  await resumed.locator('#adventure-sheet-content .sheet-roster-pick').nth(1).tap();
+  assert.equal(await resumed.locator('#adventure-sheet-content .sheet-roster-pick[aria-pressed="true"]').count(),1,
+   'selecting a reserve creature must update the same team sheet');
+  await resumed.locator('[data-adventure-sheet-tab="hero"]').tap();
   assert.match(await resumed.locator('#adventure-sheet-content').textContent(),
    /Héros|Progression/);
   await resumed.locator('[data-adventure-sheet-tab="team"]').tap();

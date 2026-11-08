@@ -51,6 +51,30 @@
     <option value="">Aucun héros personnalisé</option>
    </select>
    <p id="adventure-hero-choice-status" class="hint">Chargement des héros enregistrés dans Exploration…</p>
+   <fieldset class="adventure-camera-start">
+    <legend>Caméra avant de jouer</legend>
+    <p class="hint">Cadre initial plus près du sol et plus zoomé. Le zoom restera libre pendant le jeu.</p>
+    <label for="adventure-creator-camera-angle">Inclinaison de la caméra
+     <select id="adventure-creator-camera-angle" aria-label="Angle de caméra au début de la partie">
+      <option value="35">35° — très bas</option>
+      <option value="40">40°</option>
+      <option value="45" selected>45° — conseillé</option>
+      <option value="50">50°</option>
+      <option value="55">55° — classique</option>
+      <option value="60">60°</option>
+      <option value="65">65°</option>
+      <option value="70">70°</option>
+      <option value="75">75°</option>
+      <option value="80">80°</option>
+      <option value="85">85°</option>
+      <option value="90">90° — du dessus</option>
+     </select>
+    </label>
+    <label for="adventure-creator-camera-zoom">Zoom de départ
+     <input id="adventure-creator-camera-zoom" type="range" min="100" max="240" step="5" value="205">
+     <output id="adventure-creator-camera-zoom-value" for="adventure-creator-camera-zoom">205 %</output>
+    </label>
+   </fieldset>
    <div class="actions">
     <button type="button" id="adventure-create" disabled>Créer une nouvelle partie</button>
     <button type="button" id="adventure-resume">Afficher la sauvegarde</button>
@@ -186,24 +210,6 @@
      <input id="adventure-join-enabled" type="checkbox">
     </label>
    </div>
-   <h3>Caméra en jeu</h3>
-   <p class="hint">L’angle est fixé par le créateur et conservé dans cette aventure. Chaque joueur garde le zoom et dézoom (100 à 240 %) du moteur Exploration.</p>
-   <label for="adventure-creator-camera-angle">Inclinaison de la caméra (mode Jouer)
-    <select id="adventure-creator-camera-angle" aria-label="Angle de caméra choisi par le créateur">
-     <option value="35">35° — oblique</option>
-     <option value="40">40°</option>
-     <option value="45">45°</option>
-     <option value="50">50°</option>
-     <option value="55" selected>55°</option>
-     <option value="60">60°</option>
-     <option value="65">65°</option>
-     <option value="70">70°</option>
-     <option value="75">75°</option>
-     <option value="80">80°</option>
-     <option value="85">85°</option>
-     <option value="90">90° — vue du dessus</option>
-    </select>
-   </label>
    <h3>Ce que les autres joueurs pourront modifier</h3>
    <div class="fields">
     <label>Règles de progression <input id="adventure-guest-edit-progression" type="checkbox"></label>
@@ -220,7 +226,7 @@
 <iframe id="adventure-play-frame" title="Monster Capture · Jouer" allow="fullscreen; autoplay" allowfullscreen hidden></iframe>
 <div id="adventure-play-hud" hidden>
  <button type="button" id="adventure-open-sheet" aria-haspopup="dialog" aria-controls="adventure-play-sheet">
-  Personnage · Équipe · Sac
+  Personnage · Équipe (<span id="adventure-play-team-count">0</span>) · Sac
  </button>
  <button type="button" id="adventure-open-last-result" hidden>Dernier combat</button>
  <button type="button" id="adventure-fullscreen" aria-pressed="false" aria-label="Activer ou quitter le plein écran">Plein écran</button>

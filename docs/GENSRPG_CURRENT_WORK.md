@@ -1,3 +1,11 @@
+## 2026-11-08 — Caméra avant partie et équipe multiple en jeu
+- **Demande** : plus zoomé et plus proche du sol par défaut, possibilité de choisir **avant** démarrage. Les 1–6 créatures doivent être facilement visibles depuis la carte.
+- **Source Capture** : réglages visibles dans Ma partie, nouvel angle par défaut 45° et zoom 205 % ; valeur choisie enregistrée dans AdventureSession et transmise au **seul** moteur natif Exploration. Anciennes sauvegardes sans champ zoom continuent à 175 % sans migration.
+- **Équipe** : compteur des membres dans le bouton de jeu, ouverture immédiate sur l'onglet Créatures, sélection, ordre et stats déjà propriétaires de l'AdventureSession ; pas de faux suiveurs sur carte ni de deuxième roster.
+- **START** source c781113d18049619bc1291aa962a2cefc8d025d7, checkpoint `checkpoint/gensrpg-start-adventure-camera-team-2026-11-08`, branche `work/gensrpg-adventure-camera-team-2026-11-08`. Pas de publication avant l'intégration Exploration certifiée (PR caméra + PR cache Combat), CI source, publisher SHA vérifié HTTPS et test réel Android. Les sauvegardes existantes et autres modules restent intacts.
+
+---
+
 ## 2026-11-08 — Raccord correctif Explorer « Partie indisponible » SHA Combat
 - **Constat mobile après PR #331 :** « Adventure publication does not match official Combat author/engine sha » en entrant dans le jeu : ancien JSON reçu par Explorer (`force-cache`), malgré Bestiaire Capture frais.
 - **Source unique :** Exploration PR #392, main@`f743ae9d0df5e1aa2c24ed009a551435e5cc8e04` (son loader officiel utilise une URL unique en Jouer ; garde SHA intacte). Combat main épinglé `a182ebf2`, pas de repli ni recopie.

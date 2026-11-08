@@ -402,14 +402,22 @@ export function calculateAdventureXpV1({rules,allyLevel,enemyLevel}){
 export function normalizeAdventureCameraPolicyV1(value){
  const camera=object(value,'Adventure camera policy');
  const angle=camera.angleDeg;
+ const hasZoom=Object.hasOwn(camera,'zoomPercent');
+ const keys=Object.keys(camera);
  if(!Number.isSafeInteger(angle)||angle<35||angle>90||(angle-35)%5!==0||
-    Object.keys(camera).length!==1)
+    keys.length!==(hasZoom?2:1)||keys.some(key=>key!=='angleDeg'&&key!=='zoomPercent'))
   throw new RangeError('Angle de caméra : 35 à 90 degrés, par pas de 5.');
- return freeze({angleDeg:angle});
+ if(hasZoom&&(!Number.isSafeInteger(camera.zoomPercent)||
+   camera.zoomPercent<100||camera.zoomPercent>240||camera.zoomPercent%5!==0))
+  throw new RangeError('Zoom initial : 100 à 240 %, par pas de 5.');
+ return freeze({angleDeg:angle,...(hasZoom?{zoomPercent:camera.zoomPercent}:{})});
 }
-export function updateAdventureCameraPolicyV1({session,angleDeg,now}={}){
+export function updateAdventureCameraPolicyV1({session,angleDeg,zoomPercent,now}={}){
  const saved=assertSession(session);
- const cameraPolicy=normalizeAdventureCameraPolicyV1({angleDeg});
+ const cameraPolicy=normalizeAdventureCameraPolicyV1({angleDeg,
+  ...(zoomPercent===undefined
+    ?(saved.cameraPolicy?.zoomPercent===undefined?{}:{zoomPercent:saved.cameraPolicy.zoomPercent})
+    :{zoomPercent})});
  const updated=freeze({...saved,cameraPolicy,
   updatedAt:iso(now??saved.updatedAt,'now')});
  assertSession(updated);
@@ -471,7 +479,7 @@ function assertSession(session){
 }
 export function createAdventureSessionV1({
  bestiaryCards,starterId,starterIds=null,rules=DEFAULT_ADVENTURE_RULES_V1,ids,now,
- heroDefinitionId=null,cameraAngle=55
+ heroDefinitionId=null,cameraAngle=55,cameraZoomPercent=null
 }){
  const cards=publishedAdventureSpeciesV1(bestiaryCards);
  const selected=starterIds===null?[starterId]:starterIds;
@@ -499,7 +507,8 @@ export function createAdventureSessionV1({
  return freeze({
   schema:ADVENTURE_SAVE_SCHEMA_V1,version:1,sessionId,
   status:'configured',createdAt:timestamp,updatedAt:timestamp,rules:settings,
-  cameraPolicy:normalizeAdventureCameraPolicyV1({angleDeg:cameraAngle}),
+  cameraPolicy:normalizeAdventureCameraPolicyV1({angleDeg:cameraAngle,
+   ...(cameraZoomPercent===null?{}:{zoomPercent:cameraZoomPercent})}),
   party:{active:members[0],reserve:members.slice(1)},
   sessionControl:{
    creatorId:identity(ids?.creatorId??'owner-'+sessionId,'creatorId'),

@@ -23,6 +23,8 @@ export const DEFAULT_ADVENTURE_RULES_V1=freeze({
  loot:{currencyPerVictory:0,items:[],drops:[]},
  // Default applies only to a NEW game, and remains editable by the creator.
  combat:{hpMultiplier:0.25,defeatPolicy:'restore'},
+ // Native Exploration movement range. Minimum is the new-game default.
+ navigation:{moveSpeed:90},
  // A Capture hero is a travel avatar with NO level by default. A game's
  // creator can explicitly enable its independent progression and talent
  // points; this never steals or changes a creature's victory XP.
@@ -92,7 +94,14 @@ function iso(value,field){
 export function normalizeAdventureRulesV1(input){
  // Additive optional policy: historical v1 rules have no heroProgression.
  // Their precise old representation remains legal, and never enables hero XP.
- const {heroProgression:heroRaw,combat:combatRaw,...legacy}=object(input,'AdventureRules');
+ const {heroProgression:heroRaw,combat:combatRaw,navigation:navigationRaw,...legacy}=object(input,'AdventureRules');
+ const navigation=navigationRaw===undefined?null:
+  exact(navigationRaw,['moveSpeed'],'navigation');
+ if(navigation){
+  integer(navigation.moveSpeed,'navigation.moveSpeed',90,360);
+  if((navigation.moveSpeed-90)%10!==0)
+   throw new RangeError('navigation.moveSpeed must follow official Exploration 10-unit steps');
+ }
  // Old saves were authored without this policy: never quarter their HP on load.
  // Old saves keep their HP policy; absent defeat policy means recovery, not game over.
  const inputCombat=combatRaw===undefined?{hpMultiplier:1}:object(combatRaw,'combat');
@@ -183,6 +192,7 @@ export function normalizeAdventureRulesV1(input){
     ...(bands===undefined?{}:{xpBands:bands})},
   loot:{currencyPerVictory:loot.currencyPerVictory,items,drops},
   combat:{hpMultiplier:combat.hpMultiplier,defeatPolicy},
+  ...(navigation?{navigation:{moveSpeed:navigation.moveSpeed}}:{}),
   heroProgression:{enabled:hero.enabled,xpGainPercent:hero.xpGainPercent,
    xpPerLevel:hero.xpPerLevel,maxLevel:hero.maxLevel,
    talentPointsPerLevel:hero.talentPointsPerLevel}
@@ -260,27 +270,59 @@ function statWallet(actor,progression){
   throw new RangeError('Creature stat points spent exceed earned level budget');
  return {spent,earned};
 }
-export function availableAdventureStatPointsV1(session){
+function partyMemberByInstanceV1(session,instanceId=null){
+ const party=session.party;
+ if(instanceId===null||instanceId===undefined)return party.active;
+ const id=identity(instanceId,'instanceId');
+ const member=[party.active,...(party.reserve??[])].find(actor=>actor.instanceId===id);
+ if(!member)throw new RangeError('Créature absente de ton équipe');
+ return member;
+}
+export function availableAdventureStatPointsV1(session,instanceId=null){
  const v=assertSession(session);
- const wallet=statWallet(v.party.active,normalizeAdventureRulesV1(v.rules).progression);
+ const wallet=statWallet(partyMemberByInstanceV1(v,instanceId),
+  normalizeAdventureRulesV1(v.rules).progression);
  return wallet.earned-wallet.spent;
 }
-// The actual stat IDs come ONLY from Combat's published registry. This stores
-// bonus allocations, not a second authority for stat effects or base values.
-export function allocateAdventureStatPointsV1({session,registry,statId,points,now}={}){
+// The official Combat registry remains the only owner of stat identities.
+// Only the selected member's allocations change in the original AdventureSession.
+export function allocateAdventureStatPointsV1({session,registry,statId,points,instanceId=null,now}={}){
  const v=assertSession(session);
  const id=identity(statId,'statId');
  if(registry?.schema!=='capture-stat-registry-v1'||!Array.isArray(registry.stats)||
     !registry.stats.some(entry=>entry.id===id))
   throw new RangeError('Stat absent du registre officiel Combat');
  const amount=integer(points,'points to allocate',1,100000);
- if(amount>availableAdventureStatPointsV1(v))
+ const actor=partyMemberByInstanceV1(v,instanceId);
+ if(amount>availableAdventureStatPointsV1(v,actor.instanceId))
   throw new RangeError('Not enough available creature stat points');
- const actor=v.party.active;
  const statAllocations={...(actor.statAllocations??{})};
  statAllocations[id]=(statAllocations[id]??0)+amount;
+ const changed={...actor,statAllocations};
+ const party=actor.instanceId===v.party.active.instanceId
+  ?{...v.party,active:changed}
+  :{...v.party,reserve:v.party.reserve.map(member=>
+     member.instanceId===actor.instanceId?changed:member)};
+ const updated=freeze({...v,updatedAt:iso(now??v.updatedAt,'now'),party});
+ assertSession(updated);
+ return updated;
+}
+// Reorder the canonical team; slot 1 is the first fighter in the next battle.
+// A KO creature may be inspected/reordered but may never occupy the active slot.
+export function moveAdventurePartyMemberV1({session,instanceId,direction,now}={}){
+ const v=assertSession(session);
+ if(v.status==='finished')throw new Error('Partie terminée : équipe non modifiable.');
+ const id=identity(instanceId,'instanceId');
+ if(direction!=='up'&&direction!=='down')throw new RangeError('Direction d’équipe inconnue');
+ const members=[v.party.active,...(v.party.reserve??[])];
+ const index=members.findIndex(actor=>actor.instanceId===id);
+ if(index<0)throw new RangeError('Créature absente de ton équipe');
+ const next=index+(direction==='up'?-1:1);
+ if(next<0||next>=members.length)return v;
+ [members[index],members[next]]=[members[next],members[index]];
+ if(members[0].hp===0)throw new RangeError('Une créature KO ne peut pas commencer le combat');
  const updated=freeze({...v,updatedAt:iso(now??v.updatedAt,'now'),
-  party:{...v.party,active:{...actor,statAllocations}}});
+  party:{...v.party,active:members[0],reserve:members.slice(1)}});
  assertSession(updated);
  return updated;
 }

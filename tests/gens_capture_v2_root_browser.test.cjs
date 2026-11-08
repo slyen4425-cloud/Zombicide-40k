@@ -404,7 +404,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await resumed.locator('[data-adventure-sheet-tab="stats"]').tap();
   assert.match(await resumed.locator('#adventure-sheet-content').textContent(),
    /Points à répartir/);
-  assert.equal(await resumed.locator('#adventure-sheet-content button:enabled').count(),0,
+  assert.equal(await resumed.locator('#adventure-sheet-content .sheet-stat-actions button:enabled').count(),0,
    'no free stats may be assigned at creature level one');
   const sameWhileOpen=await resumed.locator('#adventure-play-frame').evaluate(frame=>({
     current:frame.contentWindow.location.href,

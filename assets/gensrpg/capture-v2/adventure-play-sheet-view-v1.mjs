@@ -121,7 +121,7 @@ export function renderAdventureSheetViewV1({
    vitals:[['Niveau',c.level],
     ...(Number.isFinite(c.maxHp)?[
      ['PV en jeu',c.hp+' / '+c.maxHp],
-     ['PV maximum au Labo',c.baseMaxHp],
+     ['PV maximum au Labo',c.labMaxHp],
      ['Règle de PV',c.hpPercent+' %']
     ]:[['PV actuels',c.hp===null?'Non renseignés':c.hp]]),
     ['XP',c.xp]]

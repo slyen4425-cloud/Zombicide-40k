@@ -875,32 +875,53 @@ $('adventure-world-builder').addEventListener('click',guarded(()=>{
  window.location.assign(url.href);
 }));
 
+// Never inspect or mutate the Shell DOM. Its own presentation API is the
+// fullscreen owner when Capture is opened through the four-mode app.
+function captureShellFullscreenOwner(){
+ try{
+  const shell=window.parent!==window?window.parent.GensCaptureV2:null;
+  return shell?.status?.().view==='adventure'?shell:null;
+ }catch{return null;}
+}
 function syncFullscreenControl(){
- const enabled=Boolean(document.fullscreenElement);
+ const shell=captureShellFullscreenOwner();
+ const enabled=Boolean(shell?.gameFullscreenActive?.()||document.fullscreenElement);
  const control=$('adventure-fullscreen');
  control.textContent=enabled?'Quitter le plein écran':'Plein écran';
  control.setAttribute('aria-pressed',String(enabled));
 }
 async function requestAdventureFullscreen(){
+ const shell=captureShellFullscreenOwner();
+ if(shell?.requestGameFullscreen){
+  // Synchronous call into the Shell-owned method preserves Android's user
+  // activation; Shell fullscreen includes BOTH Back and the Adventure HUD.
+  try{await shell.requestGameFullscreen();}
+  catch{ /* Browser may deny native fullscreen, 100dvh remains active. */ }
+  syncFullscreenControl();return;
+ }
  if(document.fullscreenElement)return;
  if(!document.fullscreenEnabled||typeof document.documentElement.requestFullscreen!=='function')return;
  try{
   await document.documentElement.requestFullscreen({navigationUI:'hide'});
-  // The phone's landscape orientation is requested only after the trusted
-  // fullscreen gesture, never by overriding the creator's camera angle.
   if(document.fullscreenElement&&typeof screen.orientation?.lock==='function'){
    try{await screen.orientation.lock('landscape');}
-   catch{ /* Android/PWA may deny orientation lock; responsive CSS survives. */ }
+   catch{ /* Android may deny orientation lock, authored camera stays intact. */ }
   }
- }catch{ /* Full viewport is maintained by CSS when the browser blocks fullscreen. */ }
+ }catch{ /* The CSS dynamic viewport remains the standalone fallback. */ }
  syncFullscreenControl();
 }
 $('adventure-fullscreen').addEventListener('click',()=>{
- if(document.fullscreenElement){
+ const shell=captureShellFullscreenOwner();
+ if(shell?.gameFullscreenActive?.()){
+  void shell.exitGameFullscreen();
+ }else if(document.fullscreenElement){
   void document.exitFullscreen?.().catch(()=>{});
  }else void requestAdventureFullscreen();
 });
 document.addEventListener('fullscreenchange',syncFullscreenControl);
+const detachShellFullscreen=captureShellFullscreenOwner()?.onGameFullscreenChange?.(
+ syncFullscreenControl);
+window.addEventListener('pagehide',()=>detachShellFullscreen?.(),{once:true});
 syncFullscreenControl();
 
 $('adventure-play').addEventListener('click',guardedAsync(async()=>{

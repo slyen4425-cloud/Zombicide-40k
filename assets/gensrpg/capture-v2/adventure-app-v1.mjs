@@ -2,6 +2,8 @@
 // Bestiary publication is computed by the SAME official Combat main function.
 // The only gameplay model lives in adventure-contract-v1.mjs (not DOM).
 import {captureBestiaryCardsV1} from '../../../vendor/combat-lab/src/ui/capture-bestiary-cards-v1.js';
+import {projectCaptureStatEffectsV1} from '../../../vendor/combat-lab/src/core/combat/capture-stat-effects-v1.js';
+import {projectCaptureEncounterMaxHpV1} from '../../../vendor/combat-lab/src/core/combat/capture-adventure-hp-policy-v1.js';
 import {readWorldAssemblerDraft} from '../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js';
 import {
  createNewExplorationPlay,readExplorationPlay,playWorldFingerprint
@@ -662,7 +664,9 @@ function renderPlayingSheet(){
  if(session?.sessionId!==activePlayingSheet.sessionId)
   throw new Error('La fiche ne correspond plus à la partie active');
  const snapshot=adventurePlaySheetSnapshotV1({
-  session,bestiaryCards:published,statRegistry:officialStatRegistry
+  session,bestiaryCards:published,statRegistry:officialStatRegistry,
+  projectCombatStatEffects:projectCaptureStatEffectsV1,
+  projectCombatMaxHp:projectCaptureEncounterMaxHpV1
  });
  for(const button of document.querySelectorAll('[data-adventure-sheet-tab]')){
   const selected=button.dataset.adventureSheetTab===currentSheetTab;

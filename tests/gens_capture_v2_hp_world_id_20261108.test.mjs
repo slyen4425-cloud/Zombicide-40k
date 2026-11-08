@@ -88,6 +88,8 @@ test('game HP, stat points, and team use one provided Combat projection, preserv
   assert.equal(result.creature.maxHp,expected);
   assert.equal(result.creature.hp,shown);
   assert.equal(result.creature.baseMaxHp,140+allocation);
+  assert.equal(result.creature.labMaxHp,140);
+  assert.equal(result.creature.stats[0].authoredBaseHp,140);
   assert.equal(result.creature.stats[0].baseValue,expected);
   assert.equal(result.creature.stats[0].allocated,allocation);
   assert.equal(result.creature.stats[0].gameHp,true);

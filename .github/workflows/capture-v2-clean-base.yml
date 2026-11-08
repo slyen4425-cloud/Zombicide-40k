@@ -147,6 +147,9 @@ jobs:
       - name: Aventure — PV 25 % configurable, sauvegardes anciennes intactes et niveaux libres (TDD)
         run: node --test tests/gens_capture_v2_adventure_hp_policy_20261105.test.mjs
 
+      - name: RED/GREEN — PV 140→35 identiques à Combat, monde Test 1, aucune sauvegarde écrasée
+        run: node --test tests/gens_capture_v2_hp_world_id_20261108.test.mjs
+
       - name: Aventure — points de stats de l'instance transportés avec validation du budget officiel (TDD)
         run: node --test tests/gens_capture_v2_adventure_owned_stats_grant_v1.test.mjs
 

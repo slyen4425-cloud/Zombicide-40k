@@ -16,13 +16,13 @@ test('the ONE real GenSRPG Pages build publishes the complete team and title con
  for(const id of ['adventure-play-frame','adventure-return-title',
   'adventure-move-speed','adventure-move-speed-value','adventure-play-sheet'])
   assert.ok(html.includes('id="'+id+'"'),id+' absent from real assembled Pages');
- assert.match(app,/gensrpg\\.capture\\.v2\\.save-and-title\\.v1/);
+ assert.ok(app.includes('gensrpg.capture.v2.save-and-title.v1'));
  assert.match(app,/GensCaptureV2/);
- assert.match(app,/gensrpg\\.capture\\.v2\\.party-refresh\\.v1/);
- assert.match(app,/url\\.searchParams\\.set\\('moveSpeed'/);
+ assert.ok(app.includes('gensrpg.capture.v2.party-refresh.v1'));
+ assert.ok(app.includes("url.searchParams.set('moveSpeed'"));
  assert.match(contract,/export function moveAdventurePartyMemberV1/);
  assert.match(contract,/export function allocateAdventureStatPointsV1/);
- assert.match(contract,/availableAdventureStatPointsV1\\(session,instanceId=null\\)/);
+ assert.ok(contract.includes('availableAdventureStatPointsV1(session,instanceId=null)'));
  assert.match(sheet,/selectedInstanceId/);
  assert.match(view,/onSelectCreature/);
  assert.match(view,/onMoveCreature/);
@@ -38,9 +38,9 @@ test('Explorer owns the SAME native Portal, loading overlay, movement and title 
  assert.match(native,/sculptPortalLoading/);
  assert.match(native,/applyPortalTransition/);
  assert.match(native,/moveSpeed/);
- assert.match(native,/gensrpg\\.exploration\\.play\\.return-title\\.v1/);
- assert.match(native,/gensrpg\\.capture\\.v2\\.save-and-title\\.v1/);
- assert.match(native,/gensrpg\\.capture\\.v2\\.party-refresh\\.v1/);
+ assert.ok(native.includes('gensrpg.exploration.play.return-title.v1'));
+ assert.ok(native.includes('gensrpg.capture.v2.save-and-title.v1'));
+ assert.ok(native.includes('gensrpg.capture.v2.party-refresh.v1'));
 });
 
 test('publisher source is immutable Capture with certified current Exploration, no new source authority',()=>{

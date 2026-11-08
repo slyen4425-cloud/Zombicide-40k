@@ -89,9 +89,15 @@ test('a defeat gives 0 XP to everyone and preserves original roster HP state',()
  assert.equal(r.award.xp,0);
  assert.deepEqual(r.award.memberXp.map(m=>m.xp),[0,0]);
 });
-test('Capture owns fullscreen and native Exploration cannot cover the parent Sac/Equipe HUD',()=>{
+test('Shell fullscreen contains Capture Sac, Équipe and native Back, Explorer cannot steal layer',()=>{
  const html=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure.html',import.meta.url),'utf8');
  const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ const shell=readFileSync(new URL('../assets/gensrpg/capture-v2/shell-entry-v1.js',import.meta.url),'utf8');
+ assert.match(shell,/function requestGameFullscreen\(\)/);
+ assert.match(shell,/host\.requestFullscreen\(/);
+ assert.match(shell,/gameFullscreenActive,onGameFullscreenChange/);
+ assert.match(app,/shell\.requestGameFullscreen\(\)/);
+ assert.match(app,/shell\.exitGameFullscreen\(\)/);
  assert.match(html,/id="adventure-xp-distribution"/);
  assert.match(html,/id="adventure-play-frame"[^>]+allow="autoplay" hidden/);
  assert.doesNotMatch(html,/id="adventure-play-frame"[^>]*allowfullscreen/);

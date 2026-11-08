@@ -85,3 +85,29 @@ test('Gorice and Gemmor are visible AND playable in the actual published PWA Bes
  assert.ok(existsSync(new URL('../'+assembled+'vendor/exploration-lab/src/play/exploration-creator-camera-v1.js',import.meta.url)),
   'the native Exploration camera must be present in this same published build');
 });
+
+test('the published Aventure sheet identifies game HP 25%, original Lab HP, allocated health points and actual Combat owner',()=>{
+ const html=read(assembled+'assets/gensrpg/capture-v2/adventure.html');
+ const app=read(assembled+'assets/gensrpg/capture-v2/adventure-app-v1.mjs');
+ const view=read(assembled+'assets/gensrpg/capture-v2/adventure-play-sheet-view-v1.mjs');
+ const sheet=read(assembled+'assets/gensrpg/capture-v2/adventure-play-sheet-v1.mjs');
+ const projector=read(assembled+'assets/gensrpg/capture-v2/adventure-hp-projection-v1.mjs');
+ const model=read(assembled+'vendor/combat-lab/src/ui/capture-encounter-combat-source-v1.js');
+ const world=read(assembled+'vendor/exploration-lab/src/world/world-document-identity-v1.js');
+ const hero=read(assembled+'assets/gensrpg/capture-v2/adventure-hero-selection-grant-v1.mjs');
+ assert.doesNotMatch(html,/id="adventure-stat-wallet"/);
+ assert.match(app,/projectCaptureEncounterMaxHpV1/);
+ assert.match(sheet,/projectCombatVitals/);
+ assert.match(view,/PV en jeu/);
+ assert.match(view,/PV maximum au Labo/);
+ assert.match(view,/Points Santé investis/);
+ assert.match(projector,/projectOwnedStats/);
+ assert.match(projector,/projectStatEffects/);
+ assert.match(projector,/projectMaxHp/);
+ assert.match(model,/export function projectCaptureEncounterMaxHpV1/);
+ assert.match(world,/assertExplorationWorldDocumentIdV1/);
+ assert.match(hero,/assertOfficialAdventureWorldIdV1/);
+ assert.match(html,/id="adventure-combat-hp-percent"/);
+ const prov=JSON.parse(read(assembled+'release-provenance.v1.json'));
+ assert.equal(prov.combat.sha,JSON.parse(read(assembled+'assets/gensrpg/capture-v2/source-pins-v1.json')).combat.sha);
+});

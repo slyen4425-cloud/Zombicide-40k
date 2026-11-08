@@ -110,6 +110,11 @@ test('native Play enters Capture-owned fullscreen from a tap and keeps Sac and t
  assert.match(launch,/document\.body\.dataset\.adventurePlaying='true'/);
  assert.match(launch,/void requestAdventureFullscreen\(\);/,
   'the actual start tap requests fullscreen before any async world checks');
+ const shell=readFileSync(new URL('../assets/gensrpg/capture-v2/shell-entry-v1.js',import.meta.url),'utf8');
+ assert.match(shell,/host\.requestFullscreen\(/,
+  'the Shell root, not the game iframe, stays in the top fullscreen layer');
+ assert.match(app,/shell\.requestGameFullscreen\(\)/,
+  'Adventure must use the Shell-owned API to keep the native Back button');
  const html=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure.html',import.meta.url),'utf8');
  assert.match(html,/id="adventure-play-frame"[^>]+allow="autoplay" hidden/,
   'native Explorer frame may not hide the owner HUD in its own fullscreen layer');

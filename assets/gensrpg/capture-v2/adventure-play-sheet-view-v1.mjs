@@ -72,7 +72,10 @@ function statGrid(stats,{availablePoints=null,onAllocate=null}={}){
   cell.append(node('strong','sheet-stat-value',
    stat.baseValue===null?'—':stat.baseValue));
   cell.append(node('span','sheet-stat-bonus',
-   'Points attribués : +'+stat.allocated));
+   stat.gameHp?'Points Santé investis : +'+stat.allocated+' (déjà inclus)':
+    'Points attribués : +'+stat.allocated));
+  if(stat.gameHp)cell.append(node('small','sheet-stat-source',
+   'PV originaux au Labo : '+stat.authoredBaseHp));
   if(onAllocate){
    const buttons=node('div','sheet-stat-actions');
    for(const count of [1,5]){
@@ -115,14 +118,35 @@ export function renderAdventureSheetViewV1({
    subtitle:'Créature de ton équipe',imageUrl:portraitUrl,
    artCaption:'Aucun portrait officiel disponible',
    elements:c.elements,
-   vitals:[['Niveau',c.level],['PV actuels',c.hp===null?'Non renseignés':c.hp],['XP',c.xp]]
+   vitals:[['Niveau',c.level],
+    ...(Number.isFinite(c.maxHp)?[
+     ['PV en jeu',c.hp+' / '+c.maxHp],
+     ['PV maximum au Labo',c.baseMaxHp],
+     ['Règle de PV',c.hpPercent+' %']
+    ]:[['PV actuels',c.hp===null?'Non renseignés':c.hp]]),
+    ['XP',c.xp]]
   });
   card.append(statGrid(c.stats,{
    availablePoints:c.availablePoints,
    onAllocate:tab==='stats'?onAllocate:null
   }));
   content.push(card);
-  if(tab==='team')content.push(hint('Équipe actuelle : une créature active. La réserve sera ajoutée quand Monster Capture la prendra en charge.'));
+  if(tab==='team'){
+   const reserve=snapshot.team.filter(member=>!member.isActive);
+   if(reserve.length){
+    const list=node('section','sheet-team-reserve');
+    list.append(node('h4','','Réserve · '+reserve.length+' créature(s)'));
+    for(const member of reserve){
+     const summary=Number.isFinite(member.maxHp)
+      ?member.hp+' / '+member.maxHp+' PV en jeu ('+member.hpPercent+' %)'
+      :(member.hp===null?'PV non renseignés':member.hp+' PV');
+     list.append(node('p','sheet-team-member',
+      member.name+' · niveau '+member.level+' · '+summary+
+       (member.hp===0?' · KO':'')));
+    }
+    content.push(list);
+   }else content.push(hint('Équipe actuelle : une seule créature.'));
+  }
  }else if(tab==='inventory'){
   const section=node('section','sheet-inventory');
   const heading=node('div','sheet-inventory-heading');

@@ -19,6 +19,7 @@ on:
       - 'tests/gens_capture_v2_adventure_creator_draft_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_play_sheet_v1.test.mjs'
       - 'tests/gens_capture_v2_play_team_ux_20261108.test.mjs'
+      - 'tests/gens_capture_v2_team_native_interop_20261108.test.mjs'
       - 'tests/gens_capture_v2_multiplayer_lobby_v1.test.mjs'
       - 'tests/gens_capture_v2_survival_online_boundary_v1.test.mjs'
       - 'tests/gens_capture_v2_live_room_adapter_v1.test.mjs'
@@ -261,6 +262,8 @@ jobs:
       - name: Combat officiel = fiche en jeu PV 140→35, points Santé et reprise ancienne (TDD)
         run: node --test tests/gens_capture_v2_official_hp_parity_20261108.test.mjs
 
+      - name: Verify native owner of speed, transitions, team and title return
+        run: node --test tests/gens_capture_v2_team_native_interop_20261108.test.mjs
       - name: Install browser test dependencies
         run: |
           npm install --no-save --no-package-lock playwright@1.57.0 pngjs@7.0.0

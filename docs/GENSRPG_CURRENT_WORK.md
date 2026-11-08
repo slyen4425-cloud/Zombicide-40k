@@ -1,3 +1,11 @@
+## 2026-11-08 — Livraison unique à préparer : menu titre, équipe et transitions Aventure (C2)
+- START publisher `main@e6ab7000e575cc57186abb4efeadf7b98cd92103` ; checkpoint `checkpoint/gensrpg-start-capture-play-ux-publish-2026-11-08`, branche dédiée `work/gensrpg-capture-play-ux-publish-2026-11-08`. Source propriétaire Capture v2 PR #327 fusionnée sur checkpoint (merge `815b24114ca8fdfca9cfb3b3b577797ab12d8639`), raccord propriétaire PR #328 toujours à certifier ; Exploration main PR #390 et correctif smoke PR #391, Combat main propriétaire inchangé.
+- Portée : seul pin immuable Capture V2 du publisher, tests ciblés sur le site réellement assemblé et journal. Aucun nouveau runtime, aucune copie intégrale de bibliothèque, aucune modification de sauvegarde, ni PWA/Survie/Dungeon.
+- Invariants : équipe 1–6 avec ordre de premier combattant non KO, fiches/points individuels, retour au vrai titre après checkpoint natif, chargement des zones avec décors, vitesse 90 minimum par défaut et réglage 90–360 via Exploration.
+- GATE bloquant : Explorer main exact commit + CI source + Pages officiel/HTTPS GREEN, Capture PR #328 CI réel Chromium + source exacte GREEN puis promote pin ; publisher main PR C2, budget 900 Mio/duplications, vraie navigation root/Android/PC, HTTP provenance des trois SHA et PWA mise à jour. Ancienne livraison reste active jusqu'à toutes ces vérifications. Aucune publication forcée ou double autorité.
+
+---
+
 ## 2026-11-08 — Livraison unique : PV de partie visibles et WorldDocument « Test 1 »
 - **START publisher** : `main@55c67a63ab376815ccc26cc8f811e5a30124788f`, checkpoint `checkpoint/gensrpg-start-capture-hp-world-publish-2026-11-08`, branche `work/gensrpg-capture-hp-world-publish-2026-11-08`. Source Capture V2 dans lot indépendant `work/gensrpg-capture-hp-world-id-2026-11-08` démarré sur `d446bb2104dec8bad5725d9000df54e268e00012`.
 - Rendu jeu : `PV en jeu actuels / maximum` et `PV maximum au Labo` distincts. La valeur de santé est projetée depuis le **seul propriétaire Combat**, à partir de la stat de l'instance (points déjà attribués compris), sans mutation de fiches auteur, KO, inventaires, progression ni sauvegardes. Test parité source exacte (140→35 à 25 %, +5 Santé→37).

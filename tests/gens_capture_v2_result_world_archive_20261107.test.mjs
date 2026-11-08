@@ -121,10 +121,10 @@ test('shared XP receipt lists the actual saved instance owners, even after a KO 
  }),/identique|persisté/);
 });
 test('creation UI exposes the chosen XP distribution without imposing it on older saves',()=>{
- const html=fs.readFileSync(new URL('../assets/gensrpg/capture-v2/adventure.html',import.meta.url),'utf8');
- const code=fs.readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ const html=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure.html',import.meta.url),'utf8');
+ const code=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
  assert.match(html,/id="adventure-xp-distribution"/);
  assert.match(html,/<option value="all">/);
  assert.match(html,/<option value="active">/);
- assert.match(code,/distribution:\$\('adventure-xp-distribution'\)/);
+ assert.match(code,/distribution:\$\(idField\.distribution\)\.value/);
 });

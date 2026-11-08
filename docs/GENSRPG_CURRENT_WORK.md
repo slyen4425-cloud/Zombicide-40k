@@ -1,3 +1,12 @@
+## 2026-11-08 — Raccord correctif Explorer « Partie indisponible » SHA Combat
+- **Constat mobile après PR #331 :** « Adventure publication does not match official Combat author/engine sha » en entrant dans le jeu : ancien JSON reçu par Explorer (`force-cache`), malgré Bestiaire Capture frais.
+- **Source unique :** Exploration PR #392, main@`f743ae9d0df5e1aa2c24ed009a551435e5cc8e04` (son loader officiel utilise une URL unique en Jouer ; garde SHA intacte). Combat main épinglé `a182ebf2`, pas de repli ni recopie.
+- **START Source Capture :** ancien pin PR #330 `4fc9307d4f42c69f1c54ca08995b3cd8dd7d660f`, checkpoint `checkpoint/gensrpg-start-capture-exploration-cache-pin-2026-11-08`, branche unique `work/gensrpg-capture-exploration-cache-pin-2026-11-08`. Changement : un seul SHA Explorer et test de preuve transportée dans l'artefact.
+- **Gates** : attendre CI et Pages sur le *nouveau* Exploration main, puis CI native Capture au SHA, puis PR publisher unique GenSRPG main/Pages/HTTPS sur nouvel immutable Capture SHA. Pas de déclaration GREEN sur la PWA sans test réel.
+- **Protections :** aucune mutation du stockage ou des mondes, pas d'assets dupliqués, Survie/Dungeon non touchés.
+
+---
+
 ## 2026-11-08 — Raccord natif Capture équipe/Exploration main (C2, candidat)
 - Base SHA `815b24114ca8fdfca9cfb3b3b577797ab12d8639` après PR #327 GREEN fusionnée exclusivement dans checkpoint (jamais main publisher). START `checkpoint/gensrpg-start-capture-ux-exploration-pin-2026-11-08`, branche `work/gensrpg-capture-ux-exploration-pin-2026-11-08`.
 - Pin propriétaire Exploration `main@7a4f4b3e198e6fe3b5707c4b5b6dfed5d17007b9`, CI officielle `42462411801` SUCCESS ; remplace uniquement le vieux pin `58bb2586` pour relier le menu titre, la projection équipe, la transition d'Area et la vitesse minimale native. Combat reste `a182ebf2`. Contrats probés dans le vrai site assemblé via TDD d'interop. Une seule source par module.

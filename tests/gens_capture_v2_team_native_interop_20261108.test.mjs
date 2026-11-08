@@ -26,3 +26,15 @@ test('official source pin proves native Exploration owns loading, speed and titl
  assert.doesNotMatch(game,/new (?:Exploration|Movement|Combat)Runtime\(/,
   'Game consumes the official Lab, never a parallel movement/combat engine');
 });
+test('scoped Android Adventure reloads the exact official Exploration Combat bundle without stale CacheStorage',()=>{
+ const native=read('_site/vendor/exploration-lab/src/sculpt-lab-main.js');
+ const loader=read('_site/vendor/exploration-lab/src/capture/capture-showcase-encounter-source-v1.js');
+ assert.match(native,/sculptPlayRequested&&playOptions/,
+  'fresh author request must be limited to the true game session');
+ assert.match(native,/releaseLoadId:window\.crypto\.randomUUID\(\)/);
+ assert.match(loader,/url\.searchParams\.set\('_gens_capture_release',releaseLoadId\)/);
+ assert.match(loader,/releaseLoadId===null\?'force-cache':'no-store'/);
+ assert.match(native,/readScopedAdventurePublishedEncountersV1/,
+  'strict author+engine SHA validation must remain in native Exploration');
+});
+

@@ -1,6 +1,7 @@
 // GenSrpg Capture V2 UI: configuration/session presentation only.
 // Bestiary publication is computed by the SAME official Combat main function.
 // The only gameplay model lives in adventure-contract-v1.mjs (not DOM).
+import {fetchOfficialAdventureJsonV1} from './adventure-official-json-v1.mjs';
 import {captureBestiaryCardsV1} from '../../../vendor/combat-lab/src/ui/capture-bestiary-cards-v1.js';
 import {projectCaptureEncounterOwnedStatsV1}
  from '../../../vendor/combat-lab/src/adapters/input/capture/capture-encounter-owned-stats-v1.js';
@@ -193,13 +194,15 @@ function fromFields(){
    talentPointsPerLevel:numberFrom(idField.heroTalent)}
  });
 }
-async function fetchJson(relative){
- const url=new URL(relative,import.meta.url);
- const result=await fetch(url,{cache:'no-store'});
- if(!result.ok)throw new Error('Source officielle indisponible (HTTP '+result.status+') : '+url.pathname);
- return result.json();
-}
 async function fetchPublishedBestiary(){
+ // The preview is an installed PWA: its previous worker may still serve JSON
+ // cache-first even when fetch({cache:'no-store'}) is requested. One fresh,
+ // unguessable boot key forces all FIVE official files to use the same new
+ // network snapshot instead of combining old Combat transfers and new pins.
+ // The original Combat main publication predicate stays the sole authority.
+ const releaseLoadId=crypto.randomUUID();
+ const fetchJson=relative=>fetchOfficialAdventureJsonV1(
+  relative,import.meta.url,releaseLoadId,fetch);
  // A single Combat source: same captureBestiaryCardsV1 publication predicate,
  // same Showcase transfers and skill definitions; immutable visual catalog as
  // certified in the GenSrpg Pages release, never a moving global-assets branch.

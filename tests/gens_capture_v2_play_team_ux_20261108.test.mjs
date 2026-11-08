@@ -45,7 +45,8 @@ test('the first fighter and the reserve use the same canonical ordered team',()=
  assert.equal(swapped.party.active.hp,23);
  assert.equal(JSON.stringify(s),before,'no mutation of existing saved state');
  assert.equal(chooseAdventureActiveCreatureV1({session:s,instanceId:'b2',now}).party.active.instanceId,'b2');
- assert.throws(()=>moveAdventurePartyMemberV1({session:s,instanceId:'c3',direction:'up',now}),
+ const advance=moveAdventurePartyMemberV1({session:s,instanceId:'c3',direction:'up',now});
+ assert.throws(()=>moveAdventurePartyMemberV1({session:advance,instanceId:'c3',direction:'up',now}),
   /KO/);
  assert.throws(()=>moveAdventurePartyMemberV1({session:s,instanceId:'unknown',direction:'up',now}),
   /absente/);

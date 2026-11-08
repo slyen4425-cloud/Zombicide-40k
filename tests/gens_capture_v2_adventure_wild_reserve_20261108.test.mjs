@@ -108,3 +108,35 @@ test('legacy one-creature grant/result unchanged, no empty reserve field added',
  assert.equal(result.session.party.active.hp,15);
  assert.equal(result.award.outcome,'victory');
 });
+
+test('creator may share exactly one official XP pool equally across the six owned creatures',()=>{
+ const rules=normalizeAdventureRulesV1({...DEFAULT_ADVENTURE_RULES_V1,
+  xp:{...DEFAULT_ADVENTURE_RULES_V1.xp,baseVictoryXp:1001,distribution:'all'}});
+ const s=session(['a','b','a','b','a','b'],rules);
+ const members=s.party.active.instanceId;
+ const e=native('victory',s.party.active?[s.party.active,...s.party.reserve]
+  .map((m,i)=>[m.instanceId,m.speciesId,i===0?0:10]):[]);
+ const x=commit(s,e);
+ const roster=[x.session.party.active,...x.session.party.reserve];
+ assert.equal(x.award.xp,1001);
+ assert.equal(x.award.distribution,'all');
+ assert.equal(x.award.recipients.length,6);
+ assert.deepEqual(x.award.recipients.map(v=>v.xp),[167,167,167,167,167,166]);
+ assert.deepEqual(x.award.recipients.map(v=>v.instanceId),
+  ['owned-1','owned-2','owned-3','owned-4','owned-5','owned-6']);
+ assert.equal(x.award.recipients.reduce((total,v)=>total+v.xp,0),1001);
+ assert.equal(roster.find(m=>m.instanceId===members).hp,0);
+ for(const prize of x.award.recipients){
+  assert.equal(roster.find(m=>m.instanceId===prize.instanceId).xp,prize.xp);
+ }
+ assert.equal(commit(x.session,e).applied,false,'combat result is idempotent');
+ assert.equal(s.party.reserve.every(m=>m.xp===0),true,'old state remains unchanged');
+});
+test('legacy active-only saves keep their original XP policy, without creating an additional reward',()=>{
+ const s=session(),e=native('victory',[['owned-1','a',0],['owned-2','b',10],['owned-3','a',0]]);
+ const x=commit(s,e);
+ assert.equal(x.session.party.reserve[0].xp,x.award.xp);
+ assert.equal(x.session.party.active.xp,0);
+ assert.equal(x.award.distribution,undefined);
+ assert.equal(x.award.recipients,undefined);
+});

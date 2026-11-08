@@ -24,11 +24,16 @@ test('Monster Capture release pins one immutable candidate and proves the select
 test('published Monster Capture stays isolated and retains exact certified original visual author',()=>{
  assert.equal(file.officialVisuals.repository,'slyen4425-cloud/GenSrpg_labo_combat_dynamique');
  assert.equal(file.officialVisuals.ref,'global-assets');
- assert.equal(file.officialVisuals.sha,'aded6a9bc571dd1dd557889d35ad4e513f6f27dd');
- assert.equal(file.officialVisuals.certifiedCiRun,41558880085);
+ assert.equal(file.officialVisuals.sha,'f61191afb001807955bccf3c5b2b5e292c76fc52',
+  'approved author library must contain Gorice movement sprites and Gemmor portraits');
+ assert.equal(file.officialVisuals.certifiedCiRun,42036930914);
  const workflow=fs.readFileSync(new URL('../.github/workflows/main.yml',import.meta.url),'utf8');
  assert.match(workflow,/steps\.preview_labs\.outputs\.combat/);
  assert.match(workflow,/steps\.preview_labs\.outputs\.exploration/);
+ assert.equal((workflow.match(/ref: \$\{\{ steps\.preview_pin\.outputs\.visuals \}\}/g)||[]).length,2,
+  'Pages build and PR review must both consume the ONE certified visual SHA');
+ assert.doesNotMatch(workflow,/ref: aded6a9bc571dd1dd557889d35ad4e513f6f27dd/,
+  'an obsolete visual SHA must not survive independently in the workflow');
  assert.match(workflow,/node --test tests\/gens_capture_v2_owned_stats_pages_promotion_20261105\.test\.mjs/);
  assert.doesNotMatch(workflow,/ref: 53890e1383b33f7a0ec5bb2fafed59acf1d7a163|ref: 7155516b51db9892183cc043837037c4c87a0315/);
 });

@@ -51,8 +51,17 @@ test('publisher source is immutable Capture with certified current Exploration, 
  const pins=JSON.parse(file('assets/gensrpg/capture-v2/source-pins-v1.json'));
  assert.equal(provenance.source.commit,pin.sha);
  assert.equal(pins.exploration.ref,'main');
- assert.equal(pins.exploration.sha,'7a4f4b3e198e6fe3b5707c4b5b6dfed5d17007b9');
- assert.equal(pins.exploration.certifiedCiRun,42462411801);
+ // Historical exact-SHA literals become stale when a new certified main
+ // arrives. The versioned source pin + packaged provenance are the authority.
+ assert.match(pins.exploration.sha,/^[a-f0-9]{40}$/);
+ assert.ok(Number.isInteger(pins.exploration.certifiedCiRun) &&
+   pins.exploration.certifiedCiRun>0,'only an explicitly certified Exploration main');
+ const native=file('vendor/exploration-lab/src/sculpt-lab-main.js');
+ const loader=file('vendor/exploration-lab/src/capture/capture-showcase-encounter-source-v1.js');
+ assert.match(native,/sculptPlayRequested&&playOptions/);
+ assert.match(native,/releaseLoadId:window\.crypto\.randomUUID\(\)/);
+ assert.match(loader,/url\.searchParams\.set\('_gens_capture_release',releaseLoadId\)/);
+ assert.match(loader,/releaseLoadId===null\?'force-cache':'no-store'/);
  assert.equal(provenance.exploration.sha,pins.exploration.sha);
  assert.equal(provenance.combat.sha,pins.combat.sha);
 });

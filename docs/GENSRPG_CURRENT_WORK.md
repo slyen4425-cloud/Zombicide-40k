@@ -1,3 +1,12 @@
+## 2026-11-08 — Re-pin officiel Explorer caméra + Combat immutable
+- **Incident à résoudre complètement** : troisième message Combat SHA au clic combat, équipe 1–6 sur carte et réglages caméra plus bas/zoomés avant le lancement.
+- **Exploration propriétaire** : PR #393 et #394 fusionnées sur main `6915526c5ea2f96265bbd4cfbe6bd081ebea0ec2`; publication et CI exactes sont obligatoires avant promotion. Le pont Combat n'ajoute plus de module non transporté aux previews gelées.
+- **Capture propriétaire** : PR #334 fusionnée sur checkpoint à `75130f8c12e2f848668c7e44a1f6a006674a7121` ; test navigateur 3 créatures + zoom initial. Seul `source-pins-v1.json` pointe désormais sur l'Exploration candidat. Le champ `certifiedCiRun: 42475172293` est un run actuellement à confirmer GREEN, **pas une certification anticipée**.
+- **START** `checkpoint/gensrpg-start-capture-official-exploration-pin-2026-11-08`, lot `work/gensrpg-capture-official-exploration-pin-2026-11-08`, charte même propriétaire Combat main; aucune modification de sauvegardes, données, Sprint Dungeon ou Survie.
+- **Gates** : Exploration exact main CI+Pages SUCCESS, Capture clean & native CI tests et contrôles 1–6, publisher GenSRPG single main Pages/HTTPS + vraie URL smoke ; ne pas livrer tant que ces preuves manquent.
+
+---
+
 ## 2026-11-08 — Caméra avant partie et équipe multiple en jeu
 - **Demande** : plus zoomé et plus proche du sol par défaut, possibilité de choisir **avant** démarrage. Les 1–6 créatures doivent être facilement visibles depuis la carte.
 - **Source Capture** : réglages visibles dans Ma partie, nouvel angle par défaut 45° et zoom 205 % ; valeur choisie enregistrée dans AdventureSession et transmise au **seul** moteur natif Exploration. Anciennes sauvegardes sans champ zoom continuent à 175 % sans migration.

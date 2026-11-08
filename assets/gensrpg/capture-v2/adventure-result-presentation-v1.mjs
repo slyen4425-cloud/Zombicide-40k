@@ -14,6 +14,22 @@ export function projectAdventureCombatAwardV1({session,award,bestiaryCards=[]}={
   throw new Error('Résultat de combat sauvegardé incomplet');
  const name=id=>bestiaryCards.find(card=>card.id===id)?.name??id;
  const member=name(session.party.active.speciesId);
+ // An old award contains one recipient. New team awards persist the exact
+ // per-member allocation before any post-battle automatic active swap.
+ const detailed=Array.isArray(saved.memberXp)?saved.memberXp:null;
+ if(detailed&&(
+   detailed.length<1||detailed.length>6||
+   detailed.some(m=>typeof m.instanceId!=='string'||
+     typeof m.speciesId!=='string'||!Number.isSafeInteger(m.xp)||m.xp<0||
+     !Number.isSafeInteger(m.levelBefore)||!Number.isSafeInteger(m.levelAfter))||
+   detailed.reduce((sum,m)=>sum+m.xp,0)!==saved.xp
+  ))throw new Error("Répartition XP persistée invalide");
+ const xpRows=detailed
+  ?[Object.freeze({label:'XP de l’équipe',value:'+'+saved.xp+' XP au total'}),
+    ...detailed.map((m,index)=>Object.freeze({label:'Créature '+(index+1)+' · '+name(m.speciesId),
+      value:'+'+m.xp+' XP · niv. '+m.levelBefore+' → '+m.levelAfter}))]
+  :[Object.freeze({label:'XP créature',value:'+'+saved.xp+' XP pour '+member}),
+    Object.freeze({label:'Progression',value:'Niveau '+saved.levelBefore+' → '+saved.levelAfter})];
  const itemName=id=>session.rules.loot.items.find(item=>item.id===id)?.name??id;
  const drops=saved.drops.map(item=>itemName(item.itemId)+' ×'+item.quantity);
  const title=saved.outcome==='victory'?'Victoire':
@@ -21,8 +37,7 @@ export function projectAdventureCombatAwardV1({session,award,bestiaryCards=[]}={
  return Object.freeze({title,outcome:saved.outcome,
   rows:Object.freeze([
    Object.freeze({label:'Adversaire',value:name(saved.enemyId)}),
-   Object.freeze({label:'XP créature',value:'+'+saved.xp+' XP pour '+member}),
-   Object.freeze({label:'Progression',value:'Niveau '+saved.levelBefore+' → '+saved.levelAfter}),
+   ...xpRows,
    Object.freeze({label:'XP du héros',value:'+'+saved.heroXp+' XP'}),
    Object.freeze({label:'Monnaie',value:'+'+saved.currency}),
    Object.freeze({label:'Objets',value:drops.length?drops.join(', '):'Aucun objet'})

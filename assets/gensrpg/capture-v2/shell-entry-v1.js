@@ -102,8 +102,39 @@
     host.dataset.nativeFamily=info.family;
     return true;
   }
+  // The existing Shell owns its entire Capture viewport, including the
+  // native Back control. An Adventure iframe must NEVER fullscreen itself:
+  // that would place its document above the Shell and hide the return button.
+  // The same user gesture crosses the same-origin owner API before awaits.
+  function gameFullscreenActive(){
+    return Boolean(host&&root.document.fullscreenElement===host);
+  }
+  function requestGameFullscreen(){
+    if(!host||current!=="adventure")return Promise.resolve(false);
+    if(gameFullscreenActive())return Promise.resolve(true);
+    if(!root.document.fullscreenEnabled||typeof host.requestFullscreen!=="function")
+      return Promise.resolve(false);
+    try{
+      return Promise.resolve(host.requestFullscreen({navigationUI:"hide"})).then(async()=>{
+        if(!gameFullscreenActive())return false;
+        try{await root.screen?.orientation?.lock?.("landscape");}
+        catch{ /* Landscape lock may be denied by the mobile browser. */ }
+        return true;
+      }).catch(()=>false);
+    }catch{return Promise.resolve(false);}
+  }
+  function exitGameFullscreen(){
+    if(!gameFullscreenActive())return Promise.resolve(false);
+    return Promise.resolve(root.document.exitFullscreen?.()).then(()=>true).catch(()=>false);
+  }
+  function onGameFullscreenChange(callback){
+    if(typeof callback!=="function")throw new TypeError("Fullscreen callback required");
+    root.document.addEventListener("fullscreenchange",callback);
+    return ()=>root.document.removeEventListener("fullscreenchange",callback);
+  }
   function home(){
     if(!host)return false;
+    if(gameFullscreenActive())void exitGameFullscreen();
     if(frame){frame.src="about:blank";frame.remove();frame=null;}
     stage.replaceChildren();
     current=null;host.dataset.view="home";host.dataset.menu="main";
@@ -193,6 +224,7 @@
   }
   function stop(){
     if(!host)return false;
+    if(gameFullscreenActive())void exitGameFullscreen();
     if(frame){frame.src="about:blank";frame.remove();}
     frame=null;stage=null;notice=null;nativeTitle=null;current=null;
     host.remove();host=null;
@@ -203,5 +235,6 @@
   function status(){return Object.freeze({active:!!host,view:current});}
   if(shell.register("capture",start)!==true)throw new Error("Capture Shell registration refused");
   if(returnShell.register("capture",home)!==true)throw new Error("Capture return registration refused");
-  root.GensCaptureV2=Object.freeze({start,stop,open,home,status});
+  root.GensCaptureV2=Object.freeze({start,stop,open,home,status,
+    requestGameFullscreen,exitGameFullscreen,gameFullscreenActive,onGameFullscreenChange});
 })(typeof window!=="undefined"?window:globalThis);

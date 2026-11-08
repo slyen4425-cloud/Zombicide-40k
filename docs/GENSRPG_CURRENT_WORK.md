@@ -1,3 +1,14 @@
+## 2026-11-08 — Correctif Capture V2 : sac en plein écran + XP partageable (C2, EN VALIDATION)
+- **Source réelle publiée à l'ouverture :** GenSRPG main `1faff1a64b91b949e0bf845bf3df2ec371ba1003`, pin source Capture `18309e6173baf8dd86d3aab2cdf4d0c0dbb5afb7`; ce lot ne modifie PAS `main` directement.
+- **START source :** `18309e6173baf8dd86d3aab2cdf4d0c0dbb5afb7`, checkpoint `checkpoint/gensrpg-start-play-fullscreen-xp-2026-11-08`, branche `work/gensrpg-play-fullscreen-xp-2026-11-08`; dernier vert connu : CI native source `42506984636` et clean boundary `42506984642`, publisher main PR #342 sur `1faff1a`.
+- **Portée :** Shell GenSRPG conserve l'autorité du vrai plein écran sur le conteneur Capture entier (bouton natif « Retour Monster Capture » ET Sac enfant accessibles), iframe Exploration interdit de plein écran concurrent ; lancement sous geste utilisateur et fallback 100dvh ; caméra latérale 45° déjà choisie et paramétrable et transmise au moteur propriétaire Exploration ; règle d'XP `all` pour nouvelles parties showcase, `active` inchangée pour anciennes sauvegardes, partage entier déterministe 1–6 membres, écran de résultat par instance, anticumul.
+- **Pas encore inclus :** répartition par *participants réels* (nécessite une nouvelle preuve de participation officielle du Combat RosterSession ; ne jamais déduire à partir des seuls PV), optimisations carte (propriétaire Exploration, ticket #397).
+- **Invariant :** aucun nouveau stockage ni moteur, aucune migration silencieuse des sauvegardes, Combat et Exploration mains restent les uniques moteurs, Survie/Dungeon/PvP et assets inchangés. La règle éditée par le créateur est versionnée dans AdventureRules v1.
+- **Tests ciblés :** `tests/gens_capture_v2_adventure_xp_fullscreen_20261108.test.mjs`, anciens `adventure_contract`, `wild_reserve`, `ui_owner` ; puis C2 clean/native/runtime, parcours Chromium réel de l'iframe et publisher exact SHA, smoke HTTPS mobile et retour arrière. Aucun « livré » sans GREEN et provenance main.
+- **Prochaine étape :** inspecter CI du lot et corriger ses vrais échecs ; checkpoint GREEN ; publisher unique GenSRPG ; preuve SHA public / Android.
+
+---
+
 ## 2026-11-08 — Capture Aventure : équipe entière vers le combat sauvage (propriétaire sauvegarde)
 - **Départ :** source certifiée Candidate Dodge `52273fe93364db26122d477999f81a2f0cd5807d` (Combat `ef4e9315` déjà certifié), checkpoint `checkpoint/gensrpg-start-capture-wild-reserve-2026-11-08`, branche `work/gensrpg-capture-wild-reserve-2026-11-08`. Chantiers propriétaires Combat PR #285 et Exploration PR #395 séparés, sans fusion avant CI/Pages exactes.
 - **Règle jouable sauvage :** 1 monstre actif, jusqu'à 5 membres en réserve issus du même `AdventureSession`. La composition et l'ordre sont projetés dans le grant transitoire existant avec même session/world/CombatSHA ; aucune seconde sauvegarde. Explorer porte seulement les instances vers le RosterSession propriétaire Combat.

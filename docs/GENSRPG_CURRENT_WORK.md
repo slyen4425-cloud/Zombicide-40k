@@ -1,3 +1,13 @@
+## 2026-11-08 — Candidat de livraison unique Capture V2 : esquive + réserve sauvage native 1–6
+- **START immuable :** GenSRPG main `5f6909f1aeb85758d4b18d1fcc400c281bdd5205`; checkpoint `checkpoint/gensrpg-start-publish-capture-wild-reserve-2026-11-08`; une seule branche de publisher `work/gensrpg-publish-capture-wild-reserve-2026-11-08`. Le PR publisher esquive #339 reste une proposition concurrente NON fusionnée : ne pas publier les deux comme autorités parallèles.
+- **Propriétaires uniques :** Combat main `4f62760a7ef41dca573b86fe2245ef1451f70f0d` (Laboratory CI `42506044399`, Pages `42506044251` SUCCESS) ; Exploration main `bb358ee38410f9590d5f80fa116e0286c23f6216` (CI `42506481003`, Pages `42506477244` SUCCESS). GenSRPG ne possède que la persistance AdventureSession et son contrat de grant ; aucune copie de moteur ou catalogue.
+- **Source versionnée candidate :** `18309e6173baf8dd86d3aab2cdf4d0c0dbb5afb7` sur PR source #338, basée sur la source esquive #337. `assets/gensrpg/capture-v2/source-pins-v1.json` épingle les deux mains exacts. Le SEUL fichier sélectionnant la source du site est `tools/capture_v2_pages_preview_pin.json`. La source doit rester immuable et recevoir tous ses tests CI GREEN avant promotion.
+- **Périmètre :** esquive Ailevent et 15 espèces publiées ; combat sauvage avec 1–6 membres, active + réserve native, rappel, résultat membre par membre, PV/KO persistés, XP anti-double récompense. Moteur Combat, Exploration, caméra, autres modules, sauvegardes existantes, assets globaux et PWA scopes non modifiés dans cette PR.
+- **Gates obligatoires :** source #338 propre avec native/clean/runtime/architecture ; publisher PR validée avec vraie construction et revue Chromium imbriquée, budget <=900 Mio, absence de duplication ; fusion main seulement après GREEN et revue ; Pages main SUCCESS SHA exact, vérification HTTPS release-provenance, smoke public et essai Android réel. Ne jamais interpréter un build PR dont deploy est SKIPPED comme une publication.
+- **Différé :** réglages 1v1/2v2 par créateur/scénario dans un lot ultérieur versionné ; aucune nouvelle autorité Combat.
+  
+---
+
 ## 2026-11-08 — Livraison unique cache Combat (iframe), équipe et caméra
 - **Incident reproduit sur Android :** « Combat indisponible : Adventure publication does not match official Combat author/engine sha » après entrée dans le monde ; le 3e loader (iframe Combat native) utilisait encore l'URL historique cacheable.
 - **Un seul correctif propriétaire :** Explorer main certifié `6915526c5ea2f96265bbd4cfbe6bd081ebea0ec2` PR #393 (Combat iframe au SHA cohérent, garde inchangée) + PR #394 (zoom de départ natif) ; CI `42475172293`, Pages `42475172283` SUCCESS.

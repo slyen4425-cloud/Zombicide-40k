@@ -132,7 +132,9 @@ function setSessionControlFields(saved){
  $('adventure-guest-edit-rewards').checked=permissions.editRewards;
  $('adventure-guest-edit-world').checked=permissions.editWorld;
  $('adventure-guest-allocate-stats').checked=permissions.allocateOwnCreatureStats;
- $('adventure-creator-camera-angle').value=String(saved?.cameraPolicy?.angleDeg??55);
+ $('adventure-creator-camera-angle').value=String(saved?.cameraPolicy?.angleDeg??45);
+ $('adventure-creator-camera-zoom').value=String(saved?.cameraPolicy?.zoomPercent??(saved?175:205));
+ $('adventure-creator-camera-zoom-value').textContent=$('adventure-creator-camera-zoom').value+' %';
  $('adventure-save-control').disabled=false;
  $('adventure-save-control').textContent=saved?'Enregistrer les choix du créateur'
   :'Enregistrer les choix avant la première partie';
@@ -426,6 +428,7 @@ function showSave(){
   renderPortfolioOptions();
   const state=store.load();
   $('adventure-room-host').disabled=!!activeCaptureRoom||!state?.sessionControl?.joinEnabled;
+  text($('adventure-play-team-count'),String(state?1+(state.party.reserve?.length??0):0));
   if(!state){
    $('adventure-hero-choice').disabled=false;
    text($('adventure-save-summary'),'Aucune partie créée.');
@@ -760,7 +763,7 @@ $('adventure-open-sheet').addEventListener('click',guarded(()=>{
  const dialog=$('adventure-play-sheet');
  if(dialog.open)return;
  discardHeroVisual();
- currentSheetTab='hero';
+ currentSheetTab='team'; // Immediately show all 1–6 saved creatures on the map.
  currentSheetCreatureId=store.load()?.party?.active?.instanceId??null;
  renderPlayingSheet();
  text($('adventure-sheet-status'),'Fiche mise à jour depuis la partie sauvegardée.');
@@ -829,6 +832,9 @@ $('adventure-xp-band-add').addEventListener('click',guarded(()=>{
  bands.splice(bands.length-1,0,{throughLevel:middle,xpPerLevel:last.xpPerLevel});
  renderXpBandRows(bands);updatePreview();
 }));
+$('adventure-creator-camera-zoom').addEventListener('input',()=>{
+ $('adventure-creator-camera-zoom-value').textContent=$('adventure-creator-camera-zoom').value+' %';
+});
 $('adventure-enemy').addEventListener('change',updatePreview);
 $('adventure-starter').addEventListener('change',updatePreview);
 $('adventure-starter-count').addEventListener('change',guarded(renderStarterReserveSelectors));
@@ -843,7 +849,8 @@ $('adventure-create').addEventListener('click',guarded(()=>{
   rules,ids:{sessionId:id(),instanceId:id(),
    reserveInstanceIds:starterIds.slice(1).map(()=>id()),creatorId:id()},now,
   heroDefinitionId:$('adventure-hero-choice').value||null,
-  cameraAngle:Number($('adventure-creator-camera-angle').value)
+  cameraAngle:Number($('adventure-creator-camera-angle').value),
+  cameraZoomPercent:Number($('adventure-creator-camera-zoom').value)
  });
  const configured=updateAdventureSessionControlV1({
   session:state,settings:sessionControlFromFields(),now
@@ -890,7 +897,20 @@ syncFullscreenControl();
 $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  const selectedWorldId=$('adventure-world-select').value;
  let world=readWorldAssemblerDraft(window.localStorage);
- const beforeWorldSession=store.load();
+ let beforeWorldSession=store.load();
+ // The preparation controls must apply to the next actual play entry even
+ // when the player didn't reopen the creator's advanced settings.
+ if(beforeWorldSession&&beforeWorldSession.status!=='finished'){
+  const angleDeg=Number($('adventure-creator-camera-angle').value);
+  const zoomPercent=Number($('adventure-creator-camera-zoom').value);
+  if(beforeWorldSession.cameraPolicy?.angleDeg!==angleDeg||
+     (beforeWorldSession.cameraPolicy?.zoomPercent??175)!==zoomPercent){
+   beforeWorldSession=updateAdventureCameraPolicyV1({
+    session:beforeWorldSession,angleDeg,zoomPercent,now:new Date().toISOString()
+   });
+   store.save(beforeWorldSession);
+  }
+ }
  if(worldLibrary&&selectedWorldId){
   world=resolveSelectedAdventureWorldV1({
    session:beforeWorldSession,worldLibrary,selectedWorldId
@@ -972,6 +992,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  url.searchParams.set('play','1');
  url.searchParams.set('adventureSession',sessionId);
  url.searchParams.set('cameraAngle',String(result.session.cameraPolicy?.angleDeg??55));
+ url.searchParams.set('cameraZoom',String(result.session.cameraPolicy?.zoomPercent??175));
  url.searchParams.set('moveSpeed',String(result.session.rules.navigation?.moveSpeed??90));
  if(url.origin!==window.location.origin)
   throw new Error('Jouer doit utiliser le moteur Exploration officiel de la même origine');
@@ -1096,7 +1117,8 @@ $('adventure-save-control').addEventListener('click',guarded(()=>{
    });
  // Same AdventureSession owns creator settings and the camera policy.
  const updated=updateAdventureCameraPolicyV1({
-  session:saved,angleDeg:Number($('adventure-creator-camera-angle').value),now
+  session:saved,angleDeg:Number($('adventure-creator-camera-angle').value),
+  zoomPercent:Number($('adventure-creator-camera-zoom').value),now
  });
  store.save(updated);setSessionControlFields(updated);showSave();
  stateMessage('Choix du créateur/MJ enregistrés. La connexion des invités et les actions MJ seront raccordées ultérieurement.');

@@ -7,6 +7,16 @@
 <link rel="stylesheet" href="./adventure-style-v1.css">
 </head>
 <body>
+<!-- Visible immediately on launch; no second editor/game engine or asset collection. -->
+<section id="adventure-launch-loading" role="status" aria-live="polite" aria-busy="true" hidden>
+ <div class="adventure-loading-panel">
+  <strong class="adventure-loading-brand" aria-label="GenSRPG">GenSRPG</strong>
+  <span class="adventure-loading-spinner" aria-hidden="true"></span>
+  <h2>Préparation de l’aventure</h2>
+  <output id="adventure-launch-loading-status">Chargement du monde et des créatures…</output>
+  <button id="adventure-loading-cancel" type="button">Retour à la préparation</button>
+ </div>
+</section>
 <main data-adventure-app>
  <header class="adventure-head">
   <div><span class="eyebrow">MONSTER CAPTURE</span><h1>Jouer</h1>
@@ -25,7 +35,7 @@
     <button type="button" id="adventure-save-load">Charger cette partie</button>
     <button type="button" id="adventure-save-delete" disabled>Supprimer cette sauvegarde</button>
    </div>
-   <p class="hint">Pour créer une nouvelle partie, choisis sa créature de départ et son héros. Les parties déjà créées restent intactes.</p>
+   <p class="hint">Les sélecteurs ci-dessous servent uniquement à créer une <strong>nouvelle</strong> partie. Les créatures de tes sauvegardes sont listées dans « Équipe enregistrée » plus bas.</p>
    <label for="adventure-world-select">Monde de l'aventure</label>
    <select id="adventure-world-select" aria-label="Choisir un monde Exploration enregistré" disabled>
     <option value="">Chargement des mondes officiels…</option>
@@ -83,6 +93,10 @@
    <section class="save-state" aria-labelledby="adventure-save-heading">
     <h3 id="adventure-save-heading">Sauvegarde en cours</h3>
     <output id="adventure-save-summary">Aucune partie créée.</output>
+    <section id="adventure-saved-roster" aria-label="Équipe enregistrée" hidden>
+     <h4>Équipe enregistrée dans cette sauvegarde</h4>
+     <ol id="adventure-saved-roster-members"></ol>
+    </section>
     <div class="fields">
      <label for="adventure-active-creature">Créature active de mon équipe</label>
      <select id="adventure-active-creature" disabled></select>

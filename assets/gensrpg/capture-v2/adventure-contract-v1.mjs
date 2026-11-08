@@ -35,6 +35,8 @@ export const DEFAULT_ADVENTURE_RULES_V1=freeze({
 // their exact existing progression and do not gain retroactive stat points.
 export const SHOWCASE_ADVENTURE_RULES_V1=freeze({
  ...DEFAULT_ADVENTURE_RULES_V1,
+ // Only NEW games share the pool by default; existing active-only saves stay unchanged.
+ xp:{...DEFAULT_ADVENTURE_RULES_V1.xp,distribution:'all'},
  progression:{
   xpCurveMode:'custom',xpPerLevel:2000,maxLevel:100,statPointsPerLevel:20,
   xpBands:[
@@ -129,8 +131,8 @@ export function normalizeAdventureRulesV1(input){
  number(xp.higherEnemyBonusPercent,'higherEnemyBonusPercent',0,200);
  number(xp.higherAllyPenaltyPercent,'higherAllyPenaltyPercent',0,100);
  number(xp.globalMultiplier,'globalMultiplier',0,100);
- if(xp.distribution!=='active')
-  throw new RangeError('xp.distribution active is the only implemented participant policy');
+ if(!['active','all'].includes(xp.distribution))
+  throw new RangeError('xp.distribution must be active or all (participants require a verified Combat contract)');
  const {xpBands:bandsRaw,statPointsPerLevel:pointsRaw,...baseProgression}=
   object(rule.progression,'progression');
  const p=exact(baseProgression,['xpCurveMode','xpPerLevel','maxLevel'],'progression');
@@ -186,7 +188,7 @@ export function normalizeAdventureRulesV1(input){
   schema:ADVENTURE_RULES_SCHEMA_V1,version:1,
   xp:{baseVictoryXp:xp.baseVictoryXp,higherEnemyBonusPercent:xp.higherEnemyBonusPercent,
    higherAllyPenaltyPercent:xp.higherAllyPenaltyPercent,
-   globalMultiplier:xp.globalMultiplier,distribution:'active'},
+   globalMultiplier:xp.globalMultiplier,distribution:xp.distribution},
   progression:{xpCurveMode:p.xpCurveMode,xpPerLevel:p.xpPerLevel,maxLevel:p.maxLevel,
     ...(pointsRaw===undefined?{}:{statPointsPerLevel:pointsRaw}),
     ...(bands===undefined?{}:{xpBands:bands})},
@@ -566,11 +568,24 @@ export function applyAdventureCombatResultV1({
  const before=state.party.active.level;
  const amount=result.outcome==='victory'
   ?calculateAdventureXpV1({rules:state.rules,allyLevel:before,enemyLevel:enemy.level}).xp:0;
- const total=state.party.active.xp+amount;
- integer(total,'new accumulated XP');
- const level=progressionCore.levelFromXp(total,
-  coreAdventureProgressionConfigV1(normalizeAdventureRulesV1(state.rules).progression));
- integer(level,'Core progression level',1,state.rules.progression.maxLevel);
+ const normalizedRules=normalizeAdventureRulesV1(state.rules);
+ const savedRoster=[state.party.active,...(state.party.reserve??[])];
+ const shareAll=normalizedRules.xp.distribution==='all';
+ const progressionConfig=coreAdventureProgressionConfigV1(normalizedRules.progression);
+ // One official victory pool, split by stable instance order. Never multiply
+ // rewards by the number of creatures or infer combat participation from HP.
+ const baseShare=shareAll?Math.floor(amount/savedRoster.length):0;
+ const remainder=shareAll?amount%savedRoster.length:0;
+ const memberProgress=savedRoster.map((member,index)=>{
+  const earned=shareAll?baseShare+(index<remainder?1:0):(index===0?amount:0);
+  const xp=integer(member.xp+earned,'new accumulated XP');
+  const level=progressionCore.levelFromXp(xp,progressionConfig);
+  integer(level,'Core progression level',1,state.rules.progression.maxLevel);
+  return {instanceId:member.instanceId,speciesId:member.speciesId,earned,
+   levelBefore:member.level,levelAfter:level,level,xp};
+ });
+ const total=memberProgress[0].xp;
+ const level=memberProgress[0].level;
  const currency=result.outcome==='victory'?state.rules.loot.currencyPerVictory:0;
  const itemCounts={...state.inventory.items};
  const drops=[];
@@ -643,7 +658,11 @@ export function applyAdventureCombatResultV1({
  const timestamp=iso(now??state.updatedAt,'now');
  const award=freeze({
   encounterId,enemyId,outcome:result.outcome,xp:amount,
-  levelBefore:before,levelAfter:level,currency,drops,heroXp
+  levelBefore:before,levelAfter:level,currency,drops,heroXp,
+  ...(shareAll?{distribution:'all',recipients:memberProgress.map(member=>({
+   instanceId:member.instanceId,speciesId:member.speciesId,xp:member.earned,
+   levelBefore:member.levelBefore,levelAfter:member.levelAfter
+  }))}:{})
  });
  // The creator chooses recovery or terminal game over in the save's rules.
  // Recovery uses Combat's own max HP for the next encounter (null snapshot).
@@ -664,9 +683,9 @@ export function applyAdventureCombatResultV1({
   updatedAt:timestamp,
   party:(()=>{
    if(nativeMembers!==null){
-    const [original,...reserves]=[state.party.active,...(state.party.reserve??[])]
+    const [original,...reserves]=savedRoster
      .map((member,index)=>({...member,hp:nativeMembers[index].hp,
-       ...(index===0?{level,xp:total}:{})}));
+       level:memberProgress[index].level,xp:memberProgress[index].xp}));
     const replacement=original.hp===0?reserves.findIndex(member=>member.hp>0):-1;
     if(replacement>=0){
      const next=reserves.splice(replacement,1)[0];
@@ -679,7 +698,9 @@ export function applyAdventureCombatResultV1({
       reserve:reserves};
    }
    // Historical 1v1 result path stays unchanged for saved old sessions.
-   const available=state.party.reserve??[];
+   const available=(state.party.reserve??[]).map((member,index)=>({
+    ...member,level:memberProgress[index+1].level,xp:memberProgress[index+1].xp
+   }));
    const replacement=defeated?available.findIndex(member=>member.hp!==0):-1;
    const knockedOut={...state.party.active,level,xp:total,
     hp:replacement>=0?0:recover?null:gameOver?0:hp==null?state.party.active.hp:hp};

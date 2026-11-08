@@ -479,11 +479,31 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg.exploration.play.navigation.v1')),null,
     'GenSRPG must not reuse the standalone native checkpoint');
   const playFrame=resumed.frameLocator('#adventure-play-frame');
+  // The game Menu now commits the official Exploration checkpoint and returns
+  // to the real Monster Capture title, not the obsolete standalone play.html.
   await playFrame.locator('#play-menu-button').tap();
-  await playFrame.locator('#play-continue:not([disabled])').waitFor({timeout:30000});
-  assert.equal(await playFrame.locator('#play-new').isVisible(),false,
-    'Exploration may never create/reset a GenSRPG-owned AdventureSession');
-  await playFrame.locator('#play-continue').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]')
+    .waitFor({state:'visible',timeout:15000});
+  assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),null,
+    'the native Menu must return to the real Capture title');
+  assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0,
+    'return to title must dispose the live game without a second renderer');
+  const afterTitle=await page.evaluate(id=>{
+    const raw=localStorage.getItem('gensrpg.exploration.play.navigation.v1:'+id);
+    return raw?JSON.parse(raw):null;
+  },stored.sessionId);
+  assert.equal(afterTitle?.sessionId,stored.sessionId,
+    'native Exploration must persist the same scoped checkpoint before exit');
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
+  await resumed.locator('#adventure-save-summary').waitFor({timeout:15000});
+  await page.waitForFunction(id=>{
+    const doc=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument;
+    return doc?.querySelector('#adventure-play:not([disabled])') &&
+      doc.querySelector('#adventure-save-summary')?.textContent?.includes(id.slice(0,8));
+  },stored.sessionId,{timeout:20000});
+  assert.equal(await resumed.locator('#adventure-play').isVisible(),true,
+    'returning to the title must allow the saved AdventureSession to resume');
+  await resumed.locator('#adventure-play').tap();
   await page.waitForFunction(()=>{
     try{return document.querySelector('#gensCaptureV2Root iframe')?.contentDocument?.querySelector('#adventure-play-frame')?.contentWindow?.__sculptPlayProbe?.().active;}catch{return false;}
   },null,{timeout:15000});

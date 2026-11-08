@@ -74,7 +74,7 @@ test('publisher source is immutable Capture with certified current Exploration, 
  assert.match(battle,/const templateRequest=scopedRequest\('\.\/capture-editor-v2\.html'\)/);
  assert.match(battle,/readScopedAdventurePublishedEncountersV1\(context\)/,
   'retain strict real-game author and engine SHA validation');
- assert.match(battle,/from '\\.\\/exploration-native-source-v1\\.js'/,
+ assert.ok(battle.includes("from './exploration-native-source-v1.js'"),
   'one existing packaged Combat native bridge must own the scoped loader');
  assert.match(cacheOwner,/source\.searchParams\.set\('_gens_capture_release',loadId\)/);
  assert.match(cacheOwner,/cache:'no-store'/);

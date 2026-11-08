@@ -1,3 +1,11 @@
+## 2026-11-08 — Plein écran Aventure, sac toujours visible (C2 candidat)
+- **START :** source Capture V2 `18309e6173baf8dd86d3aab2cdf4d0c0dbb5afb7` liée au publisher `main@1faff1a`, checkpoint `checkpoint/gensrpg-start-capture-fullscreen-hud-2026-11-08`, branche `work/gensrpg-capture-fullscreen-hud-2026-11-08`. Pas de changement direct sur `main`.
+- **Retour terrain :** sac, équipe et fiche masqués en plein écran issu de l'iframe Exploration ; attente de plein écran direct et orientation paysage au clic « Démarrer ».
+- **Propriétaire unique :** l'iframe GenSRPG Capture possède l'HUD et demande le vrai fullscreen de **son document** sur le geste Jouer, avant toute attente réseau/monde ; orientation écran paysage si Android l'autorise, sans modifier la caméra auteur. En cas d'erreur de prévol, sortie du fullscreen nouvellement demandé. Explorer ne doit jamais ouvrir son propre fullscreen natif en mode Aventure GenSRPG : correctif propriétaire Explorer distinct.
+- **Protections :** sauvegardes, Combat, règles XP, caméras, Explorer moteur, Shell root historique, Survie, Dungeon, PWA inchangés. CI Capture et vrai navigateur mobile paysage, HUD Sac ouvrable après plein écran, retour titre et autorisations refusées à vérifier avant GREEN. Aucun deuxième Shell/fullscreen créé.
+
+---
+
 ## 2026-11-08 — Capture Aventure : équipe entière vers le combat sauvage (propriétaire sauvegarde)
 - **Départ :** source certifiée Candidate Dodge `52273fe93364db26122d477999f81a2f0cd5807d` (Combat `ef4e9315` déjà certifié), checkpoint `checkpoint/gensrpg-start-capture-wild-reserve-2026-11-08`, branche `work/gensrpg-capture-wild-reserve-2026-11-08`. Chantiers propriétaires Combat PR #285 et Exploration PR #395 séparés, sans fusion avant CI/Pages exactes.
 - **Règle jouable sauvage :** 1 monstre actif, jusqu'à 5 membres en réserve issus du même `AdventureSession`. La composition et l'ordre sont projetés dans le grant transitoire existant avec même session/world/CombatSHA ; aucune seconde sauvegarde. Explorer porte seulement les instances vers le RosterSession propriétaire Combat.

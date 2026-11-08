@@ -62,6 +62,24 @@ test('publisher source is immutable Capture with certified current Exploration, 
  assert.match(native,/releaseLoadId:window\.crypto\.randomUUID\(\)/);
  assert.match(loader,/url\.searchParams\.set\('_gens_capture_release',releaseLoadId\)/);
  assert.match(loader,/releaseLoadId===null\?'force-cache':'no-store'/);
+ const battle=file('vendor/exploration-lab/combat-preview/examples/dom-demo/exploration-encounter.js');
+ const cacheOwner=file('vendor/exploration-lab/src/encounters/official-adventure-combat-request-v1.js');
+ const game=file('assets/gensrpg/capture-v2/adventure-app-v1.mjs');
+ const setup=file('assets/gensrpg/capture-v2/adventure.html');
+ const camera=file('vendor/exploration-lab/src/play/exploration-creator-camera-v1.js');
+ assert.match(battle,/const scopedReleaseLoadId=encounterSessionId===undefined\?null:window\.crypto\.randomUUID\(\)/,
+  'the REAL embedded combat must isolate Android cache, not only overworld entry');
+ assert.match(battle,/const request=scopedRequest\(url\)/,
+  'combat author bundle and other official JSON load with one scoped boot ID');
+ assert.match(battle,/const templateRequest=scopedRequest\('\.\/capture-editor-v2\.html'\)/);
+ assert.match(battle,/readScopedAdventurePublishedEncountersV1\(context\)/,
+  'retain strict real-game author and engine SHA validation');
+ assert.match(cacheOwner,/source\.searchParams\.set\('_gens_capture_release',loadId\)/);
+ assert.match(cacheOwner,/cache:'no-store'/);
+ assert.match(setup,/id="adventure-creator-camera-zoom"/);
+ assert.match(setup,/id="adventure-play-team-count"/);
+ assert.match(game,/url\.searchParams\.set\('cameraZoom'/);
+ assert.match(camera,/export function cameraInitialZoomFromAdventurePlayUrlV1/);
  assert.equal(provenance.exploration.sha,pins.exploration.sha);
  assert.equal(provenance.combat.sha,pins.combat.sha);
 });

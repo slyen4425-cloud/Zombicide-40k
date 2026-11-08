@@ -98,6 +98,12 @@
     <label>Bonus par niveau ennemi supérieur (%) <input type="number" id="adventure-xp-bonus" min="0" max="200" step="1"></label>
     <label>Malus par niveau allié supérieur (%) <input type="number" id="adventure-xp-penalty" min="0" max="100" step="1"></label>
     <label>Multiplicateur global <input type="number" id="adventure-xp-global" min="0" max="100" step="0.1"></label>
+     <label>Répartition de l'XP de victoire
+      <select id="adventure-xp-distribution" aria-label="Répartition de l'expérience entre les créatures">
+       <option value="all">Toute l'équipe (XP partagée entre 1 à 6 créatures)</option>
+       <option value="active">Créature de départ uniquement (ancienne règle)</option>
+      </select>
+     </label>
     <label>Progression XP
      <select id="adventure-xp-mode">
       <option value="custom">Par paliers (conseillé)</option>
@@ -223,7 +229,8 @@
   </details>
  </div>
 </main>
-<iframe id="adventure-play-frame" title="Monster Capture · Jouer" allow="fullscreen; autoplay" allowfullscreen hidden></iframe>
+<!-- Capture parent owns fullscreen so its Sac/Équipe HUD never disappears behind the native map frame. -->
+<iframe id="adventure-play-frame" title="Monster Capture · Jouer" allow="autoplay" hidden></iframe>
 <div id="adventure-play-hud" hidden>
  <button type="button" id="adventure-open-sheet" aria-haspopup="dialog" aria-controls="adventure-play-sheet">
   Personnage · Équipe (<span id="adventure-play-team-count">0</span>) · Sac

@@ -52,7 +52,7 @@ const $=id=>document.getElementById(id);
 const status=$('adventure-status');
 const idField={
  base:'adventure-xp-base',bonus:'adventure-xp-bonus',penalty:'adventure-xp-penalty',
- global:'adventure-xp-global',level:'adventure-xp-level',max:'adventure-level-max',
+ global:'adventure-xp-global',distribution:'adventure-xp-distribution',level:'adventure-xp-level',max:'adventure-level-max',
  statPoints:'adventure-stat-points-per-level',xpMode:'adventure-xp-mode',
  currency:'adventure-currency',hpPercent:'adventure-combat-hp-percent',
  moveSpeed:'adventure-move-speed',
@@ -156,6 +156,7 @@ function setFields(value){
  $(idField.bonus).value=value.xp.higherEnemyBonusPercent;
  $(idField.penalty).value=value.xp.higherAllyPenaltyPercent;
  $(idField.global).value=value.xp.globalMultiplier;
+ $(idField.distribution).value=value.xp.distribution;
  $(idField.level).value=value.progression.xpPerLevel;
  $(idField.max).value=value.progression.maxLevel;
  $(idField.xpMode).value=value.progression.xpCurveMode;
@@ -179,7 +180,8 @@ function fromFields(){
   xp:{...rules.xp,baseVictoryXp:numberFrom(idField.base),
    higherEnemyBonusPercent:numberFrom(idField.bonus),
    higherAllyPenaltyPercent:numberFrom(idField.penalty),
-   globalMultiplier:numberFrom(idField.global)},
+   globalMultiplier:numberFrom(idField.global),
+   distribution:$(idField.distribution).value},
   progression:{xpCurveMode:$(idField.xpMode).value,
    xpPerLevel:numberFrom(idField.level),maxLevel:numberFrom(idField.max),
    statPointsPerLevel:numberFrom(idField.statPoints),
@@ -873,28 +875,60 @@ $('adventure-world-builder').addEventListener('click',guarded(()=>{
  window.location.assign(url.href);
 }));
 
+// Never inspect or mutate the Shell DOM. Its own presentation API is the
+// fullscreen owner when Capture is opened through the four-mode app.
+function captureShellFullscreenOwner(){
+ try{
+  const shell=window.parent!==window?window.parent.GensCaptureV2:null;
+  return shell?.status?.().view==='adventure'?shell:null;
+ }catch{return null;}
+}
 function syncFullscreenControl(){
- const enabled=Boolean(document.fullscreenElement);
+ const shell=captureShellFullscreenOwner();
+ const enabled=Boolean(shell?.gameFullscreenActive?.()||document.fullscreenElement);
  const control=$('adventure-fullscreen');
  control.textContent=enabled?'Quitter le plein écran':'Plein écran';
  control.setAttribute('aria-pressed',String(enabled));
 }
 async function requestAdventureFullscreen(){
+ const shell=captureShellFullscreenOwner();
+ if(shell?.requestGameFullscreen){
+  // Synchronous call into the Shell-owned method preserves Android's user
+  // activation; Shell fullscreen includes BOTH Back and the Adventure HUD.
+  try{await shell.requestGameFullscreen();}
+  catch{ /* Browser may deny native fullscreen, 100dvh remains active. */ }
+  syncFullscreenControl();return;
+ }
  if(document.fullscreenElement)return;
  if(!document.fullscreenEnabled||typeof document.documentElement.requestFullscreen!=='function')return;
- try{await document.documentElement.requestFullscreen();}
- catch{ /* Full viewport is maintained by CSS when the browser blocks fullscreen. */ }
+ try{
+  await document.documentElement.requestFullscreen({navigationUI:'hide'});
+  if(document.fullscreenElement&&typeof screen.orientation?.lock==='function'){
+   try{await screen.orientation.lock('landscape');}
+   catch{ /* Android may deny orientation lock, authored camera stays intact. */ }
+  }
+ }catch{ /* The CSS dynamic viewport remains the standalone fallback. */ }
  syncFullscreenControl();
 }
 $('adventure-fullscreen').addEventListener('click',()=>{
- if(document.fullscreenElement){
+ const shell=captureShellFullscreenOwner();
+ if(shell?.gameFullscreenActive?.()){
+  void shell.exitGameFullscreen();
+ }else if(document.fullscreenElement){
   void document.exitFullscreen?.().catch(()=>{});
  }else void requestAdventureFullscreen();
 });
 document.addEventListener('fullscreenchange',syncFullscreenControl);
+const detachShellFullscreen=captureShellFullscreenOwner()?.onGameFullscreenChange?.(
+ syncFullscreenControl);
+window.addEventListener('pagehide',()=>detachShellFullscreen?.(),{once:true});
 syncFullscreenControl();
 
 $('adventure-play').addEventListener('click',guardedAsync(async()=>{
+ // Must be requested inside the real user gesture, before async world/asset
+ // checks lose activation. The viewport CSS remains the browser-denied fallback.
+ // Nested Exploration fullscreen is deliberately disallowed: Sac stays in parent.
+ void requestAdventureFullscreen();
  const selectedWorldId=$('adventure-world-select').value;
  let world=readWorldAssemblerDraft(window.localStorage);
  let beforeWorldSession=store.load();
@@ -1051,10 +1085,8 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  document.querySelector('[data-adventure-app]').hidden=true;
  document.body.dataset.adventurePlaying='true';
  $('adventure-play-hud').hidden=false;
- // Fullscreen API is ONLY requested through the explicit touch button above.
- // Auto fullscreen inside a nested iframe captures the browser top layer and
- // physically blocks the parent Shell's real "Retour à Monster Capture" button.
- // The viewport-filling CSS is the standard default and keeps touch navigation.
+ // Capture's parent owns native fullscreen and keeps Sac/Équipe/Retour above
+ // the official Exploration iframe. If denied, existing viewport CSS applies.
 }));
 $('adventure-world-select').addEventListener('change',()=>{
  text($('adventure-world-status'),'Monde sélectionné pour la prochaine entrée en jeu. Une sauvegarde existante conserve son monde lié.');

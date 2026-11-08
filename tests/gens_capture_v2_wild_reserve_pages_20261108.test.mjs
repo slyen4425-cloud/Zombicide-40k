@@ -26,9 +26,9 @@ test('actual physical Pages files preserve the six-member Adventure to Explorati
  const adventure=site('assets/gensrpg/capture-v2/adventure-playing-party-grant-v1.mjs');
  const results=site('assets/gensrpg/capture-v2/adventure-contract-v1.mjs');
  const explorer=site('vendor/exploration-lab/src/encounters/adventure-playing-party-v1.js');
- const bridge=site('vendor/exploration-lab/integration/combat-bridge/exploration-native-source-v1.js');
- const combat=site('vendor/combat-lab/src/ui/capture-encounter-combat-source-v1.js');
- const lifecycle=site('vendor/combat-lab/src/ui/embedded-combat-lifecycle-v1.js');
+ const bridge=site('vendor/exploration-lab/combat-preview/examples/dom-demo/exploration-native-source-v1.js');
+ const combat=site('vendor/exploration-lab/combat-preview/src/ui/capture-encounter-combat-source-v1.js');
+ const lifecycle=site('vendor/exploration-lab/combat-preview/src/ui/embedded-combat-lifecycle-v1.js');
  assert.match(adventure,/rawReserve\.length>5/,'GenSRPG must project at most five reserve members');
  assert.match(adventure,/reserve:Object\.freeze\(members\.slice\(1\)\)/,'real saved party must be projected, not a fabricated Tester team');
  assert.match(results,/partyState\.members/,'each owned member must be reconciled after battle');

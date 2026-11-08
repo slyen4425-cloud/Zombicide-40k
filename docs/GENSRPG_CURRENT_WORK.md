@@ -1,3 +1,13 @@
+## 2026-11-08 — Livraison Android C2 Partie indisponible / SHA Combat
+- **Constat mobile** : Bestiaire charge, mais Exploration bloque la partie à cause du SHA Combat auteur/moteur : le loader Explorer gardait une URL force-cache d'ancien JSON, face au Bestiaire fraîchement lu.
+- **Propriétaire corrigé** : Exploration PR #392 main f743ae9d0df5e1aa2c24ed009a551435e5cc8e04 ; relecture du même bundle officiel par URL UUID scoped, sans contournement de SHA ni source de données bis.
+- **Capture** : source PR #332 c781113d18049619bc1291aa962a2cefc8d025d7, quatre CI de contrôle réussies ; pin Exploration et test du vrai fichier transporté.
+- **START publication** main d99e30139b2acfe20cc7f80c442a3651b1331b76 ; checkpoint checkpoint/gensrpg-start-adventure-combat-author-cache-release-2026-11-08 ; branche unique work/gensrpg-adventure-combat-author-cache-release-2026-11-08. Un seul pin, publisher Pages main existant.
+- **Gates** : attendre CI et Pages Exploration SHA exact, CI build/Chromium de la PR publisher, budget 900MiB, puis merge main et contrôle de provenance HTTPS et smoke public. Aucun GREEN Android sans test réel.
+- **Protections** : saves, mondes, Combat main a182ebf2, V80, Survie et Dungeon inchangés ; aucune bibliothèque dupliquée.
+
+---
+
 ## 2026-11-08 — Incident Android « Bestiaire : transferts incompatibles » (C2)
 - **Constat utilisateur** : l'écran Jouer de Monster Capture reste bloqué avant Bestiaire/monde/héros. La garde `authorSha == engineSha == delivery.combat.sha` refuse de démarrer une session si deux générations de fichiers JSON sont mélangées ; elle doit rester stricte.
 - **Cause technique plausible et reproductible** : le SW PWA existant traite les fichiers `.json` en cache-first (`caches.match(request)`), ce qui peut ignorer `fetch(cache:'no-store')` et renvoyer des fichiers de versions différentes. L'assemblage certifie déjà les SHA identiques à l'origine.

@@ -52,7 +52,7 @@ const $=id=>document.getElementById(id);
 const status=$('adventure-status');
 const idField={
  base:'adventure-xp-base',bonus:'adventure-xp-bonus',penalty:'adventure-xp-penalty',
- global:'adventure-xp-global',level:'adventure-xp-level',max:'adventure-level-max',
+ global:'adventure-xp-global',distribution:'adventure-xp-distribution',level:'adventure-xp-level',max:'adventure-level-max',
  statPoints:'adventure-stat-points-per-level',xpMode:'adventure-xp-mode',
  currency:'adventure-currency',hpPercent:'adventure-combat-hp-percent',
  moveSpeed:'adventure-move-speed',
@@ -156,6 +156,7 @@ function setFields(value){
  $(idField.bonus).value=value.xp.higherEnemyBonusPercent;
  $(idField.penalty).value=value.xp.higherAllyPenaltyPercent;
  $(idField.global).value=value.xp.globalMultiplier;
+ $(idField.distribution).value=value.xp.distribution;
  $(idField.level).value=value.progression.xpPerLevel;
  $(idField.max).value=value.progression.maxLevel;
  $(idField.xpMode).value=value.progression.xpCurveMode;
@@ -179,7 +180,8 @@ function fromFields(){
   xp:{...rules.xp,baseVictoryXp:numberFrom(idField.base),
    higherEnemyBonusPercent:numberFrom(idField.bonus),
    higherAllyPenaltyPercent:numberFrom(idField.penalty),
-   globalMultiplier:numberFrom(idField.global)},
+   globalMultiplier:numberFrom(idField.global),
+   distribution:$(idField.distribution).value},
   progression:{xpCurveMode:$(idField.xpMode).value,
    xpPerLevel:numberFrom(idField.level),maxLevel:numberFrom(idField.max),
    statPointsPerLevel:numberFrom(idField.statPoints),
@@ -895,6 +897,10 @@ document.addEventListener('fullscreenchange',syncFullscreenControl);
 syncFullscreenControl();
 
 $('adventure-play').addEventListener('click',guardedAsync(async()=>{
+ // Must be requested inside the real user gesture, before async world/asset
+ // checks lose activation. The viewport CSS remains the browser-denied fallback.
+ // Nested Exploration fullscreen is deliberately disallowed: Sac stays in parent.
+ void requestAdventureFullscreen();
  const selectedWorldId=$('adventure-world-select').value;
  let world=readWorldAssemblerDraft(window.localStorage);
  let beforeWorldSession=store.load();
@@ -1051,10 +1057,8 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  document.querySelector('[data-adventure-app]').hidden=true;
  document.body.dataset.adventurePlaying='true';
  $('adventure-play-hud').hidden=false;
- // Fullscreen API is ONLY requested through the explicit touch button above.
- // Auto fullscreen inside a nested iframe captures the browser top layer and
- // physically blocks the parent Shell's real "Retour à Monster Capture" button.
- // The viewport-filling CSS is the standard default and keeps touch navigation.
+ // Capture's parent owns native fullscreen and keeps Sac/Équipe/Retour above
+ // the official Exploration iframe. If denied, existing viewport CSS applies.
 }));
 $('adventure-world-select').addEventListener('change',()=>{
  text($('adventure-world-status'),'Monde sélectionné pour la prochaine entrée en jeu. Une sauvegarde existante conserve son monde lié.');

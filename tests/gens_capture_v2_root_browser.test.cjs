@@ -347,7 +347,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
         f.contentDocument.querySelector('#sculpt-canvas')?.width>300;}catch{return false;}
     },null,{timeout:15000});
   }catch(error){
-    const state=await page.evaluate(()=>{
+    const state=await page.evaluate(async()=>{
       const doc=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument;
       const native=doc?.querySelector('#adventure-play-frame');
       let probe=null,href=null,canvas=null;
@@ -355,8 +355,20 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
         href=native?.contentWindow?.location?.href??null;
         canvas=native?.contentDocument?.querySelector('#sculpt-canvas')?.width??null;
       }catch(failure){probe={error:String(failure)};}
+      const raw=localStorage.getItem('gensrpg.world-assembler.document.v1');
+      const worldStorage={bytes:raw?.length??0,areas:null,id:null,loaded:null,error:null};
+      if(raw){
+        try{
+          const json=JSON.parse(raw);worldStorage.id=json.id;
+          worldStorage.areas=json.areas?.length??null;
+          const owner=await import('/vendor/exploration-lab/src/builder/world-builder-draft.js');
+          const imported=owner.importWorldBuilderDocument(raw);
+          worldStorage.loaded=imported?.areas?.length??null;
+        }catch(error){worldStorage.error=String(error);}
+      }
       return {playExists:!!native,playSrc:native?.getAttribute('src')??null,
-        href,probe,canvas,
+        href,probe,canvas,worldStorage,
+        selectedWorldId:doc?.querySelector('#adventure-world-select')?.value??null,
         adventureStatus:doc?.querySelector('#adventure-status')?.textContent??null,
         adventureSave:doc?.querySelector('#adventure-save-summary')?.textContent??null};
     });

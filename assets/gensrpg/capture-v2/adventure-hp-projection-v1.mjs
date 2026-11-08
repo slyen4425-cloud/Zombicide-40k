@@ -23,7 +23,10 @@ export function createAdventureHpProjectorV1({
   const effects=projectStatEffects({
    registry:statRegistry,statValues:projected.get(actor.speciesId)?.statValues
   });
-  if(!effects.hasMaxHpProjection)
+  const original=projectStatEffects({
+   registry:statRegistry,statValues:record.statValues
+  });
+  if(!effects.hasMaxHpProjection||!original.hasMaxHpProjection)
    throw new Error('Official Combat HP registry has no health stat projection');
   const baseMaxHp=effects.maxHp;
   const maxHp=projectMaxHp(baseMaxHp,hpMultiplier);
@@ -31,7 +34,8 @@ export function createAdventureHpProjectorV1({
   if(savedHp!==null&&(typeof savedHp!=='number'||!Number.isFinite(savedHp)||savedHp<0))
    throw new RangeError('Invalid saved current creature HP');
   return Object.freeze({
-   baseMaxHp,maxHp,currentHp:savedHp===null?maxHp:Math.min(savedHp,maxHp),
+   baseMaxHp,labMaxHp:original.maxHp,
+   maxHp,currentHp:savedHp===null?maxHp:Math.min(savedHp,maxHp),
    hpPercent:100*hpMultiplier,
    storedHp:savedHp
   });

@@ -35,6 +35,8 @@ export const DEFAULT_ADVENTURE_RULES_V1=freeze({
 // their exact existing progression and do not gain retroactive stat points.
 export const SHOWCASE_ADVENTURE_RULES_V1=freeze({
  ...DEFAULT_ADVENTURE_RULES_V1,
+ // Only NEW showcase games share XP; historical active-only games stay unchanged.
+ xp:{...DEFAULT_ADVENTURE_RULES_V1.xp,distribution:'all'},
  progression:{
   xpCurveMode:'custom',xpPerLevel:2000,maxLevel:100,statPointsPerLevel:20,
   xpBands:[
@@ -129,8 +131,8 @@ export function normalizeAdventureRulesV1(input){
  number(xp.higherEnemyBonusPercent,'higherEnemyBonusPercent',0,200);
  number(xp.higherAllyPenaltyPercent,'higherAllyPenaltyPercent',0,100);
  number(xp.globalMultiplier,'globalMultiplier',0,100);
- if(xp.distribution!=='active')
-  throw new RangeError('xp.distribution active is the only implemented participant policy');
+ if(!['active','all'].includes(xp.distribution))
+   throw new RangeError('xp.distribution must be active (legacy) or all (entire team)');
  const {xpBands:bandsRaw,statPointsPerLevel:pointsRaw,...baseProgression}=
   object(rule.progression,'progression');
  const p=exact(baseProgression,['xpCurveMode','xpPerLevel','maxLevel'],'progression');
@@ -186,7 +188,7 @@ export function normalizeAdventureRulesV1(input){
   schema:ADVENTURE_RULES_SCHEMA_V1,version:1,
   xp:{baseVictoryXp:xp.baseVictoryXp,higherEnemyBonusPercent:xp.higherEnemyBonusPercent,
    higherAllyPenaltyPercent:xp.higherAllyPenaltyPercent,
-   globalMultiplier:xp.globalMultiplier,distribution:'active'},
+   globalMultiplier:xp.globalMultiplier,distribution:xp.distribution},
   progression:{xpCurveMode:p.xpCurveMode,xpPerLevel:p.xpPerLevel,maxLevel:p.maxLevel,
     ...(pointsRaw===undefined?{}:{statPointsPerLevel:pointsRaw}),
     ...(bands===undefined?{}:{xpBands:bands})},
@@ -566,11 +568,32 @@ export function applyAdventureCombatResultV1({
  const before=state.party.active.level;
  const amount=result.outcome==='victory'
   ?calculateAdventureXpV1({rules:state.rules,allyLevel:before,enemyLevel:enemy.level}).xp:0;
- const total=state.party.active.xp+amount;
- integer(total,'new accumulated XP');
- const level=progressionCore.levelFromXp(total,
-  coreAdventureProgressionConfigV1(normalizeAdventureRulesV1(state.rules).progression));
- integer(level,'Core progression level',1,state.rules.progression.maxLevel);
+ // GenSRPG owns XP; Combat provides official outcome and member HP only.
+ // Deterministic splitting preserves every XP point, including remainders.
+ const originalMembers=[state.party.active,...(state.party.reserve??[])];
+ const recipients=state.rules.xp.distribution==='all'
+  ?originalMembers:[state.party.active];
+ const part=Math.floor(amount/recipients.length);
+ const remainder=amount%recipients.length;
+ const shares=new Map(recipients.map((member,index)=>
+  [member.instanceId,part+(index<remainder?1:0)]));
+ const progressionConfig=coreAdventureProgressionConfigV1(
+  normalizeAdventureRulesV1(state.rules).progression);
+ const progressed=new Map(originalMembers.map(member=>{
+  const gain=shares.get(member.instanceId)??0;
+  const totalXp=integer(member.xp+gain,'member accumulated XP');
+  const levelAfter=gain===0?member.level:
+   progressionCore.levelFromXp(totalXp,progressionConfig);
+  integer(levelAfter,'Core progression level',1,state.rules.progression.maxLevel);
+  return [member.instanceId,{...member,xp:totalXp,level:levelAfter}];
+ }));
+ const original=progressed.get(state.party.active.instanceId);
+ const total=original.xp,level=original.level;
+ const memberXp=recipients.map(member=>({
+  instanceId:member.instanceId,speciesId:member.speciesId,
+  xp:shares.get(member.instanceId),levelBefore:member.level,
+  levelAfter:progressed.get(member.instanceId).level
+ }));
  const currency=result.outcome==='victory'?state.rules.loot.currencyPerVictory:0;
  const itemCounts={...state.inventory.items};
  const drops=[];
@@ -643,7 +666,8 @@ export function applyAdventureCombatResultV1({
  const timestamp=iso(now??state.updatedAt,'now');
  const award=freeze({
   encounterId,enemyId,outcome:result.outcome,xp:amount,
-  levelBefore:before,levelAfter:level,currency,drops,heroXp
+  levelBefore:before,levelAfter:level,currency,drops,heroXp,
+  ...(state.rules.xp.distribution==='all'?{memberXp}:{})
  });
  // The creator chooses recovery or terminal game over in the save's rules.
  // Recovery uses Combat's own max HP for the next encounter (null snapshot).
@@ -664,9 +688,8 @@ export function applyAdventureCombatResultV1({
   updatedAt:timestamp,
   party:(()=>{
    if(nativeMembers!==null){
-    const [original,...reserves]=[state.party.active,...(state.party.reserve??[])]
-     .map((member,index)=>({...member,hp:nativeMembers[index].hp,
-       ...(index===0?{level,xp:total}:{})}));
+    const [original,...reserves]=originalMembers
+     .map((member,index)=>({...progressed.get(member.instanceId),hp:nativeMembers[index].hp}));
     const replacement=original.hp===0?reserves.findIndex(member=>member.hp>0):-1;
     if(replacement>=0){
      const next=reserves.splice(replacement,1)[0];
@@ -679,9 +702,9 @@ export function applyAdventureCombatResultV1({
       reserve:reserves};
    }
    // Historical 1v1 result path stays unchanged for saved old sessions.
-   const available=state.party.reserve??[];
+   const available=(state.party.reserve??[]).map(member=>progressed.get(member.instanceId));
    const replacement=defeated?available.findIndex(member=>member.hp!==0):-1;
-   const knockedOut={...state.party.active,level,xp:total,
+   const knockedOut={...original,level,xp:total,
     hp:replacement>=0?0:recover?null:gameOver?0:hp==null?state.party.active.hp:hp};
    if(replacement>=0){
     const reserve=available.slice(),next=reserve.splice(replacement,1)[0];

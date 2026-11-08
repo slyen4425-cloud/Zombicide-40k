@@ -294,3 +294,10 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
 .sheet-roster-move{flex:0 0 34px}
 .sheet-roster-active{flex:0 0 auto}
 @media(max-width:540px){.sheet-roster-row{flex-wrap:wrap}.sheet-roster-active{flex:1 1 100%}}
+
+/* Camera: compact creator controls before starting a Monster Capture game. */
+.adventure-camera-start{margin:12px 0 9px;padding:10px;border:1px solid #406e74;border-radius:11px;background:#102d35;min-width:0}
+.adventure-camera-start legend{font-weight:800;color:#b3f6df;padding:0 6px;font-size:13px}
+.adventure-camera-start label{display:grid;gap:5px;margin:9px 0}
+.adventure-camera-start input[type=range]{padding:0;accent-color:#82e6c7}
+.adventure-camera-start output{font-weight:800;color:#b3f6df}

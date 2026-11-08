@@ -42,6 +42,8 @@ test('restarting an actual scoped save preserves the whole 1-to-6 roster and cho
   }
   const firstRaw=storage.getItem('gensrpg.capture.v2.adventure.slot.v1:game-'+size);
   const restarted=reopen(storage).load();
+  assert.equal(reopen(storage).list()[0].partySize,size,
+   'the saved-game selector must advertise the FULL persisted team size');
   assert.ok(firstRaw,'the real Core Storage slot must exist before reload');
   assert.equal(restarted.party.reserve.length,size-1);
   const members=[restarted.party.active,...restarted.party.reserve];

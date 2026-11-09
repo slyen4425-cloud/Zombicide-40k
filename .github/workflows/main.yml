@@ -492,6 +492,7 @@ jobs:
           test "$(git -C preview-exploration-lab rev-parse HEAD)" = "${{ steps.preview_labs.outputs.exploration }}"
           node --check tools/stage_capture_v2_pages_preview.mjs
           node tools/stage_capture_v2_pages_preview.mjs capture-v2-source preview-combat-lab preview-exploration-lab _site preview-combat-assets
+          node --test tests/gens_capture_v2_80_icons_promotion_20261109.test.mjs
           # Execute the unit tests from the EXACT pinned Capture source, not the old main.
           node --test capture-v2-source/tests/gens_capture_v2_adventure_save_defeat_policy_20261107.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_preparation_stats_owner_20261107.test.mjs
@@ -635,6 +636,7 @@ jobs:
       - name: Build the physical Pages subdirectory from the three official SHAs
         run: |
           node tools/stage_capture_v2_pages_preview.mjs capture-v2-source preview-combat-lab preview-exploration-lab _site preview-combat-assets
+          node --test tests/gens_capture_v2_80_icons_promotion_20261109.test.mjs
           # Execute the unit tests from the EXACT pinned Capture source, not the old main.
           node --test capture-v2-source/tests/gens_capture_v2_adventure_save_defeat_policy_20261107.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_result_world_archive_20261107.test.mjs

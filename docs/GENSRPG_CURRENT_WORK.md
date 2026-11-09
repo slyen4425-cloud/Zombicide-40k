@@ -1,3 +1,12 @@
+## 2026-11-09 — Raccord unique des 80 icônes officielles Monster Capture (publisher #353 / candidat)
+- START immuable `main@eb50d17d4000521104247cb370600a94e2854c07`; checkpoint `checkpoint/gensrpg-start-capture-80-icons-visual-pin-2026-11-09`; lot `work/gensrpg-capture-80-icons-visual-pin-2026-11-09`.
+- Source unique de médiathèque : Combat `global-assets@64577c0620f952483825537a4bbcb2bfd952c8b7`, CI Laboratory SUCCESS `42586781298`. 80 WebP 128 px, deux séries de 40, 80 entrées du catalogue et provenance d'origine. Le moteur Combat `main` reste inchangé ; aucun clone ni réimport.
+- Seul pin de publication autorisé : `tools/capture_v2_pages_preview_pin.json.officialVisuals` ; tests physiques `tests/gens_capture_v2_80_icons_promotion_20261109.test.mjs` dans le publisher original et sa revue PR, plus tests stricts de promotion, budget réel ≤900 Mio, absence de doublons et navigateur natif. La source officielle V2 est gelée et les icônes ne sont pas assignées arbitrairement aux compétences.
+- Rollback START ci-dessus. Gate : CI de l'exact SHA de PR #353 intégralement GREEN, checkpoint GREEN, fusion ciblée `main`, workflow Pages sur SHA merge et provenance HTTPS effective. Aucune publication annoncée avant les contrôles. Détails : `docs/GENSRPG_CAPTURE_80_ICONS_VISUAL_PIN_2026-11-09.md`.
+- Les chantiers du Sac après Combat (Exploration PR #396) et des niveaux de rencontres par WorldArea (Exploration PR #400) appartiennent à leurs lots propres ; aucun autre moteur ou publisher créé.
+
+---
+
 ## 2026-11-09 — Shell : compteur vivant de la carte Monster Capture (lot de non-régression séparé)
 - **START immuable §25** : GenSRPG `main@8156b542a737c8ee26a2c83cda058052c3555c6d`, checkpoint `checkpoint/gensrpg-start-shell-live-capture-summary-2026-11-09`, branche de travail `work/gensrpg-shell-live-capture-summary-2026-11-09`. La PR de publication Capture V2 #351 est **distincte** : ne pas y ajouter de deuxième autorité moteur.
 - **Défaut mesuré** : [architecture-sentinels run 42579742836](https://github.com/slyen4425-cloud/Zombicide-40k/actions/runs/42579742836), le vrai test navigateur `gens_capture_current_shell_browser_v11411.test.cjs:224` reçoit « Monster Capture 1 dresseur · Capture de créatures » au lieu des compteurs réels « N créatures · M objets ».

@@ -250,13 +250,14 @@
   Personnage · Équipe (<span id="adventure-play-team-count">0</span>) · Sac
  </button>
  <button type="button" id="adventure-open-last-result" hidden>Dernier combat</button>
- <button type="button" id="adventure-fullscreen" aria-pressed="false" aria-label="Activer ou quitter le plein écran">Plein écran</button>
  <output id="adventure-play-remote-status" aria-live="polite">Positions reçues : 0 · affichage des avatars à raccorder</output>
 </div>
 <dialog id="adventure-play-sheet" aria-labelledby="adventure-play-sheet-title">
  <header class="sheet-header">
   <div><span class="eyebrow">AVENTURE EN COURS</span><h2 id="adventure-play-sheet-title">Ma fiche</h2></div>
   <div class="sheet-header-actions">
+   <!-- Fullscreen remains a Capture-owned action, but never overlays Combat's Fuir button. -->
+   <button type="button" id="adventure-fullscreen" aria-pressed="false" aria-label="Activer ou quitter le plein écran">Plein écran</button>
    <button type="button" id="adventure-return-title" aria-label="Enregistrer et revenir à l'écran titre">Écran titre</button>
    <button type="button" id="adventure-close-sheet" aria-label="Fermer la fiche et retourner au monde">Retour au monde</button>
   </div>

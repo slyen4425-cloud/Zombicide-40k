@@ -3,6 +3,7 @@
 import {
  availableAdventureStatPointsV1,publishedAdventureSpeciesV1,normalizeAdventureRulesV1
 } from './adventure-contract-v1.mjs';
+import {fragmentItemIdV1,fragmentSpeciesIdV1} from './adventure-fragment-rules-v1.mjs';
 const frozen=value=>Object.freeze(value);
 export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry,projectCombatVitals=null,selectedInstanceId=null}={}){
  if(session?.status!=='playing')throw new Error('La fiche exige une partie Aventure en cours (playing)');
@@ -33,10 +34,29 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
    ...(isGameHp?{gameHp:true,authoredBaseHp:vitals.labMaxHp}:{} )});
  }));
  const catalog=new Map(rules.loot.items.map(item=>[item.id,item]));
- const items=frozen(Object.entries(session.inventory.items).map(([id,quantity])=>{
+ const items=frozen(Object.entries(session.inventory.items).filter(([id])=>
+  fragmentSpeciesIdV1(id)===null).map(([id,quantity])=>{
   const rule=catalog.get(id);
   return frozen({id,name:rule?.name??id,quantity,saleValue:rule?.saleValue??null});
  }));
+ const collection=frozen((session.collection??[]).map(actor=>{
+  const item=published.find(card=>card.id===actor.speciesId);
+  if(!item)throw new Error('Réserve : créature absente du Bestiaire officiel');
+  return frozen({instanceId:actor.instanceId,speciesId:actor.speciesId,
+   name:item.name,level:actor.level,xp:actor.xp,hp:actor.hp});
+ }));
+ const fragments=frozen(rules.recruitment?.enabled?published.flatMap(card=>{
+  const count=session.inventory.items[fragmentItemIdV1(card.id)]??0;
+  if(!count)return [];
+  const owned=[active,...(session.party.reserve??[]),...(session.collection??[])]
+   .filter(actor=>actor.speciesId===card.id)
+   .map(actor=>frozen({instanceId:actor.instanceId,level:actor.level,
+    xp:actor.xp,location:(session.collection??[]).some(x=>x.instanceId===actor.instanceId)?'collection':'team'}));
+  return [frozen({speciesId:card.id,name:card.name,count,icon:card.icon??null,
+   invocationCost:rules.recruitment.invocationCost,
+   xpFragmentCost:rules.recruitment.xpFragmentCost,
+   xpReward:rules.recruitment.xpReward,owned})];
+ }):[]);
  const creature=frozen({
   instanceId:selected.instanceId,speciesId:selected.speciesId,name:card.name,
   level:selected.level,xp:selected.xp,hp:vitals?vitals.currentHp:selected.hp,
@@ -67,6 +87,9 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
    ...(shown?{maxHp:shown.maxHp,hpPercent:shown.hpPercent}:{}),
    isActive:actor===active,isSelected:actor===selected});
  }));
- return frozen({sessionId:session.sessionId,hero,creature,team,
+ return frozen({sessionId:session.sessionId,hero,creature,team,collection,fragments,
+  limits:frozen({teamMax:rules.recruitment?.teamMax??6,
+   reserveMax:rules.recruitment?.reserveMax??0,
+   reserveAccessMode:rules.recruitment?.reserveAccessMode??'unavailable'}),
   inventory:frozen({currency:session.inventory.currency,items})});
 }

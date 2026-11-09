@@ -17,11 +17,11 @@ permissions:
   pages: write
   id-token: write
 
-# Release builds for separate PRs must not cancel or block each other.
-# Only deployments/updates of the same ref share a concurrency lock.
+# A newer PR validation may supersede only that same PR; never production.
+# Push and manual dispatch of main share ONE publication lock.
 concurrency:
-  group: "pages-${{ github.event_name }}-${{ github.ref }}"
-  cancel-in-progress: true
+  group: ${{ github.event_name == 'pull_request' && format('pages-pr-{0}', github.event.pull_request.number) || format('pages-publish-{0}', github.ref) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -33,6 +33,9 @@ jobs:
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
+
+      - name: Vérifier la sérialisation des publications Pages
+        run: node --test tests/gensrpg_pages_deploy_serialize_20261109.test.mjs
 
       - name: Tester la réparation automatique des profils Dungeon
         run: node tests/dungeon_profile_auto_repair.test.cjs

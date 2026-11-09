@@ -1,3 +1,9 @@
+## 2026-11-09 — Également masquer « Retour Monster Capture » pendant Combat
+- Le retour global est le **contrôle du Shell propriétaire**, distinct du Sac/Équipe qui est propriétaire de la fiche Aventure. Sans correction, ce bouton restait susceptible de recouvrir les PV adverses même après le masquage du HUD Capture.
+- **API propriétaire** `GensCaptureV2.setAdventureCombatVisibility(boolean)` : active uniquement dans `view='adventure'`, limitée à la visibilité de la barre native ; le Shell réinitialise sa présentation à chaque changement de vue et retour au menu. Capture appelle l'API seulement après vérification de l'événement de l'iframe Exploration. Aucun accès au DOM du Shell depuis Capture, aucun déplacement ou suppression du bouton, accès restauré immédiatement hors Combat.
+- **Contrôles** : test `gens_capture_v2_combat_hud_visibility_20261109.test.mjs` complété pour confirmer les deux propriétaires du HUD, la disparition et le retour. Checkpoint START et dépendance Exploration #401 inchangés ; ne pas publier la source avant CI et repin certifiés.
+---
+
 ## 2026-11-09 — Le Sac/Équipe ne doit pas masquer les PV adverses en combat
 - **START** source Capture `0da12ae99405f62e21e0af67d78c1490c271488f` ; checkpoint `checkpoint/gensrpg-start-combat-hud-visibility-2026-11-09`, lot `work/gensrpg-capture-combat-hud-visibility-2026-11-09`. Publisher main `158044e05e441e76e522fc314f7fbf94179e1b15` intact avant validation.
 - **Signal** : seul le moteur Exploration propriétaire de `createImmersiveEncounterHostV1` signale l'ouverture/fermeture du Combat natif. Le parent Capture vérifie origine, iframe source, `sessionId`, `encounterId`, et booléen de visibilité ; ne touche qu'au HUD Sac/Équipe/Plein écran, jamais à la vie des adversaires ni à la simulation.

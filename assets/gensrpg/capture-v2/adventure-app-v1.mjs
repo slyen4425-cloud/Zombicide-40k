@@ -639,12 +639,19 @@ window.addEventListener('pagehide',()=>{
 // consumes the already persisted AdventureSession. No second player state.
 let activePlayingSheet=null,activeCombatHost=null;
 let activeCombatOverlayId=null;
+function setShellAdventureCombatVisibility(visible){
+ try{
+  const shell=window.parent!==window?window.parent.GensCaptureV2:null;
+  if(shell?.status?.().view==='adventure')shell.setAdventureCombatVisibility?.(visible);
+ }catch{ /* Standalone Adventure never owns the Shell's separate Back control. */ }
+}
 // Only Capture owns its Sac/Equipe HUD. Exploration owns the native Combat
 // overlay and sends this presentation-only signal; no HP/save state is copied.
 function resetAdventureCombatHud(){
  activeCombatOverlayId=null;
  document.body.dataset.adventureCombatVisible='false';
  $('adventure-play-hud').hidden=!activePlayingSheet;
+ setShellAdventureCombatVisibility(false);
 }
 window.addEventListener('message',event=>{
  const frame=$('adventure-play-frame');
@@ -657,6 +664,7 @@ window.addEventListener('message',event=>{
   activeCombatOverlayId=visibility.encounterId;
   document.body.dataset.adventureCombatVisible='true';
   $('adventure-play-hud').hidden=true;
+  setShellAdventureCombatVisibility(true);
   if($('adventure-play-sheet').open)$('adventure-play-sheet').close();
  }else if(activeCombatOverlayId===visibility.encounterId){
   resetAdventureCombatHud();

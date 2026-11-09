@@ -27,5 +27,17 @@ test('only the Capture-owned HUD is hidden and restored by encounter correlation
  assert.match(app,/\$\('adventure-play-hud'\)\.hidden=true/);
  assert.match(app,/if\(dialog\.open\|\|activeCombatOverlayId\)return/);
  assert.match(app,/resetAdventureCombatHud\(\)/);
+ assert.match(app,/setShellAdventureCombatVisibility\(true\)/);
+ assert.match(app,/setShellAdventureCombatVisibility\(false\)/);
  assert.match(css,/body\[data-adventure-combat-visible="true"\] #adventure-play-hud\{display:none!important\}/);
+});
+
+test('the Shell alone hides its native Back bar in Adventure combat',()=>{
+ const js=readFileSync(new URL('../assets/gensrpg/capture-v2/shell-entry-v1.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../assets/gensrpg/capture-v2/shell-style-v1.css',import.meta.url),'utf8');
+ assert.match(js,/function setAdventureCombatVisibility\(visible\)/);
+ assert.match(js,/host\.dataset\.adventureCombatActive=String\(visible\)/);
+ assert.match(js,/current!==["']adventure["']/);
+ assert.match(js,/delete host\.dataset\.adventureCombatActive/);
+ assert.match(css,/data-adventure-combat-active="true"\] > \.gensCaptureV2NativeBar\{display:none!important\}/);
 });

@@ -549,6 +549,105 @@ export function createAdventureSessionV1({
   processedEncounterKeys:[],lastAward:null
  });
 }
+
+/**
+ * Exchange fragments in the original AdventureSession. It never edits Combat
+ * data, never invents a species or XP formula, and only commits on success.
+ * The caller locks the SAME Core Save domain used for CombatResult commits.
+ */
+export function exchangeAdventureFragmentsV1({
+ session,bestiaryCards,action,speciesId,targetInstanceId=null,newInstanceId=null,
+ progressionCore,now
+}={}){
+ const state=assertSession(session),rules=normalizeAdventureRulesV1(state.rules);
+ const policy=rules.recruitment;
+ if(!policy?.enabled)throw new Error('Fragments désactivés dans ce jeu');
+ if(state.status==='finished')throw new Error('Partie terminée : fragments conservés');
+ const id=identity(speciesId,'speciesId');
+ const card=publishedAdventureSpeciesV1(bestiaryCards).find(entry=>entry.id===id);
+ if(!card||!Array.isArray(card.skills)||!card.skills.some(x=>x.state==='ready'))
+  throw new Error('Seule une créature jouable du Bestiaire officiel peut être invoquée');
+ if(action!=='summon'&&action!=='xp')throw new RangeError('Usage des fragments inconnu');
+ const cost=action==='summon'?policy.invocationCost:policy.xpFragmentCost;
+ const key=fragmentItemIdV1(id),inventory={...state.inventory.items};
+ const count=integer(inventory[key]??0,'Fragments disponibles');
+ if(count<cost)throw new RangeError('Fragments insuffisants : '+count+' / '+cost);
+ let party=state.party,collection=state.collection??[],earnedXp=0,placement=null;
+ if(action==='xp'){
+  const targetId=identity(targetInstanceId,'targetInstanceId');
+  const actors=[party.active,...(party.reserve??[]),...collection];
+  const actor=actors.find(member=>member.instanceId===targetId&&member.speciesId===id);
+  if(!actor)throw new RangeError('La créature choisie doit déjà appartenir au héros');
+  if(actor.level>=rules.progression.maxLevel)
+   throw new RangeError('Niveau maximum : aucun fragment consommé');
+  if(typeof progressionCore?.levelFromXp!=='function')
+   throw new TypeError('Le Core XP officiel est requis');
+  const xp=integer(actor.xp+policy.xpReward,'XP après fragments');
+  const level=progressionCore.levelFromXp(xp,coreAdventureProgressionConfigV1(rules.progression));
+  integer(level,'Niveau calculé par Core',actor.level,rules.progression.maxLevel);
+  const gained={...actor,xp,level};
+  party={...party,active:party.active.instanceId===targetId?gained:party.active,
+   reserve:(party.reserve??[]).map(member=>member.instanceId===targetId?gained:member)};
+  collection=collection.map(member=>member.instanceId===targetId?gained:member);
+  earnedXp=policy.xpReward;
+ }else{
+  const newId=identity(newInstanceId,'newInstanceId');
+  const all=[party.active,...(party.reserve??[]),...collection];
+  if(all.some(member=>member.instanceId===newId))
+   throw new RangeError('Identifiant de créature déjà utilisé');
+  const creature={instanceId:newId,speciesId:id,level:1,xp:0,hp:null,
+   ...(rules.progression.statPointsPerLevel===undefined?{}:{statAllocations:{}})};
+  if(1+(party.reserve??[]).length<policy.teamMax){
+   party={...party,reserve:[...(party.reserve??[]),creature]};
+   placement='team';
+  }else if(collection.length<policy.reserveMax){
+   collection=[...collection,creature];placement='collection';
+  }else throw new RangeError('Équipe et réserve pleines : fragments conservés');
+ }
+ const left=count-cost;
+ if(left===0)delete inventory[key];else inventory[key]=left;
+ const next=freeze({...state,updatedAt:iso(now??state.updatedAt,'now'),party,
+  ...(state.collection!==undefined||collection.length?{collection}:{}),
+  inventory:{...state.inventory,items:inventory}});
+ assertSession(next);
+ return freeze({session:next,action,speciesId:id,spent:cost,remaining:left,earnedXp,placement});
+}
+// The out-of-battle collection NEVER participates in the Combat grant.
+// Restricted access modes fail closed until Exploration supplies a certified
+// access-zone/interaction contract. No DOM or location heuristics.
+export function transferAdventureCollectionCreatureV1({
+ session,instanceId,direction,now
+}={}){
+ const state=assertSession(session),rules=normalizeAdventureRulesV1(state.rules);
+ const policy=rules.recruitment;
+ if(!policy||policy.reserveAccessMode!=='anywhere')
+  throw new Error('La réserve exige une zone ou une interaction autorisée');
+ if(state.status==='finished')throw new Error('Partie terminée');
+ const id=identity(instanceId,'instanceId');
+ const team=[state.party.active,...(state.party.reserve??[])],collection=state.collection??[];
+ let nextTeam=team,nextCollection=collection;
+ if(direction==='deposit'){
+  if(team.length<=1)throw new RangeError('Au moins une créature doit rester en équipe');
+  if(collection.length>=policy.reserveMax)throw new RangeError('Réserve hors combat pleine');
+  const member=team.find(x=>x.instanceId===id);
+  if(!member)throw new RangeError('Créature absente de l’équipe');
+  nextTeam=team.filter(x=>x.instanceId!==id);
+  if(nextTeam[0].hp===0)
+   throw new RangeError('Choisis une créature non KO avant de déposer la première');
+  nextCollection=[...collection,member];
+ }else if(direction==='withdraw'){
+  if(team.length>=policy.teamMax)throw new RangeError('Équipe de combat pleine');
+  const member=collection.find(x=>x.instanceId===id);
+  if(!member)throw new RangeError('Créature absente de la réserve');
+  nextTeam=[...team,member];nextCollection=collection.filter(x=>x.instanceId!==id);
+ }else throw new RangeError('Transfert inconnu');
+ const next=freeze({...state,updatedAt:iso(now??state.updatedAt,'now'),
+  party:{...state.party,active:nextTeam[0],reserve:nextTeam.slice(1)},
+  collection:nextCollection});
+ assertSession(next);
+ return next;
+}
+
 function roll(random){
  if(typeof random!=='function')throw new TypeError('Explicit random adapter required for Adventure loot');
  const value=random();

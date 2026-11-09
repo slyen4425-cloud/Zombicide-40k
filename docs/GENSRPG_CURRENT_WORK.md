@@ -1,3 +1,10 @@
+## 2026-11-09 — Release publisher : sérialisation main, pas d'annulation en plein déploiement
+- Périmètre : workflow de publication GenSRPG uniquement, lot unique PR #357, START `main@0b8c5f5dfc567b6789d200231231d374b7c6bce8`, checkpoint `checkpoint/gensrpg-publisher-combat-sync-start-2026-11-09`. Aucun changement moteur, média, PWA, sauvegarde ou source Exploration/Combat.
+- Bug de concurrence : `pages-${{ github.event_name }}-${{ github.ref }}` sépare une publication `push` de la publication manuelle du même `main` ; `cancel-in-progress: true` risque d'interrompre un vrai déploiement en cours. Ceci est un défaut distinct des expirations Pages `syncing_files` ; ne pas lui attribuer à tort ces échecs distants.
+- Correction : groupement production sur le même `github.ref`, validation PR isolée par numéro, annulation uniquement des vérifications PR supersédées. Nouveau test sentinelle exact ajouté au build Pages. Aucun délai augmenté, aucun fichier nettoyé ni création supprimée.
+- Conditions : les 8 workflows du nouveau SHA, navigateur réel, budget et absence de duplication, checkpoint GREEN, fusion ciblée, puis un vrai Pages main SUCCESS et contrôle HTTPS ; ne pas déclarer la PWA publiée avant cette dernière preuve.
+
+---
 ## 2026-11-09 — Réconciliation des publishers Capture : source unique #358 et médias #357 (NON PUBLIÉ)
 - **Réutilisation du lot existant** `work/gensrpg-publisher-combat-assets-sync-2026-11-09`, START `main@0b8c5f5dfc567b6789d200231231d374b7c6bce8`, checkpoint `checkpoint/gensrpg-publisher-combat-sync-start-2026-11-09`. Aucune nouvelle autorité, aucun changement moteur, aucun asset effacé, aucune migration de sauvegarde.
 - **Correction du seul pin** `tools/capture_v2_pages_preview_pin.json.sha` de `002e6302d0c4a787fda7dba2498887f06606c79a` (source PR #356) à `0da12ae99405f62e21e0af67d78c1490c271488f` (source PR #358, quatre contrôles CI SUCCESS, même Combat main certifié et même Exploration main certifié).

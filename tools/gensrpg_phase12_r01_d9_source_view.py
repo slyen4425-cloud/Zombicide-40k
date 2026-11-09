@@ -35,7 +35,7 @@ def read_d9_index_view(index_file, root):
         data=r04_reverse(data,module) # test-only R04 -> R03 exact restoration
     if _blob(data)=="8faf7af7fced0a1e0724985e85718a0e4a9e673b":
         from gensrpg_phase12_r03_shell_hub_extract_apply import reverse as r03_reverse
-        shell=(Path(root)/"assets/gensrpg/shell/legacy-hub-family-ui-v1.js").read_bytes()
+        shell=(Path(root)/"tests/fixtures/gensrpg_r03_shell_hub_owner_immutable_v1.txt").read_bytes()  # Exact R03 historical owner, not mutable live runtime
         data=r03_reverse(data,shell)  # exact R03 -> R02 historical source, tests only
     if _blob(data)=="062c4cd37634f504cc75ce3329d6e69e19b5f547":
         from gensrpg_phase12_r02_legacy_visual_data_extract_apply import reverse

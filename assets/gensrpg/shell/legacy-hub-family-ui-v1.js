@@ -10,10 +10,16 @@ function renderGensRpgUniverseCards(family="adventure"){
   const cards=profiles.map(p=>{
     try{
       ensureRpgProfileData(p);
+      // Read card statistics from the existing live-content owner during the
+      // *first* render. A later MutationObserver repaint cannot be relied upon
+      // to make the real Shell card correct on its first browser assertion.
+      let liveMeta="";
+      try{liveMeta=window.GensWorldSummary167820?.summarizeProfile?.(p)?.text||""}
+      catch(error){console.warn("GenSrpG world card summary unavailable",error)}
       const trainerCount=p.heroPool?.length||0;
-      const meta=gensContentFamilyForProfile(p)==="creature"
+      const meta=liveMeta||(gensContentFamilyForProfile(p)==="creature"
         ? trainerCount+" dresseur"+(trainerCount===1?"":"s")+" · Capture de créatures"
-        : trainerCount+" héros · "+(p.objectPool?.length||0)+" objets · "+Object.keys(p.enemyConfig||{}).length+" monstres";
+        : trainerCount+" héros · "+(p.objectPool?.length||0)+" objets · "+Object.keys(p.enemyConfig||{}).length+" monstres");
       const protectedUniverse=p.id===GAME_PROFILE_DUNGEON_ID||p.builtIn;
       return `
         <div class="gensFamilyGameCard gensUniverseCard" data-rpg-profile="${z40kEscAttr(p.id)}">

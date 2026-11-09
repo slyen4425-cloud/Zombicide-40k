@@ -54,7 +54,7 @@
    <select id="adventure-starter" aria-label="Créature de départ publiée" disabled>
     <option value="">Chargement du Bestiaire…</option>
    </select>
-   <div id="adventure-starter-reserve" class="fields" aria-label="Créatures de réserve initiales"></div>
+   <div id="adventure-starter-reserve" class="fields" aria-label="Créatures supplémentaires de l’équipe de combat"></div>
    <p id="adventure-bestiary-count" class="hint"></p>
    <label for="adventure-hero-choice">Héros (bibliothèque Exploration)</label>
    <select id="adventure-hero-choice" aria-label="Héros officiel de la partie">
@@ -171,6 +171,37 @@
     <label>Ennemi publié <select id="adventure-enemy" disabled></select></label>
     <output id="adventure-xp-preview">Sélectionne une créature publiée.</output>
    </div>
+  </details>
+  <details id="adventure-recruitment-panel" class="adventure-options">
+   <summary>Fragments, invocation et réserve de créatures</summary>
+   <p class="hint">Les fragments réutilisent les icônes officielles ; la réserve hors combat ne participe jamais aux combats.</p>
+   <div class="fields">
+    <label>Activer les fragments et invocations
+     <input id="adventure-fragment-enabled" type="checkbox" checked></label>
+    <label>Chance de fragments par victoire (%)
+     <input id="adventure-fragment-chance" type="number" min="0" max="100" step="1" value="100"></label>
+    <label>Fragments minimum
+     <input id="adventure-fragment-min" type="number" min="1" max="9999" value="1"></label>
+    <label>Fragments maximum
+     <input id="adventure-fragment-max" type="number" min="1" max="9999" value="1"></label>
+    <label>Coût d’invocation (fragments)
+     <input id="adventure-fragment-invoke" type="number" min="1" max="999999" value="10"></label>
+    <label>Coût de conversion en XP (fragments)
+     <input id="adventure-fragment-xp-cost" type="number" min="1" max="999999" value="10"></label>
+    <label>Gain d’XP pour la créature choisie
+     <input id="adventure-fragment-xp-reward" type="number" min="1" max="1000000000" value="1000"></label>
+    <label>Limite de l’équipe utilisable en combat
+     <input id="adventure-team-max" type="number" min="1" max="6" value="6"></label>
+    <label>Capacité du stockage hors combat
+     <input id="adventure-reserve-max" type="number" min="0" max="9999" value="100"></label>
+    <label>Accès au stockage hors combat
+     <select id="adventure-reserve-access">
+      <option value="anywhere">Partout (hors combat)</option>
+      <option value="zone">Zone spéciale (raccord ultérieur)</option>
+      <option value="interaction">Objet / PNJ (raccord ultérieur)</option>
+     </select></label>
+   </div>
+   <p class="hint">L’équipe contient les créatures interchangeables en combat, actuellement 1 à 6 selon la limite fixée. Le stockage n’est jamais envoyé au moteur Combat. Les accès par zone ou objet restent verrouillés tant qu’ils ne sont pas reliés au World Builder.</p>
   </details>
   <details id="adventure-loot-panel" class="adventure-options">
    <summary id="adventure-loot-heading">Récompenses et objets</summary>

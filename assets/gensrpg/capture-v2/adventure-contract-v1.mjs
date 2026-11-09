@@ -2,6 +2,8 @@
 // Combat remains authoritative for the outcome, the native Bestiary remains
 // authoritative for published species, and the existing Core owns storage
 // serialization and XP->level. No legacy Capture imports or DOM access.
+import {normalizeAdventureRecruitmentV1,fragmentItemIdV1,
+ rollAdventureFragmentDropV1} from './adventure-fragment-policy-v1.mjs';
 export const ADVENTURE_RULES_SCHEMA_V1='gensrpg-capture-adventure-rules-v1';
 export const ADVENTURE_SAVE_SCHEMA_V1='gensrpg-capture-adventure-save-v1';
 export const ADVENTURE_STORAGE_KEY_V1='gensrpg.capture.v2.adventure.save.v1';
@@ -46,6 +48,11 @@ export const SHOWCASE_ADVENTURE_RULES_V1=freeze({
    {throughLevel:80,xpPerLevel:8000},
    {throughLevel:100,xpPerLevel:10000}
   ]
+ },
+ recruitment:{
+  fragments:{enabled:true,required:10,xpPerFragment:200,dropChancePercent:100,
+   minQuantity:1,maxQuantity:1,speciesOverrides:{}},
+  storageCapacity:100
  }
 });
 function object(value,label){
@@ -96,7 +103,8 @@ function iso(value,field){
 export function normalizeAdventureRulesV1(input){
  // Additive optional policy: historical v1 rules have no heroProgression.
  // Their precise old representation remains legal, and never enables hero XP.
- const {heroProgression:heroRaw,combat:combatRaw,navigation:navigationRaw,...legacy}=object(input,'AdventureRules');
+ const {heroProgression:heroRaw,combat:combatRaw,navigation:navigationRaw,recruitment:recruitRaw,...legacy}=object(input,'AdventureRules');
+ const recruitment=normalizeAdventureRecruitmentV1(recruitRaw);
  const navigation=navigationRaw===undefined?null:
   exact(navigationRaw,['moveSpeed'],'navigation');
  if(navigation){
@@ -168,7 +176,7 @@ export function normalizeAdventureRulesV1(input){
  const items=loot.items.map((raw,i)=>{
   const item=exact(raw,['id','name','saleValue'],'loot.items['+i+']');
   const id=identity(item.id,'item.id');
-  if(itemIds.has(id))throw new RangeError('Duplicate Adventure item '+id);
+  if(itemIds.has(id)||id.startsWith('fragment:'))throw new RangeError('Duplicate or reserved Adventure item '+id);
   itemIds.add(id);
   return {id,name:label(item.name,'item.name'),saleValue:integer(item.saleValue,'item.saleValue',0,100000000)};
  });
@@ -197,7 +205,8 @@ export function normalizeAdventureRulesV1(input){
   ...(navigation?{navigation:{moveSpeed:navigation.moveSpeed}}:{}),
   heroProgression:{enabled:hero.enabled,xpGainPercent:hero.xpGainPercent,
    xpPerLevel:hero.xpPerLevel,maxLevel:hero.maxLevel,
-   talentPointsPerLevel:hero.talentPointsPerLevel}
+   talentPointsPerLevel:hero.talentPointsPerLevel},
+  ...(recruitment===null?{}:{recruitment})
  });
 }
 // The existing Core Progression accepts compact bands and alone computes
@@ -452,6 +461,24 @@ function assertSession(session){
   statWallet(owned,normalizeAdventureRulesV1(v.rules).progression);
   if(owned.hp!==null)number(owned.hp,field+'.hp');
  }
+ if(Object.hasOwn(v,'collection')){
+  const collection=object(v.collection,'collection'),stored=collection.stored;
+  if(!Array.isArray(stored)||stored.length>10000||Object.keys(collection).some(k=>k!=='stored'))
+   throw new RangeError('Invalid storage collection');
+  if(v.rules.recruitment&&stored.length>v.rules.recruitment.storageCapacity)
+   throw new RangeError('Storage collection exceeds creator capacity');
+  for(const [index,entry] of stored.entries()){
+   const field='collection.stored['+index+']',owned=object(entry,field);
+   const instanceId=identity(owned.instanceId,field+'.instanceId');
+   if(instances.has(instanceId))throw new RangeError('Duplicate creature instance in Adventure collection');
+   instances.add(instanceId);
+   identity(owned.speciesId,field+'.speciesId');
+   integer(owned.level,field+'.level',1,v.rules.progression.maxLevel);
+   integer(owned.xp,field+'.xp');
+   statWallet(owned,normalizeAdventureRulesV1(v.rules).progression);
+   if(owned.hp!==null)number(owned.hp,field+'.hp');
+  }
+ }
  if(Object.hasOwn(v,'sessionControl'))
   normalizeAdventureSessionControlV1(v.sessionControl);
  if(Object.hasOwn(v,'hero')){
@@ -512,6 +539,7 @@ export function createAdventureSessionV1({
   cameraPolicy:normalizeAdventureCameraPolicyV1({angleDeg:cameraAngle,
    ...(cameraZoomPercent===null?{}:{zoomPercent:cameraZoomPercent})}),
   party:{active:members[0],reserve:members.slice(1)},
+  ...(settings.recruitment?{collection:{stored:[]}}:{}),
   sessionControl:{
    creatorId:identity(ids?.creatorId??'owner-'+sessionId,'creatorId'),
    hostIsGameMaster:false,joinEnabled:false,
@@ -604,6 +632,16 @@ export function applyAdventureCombatResultV1({
     Math.floor(roll(random)*(drop.maxQuantity-drop.minQuantity+1));
    itemCounts[drop.itemId]=(itemCounts[drop.itemId]||0)+quantity;
    drops.push({itemId:drop.itemId,quantity});
+  }
+ }
+ // One logical fragment item per official published species; no media copy.
+ // The existing idempotent EncounterResult gate above owns the only award.
+ if(result.outcome==='victory'){
+  const fragments=rollAdventureFragmentDropV1({rules:state.rules,speciesId:enemyId,random});
+  if(fragments){
+   const itemId=fragmentItemIdV1(enemyId);
+   itemCounts[itemId]=(itemCounts[itemId]??0)+fragments;
+   drops.push({itemId,quantity:fragments});
   }
  }
  const hp=result.partyState?.hp;
@@ -769,3 +807,6 @@ export function createAdventureStoreV1({storage,coreStorage,key=ADVENTURE_STORAG
   }
  });
 }
+
+// Public validation for the independently tested fragment transaction adapter.
+export function assertAdventureSessionV1(session){return assertSession(session);}

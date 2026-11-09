@@ -23,8 +23,8 @@ test('physically staged shell owns fullscreen and Sac remains above real Explora
  assert.match(shell,/gameFullscreenActive/);
  assert.match(app,/shell\.requestGameFullscreen\(\)/,
   'launch must reach the official four-module Shell instead of stealing fullscreen');
- assert.match(app,/void requestAdventureFullscreen\(\);\s*const selectedWorldId/,
-  'fullscreen must be requested during the actual game-entry tap');
+ assert.match(app,/\$\('adventure-play'\)\.addEventListener\('click',[\s\S]*?void requestAdventureFullscreen\(\);[\s\S]*?const selectedWorldId/,
+  'fullscreen must be requested during the actual game-entry tap, before async world selection');
  assert.match(html,/id="adventure-open-sheet"/);
  assert.match(html,/id="adventure-play-frame"[^>]*allow="autoplay" hidden/);
  assert.doesNotMatch(html,/id="adventure-play-frame"[^>]*allowfullscreen/,

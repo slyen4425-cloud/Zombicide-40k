@@ -111,7 +111,18 @@ test('existing installed Capture V2 auto-updates on reopening its SAME URL, no u
        }else stableSince=0;
        await new Promise(resolve=>setTimeout(resolve,150));
      }
-     throw Error('Installed Capture PWA never reached stable new-worker cache state in 60s');
+     const finalNames=await caches.keys();
+     const finalReg=await navigator.serviceWorker.getRegistration();
+     throw Error('Installed Capture PWA never reached stable new-worker cache state in 60s: '+
+       JSON.stringify({
+         caches:finalNames,
+         active:finalReg?.active?.state||null,
+         waiting:finalReg?.waiting?.state||null,
+         installing:finalReg?.installing?.state||null,
+         controlled:!!navigator.serviceWorker.controller,
+         hasExpected:finalNames.includes('gensrpg-preview-capture-v2-bbbbbbbbbbbb'),
+         stillHasOld:finalNames.includes('gensrpg-preview-capture-v2-aaaaaaaaaaaa')
+       }));
    });
    const diagnostics=await after.evaluate(async()=>{
      const samples=[];

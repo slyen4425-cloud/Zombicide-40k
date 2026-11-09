@@ -1,3 +1,10 @@
+## 2026-11-09 — Repin certifié Exploration : signal UI Combat maintenant public
+- **Dépendance livrée :** Exploration `main@b7f2feb1ac79a63f338f28347f899e2cb16a8a15` PR #401, CI main `42676822546` SUCCESS, Pages main `42676822373` SUCCESS et étapes de preuve HTTPS/V80 SUCCESS.
+- **Source Capture :** seul `assets/gensrpg/capture-v2/source-pins-v1.json.exploration` passe de `9ae6a89c870cf001b540207e2dc7889ec930d518` à `b7f2feb1ac79a63f338f28347f899e2cb16a8a15`. Combat reste `main@f0431774e8831467a64a0c86b5985f8c5c2e5033`, les données, tous les assets, les 98 icônes et les sauvegardes sont inchangés.
+- **Contrat :** le host Explorer publie le signal ouverture/fermeture native, Capture masque son propre HUD et le Shell son bouton retour, puis les restaure après la sortie. La source candidate doit repasser les 4 workflows CI exacts après ce repin ; checkpoint GREEN final avant l'unique publisher GenSRPG. Aucun effet sur les bars PV Combat natives.
+- **Retour arrière :** checkpoint UI `checkpoint/gensrpg-capture-combat-hud-ui-green-2026-11-09` ; rollback source `563e84833ab903acfd76eee39fba0f4b39f86a9b`, sans suppression de média.
+---
+
 ## 2026-11-09 — Également masquer « Retour Monster Capture » pendant Combat
 - Le retour global est le **contrôle du Shell propriétaire**, distinct du Sac/Équipe qui est propriétaire de la fiche Aventure. Sans correction, ce bouton restait susceptible de recouvrir les PV adverses même après le masquage du HUD Capture.
 - **API propriétaire** `GensCaptureV2.setAdventureCombatVisibility(boolean)` : active uniquement dans `view='adventure'`, limitée à la visibilité de la barre native ; le Shell réinitialise sa présentation à chaque changement de vue et retour au menu. Capture appelle l'API seulement après vérification de l'événement de l'iframe Exploration. Aucun accès au DOM du Shell depuis Capture, aucun déplacement ou suppression du bouton, accès restauré immédiatement hors Combat.

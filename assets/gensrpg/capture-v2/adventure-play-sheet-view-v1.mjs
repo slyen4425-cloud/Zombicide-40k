@@ -95,7 +95,9 @@ function statGrid(stats,{availablePoints=null,onAllocate=null}={}){
 }
 export function renderAdventureSheetViewV1({
  host,snapshot,tab,portraitUrl=null,heroVisual=null,onAllocate=null,
- onSelectCreature=null,onMoveCreature=null,onMakeActive=null
+ onSelectCreature=null,onMoveCreature=null,onMakeActive=null,
+ onSummonFragment=null,onConvertFragment=null,onFragmentIcon=null,
+ onTransferCreature=null
 }={}){
  if(!host||!snapshot)throw new TypeError('A valid active Capture sheet and host are required');
  const content=[];
@@ -141,9 +143,33 @@ export function renderAdventureSheetViewV1({
     active.type='button';active.addEventListener('click',()=>onMakeActive(member.instanceId));
     row.append(active);
    }
+   if(tab==='team'&&onTransferCreature&&snapshot.limits.reserveAccessMode==='anywhere'&&
+      snapshot.team.length>1&&snapshot.collection.length<snapshot.limits.reserveMax){
+    const deposit=node('button','sheet-roster-move','Stocker');
+    deposit.type='button';deposit.addEventListener('click',()=>onTransferCreature(member.instanceId,'deposit'));
+    row.append(deposit);
+   }
    selector.append(row);
   }
   content.push(selector);
+  if(tab==='team'){
+   const box=node('section','sheet-roster');
+   box.append(node('h4','','Réserve hors combat · '+snapshot.collection.length+' / '+snapshot.limits.reserveMax));
+   box.append(hint('Les créatures stockées ne peuvent pas être appelées pendant un combat.'));
+   if(snapshot.limits.reserveAccessMode!=='anywhere')
+    box.append(hint('Accès limité par le créateur : zone ou objet interactif. Le raccord Exploration reste à activer.'));
+   for(const member of snapshot.collection){
+    const row=node('div','sheet-roster-row');
+    row.append(node('span','sheet-roster-pick',member.name+' · niv. '+member.level+' · '+member.xp+' XP'));
+    const withdraw=node('button','sheet-roster-move','Ajouter à l’équipe');
+    withdraw.type='button';
+    withdraw.disabled=snapshot.limits.reserveAccessMode!=='anywhere'||
+     snapshot.team.length>=snapshot.limits.teamMax||!onTransferCreature;
+    withdraw.addEventListener('click',()=>onTransferCreature?.(member.instanceId,'withdraw'));
+    row.append(withdraw);box.append(row);
+   }
+   content.push(box);
+  }
   const c=snapshot.creature;
   const card=profile({kind:'creature',name:c.name,
    subtitle:c.isActive?'Premier combattant':'Créature de réserve',imageUrl:portraitUrl,
@@ -187,6 +213,43 @@ export function renderAdventureSheetViewV1({
    section.append(grid);
   }
   content.push(section);
+  if(snapshot.fragments.length){
+   const area=node('section','sheet-inventory sheet-fragments');
+   area.append(node('h3','','Éclats de créatures'));
+   area.append(hint('Invoque une créature publiée ou renforce une instance que tu possèdes déjà.'));
+   for(const fragment of snapshot.fragments){
+    const row=node('div','sheet-fragment-row');
+    const iconUrl=onFragmentIcon?.(fragment.speciesId)??null;
+    if(iconUrl){
+     const img=node('img','sheet-fragment-icon');img.alt='Icône officielle de '+fragment.name;
+     img.loading='lazy';img.addEventListener('error',()=>img.remove(),{once:true});
+     img.src=iconUrl;row.append(img);
+    }
+    const detail=node('div','sheet-fragment-detail');
+    detail.append(node('strong','',fragment.name+' · '+fragment.count+' éclat(s)'));
+    const summon=node('button','',
+     'Invoquer ('+fragment.invocationCost+' éclats)');
+    summon.type='button';summon.disabled=fragment.count<fragment.invocationCost||!onSummonFragment;
+    summon.addEventListener('click',()=>onSummonFragment?.(fragment.speciesId));
+    detail.append(summon);
+    if(fragment.owned.length){
+     const select=node('select','sheet-fragment-target');
+     select.setAttribute('aria-label','Créature bénéficiaire de l’XP : '+fragment.name);
+     for(const member of fragment.owned){
+      const opt=node('option','',null);opt.value=member.instanceId;
+      opt.textContent=(member.location==='collection'?'Réserve':'Équipe')+
+       ' · niv. '+member.level+' · '+member.xp+' XP';select.append(opt);
+     }
+     const gain=node('button','',
+      'Donner +'+fragment.xpReward+' XP ('+fragment.xpFragmentCost+' éclats)');
+     gain.type='button';gain.disabled=fragment.count<fragment.xpFragmentCost||!onConvertFragment;
+     gain.addEventListener('click',()=>onConvertFragment?.(fragment.speciesId,select.value));
+     detail.append(select,gain);
+    }
+    row.append(detail);area.append(row);
+   }
+   content.push(area);
+  }
  }else throw new RangeError('Rubrique de fiche inconnue');
  host.replaceChildren(...content);
 }

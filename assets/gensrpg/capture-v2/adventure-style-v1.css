@@ -301,3 +301,30 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
 .adventure-camera-start label{display:grid;gap:5px;margin:9px 0}
 .adventure-camera-start input[type=range]{padding:0;accent-color:#82e6c7}
 .adventure-camera-start output{font-weight:800;color:#b3f6df}
+
+/* Capture owns the launch veil. The native Explorer scene is exposed only
+   after its real first paint, not after HTML iframe load. */
+#adventure-launch-loading[hidden]{display:none!important}
+#adventure-launch-loading{position:fixed;inset:0;z-index:3200;
+ display:grid;place-items:center;background:#07151d;color:#eafff6;
+ text-align:center;overflow:auto;overscroll-behavior:contain;padding:22px}
+.adventure-loading-panel{width:min(440px,100%);display:grid;justify-items:center;
+ gap:14px;padding:26px 18px;border:1px solid #336e6d;border-radius:18px;
+ background:#11232dcf;box-shadow:0 16px 40px #0005}
+.adventure-loading-brand{font-size:clamp(30px,7vw,47px);font-weight:900;
+ letter-spacing:.075em;color:#caffde;text-shadow:0 0 21px #1673589c}
+.adventure-loading-spinner{display:block;width:46px;height:46px;border-radius:50%;
+ border:4px solid #41615f;border-top-color:#92e3c3;
+ animation:adventure-loading-spin 1s linear infinite}
+@keyframes adventure-loading-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.adventure-loading-spinner{animation:none}}
+#adventure-launch-loading h2{font-size:18px;margin:0}
+#adventure-launch-loading output{color:#c1dfd8;font-size:14px;line-height:1.5}
+#adventure-loading-cancel{min-height:44px;padding:10px 16px;border:1px solid #73bba3;
+ border-radius:10px;background:#173b41;color:#eafff6;font-weight:750}
+#adventure-saved-roster[hidden]{display:none!important}
+#adventure-saved-roster{margin-top:10px;border:1px solid #33646c;
+ border-radius:10px;background:#12303b;padding:10px}
+#adventure-saved-roster h4{margin:0 0 7px;font-size:14px;color:#e2fcf2}
+#adventure-saved-roster ol{margin:0;padding-left:23px;display:grid;gap:4px}
+#adventure-saved-roster li{font-size:13px;line-height:1.45;color:#deefe8}

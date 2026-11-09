@@ -101,6 +101,10 @@ test('Shell fullscreen contains Capture Sac, Équipe and native Back, Explorer 
  assert.match(html,/id="adventure-xp-distribution"/);
  assert.match(html,/id="adventure-play-frame"[^>]+allow="autoplay" hidden/);
  assert.doesNotMatch(html,/id="adventure-play-frame"[^>]*allowfullscreen/);
- assert.match(app,/void requestAdventureFullscreen\(\);\s*const selectedWorldId/);
+ assert.match(app,/void requestAdventureFullscreen\(\);/, 'fullscreen remains requested during the trusted Play tap');
+ assert.match(app,/showJourneyLoading\('Chargement du monde et des sauvegardes…'\)/,
+  'native map cannot expose editor while loading');
+ assert.match(app,/schema==='gensrpg\.exploration\.play\.ready\.v1'/,
+  'only the genuine native first frame clears the transition veil');
  assert.match(app,/url\.searchParams\.set\('cameraAngle',String\(result\.session\.cameraPolicy/);
 });

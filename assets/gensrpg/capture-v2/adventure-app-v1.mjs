@@ -355,7 +355,8 @@ function renderPortfolioOptions(){
  select.replaceChildren(...(saved.length?saved.map(entry=>
   option(entry.sessionId,'Partie '+entry.sessionId.slice(0,8)+
    ' · '+(published.find(c=>c.id===entry.speciesId)?.name??entry.speciesId)+
-   ' niv. '+entry.level+(entry.status==='playing'?' · en cours':
+   ' niv. '+entry.level+' · '+entry.partySize+' créature(s)'+
+   (entry.status==='playing'?' · en cours':
      entry.status==='finished'?' · fin de partie':' · prête')))
    :[option('','Aucune partie enregistrée')]));
  select.disabled=!saved.length;
@@ -425,12 +426,27 @@ $('adventure-select-active').addEventListener('click',guarded(()=>{
  showSave();
  stateMessage('Créature active de ton équipe enregistrée.');
 }));
+function renderSavedAdventureRosterV1(state){
+ const host=$('adventure-saved-roster'),list=$('adventure-saved-roster-members');
+ const members=state?[state.party.active,...(state.party.reserve??[])]:[];
+ host.hidden=!members.length;
+ list.replaceChildren(...members.map((member,index)=>{
+  const name=published.find(card=>card.id===member.speciesId)?.name??member.speciesId;
+  const li=document.createElement('li');
+  li.textContent=name+' · niv. '+member.level+' · '+member.xp+' XP'+
+   (member.hp===0?' · KO':member.hp===null?' · PV au maximum':' · '+member.hp+' PV')+
+   (index===0?' · premier combattant':' · réserve');
+  li.dataset.instanceId=member.instanceId;
+  return li;
+ }));
+}
 function showSave(){
  try{
   renderPortfolioOptions();
   const state=store.load();
   $('adventure-room-host').disabled=!!activeCaptureRoom||!state?.sessionControl?.joinEnabled;
   text($('adventure-play-team-count'),String(state?1+(state.party.reserve?.length??0):0));
+  renderSavedAdventureRosterV1(state); // Always reread the same persisted Core save.
   if(!state){
    $('adventure-hero-choice').disabled=false;
    text($('adventure-save-summary'),'Aucune partie créée.');
@@ -794,6 +810,7 @@ window.addEventListener('message',event=>{
  activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
  activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
  activePlayingSheet=null;currentSheetCreatureId=null;
+ dismissJourneyLoading();
  frame.hidden=true;frame.src='about:blank';
  document.body.dataset.adventurePlaying='false';
  $('adventure-play-hud').hidden=true;
@@ -924,11 +941,57 @@ const detachShellFullscreen=captureShellFullscreenOwner()?.onGameFullscreenChang
 window.addEventListener('pagehide',()=>detachShellFullscreen?.(),{once:true});
 syncFullscreenControl();
 
+const journeyLoading=$('adventure-launch-loading');
+let journeyLaunchEpoch=0;
+function showJourneyLoading(message){
+ text($('adventure-launch-loading-status'),message);
+ journeyLoading.hidden=false;
+}
+function dismissJourneyLoading(){
+ journeyLoading.hidden=true;
+}
+function cancelPendingAdventureLaunch(){
+ ++journeyLaunchEpoch; // Explicit cancellation invalidates any still-pending async preflight.
+ const frame=$('adventure-play-frame');
+ activeCombatHost?.dispose();activeCombatHost=null;
+ activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
+ activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
+ activePlayingSheet=null;currentSheetCreatureId=null;
+ frame.hidden=true;frame.src='about:blank';
+ $('adventure-play-hud').hidden=true;
+ document.body.dataset.adventurePlaying='false';
+ document.querySelector('[data-adventure-app]').hidden=false;
+ dismissJourneyLoading();
+ showSave();
+}
+$('adventure-loading-cancel').addEventListener('click',()=>{
+ cancelPendingAdventureLaunch();
+ stateMessage('Retour à la préparation. Équipe et checkpoint conservés.');
+});
+window.addEventListener('message',event=>{
+ const frame=$('adventure-play-frame');
+ if(journeyLoading.hidden||event.origin!==window.location.origin||
+    event.source!==frame.contentWindow||
+    event.data?.sessionId!==activePlayingSheet?.sessionId)return;
+ if(event.data.schema==='gensrpg.exploration.play.ready.v1'){
+  if(event.data.worldId!==store.load()?.world?.mapRef&&
+     event.data.worldId!==readWorldAssemblerDraft(window.localStorage)?.id)return;
+  dismissJourneyLoading();
+ }else if(event.data.schema==='gensrpg.exploration.play.failed.v1'){
+  text($('adventure-launch-loading-status'),
+   'Impossible de charger cette partie : '+String(event.data.message??'Erreur inconnue')+
+   '. Utilise « Retour à la préparation » pour réessayer.');
+ }
+});
 $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  // Must be requested inside the real user gesture, before async world/asset
  // checks lose activation. The viewport CSS remains the browser-denied fallback.
  // Nested Exploration fullscreen is deliberately disallowed: Sac stays in parent.
  void requestAdventureFullscreen();
+ if(!journeyLoading.hidden)return; // One authoritative launch at a time.
+ showJourneyLoading('Chargement du monde et des sauvegardes…');
+ const launchEpoch=++journeyLaunchEpoch;
+ try{
  const selectedWorldId=$('adventure-world-select').value;
  let world=readWorldAssemblerDraft(window.localStorage);
  let beforeWorldSession=store.load();
@@ -962,6 +1025,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  }
  const savedHeroId=store.load()?.hero?.definitionId??null;
  const heroRecord=savedHeroId?await (await officialHeroStore()).get(savedHeroId):null;
+ if(launchEpoch!==journeyLaunchEpoch)return; // Closed during asynchronous HeroDefinition lookup.
  if(savedHeroId&&!heroRecord)
   throw new Error('Le héros de cette partie n’existe plus dans la bibliothèque Exploration. La sauvegarde reste intacte.');
  // Bound worlds are immutable for this room. Refuse an alien/world-mismatched
@@ -971,6 +1035,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
   world,officialFingerprint:playWorldFingerprint,
   sessionId:store.load()?.sessionId
  });
+ if(launchEpoch!==journeyLaunchEpoch)return;
  if(worldLibrary&&selectedWorldId){
   const activated=activateSelectedAdventureWorldV1({
    worldLibrary,selectedWorldId
@@ -993,6 +1058,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
   context:onlineContext,transport:captureRoomTransport,
   navigation:result.navigation
  });
+ if(launchEpoch!==journeyLaunchEpoch)return;
  // Native Exploration consumes the original selected HeroDefinition by ID only.
  writeAdventureHeroSelectionGrantV1({storage:window.sessionStorage,
   session:result.session,world,heroRecord});
@@ -1038,6 +1104,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
   refreshParty,bestiaryCards:published,progressionCore:window.GensProgressionV1,
   onCombatResult:showAdventureCombatResult,
   onGameOver:()=>{
+   dismissJourneyLoading();
    activeCombatHost?.dispose();activeCombatHost=null;
    activePlayingSheet=null;
    activeCaptureExplorationEvents?.dispose();
@@ -1087,6 +1154,10 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  $('adventure-play-hud').hidden=false;
  // Capture's parent owns native fullscreen and keeps Sac/Équipe/Retour above
  // the official Exploration iframe. If denied, existing viewport CSS applies.
+ }catch(error){
+   cancelPendingAdventureLaunch();
+   throw error;
+ }
 }));
 $('adventure-world-select').addEventListener('change',()=>{
  text($('adventure-world-status'),'Monde sélectionné pour la prochaine entrée en jeu. Une sauvegarde existante conserve son monde lié.');

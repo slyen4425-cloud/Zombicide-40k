@@ -86,6 +86,7 @@ export function createAdventurePortfolioStoreV1({storage,coreStorage,legacyStore
    sessionId:state.sessionId,createdAt:state.createdAt,
    updatedAt:state.updatedAt,status:state.status,
    speciesId:state.party.active.speciesId,level:state.party.active.level,
+   partySize:1+(state.party.reserve?.length??0),
    selected:state.sessionId===selectedId(index)
   })));
  }

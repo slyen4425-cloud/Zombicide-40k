@@ -6,6 +6,7 @@ const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const storageSrc=fs.readFileSync(path.join(root,'assets','gensrpg','core','storage-v1.js'),'utf8');
 const src=fs.readFileSync(path.join(root,'assets','gensrpg','gens-world-summary-167820.js'),'utf8');
+const shellSource=fs.readFileSync(path.join(root,'assets','gensrpg','shell','legacy-hub-family-ui-v1.js'),'utf8');
 const builtArg=process.argv[2];
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','main.yml'),'utf8');
 const sw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
@@ -68,6 +69,31 @@ assert.equal(capture.trainers,1);
 assert.equal(capture.creatures,2,'Capture must count unique entities from its scoped live roster');
 assert.equal(capture.objects,5,'Capture must count 4 starter capture items + exact-world custom capture item');
 assert.equal(capture.text,'1 dresseur · 2 créatures · 5 objets');
+
+// The actual Shell card renderer must consume the existing live-summary owner.
+// A mutation observer cannot be relied upon to repair a stale card after its
+// first render: assert the first HTML already contains the real scoped counts.
+const shellStart=shellSource.indexOf('function renderGensRpgUniverseCards(');
+const shellEnd=shellSource.indexOf('function renderGensSurvivalUniverseCards(',shellStart);
+assert.ok(shellStart>=0&&shellEnd>shellStart,'canonical Shell card owner must exist');
+ctx.ensureRpgProfileData=profile=>profile;
+ctx.gensContentFamilyForProfile=profile=>profile?.rpgUniverse?.gameplay?.profile==='creature'?'creature':'rpg';
+ctx.z40kEscAttr=String;
+ctx.z40kEscHtml=String;
+ctx.GAME_PROFILE_DUNGEON_ID='game_profile_dungeon_demo';
+vm.runInContext(shellSource.slice(shellStart,shellEnd),ctx,{filename:'legacy-hub-family-ui-v1.js'});
+const renderedCapture=ctx.renderGensRpgUniverseCards('capture');
+assert.match(renderedCapture,/1 dresseur · 2 créatures · 5 objets/,
+  'the first Capture card must render live owners, not placeholder counts');
+assert.doesNotMatch(renderedCapture,/Capture de créatures/,
+  'live counts must not be replaced by a non-authoritative placeholder');
+const renderedDungeon=ctx.renderGensRpgUniverseCards('adventure');
+assert.match(renderedDungeon,/4 héros · 5 objets · 3 monstres/,
+  'the Dungeon card must retain its live-world summary');
+assert.doesNotMatch(renderedCapture,/game_profile_dungeon_demo/,
+  'Capture family must not list Dungeon');
+assert.doesNotMatch(renderedDungeon,/gp_mt7ker7t_m2iw9/,
+  'Dungeon family must not list Capture');
 
 const custom=api.summarizeProfile(customProfile);
 assert.equal(custom.live,false,'custom worlds keep legacy profile summary behavior');

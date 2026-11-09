@@ -47,3 +47,29 @@ test('only the certified 80 approved Capture icons are transported by the canoni
   assert.equal(manifest.get(rel),digest(bytes),'native Pages manifest must verify '+rel);
  }
 });
+
+test('the certified UI medallions are added without removing the 80 approved Capture icons',()=>{
+ const ids=[
+  'core:ui-stat-health-01','core:ui-symbol-energy-01',
+  'core:ui-stat-physical-01','core:ui-stat-defense-01',
+  'core:ui-symbol-endurance-01','core:ui-stat-speed-01',
+  'core:ui-element-fire-01','core:ui-element-water-01',
+  'core:ui-element-electric-01','core:ui-element-glace-01',
+  'core:ui-element-poison-01','core:ui-element-earth-01',
+  'core:ui-element-air-01','core:ui-element-nature-01',
+  'core:ui-element-acier-01','core:ui-element-light-01',
+  'core:ui-element-shadow-01','core:ui-element-esprit-01'
+ ];
+ const medallions=cat.assets.filter(a=>a.assetType==='icon'&&a.category==='ui'&&ids.includes(a.id));
+ assert.equal(medallions.length,18,'18 new authored icons must be present in the real catalog');
+ assert.equal(new Set(medallions.map(a=>a.id)).size,18);
+ assert.equal(new Set(medallions.map(a=>a.resource?.file)).size,18);
+ for(const item of medallions){
+  assert.equal(item.resource.mime,'image/webp');
+  const rel=base+'assets/library/'+item.resource.file;
+  const bytes=read(rel);
+  assert.ok(bytes.length>0,'missing authored medallion: '+rel);
+  assert.equal(manifest.get(rel),digest(bytes),'signed transport must match '+rel);
+ }
+ assert.equal(published.length,80,'new UI icons must not replace approved Capture skill icons');
+});

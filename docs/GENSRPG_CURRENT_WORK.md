@@ -1,3 +1,12 @@
+## 2026-11-09 — Publication unique Capture : commandes masquées pendant Combat, ennemis visibles
+- **START publisher** `main@158044e05e441e76e522fc314f7fbf94179e1b15` ; checkpoint `checkpoint/gensrpg-publisher-combat-hud-start-2026-11-09`, lot `work/gensrpg-publisher-combat-hud-2026-11-09`, sans autre publisher ni nettoyage destructeur.
+- **Source immuable** : Capture candidate `70590fa58376d0aad22677e8c0fb6536b138a253` (source PR #361) contient le signal UI validé et épingle Exploration `main@b7f2feb1ac79a63f338f28347f899e2cb16a8a15`, CI `42676822546` GREEN et Pages `42676822373` GREEN avec preuve HTTPS/V80. Combat demeure `main@f0431774e8831467a64a0c86b5985f8c5c2e5033` certifié. Les 80 icônes + 18 médaillons restent `global-assets@14e216c7fa27fa768d9be090ceaef829a76ff161`.
+- **Changement publisher** : un unique `tools/capture_v2_pages_preview_pin.json.sha` + deux validations identiques du contrat UI dans le build et le review ; aucune modification du Shell source historique, des médias, des sauvegardes ni du runtime Combat.
+- **Comportement** : Sac, fiche, équipe, bouton plein écran et retour Shell sont masqués par leurs propriétaires uniquement tant que l'overlay natif Combat est ouvert ; réapparition après fermeture/annulation. Les PV adverses et toute la simulation restent à Combat.
+- **Gates** : CI exact source Capture 4/4 GREEN exigée avant merge, publisher CI PR exacte 8/8 et navigateur/98 icônes/budget, checkpoint GREEN publisher, fusion en `main`, GitHub Pages déploiement SUCCESS et SHA public HTTPS. Ne pas annoncer la correction disponible avant ces preuves.
+- **Retour arrière** : publisher START `158044e0`, source précédent `0da12ae9`, Explorer précédent `9ae6a89c`; ne jamais détruire les assets ni le V80.
+---
+
 ## 2026-11-09 — Release publisher : sérialisation main, pas d'annulation en plein déploiement
 - Périmètre : workflow de publication GenSRPG uniquement, lot unique PR #357, START `main@0b8c5f5dfc567b6789d200231231d374b7c6bce8`, checkpoint `checkpoint/gensrpg-publisher-combat-sync-start-2026-11-09`. Aucun changement moteur, média, PWA, sauvegarde ou source Exploration/Combat.
 - Bug de concurrence : `pages-${{ github.event_name }}-${{ github.ref }}` sépare une publication `push` de la publication manuelle du même `main` ; `cancel-in-progress: true` risque d'interrompre un vrai déploiement en cours. Ceci est un défaut distinct des expirations Pages `syncing_files` ; ne pas lui attribuer à tort ces échecs distants.

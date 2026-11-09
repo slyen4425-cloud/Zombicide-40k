@@ -1,3 +1,4 @@
+import {fragmentItemIdV1,ADVENTURE_FRAGMENT_ITEM_PREFIX_V1,normalizeAdventureRecruitmentV1,SHOWCASE_ADVENTURE_RECRUITMENT_V1} from './adventure-fragment-rules-v1.mjs';
 // Monster Capture V2 — Adventure game-state owner (GenSrpg only).
 // Combat remains authoritative for the outcome, the native Bestiary remains
 // authoritative for published species, and the existing Core owns storage
@@ -37,6 +38,7 @@ export const SHOWCASE_ADVENTURE_RULES_V1=freeze({
  ...DEFAULT_ADVENTURE_RULES_V1,
  // Only NEW showcase games share XP; historical active-only games stay unchanged.
  xp:{...DEFAULT_ADVENTURE_RULES_V1.xp,distribution:'all'},
+ recruitment:SHOWCASE_ADVENTURE_RECRUITMENT_V1,
  progression:{
   xpCurveMode:'custom',xpPerLevel:2000,maxLevel:100,statPointsPerLevel:20,
   xpBands:[
@@ -96,7 +98,9 @@ function iso(value,field){
 export function normalizeAdventureRulesV1(input){
  // Additive optional policy: historical v1 rules have no heroProgression.
  // Their precise old representation remains legal, and never enables hero XP.
- const {heroProgression:heroRaw,combat:combatRaw,navigation:navigationRaw,...legacy}=object(input,'AdventureRules');
+ const {heroProgression:heroRaw,combat:combatRaw,navigation:navigationRaw,
+  recruitment:recruitmentRaw,...legacy}=object(input,'AdventureRules');
+ const recruitment=recruitmentRaw===undefined?null:normalizeAdventureRecruitmentV1(recruitmentRaw);
  const navigation=navigationRaw===undefined?null:
   exact(navigationRaw,['moveSpeed'],'navigation');
  if(navigation){
@@ -169,6 +173,8 @@ export function normalizeAdventureRulesV1(input){
   const item=exact(raw,['id','name','saleValue'],'loot.items['+i+']');
   const id=identity(item.id,'item.id');
   if(itemIds.has(id))throw new RangeError('Duplicate Adventure item '+id);
+  if(id.startsWith(ADVENTURE_FRAGMENT_ITEM_PREFIX_V1))
+   throw new RangeError('Identifiant fragment réservé au Bestiaire');
   itemIds.add(id);
   return {id,name:label(item.name,'item.name'),saleValue:integer(item.saleValue,'item.saleValue',0,100000000)};
  });
@@ -197,7 +203,8 @@ export function normalizeAdventureRulesV1(input){
   ...(navigation?{navigation:{moveSpeed:navigation.moveSpeed}}:{}),
   heroProgression:{enabled:hero.enabled,xpGainPercent:hero.xpGainPercent,
    xpPerLevel:hero.xpPerLevel,maxLevel:hero.maxLevel,
-   talentPointsPerLevel:hero.talentPointsPerLevel}
+   talentPointsPerLevel:hero.talentPointsPerLevel},
+  ...(recruitment?{recruitment}:{})
  });
 }
 // The existing Core Progression accepts compact bands and alone computes
@@ -433,13 +440,17 @@ function assertSession(session){
  iso(v.createdAt,'createdAt');iso(v.updatedAt,'updatedAt');
  if(v.status!=='configured'&&v.status!=='playing'&&v.status!=='finished')
   throw new RangeError('Unknown Adventure save status');
- normalizeAdventureRulesV1(v.rules);
+ const sessionRules=normalizeAdventureRulesV1(v.rules);
  if(Object.hasOwn(v,'cameraPolicy'))normalizeAdventureCameraPolicyV1(v.cameraPolicy);
  const party=object(v.party,'party');
  const actor=object(party.active,'party.active');
  const roster=[actor,...(party.reserve??[])];
- if(!Array.isArray(party.reserve??[])||roster.length<1||roster.length>6)
-  throw new RangeError('Une équipe Aventure doit compter de 1 à 6 créatures.');
+ if(!Array.isArray(party.reserve??[])||roster.length<1||
+    roster.length>(sessionRules.recruitment?.teamMax??6))
+  throw new RangeError('Équipe de combat plus grande que la limite du créateur.');
+ const collection=v.collection===undefined?[]:v.collection;
+ if(!Array.isArray(collection)||collection.length>(sessionRules.recruitment?.reserveMax??0))
+  throw new RangeError('Réserve hors combat invalide ou trop grande.');
  const instances=new Set();
  for(const [index,entry] of roster.entries()){
   const field=index===0?'party.active':'party.reserve['+(index-1)+']';
@@ -450,6 +461,15 @@ function assertSession(session){
   integer(owned.level,field+'.level',1,v.rules.progression.maxLevel);
   integer(owned.xp,field+'.xp');
   statWallet(owned,normalizeAdventureRulesV1(v.rules).progression);
+  if(owned.hp!==null)number(owned.hp,field+'.hp');
+ }
+ for(const [index,entry] of collection.entries()){
+  const field='collection['+index+']';
+  const owned=object(entry,field),instanceId=identity(owned.instanceId,field+'.instanceId');
+  if(instances.has(instanceId))throw new RangeError('Duplicate creature instance in collection');
+  instances.add(instanceId);identity(owned.speciesId,field+'.speciesId');
+  integer(owned.level,field+'.level',1,v.rules.progression.maxLevel);
+  integer(owned.xp,field+'.xp');statWallet(owned,sessionRules.progression);
   if(owned.hp!==null)number(owned.hp,field+'.hp');
  }
  if(Object.hasOwn(v,'sessionControl'))
@@ -485,11 +505,12 @@ export function createAdventureSessionV1({
 }){
  const cards=publishedAdventureSpeciesV1(bestiaryCards);
  const selected=starterIds===null?[starterId]:starterIds;
- if(!Array.isArray(selected)||selected.length<1||selected.length>6)
-  throw new RangeError('Équipe de départ : choisir entre 1 et 6 créatures.');
+ const settings=normalizeAdventureRulesV1(rules);
+ if(!Array.isArray(selected)||selected.length<1||
+     selected.length>(settings.recruitment?.teamMax??6))
+  throw new RangeError('Créatures de départ au-delà de la limite de combat.');
  if(starterId!==selected[0])
   throw new RangeError('La première créature doit être active.');
- const settings=normalizeAdventureRulesV1(rules);
  const sessionId=identity(ids?.sessionId,'sessionId');
  const rawIds=[ids?.instanceId,...(ids?.reserveInstanceIds??[])];
  if(rawIds.length!==selected.length)
@@ -512,6 +533,7 @@ export function createAdventureSessionV1({
   cameraPolicy:normalizeAdventureCameraPolicyV1({angleDeg:cameraAngle,
    ...(cameraZoomPercent===null?{}:{zoomPercent:cameraZoomPercent})}),
   party:{active:members[0],reserve:members.slice(1)},
+  ...(settings.recruitment?{collection:[]}:{}),
   sessionControl:{
    creatorId:identity(ids?.creatorId??'owner-'+sessionId,'creatorId'),
    hostIsGameMaster:false,joinEnabled:false,
@@ -596,7 +618,17 @@ export function applyAdventureCombatResultV1({
  }));
  const currency=result.outcome==='victory'?state.rules.loot.currencyPerVictory:0;
  const itemCounts={...state.inventory.items};
- const drops=[];
+ const drops=[],fragments=[];
+ const recruitment=normalizeAdventureRulesV1(state.rules).recruitment;
+ if(result.outcome==='victory'&&recruitment?.enabled&&
+    recruitment.fragmentChancePercent>0&&
+    roll(random)*100<recruitment.fragmentChancePercent){
+  const quantity=recruitment.fragmentMinPerVictory+
+    Math.floor(roll(random)*(recruitment.fragmentMaxPerVictory-recruitment.fragmentMinPerVictory+1));
+  const id=fragmentItemIdV1(enemyId);
+  itemCounts[id]=integer((itemCounts[id]??0)+quantity,'fragments');
+  fragments.push({speciesId:enemyId,quantity});
+ }
  if(result.outcome==='victory'){
   for(const drop of state.rules.loot.drops.filter(d=>d.speciesId===enemyId)){
    if(roll(random)*100>=drop.chancePercent)continue;
@@ -667,6 +699,7 @@ export function applyAdventureCombatResultV1({
  const award=freeze({
   encounterId,enemyId,outcome:result.outcome,xp:amount,
   levelBefore:before,levelAfter:level,currency,drops,heroXp,
+  ...(fragments.length?{fragments}:{}),
   ...(state.rules.xp.distribution==='all'?{memberXp}:{})
  });
  // The creator chooses recovery or terminal game over in the save's rules.

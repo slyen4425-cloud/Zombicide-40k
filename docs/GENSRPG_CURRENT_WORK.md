@@ -1,3 +1,10 @@
+## 2026-11-09 — Le Sac/Équipe ne doit pas masquer les PV adverses en combat
+- **START** source Capture `0da12ae99405f62e21e0af67d78c1490c271488f` ; checkpoint `checkpoint/gensrpg-start-combat-hud-visibility-2026-11-09`, lot `work/gensrpg-capture-combat-hud-visibility-2026-11-09`. Publisher main `158044e05e441e76e522fc314f7fbf94179e1b15` intact avant validation.
+- **Signal** : seul le moteur Exploration propriétaire de `createImmersiveEncounterHostV1` signale l'ouverture/fermeture du Combat natif. Le parent Capture vérifie origine, iframe source, `sessionId`, `encounterId`, et booléen de visibilité ; ne touche qu'au HUD Sac/Équipe/Plein écran, jamais à la vie des adversaires ni à la simulation.
+- **Vie du jeu** : le HUD se masque à l'ouverture, se restaure au retour, et sa visibilité est réinitialisée en cas de sortie au titre, annulation ou fin de partie. Le panneau équipe ne peut être ouvert pendant le combat. Aucune donnée persistante, asset, WorldDocument, save, sprite, capacité ou moteur dupliqué.
+- **Gates** : CI/Chromium de la source exacte, Explorer #401 publié sur main, mise à jour du pin SHA exact, checkpoint GREEN, publisher GenSRPG seul sur main après CI, Pages + HTTPS. Aucun déploiement de source sans son propriétaire Explorer certifié.
+---
+
 ## 2026-11-08 — Capture V2 : chargements et reprise fiable des 1–6 créatures (C3, candidat)
 - **Signalement utilisateur réel :** marche saccadée, passages de zones longs, édition visible brièvement avant la vraie carte, combats sans transition, reprise de sauvegarde faisant croire qu'une équipe de plusieurs créatures a disparu.
 - **START immuable source :** Capture `8f7bc6bdbdf69f0a71278c2d0aadc4dfaf7bfe29`, checkpoint `checkpoint/gensrpg-start-journey-loading-save-2026-11-08`, branche `work/gensrpg-journey-loading-save-2026-11-08`. Publisher officiel main GenSRPG `8156b542a737c8ee26a2c83cda058052c3555c6d` ; pin sous `tools/capture_v2_pages_preview_pin.json` NON modifié dans ce chantier.

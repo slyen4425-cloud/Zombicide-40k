@@ -16,6 +16,7 @@ import {
 } from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
 import {readCombatHandoff} from '../../../vendor/exploration-lab/src/encounters/combat-handoff-store.js';
 import {connectAdventureCombatHostV1} from './adventure-combat-host-v1.mjs';
+import {readScopedAdventureCombatVisibilityV1} from './adventure-combat-visibility-v1.mjs';
 import {projectAdventureCombatAwardV1} from './adventure-result-presentation-v1.mjs';
 import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
 import {createAdventureRulesDraftStoreV1} from './adventure-rules-draft-v1.mjs';
@@ -637,6 +638,30 @@ window.addEventListener('pagehide',()=>{
 // The Exploration iframe remains mounted; only this Capture-owned view
 // consumes the already persisted AdventureSession. No second player state.
 let activePlayingSheet=null,activeCombatHost=null;
+let activeCombatOverlayId=null;
+// Only Capture owns its Sac/Equipe HUD. Exploration owns the native Combat
+// overlay and sends this presentation-only signal; no HP/save state is copied.
+function resetAdventureCombatHud(){
+ activeCombatOverlayId=null;
+ document.body.dataset.adventureCombatVisible='false';
+ $('adventure-play-hud').hidden=!activePlayingSheet;
+}
+window.addEventListener('message',event=>{
+ const frame=$('adventure-play-frame');
+ const visibility=readScopedAdventureCombatVisibilityV1({
+  event,frameWindow:frame.contentWindow,origin:window.location.origin,
+  sessionId:activePlayingSheet?.sessionId
+ });
+ if(!visibility||document.body.dataset.adventurePlaying!=='true')return;
+ if(visibility.visible){
+  activeCombatOverlayId=visibility.encounterId;
+  document.body.dataset.adventureCombatVisible='true';
+  $('adventure-play-hud').hidden=true;
+  if($('adventure-play-sheet').open)$('adventure-play-sheet').close();
+ }else if(activeCombatOverlayId===visibility.encounterId){
+  resetAdventureCombatHud();
+ }
+});
 function showAdventureCombatResult({session,award}){
  const view=projectAdventureCombatAwardV1({session,award,bestiaryCards:published});
  text($('adventure-result-title'),view.title);
@@ -779,7 +804,7 @@ async function allocatePlayingSheetStat(statId,points,instanceId){
 }
 $('adventure-open-sheet').addEventListener('click',guarded(()=>{
  const dialog=$('adventure-play-sheet');
- if(dialog.open)return;
+ if(dialog.open||activeCombatOverlayId)return;
  discardHeroVisual();
  currentSheetTab='team'; // Immediately show all 1–6 saved creatures on the map.
  currentSheetCreatureId=store.load()?.party?.active?.instanceId??null;
@@ -810,6 +835,7 @@ window.addEventListener('message',event=>{
  activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
  activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
  activePlayingSheet=null;currentSheetCreatureId=null;
+ resetAdventureCombatHud();
  dismissJourneyLoading();
  frame.hidden=true;frame.src='about:blank';
  document.body.dataset.adventurePlaying='false';
@@ -957,6 +983,7 @@ function cancelPendingAdventureLaunch(){
  activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
  activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
  activePlayingSheet=null;currentSheetCreatureId=null;
+ resetAdventureCombatHud();
  frame.hidden=true;frame.src='about:blank';
  $('adventure-play-hud').hidden=true;
  document.body.dataset.adventurePlaying='false';
@@ -1107,6 +1134,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
    dismissJourneyLoading();
    activeCombatHost?.dispose();activeCombatHost=null;
    activePlayingSheet=null;
+   resetAdventureCombatHud();
    activeCaptureExplorationEvents?.dispose();
    activeCaptureExplorationEvents=null;
    activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
@@ -1151,7 +1179,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  frame.hidden=false;
  document.querySelector('[data-adventure-app]').hidden=true;
  document.body.dataset.adventurePlaying='true';
- $('adventure-play-hud').hidden=false;
+ resetAdventureCombatHud();
  // Capture's parent owns native fullscreen and keeps Sac/Équipe/Retour above
  // the official Exploration iframe. If denied, existing viewport CSS applies.
  }catch(error){

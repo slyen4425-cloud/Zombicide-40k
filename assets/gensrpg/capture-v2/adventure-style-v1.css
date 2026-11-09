@@ -68,6 +68,7 @@ output{display:block;overflow-wrap:anywhere}
 /* Capture-owned in-game sheet, above the native Exploration iframe.
    The browser's dialog top layer owns focus and Escape handling. */
 #adventure-play-hud[hidden]{display:none!important}
+body[data-adventure-combat-visible="true"] #adventure-play-hud{display:none!important}
 /* Keep the native Explorer menu clear on the left and Combat's Fuir control
    clear in the top-right. The parent Sac remains accessible after Combat. */
 #adventure-play-hud{position:fixed;z-index:15;top:max(64px,calc(env(safe-area-inset-top) + 56px));right:max(8px,env(safe-area-inset-right));left:auto;max-width:min(235px,45vw)}

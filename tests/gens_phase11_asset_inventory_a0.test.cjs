@@ -5,6 +5,7 @@ const assert=require("node:assert/strict");
 const fs=require("node:fs");
 const path=require("node:path");
 const cp=require("node:child_process");
+const crypto=require("node:crypto");
 
 const root=path.join(__dirname,"..");
 const manifest=JSON.parse(fs.readFileSync(path.join(root,"docs/phase11/asset-inventory-a0.json"),"utf8"));
@@ -28,11 +29,26 @@ assert.equal(manifest.sourceCommit,"3acd7a6112e3da9a546749e1acb39ee81cb4c9d7");
 assert.equal(manifest.migrationAllowed,false);
 assert.match(manifest.productionReferenceStatus,/UNVERIFIED/);
 assert.equal(manifest.images.length,173,"review inventory changes before migration");
-assert.equal(gitEntries.length,manifest.images.length,"all tracked visual files must have an inventory row");
+// Preserve the frozen Phase-11 baseline. The 12 author-uploaded Capture icons
+// are a separately authenticated additive batch, NOT retroactive inventory rows.
+const iconRoot="assets/gensrpg/capture-v2/item-icons/";
+const provenance=JSON.parse(fs.readFileSync(path.join(root,iconRoot,"provenance.v1.json"),"utf8"));
+assert.equal(provenance.schema,"gensrpg-capture-drop-icons-source-v1");
+assert.equal(provenance.iconCount,12);
+assert.equal(provenance.files.length,12);
+const authored=new Map(provenance.files.map(row=>{
+ assert.match(row.name,/^drop_[a-z0-9_]+\.png$/);
+ assert.match(row.sha256,/^[0-9a-f]{64}$/);
+ return [iconRoot+row.name,row];
+}));
+assert.equal(authored.size,12,"all uploaded icon filenames must be unique");
+const legacyEntries=gitEntries.filter(x=>!authored.has(x.file));
+assert.equal(legacyEntries.length,manifest.images.length,
+ "all frozen historic images must remain accounted for, with only 12 approved new icons");
 const map=new Map(manifest.images.map(row=>[row.path,row]));
 assert.equal(map.size,manifest.images.length,"duplicate paths in inventory");
 const counts={};
-for(const entry of gitEntries){
+for(const entry of legacyEntries){
   const row=map.get(entry.file);
   assert.ok(row,"asset missing from inventory: "+entry.file);
   assert.equal(entry.stage,"0");
@@ -41,6 +57,19 @@ for(const entry of gitEntries){
   assert.equal(row.bytes,fs.statSync(path.join(root,entry.file)).size,"asset byte count changed: "+entry.file);
   assert.equal(row.classification,classification(entry.file),"owner classification changed: "+entry.file);
   counts[row.classification]=(counts[row.classification]||0)+1;
+}
+const addedEntries=gitEntries.filter(x=>authored.has(x.file));
+assert.equal(addedEntries.length,authored.size,"all 12 validated uploaded icons must be present");
+for(const entry of addedEntries){
+ const row=authored.get(entry.file);
+ assert.equal(entry.stage,"0");
+ assert.equal(entry.mode,"100644","only regular uploaded image files are accepted");
+ const bytes=fs.readFileSync(path.join(root,entry.file));
+ assert.equal(bytes.subarray(1,4).toString("ascii"),"PNG");
+ assert.equal(bytes.readUInt32BE(16),row.width);
+ assert.equal(bytes.readUInt32BE(20),row.height);
+ assert.equal(crypto.createHash("sha256").update(bytes).digest("hex"),row.sha256,
+  "the authored icon bytes must match their immutable ZIP provenance");
 }
 assert.deepEqual(counts,{
   "shell-pwa-candidate":4,
@@ -70,7 +99,8 @@ assert.deepEqual(duplicates,[
 // file. This inventory does not perform any rename, rewrite or fallback.
 console.log(JSON.stringify({
   scenario:"Phase 11 A0 Git-tree image inventory",
-  total:manifest.images.length,
+  total:manifest.images.length+addedEntries.length,
+  legacyTotal:manifest.images.length,authoredCaptureDropIcons:addedEntries.length,
   counts,
   duplicates:duplicates.map(x=>x.name),
   actualProductionUsage:"not determined; Rule 26 exact index audit required",

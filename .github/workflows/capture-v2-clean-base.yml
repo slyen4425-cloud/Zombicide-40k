@@ -316,6 +316,10 @@ jobs:
           print('AUTHORED_DROP_ZIP_SHA256',hashlib.sha256(p.read_bytes()).hexdigest())
           with zipfile.ZipFile(p) as z:
               entries=[x for x in z.infolist() if not x.is_dir()]
+              print('AUTHORED_DROP_README_BEGIN')
+              print(z.read('README_IMPORT.md').decode('utf-8'))
+              print('AUTHORED_DROP_README_END')
+              print('AUTHORED_DROP_RUNTIME_ICONS',len([x for x in entries if x.filename.startswith('icones_png_512/') and x.filename.endswith('.png')]))
               print('AUTHORED_DROP_IMAGE_COUNT',len(entries))
               if not entries or len(entries)>100 or sum(x.file_size for x in entries)>100_000_000:
                   raise ValueError('Unexpected authored source ZIP size/count')
@@ -325,7 +329,7 @@ jobs:
                       raise ValueError('Unsafe archive entry '+repr(x.filename))
                   data=z.read(x)
                   dims=''
-                  if data[:8]==b'\\x89PNG\\r\\n\\x1a\\n':
+                  if data[:8]==bytes([137,80,78,71,13,10,26,10]):
                       dims=str(struct.unpack('>II',data[16:24]))
                   elif data[:4]==b'RIFF' and data[8:12]==b'WEBP':
                       dims='webp'

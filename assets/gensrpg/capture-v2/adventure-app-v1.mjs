@@ -81,8 +81,9 @@ const isItemEditor=new URLSearchParams(window.location.search).get('editor')==='
 let activeItemEditId=null;
 let activeDropEditIndex=null;
 let itemTemplates=Object.freeze({schema:'gensrpg-capture-item-templates-v1',version:1,items:Object.freeze([])});
+const availableItemVisuals=()=>[...itemTemplates.items,...(itemTemplates.icons??[])];
 const officialItemIconUrl=iconKey=>{
- const template=itemTemplates.items.find(entry=>entry.id===iconKey);
+ const template=availableItemVisuals().find(entry=>entry.id===iconKey);
  return template?new URL(template.iconPath,import.meta.url).href:null;
 };
 if(isItemEditor){
@@ -393,7 +394,7 @@ function editItem(itemId){
  $('adventure-item-name').value=item.name;
  $('adventure-item-value').value=String(item.saleValue);
  const select=$('adventure-item-icon');
- if(item.iconKey&&!itemTemplates.items.some(x=>x.id===item.iconKey))
+ if(item.iconKey&&!availableItemVisuals().some(x=>x.id===item.iconKey))
   select.append(option(item.iconKey,'Icône indisponible (conservée)'));
  select.value=item.iconKey??'';
  $('adventure-item-add').textContent='Enregistrer les modifications';
@@ -480,10 +481,11 @@ async function loadOfficialItemTemplates(){
   itemTemplates=normalizeCaptureItemTemplatesV1(await response.json(),published);
   const selector=$('adventure-item-icon');
   selector.replaceChildren(option('','Sans icône officielle'));
-  for(const item of itemTemplates.items)selector.append(option(item.id,item.name));
+  for(const item of availableItemVisuals())selector.append(option(item.id,item.name));
   $('adventure-item-import').disabled=!itemTemplates.items.length;
   text($('adventure-item-icon-status'),itemTemplates.items.length
-   ?itemTemplates.items.length+' visuels officiels disponibles.'
+   ?itemTemplates.items.length+' objets officiels importables, '+
+     (itemTemplates.icons?.length??0)+' icônes supplémentaires utilisables manuellement.'
    :'Icônes en attente du dépôt validé. Création manuelle déjà disponible.');
  }catch(error){
   console.warn('Catalogue visuel officiel indisponible ; jeu intact',error);

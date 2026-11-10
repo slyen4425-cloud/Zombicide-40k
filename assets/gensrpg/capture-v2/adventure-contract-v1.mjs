@@ -1,3 +1,7 @@
+import {
+ DEFAULT_ADVENTURE_FRAGMENTS_V1,normalizeAdventureFragmentRulesV1,
+ grantAdventureFragmentsV1,summonAdventureFromFragmentsV1,convertAdventureFragmentsToXpV1
+} from './adventure-fragments-v1.mjs';
 // Monster Capture V2 — Adventure game-state owner (GenSrpg only).
 // Combat remains authoritative for the outcome, the native Bestiary remains
 // authoritative for published species, and the existing Core owns storage
@@ -46,7 +50,9 @@ export const SHOWCASE_ADVENTURE_RULES_V1=freeze({
    {throughLevel:80,xpPerLevel:8000},
    {throughLevel:100,xpPerLevel:10000}
   ]
- }
+ },
+ // Only new Showcase worlds opt in; old saves retain their historical rules.
+ fragmentRecruitment:DEFAULT_ADVENTURE_FRAGMENTS_V1
 });
 function object(value,label){
  if(!value||typeof value!=='object'||Array.isArray(value))
@@ -96,7 +102,8 @@ function iso(value,field){
 export function normalizeAdventureRulesV1(input){
  // Additive optional policy: historical v1 rules have no heroProgression.
  // Their precise old representation remains legal, and never enables hero XP.
- const {heroProgression:heroRaw,combat:combatRaw,navigation:navigationRaw,...legacy}=object(input,'AdventureRules');
+ const {heroProgression:heroRaw,combat:combatRaw,navigation:navigationRaw,
+  fragmentRecruitment:fragmentRaw,...legacy}=object(input,'AdventureRules');
  const navigation=navigationRaw===undefined?null:
   exact(navigationRaw,['moveSpeed'],'navigation');
  if(navigation){
@@ -197,7 +204,9 @@ export function normalizeAdventureRulesV1(input){
   ...(navigation?{navigation:{moveSpeed:navigation.moveSpeed}}:{}),
   heroProgression:{enabled:hero.enabled,xpGainPercent:hero.xpGainPercent,
    xpPerLevel:hero.xpPerLevel,maxLevel:hero.maxLevel,
-   talentPointsPerLevel:hero.talentPointsPerLevel}
+   talentPointsPerLevel:hero.talentPointsPerLevel},
+  ...(fragmentRaw===undefined?{}:{
+   fragmentRecruitment:normalizeAdventureFragmentRulesV1(fragmentRaw)})
  });
 }
 // The existing Core Progression accepts compact bands and alone computes
@@ -451,6 +460,32 @@ function assertSession(session){
   integer(owned.xp,field+'.xp');
   statWallet(owned,normalizeAdventureRulesV1(v.rules).progression);
   if(owned.hp!==null)number(owned.hp,field+'.hp');
+ }
+ // Storage is separate from the battle bench (party.reserve).
+ // Old Adventure saves have no storedCreatures and remain valid unchanged.
+ const stored=v.storedCreatures??[];
+ if(!Array.isArray(stored)||stored.length>100000)
+  throw new TypeError('Invalid Adventure creature storage');
+ for(const [index,entry] of stored.entries()){
+  const field='storedCreatures['+index+']',storedMember=object(entry,field);
+  const id=identity(storedMember.instanceId,field+'.instanceId');
+  if(instances.has(id))throw new RangeError('Duplicate stored Adventure creature instance');
+  instances.add(id);
+  identity(storedMember.speciesId,field+'.speciesId');
+  integer(storedMember.level,field+'.level',1,v.rules.progression.maxLevel);
+  integer(storedMember.xp,field+'.xp');
+  statWallet(storedMember,normalizeAdventureRulesV1(v.rules).progression);
+  if(storedMember.hp!==null)number(storedMember.hp,field+'.hp');
+ }
+ if(Object.hasOwn(v,'processedFragmentActions')){
+  if(!Array.isArray(v.processedFragmentActions))
+   throw new TypeError('Invalid fragment action history');
+  const actions=new Set();
+  for(const id of v.processedFragmentActions){
+   identity(id,'fragment actionId');
+   if(actions.has(id))throw new RangeError('Duplicate fragment action record');
+   actions.add(id);
+  }
  }
  if(Object.hasOwn(v,'sessionControl'))
   normalizeAdventureSessionControlV1(v.sessionControl);
@@ -719,6 +754,33 @@ export function applyAdventureCombatResultV1({
  });
  assertSession(updated);
  return {applied:true,session:updated,award};
+}
+// Fragments use the same AdventureSession and Core Progression authorities.
+export function awardAdventureSpeciesFragmentsV1({session,bestiaryCards,...event}={}){
+ const state=assertSession(session);
+ const result=grantAdventureFragmentsV1({session:state,
+  bestiaryCards:publishedAdventureSpeciesV1(bestiaryCards),...event});
+ assertSession(result.session);return result;
+}
+export function summonAdventureCreatureWithFragmentsV1({
+ session,bestiaryCards,progressionCore,...event
+}={}){
+ const state=assertSession(session);
+ const result=summonAdventureFromFragmentsV1({session:state,
+  bestiaryCards:publishedAdventureSpeciesV1(bestiaryCards),progressionCore,
+  progressionConfig:coreAdventureProgressionConfigV1(state.rules.progression),
+  ...event});
+ assertSession(result.session);return result;
+}
+export function grantAdventureCreatureFragmentXpV1({
+ session,bestiaryCards,progressionCore,...event
+}={}){
+ const state=assertSession(session);
+ const result=convertAdventureFragmentsToXpV1({session:state,
+  bestiaryCards:publishedAdventureSpeciesV1(bestiaryCards),progressionCore,
+  progressionConfig:coreAdventureProgressionConfigV1(state.rules.progression),
+  ...event});
+ assertSession(result.session);return result;
 }
 // Recovery of historical saved KO states only after a real, correlated defeat.
 // Never heal a manual HP=0 edit or another outcome; never change the bestiary.

@@ -171,7 +171,7 @@ export function renderAdventureSheetViewV1({
   const section=node('section','sheet-inventory');
   const heading=node('div','sheet-inventory-heading');
   heading.append(node('h3','','Mon sac'),node('span','sheet-currency',
-   '◈ '+snapshot.inventory.currency+' pièces'));
+   '◈ '+snapshot.inventory.currency+' '+(snapshot.inventory.currencyLabel??'pièces')));
   section.append(heading);
   if(!snapshot.inventory.items.length){
    section.append(hint('Ton inventaire est vide pour le moment.'));

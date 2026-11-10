@@ -47,6 +47,7 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
    saleValue:rule?.saleValue??null});
   const policy=adventureFragmentSpeciesRulesV1(rules.fragmentRecruitment,speciesId);
   const targets=[...members,...stored].filter(member=>member.speciesId===speciesId);
+  const xpTargets=targets.filter(member=>member.level<rules.progression.maxLevel);
   const teamFree=members.length<6;
   const storageFree=stored.length<policy.storageCapacity;
   const canSummon=quantity>=policy.required&&
@@ -55,11 +56,11 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
   return frozen({id,name:'Éclat de '+species.name,quantity,saleValue:null,
    fragment:frozen({speciesId,required:policy.required,
     summonLevel:policy.summonLevel,xpPerFragment:policy.xpPerFragment,
-    canSummon,canConvert:targets.length>0&&quantity>0,
+    canSummon,canConvert:xpTargets.length>0&&quantity>0&&policy.xpPerFragment>0,
     message:!teamFree&&!storageFree?'Stockage plein : éclats conservés':
      !policy.allowDuplicates&&targets.length>0?'Un seul exemplaire autorisé':
      'Éclats de '+species.name+' : '+quantity+' / '+policy.required,
-    targets:frozen(targets.map(member=>frozen({
+    targets:frozen(xpTargets.map(member=>frozen({
      instanceId:member.instanceId,
      label:species.name+' · niv. '+member.level+
       (member.hp===0?' · KO':'')+(stored.includes(member)?' · stockage':' · équipe')

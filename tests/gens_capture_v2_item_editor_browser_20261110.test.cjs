@@ -162,7 +162,7 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
 
   // The drop editor uses ONE official species registry, not a second
   // per-monster inventory. Filtering must not alter the other species.
-  await frame.locator('#adventure-drop-filter').selectOption(templateSpecies[0]);
+  await frame.locator('#adventure-drop-filter').selectOption(templateSpecies[1]);
   assert.equal(await frame.locator('#adventure-drops .rule-row').count(),1,
    'one authored imported drop is visible for this published species');
   await frame.locator('#adventure-drop-filter').selectOption('');

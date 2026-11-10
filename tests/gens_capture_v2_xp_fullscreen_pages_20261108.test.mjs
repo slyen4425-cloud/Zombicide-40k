@@ -1,3 +1,4 @@
+import './gens_capture_v2_fragments_labs_promotion_20261110.test.mjs'; // Physical Capture fragments and paired Lab pin gate
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';

@@ -227,6 +227,10 @@ export function convertAdventureFragmentsToXpV1({
   throw new TypeError('Official Core Progression required');
  const member=owned(session).find(v=>v.instanceId===instanceId&&v.speciesId===speciesId);
  if(!member)throw new RangeError('Target creature instance is not owned');
+ if(member.level>=session.rules.progression.maxLevel)
+  throw new RangeError('Creature already at maximum level: fragments preserved');
+ if(policy.xpPerFragment===0)
+  throw new RangeError('Fragment XP conversion is disabled for this world');
  const inventory=debit(session,speciesId,quantity);
  const gain=positive(quantity*policy.xpPerFragment,'fragment XP award',0);
  const xp=positive(member.xp+gain,'total creature XP',0);

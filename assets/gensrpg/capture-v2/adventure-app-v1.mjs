@@ -1542,7 +1542,14 @@ $('adventure-return-preparation').addEventListener('click',guarded(()=>{
  saveCurrentAdventureRules();
  navigateToAdventureOwner('adventure');
 }));
-$('adventure-drop-filter').addEventListener('change',renderItemRules);
+$('adventure-drop-filter').addEventListener('change',()=>{
+ const speciesId=$('adventure-drop-filter').value;
+ // When focusing one species, edit that very same official monster's drop
+ // and fragment settings. Clearing the filter returns to the full registry.
+ if(speciesId&&published.some(card=>card.id===speciesId))
+  $('adventure-drop-species').value=speciesId;
+ renderItemRules();
+});
 $('adventure-drop-species').addEventListener('change',renderMonsterFragmentEditor);
 $('adventure-monster-fragments-save').addEventListener('click',guarded(()=>{
  const speciesId=$('adventure-drop-species').value;

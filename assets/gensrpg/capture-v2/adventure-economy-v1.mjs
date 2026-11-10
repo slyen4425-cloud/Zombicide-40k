@@ -123,7 +123,8 @@ export function tradeAdventureMerchantInventoryV1({
  if(kind==='buy'){
   const offer=merchant.offers.find(x=>x.itemId===target);
   if(!offer)throw new RangeError('Merchant does not offer this item');
-  const remaining=stocks[merchant.id]?.[target]??offer.stock;
+  const remaining=offer.stock===null?null:
+   Math.min(stocks[merchant.id]?.[target]??offer.stock,offer.stock);
   if(remaining!==null&&remaining<count)throw new RangeError('Merchant out of stock');
   paidCurrency=multiply(offer.currencyPrice,count,'currency purchase');
   if(currency<paidCurrency)throw new RangeError('Insufficient currency');

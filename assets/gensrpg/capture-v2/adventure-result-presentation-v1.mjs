@@ -30,7 +30,16 @@ export function projectAdventureCombatAwardV1({session,award,bestiaryCards=[]}={
       value:'+'+m.xp+' XP · niv. '+m.levelBefore+' → '+m.levelAfter}))]
   :[Object.freeze({label:'XP créature',value:'+'+saved.xp+' XP pour '+member}),
     Object.freeze({label:'Progression',value:'Niveau '+saved.levelBefore+' → '+saved.levelAfter})];
- const itemName=id=>session.rules.loot.items.find(item=>item.id===id)?.name??id;
+ const itemName=id=>{
+  const authored=session.rules.loot.items.find(item=>item.id===id);
+  if(authored)return authored.name;
+  // Official bestiary is the only naming authority for species fragments.
+  if(id.startsWith('fragment:')&&session.rules.fragmentRecruitment?.enabled){
+   const species=bestiaryCards.find(card=>card.id===id.slice('fragment:'.length));
+   if(species)return 'Éclat de '+species.name;
+  }
+  return id;
+ };
  const drops=saved.drops.map(item=>itemName(item.itemId)+' ×'+item.quantity);
  const title=saved.outcome==='victory'?'Victoire':
   saved.outcome==='defeat'?'Défaite':'Fuite';

@@ -329,3 +329,29 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
 #adventure-saved-roster h4{margin:0 0 7px;font-size:14px;color:#e2fcf2}
 #adventure-saved-roster ol{margin:0;padding-left:23px;display:grid;gap:4px}
 #adventure-saved-roster li{font-size:13px;line-height:1.45;color:#deefe8}
+
+
+/* Capture V2 fragments: compact inside the EXISTING Sac and creator editor. */
+#adventure-fragments-panel{margin-top:12px;padding:9px;border:1px solid #345a62;border-radius:10px;background:#102a35}
+#adventure-fragments-panel>summary{font-size:14px;padding:4px 2px}
+#adventure-fragments-panel h3{font-size:13px;margin:12px 0 4px}
+#adventure-fragments-panel .fields{gap:4px 10px}
+#adventure-fragments-panel .hint{font-size:11px;line-height:1.4}
+.sheet-item:has(.sheet-item-icon){grid-template-columns:36px minmax(0,1fr) auto}
+.sheet-item-icon{width:36px;height:36px;object-fit:contain;grid-row:1/span 2}
+.sheet-item-progress{grid-column:1/-1;font-size:11px;line-height:1.35;color:#c2e6d8}
+.sheet-fragment-summon{grid-column:1/-1;min-height:35px}
+.sheet-fragment-xp{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(86px,.55fr);gap:5px 8px}
+.sheet-fragment-xp label{font-size:11px;margin:0;min-width:0}
+.sheet-fragment-xp select,.sheet-fragment-xp input{width:100%;max-width:100%;min-width:0;padding:7px}
+.sheet-fragment-xp button{grid-column:1/-1;min-height:35px}
+.sheet-fragment-xp small{grid-column:1/-1;color:#b6d5cf;font-size:11px}
+.sheet-storage{border:1px solid #335965;background:#112a35;padding:10px;margin-top:10px;border-radius:10px}
+.sheet-storage h3{font-size:14px;margin:0 0 6px}
+.sheet-storage-member{font-size:12px;margin:4px 0;color:#d5ece7}
+@media(orientation:landscape) and (max-height:550px){
+ #adventure-fragments-panel{padding:6px}
+ .sheet-items{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:6px}
+ .sheet-item{padding:8px}
+ .sheet-fragment-xp select,.sheet-fragment-xp input{height:35px}
+}

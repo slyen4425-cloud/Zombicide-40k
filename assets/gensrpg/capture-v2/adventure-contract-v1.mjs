@@ -1,6 +1,7 @@
 import {
  DEFAULT_ADVENTURE_FRAGMENTS_V1,normalizeAdventureFragmentRulesV1,
- grantAdventureFragmentsV1,summonAdventureFromFragmentsV1,convertAdventureFragmentsToXpV1
+ grantAdventureFragmentsV1,summonAdventureFromFragmentsV1,convertAdventureFragmentsToXpV1,
+ rollAdventureFragmentDropV1
 } from './adventure-fragments-v1.mjs';
 // Monster Capture V2 — Adventure game-state owner (GenSrpg only).
 // Combat remains authoritative for the outcome, the native Bestiary remains
@@ -639,6 +640,17 @@ export function applyAdventureCombatResultV1({
     Math.floor(roll(random)*(drop.maxQuantity-drop.minQuantity+1));
    itemCounts[drop.itemId]=(itemCounts[drop.itemId]||0)+quantity;
    drops.push({itemId:drop.itemId,quantity});
+  }
+  // Commit fragment rewards under the SAME CombatResult encounter receipt.
+  // Historical saves without fragment rules keep their exact loot behavior.
+  const fragmentDrop=rollAdventureFragmentDropV1({
+   rules:state.rules.fragmentRecruitment,speciesId:enemyId,random
+  });
+  if(fragmentDrop){
+   const next=(itemCounts[fragmentDrop.itemId]??0)+fragmentDrop.quantity;
+   integer(next,'fragment inventory total',1);
+   itemCounts[fragmentDrop.itemId]=next;
+   drops.push(fragmentDrop);
   }
  }
  const hp=result.partyState?.hp;

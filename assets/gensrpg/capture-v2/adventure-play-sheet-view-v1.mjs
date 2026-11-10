@@ -95,7 +95,8 @@ function statGrid(stats,{availablePoints=null,onAllocate=null}={}){
 }
 export function renderAdventureSheetViewV1({
  host,snapshot,tab,portraitUrl=null,heroVisual=null,onAllocate=null,
- onSelectCreature=null,onMoveCreature=null,onMakeActive=null
+ onSelectCreature=null,onMoveCreature=null,onMakeActive=null,
+ onSummonFragment=null,onUseFragmentXp=null,resolveFragmentIcon=null
 }={}){
  if(!host||!snapshot)throw new TypeError('A valid active Capture sheet and host are required');
  const content=[];
@@ -182,11 +183,61 @@ export function renderAdventureSheetViewV1({
      node('strong','sheet-item-quantity','× '+item.quantity));
     if(item.saleValue!==null)row.append(node('small','sheet-item-value',
      item.saleValue+' pièces / unité'));
+    if(item.fragment){
+     const fragment=item.fragment;
+     const imageUrl=resolveFragmentIcon?.(fragment.speciesId);
+     if(imageUrl){
+      const image=node('img','sheet-item-icon');
+      image.alt='Icône officielle de '+item.name;image.src=imageUrl;
+      image.loading='lazy';row.prepend(image);
+     }
+     row.append(node('small','sheet-item-progress',
+      fragment.message+' · Invocation niv. '+fragment.summonLevel));
+     if(onSummonFragment){
+      const summon=node('button','sheet-fragment-summon','Invoquer');
+      summon.type='button';summon.disabled=!fragment.canSummon;
+      summon.setAttribute('aria-label','Invoquer '+item.name);
+      summon.addEventListener('click',()=>onSummonFragment(fragment.speciesId));
+      row.append(summon);
+     }
+     if(onUseFragmentXp&&fragment.targets.length){
+      const controls=node('div','sheet-fragment-xp');
+      const targetLabel=node('label','', 'Donner de l’XP à');
+      const selector=node('select','sheet-fragment-target');
+      selector.setAttribute('aria-label','Créature recevant les éclats '+item.name);
+      for(const target of fragment.targets){
+       const entry=node('option','',target.label);
+       entry.value=target.instanceId;selector.append(entry);
+      }
+      targetLabel.append(selector);
+      const quantityLabel=node('label','', 'Éclats à utiliser');
+      const amount=node('input','sheet-fragment-quantity');
+      amount.type='number';amount.min='1';amount.max=String(item.quantity);
+      amount.step='1';amount.value='1';
+      quantityLabel.append(amount);
+      const convert=node('button','sheet-fragment-convert','Convertir en XP');
+      convert.type='button';convert.disabled=!fragment.canConvert;
+      convert.addEventListener('click',()=>onUseFragmentXp(
+       fragment.speciesId,selector.value,Number(amount.value)));
+      controls.append(targetLabel,quantityLabel,convert);
+      controls.append(node('small','',fragment.xpPerFragment+' XP par éclat'));
+      row.append(controls);
+     }
+    }
     grid.append(row);
    }
    section.append(grid);
   }
   content.push(section);
+  if(snapshot.storage?.count){
+   const reserve=node('section','sheet-storage');
+   reserve.append(node('h3','','Stockage hors combat · '+snapshot.storage.count+' créature(s)'));
+   for(const member of snapshot.storage.members)
+    reserve.append(node('p','sheet-storage-member',
+     member.name+' · niveau '+member.level+(member.hp===0?' · KO':'')));
+   reserve.append(hint('Ces créatures ne sont pas remplaçantes en combat. Leur transfert vers l’équipe sera configuré séparément.'));
+   content.push(reserve);
+  }
  }else throw new RangeError('Rubrique de fiche inconnue');
  host.replaceChildren(...content);
 }

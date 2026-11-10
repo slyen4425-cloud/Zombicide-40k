@@ -8,9 +8,11 @@ import {dirname,resolve} from 'node:path';
 import {
  DEFAULT_ADVENTURE_RULES_V1,SHOWCASE_ADVENTURE_RULES_V1,
  createAdventureSessionV1,createAdventureStoreV1,
+ applyAdventureCombatResultV1,
  normalizeAdventureRulesV1,awardAdventureSpeciesFragmentsV1,
  summonAdventureCreatureWithFragmentsV1,grantAdventureCreatureFragmentXpV1
 } from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
+import {projectAdventureCombatAwardV1} from '../assets/gensrpg/capture-v2/adventure-result-presentation-v1.mjs';
 import {adventureFragmentItemIdV1,normalizeAdventureFragmentRulesV1}
  from '../assets/gensrpg/capture-v2/adventure-fragments-v1.mjs';
 
@@ -158,4 +160,90 @@ test('same Core persistence keeps storage and inventory isolated per saved world
  assert.equal(count(store.load(),'gemmor'),0);
  assert.equal(count(s,'gemmor'),10);
  assert.equal(count(session(),'gemmor'),0);
+});
+
+test('official native CombatResult grants one species fragment after victory and never re-rolls',()=>{
+ const original=session();
+ const envelope={
+  version:1,
+  snapshot:{schema:'capture-encounter-snapshot-v1',version:1,
+   encounterId:'encounter-frag-1',returnToken:'return-frag-1',
+   opponents:[{creatureId:'gemmor'}]},
+  result:{schema:'capture-combat-result-v1',version:1,
+   encounterId:'encounter-frag-1',returnToken:'return-frag-1',
+   outcome:'victory',partyState:{activeCreatureId:'gorice',hp:10},rewards:[]}
+ };
+ const first=applyAdventureCombatResultV1({
+  session:original,envelope,bestiaryCards:cards,
+  progressionCore,random:()=>0.1,now
+ });
+ assert.equal(first.applied,true);
+ assert.equal(count(first.session,'gemmor'),1);
+ assert.equal(first.award.drops.length,1);
+ const receipt=projectAdventureCombatAwardV1({
+  session:first.session,award:first.award,bestiaryCards:cards
+ });
+ assert.match(receipt.rows.find(row=>row.label==='Objets').value,
+  /Éclat de Gemmor ×1/);
+ assert.deepEqual({...first.award.drops[0]},
+  {itemId:adventureFragmentItemIdV1('gemmor'),quantity:1});
+ const unchanged=applyAdventureCombatResultV1({
+  session:first.session,envelope,bestiaryCards:cards,progressionCore,
+  random:()=>{throw new Error('duplicate draw')},now
+ });
+ assert.equal(unchanged.applied,false);
+ assert.equal(count(unchanged.session,'gemmor'),1);
+ assert.equal(first.session.processedEncounterKeys.length,1);
+ assert.equal(count(original,'gemmor'),0);
+});
+test('custom native chance and species quantity override apply only to victory',()=>{
+ const rules=structuredClone(SHOWCASE_ADVENTURE_RULES_V1);
+ rules.fragmentRecruitment.dropChancePercent=0;
+ rules.fragmentRecruitment.perSpecies.gemmor={
+  dropChancePercent:80,dropMin:2,dropMax:4
+ };
+ const initial=session(rules);
+ const event=(outcome,id)=>({
+  version:1,
+  snapshot:{schema:'capture-encounter-snapshot-v1',version:1,
+   encounterId:id,returnToken:id+'-return',opponents:[{creatureId:'gemmor'}]},
+  result:{schema:'capture-combat-result-v1',version:1,encounterId:id,
+   returnToken:id+'-return',outcome,
+   partyState:{activeCreatureId:'gorice',hp:18},rewards:[]}
+ });
+ for(const outcome of ['fled','defeat']){
+  const got=applyAdventureCombatResultV1({
+   session:initial,envelope:event(outcome,'no-'+outcome),
+   bestiaryCards:cards,progressionCore,random:()=>0,now
+  });
+  assert.equal(count(got.session,'gemmor'),0);
+ }
+ const missed=applyAdventureCombatResultV1({
+  session:initial,envelope:event('victory','miss'),
+  bestiaryCards:cards,progressionCore,random:()=>0.9,now
+ });
+ assert.equal(count(missed.session,'gemmor'),0);
+ const won=applyAdventureCombatResultV1({
+  session:initial,envelope:event('victory','hit'),
+  bestiaryCards:cards,progressionCore,
+  random:(()=>{let n=0;return ()=>++n===1?0.1:0.99})(),now
+ });
+ assert.equal(count(won.session,'gemmor'),4);
+ assert.equal(won.award.drops[0].quantity,4);
+});
+test('XP at level cap and a disabled XP policy preserve fragment balance',()=>{
+ const normal=structuredClone(SHOWCASE_ADVENTURE_RULES_V1);
+ const atCap=session(normal);
+ const max=atCap.rules.progression.maxLevel;
+ const capped={...atCap,party:{...atCap.party,
+  active:{...atCap.party.active,level:max,xp:1000000}}};
+ const saved=grant(capped,'gorice',2,'cap-drop').session;
+ assert.throws(()=>xp(saved,'gorice','cap-convert',saved.party.active.instanceId,1),
+  /maximum level/);
+ assert.equal(count(saved,'gorice'),2);
+ normal.fragmentRecruitment.xpPerFragment=0;
+ const zero=grant(session(normal),'gorice',1,'zero-drop').session;
+ assert.throws(()=>xp(zero,'gorice','zero-convert',zero.party.active.instanceId,1),
+  /disabled/);
+ assert.equal(count(zero,'gorice'),1);
 });

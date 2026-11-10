@@ -187,6 +187,8 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   await frame.locator('#adventure-return-preparation').tap();
   await page.waitForFunction(()=>window.GensCaptureV2?.status?.().view==='adventure');
   await frame.locator('#adventure-loot-panel summary').first().tap();
+  await frame.locator('#adventure-loot-preparation-count').filter({hasText:/9 objet\(s\)/})
+   .waitFor({timeout:40000});
   assert.equal(await frame.locator('#adventure-item-authoring').isVisible(),false,
    'preplay must not expose a second catalogue or merchant editor');
   assert.match(await frame.locator('#adventure-loot-preparation-count').innerText(),

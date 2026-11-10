@@ -17,6 +17,7 @@
     combat:{label:"Règles de combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=combat",family:"combat"},
     music:{label:"Musiques",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=music",family:"combat"},
     bestiary:{label:"Bestiaire",path:"vendor/combat-lab/examples/dom-demo/bestiary.html",family:"combat"},
+    items:{label:"Objets et drops",path:"assets/gensrpg/capture-v2/adventure.html?editor=items",family:"capture"},
     adventure:{label:"Jouer",path:"assets/gensrpg/capture-v2/adventure.html",family:"capture"}
   });
   // Navigation is presentation-only: one destination per native owner,
@@ -24,7 +25,8 @@
   const EDITOR_GROUPS=Object.freeze([
     Object.freeze({id:"world",title:"Monde",items:Object.freeze(["world","builder"])}),
     Object.freeze({id:"combat",title:"Créatures et combat",items:Object.freeze(
-      ["creature","skills","combat","bestiary","music"])})
+      ["creature","skills","combat","bestiary","music"])}),
+    Object.freeze({id:"economy",title:"Objets et économie",items:Object.freeze(["items"])})
   ]);
   const shell=root.GensShellModuleLaunchV1;
   const returnShell=root.GensShellScreenReturnV1;

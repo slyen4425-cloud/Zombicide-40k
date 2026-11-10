@@ -47,6 +47,9 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   await frame.locator('#adventure-loot-panel:visible').waitFor({timeout:30000});
   await frame.locator('#adventure-status').waitFor({timeout:30000});
   await frame.locator('#adventure-drop-species:not([disabled])').waitFor({timeout:40000});
+  const officialSpecies=await frame.locator('#adventure-drop-species option')
+   .evaluateAll(nodes=>nodes.map(x=>({id:x.value,name:x.textContent})));
+  console.log('AUTHORED_DROP_OFFICIAL_SPECIES',JSON.stringify(officialSpecies));
   assert.equal(await frame.locator('body').getAttribute('data-adventure-item-editor'),'true');
   assert.equal(await frame.locator('#adventure-item-import').isDisabled(),true,
    'do not invent official item images before deposit');

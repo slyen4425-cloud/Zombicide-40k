@@ -3,6 +3,8 @@ import {
  grantAdventureFragmentsV1,summonAdventureFromFragmentsV1,convertAdventureFragmentsToXpV1,
  rollAdventureFragmentDropV1
 } from './adventure-fragments-v1.mjs';
+import {normalizeAdventureEconomyV1,tradeAdventureMerchantInventoryV1}
+ from './adventure-economy-v1.mjs';
 // Monster Capture V2 — Adventure game-state owner (GenSrpg only).
 // Combat remains authoritative for the outcome, the native Bestiary remains
 // authoritative for published species, and the existing Core owns storage
@@ -104,7 +106,7 @@ export function normalizeAdventureRulesV1(input){
  // Additive optional policy: historical v1 rules have no heroProgression.
  // Their precise old representation remains legal, and never enables hero XP.
  const {heroProgression:heroRaw,combat:combatRaw,navigation:navigationRaw,
-  fragmentRecruitment:fragmentRaw,...legacy}=object(input,'AdventureRules');
+  fragmentRecruitment:fragmentRaw,economy:economyRaw,...legacy}=object(input,'AdventureRules');
  const navigation=navigationRaw===undefined?null:
   exact(navigationRaw,['moveSpeed'],'navigation');
  if(navigation){
@@ -213,7 +215,8 @@ export function normalizeAdventureRulesV1(input){
    xpPerLevel:hero.xpPerLevel,maxLevel:hero.maxLevel,
    talentPointsPerLevel:hero.talentPointsPerLevel},
   ...(fragmentRaw===undefined?{}:{
-   fragmentRecruitment:normalizeAdventureFragmentRulesV1(fragmentRaw)})
+   fragmentRecruitment:normalizeAdventureFragmentRulesV1(fragmentRaw)}),
+  ...(economyRaw===undefined?{}:{economy:normalizeAdventureEconomyV1(economyRaw,items)})
  });
 }
 // The existing Core Progression accepts compact bands and alone computes
@@ -494,6 +497,30 @@ function assertSession(session){
    actions.add(id);
   }
  }
+ // Merchant stock and transaction receipts live in the SAME AdventureSession.
+ // Old saves without an economy never acquire a merchant or a second wallet.
+ if(Object.hasOwn(v,'processedMerchantActions')){
+  if(!Array.isArray(v.processedMerchantActions))
+   throw new TypeError('Invalid merchant action history');
+  const actions=new Set();
+  for(const action of v.processedMerchantActions){
+   identity(action,'merchant actionId');
+   if(actions.has(action))throw new RangeError('Duplicate merchant action');
+   actions.add(action);
+  }
+ }
+ if(Object.hasOwn(v,'merchantStocks')){
+  const stocks=object(v.merchantStocks,'merchantStocks');
+  // A creator may retire a merchant, remove an offer, or change its stock.
+  // Historical remaining-stock entries stay inert, never invalidate a save.
+  for(const [merchantId,entries] of Object.entries(stocks)){
+   identity(merchantId,'stock merchantId');
+   for(const [itemId,count] of Object.entries(object(entries,'merchant stocks'))){
+    identity(itemId,'stock itemId');
+    integer(count,'merchant stock',0);
+   }
+  }
+ }
  if(Object.hasOwn(v,'sessionControl'))
   normalizeAdventureSessionControlV1(v.sessionControl);
  if(Object.hasOwn(v,'hero')){
@@ -772,6 +799,29 @@ export function applyAdventureCombatResultV1({
  });
  assertSession(updated);
  return {applied:true,session:updated,award};
+}
+// The merchant engine only changes inventory.currency/inventory.items and
+// the merchant stock/receipts on the validated AdventureSession. A future
+// Exploration NPC interaction will pass merchantId, not a duplicate shop state.
+export function tradeAdventureMerchantV1({session,bestiaryCards,...transaction}={}){
+ const state=assertSession(session);
+ if(transaction.kind==='buy'){
+  const merchant=state.rules.economy?.merchants.find(m=>m.id===transaction.merchantId);
+  const offer=merchant?.offers.find(o=>o.itemId===transaction.itemId);
+  const fragments=[transaction.itemId,...(offer?.resourceCosts??[]).map(r=>r.itemId)]
+   .filter(id=>typeof id==='string'&&id.startsWith('fragment:'));
+  if(fragments.length){
+   if(!state.rules.fragmentRecruitment?.enabled)
+    throw new RangeError('Creature fragments are disabled in this world');
+   const valid=new Set(publishedAdventureSpeciesV1(bestiaryCards).map(card=>card.id));
+   for(const itemId of fragments)
+    if(!valid.has(itemId.slice('fragment:'.length)))
+     throw new RangeError('Fragment species absent from official published Bestiary');
+  }
+ }
+ const result=tradeAdventureMerchantInventoryV1({session:state,...transaction});
+ if(result.applied)assertSession(result.session);
+ return result;
 }
 // Fragments use the same AdventureSession and Core Progression authorities.
 export function awardAdventureSpeciesFragmentsV1({session,bestiaryCards,...event}={}){

@@ -104,5 +104,6 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
    return frozen({instanceId:member.instanceId,speciesId:member.speciesId,
     name:card?.name??member.speciesId,level:member.level,hp:member.hp});
   }))}),
-  inventory:frozen({currency:session.inventory.currency,items})});
+  inventory:frozen({currency:session.inventory.currency,items,
+   ...(rules.economy?{currencyLabel:rules.economy.currency.plural}:{})})});
 }

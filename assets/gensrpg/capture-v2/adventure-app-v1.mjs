@@ -52,6 +52,7 @@ import {DEFAULT_ADVENTURE_FRAGMENTS_V1}
  from './adventure-fragments-v1.mjs';
 import {normalizeCaptureItemTemplatesV1,materializeCaptureItemTemplatesV1}
  from './item-templates-v1.mjs';
+import {installAdventureEconomyEditorV1} from './adventure-economy-editor-v1.mjs';
 
 const $=id=>document.getElementById(id);
 const status=$('adventure-status');
@@ -80,6 +81,7 @@ let rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
 const isItemEditor=new URLSearchParams(window.location.search).get('editor')==='items';
 let activeItemEditId=null;
 let activeDropEditIndex=null;
+let economyEditor=null;
 let itemTemplates=Object.freeze({schema:'gensrpg-capture-item-templates-v1',version:1,items:Object.freeze([])});
 const availableItemVisuals=()=>[...itemTemplates.items,...(itemTemplates.icons??[])];
 const officialItemIconUrl=iconKey=>{
@@ -195,6 +197,7 @@ function setFields(value){
  $(idField.statPoints).value=value.progression.statPointsPerLevel??0;
  $(idField.currency).value=value.loot.currencyPerVictory;
  $(idField.hpPercent).value=100*value.combat.hpMultiplier;
+ economyEditor?.sync(value);
  $(idField.moveSpeed).value=value.navigation?.moveSpeed??90;
  $('adventure-move-speed-value').textContent=$(idField.moveSpeed).value;
  $('adventure-defeat-policy').value=value.combat.defeatPolicy??'restore';
@@ -213,6 +216,7 @@ function setFields(value){
  }
 }
 function fromFields(){
+ const economy=economyEditor?.read();
  return normalizeAdventureRulesV1({
   ...rules,
   xp:{...rules.xp,baseVictoryXp:numberFrom(idField.base),
@@ -225,6 +229,7 @@ function fromFields(){
    statPointsPerLevel:numberFrom(idField.statPoints),
    ...($(idField.xpMode).value==='custom'?{xpBands:readXpBandRows()}: {})},
   loot:{...rules.loot,currencyPerVictory:numberFrom(idField.currency)},
+  ...(economy===undefined?{}:{economy}),
   combat:{hpMultiplier:numberFrom(idField.hpPercent)/100,
     defeatPolicy:$('adventure-defeat-policy').value},
   navigation:{moveSpeed:numberFrom(idField.moveSpeed)},
@@ -433,12 +438,15 @@ function renderItemRules(){
    const image=document.createElement('img');image.className='sheet-item-icon';
    image.alt='Icône de '+item.name;image.src=iconUrl;image.loading='lazy';holder.append(image);
   }
-  const span=document.createElement('span');span.textContent=item.name+' · '+item.saleValue+' pièces';
+  const span=document.createElement('span');span.textContent=item.name+' · '+item.saleValue+' '+
+   (rules.economy?.currency.plural??'pièces');
   holder.append(span);
   const edit=document.createElement('button');edit.type='button';edit.textContent='Modifier';
   edit.addEventListener('click',guarded(()=>editItem(item.id)));
   const remove=document.createElement('button');remove.type='button';remove.textContent='Supprimer';
   remove.addEventListener('click',guarded(()=>{
+   if(economyEditor?.isItemUsed(item.id))
+    throw new Error('Objet utilisé par un marchand : retire d’abord ses offres ou ressources de paiement.');
    const attached=rules.loot.drops.filter(d=>d.itemId===item.id).length;
    if(attached&&!window.confirm('Supprimer '+item.name+' et ses '+attached+' drop(s) associés ?'))return;
    rules=normalizeAdventureRulesV1({...rules,loot:{...rules.loot,
@@ -470,6 +478,7 @@ function renderItemRules(){
   edit.addEventListener('click',guarded(()=>editDropRule(index)));
   holder.append(edit);return holder;
  }): [document.createTextNode('Aucun drop : aucune récompense aléatoire implicite.')]));
+ economyEditor?.render();
 }
 async function loadOfficialItemTemplates(){
  // Optional author illustrations must NEVER prevent the game from starting.
@@ -613,7 +622,8 @@ function showSave(){
   text($('adventure-save-summary'),
    'Partie '+state.sessionId.slice(0,8)+' · '+(card?.name??a.speciesId)+
    ' · niveau '+a.level+' · '+(1+(state.party.reserve?.length??0))+
-   ' créature(s) · '+a.xp+' XP · '+state.inventory.currency+' pièces'+
+   ' créature(s) · '+a.xp+' XP · '+state.inventory.currency+' '+
+   (state.rules.economy?.currency.plural??'pièces')+
    (a.hp===0?' · KO : 0 PV, soins ou réanimation nécessaires':'')+
    (state.rules.heroProgression?.enabled===true
     ?' · Héros niv. '+(state.hero?.progression?.level??1)+' · '+
@@ -1044,6 +1054,16 @@ for(const button of document.querySelectorAll('[data-adventure-sheet-tab]')){
  }));
 }
 
+economyEditor=installAdventureEconomyEditorV1({
+ document,getRules:()=>rules,getPublishedSpecies:()=>published,
+ commitEconomy:economy=>{
+  const currency={singular:$('adventure-money-singular').value.trim(),
+   plural:$('adventure-money-plural').value.trim()};
+  rules=normalizeAdventureRulesV1({...fromFields(),economy:{...economy,currency}});
+  renderItemRules();updatePreview();
+ },
+ notify:stateMessage
+});
 setFields(rules);
 setSessionControlFields(null);
 for(const field of Object.values(idField))$(field).addEventListener('input',updatePreview);

@@ -1612,7 +1612,6 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
  const drops=activeDropEditIndex===null?[...rules.loot.drops,drop]:
    rules.loot.drops.map((value,index)=>index===activeDropEditIndex?drop:value);
  rules=normalizeAdventureRulesV1({...fromFields(),loot:{...rules.loot,drops}});
- $('adventure-drop-filter').value=speciesId;
  resetDropEditor();renderItemRules();updatePreview();
  stateMessage('Règle de drop enregistrée dans le brouillon. Enregistre les paramètres pour confirmer.');
 }));

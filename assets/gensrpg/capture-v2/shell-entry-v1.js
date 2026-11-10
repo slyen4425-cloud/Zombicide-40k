@@ -134,6 +134,28 @@
     root.document.addEventListener("fullscreenchange",callback);
     return ()=>root.document.removeEventListener("fullscreenchange",callback);
   }
+  // The Shell transports a READ-ONLY request to the Capture rules owner.
+  // Exploration only sees merchant names. No second shop registry or input ID.
+  root.addEventListener("message",async event=>{
+    if(!host||current!=="builder"||!frame||
+       event.source!==frame.contentWindow||event.origin!==root.location.origin||
+       event.data?.schema!=="gensrpg.exploration.npc.merchant.catalog.request.v1")return;
+    const requestId=event.data.requestId;
+    if(typeof requestId!=="string"||!/^[a-z0-9-]{1,80}$/i.test(requestId))return;
+    const responder=event.source;
+    let merchants=[],error=null;
+    try{
+      const owner=await import(new URL(
+        "assets/gensrpg/capture-v2/adventure-merchant-catalog-bridge-v1.mjs",base));
+      merchants=owner.availableAdventureMerchantsForNpcV1({
+        storage:root.localStorage,coreStorage:root.GensStorageV1});
+    }catch(failure){error=String(failure?.message??failure).slice(0,180);}
+    if(frame?.contentWindow!==responder||current!=="builder")return;
+    responder.postMessage({
+      schema:"gensrpg.capture.v2.npc.merchant.catalog.response.v1",
+      requestId,merchants,error
+    },root.location.origin);
+  });
   function home(){
     if(!host)return false;
     if(gameFullscreenActive())void exitGameFullscreen();

@@ -1,0 +1,35 @@
+# Non-publishing Pages recovery watchdog.
+# Only re-triggers the existing canonical main.yml after a confirmed failure.
+# No second Pages owner, no asset edits, no reset of Pages environments.
+name: GenSRPG Pages recovery watchdog
+
+on:
+  schedule:
+    - cron: '0 1,7,13,19 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+# Two watchdog executions must never dispatch at the same time.
+concurrency:
+  group: pages-recovery-watchdog-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - name: Checkout exact main for source-verified watchdog
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify the watchdog safety gate before dispatch
+        run: node --test tests/gensrpg_pages_recovery_watchdog_20261110.test.mjs
+      - name: Inspect current Pages publication and safely request recovery
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node tools/gensrpg_pages_recovery_watchdog.mjs

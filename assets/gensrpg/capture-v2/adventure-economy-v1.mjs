@@ -45,6 +45,8 @@ export function normalizeAdventureEconomyV1(input,lootItems=[]){
  if(!Array.isArray(lootItems)||!Array.isArray(source.merchants))
   throw new TypeError('Economy items and merchants must be arrays');
  const existing=new Set(lootItems.map(item=>id(item.id,'economy item.id')));
+ const isCommodity=commodity=>existing.has(commodity)||
+  (commodity.startsWith('fragment:')&&commodity.length>'fragment:'.length);
  const seen=new Set();
  const merchants=source.merchants.map((raw,i)=>{
   const m=exact(raw,['id','name','buysItems','offers'],'economy.merchants['+i+']');
@@ -58,7 +60,7 @@ export function normalizeAdventureEconomyV1(input,lootItems=[]){
    const offer=exact(rawOffer,['itemId','currencyPrice','resourceCosts','stock'],
     'merchant.offers['+j+']');
    const itemId=id(offer.itemId,'offer.itemId');
-   if(!existing.has(itemId))throw new RangeError('Merchant item missing from loot.items: '+itemId);
+   if(!isCommodity(itemId))throw new RangeError('Merchant item missing from loot.items: '+itemId);
    if(offered.has(itemId))throw new RangeError('Duplicate merchant offer '+itemId);
    offered.add(itemId);
    const currencyPrice=integer(offer.currencyPrice,'offer.currencyPrice',0,100000000);
@@ -69,7 +71,7 @@ export function normalizeAdventureEconomyV1(input,lootItems=[]){
    const resourceCosts=offer.resourceCosts.map(cost=>{
     exact(cost,['itemId','quantity'],'offer.resourceCost');
     const resourceId=id(cost.itemId,'resourceCost.itemId');
-    if(!existing.has(resourceId))throw new RangeError('Unknown resource item: '+resourceId);
+    if(!isCommodity(resourceId))throw new RangeError('Unknown resource item: '+resourceId);
     if(resourceId===itemId)throw new RangeError('An item cannot pay for itself');
     if(resourceIds.has(resourceId))throw new RangeError('Duplicate resource cost '+resourceId);
     resourceIds.add(resourceId);
@@ -112,7 +114,8 @@ export function tradeAdventureMerchantInventoryV1({
  const target=id(itemId,'trade itemId');
  const count=integer(quantity,'trade quantity',1,9999);
  const definition=state.rules.loot.items.find(item=>item.id===target);
- if(!definition)throw new RangeError('Unknown trade item '+target);
+ if(!definition&&!target.startsWith('fragment:'))
+  throw new RangeError('Unknown trade item '+target);
  const inventory=obj(state.inventory,'inventory'),original=obj(inventory.items,'inventory.items');
  const items={...original};
  let currency=integer(inventory.currency,'inventory.currency');
@@ -144,6 +147,7 @@ export function tradeAdventureMerchantInventoryV1({
   }
  }else if(kind==='sell'){
   if(!merchant.buysItems)throw new RangeError('Merchant does not buy items');
+  if(!definition)throw new RangeError('Fragment resale has no authored saleValue');
   if((items[target]??0)<count)throw new RangeError('Insufficient items to sell');
   const price=integer(definition.saleValue,'item.saleValue',0,100000000);
   if(price===0)throw new RangeError('Item has no resale value');

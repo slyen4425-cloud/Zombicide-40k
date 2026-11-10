@@ -378,17 +378,64 @@ function row(caption,remove){
  holder.append(span,btn);
  return holder;
 }
+function resetItemEditor(){
+ activeItemEditId=null;
+ $('adventure-item-name').value='';$('adventure-item-value').value='0';
+ $('adventure-item-icon').value='';
+ $('adventure-item-add').textContent='Ajouter cet objet';
+ $('adventure-item-edit-cancel').hidden=true;
+}
+function editItem(itemId){
+ const item=rules.loot.items.find(value=>value.id===itemId);
+ if(!item)throw Error('Objet non disponible');
+ activeItemEditId=itemId;
+ $('adventure-item-name').value=item.name;
+ $('adventure-item-value').value=String(item.saleValue);
+ const select=$('adventure-item-icon');
+ if(item.iconKey&&!itemTemplates.items.some(x=>x.id===item.iconKey))
+  select.append(option(item.iconKey,'Icône indisponible (conservée)'));
+ select.value=item.iconKey??'';
+ $('adventure-item-add').textContent='Enregistrer les modifications';
+ $('adventure-item-edit-cancel').hidden=false;
+ $('adventure-item-name').focus();
+}
 function renderItemRules(){
  const itemList=$('adventure-items'),dropList=$('adventure-drops');
- itemList.replaceChildren(...(rules.loot.items.length?rules.loot.items.map(item=>
-  row(item.name+' · '+item.saleValue+' pièces',()=>{
-   const items=rules.loot.items.filter(i=>i.id!==item.id);
-   const drops=rules.loot.drops.filter(d=>d.itemId!==item.id);
-   rules=normalizeAdventureRulesV1({...rules,loot:{...rules.loot,items,drops}});
+ const needle=$('adventure-item-search').value.trim().toLocaleLowerCase('fr');
+ itemList.replaceChildren();
+ for(const item of rules.loot.items.filter(i=>!needle||
+  [i.name,...rules.loot.drops.filter(d=>d.itemId===i.id)
+   .map(d=>published.find(c=>c.id===d.speciesId)?.name??d.speciesId)]
+    .some(t=>t.toLocaleLowerCase('fr').includes(needle)))){
+  const holder=document.createElement('div');holder.className='rule-row';
+  const iconUrl=officialItemIconUrl(item.iconKey);
+  if(iconUrl){
+   const image=document.createElement('img');image.className='sheet-item-icon';
+   image.alt='Icône de '+item.name;image.src=iconUrl;image.loading='lazy';holder.append(image);
+  }
+  const span=document.createElement('span');span.textContent=item.name+' · '+item.saleValue+' pièces';
+  holder.append(span);
+  const edit=document.createElement('button');edit.type='button';edit.textContent='Modifier';
+  edit.addEventListener('click',guarded(()=>editItem(item.id)));
+  const remove=document.createElement('button');remove.type='button';remove.textContent='Supprimer';
+  remove.addEventListener('click',guarded(()=>{
+   const attached=rules.loot.drops.filter(d=>d.itemId===item.id).length;
+   if(attached&&!window.confirm('Supprimer '+item.name+' et ses '+attached+' drop(s) associés ?'))return;
+   rules=normalizeAdventureRulesV1({...rules,loot:{...rules.loot,
+    items:rules.loot.items.filter(i=>i.id!==item.id),
+    drops:rules.loot.drops.filter(d=>d.itemId!==item.id)}});
+   if(activeItemEditId===item.id)resetItemEditor();
    renderItemRules();updatePreview();
-  })): [document.createTextNode('Aucun objet défini.')]));
- const itemSelect=$('adventure-drop-item');itemSelect.replaceChildren();
- for(const item of rules.loot.items)itemSelect.append(option(item.id,item.name));
+   stateMessage('Objet supprimé du brouillon. Enregistre les paramètres.');
+  }));
+  holder.append(edit,remove);itemList.append(holder);
+ }
+ if(!itemList.childNodes.length)itemList.append(document.createTextNode(needle
+  ?'Aucun résultat.':'Aucun objet défini.'));
+ const selector=$('adventure-drop-item'),selected=selector.value;
+ selector.replaceChildren();
+ for(const item of rules.loot.items)selector.append(option(item.id,item.name));
+ if(rules.loot.items.some(x=>x.id===selected))selector.value=selected;
  $('adventure-drop-add').disabled=!published.length||!rules.loot.items.length;
  dropList.replaceChildren(...(rules.loot.drops.length?rules.loot.drops.map((drop,index)=>
   row((published.find(c=>c.id===drop.speciesId)?.name??drop.speciesId)+
@@ -396,9 +443,23 @@ function renderItemRules(){
    ' · '+drop.chancePercent+' % · '+drop.minQuantity+'–'+drop.maxQuantity,()=>{
     rules=normalizeAdventureRulesV1({...rules,loot:{...rules.loot,
      drops:rules.loot.drops.filter((_,i)=>i!==index)}});
-    renderItemRules();
+    renderItemRules();updatePreview();
    })): [document.createTextNode('Aucun drop : aucune récompense aléatoire implicite.')]));
 }
+async function loadOfficialItemTemplates(){
+ const response=await fetch(new URL('./item-templates.v1.json',import.meta.url),{cache:'no-store'});
+ if(!response.ok)throw Error('Catalogue officiel indisponible : '+response.status);
+ itemTemplates=normalizeCaptureItemTemplatesV1(await response.json(),published);
+ const selector=$('adventure-item-icon');
+ selector.replaceChildren(option('','Sans icône officielle'));
+ for(const item of itemTemplates.items)selector.append(option(item.id,item.name));
+ $('adventure-item-import').disabled=!itemTemplates.items.length;
+ text($('adventure-item-icon-status'),itemTemplates.items.length
+  ?itemTemplates.items.length+' visuels officiels disponibles.'
+  :'Icônes en attente du dépôt validé. Création manuelle déjà disponible.');
+ renderItemRules();
+}
+
 function renderPortfolioOptions(){
  if(!portfolio)return;
  const select=$('adventure-save-select'),saved=portfolio.list();

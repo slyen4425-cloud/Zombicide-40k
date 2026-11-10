@@ -840,6 +840,7 @@ function renderPlayingSheet(){
     $('adventure-sheet-status').dataset.error='true';
    });
   },
+  resolveItemIcon:officialItemIconUrl,
   resolveFragmentIcon:speciesId=>{
    const icon=published.find(card=>card.id===speciesId)?.icon;
    return publishedCapturePortraitUrlV1({

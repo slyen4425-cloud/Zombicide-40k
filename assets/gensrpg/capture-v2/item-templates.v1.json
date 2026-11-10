@@ -1,5 +1,86 @@
 {
   "schema": "gensrpg-capture-item-templates-v1",
   "version": 1,
-  "items": []
+  "items": [
+    {
+      "id": "plume-ailevent",
+      "name": "Plume d’Elfe Vent",
+      "speciesId": "crea_ailevent",
+      "iconPath": "./item-icons/drop_elfe_vent_plume.png",
+      "saleValue": 10,
+      "chancePercent": 20,
+      "minQuantity": 1,
+      "maxQuantity": 1
+    },
+    {
+      "id": "graine-gemmor",
+      "name": "Graine carnivore",
+      "speciesId": "crea_crys_2",
+      "iconPath": "./item-icons/drop_gemmor_graine_carnivore.png",
+      "saleValue": 10,
+      "chancePercent": 20,
+      "minQuantity": 1,
+      "maxQuantity": 1
+    },
+    {
+      "id": "cristal-gorice",
+      "name": "Cristal de givre",
+      "speciesId": "gorice",
+      "iconPath": "./item-icons/drop_gorice_cristal_givre.png",
+      "saleValue": 10,
+      "chancePercent": 20,
+      "minQuantity": 1,
+      "maxQuantity": 1
+    },
+    {
+      "id": "poche-grenou",
+      "name": "Poche aquatique",
+      "speciesId": "crea_nat_1",
+      "iconPath": "./item-icons/drop_grenou_poche_aquatique.png",
+      "saleValue": 10,
+      "chancePercent": 20,
+      "minQuantity": 1,
+      "maxQuantity": 1
+    },
+    {
+      "id": "amulette-kitsune-lunaire",
+      "name": "Amulette lunaire",
+      "speciesId": "kitsune_lunaire",
+      "iconPath": "./item-icons/drop_kitsune_lunaire_amulette_lunaire.png",
+      "saleValue": 10,
+      "chancePercent": 20,
+      "minQuantity": 1,
+      "maxQuantity": 1
+    },
+    {
+      "id": "eclat-lumilo",
+      "name": "Éclat de lumière",
+      "speciesId": "crea_lumilo",
+      "iconPath": "./item-icons/drop_lumilo_eclat_lumiere.png",
+      "saleValue": 10,
+      "chancePercent": 20,
+      "minQuantity": 1,
+      "maxQuantity": 1
+    },
+    {
+      "id": "feuille-moussado",
+      "name": "Feuille de Moussado",
+      "speciesId": "crea_mossback",
+      "iconPath": "./item-icons/drop_moussado_feuille.png",
+      "saleValue": 10,
+      "chancePercent": 20,
+      "minQuantity": 1,
+      "maxQuantity": 1
+    },
+    {
+      "id": "croc-venombre",
+      "name": "Croc venimeux",
+      "speciesId": "crea_tox_2",
+      "iconPath": "./item-icons/drop_venombre_croc_venimeux.png",
+      "saleValue": 10,
+      "chancePercent": 20,
+      "minQuantity": 1,
+      "maxQuantity": 1
+    }
+  ]
 }

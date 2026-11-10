@@ -124,7 +124,7 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
   await frame.locator('#adventure-item-import').tap();
   assert.equal(await frame.locator('#adventure-items .rule-row').count(),9,
-   'reimport must never duplicate the author's items');
+   "reimport must never duplicate the author's items");
   assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
 
   // Real native UI: edit world currency + a merchant that sells an authored

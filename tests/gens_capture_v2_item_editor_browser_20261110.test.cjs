@@ -212,3 +212,87 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   await new Promise(ok=>server.close(ok));
  }
 });
+
+test('real smartphone merchant: proximity iframe opens only canonical shop and buys/sells through one session',
+ {timeout:95000},async()=>{
+ await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
+ let browser;
+ try{
+  browser=await chromium.launch({headless:true});
+  const context=await browser.newContext({viewport:{width:932,height:430},
+   serviceWorkers:'block',locale:'fr-FR'});
+  const page=await context.newPage(),origin='http://127.0.0.1:'+server.address().port;
+  await page.route('**/merchant-host.html',route=>route.fulfill({
+   status:200,contentType:'text/html',
+   body:'<!doctype html><meta charset="utf-8"><body data-adventure-playing="true">'+
+    '<iframe id="native-explorer"></iframe>'+
+    '<dialog id="adventure-merchant-dialog" aria-labelledby="adventure-merchant-title">'+
+    '<h2 id="adventure-merchant-title"></h2><p id="adventure-merchant-balance"></p>'+
+    '<div id="adventure-merchant-trades"></div>'+
+    '<output id="adventure-merchant-message"></output>'+
+    '<button id="adventure-merchant-close">Retour au monde</button></dialog></body>'
+  }));
+  await page.goto(origin+'/merchant-host.html',{waitUntil:'domcontentloaded'});
+  await page.evaluate(async()=>{
+   const card={id:'crea_nat_1',name:'Grainou',
+    skills:[{slot:'slot-1',state:'ready',name:'Feuille'}]};
+   const contract=await import('/assets/gensrpg/capture-v2/adventure-contract-v1.mjs');
+   const rules=contract.normalizeAdventureRulesV1({
+    ...contract.DEFAULT_ADVENTURE_RULES_V1,
+    loot:{currencyPerVictory:0,items:[
+     {id:'wood',name:'Bois',saleValue:0},
+     {id:'potion',name:'Potion',saleValue:4}],drops:[]},
+    economy:{currency:{singular:'jeton',plural:'jetons'},merchants:[{
+     id:'merchant-test',name:'Marchand de la forêt',buysItems:true,
+     offers:[{itemId:'potion',currencyPrice:8,
+      resourceCosts:[{itemId:'wood',quantity:1}],stock:2}]
+    }]}
+   });
+   const base=contract.createAdventureSessionV1({
+    bestiaryCards:[card],starterId:card.id,rules,
+    ids:{sessionId:'merchant-session',instanceId:'merchant-creature'},
+    now:'2026-11-10T20:00:00.000Z'
+   });
+   window.__merchantSession={...base,status:'playing',
+    inventory:{currency:30,items:{wood:2}}};
+   const host=await import('/assets/gensrpg/capture-v2/adventure-merchant-play-v1.mjs');
+   const iframe=document.getElementById('native-explorer');
+   iframe.srcdoc='<script>window.openNativeShop=()=>parent.postMessage('+
+    '{schema:"gensrpg.exploration.npc.merchant.open.v1",'+
+    'sessionId:"merchant-session",merchantId:"merchant-test",actorId:"actor-1"},'+
+    'location.origin);window.addEventListener("message",event=>{'+
+    'if(event.data?.schema==="gensrpg.capture.v2.npc.merchant.closed.v1")'+
+    'window.shopWasClosed=true;});<\\/script>';
+   host.installAdventureMerchantPlayV1({
+    window,document,frame:iframe,load:()=>window.__merchantSession,
+    save:session=>{window.__merchantSession=session;},
+    sessionId:()=>window.__merchantSession.sessionId,
+    bestiaryCards:()=>[card],hasPendingCombat:()=>false,afterSave:()=>{}
+   });
+  });
+  await page.waitForFunction(()=>
+   typeof document.getElementById('native-explorer').contentWindow.openNativeShop==='function');
+  await page.evaluate(()=>document.getElementById('native-explorer').contentWindow.openNativeShop());
+  await page.locator('#adventure-merchant-dialog[open]').waitFor();
+  assert.match(await page.locator('#adventure-merchant-title').innerText(),/Marchand de la forêt/);
+  assert.match(await page.locator('#adventure-merchant-balance').innerText(),/30 jetons/);
+  await page.getByRole('button',{name:'Acheter'}).click();
+  await page.waitForFunction(()=>window.__merchantSession.inventory.items.potion===1);
+  assert.equal(await page.evaluate(()=>window.__merchantSession.inventory.currency),22);
+  assert.equal(await page.evaluate(()=>window.__merchantSession.inventory.items.wood),1);
+  assert.equal(await page.evaluate(()=>
+   window.__merchantSession.merchantStocks['merchant-test'].potion),1);
+  await page.getByRole('button',{name:'Vendre'}).click();
+  await page.waitForFunction(()=>
+   window.__merchantSession.inventory.currency===26);
+  assert.equal(await page.evaluate(()=>
+   window.__merchantSession.inventory.items.potion??0),0);
+  await page.locator('#adventure-merchant-close').click();
+  await page.waitForFunction(()=>
+   document.getElementById('native-explorer').contentWindow.shopWasClosed===true);
+  assert.equal(await page.locator('#adventure-merchant-dialog').evaluate(e=>e.open),false);
+ }finally{
+  await browser?.close();server.closeAllConnections();
+  await new Promise(ok=>server.close(ok));
+ }
+});

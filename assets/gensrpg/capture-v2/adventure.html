@@ -230,6 +230,10 @@
      <label>Prix dans la monnaie principale <input id="adventure-merchant-price" type="number" min="0" max="100000000" value="10" step="1"></label>
      <label>Ressource supplémentaire (facultative) <select id="adventure-merchant-resource"></select></label>
      <label>Quantité de ressource <input id="adventure-merchant-resource-qty" type="number" min="1" max="9999" value="1" step="1"></label>
+    </div>
+    <div class="actions"><button type="button" id="adventure-merchant-resource-add">Ajouter cette ressource au prix</button></div>
+    <div id="adventure-merchant-resource-list" class="rules-list" aria-live="polite"></div>
+    <div class="fields">
      <label><input id="adventure-merchant-unlimited" type="checkbox" checked> Stock illimité</label>
      <label>Stock initial si limité <input id="adventure-merchant-stock" type="number" min="0" max="100000000" value="1" step="1"></label>
     </div>

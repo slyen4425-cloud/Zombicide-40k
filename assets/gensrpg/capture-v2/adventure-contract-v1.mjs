@@ -174,11 +174,17 @@ export function normalizeAdventureRulesV1(input){
   throw new TypeError('loot.items and loot.drops must be arrays');
  const itemIds=new Set();
  const items=loot.items.map((raw,i)=>{
-  const item=exact(raw,['id','name','saleValue'],'loot.items['+i+']');
+  // Visual identity is optional. Historical item records stay valid byte for byte.
+  const {iconKey,...legacyItem}=object(raw,'loot.items['+i+']');
+  const item=exact(legacyItem,['id','name','saleValue'],'loot.items['+i+']');
   const id=identity(item.id,'item.id');
   if(itemIds.has(id))throw new RangeError('Duplicate Adventure item '+id);
   itemIds.add(id);
-  return {id,name:label(item.name,'item.name'),saleValue:integer(item.saleValue,'item.saleValue',0,100000000)};
+  if(iconKey!==undefined&&
+     (typeof iconKey!=='string'||!/^[a-z0-9][a-z0-9._-]{0,95}$/.test(iconKey)))
+    throw new RangeError('Invalid official Capture item icon key');
+  return {id,name:label(item.name,'item.name'),saleValue:integer(item.saleValue,'item.saleValue',0,100000000),
+   ...(iconKey===undefined?{}:{iconKey})};
  });
  const drops=loot.drops.map((raw,i)=>{
   const d=exact(raw,['speciesId','itemId','chancePercent','minQuantity','maxQuantity'],

@@ -296,3 +296,39 @@ jobs:
           node tests/gens_dungeon_builder_visibility_after_capture_v2_browser_v1.test.cjs
           node --test tests/gens_capture_v2_pwa_upgrade_browser_v1.test.cjs
           node tests/gens_preview_external_capture_v2_browser_v1.test.cjs
+
+  inspect-authored-drop-icons:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Inspect exact uploaded ZIP on current publisher main without touching source branch
+        uses: actions/checkout@v4
+        with:
+          ref: 4bac69424ccf0dabb078258eba0d0ab45689b496
+          sparse-checkout: monster_capture_drops_visuels_12_icones.zip
+          persist-credentials: false
+      - name: Print checked ZIP file names, sizes, PNG dimensions, and safe extraction paths
+        run: |
+          python3 - <<'PY'
+          import zipfile,hashlib,struct, pathlib
+          p=pathlib.Path('monster_capture_drops_visuels_12_icones.zip')
+          print('AUTHORED_DROP_ZIP_BYTES',p.stat().st_size)
+          print('AUTHORED_DROP_ZIP_SHA256',hashlib.sha256(p.read_bytes()).hexdigest())
+          with zipfile.ZipFile(p) as z:
+              entries=[x for x in z.infolist() if not x.is_dir()]
+              print('AUTHORED_DROP_IMAGE_COUNT',len(entries))
+              if not entries or len(entries)>100 or sum(x.file_size for x in entries)>100_000_000:
+                  raise ValueError('Unexpected authored source ZIP size/count')
+              for x in entries:
+                  name=pathlib.PurePosixPath(x.filename)
+                  if name.is_absolute() or '..' in name.parts or not x.filename.isascii():
+                      raise ValueError('Unsafe archive entry '+repr(x.filename))
+                  data=z.read(x)
+                  dims=''
+                  if data[:8]==b'\\x89PNG\\r\\n\\x1a\\n':
+                      dims=str(struct.unpack('>II',data[16:24]))
+                  elif data[:4]==b'RIFF' and data[8:12]==b'WEBP':
+                      dims='webp'
+                  print('AUTHORED_DROP_ENTRY',repr(x.filename),x.file_size,dims,
+                        hashlib.sha256(data).hexdigest()[:16])
+          PY

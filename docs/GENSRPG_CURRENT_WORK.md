@@ -1,3 +1,12 @@
+## 2026-11-10 — Capture Preview PWA : service worker WAITING après réouverture (C2 / correctif dans publisher candidat)
+- **START après échec du vrai navigateur** : `b8d0efc0606d95a1f45affe18402832fe6518438` de PR publisher #373, checkpoint `checkpoint/gensrpg-start-preview-sw-activation-2026-11-10`, branche ciblée `work/gensrpg-preview-sw-activation-2026-11-10`.
+- **RED prouvé** : publisher PR #373 build `42799790606` SUCCESS ; `capture-preview-review` FAILURE du vrai Chromium sur `tests/gens_capture_v2_auto_update_browser_20261107.test.cjs`. État : preview ancien cache `aaaaaaaaaaaa` et nouveau `bbbbbbbbbbbb` présents, nouveau worker `waiting=installed`, ancien `active=activated` malgré navigation à la bonne nouvelle version. Refus de masquer l'échec comme timeout infrastructure.
+- **Unique propriétaire** : `tools/capture_v2_pwa_release.mjs` est le compilateur du worker isolé `/preview/capture-v2-pr225/`. Il appelle et **attend `self.skipWaiting()` dès le début de l'install**, puis effectue le pré-cache sous le même `event.waitUntil`. L'ancienne requête d'activation après tout le pré-cache pouvait être trop tardive pour prendre la main. La gestion de cache limitée au préfixe Capture, les assets, le SW root, les données et les autres PWA restent inchangés.
+- **Gates** : test statique `tests/gens_capture_v2_auto_update_20261107.test.mjs`, le VRAI test navigateur de réouverture sans clic/réinstallation, conservation du cache root, pas de résurrection old preview, Chromium PC/Android paysage, puis 8/8 CI publisher et publication Pages main SHA exact. La PR parent #373 doit recueillir le correctif après revue ; pas de publication tant que RED navigateur.
+- **Rollback** : checkpoint START de la PR publisher ; ne pas supprimer les workers ni les caches de l'application historique ou du Labo Exploration.
+
+---
+
 ## 2026-11-10 — Publisher GenSRPG : fragments Capture + nouveau profil sauvage des deux labos (C2 CANDIDAT)
 - **Accord utilisateur** : Labo Exploration main annoncé prêt ; demande explicite de raccorder et publier. Cette autorisation n'écarte aucun gate de la charte.
 - **START publisher immuable** : GenSRPG main `158044e05e441e76e522fc314f7fbf94179e1b15`, checkpoint `checkpoint/gensrpg-start-publish-capture-fragments-labs-2026-11-10`, branche unique `work/gensrpg-publish-capture-fragments-labs-2026-11-10`. Dernier checkpoint GREEN publisher connu `checkpoint/gensrpg-publisher-combat-assets-green-2026-11-09`.

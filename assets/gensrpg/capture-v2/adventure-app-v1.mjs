@@ -795,7 +795,7 @@ async function performPlayingFragmentAction({kind,speciesId,instanceId=null,quan
   const locks=window.navigator.locks;
   if(typeof locks?.request!=='function')
    throw new Error('Verrou de sauvegarde indisponible : éclats conservés');
-  let receipt=null;
+  let receipt=null,refreshWarning=null;
   await locks.request('gensrpg.capture.v2.adventure-combat:'+play.sessionId,()=>{
    const session=store.load();
    if(session?.status!=='playing'||session.sessionId!==play.sessionId)
@@ -818,14 +818,17 @@ async function performPlayingFragmentAction({kind,speciesId,instanceId=null,quan
    // Save first, then refresh Exploration's official party projection.
    // If the saving fails, the original inventory remains untouched.
    store.save(receipt.session);
-   play.refreshParty(receipt.session);
+   try{play.refreshParty(receipt.session);}
+   catch(error){refreshWarning=error.message;}
   });
   showSave();renderPlayingSheet();
-  text($('adventure-sheet-status'),kind==='summon'
+  const summary=kind==='summon'
    ?'Créature invoquée au niveau '+receipt.creature.level+
      (receipt.destination==='storage'?' et placée dans le stockage hors combat.':'.')
-   :'+'+receipt.xpGained+' XP enregistrée(s) sur la créature sélectionnée.');
-  $('adventure-sheet-status').dataset.error='false';
+   :'+'+receipt.xpGained+' XP enregistrée(s) sur la créature sélectionnée.';
+  text($('adventure-sheet-status'),summary+(refreshWarning
+   ?' Sauvegarde effectuée, mais synchronisation Exploration à vérifier : '+refreshWarning:''));
+  $('adventure-sheet-status').dataset.error=String(Boolean(refreshWarning));
  }finally{fragmentActionPending=false;}
 }
 async function updatePlayingTeam(instanceId,action,direction=null){

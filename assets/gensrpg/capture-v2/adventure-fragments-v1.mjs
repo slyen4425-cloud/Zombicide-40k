@@ -72,6 +72,30 @@ export function adventureFragmentSpeciesRulesV1(rules,speciesId){
  const policy=normalizeAdventureFragmentRulesV1(rules);
  return deepFreeze({...policy,...(policy.perSpecies[validId(speciesId,'speciesId')]??{})});
 }
+// Pure roll using the SAME official combat result and injected randomness.
+// Actual write is performed by applyAdventureCombatResultV1 in its existing
+// once-per-encounter transaction. Manual/world/merchant grants use the same
+// AdventureSession but NOT this automatic battle roll.
+export function rollAdventureFragmentDropV1({rules,speciesId,random}={}){
+ if(rules===undefined||rules===null)return null; // historical rules: no drops
+ const policy=adventureFragmentSpeciesRulesV1(rules,speciesId);
+ if(!policy.enabled||policy.dropChancePercent===0)return null;
+ if(typeof random!=='function')
+  throw new TypeError('Official Adventure loot random adapter required');
+ const chance=random();
+ if(typeof chance!=='number'||!Number.isFinite(chance)||chance<0||chance>=1)
+  throw new RangeError('Invalid fragment drop random roll');
+ if(chance*100>=policy.dropChancePercent)return null;
+ const quantityRoll=random();
+ if(typeof quantityRoll!=='number'||!Number.isFinite(quantityRoll)||
+    quantityRoll<0||quantityRoll>=1)
+  throw new RangeError('Invalid fragment quantity random roll');
+ return Object.freeze({
+  itemId:adventureFragmentItemIdV1(speciesId),
+  quantity:policy.dropMin+Math.floor(
+   quantityRoll*(policy.dropMax-policy.dropMin+1))
+ });
+}
 const published=(cards,speciesId)=>{
  if(!Array.isArray(cards)||!cards.some(card=>card.id===speciesId))
   throw new RangeError('Creature not in official published Bestiary: '+speciesId);

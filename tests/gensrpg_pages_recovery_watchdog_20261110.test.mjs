@@ -46,7 +46,7 @@ test('watchdog workflow is separate, single-owner, guarded, and dispatches only 
  const y=readFileSync(new URL('../.github/workflows/gensrpg-pages-recovery-watchdog.yml',import.meta.url),'utf8');
  const publisher=readFileSync(new URL('../.github/workflows/main.yml',import.meta.url),'utf8');
  assert.match(y,/schedule:/);
- assert.match(y,/cron: ['"]?0 1,7,13,19 \* \* \*['"]?/);
+ assert.match(y,/cron: ['"]?17 1,7,13,19 \* \* \*['"]?/);
  assert.match(y,/actions: write/);
  assert.match(y,/contents: read/);
  assert.match(y,/github\.ref == 'refs\/heads\/main'/);

@@ -115,6 +115,31 @@ test('reject invalid merchant configurations, unknown or circular resources',()=
   loot:{...rules.loot,items:rules.loot.items.filter(x=>x.id!=='gem')}}),/Unknown resource/);
 });
 
+
+test('retiring an offer or changing stock never destroys an already played adventure',()=>{
+ const first=buy(stocked());
+ const retired=normalizeAdventureRulesV1({...rules,economy:{
+  ...rules.economy,merchants:rules.economy.merchants.map(m=>
+   m.id==='marchand-foret'?{...m,offers:[]}:m)}});
+ const oldState={...first.session,rules:retired};
+ assert.throws(()=>buy(oldState,'after-remove'),/does not offer/,
+  'removed author offers remain inactive even if old stock receipts are kept');
+ const limited=normalizeAdventureRulesV1({...rules,economy:{
+  ...rules.economy,merchants:rules.economy.merchants.map(m=>
+   m.id==='marchand-foret'?{...m,offers:[{...m.offers[0],stock:0}]}:m)}});
+ const changed={...first.session,rules:limited};
+ assert.throws(()=>buy(changed,'after-stock'),/out of stock/,
+  'lowering the author stock must not revive unsold inventory');
+ const unlimited=normalizeAdventureRulesV1({...rules,economy:{
+  ...rules.economy,merchants:rules.economy.merchants.map(m=>
+   m.id==='marchand-foret'?{...m,offers:[{...m.offers[0],stock:null}]}:m)}});
+ const noLimit={...first.session,rules:unlimited};
+ const next=buy(noLimit,'after-unlimited');
+ assert.equal(next.applied,true,'a removed stock cap is no longer binding');
+ assert.equal(Object.hasOwn(next.session,'merchantStocks'),true,
+  'old receipt may be retained safely; active unlimited rule is authoritative');
+});
+
 test('merchant editor only configures the canonical rules and never embeds an NPC/map authority',()=>{
  const html=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure.html',import.meta.url),'utf8');
  const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');

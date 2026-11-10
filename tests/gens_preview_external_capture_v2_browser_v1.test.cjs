@@ -73,8 +73,10 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
     assert.equal(owner.modeCount,4);
     await page.locator('button.gensRootModeCard.capture').click();
     await page.locator('#gensCaptureV2Root').waitFor({state:'visible'});
-    assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view]').count(),8,
-      'external Shell has seven distinct native Lab destinations and one Jouer entry');
+    assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view]').count(),9,
+      'external Shell has seven native Lab destinations, one Jouer, and one item editor');
+    assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="economy"] [data-capture-v2-view="items"]').count(),1,
+      'external Shell item editor is the existing Capture Adventure owner');
     assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').count(),1);
     // External preview only: render each original Lab on its immutable commit.
     // Production must still require its own same-origin vendor owner.

@@ -182,7 +182,7 @@ test('rare merchants sell ONLY fragments of actual published creatures into the 
    fragmentRecruitment:{...DEFAULT_ADVENTURE_FRAGMENTS_V1,enabled:false}})}}),
   /disabled/);
  assert.throws(()=>tradeAdventureMerchantV1({...arg,itemId:'fragment:not-published',
-  actionId:'rare-3'}),/does not offer/,
+  actionId:'rare-3'}),/official published Bestiary/,
   'unpublished species cannot be offered through an authored shop');
  assert.throws(()=>tradeAdventureMerchantV1({...arg,kind:'sell',actionId:'rare-4'}),
   /does not buy|no authored saleValue/);

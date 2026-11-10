@@ -137,7 +137,7 @@
   // The Shell transports a READ-ONLY request to the Capture rules owner.
   // Exploration only sees merchant names. No second shop registry or input ID.
   root.addEventListener?.("message",async event=>{
-    if(!host||current!=="builder"||!frame||
+    if(!host||(current!=="builder"&&current!=="world")||!frame||
        event.source!==frame.contentWindow||event.origin!==root.location.origin||
        event.data?.schema!=="gensrpg.exploration.npc.merchant.catalog.request.v1")return;
     const requestId=event.data.requestId;
@@ -149,7 +149,7 @@
         "assets/gensrpg/capture-v2/adventure-merchant-catalog-bridge-v1.mjs",base));
       merchants=await owner.availableAdventureMerchantsForNpcV1();
     }catch(failure){error=String(failure?.message??failure).slice(0,180);}
-    if(frame?.contentWindow!==responder||current!=="builder")return;
+    if(frame?.contentWindow!==responder||(current!=="builder"&&current!=="world"))return;
     responder.postMessage({
       schema:"gensrpg.capture.v2.npc.merchant.catalog.response.v1",
       requestId,merchants,error

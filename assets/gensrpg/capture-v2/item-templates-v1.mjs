@@ -33,7 +33,28 @@ export function normalizeCaptureItemTemplatesV1(raw,knownSpecies=null){
   return Object.freeze({id:itemId,name:name.trim(),speciesId,iconPath,saleValue,
    chancePercent,minQuantity,maxQuantity});
  });
- return Object.freeze({schema:raw.schema,version:raw.version,items:Object.freeze(items)});
+ // Extra author-uploaded pictures may be assigned by hand to custom objects,
+ // but never silently create a creature, item or drop rule.
+ const visualIds=new Set(ids);
+ const icons=(raw.icons??[]);
+ if(!Array.isArray(icons))throw new TypeError('Invalid optional item icon gallery');
+ const gallery=icons.map((entry,i)=>{
+  if(!entry||Array.isArray(entry)||typeof entry!=='object' ||
+     Object.keys(entry).some(key=>!['id','name','iconPath'].includes(key)))
+   throw new TypeError('Invalid optional item icon '+i);
+  if(!id(entry.id)||visualIds.has(entry.id))
+   throw new RangeError('Invalid or duplicate optional item icon id');
+  if(typeof entry.name!=='string'||!entry.name.trim()||entry.name.length>80)
+   throw new RangeError('Invalid optional item icon name');
+  if(typeof entry.iconPath!=='string'||
+     !/^\\.\\/item-icons\\/[a-z0-9][a-z0-9._-]{0,95}\\.(png|webp)$/.test(entry.iconPath)||
+     keys.has(entry.iconPath))
+   throw new RangeError('Optional item icon path must be unique and same-owner');
+  visualIds.add(entry.id);keys.add(entry.iconPath);
+  return Object.freeze({id:entry.id,name:entry.name.trim(),iconPath:entry.iconPath});
+ });
+ return Object.freeze({schema:raw.schema,version:raw.version,
+  items:Object.freeze(items),icons:Object.freeze(gallery)});
 }
 export function materializeCaptureItemTemplatesV1({rules,templates}){
  if(!rules?.loot||!Array.isArray(rules.loot.items)||!Array.isArray(rules.loot.drops))

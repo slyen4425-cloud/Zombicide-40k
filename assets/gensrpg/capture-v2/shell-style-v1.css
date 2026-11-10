@@ -76,6 +76,8 @@
 #gensCaptureV2Root .gensCaptureV2NativeBack{min-height:34px;padding:5px 10px;
  font-size:12px;flex-shrink:0;white-space:nowrap;border-radius:999px}
 #gensCaptureV2Root .gensCaptureV2NativeTitle{display:none}
+/* Native Combat owns the arena; Shell-owned Back cannot cover enemy HP. */
+#gensCaptureV2Root[data-view="adventure"][data-adventure-combat-active="true"] > .gensCaptureV2NativeBar{display:none!important}
 #gensCaptureV2Root:not([data-view="home"]) > header,
 #gensCaptureV2Root:not([data-view="home"]) > nav,
 #gensCaptureV2Root:not([data-view="home"]) > .gensCaptureV2Editors,

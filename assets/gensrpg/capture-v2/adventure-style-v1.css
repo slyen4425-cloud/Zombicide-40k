@@ -399,3 +399,25 @@ body[data-adventure-item-editor="true"] #adventure-loot-preparation-summary{disp
  margin:14px 0;padding:10px;border:1px solid #2a5159;border-radius:10px
 }
 #adventure-item-authoring #adventure-drops .rule-row>span{flex:1;min-width:0}
+
+/* NPC merchant is a Capture-owned modal: it sits above the Exploration
+   frame, with compact, scrollable rows on Android landscape and desktop. */
+#adventure-merchant-dialog{border:1px solid #79cbb4;border-radius:14px;background:#102d36;color:#f3fffb;
+ width:min(800px,calc(100vw - 20px));max-width:800px;max-height:calc(100dvh - 16px);overflow:auto;padding:14px;
+ box-sizing:border-box}
+#adventure-merchant-dialog::backdrop{background:#06171bc9}
+#adventure-merchant-dialog .sheet-header{display:flex;justify-content:space-between;gap:8px;align-items:center}
+#adventure-merchant-dialog h2,#adventure-merchant-dialog h3{margin:5px 0}
+#adventure-merchant-balance{margin:8px 0;font-weight:700}
+#capture-merchant-trades,#adventure-merchant-trades{display:grid;gap:7px;max-height:55dvh;overflow-y:auto}
+.merchant-trade-row{display:grid;grid-template-columns:minmax(0,1fr) 65px 86px;align-items:center;gap:8px;
+ border:1px solid #40766e;border-radius:8px;padding:7px;font-size:12px}
+.merchant-trade-row span{overflow-wrap:anywhere}
+.merchant-trade-row input{height:40px;min-width:0;width:100%;padding:5px;box-sizing:border-box}
+.merchant-trade-row button{min-height:40px;padding:5px}
+#adventure-merchant-message[data-error="true"]{color:#ffc6b8}
+@media(orientation:landscape) and (max-height:550px){
+ #adventure-merchant-dialog{padding:8px}
+ #adventure-merchant-trades{max-height:47dvh}
+ .merchant-trade-row{padding:4px;gap:5px}
+}

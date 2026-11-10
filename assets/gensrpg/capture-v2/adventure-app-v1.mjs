@@ -53,6 +53,7 @@ import {DEFAULT_ADVENTURE_FRAGMENTS_V1}
 import {normalizeCaptureItemTemplatesV1,materializeCaptureItemTemplatesV1}
  from './item-templates-v1.mjs';
 import {installAdventureEconomyEditorV1} from './adventure-economy-editor-v1.mjs';
+import {installAdventureMerchantPlayV1} from './adventure-merchant-play-v1.mjs';
 
 const $=id=>document.getElementById(id);
 const status=$('adventure-status');
@@ -1103,6 +1104,16 @@ for(const button of document.querySelectorAll('[data-adventure-sheet-tab]')){
  }));
 }
 
+// Native Explorer supplies only proximity and the chosen merchant reference.
+ // Every purchase/sale is committed under the original Adventure Core lock.
+installAdventureMerchantPlayV1({
+ window,document,frame:$('adventure-play-frame'),
+ load:()=>store?.load(),save:session=>store.save(session),
+ sessionId:()=>activePlayingSheet?.sessionId,
+ bestiaryCards:()=>published,
+ hasPendingCombat:id=>Boolean(readCombatHandoff(window.localStorage,{sessionId:id})),
+ afterSave:()=>{showSave();renderPlayingSheet();}
+});
 economyEditor=installAdventureEconomyEditorV1({
  document,getRules:()=>rules,getPublishedSpecies:()=>published,
  commitEconomy:economy=>{

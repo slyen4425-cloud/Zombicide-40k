@@ -74,8 +74,10 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.locator('#gensGameHome:visible').count(),0);
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   const buttons=page.locator('#gensCaptureV2Root [data-capture-v2-view]');
-  assert.equal(await buttons.count(),8,
-   'seven distinct native Lab destinations plus the game, without duplicate 2.5D Tester');
+  assert.equal(await buttons.count(),9,
+   'seven native Lab destinations, one item editor and one game; no duplicate 2.5D Tester');
+  assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="economy"] [data-capture-v2-view="items"]').count(),1,
+   'one official item editor is grouped under Objets et économie');
   assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu > button').count(),2,
    'the game home shows only Jouer and Éditeurs');
   assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="world"] button').count(),2,

@@ -6,6 +6,8 @@ import {DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,
 import {normalizeAdventureEconomyV1}
  from '../assets/gensrpg/capture-v2/adventure-economy-v1.mjs';
 import {readFileSync} from 'node:fs';
+import {adventurePlaySheetSnapshotV1}
+ from '../assets/gensrpg/capture-v2/adventure-play-sheet-v1.mjs';
 
 const image={assetId:'pack:official',file:'capture/creatures/published.webp'};
 const published=[{id:'crea_nat_1',name:'Grainou',level:1,portrait:image,icon:image,
@@ -138,6 +140,17 @@ test('retiring an offer or changing stock never destroys an already played adven
  assert.equal(next.applied,true,'a removed stock cap is no longer binding');
  assert.equal(Object.hasOwn(next.session,'merchantStocks'),true,
   'old receipt may be retained safely; active unlimited rule is authoritative');
+});
+
+test('in-game Bag displays creator-defined currency without altering item values',()=>{
+ const active={...stocked(),status:'playing'};
+ const snapshot=adventurePlaySheetSnapshotV1({session:active,bestiaryCards:published,
+  statRegistry:{schema:'capture-stat-registry-v1',stats:[{id:'health',label:'Santé'}]}});
+ assert.equal(snapshot.inventory.currency,25);
+ assert.equal(snapshot.inventory.currencyLabel,'jetons');
+ assert.equal(snapshot.inventory.items.find(x=>x.id==='elixir').saleValue,5);
+ const view=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-play-sheet-view-v1.mjs',import.meta.url),'utf8');
+ assert.match(view,/snapshot\.inventory\.currencyLabel/);
 });
 
 test('merchant editor only configures the canonical rules and never embeds an NPC/map authority',()=>{

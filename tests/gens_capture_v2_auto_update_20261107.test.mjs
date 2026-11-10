@@ -74,3 +74,15 @@ test('one publisher and HTTPS proof must require the exact preview release SHA',
  const stage=fs.readFileSync(path.join(root,'tools/stage_capture_v2_pages_preview.mjs'),'utf8');
  assert.match(stage,/process\.env\.GITHUB_SHA/);
 });
+
+test('preview worker requests skipWaiting before precache and holds activation in install lifetime',()=>{
+ const worker=releasePreviewPwaForCommit(originalWorker,sample,a).worker;
+ const install=worker.match(/self\.addEventListener\("install",event=>\{([^\n]+)\}\);/)?.[1];
+ assert.ok(install,'the actual source has one installed worker authority');
+ assert.match(install,/event\.waitUntil\(\(async\(\)=>\{await self\.skipWaiting\(\);const cache=await caches\.open\(CACHE_NAME\)/);
+ assert.ok(install.indexOf('await self.skipWaiting()')<
+  install.indexOf('for(const file of CORE_FILES)'),
+  'activation request must not be blocked by the 140-resource precache');
+ assert.match(worker,/name\.startsWith\("gensrpg-preview-capture-v2-"\)/);
+ assert.doesNotMatch(worker,/name\.startsWith\("gensrpg-cache-"\)&&name!==CACHE_NAME/);
+});

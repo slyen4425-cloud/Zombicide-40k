@@ -21,9 +21,13 @@ export function releasePreviewPwaForCommit(sourceWorker,sourceHtml,releaseSha){
   // The pinned worker called skipWaiting() without binding its promise
   // to the install lifetime. In mobile Chromium a newly installed release
   // could remain WAITING behind its predecessor after reopening the app.
-  // Complete the pre-cache, then await the built-in activation request.
+  // Request activation at the START of installation, not only after a
+  // long, sequential precache. The previous release could finish install and
+  // remain WAITING behind the old PWA on Android despite the new cache being
+  // present. Bind skipWaiting to waitUntil so the installation lifecycle owns
+  // its promise, while letting cache population finish before install settles.
   const oldInstall='self.addEventListener("install",event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE_NAME).then(async cache=>{for(const file of CORE_FILES)await cacheFresh(cache,file)}))});';
-  const activatedInstall='self.addEventListener("install",event=>{event.waitUntil((async()=>{const cache=await caches.open(CACHE_NAME);for(const file of CORE_FILES)await cacheFresh(cache,file);await self.skipWaiting()})())});';
+  const activatedInstall='self.addEventListener("install",event=>{event.waitUntil((async()=>{await self.skipWaiting();const cache=await caches.open(CACHE_NAME);for(const file of CORE_FILES)await cacheFresh(cache,file)})())});';
   if(scoped.split(oldInstall).length!==2)
     throw Error('Unknown preview install lifecycle; fail closed');
   const lifecycleWorker=scoped.replace(oldInstall,activatedInstall);

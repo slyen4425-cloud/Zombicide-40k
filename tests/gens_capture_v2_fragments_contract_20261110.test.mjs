@@ -12,6 +12,7 @@ import {
  normalizeAdventureRulesV1,awardAdventureSpeciesFragmentsV1,
  summonAdventureCreatureWithFragmentsV1,grantAdventureCreatureFragmentXpV1
 } from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
+import {projectAdventureCombatAwardV1} from '../assets/gensrpg/capture-v2/adventure-result-presentation-v1.mjs';
 import {adventureFragmentItemIdV1,normalizeAdventureFragmentRulesV1}
  from '../assets/gensrpg/capture-v2/adventure-fragments-v1.mjs';
 
@@ -179,6 +180,11 @@ test('official native CombatResult grants one species fragment after victory and
  assert.equal(first.applied,true);
  assert.equal(count(first.session,'gemmor'),1);
  assert.equal(first.award.drops.length,1);
+ const receipt=projectAdventureCombatAwardV1({
+  session:first.session,award:first.award,bestiaryCards:cards
+ });
+ assert.match(receipt.rows.find(row=>row.label==='Objets').value,
+  /Éclat de Gemmor ×1/);
  assert.deepEqual({...first.award.drops[0]},
   {itemId:adventureFragmentItemIdV1('gemmor'),quantity:1});
  const unchanged=applyAdventureCombatResultV1({

@@ -82,5 +82,27 @@
       "minQuantity": 1,
       "maxQuantity": 1
     }
+  ],
+  "icons": [
+    {
+      "id": "visuel-heriplante",
+      "name": "Bourgeon épineux (Hériplante)",
+      "iconPath": "./item-icons/drop_heriplante_bourgeon_epineux.png"
+    },
+    {
+      "id": "visuel-liane-venimeuse",
+      "name": "Fleur venimeuse (Liane venimeuse)",
+      "iconPath": "./item-icons/drop_liane_venimeuse_fleur_venimeuse.png"
+    },
+    {
+      "id": "visuel-pieuvre",
+      "name": "Perle d’encre (Pieuvre)",
+      "iconPath": "./item-icons/drop_pieuvre_perle_encre.png"
+    },
+    {
+      "id": "visuel-peste-noire",
+      "name": "Spore pestilentielle (Peste noire)",
+      "iconPath": "./item-icons/drop_peste_noire_spore_pestilentielle.png"
+    }
   ]
 }

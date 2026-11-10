@@ -47,7 +47,7 @@ export function normalizeCaptureItemTemplatesV1(raw,knownSpecies=null){
   if(typeof entry.name!=='string'||!entry.name.trim()||entry.name.length>80)
    throw new RangeError('Invalid optional item icon name');
   if(typeof entry.iconPath!=='string'||
-     !/^\\.\\/item-icons\\/[a-z0-9][a-z0-9._-]{0,95}\\.(png|webp)$/.test(entry.iconPath)||
+     !/^\.\/item-icons\/[a-z0-9][a-z0-9._-]{0,95}\.(png|webp)$/.test(entry.iconPath)||
      keys.has(entry.iconPath))
    throw new RangeError('Optional item icon path must be unique and same-owner');
   visualIds.add(entry.id);keys.add(entry.iconPath);

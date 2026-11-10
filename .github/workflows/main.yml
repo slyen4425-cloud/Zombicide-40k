@@ -36,6 +36,8 @@ jobs:
 
       - name: Vérifier la sérialisation des publications Pages
         run: node --test tests/gensrpg_pages_deploy_serialize_20261109.test.mjs
+      - name: Vérifier la récupération automatique Pages sans seconde autorité
+        run: node --test tests/gensrpg_pages_recovery_watchdog_20261110.test.mjs
 
       - name: Tester la réparation automatique des profils Dungeon
         run: node tests/dungeon_profile_auto_repair.test.cjs

@@ -803,8 +803,22 @@ export function applyAdventureCombatResultV1({
 // The merchant engine only changes inventory.currency/inventory.items and
 // the merchant stock/receipts on the validated AdventureSession. A future
 // Exploration NPC interaction will pass merchantId, not a duplicate shop state.
-export function tradeAdventureMerchantV1({session,...transaction}={}){
+export function tradeAdventureMerchantV1({session,bestiaryCards,...transaction}={}){
  const state=assertSession(session);
+ if(transaction.kind==='buy'){
+  const merchant=state.rules.economy?.merchants.find(m=>m.id===transaction.merchantId);
+  const offer=merchant?.offers.find(o=>o.itemId===transaction.itemId);
+  const fragments=[transaction.itemId,...(offer?.resourceCosts??[]).map(r=>r.itemId)]
+   .filter(id=>typeof id==='string'&&id.startsWith('fragment:'));
+  if(fragments.length){
+   if(!state.rules.fragmentRecruitment?.enabled)
+    throw new RangeError('Creature fragments are disabled in this world');
+   const valid=new Set(publishedAdventureSpeciesV1(bestiaryCards).map(card=>card.id));
+   for(const itemId of fragments)
+    if(!valid.has(itemId.slice('fragment:'.length)))
+     throw new RangeError('Fragment species absent from official published Bestiary');
+  }
+ }
  const result=tradeAdventureMerchantInventoryV1({session:state,...transaction});
  if(result.applied)assertSession(result.session);
  return result;

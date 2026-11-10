@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,
  createAdventureSessionV1,tradeAdventureMerchantV1}
  from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
+import {DEFAULT_ADVENTURE_FRAGMENTS_V1}
+ from '../assets/gensrpg/capture-v2/adventure-fragments-v1.mjs';
 import {normalizeAdventureEconomyV1}
  from '../assets/gensrpg/capture-v2/adventure-economy-v1.mjs';
 import {readFileSync} from 'node:fs';
@@ -151,6 +153,39 @@ test('in-game Bag displays creator-defined currency without altering item values
  assert.equal(snapshot.inventory.items.find(x=>x.id==='elixir').saleValue,5);
  const view=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-play-sheet-view-v1.mjs',import.meta.url),'utf8');
  assert.match(view,/snapshot\.inventory\.currencyLabel/);
+});
+
+test('rare merchants sell ONLY fragments of actual published creatures into the same inventory',()=>{
+ const commodity='fragment:crea_nat_1';
+ const rareRules=normalizeAdventureRulesV1({...rules,
+  fragmentRecruitment:DEFAULT_ADVENTURE_FRAGMENTS_V1,
+  economy:{...rules.economy,merchants:[
+   {id:'rare-fragments',name:'Vendeur de fragments',buysItems:false,offers:[
+    {itemId:commodity,currencyPrice:9,resourceCosts:[],stock:2}]}]}});
+ const original=createAdventureSessionV1({bestiaryCards:published,
+  starterId:'crea_nat_1',rules:rareRules,
+  ids:{sessionId:'frag-shop',instanceId:'frag-shop-hero'},now:time});
+ const state={...original,status:'playing',inventory:{currency:30,items:{}}};
+ const arg={session:state,bestiaryCards:published,merchantId:'rare-fragments',
+  itemId:commodity,kind:'buy',quantity:2,actionId:'rare-1',now:time};
+ const purchase=tradeAdventureMerchantV1(arg);
+ assert.equal(purchase.applied,true);
+ assert.equal(purchase.session.inventory.currency,12);
+ assert.deepEqual(purchase.session.inventory.items,{[commodity]:2});
+ assert.equal(purchase.session.merchantStocks['rare-fragments'][commodity],0);
+ assert.equal(Object.hasOwn(purchase.session.inventory,'fragments'),false);
+ assert.equal(tradeAdventureMerchantV1({...arg,session:purchase.session}).applied,false);
+ assert.throws(()=>tradeAdventureMerchantV1({...arg,actionId:'rare-2',
+  bestiaryCards:[]}),/official published Bestiary/);
+ assert.throws(()=>tradeAdventureMerchantV1({...arg,actionId:'rare-2',
+  session:{...state,rules:normalizeAdventureRulesV1({...rareRules,
+   fragmentRecruitment:{...DEFAULT_ADVENTURE_FRAGMENTS_V1,enabled:false}})}}),
+  /disabled/);
+ assert.throws(()=>tradeAdventureMerchantV1({...arg,itemId:'fragment:not-published',
+  actionId:'rare-3'}),/does not offer/,
+  'unpublished species cannot be offered through an authored shop');
+ assert.throws(()=>tradeAdventureMerchantV1({...arg,kind:'sell',actionId:'rare-4'}),
+  /does not buy|no authored saleValue/);
 });
 
 test('merchant editor only configures the canonical rules and never embeds an NPC/map authority',()=>{

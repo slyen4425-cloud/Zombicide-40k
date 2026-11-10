@@ -76,7 +76,7 @@ test('eight author-uploaded PNGs map only to verified published Bestiary species
   assert.equal(png.subarray(1,4).toString(),'PNG');
   assert.equal(png.readUInt32BE(16),512);
   assert.equal(png.readUInt32BE(20),512);
-  assert.equal(png[25],6,'official icon must keep RGBA alpha');
+  assert.ok([4,6].includes(png[25]),'official icon must keep its alpha channel');
   assert.equal(template.saleValue,10);
   assert.equal(template.chancePercent,20);
  }

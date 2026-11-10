@@ -82,3 +82,17 @@ test('menu has one dedicated item editor view using the SAME Adventure owner',()
  assert.doesNotMatch(shell,/localStorage\.setItem\(/);
  assert.doesNotMatch(app,/window\.open\(/);
 });
+
+test('never attach a monster drop to a custom item with a conflicting official ID',()=>{
+ const rules=normalizeAdventureRulesV1({...SHOWCASE_ADVENTURE_RULES_V1,
+  loot:{currencyPerVictory:0,
+   items:[{id:'feather-ailevent',name:'Objet inventé personnel',saleValue:8}],
+   drops:[{speciesId:'other',itemId:'feather-ailevent',
+    chancePercent:50,minQuantity:1,maxQuantity:1}] }});
+ const result=materializeCaptureItemTemplatesV1({rules,templates:sample});
+ assert.equal(result.addedItems,0);
+ assert.equal(result.addedDrops,0);
+ assert.equal(result.skippedConflicts,1);
+ assert.deepEqual(result.loot.items,rules.loot.items);
+ assert.deepEqual(result.loot.drops,rules.loot.drops);
+});

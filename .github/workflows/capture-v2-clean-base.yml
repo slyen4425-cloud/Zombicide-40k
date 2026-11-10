@@ -10,6 +10,8 @@ on:
       - 'index.html'
       - 'tests/gens_capture_v2_clean_boundary.test.cjs'
       - 'tests/gens_capture_v2_game_menu_v1.test.cjs'
+      - 'tests/gens_capture_v2_item_editor_catalog_20261110.test.mjs'
+      - 'tests/gens_capture_v2_item_editor_browser_20261110.test.cjs'
       - 'tests/gens_capture_v2_adventure_hero_progression_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_portfolio_v1.test.mjs'
       - 'tests/gens_capture_v2_compact_rpg_sheet_v1.test.mjs'
@@ -102,6 +104,9 @@ jobs:
 
       - name: Aventure V2 — contrat XP, loot, bestiaire publié, sauvegarde et résultat unique (TDD)
         run: node --test tests/gens_capture_v2_adventure_contract_v1.test.mjs
+
+      - name: Éditeur d’objets Capture — catalogue, imports sans destruction, sauvegardes historiques
+        run: node --test tests/gens_capture_v2_item_editor_catalog_20261110.test.mjs
 
       - name: RED/GREEN — 1 à 6 créatures de départ en Aventure
         run: node --test tests/gens_capture_v2_initial_party_1to6_20261107.test.mjs
@@ -287,6 +292,47 @@ jobs:
       - name: Run real four-mode GenSrpg root and Capture V2-to-Dungeon Builder in Chromium
         run: |
           node --test tests/gens_capture_v2_root_browser.test.cjs
+          node --test tests/gens_capture_v2_item_editor_browser_20261110.test.cjs
           node tests/gens_dungeon_builder_visibility_after_capture_v2_browser_v1.test.cjs
           node --test tests/gens_capture_v2_pwa_upgrade_browser_v1.test.cjs
           node tests/gens_preview_external_capture_v2_browser_v1.test.cjs
+
+  inspect-authored-drop-icons:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Inspect exact uploaded ZIP on current publisher main without touching source branch
+        uses: actions/checkout@v4
+        with:
+          ref: 4bac69424ccf0dabb078258eba0d0ab45689b496
+          sparse-checkout: monster_capture_drops_visuels_12_icones.zip
+          persist-credentials: false
+      - name: Print checked ZIP file names, sizes, PNG dimensions, and safe extraction paths
+        run: |
+          python3 - <<'PY'
+          import zipfile,hashlib,struct, pathlib
+          p=pathlib.Path('monster_capture_drops_visuels_12_icones.zip')
+          print('AUTHORED_DROP_ZIP_BYTES',p.stat().st_size)
+          print('AUTHORED_DROP_ZIP_SHA256',hashlib.sha256(p.read_bytes()).hexdigest())
+          with zipfile.ZipFile(p) as z:
+              entries=[x for x in z.infolist() if not x.is_dir()]
+              print('AUTHORED_DROP_README_BEGIN')
+              print(z.read('README_IMPORT.md').decode('utf-8'))
+              print('AUTHORED_DROP_README_END')
+              print('AUTHORED_DROP_RUNTIME_ICONS',len([x for x in entries if x.filename.startswith('icones_png_512/') and x.filename.endswith('.png')]))
+              print('AUTHORED_DROP_IMAGE_COUNT',len(entries))
+              if not entries or len(entries)>100 or sum(x.file_size for x in entries)>100_000_000:
+                  raise ValueError('Unexpected authored source ZIP size/count')
+              for x in entries:
+                  name=pathlib.PurePosixPath(x.filename)
+                  if name.is_absolute() or '..' in name.parts or not x.filename.isascii():
+                      raise ValueError('Unsafe archive entry '+repr(x.filename))
+                  data=z.read(x)
+                  dims=''
+                  if data[:8]==bytes([137,80,78,71,13,10,26,10]):
+                      dims=str(struct.unpack('>II',data[16:24]))
+                  elif data[:4]==b'RIFF' and data[8:12]==b'WEBP':
+                      dims='webp'
+                  print('AUTHORED_DROP_ENTRY',repr(x.filename),x.file_size,dims,
+                        hashlib.sha256(data).hexdigest()[:16])
+          PY

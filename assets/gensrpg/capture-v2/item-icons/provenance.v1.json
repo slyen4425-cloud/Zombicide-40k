@@ -1,0 +1,82 @@
+{
+  "schema": "gensrpg-capture-drop-icons-source-v1",
+  "sourceRepository": "slyen4425-cloud/Zombicide-40k",
+  "sourceCommit": "4bac69424ccf0dabb078258eba0d0ab45689b496",
+  "sourceArchive": "monster_capture_drops_visuels_12_icones.zip",
+  "sourceZipSha256": "18da5d1e84401c0b68ded24971d892f26f2338b92c1b02330254d20ffde13f7f",
+  "iconCount": 12,
+  "files": [
+    {
+      "name": "drop_elfe_vent_plume.png",
+      "sha256": "f1437e3817a85af0f5bf3c238b032f2a8b1e446d010155d8192e7ce5caea5ad2",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "name": "drop_gemmor_graine_carnivore.png",
+      "sha256": "808100162b9a8d8aeb964f1155cc052ee2a836017020be5c13ecd9f863cf27af",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "name": "drop_gorice_cristal_givre.png",
+      "sha256": "80bc4ea9a79cc966d3cecf84514615d1475bde2a691bf961922b56825ba117e1",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "name": "drop_grenou_poche_aquatique.png",
+      "sha256": "2eb2585023808141582353506502bb239a132a2ce28d4eda33868397e5267528",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "name": "drop_heriplante_bourgeon_epineux.png",
+      "sha256": "281aab7ecba26f6b6a6c6950b4d0fa33af6dc7da85fffc27bc40be55e8209ab2",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "name": "drop_kitsune_lunaire_amulette_lunaire.png",
+      "sha256": "3aaeb11da96ce5091267098d4fab6492e83d8b88629723b22d5c76b11a4b55d0",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "name": "drop_liane_venimeuse_fleur_venimeuse.png",
+      "sha256": "1dd62fff60946ccb80888a54588cf0e52d01a2fad5c3a01769866e05105652d4",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "name": "drop_lumilo_eclat_lumiere.png",
+      "sha256": "3db935d09026a8d488e138d209be07fcb1f0f8e9ce592c36be9940a0e865d092",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "name": "drop_moussado_feuille.png",
+      "sha256": "407c28735feb82c618f3eccf61c5d1ccb2cc8ba426aa7e9a5afa33bb7d23f1fc",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "name": "drop_peste_noire_spore_pestilentielle.png",
+      "sha256": "31391a7684ab42d86c13ae485f0dab433ad9bfef58454e4bfcb4922f5f4904d2",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "name": "drop_pieuvre_perle_encre.png",
+      "sha256": "b90250fcdab74417a2a82095c5d59100e7ea3930fe0bdca4a1e7d56d606a80d6",
+      "width": 512,
+      "height": 512
+    },
+    {
+      "name": "drop_venombre_croc_venimeux.png",
+      "sha256": "5d269378ea11d3117449ca264a39efa45b77362ceeb422d8b4db3779ba7f8f2c",
+      "width": 512,
+      "height": 512
+    }
+  ]
+}

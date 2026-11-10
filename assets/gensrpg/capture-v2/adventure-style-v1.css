@@ -355,3 +355,31 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
  .sheet-item{padding:8px}
  .sheet-fragment-xp select,.sheet-fragment-xp input{height:35px}
 }
+
+/* One official Adventure authoring owner. Editor-only layout, no second item
+   model or form duplication; smartphone landscape remains fully scrollable. */
+body[data-adventure-item-editor="true"] .adventure-columns{
+ display:grid;grid-template-columns:minmax(0,980px);justify-content:center;
+}
+body[data-adventure-item-editor="true"] .adventure-columns > :not(#adventure-loot-panel){
+ display:none!important;
+}
+body[data-adventure-item-editor="true"] #adventure-loot-panel{
+ display:block;grid-column:1;width:100%;max-width:980px;
+}
+body[data-adventure-item-editor="true"] #adventure-loot-heading{font-size:19px}
+body[data-adventure-item-editor="true"] #adventure-item-search{
+ width:100%;min-height:34px;margin:6px 0 10px;
+}
+body[data-adventure-item-editor="true"] #adventure-items{max-height:min(43vh,420px);overflow-y:auto}
+body[data-adventure-item-editor="true"] .rule-row{gap:8px;min-width:0}
+body[data-adventure-item-editor="true"] .rule-row>span{flex:1;overflow-wrap:anywhere}
+body[data-adventure-item-editor="true"] .rule-row>button{flex:0 0 auto}
+body[data-adventure-item-editor="true"] .rule-row>.sheet-item-icon{
+ width:34px;height:34px;object-fit:contain;flex:none;border-radius:7px;
+}
+#adventure-item-edit-cancel[hidden]{display:none!important}
+@media(orientation:landscape) and (max-height:550px){
+ body[data-adventure-item-editor="true"] #adventure-items{max-height:28vh}
+ body[data-adventure-item-editor="true"] .adventure-columns>details{padding:10px}
+}

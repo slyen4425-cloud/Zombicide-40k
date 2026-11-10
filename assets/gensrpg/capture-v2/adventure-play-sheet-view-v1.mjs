@@ -96,7 +96,7 @@ function statGrid(stats,{availablePoints=null,onAllocate=null}={}){
 export function renderAdventureSheetViewV1({
  host,snapshot,tab,portraitUrl=null,heroVisual=null,onAllocate=null,
  onSelectCreature=null,onMoveCreature=null,onMakeActive=null,
- onSummonFragment=null,onUseFragmentXp=null,resolveFragmentIcon=null
+ onSummonFragment=null,onUseFragmentXp=null,resolveFragmentIcon=null,resolveItemIcon=null
 }={}){
  if(!host||!snapshot)throw new TypeError('A valid active Capture sheet and host are required');
  const content=[];
@@ -183,6 +183,14 @@ export function renderAdventureSheetViewV1({
      node('strong','sheet-item-quantity','× '+item.quantity));
     if(item.saleValue!==null)row.append(node('small','sheet-item-value',
      item.saleValue+' pièces / unité'));
+    if(!item.fragment&&item.iconKey){
+     const imageUrl=resolveItemIcon?.(item.iconKey);
+     if(imageUrl){
+      const image=node('img','sheet-item-icon');
+      image.alt='Icône de '+item.name;image.src=imageUrl;image.loading='lazy';
+      row.prepend(image);
+     }
+    }
     if(item.fragment){
      const fragment=item.fragment;
      const imageUrl=resolveFragmentIcon?.(fragment.speciesId);

@@ -50,6 +50,8 @@ import {
 } from './adventure-contract-v1.mjs';
 import {DEFAULT_ADVENTURE_FRAGMENTS_V1}
  from './adventure-fragments-v1.mjs';
+import {normalizeCaptureItemTemplatesV1,materializeCaptureItemTemplatesV1}
+ from './item-templates-v1.mjs';
 
 const $=id=>document.getElementById(id);
 const status=$('adventure-status');
@@ -75,6 +77,22 @@ const fragmentFields={
  allowDuplicates:'adventure-fragments-duplicates'
 };
 let rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
+const isItemEditor=new URLSearchParams(window.location.search).get('editor')==='items';
+let activeItemEditId=null;
+let activeDropEditIndex=null;
+let itemTemplates=Object.freeze({schema:'gensrpg-capture-item-templates-v1',version:1,items:Object.freeze([])});
+const availableItemVisuals=()=>[...itemTemplates.items,...(itemTemplates.icons??[])];
+const officialItemIconUrl=iconKey=>{
+ const template=availableItemVisuals().find(entry=>entry.id===iconKey);
+ return template?new URL(template.iconPath,import.meta.url).href:null;
+};
+if(isItemEditor){
+ document.body.dataset.adventureItemEditor='true';
+ document.querySelector('.adventure-head h1').textContent='Éditeur d’objets';
+ document.querySelector('.adventure-head p').textContent=
+  'Catalogue, valeur de vente et butin par espèce — même sauvegarde que Jouer.';
+ const panel=document.getElementById('adventure-loot-panel');panel.open=true;
+}
 let published=[];
 let officialCombatSha=null,officialStatRegistry=null;
 let officialCombatVitalsProjector=null;
@@ -362,27 +380,122 @@ function row(caption,remove){
  holder.append(span,btn);
  return holder;
 }
+function resetItemEditor(){
+ activeItemEditId=null;
+ $('adventure-item-name').value='';$('adventure-item-value').value='0';
+ $('adventure-item-icon').value='';
+ $('adventure-item-add').textContent='Ajouter cet objet';
+ $('adventure-item-edit-cancel').hidden=true;
+}
+function editItem(itemId){
+ const item=rules.loot.items.find(value=>value.id===itemId);
+ if(!item)throw Error('Objet non disponible');
+ activeItemEditId=itemId;
+ $('adventure-item-name').value=item.name;
+ $('adventure-item-value').value=String(item.saleValue);
+ const select=$('adventure-item-icon');
+ if(item.iconKey&&!availableItemVisuals().some(x=>x.id===item.iconKey))
+  select.append(option(item.iconKey,'Icône indisponible (conservée)'));
+ select.value=item.iconKey??'';
+ $('adventure-item-add').textContent='Enregistrer les modifications';
+ $('adventure-item-edit-cancel').hidden=false;
+ $('adventure-item-name').focus();
+}
+function resetDropEditor(){
+ activeDropEditIndex=null;
+ $('adventure-drop-add').textContent='Ajouter une règle de drop';
+ $('adventure-drop-edit-cancel').hidden=true;
+}
+function editDropRule(index){
+ const drop=rules.loot.drops[index];
+ if(!drop)throw new Error('Règle de drop indisponible');
+ activeDropEditIndex=index;
+ $('adventure-drop-species').value=drop.speciesId;
+ $('adventure-drop-item').value=drop.itemId;
+ $('adventure-drop-chance').value=String(drop.chancePercent);
+ $('adventure-drop-min').value=String(drop.minQuantity);
+ $('adventure-drop-max').value=String(drop.maxQuantity);
+ $('adventure-drop-add').textContent='Enregistrer la règle de drop';
+ $('adventure-drop-edit-cancel').hidden=false;
+ $('adventure-drop-chance').focus();
+}
 function renderItemRules(){
  const itemList=$('adventure-items'),dropList=$('adventure-drops');
- itemList.replaceChildren(...(rules.loot.items.length?rules.loot.items.map(item=>
-  row(item.name+' · '+item.saleValue+' pièces',()=>{
-   const items=rules.loot.items.filter(i=>i.id!==item.id);
-   const drops=rules.loot.drops.filter(d=>d.itemId!==item.id);
-   rules=normalizeAdventureRulesV1({...rules,loot:{...rules.loot,items,drops}});
+ const needle=$('adventure-item-search').value.trim().toLocaleLowerCase('fr');
+ itemList.replaceChildren();
+ for(const item of rules.loot.items.filter(i=>!needle||
+  [i.name,...rules.loot.drops.filter(d=>d.itemId===i.id)
+   .map(d=>published.find(c=>c.id===d.speciesId)?.name??d.speciesId)]
+    .some(t=>t.toLocaleLowerCase('fr').includes(needle)))){
+  const holder=document.createElement('div');holder.className='rule-row';
+  const iconUrl=officialItemIconUrl(item.iconKey);
+  if(iconUrl){
+   const image=document.createElement('img');image.className='sheet-item-icon';
+   image.alt='Icône de '+item.name;image.src=iconUrl;image.loading='lazy';holder.append(image);
+  }
+  const span=document.createElement('span');span.textContent=item.name+' · '+item.saleValue+' pièces';
+  holder.append(span);
+  const edit=document.createElement('button');edit.type='button';edit.textContent='Modifier';
+  edit.addEventListener('click',guarded(()=>editItem(item.id)));
+  const remove=document.createElement('button');remove.type='button';remove.textContent='Supprimer';
+  remove.addEventListener('click',guarded(()=>{
+   const attached=rules.loot.drops.filter(d=>d.itemId===item.id).length;
+   if(attached&&!window.confirm('Supprimer '+item.name+' et ses '+attached+' drop(s) associés ?'))return;
+   rules=normalizeAdventureRulesV1({...rules,loot:{...rules.loot,
+    items:rules.loot.items.filter(i=>i.id!==item.id),
+    drops:rules.loot.drops.filter(d=>d.itemId!==item.id)}});
+   if(activeItemEditId===item.id)resetItemEditor();
    renderItemRules();updatePreview();
-  })): [document.createTextNode('Aucun objet défini.')]));
- const itemSelect=$('adventure-drop-item');itemSelect.replaceChildren();
- for(const item of rules.loot.items)itemSelect.append(option(item.id,item.name));
+   stateMessage('Objet supprimé du brouillon. Enregistre les paramètres.');
+  }));
+  holder.append(edit,remove);itemList.append(holder);
+ }
+ if(!itemList.childNodes.length)itemList.append(document.createTextNode(needle
+  ?'Aucun résultat.':'Aucun objet défini.'));
+ const selector=$('adventure-drop-item'),selected=selector.value;
+ selector.replaceChildren();
+ for(const item of rules.loot.items)selector.append(option(item.id,item.name));
+ if(rules.loot.items.some(x=>x.id===selected))selector.value=selected;
  $('adventure-drop-add').disabled=!published.length||!rules.loot.items.length;
- dropList.replaceChildren(...(rules.loot.drops.length?rules.loot.drops.map((drop,index)=>
-  row((published.find(c=>c.id===drop.speciesId)?.name??drop.speciesId)+
+ dropList.replaceChildren(...(rules.loot.drops.length?rules.loot.drops.map((drop,index)=>{
+  const holder=row((published.find(c=>c.id===drop.speciesId)?.name??drop.speciesId)+
    ' → '+(rules.loot.items.find(i=>i.id===drop.itemId)?.name??drop.itemId)+
    ' · '+drop.chancePercent+' % · '+drop.minQuantity+'–'+drop.maxQuantity,()=>{
     rules=normalizeAdventureRulesV1({...rules,loot:{...rules.loot,
      drops:rules.loot.drops.filter((_,i)=>i!==index)}});
-    renderItemRules();
-   })): [document.createTextNode('Aucun drop : aucune récompense aléatoire implicite.')]));
+    resetDropEditor();renderItemRules();updatePreview();
+   });
+  const edit=document.createElement('button');edit.type='button';
+  edit.textContent='Modifier';
+  edit.addEventListener('click',guarded(()=>editDropRule(index)));
+  holder.append(edit);return holder;
+ }): [document.createTextNode('Aucun drop : aucune récompense aléatoire implicite.')]));
 }
+async function loadOfficialItemTemplates(){
+ // Optional author illustrations must NEVER prevent the game from starting.
+ // Invalid/unreachable manifests fail closed: no import and no invented icons.
+ try{
+  const response=await fetch(new URL('./item-templates.v1.json',import.meta.url),
+   {cache:'no-store'});
+  if(!response.ok)throw Error('HTTP '+response.status);
+  itemTemplates=normalizeCaptureItemTemplatesV1(await response.json(),published);
+  const selector=$('adventure-item-icon');
+  selector.replaceChildren(option('','Sans icône officielle'));
+  for(const item of availableItemVisuals())selector.append(option(item.id,item.name));
+  $('adventure-item-import').disabled=!itemTemplates.items.length;
+  text($('adventure-item-icon-status'),itemTemplates.items.length
+   ?itemTemplates.items.length+' objets officiels importables, '+
+     (itemTemplates.icons?.length??0)+' icônes supplémentaires utilisables manuellement.'
+   :'Icônes en attente du dépôt validé. Création manuelle déjà disponible.');
+ }catch(error){
+  console.warn('Catalogue visuel officiel indisponible ; jeu intact',error);
+  $('adventure-item-import').disabled=true;
+  text($('adventure-item-icon-status'),
+   'Catalogue visuel indisponible ; objets et récompenses manuels conservés.');
+ }
+ renderItemRules();
+}
+
 function renderPortfolioOptions(){
  if(!portfolio)return;
  const select=$('adventure-save-select'),saved=portfolio.list();
@@ -763,6 +876,7 @@ function renderPlayingSheet(){
     $('adventure-sheet-status').dataset.error='true';
    });
   },
+  resolveItemIcon:officialItemIconUrl,
   resolveFragmentIcon:speciesId=>{
    const icon=published.find(card=>card.id===speciesId)?.icon;
    return publishedCapturePortraitUrlV1({
@@ -1332,19 +1446,34 @@ $('adventure-save-rules').addEventListener('click',guarded(()=>{
  renderItemRules();showSave();updatePreview();
  stateMessage(current?'Règles de la partie enregistrées.':'Brouillon de réglages enregistré : il sera restauré après rechargement.');
 }));
+$('adventure-item-edit-cancel').addEventListener('click',resetItemEditor);
+$('adventure-item-search').addEventListener('input',renderItemRules);
 $('adventure-item-add').addEventListener('click',guarded(()=>{
  const name=$('adventure-item-name').value.trim();
  if(!name||name.length>80)throw new Error('Le nom de l’objet doit comporter de 1 à 80 caractères');
- if(rules.loot.items.some(x=>x.name.toLocaleLowerCase('fr')===name.toLocaleLowerCase('fr')))
+ if(rules.loot.items.some(x=>x.id!==activeItemEditId&&
+     x.name.toLocaleLowerCase('fr')===name.toLocaleLowerCase('fr')))
   throw new Error('Cet objet figure déjà dans ton catalogue');
- const item={id:'item-'+crypto.randomUUID(),name,
-  saleValue:numberFrom('adventure-item-value')};
- rules=normalizeAdventureRulesV1({...fromFields(),loot:{...rules.loot,
-  items:[...rules.loot.items,item]}});
- $('adventure-item-name').value='';
- renderItemRules();updatePreview();
- stateMessage('Objet ajouté au brouillon. Enregistre les réglages pour le conserver.');
+ if(activeItemEditId&&!rules.loot.items.some(x=>x.id===activeItemEditId))
+  throw new Error('Cet objet ne figure plus dans la partie.');
+ const iconKey=$('adventure-item-icon').value;
+ const item={id:activeItemEditId??'item-'+crypto.randomUUID(),name,
+  saleValue:numberFrom('adventure-item-value'),
+  ...(iconKey?{iconKey}:{})};
+ const items=activeItemEditId?rules.loot.items.map(x=>
+  x.id===activeItemEditId?item:x):[...rules.loot.items,item];
+ rules=normalizeAdventureRulesV1({...fromFields(),loot:{...rules.loot,items}});
+ resetItemEditor();renderItemRules();updatePreview();
+ stateMessage('Objet conservé dans le brouillon. Clique Enregistrer les paramètres.');
 }));
+$('adventure-item-import').addEventListener('click',guarded(()=>{
+ const staged=materializeCaptureItemTemplatesV1({rules:fromFields(),templates:itemTemplates});
+ rules=normalizeAdventureRulesV1({...fromFields(),loot:staged.loot});
+ resetItemEditor();renderItemRules();updatePreview();
+ stateMessage(staged.addedItems+' objets et '+staged.addedDrops+
+  ' drops officiels ajoutés. Tes objets personnalisés restent intacts. Enregistre les paramètres.');
+}));
+$('adventure-drop-edit-cancel').addEventListener('click',resetDropEditor);
 $('adventure-drop-add').addEventListener('click',guarded(()=>{
  const speciesId=$('adventure-drop-species').value;
  if(!published.some(card=>card.id===speciesId))
@@ -1353,10 +1482,11 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   chancePercent:numberFrom('adventure-drop-chance'),
   minQuantity:numberFrom('adventure-drop-min'),
   maxQuantity:numberFrom('adventure-drop-max')};
- rules=normalizeAdventureRulesV1({...fromFields(),loot:{...rules.loot,
-  drops:[...rules.loot.drops,drop]}});
- renderItemRules();updatePreview();
- stateMessage('Drop ajouté au brouillon. Enregistre les réglages pour le conserver.');
+ const drops=activeDropEditIndex===null?[...rules.loot.drops,drop]:
+   rules.loot.drops.map((value,index)=>index===activeDropEditIndex?drop:value);
+ rules=normalizeAdventureRulesV1({...fromFields(),loot:{...rules.loot,drops}});
+ resetDropEditor();renderItemRules();updatePreview();
+ stateMessage('Règle de drop enregistrée dans le brouillon. Enregistre les paramètres pour confirmer.');
 }));
 (async()=>{
  try{
@@ -1369,6 +1499,7 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   creatorDraftStore=createAdventureCreatorDraftStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
   const official=await fetchPublishedBestiary();
   published=official.cards;officialCombatSha=official.combatSha;
+  await loadOfficialItemTemplates();
   officialStatRegistry=official.statRegistry;
   officialCombatVitalsProjector=createAdventureHpProjectorV1({
    creatureTransfers:official.creatureTransfers,statRegistry:officialStatRegistry,

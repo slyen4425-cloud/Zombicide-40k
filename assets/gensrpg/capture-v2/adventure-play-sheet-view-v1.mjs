@@ -182,7 +182,7 @@ export function renderAdventureSheetViewV1({
     row.append(node('span','sheet-item-name',item.name),
      node('strong','sheet-item-quantity','× '+item.quantity));
     if(item.saleValue!==null)row.append(node('small','sheet-item-value',
-     item.saleValue+' pièces / unité'));
+     item.saleValue+' '+(snapshot.inventory.currencyLabel??'pièces')+' / unité'));
     if(!item.fragment&&item.iconKey){
      const imageUrl=resolveItemIcon?.(item.iconKey);
      if(imageUrl){

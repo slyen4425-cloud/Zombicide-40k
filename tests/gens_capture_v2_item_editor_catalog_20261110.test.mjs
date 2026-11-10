@@ -59,11 +59,42 @@ test('import official item templates once without rewriting custom author object
  assert.equal(b.loot.items.length,2);assert.equal(b.loot.drops.length,2);
 });
 
-test('the official item catalogue begins empty until author uploads REAL icons',()=>{
+test('eight author-uploaded PNGs map only to verified published Bestiary species',()=>{
  const catalog=JSON.parse(file('item-templates.v1.json'));
- assert.equal(normalizeCaptureItemTemplatesV1(catalog).items.length,0);
- assert.equal(materializeCaptureItemTemplatesV1({
-  rules:SHOWCASE_ADVENTURE_RULES_V1,templates:catalog}).addedItems,0);
+ const normalized=normalizeCaptureItemTemplatesV1(catalog);
+ assert.equal(normalized.items.length,8);
+ const officialSpecies=['crea_ailevent','crea_crys_2','gorice','crea_nat_1',
+  'kitsune_lunaire','crea_lumilo','crea_mossback','crea_tox_2'];
+ assert.deepEqual(normalized.items.map(x=>x.speciesId),officialSpecies);
+ const provenance=JSON.parse(file('item-icons/provenance.v1.json'));
+ assert.equal(provenance.iconCount,12);
+ const approved=new Set(provenance.files.map(x=>x.name));
+ for(const template of normalized.items){
+  const icon=template.iconPath.replace('./item-icons/','');
+  assert.ok(approved.has(icon),'icon must originate from user-uploaded archive: '+icon);
+  const png=readFileSync(new URL(root+'item-icons/'+icon,import.meta.url));
+  assert.equal(png.subarray(1,4).toString(),'PNG');
+  assert.equal(png.readUInt32BE(16),512);
+  assert.equal(png.readUInt32BE(20),512);
+  assert.equal(png[25],6,'official icon must keep RGBA alpha');
+  assert.equal(template.saleValue,10);
+  assert.equal(template.chancePercent,20);
+ }
+ const first=materializeCaptureItemTemplatesV1({
+  rules:SHOWCASE_ADVENTURE_RULES_V1,templates:catalog});
+ assert.equal(first.addedItems,8);
+ assert.equal(first.addedDrops,8);
+ const second=materializeCaptureItemTemplatesV1({
+  rules:normalizeAdventureRulesV1({...SHOWCASE_ADVENTURE_RULES_V1,loot:first.loot}),
+  templates:catalog});
+ assert.equal(second.addedItems,0);
+ assert.equal(second.addedDrops,0);
+ // Four uploaded icons have no confirmed same-named published creature ID yet.
+ const unassigned=['drop_heriplante_bourgeon_epineux.png',
+  'drop_liane_venimeuse_fleur_venimeuse.png','drop_pieuvre_perle_encre.png',
+  'drop_peste_noire_spore_pestilentielle.png'];
+ assert.ok(unassigned.every(icon=>approved.has(icon)));
+ assert.ok(unassigned.every(icon=>!normalized.items.some(x=>x.iconPath.endsWith(icon))));
 });
 
 test('menu has one dedicated item editor view using the SAME Adventure owner',()=>{

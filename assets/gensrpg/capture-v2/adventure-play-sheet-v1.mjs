@@ -3,6 +3,8 @@
 import {
  availableAdventureStatPointsV1,publishedAdventureSpeciesV1,normalizeAdventureRulesV1
 } from './adventure-contract-v1.mjs';
+import {adventureFragmentSpeciesRulesV1}
+ from './adventure-fragments-v1.mjs';
 const frozen=value=>Object.freeze(value);
 export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry,projectCombatVitals=null,selectedInstanceId=null}={}){
  if(session?.status!=='playing')throw new Error('La fiche exige une partie Aventure en cours (playing)');
@@ -33,9 +35,37 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
    ...(isGameHp?{gameHp:true,authoredBaseHp:vitals.labMaxHp}:{} )});
  }));
  const catalog=new Map(rules.loot.items.map(item=>[item.id,item]));
+ const stored=session.storedCreatures??[];
+ // A fragment is a canonical inventory entry, not an independently stored
+ // entity. Presentation reads its official species and the authored policy.
  const items=frozen(Object.entries(session.inventory.items).map(([id,quantity])=>{
   const rule=catalog.get(id);
-  return frozen({id,name:rule?.name??id,quantity,saleValue:rule?.saleValue??null});
+  const speciesId=id.startsWith('fragment:')?id.slice('fragment:'.length):null;
+  const species=speciesId&&rules.fragmentRecruitment?.enabled
+   ?published.find(card=>card.id===speciesId):null;
+  if(!species)return frozen({id,name:rule?.name??id,quantity,
+   saleValue:rule?.saleValue??null});
+  const policy=adventureFragmentSpeciesRulesV1(rules.fragmentRecruitment,speciesId);
+  const targets=[...members,...stored].filter(member=>member.speciesId===speciesId);
+  const teamFree=members.length<6;
+  const storageFree=stored.length<policy.storageCapacity;
+  const canSummon=quantity>=policy.required&&
+   (teamFree||storageFree)&&(policy.allowDuplicates||targets.length===0)&&
+   Array.isArray(species.skills)&&species.skills.some(skill=>skill.state==='ready');
+  return frozen({id,name:'Éclat de '+species.name,quantity,saleValue:null,
+   fragment:frozen({speciesId,required:policy.required,
+    summonLevel:policy.summonLevel,xpPerFragment:policy.xpPerFragment,
+    canSummon,canConvert:targets.length>0&&quantity>0,
+    message:!teamFree&&!storageFree?'Stockage plein : éclats conservés':
+     !policy.allowDuplicates&&targets.length>0?'Un seul exemplaire autorisé':
+     'Éclats de '+species.name+' : '+quantity+' / '+policy.required,
+    targets:frozen(targets.map(member=>frozen({
+     instanceId:member.instanceId,
+     label:species.name+' · niv. '+member.level+
+      (member.hp===0?' · KO':'')+(stored.includes(member)?' · stockage':' · équipe')
+    })))
+   })
+  });
  }));
  const creature=frozen({
   instanceId:selected.instanceId,speciesId:selected.speciesId,name:card.name,
@@ -68,5 +98,10 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
    isActive:actor===active,isSelected:actor===selected});
  }));
  return frozen({sessionId:session.sessionId,hero,creature,team,
+  storage:frozen({count:stored.length,members:frozen(stored.map(member=>{
+   const card=published.find(item=>item.id===member.speciesId);
+   return frozen({instanceId:member.instanceId,speciesId:member.speciesId,
+    name:card?.name??member.speciesId,level:member.level,hp:member.hp});
+  }))}),
   inventory:frozen({currency:session.inventory.currency,items})});
 }

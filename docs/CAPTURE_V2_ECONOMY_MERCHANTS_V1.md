@@ -21,7 +21,7 @@
 
 ## Raccord futur à Exploration (chantier PNJ distinct)
 - Le Labo Exploration reste propriétaire du placement, des déplacements, du visuel, des interactions et des dialogues de PNJ. Il **ne copie pas** les inventaires ou les marchands Capture.
-- Un événement d'interaction PNJ pourra référencer l'ID stable `merchantId` configuré dans Capture, exactement comme un lien de données.
+- Dans le Labo Exploration, le créateur choisira **un marchand par son nom dans une liste de marchands disponibles**, sans copier, saisir ni voir son identifiant technique. Le lien conservera en interne la référence stable `merchantId`, générée automatiquement par Monster Capture. Un marchand renommé restera lié au PNJ ; une référence retirée devra être signalée clairement pour permettre une nouvelle sélection, sans saisie manuelle.
 - La transaction effective nécessite un point de déclenchement identifié, autorisation/session active, verrou Core, reprise/retour en jeu et tests sur téléphone paysage. **Aucun raccord, PNJ, boutique en jeu ni nouveau moteur de dialogue n'est prétendu opérationnel à ce stade.**
 
 ## Validation et livraison

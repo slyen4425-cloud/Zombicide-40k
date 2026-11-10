@@ -40,14 +40,18 @@ export function materializeCaptureItemTemplatesV1({rules,templates}){
   throw new TypeError('AdventureRules required before importing author item templates');
  const normalized=normalizeCaptureItemTemplatesV1(templates);
  const items=[...rules.loot.items],drops=[...rules.loot.drops];
- const byId=new Set(items.map(x=>x.id));
- const byPair=new Set(drops.map(x=>x.speciesId+'\u0000'+x.itemId));
- let addedItems=0,addedDrops=0;
+ const byId=new Map(items.map(item=>[item.id,item]));
+ const byPair=new Set(drops.map(x=>x.speciesId+'\\u0000'+x.itemId));
+ let addedItems=0,addedDrops=0,skippedConflicts=0;
  for(const template of normalized.items){
-  if(!byId.has(template.id)){
-   items.push({id:template.id,name:template.name,saleValue:template.saleValue,
-    iconKey:template.id});
-   byId.add(template.id);addedItems++;
+  const existing=byId.get(template.id);
+  // An author's custom item with a colliding ID must NEVER gain
+  // an automatic drop for a different official creature.
+  if(existing&&existing.iconKey!==template.id){skippedConflicts++;continue;}
+  if(!existing){
+   const created={id:template.id,name:template.name,saleValue:template.saleValue,
+    iconKey:template.id};
+   items.push(created);byId.set(template.id,created);addedItems++;
   }
   const key=template.speciesId+'\u0000'+template.id;
   if(!byPair.has(key)){
@@ -57,5 +61,6 @@ export function materializeCaptureItemTemplatesV1({rules,templates}){
    byPair.add(key);addedDrops++;
   }
  }
- return Object.freeze({loot:{...rules.loot,items,drops},addedItems,addedDrops});
+ return Object.freeze({loot:{...rules.loot,items,drops},
+  addedItems,addedDrops,skippedConflicts});
 }

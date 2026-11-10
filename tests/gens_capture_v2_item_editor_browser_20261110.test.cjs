@@ -160,6 +160,46 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   assert.equal(await frame.locator('#adventure-items .rule-row').count(),9,
    'merchant configuration may not create or duplicate item definitions');
 
+  // The drop editor uses ONE official species registry, not a second
+  // per-monster inventory. Filtering must not alter the other species.
+  await frame.locator('#adventure-drop-filter').selectOption(templateSpecies[0]);
+  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),1,
+   'one authored imported drop is visible for this published species');
+  await frame.locator('#adventure-drop-filter').selectOption('');
+  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9,
+   'other monster drops remain present after switching the filter');
+
+  // Override ONLY the selected monster's fragment chance and quantities.
+  await frame.locator('#adventure-drop-species').selectOption(templateSpecies[0]);
+  await frame.locator('#adventure-monster-fragments-panel summary').tap();
+  await frame.locator('#adventure-monster-fragments-chance').fill('33');
+  await frame.locator('#adventure-monster-fragments-min').fill('2');
+  await frame.locator('#adventure-monster-fragments-max').fill('4');
+  await frame.locator('#adventure-monster-fragments-save').tap();
+  assert.match(await frame.locator('#adventure-monster-fragments-status').innerText(),
+   /particulières enregistrées/);
+  await frame.locator('#adventure-save-rules').tap();
+
+  // Navigation replaces the iframe, but saves the SAME Capture AdventureRules
+  // first. The preplay view has a summary rather than a competing item form.
+  await frame.locator('#adventure-return-preparation').tap();
+  await page.waitForFunction(()=>window.GensCaptureV2?.status?.().view==='adventure');
+  await frame.locator('#adventure-loot-panel summary').first().tap();
+  assert.equal(await frame.locator('#adventure-item-authoring').isVisible(),false,
+   'preplay must not expose a second catalogue or merchant editor');
+  assert.match(await frame.locator('#adventure-loot-preparation-count').innerText(),
+   /9 objet\(s\).*9 règle\(s\) de drop/s);
+  await frame.locator('#adventure-open-item-editor').tap();
+  await page.waitForFunction(()=>window.GensCaptureV2?.status?.().view==='items');
+  await frame.locator('#adventure-drop-species:not([disabled])').waitFor({timeout:40000});
+  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9);
+  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
+  assert.equal(await frame.locator('#adventure-money-plural').inputValue(),'jetons');
+  await frame.locator('#adventure-drop-species').selectOption(templateSpecies[0]);
+  assert.equal(await frame.locator('#adventure-monster-fragments-chance').inputValue(),'33');
+  assert.equal(await frame.locator('#adventure-monster-fragments-min').inputValue(),'2');
+  assert.equal(await frame.locator('#adventure-monster-fragments-max').inputValue(),'4');
+
   const big=await frame.locator('#adventure-loot-panel').boundingBox();
   assert.ok(big.width>300&&big.width<=932,'editor fits phone landscape viewport');
   assert.deepEqual(errors.filter(e=>/Uncaught|SyntaxError|Duplicate Capture|Competing Capture/.test(e)),[]);

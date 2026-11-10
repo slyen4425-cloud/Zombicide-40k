@@ -41,7 +41,8 @@ export function materializeCaptureItemTemplatesV1({rules,templates}){
  const normalized=normalizeCaptureItemTemplatesV1(templates);
  const items=[...rules.loot.items],drops=[...rules.loot.drops];
  const byId=new Map(items.map(item=>[item.id,item]));
- const byPair=new Set(drops.map(x=>x.speciesId+'\\u0000'+x.itemId));
+ const pair=(speciesId,itemId)=>JSON.stringify([speciesId,itemId]);
+ const byPair=new Set(drops.map(x=>pair(x.speciesId,x.itemId)));
  let addedItems=0,addedDrops=0,skippedConflicts=0;
  for(const template of normalized.items){
   const existing=byId.get(template.id);
@@ -53,7 +54,7 @@ export function materializeCaptureItemTemplatesV1({rules,templates}){
     iconKey:template.id};
    items.push(created);byId.set(template.id,created);addedItems++;
   }
-  const key=template.speciesId+'\u0000'+template.id;
+  const key=pair(template.speciesId,template.id);
   if(!byPair.has(key)){
    drops.push({speciesId:template.speciesId,itemId:template.id,
     chancePercent:template.chancePercent,minQuantity:template.minQuantity,

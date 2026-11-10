@@ -26,19 +26,19 @@ const catalog=normalizeAdventureRulesV1({...DEFAULT_ADVENTURE_RULES_V1,
   {id:'merchant-rare',name:'Marchand rare',buysItems:false,offers:[]}]}
 });
 const published=[{id:'crea_nat_1',name:'Grainou',skills:[{slot:'slot-1',state:'ready',name:'Feuille'}]}];
-test('NPC merchant list is read ONLY from the Core-owned rules draft or active AdventureSession',()=>{
+test('NPC merchant list is read ONLY from the Core-owned rules draft or active AdventureSession',async()=>{
  const s=storage();
- assert.deepEqual(availableAdventureMerchantsForNpcV1({storage:s,coreStorage}),[]);
+ assert.deepEqual(await availableAdventureMerchantsForNpcV1({storage:s,coreStorage}),[]);
  const draft=createAdventureRulesDraftStoreV1({storage:s,coreStorage});
  draft.save(catalog);
- assert.deepEqual(availableAdventureMerchantsForNpcV1({storage:s,coreStorage}),
+ assert.deepEqual(await availableAdventureMerchantsForNpcV1({storage:s,coreStorage}),
   [{id:'merchant-forest',name:'Marchand des bois'},{id:'merchant-rare',name:'Marchand rare'}]);
  const session=createAdventureSessionV1({bestiaryCards:published,starterId:'crea_nat_1',
   rules:normalizeAdventureRulesV1({...catalog,economy:{
    ...catalog.economy,merchants:[{...catalog.economy.merchants[0],name:'Marchand renommé'}]}}),
   ids:{sessionId:'shop-session',instanceId:'shop-creature'},now:'2026-11-10T19:54:00.000Z'});
  createAdventureStoreV1({storage:s,coreStorage}).create(session);
- assert.deepEqual(availableAdventureMerchantsForNpcV1({storage:s,coreStorage}),
+ assert.deepEqual(await availableAdventureMerchantsForNpcV1({storage:s,coreStorage}),
   [{id:'merchant-forest',name:'Marchand renommé'}],
   'session owner wins over draft and rename preserves stable internal reference');
 });

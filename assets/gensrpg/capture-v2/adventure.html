@@ -177,13 +177,22 @@
    <div class="fields">
     <label>Monnaie par victoire <input type="number" id="adventure-currency" min="0" max="100000000" step="1"></label>
    </div>
-   <h3>Objets</h3>
+   <h3 id="adventure-item-editor-heading">Catalogue d'objets</h3>
+   <p class="hint" id="adventure-item-catalog-message">Les objets créés ici alimentent les règles de drop de cette aventure. Les anciennes sauvegardes restent indépendantes.</p>
    <div class="fields">
     <label>Nom de l'objet <input type="text" id="adventure-item-name" maxlength="80" placeholder="Ex. Plume d'Ailevent"></label>
-    <label>Valeur de vente <input type="number" id="adventure-item-value" min="0" value="0" step="1"></label>
+    <label>Valeur de vente <input type="number" id="adventure-item-value" min="0" max="100000000" value="0" step="1"></label>
+    <label>Icône officielle <select id="adventure-item-icon"><option value="">Sans icône</option></select></label>
    </div>
-   <button type="button" id="adventure-item-add">Ajouter cet objet</button>
-   <div id="adventure-items" class="rules-list"></div>
+   <div class="actions">
+    <button type="button" id="adventure-item-add">Ajouter cet objet</button>
+    <button type="button" id="adventure-item-edit-cancel" hidden>Annuler la modification</button>
+    <button type="button" id="adventure-item-import" disabled>Importer les objets officiels des monstres</button>
+   </div>
+   <p class="hint" id="adventure-item-icon-status">Icônes officielles : en attente du catalogue.</p>
+   <label for="adventure-item-search">Rechercher un objet</label>
+   <input type="search" id="adventure-item-search" placeholder="Nom, créature ou objet…">
+   <div id="adventure-items" class="rules-list" aria-live="polite"></div>
    <h3>Objets trouvés après un combat</h3>
    <div class="fields">
     <label>Espèce publiée <select id="adventure-drop-species" disabled></select></label>

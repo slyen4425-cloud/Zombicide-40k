@@ -51,8 +51,8 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
    .evaluateAll(nodes=>nodes.map(x=>({id:x.value,name:x.textContent})));
   console.log('AUTHORED_DROP_OFFICIAL_SPECIES',JSON.stringify(officialSpecies));
   assert.equal(await frame.locator('body').getAttribute('data-adventure-item-editor'),'true');
-  assert.equal(await frame.locator('#adventure-item-import').isDisabled(),true,
-   'do not invent official item images before deposit');
+  assert.equal(await frame.locator('#adventure-item-import').isDisabled(),false,
+   'verified user-uploaded icons make the optional official import available');
   assert.equal(await frame.locator('#adventure-items .rule-row').count(),0);
   assert.equal(await frame.locator('#adventure-create:visible').count(),0,
    'item editor must not expose a second game creation screen');
@@ -90,6 +90,33 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
    'reload must use the same canonical AdventureRules draft');
   assert.match(await frame.locator('#adventure-drops').innerText(),/47 %/);
   assert.equal(await frame.locator('#adventure-items .rule-row').count(),1);
+
+  const templateSpecies=await frame.evaluate(async()=>{
+   const response=await fetch('./item-templates.v1.json',{cache:'no-store'});
+   if(!response.ok)throw Error('Missing verified item manifest');
+   return (await response.json()).items.map(item=>item.speciesId);
+  });
+  const publishedIds=new Set(officialSpecies.map(x=>x.id));
+  assert.equal(templateSpecies.length,8);
+  assert.ok(templateSpecies.every(id=>publishedIds.has(id)),
+   'every automatic creature drop must refer to the actual published Combat Bestiary');
+  await frame.locator('#adventure-item-import').tap();
+  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9);
+  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
+  const images=frame.locator('#adventure-items img.sheet-item-icon');
+  assert.equal(await images.count(),8);
+  await images.first().evaluate(img=>img.decode());
+  await frame.locator('#adventure-save-rules').tap();
+  await page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')
+   .evaluate(iframe=>iframe.contentWindow.location.reload());
+  await frame.locator('#adventure-drop-species:not([disabled])').waitFor({timeout:40000});
+  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9,
+   'imported items persist through the one AdventureRules save owner');
+  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
+  await frame.locator('#adventure-item-import').tap();
+  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9,
+   'reimport must never duplicate the author's items');
+  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
 
   const big=await frame.locator('#adventure-loot-panel').boundingBox();
   assert.ok(big.width>300&&big.width<=932,'editor fits phone landscape viewport');

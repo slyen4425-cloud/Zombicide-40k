@@ -8,7 +8,8 @@
 - `rules.economy.merchants` décrit des marchands, avec ID stable, nom, possibilité de rachat et offres par itemId. Chaque offre possède un prix en monnaie principale, zéro ou plusieurs ressources à fournir, et un stock initial entier ou `null` pour illimité.
 - `session.merchantStocks` (optionnel) enregistre **seulement** les stocks restants qui ont effectivement changé dans une partie ; `processedMerchantActions` (optionnel) protège les transactions rejouées. Les anciennes sauvegardes sans ces champs restent intactes.
 - Les modifications auteur d'un marchand ou d'une offre ne détruisent pas les stocks historiques : les lignes inactives restent inertes. Le catalogue actuel contrôle l'accès aux achats.
-- Pour vendre un objet, le marchand doit avoir `buysItems=true` ; la valeur provient de `rules.loot.items[].saleValue`, pas d'une seconde grille de prix.
+- Pour vendre un objet, le marchand doit avoir `buysItems=true` ; la valeur provient de `rules.loot.items[].saleValue`, pas d'une seconde grille de prix. Les fragments sans valeur d'objet ne sont pas rachetés automatiquement.
+- Les marchands rares peuvent vendre ou exiger des `fragment:<speciesId>` du système existant, SANS créer de nouvelles définitions `loot.items`. L'interface ne propose que les espèces réellement publiées ; l'API de transaction refuse les espèces absentes du Bestiaire officiel, les mondes où les fragments sont désactivés et tout achat qui manque de fonds, de fragments ou de stock. La vérification exige un `bestiaryCards` officiel injecté au moment de l'interaction.
 - Une transaction est une opération pure `tradeAdventureMerchantV1({session,merchantId,itemId,kind,quantity,actionId,now})`. Le runtime qui l'appellera devra valider l'interaction et sauvegarder le résultat via **le Core existant**, sous le verrou de la partie, jamais en écrivant directement dans `localStorage`.
 
 ## Éditeur et utilisation

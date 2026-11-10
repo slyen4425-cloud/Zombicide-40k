@@ -1,6 +1,6 @@
 // Monster Capture V2 — in-game merchant presentation only.
 // Exploration owns proximity and NPC placement; AdventureSession owns every
-// trade. No second item registry, wallet, shop save, or localStorage access.
+// trade. No second item registry, wallet, shop save or direct browser persistence.
 import {tradeAdventureMerchantV1} from './adventure-contract-v1.mjs';
 
 export function installAdventureMerchantPlayV1({

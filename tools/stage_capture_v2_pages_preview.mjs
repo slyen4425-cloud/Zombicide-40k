@@ -103,12 +103,30 @@ if(fs.existsSync(mainEntryTarget))throw Error('Duplicate main Capture V2 handoff
 fs.copyFileSync(mainEntrySource,mainEntryTarget);
 const exploreDest=path.join(trial,'vendor/exploration-lab');
 fs.mkdirSync(exploreDest,{recursive:true});
-for(const folder of ['src','assets'])
-  fs.cpSync(path.join(exploration,folder),path.join(exploreDest,folder),
-    {recursive:true,filter(p){
-      if(fs.lstatSync(p).isSymbolicLink())throw Error('Symlink in official Exploration: '+p);
+// Author archives stay in the Exploration repository. Browser Pages ships
+// the live sheets and frames, not the ZIPs originally used to build them.
+const explorationSourceArchivePattern=
+  /^exploration\/objects\/animated\/(windmill|wind_turbine)\/(front|three_quarters_left|three_quarters_right)\/source\.zip$/;
+const excludedSourceArchives=[];
+for(const folder of ['src','assets']){
+  const sourceDir=path.join(exploration,folder);
+  fs.cpSync(sourceDir,path.join(exploreDest,folder),{
+    recursive:true,filter(p){
+      if(fs.lstatSync(p).isSymbolicLink())
+        throw Error('Symlink in official Exploration: '+p);
+      const relative=path.relative(sourceDir,p).split(path.sep).join('/');
+      if(folder==='assets'&&explorationSourceArchivePattern.test(relative)){
+        if(!fs.statSync(p).isFile())throw Error('Expected source ZIP file: '+relative);
+        excludedSourceArchives.push(relative);
+        return false;
+      }
       return true;
-    }});
+    }
+  });
+}
+if(excludedSourceArchives.length!==6)
+  throw Error('Unexpected official Exploration author ZIP count: '+excludedSourceArchives.length);
+console.log('Excluded 6 non-runtime Exploration source ZIPs from Pages:',excludedSourceArchives.join(', '));
 for(const filename of ['index.html','builder.html','world-assembler.html','sculpt-lab.html','play.html','manifest.webmanifest']){
   const from=path.join(exploration,filename);
   if(fs.existsSync(from))fs.copyFileSync(from,path.join(exploreDest,filename));

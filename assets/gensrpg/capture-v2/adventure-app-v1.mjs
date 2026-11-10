@@ -1055,7 +1055,7 @@ for(const button of document.querySelectorAll('[data-adventure-sheet-tab]')){
 }
 
 economyEditor=installAdventureEconomyEditorV1({
- document,getRules:()=>rules,
+ document,getRules:()=>rules,getPublishedSpecies:()=>published,
  commitEconomy:economy=>{
   const currency={singular:$('adventure-money-singular').value.trim(),
    plural:$('adventure-money-plural').value.trim()};

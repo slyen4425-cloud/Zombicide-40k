@@ -262,7 +262,7 @@ test('real smartphone merchant: proximity iframe opens only canonical shop and b
     'sessionId:"merchant-session",merchantId:"merchant-test",actorId:"actor-1"},'+
     'location.origin);window.addEventListener("message",event=>{'+
     'if(event.data?.schema==="gensrpg.capture.v2.npc.merchant.closed.v1")'+
-    'window.shopWasClosed=true;});<\\/script>';
+    'window.shopWasClosed=true;});</script>';
    host.installAdventureMerchantPlayV1({
     window,document,frame:iframe,load:()=>window.__merchantSession,
     save:session=>{window.__merchantSession=session;},

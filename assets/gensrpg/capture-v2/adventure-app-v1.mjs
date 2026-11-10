@@ -1508,12 +1508,70 @@ $('adventure-save-control').addEventListener('click',guarded(()=>{
  stateMessage('Choix du créateur/MJ enregistrés. La connexion des invités et les actions MJ seront raccordées ultérieurement.');
 }));
 $('adventure-save-rules').addEventListener('click',guarded(()=>{
+ const current=store.load();
+ saveCurrentAdventureRules();
+ stateMessage(current?'Règles de la partie enregistrées.':'Brouillon de réglages enregistré : il sera restauré après rechargement.');
+}));
+// The preparation screen and the specialist editor are just two views of
+// the SAME rules and Core store. Save before Shell replaces the iframe.
+function saveCurrentAdventureRules(){
  rules=fromFields();
  const current=store.load();
  if(current)store.save({...current,rules,updatedAt:new Date().toISOString()});
  else draftStore.save(rules);
  renderItemRules();showSave();updatePreview();
- stateMessage(current?'Règles de la partie enregistrées.':'Brouillon de réglages enregistré : il sera restauré après rechargement.');
+}
+function navigateToAdventureOwner(destination){
+ const shell=window.parent!==window?window.parent.GensCaptureV2:null;
+ if(shell?.status?.().view==='adventure'||shell?.status?.().view==='items'){
+  if(shell.open?.(destination)===true)return;
+ }
+ const relative=destination==='items'?'./adventure.html?editor=items':'./adventure.html';
+ const target=new URL(relative,import.meta.url);
+ if(target.origin!==window.location.origin)
+  throw Error('Éditeur Capture : navigation hors origine refusée');
+ window.location.assign(target.href);
+}
+$('adventure-open-item-editor').addEventListener('click',guarded(()=>{
+ if(!store)throw Error('Sauvegarde du jeu indisponible');
+ saveCurrentAdventureRules();
+ navigateToAdventureOwner('items');
+}));
+$('adventure-return-preparation').addEventListener('click',guarded(()=>{
+ if(!store)throw Error('Sauvegarde du jeu indisponible');
+ saveCurrentAdventureRules();
+ navigateToAdventureOwner('adventure');
+}));
+$('adventure-drop-filter').addEventListener('change',renderItemRules);
+$('adventure-drop-species').addEventListener('change',renderMonsterFragmentEditor);
+$('adventure-monster-fragments-save').addEventListener('click',guarded(()=>{
+ const speciesId=$('adventure-drop-species').value;
+ if(!published.some(card=>card.id===speciesId))
+  throw Error('Espèce absente du Bestiaire officiel');
+ const current=fromFields(),global=current.fragmentRecruitment??{
+  ...DEFAULT_ADVENTURE_FRAGMENTS_V1,enabled:false
+ };
+ const old=global.perSpecies?.[speciesId]??{};
+ const override={...old,
+  dropChancePercent:numberFrom('adventure-monster-fragments-chance'),
+  dropMin:numberFrom('adventure-monster-fragments-min'),
+  dropMax:numberFrom('adventure-monster-fragments-max')};
+ rules=normalizeAdventureRulesV1({...current,fragmentRecruitment:{
+  ...global,perSpecies:{...global.perSpecies,[speciesId]:override}
+ }});
+ renderItemRules();updatePreview();
+ stateMessage('Fragments de '+published.find(c=>c.id===speciesId).name+
+  ' personnalisés dans le brouillon. Enregistre les paramètres.');
+}));
+$('adventure-monster-fragments-default').addEventListener('click',guarded(()=>{
+ const speciesId=$('adventure-drop-species').value;
+ const current=fromFields();
+ const global=current.fragmentRecruitment;
+ if(!global?.perSpecies?.[speciesId])return;
+ const perSpecies={...global.perSpecies};delete perSpecies[speciesId];
+ rules=normalizeAdventureRulesV1({...current,fragmentRecruitment:{...global,perSpecies}});
+ renderItemRules();updatePreview();
+ stateMessage('Ce monstre utilise de nouveau les valeurs générales de fragments. Enregistre les paramètres.');
 }));
 $('adventure-item-edit-cancel').addEventListener('click',resetItemEditor);
 $('adventure-item-search').addEventListener('input',renderItemRules);
@@ -1554,6 +1612,7 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
  const drops=activeDropEditIndex===null?[...rules.loot.drops,drop]:
    rules.loot.drops.map((value,index)=>index===activeDropEditIndex?drop:value);
  rules=normalizeAdventureRulesV1({...fromFields(),loot:{...rules.loot,drops}});
+ $('adventure-drop-filter').value=speciesId;
  resetDropEditor();renderItemRules();updatePreview();
  stateMessage('Règle de drop enregistrée dans le brouillon. Enregistre les paramètres pour confirmer.');
 }));

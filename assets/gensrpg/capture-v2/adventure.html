@@ -201,7 +201,10 @@
     <label>Quantité minimum <input id="adventure-drop-min" type="number" min="1" max="9999" value="1"></label>
     <label>Quantité maximum <input id="adventure-drop-max" type="number" min="1" max="9999" value="1"></label>
    </div>
-   <button type="button" id="adventure-drop-add">Ajouter une règle de drop</button>
+   <div class="actions">
+    <button type="button" id="adventure-drop-add">Ajouter une règle de drop</button>
+    <button type="button" id="adventure-drop-edit-cancel" hidden>Annuler la modification</button>
+   </div>
    <div id="adventure-drops" class="rules-list"></div>
    <details id="adventure-fragments-panel" class="adventure-options">
     <summary>Fragments de créatures</summary>

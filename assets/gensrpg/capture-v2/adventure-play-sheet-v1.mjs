@@ -44,7 +44,7 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
   const species=speciesId&&rules.fragmentRecruitment?.enabled
    ?published.find(card=>card.id===speciesId):null;
   if(!species)return frozen({id,name:rule?.name??id,quantity,
-   saleValue:rule?.saleValue??null});
+   saleValue:rule?.saleValue??null,...(rule?.iconKey?{iconKey:rule.iconKey}:{})});
   const policy=adventureFragmentSpeciesRulesV1(rules.fragmentRecruitment,speciesId);
   const targets=[...members,...stored].filter(member=>member.speciesId===speciesId);
   const xpTargets=targets.filter(member=>member.level<rules.progression.maxLevel);

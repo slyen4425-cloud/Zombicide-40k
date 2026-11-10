@@ -90,6 +90,14 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
    'reload must use the same canonical AdventureRules draft');
   assert.match(await frame.locator('#adventure-drops').innerText(),/47 %/);
   assert.equal(await frame.locator('#adventure-items .rule-row').count(),1);
+  assert.equal(await frame.locator('#adventure-item-icon option').count(),13,
+   'all twelve real uploaded pictures must be selectable in the single editor');
+  await frame.locator('#adventure-items .rule-row').first()
+   .getByRole('button',{name:'Modifier'}).tap();
+  await frame.locator('#adventure-item-icon').selectOption('visuel-pieuvre');
+  await frame.locator('#adventure-item-add').tap();
+  assert.equal(await frame.locator('#adventure-items img.sheet-item-icon').count(),1,
+   'unassigned author picture is usable without pretending Pieuvre is Krakenor');
 
   const templateSpecies=await frame.locator('body').evaluate(async()=>{
    const response=await fetch('./item-templates.v1.json',{cache:'no-store'});
@@ -104,8 +112,9 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   assert.equal(await frame.locator('#adventure-items .rule-row').count(),9);
   assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
   const images=frame.locator('#adventure-items img.sheet-item-icon');
-  assert.equal(await images.count(),8);
+  assert.equal(await images.count(),9);
   await images.first().evaluate(img=>img.decode());
+  await images.nth(1).evaluate(img=>img.decode());
   await frame.locator('#adventure-save-rules').tap();
   await page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')
    .evaluate(iframe=>iframe.contentWindow.location.reload());

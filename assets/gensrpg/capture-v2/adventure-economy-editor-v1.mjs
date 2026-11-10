@@ -92,7 +92,7 @@ export function installAdventureEconomyEditorV1({
    const label=document.createElement('span');
    label.textContent=merchant.name+' · '+merchant.offers.length+' offre(s) · '+
     (merchant.buysItems?'rachète les objets':'ne rachète pas')+
-    ' · ID : '+merchant.id;
+    ;
    const edit=document.createElement('button');edit.type='button';edit.textContent='Modifier';
    edit.addEventListener('click',warn(()=>{
     editedMerchantId=merchant.id;

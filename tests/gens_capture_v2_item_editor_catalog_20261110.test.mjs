@@ -95,6 +95,21 @@ test('eight author-uploaded PNGs map only to verified published Bestiary species
   'drop_peste_noire_spore_pestilentielle.png'];
  assert.ok(unassigned.every(icon=>approved.has(icon)));
  assert.ok(unassigned.every(icon=>!normalized.items.some(x=>x.iconPath.endsWith(icon))));
+ assert.equal(normalized.icons.length,4,'unassigned illustrations remain selectable, not autoloot');
+ assert.deepEqual(normalized.icons.map(x=>x.iconPath.split('/').at(-1)),unassigned);
+ for(const artwork of normalized.icons){
+  const png=readFileSync(new URL(root+artwork.iconPath.replace('./',''),import.meta.url));
+  assert.equal(png.subarray(1,4).toString(),'PNG');
+  assert.equal(png.readUInt32BE(16),512);
+  assert.equal(png.readUInt32BE(20),512);
+  assert.ok([4,6].includes(png[25]));
+ }
+ assert.throws(()=>normalizeCaptureItemTemplatesV1({...catalog,icons:[
+  {...catalog.icons[0],iconPath:'https://unsafe.invalid/photo.png'}]}),/path/);
+ assert.throws(()=>normalizeCaptureItemTemplatesV1({...catalog,icons:[
+  {...catalog.icons[0],id:catalog.items[0].id}]}),/duplicate/);
+ assert.deepEqual(first.loot.drops.map(x=>x.speciesId),officialSpecies,
+  'unassigned artwork must NEVER produce a guessed monster drop');
 });
 
 test('menu has one dedicated item editor view using the SAME Adventure owner',()=>{

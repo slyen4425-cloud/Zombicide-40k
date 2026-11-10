@@ -511,14 +511,13 @@ function assertSession(session){
  }
  if(Object.hasOwn(v,'merchantStocks')){
   const stocks=object(v.merchantStocks,'merchantStocks');
-  const economy=normalizeAdventureEconomyV1(v.rules.economy,v.rules.loot.items);
+  // A creator may retire a merchant, remove an offer, or change its stock.
+  // Historical remaining-stock entries stay inert, never invalidate a save.
   for(const [merchantId,entries] of Object.entries(stocks)){
-   const merchant=economy.merchants.find(m=>m.id===identity(merchantId,'stock merchantId'));
-   if(!merchant)throw new RangeError('Unknown merchant stock holder '+merchantId);
+   identity(merchantId,'stock merchantId');
    for(const [itemId,count] of Object.entries(object(entries,'merchant stocks'))){
-    const offer=merchant.offers.find(o=>o.itemId===identity(itemId,'stock itemId'));
-    if(!offer||offer.stock===null)throw new RangeError('Unconfigured merchant stock item');
-    integer(count,'merchant stock',0,offer.stock);
+    identity(itemId,'stock itemId');
+    integer(count,'merchant stock',0);
    }
   }
  }

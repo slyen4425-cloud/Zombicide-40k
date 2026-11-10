@@ -40,6 +40,7 @@ import {writeAdventurePlayingPartyV1} from './adventure-playing-party-grant-v1.m
 import {writeAdventureHeroSelectionGrantV1} from './adventure-hero-selection-grant-v1.mjs';
 import {
  DEFAULT_ADVENTURE_RULES_V1,SHOWCASE_ADVENTURE_RULES_V1,
+ summonAdventureCreatureWithFragmentsV1,grantAdventureCreatureFragmentXpV1,
  DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
  createAdventureSessionV1,createAdventureStoreV1,updateAdventureCameraPolicyV1,publishedAdventureSpeciesV1,
  coreAdventureProgressionConfigV1,
@@ -47,6 +48,8 @@ import {
  updateAdventureSessionControlV1,
  initializeAdventureSessionControlV1
 } from './adventure-contract-v1.mjs';
+import {DEFAULT_ADVENTURE_FRAGMENTS_V1}
+ from './adventure-fragments-v1.mjs';
 
 const $=id=>document.getElementById(id);
 const status=$('adventure-status');
@@ -59,6 +62,17 @@ const idField={
  heroEnabled:'adventure-hero-xp-enabled',heroShare:'adventure-hero-xp-share',
  heroXpLevel:'adventure-hero-xp-per-level',heroMax:'adventure-hero-max-level',
  heroTalent:'adventure-hero-talent-points'
+};
+const fragmentFields={
+ enabled:'adventure-fragments-enabled',
+ required:'adventure-fragments-required',
+ summonLevel:'adventure-fragments-summon-level',
+ xpPerFragment:'adventure-fragments-xp',
+ dropChancePercent:'adventure-fragments-drop-chance',
+ dropMin:'adventure-fragments-drop-min',
+ dropMax:'adventure-fragments-drop-max',
+ storageCapacity:'adventure-fragments-storage-capacity',
+ allowDuplicates:'adventure-fragments-duplicates'
 };
 let rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
 let published=[];
@@ -173,6 +187,12 @@ function setFields(value){
  $(idField.heroXpLevel).value=value.heroProgression.xpPerLevel;
  $(idField.heroMax).value=value.heroProgression.maxLevel;
  $(idField.heroTalent).value=value.heroProgression.talentPointsPerLevel;
+ const policy=value.fragmentRecruitment??DEFAULT_ADVENTURE_FRAGMENTS_V1;
+ for(const [key,id] of Object.entries(fragmentFields)){
+  if(key==='enabled')$(id).checked=value.fragmentRecruitment?.enabled??false;
+  else if(key==='allowDuplicates')$(id).checked=policy.allowDuplicates;
+  else $(id).value=String(policy[key]);
+ }
 }
 function fromFields(){
  return normalizeAdventureRulesV1({
@@ -195,7 +215,22 @@ function fromFields(){
    xpGainPercent:numberFrom(idField.heroShare),
    xpPerLevel:numberFrom(idField.heroXpLevel),
    maxLevel:numberFrom(idField.heroMax),
-   talentPointsPerLevel:numberFrom(idField.heroTalent)}
+   talentPointsPerLevel:numberFrom(idField.heroTalent)},
+  // Old worlds with no fragment feature must not silently opt in.
+  ...(rules.fragmentRecruitment||$(fragmentFields.enabled).checked?{
+   fragmentRecruitment:{
+    ...(rules.fragmentRecruitment??DEFAULT_ADVENTURE_FRAGMENTS_V1),
+    enabled:$(fragmentFields.enabled).checked,
+    required:numberFrom(fragmentFields.required),
+    summonLevel:numberFrom(fragmentFields.summonLevel),
+    xpPerFragment:numberFrom(fragmentFields.xpPerFragment),
+    dropChancePercent:numberFrom(fragmentFields.dropChancePercent),
+    dropMin:numberFrom(fragmentFields.dropMin),
+    dropMax:numberFrom(fragmentFields.dropMax),
+    storageCapacity:numberFrom(fragmentFields.storageCapacity),
+    allowDuplicates:$(fragmentFields.allowDuplicates).checked
+   }
+  }:{})
  });
 }
 async function fetchPublishedBestiary(){
@@ -727,12 +762,71 @@ function renderPlayingSheet(){
     text($('adventure-sheet-status'),error.message);
     $('adventure-sheet-status').dataset.error='true';
    });
+  },
+  resolveFragmentIcon:speciesId=>{
+   const icon=published.find(card=>card.id===speciesId)?.icon;
+   return publishedCapturePortraitUrlV1({
+    card:icon?{portrait:icon}:null,moduleUrl:import.meta.url
+   });
+  },
+  onSummonFragment:speciesId=>{
+   void performPlayingFragmentAction({kind:'summon',speciesId}).catch(sheetActionError);
+  },
+  onUseFragmentXp:(speciesId,instanceId,quantity)=>{
+   void performPlayingFragmentAction({
+    kind:'xp',speciesId,instanceId,quantity
+   }).catch(sheetActionError);
   }
  });
 }
 function sheetActionError(error){
  text($('adventure-sheet-status'),error.message);
  $('adventure-sheet-status').dataset.error='true';
+}
+let fragmentActionPending=false;
+async function performPlayingFragmentAction({kind,speciesId,instanceId=null,quantity=null}){
+ const play=activePlayingSheet;
+ if(!play||play.sessionId!==store?.load()?.sessionId)
+  throw new Error('Aucune partie active pour utiliser les éclats');
+ // A double-click is one intent, never two independently issued actions.
+ if(fragmentActionPending)return;
+ fragmentActionPending=true;
+ try{
+  const locks=window.navigator.locks;
+  if(typeof locks?.request!=='function')
+   throw new Error('Verrou de sauvegarde indisponible : éclats conservés');
+  let receipt=null;
+  await locks.request('gensrpg.capture.v2.adventure-combat:'+play.sessionId,()=>{
+   const session=store.load();
+   if(session?.status!=='playing'||session.sessionId!==play.sessionId)
+    throw new Error('La partie a changé : action annulée sans consommation');
+   if(readCombatHandoff(window.localStorage,{sessionId:play.sessionId}))
+    throw new Error('Termine le combat avant d’utiliser les éclats');
+   const event={
+    session,bestiaryCards:published,speciesId,
+    actionId:crypto.randomUUID(),now:new Date().toISOString(),
+    progressionCore:window.GensProgressionV1
+   };
+   receipt=kind==='summon'
+    ?summonAdventureCreatureWithFragmentsV1({
+     ...event,instanceId:crypto.randomUUID(),destination:'auto'
+    })
+    :grantAdventureCreatureFragmentXpV1({
+     ...event,instanceId,quantity
+    });
+   if(!receipt.applied)throw new Error('Action déjà enregistrée');
+   // Save first, then refresh Exploration's official party projection.
+   // If the saving fails, the original inventory remains untouched.
+   store.save(receipt.session);
+   play.refreshParty(receipt.session);
+  });
+  showSave();renderPlayingSheet();
+  text($('adventure-sheet-status'),kind==='summon'
+   ?'Créature invoquée au niveau '+receipt.creature.level+
+     (receipt.destination==='storage'?' et placée dans le stockage hors combat.':'.')
+   :'+'+receipt.xpGained+' XP enregistrée(s) sur la créature sélectionnée.');
+  $('adventure-sheet-status').dataset.error='false';
+ }finally{fragmentActionPending=false;}
 }
 async function updatePlayingTeam(instanceId,action,direction=null){
  const play=activePlayingSheet;
@@ -836,6 +930,7 @@ for(const button of document.querySelectorAll('[data-adventure-sheet-tab]')){
 setFields(rules);
 setSessionControlFields(null);
 for(const field of Object.values(idField))$(field).addEventListener('input',updatePreview);
+for(const field of Object.values(fragmentFields))$(field).addEventListener('input',updatePreview);
 $(idField.moveSpeed).addEventListener('input',()=>{
  $('adventure-move-speed-value').textContent=$(idField.moveSpeed).value;
 });

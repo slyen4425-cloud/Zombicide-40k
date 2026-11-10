@@ -1,0 +1,59 @@
+# One-time, branch-only staging of 12 user-uploaded monster drop PNGs.
+# Does NOT publish Pages, modify main, or alter Combat/Exploration media.
+name: Capture V2 one-time author drop icon extraction
+on:
+  push:
+    branches:
+      - work/gensrpg-capture-item-editor-2026-11-10
+    paths:
+      - .github/workflows/capture-v2-item-icons-once.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gensrpg-capture-item-icons-exact-author-upload
+  cancel-in-progress: false
+
+jobs:
+  stage-author-upload:
+    if: github.ref == 'refs/heads/work/gensrpg-capture-item-editor-2026-11-10' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout only the active isolated authoring work branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/gensrpg-capture-item-editor-2026-11-10
+          persist-credentials: true
+      - name: Checkout exact user's uploaded archive SHA without changing main
+        uses: actions/checkout@v4
+        with:
+          ref: 4bac69424ccf0dabb078258eba0d0ab45689b496
+          path: _user_drop_source_20261110
+          sparse-checkout: monster_capture_drops_visuels_12_icones.zip
+          persist-credentials: false
+      - name: Validate all 12 real PNGs and stage only browser assets
+        run: |
+          python3 tools/import_capture_drop_icons_20261110.py \
+            _user_drop_source_20261110/monster_capture_drops_visuels_12_icones.zip \
+            assets/gensrpg/capture-v2/item-icons
+      - name: Check that precisely the author-approved PNGs plus provenance were staged
+        run: |
+          test "$(find assets/gensrpg/capture-v2/item-icons -maxdepth 1 -name '*.png' | wc -l)" -eq 12
+          python3 - <<'PY'
+          import json, pathlib
+          p=pathlib.Path('assets/gensrpg/capture-v2/item-icons/provenance.v1.json')
+          o=json.loads(p.read_text())
+          assert o['iconCount']==12 and len(o['files'])==12
+          assert all(x['width']==512 and x['height']==512 for x in o['files'])
+          PY
+      - name: Commit ONLY these validated images to the isolated work branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- assets/gensrpg/capture-v2/item-icons
+          test "$(git diff --cached --name-only | wc -l)" -eq 13
+          git diff --cached --name-only | grep -Ev '^assets/gensrpg/capture-v2/item-icons/' && exit 1 || true
+          git commit -m "assets(capture): stage 12 verified author drop icons on work branch"
+          git push origin HEAD:refs/heads/work/gensrpg-capture-item-editor-2026-11-10

@@ -91,7 +91,7 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   assert.match(await frame.locator('#adventure-drops').innerText(),/47 %/);
   assert.equal(await frame.locator('#adventure-items .rule-row').count(),1);
 
-  const templateSpecies=await frame.evaluate(async()=>{
+  const templateSpecies=await frame.locator('body').evaluate(async()=>{
    const response=await fetch('./item-templates.v1.json',{cache:'no-store'});
    if(!response.ok)throw Error('Missing verified item manifest');
    return (await response.json()).items.map(item=>item.speciesId);

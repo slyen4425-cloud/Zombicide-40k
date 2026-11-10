@@ -1,3 +1,12 @@
+## 2026-11-10 — Raccord PNJ marchand : dernier pin officiel Exploration (C2, EN VALIDATION)
+- **Propriétaire publié dans son dépôt** : Labo Exploration PR #410 fusionnée dans son unique `main@5db0f09c827206eccf1de740965975a3acfedbf6`. Source métier certifiée `e376d6435e8abf61ed396c052710e1253c6dfa74` (ancêtre exact de main), `verify-and-assemble` run `42895507158` SUCCESS, `core-tests`, `native-https-pixels`, `modern-combat-encounter` SUCCESS.
+- **Source Capture** : la seule définition `assets/gensrpg/capture-v2/source-pins-v1.json.exploration.sha` pointe vers le SHA métier certifié `e376d6435e8abf61ed396c052710e1253c6dfa74` (pas vers une branche mouvante), sans modifier Combat main `718d02793dacb8e6db97df36d4431f64336e3121`.
+- **Parcours corrigé** : le Shell accepte le catalogue en lecture seule lorsque Sculpt est lancé directement **ou** via World Assembler (`world` puis navigation dans le même iframe). L'éditeur affiche uniquement les noms de marchands, jamais un champ ID. La boutique en jeu demeure dans l'UI Capture et la sauvegarde de l'AdventureSession unique.
+- **Incident de branche isolé** : restauration du publisher PR #384 (deux fichiers source introduits à tort sur main) après vérification CI exacte ; aucun rollback destructeur, aucune modification de PWA ou de profils. Ne pas ajouter de source métier au publisher direct.
+- **Tests source et publication** : nouvelle CI source exacte requise après ce changement de pin. Checkpoint GREEN source sur le dernier SHA effectivement certifié, puis lot publisher séparé sur `main` actuel, avec un seul pin immuable `tools/capture_v2_pages_preview_pin.json.sha`, tests Pages et URL HTTPS réelle. **Non publié dans GenSRPG à cette étape.**
+
+---
+
 ## 2026-11-10 — Publication objets, drops, monnaies et PNJ marchands (C2, CANDIDAT)
 - **Accord utilisateur** : raccorder l'éditeur et les PNJ puis publier lorsque GREEN, sans demander de saisie d'identifiant.
 - **SOURCE START réelle** : `6a95a8474ca611b91467e6ae2834ea587ab78951` (PR #382, dépendant #380 et #379, 13 checks GREEN) ; checkpoint `checkpoint/gensrpg-start-capture-npc-commerce-2026-11-10`, branche `work/gensrpg-capture-npc-commerce-2026-11-10`.

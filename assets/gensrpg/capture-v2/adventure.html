@@ -206,6 +206,40 @@
     <button type="button" id="adventure-drop-edit-cancel" hidden>Annuler la modification</button>
    </div>
    <div id="adventure-drops" class="rules-list"></div>
+   <details id="adventure-economy-panel" class="adventure-options">
+    <summary>Monnaie, ressources et marchands</summary>
+    <p class="hint">Une monnaie principale, dont le nom est personnalisable. Les autres ressources sont les objets du catalogue : on peut les réclamer en paiement, sans créer un second inventaire. Aucun marchand n'apparaît en jeu avant son raccord explicite à un PNJ ou un événement Exploration.</p>
+    <div class="fields">
+     <label>Nom de la monnaie (singulier) <input id="adventure-money-singular" type="text" maxlength="40" value="pièce"></label>
+     <label>Nom de la monnaie (pluriel) <input id="adventure-money-plural" type="text" maxlength="40" value="pièces"></label>
+    </div>
+    <h3>Configurer un marchand</h3>
+    <div class="fields">
+     <label>Nom du marchand <input id="adventure-merchant-name" type="text" maxlength="80" placeholder="Ex. Marchand ambulant"></label>
+     <label><input id="adventure-merchant-buys" type="checkbox" checked> Peut racheter les objets au prix défini dans leur fiche</label>
+    </div>
+    <div class="actions">
+     <button type="button" id="adventure-merchant-add">Ajouter ce marchand</button>
+     <button type="button" id="adventure-merchant-cancel" hidden>Annuler la modification</button>
+    </div>
+    <div id="adventure-merchants" class="rules-list" aria-live="polite"></div>
+    <h3>Objets proposés par un marchand</h3>
+    <div class="fields">
+     <label>Marchand <select id="adventure-merchant-select"></select></label>
+     <label>Objet à vendre <select id="adventure-merchant-item"></select></label>
+     <label>Prix dans la monnaie principale <input id="adventure-merchant-price" type="number" min="0" max="100000000" value="10" step="1"></label>
+     <label>Ressource supplémentaire (facultative) <select id="adventure-merchant-resource"></select></label>
+     <label>Quantité de ressource <input id="adventure-merchant-resource-qty" type="number" min="1" max="9999" value="1" step="1"></label>
+     <label><input id="adventure-merchant-unlimited" type="checkbox" checked> Stock illimité</label>
+     <label>Stock initial si limité <input id="adventure-merchant-stock" type="number" min="0" max="100000000" value="1" step="1"></label>
+    </div>
+    <div class="actions">
+     <button type="button" id="adventure-merchant-offer-add">Ajouter cette offre</button>
+     <button type="button" id="adventure-merchant-offer-cancel" hidden>Annuler la modification</button>
+    </div>
+    <div id="adventure-merchant-offers" class="rules-list" aria-live="polite"></div>
+    <p class="hint">Les objets, prix, stocks, monnaies et règles restent modifiables par le créateur. Les achats et ventes seront enregistrés dans la sauvegarde Capture ; l'interaction PNJ sera raccordée séparément dans Exploration.</p>
+   </details>
    <details id="adventure-fragments-panel" class="adventure-options">
     <summary>Fragments de créatures</summary>
     <p class="hint">Les fragments d'une espèce publiée s'ajoutent à l'inventaire après une victoire. Invoque une créature de niveau 1 par défaut ou transforme les fragments en XP sur une créature déjà possédée. Aucun effet sur les anciennes parties sans cette règle.</p>

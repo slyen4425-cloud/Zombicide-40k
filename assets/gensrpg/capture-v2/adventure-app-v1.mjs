@@ -50,6 +50,8 @@ import {
 } from './adventure-contract-v1.mjs';
 import {DEFAULT_ADVENTURE_FRAGMENTS_V1}
  from './adventure-fragments-v1.mjs';
+import {normalizeCaptureItemTemplatesV1,materializeCaptureItemTemplatesV1}
+ from './item-templates-v1.mjs';
 
 const $=id=>document.getElementById(id);
 const status=$('adventure-status');
@@ -75,6 +77,20 @@ const fragmentFields={
  allowDuplicates:'adventure-fragments-duplicates'
 };
 let rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
+const isItemEditor=new URLSearchParams(window.location.search).get('editor')==='items';
+let activeItemEditId=null;
+let itemTemplates=Object.freeze({schema:'gensrpg-capture-item-templates-v1',version:1,items:Object.freeze([])});
+const officialItemIconUrl=iconKey=>{
+ const template=itemTemplates.items.find(entry=>entry.id===iconKey);
+ return template?new URL(template.iconPath,import.meta.url).href:null;
+};
+if(isItemEditor){
+ document.body.dataset.adventureItemEditor='true';
+ document.querySelector('.adventure-head h1').textContent='Éditeur d’objets';
+ document.querySelector('.adventure-head p').textContent=
+  'Catalogue, valeur de vente et butin par espèce — même sauvegarde que Jouer.';
+ const panel=document.getElementById('adventure-loot-panel');panel.open=true;
+}
 let published=[];
 let officialCombatSha=null,officialStatRegistry=null;
 let officialCombatVitalsProjector=null;

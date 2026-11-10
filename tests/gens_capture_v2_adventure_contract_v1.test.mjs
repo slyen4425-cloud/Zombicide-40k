@@ -1,3 +1,4 @@
+import './gens_capture_v2_fragments_contract_20261110.test.mjs'; // Fragment contract regression joins the existing source CI gate.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';

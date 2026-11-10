@@ -135,6 +135,8 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   await frame.locator('#adventure-merchant-name').fill('Marchand témoin');
   await frame.locator('#adventure-merchant-add').tap();
   assert.equal(await frame.locator('#adventure-merchants .rule-row').count(),1);
+  assert.ok(await frame.locator('#adventure-merchant-item option[value^="fragment:"]').count()>0,
+   'a rare merchant may offer fragments of published creatures, not a fake item');
   await frame.locator('#adventure-merchant-item').selectOption({index:0});
   await frame.locator('#adventure-merchant-resource').selectOption({index:2});
   await frame.locator('#adventure-merchant-resource-qty').fill('2');

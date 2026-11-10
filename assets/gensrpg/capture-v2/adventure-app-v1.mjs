@@ -1409,18 +1409,32 @@ $('adventure-save-rules').addEventListener('click',guarded(()=>{
  renderItemRules();showSave();updatePreview();
  stateMessage(current?'Règles de la partie enregistrées.':'Brouillon de réglages enregistré : il sera restauré après rechargement.');
 }));
+$('adventure-item-edit-cancel').addEventListener('click',resetItemEditor);
+$('adventure-item-search').addEventListener('input',renderItemRules);
 $('adventure-item-add').addEventListener('click',guarded(()=>{
  const name=$('adventure-item-name').value.trim();
  if(!name||name.length>80)throw new Error('Le nom de l’objet doit comporter de 1 à 80 caractères');
- if(rules.loot.items.some(x=>x.name.toLocaleLowerCase('fr')===name.toLocaleLowerCase('fr')))
+ if(rules.loot.items.some(x=>x.id!==activeItemEditId&&
+     x.name.toLocaleLowerCase('fr')===name.toLocaleLowerCase('fr')))
   throw new Error('Cet objet figure déjà dans ton catalogue');
- const item={id:'item-'+crypto.randomUUID(),name,
-  saleValue:numberFrom('adventure-item-value')};
- rules=normalizeAdventureRulesV1({...fromFields(),loot:{...rules.loot,
-  items:[...rules.loot.items,item]}});
- $('adventure-item-name').value='';
- renderItemRules();updatePreview();
- stateMessage('Objet ajouté au brouillon. Enregistre les réglages pour le conserver.');
+ if(activeItemEditId&&!rules.loot.items.some(x=>x.id===activeItemEditId))
+  throw new Error('Cet objet ne figure plus dans la partie.');
+ const iconKey=$('adventure-item-icon').value;
+ const item={id:activeItemEditId??'item-'+crypto.randomUUID(),name,
+  saleValue:numberFrom('adventure-item-value'),
+  ...(iconKey?{iconKey}:{})};
+ const items=activeItemEditId?rules.loot.items.map(x=>
+  x.id===activeItemEditId?item:x):[...rules.loot.items,item];
+ rules=normalizeAdventureRulesV1({...fromFields(),loot:{...rules.loot,items}});
+ resetItemEditor();renderItemRules();updatePreview();
+ stateMessage('Objet conservé dans le brouillon. Clique Enregistrer les paramètres.');
+}));
+$('adventure-item-import').addEventListener('click',guarded(()=>{
+ const staged=materializeCaptureItemTemplatesV1({rules:fromFields(),templates:itemTemplates});
+ rules=normalizeAdventureRulesV1({...fromFields(),loot:staged.loot});
+ resetItemEditor();renderItemRules();updatePreview();
+ stateMessage(staged.addedItems+' objets et '+staged.addedDrops+
+  ' drops officiels ajoutés. Tes objets personnalisés restent intacts. Enregistre les paramètres.');
 }));
 $('adventure-drop-add').addEventListener('click',guarded(()=>{
  const speciesId=$('adventure-drop-species').value;
@@ -1446,6 +1460,7 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   creatorDraftStore=createAdventureCreatorDraftStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
   const official=await fetchPublishedBestiary();
   published=official.cards;officialCombatSha=official.combatSha;
+  await loadOfficialItemTemplates();
   officialStatRegistry=official.statRegistry;
   officialCombatVitalsProjector=createAdventureHpProjectorV1({
    creatureTransfers:official.creatureTransfers,statRegistry:officialStatRegistry,

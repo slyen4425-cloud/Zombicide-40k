@@ -2,13 +2,16 @@
 import {DEFAULT_ADVENTURE_ECONOMY_V1} from './adventure-economy-v1.mjs';
 
 export function installAdventureEconomyEditorV1({
- document,getRules,commitEconomy,notify
+ document,getRules,getPublishedSpecies,commitEconomy,notify
 }){
  const $=id=>document.getElementById(id);
  const option=(value,label)=>{const node=document.createElement('option');
   node.value=value;node.textContent=label;return node;};
  const warn=fn=>()=>{try{fn();}catch(error){notify(error.message,true);}};
- const itemName=id=>getRules().loot.items.find(x=>x.id===id)?.name??id;
+ const commodities=()=>[...getRules().loot.items,
+  ...(getRules().fragmentRecruitment?.enabled===true?(getPublishedSpecies?.()??[])
+   .map(card=>({id:'fragment:'+card.id,name:'Éclat de '+card.name})):[])];
+ const itemName=id=>commodities().find(x=>x.id===id)?.name??id;
  const current=()=>getRules().economy??DEFAULT_ADVENTURE_ECONOMY_V1;
  const byMerchant=id=>current().merchants.find(m=>m.id===id);
  let editedMerchantId=null,editedOffer=null,resources=[];
@@ -68,7 +71,7 @@ export function installAdventureEconomyEditorV1({
   if(!resources.length)host.textContent='Pas de ressource supplémentaire exigée.';
  }
  function render(){
-  const economy=current(),items=getRules().loot.items;
+  const economy=current(),items=commodities();
   const merchantSelect=$('adventure-merchant-select');
   const chosen=merchantSelect.value;
   merchantSelect.replaceChildren(...economy.merchants.map(m=>option(m.id,m.name)));

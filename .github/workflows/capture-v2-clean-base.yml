@@ -158,6 +158,8 @@ jobs:
 
       - name: Aventure sauvage — 1 à 6 créatures en réserve, KO et sauvegarde unique
         run: node --test tests/gens_capture_v2_adventure_wild_reserve_20261108.test.mjs
+      - name: Fragments par créature, conversion XP et réserve hors combat (TDD)
+        run: node --test tests/gens_capture_v2_fragments_core_20261109.test.mjs
       - name: Répartition XP des 1 à 6 créatures et sac visible en plein écran (TDD)
         run: node --test tests/gens_capture_v2_adventure_xp_fullscreen_20261108.test.mjs
       - name: Save/reboot 1–6 party and first-paint loading regression

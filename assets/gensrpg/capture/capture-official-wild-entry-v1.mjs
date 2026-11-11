@@ -61,8 +61,11 @@ function createDialog(){
  shell.setAttribute('role','dialog');
  shell.setAttribute('aria-modal','true');
  shell.setAttribute('aria-label','Combat officiel Monster Capture');
+ // Android fullscreen/PWA: focus must enter the arena layer, not remain
+ // on the pre-fight editor/encounter UI beneath it.
+ shell.tabIndex=-1;
  Object.assign(shell.style,{
-  position:'fixed',inset:'0',zIndex:'2147482000',display:'flex',
+  position:'fixed',inset:'0',zIndex:'2147483647',display:'flex',
   alignItems:'center',justifyContent:'center',padding:'max(10px,env(safe-area-inset-top))',
   background:'rgba(9,18,16,.96)',color:'#f5faf6',
   fontFamily:'system-ui,sans-serif',overflow:'auto'
@@ -262,9 +265,16 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
    }
   }
   if(active!==entry||entry.closed)return false;
+  // Release only the known Capture pre-fight overlays. A setup modal can
+  // otherwise cover the arena on Android until hardware Back hides it.
+  // No global navigation, new combat owner or persistent game changes.
   if(typeof globalThis.captureCloseModal==='function'){
-   globalThis.captureCloseModal('captureEncounterModal');
+   for(const id of ['captureExploreModal','captureEncounterModal',
+     'captureBattleSetupModal','captureBattleLiveModal']){
+    globalThis.captureCloseModal(id);
+   }
   }
+  entry.ui.shell.focus({preventScroll:true});
   entry.ui.status.textContent='Combat officiel du Labo en cours.';
   entry.ui.status.dataset.phase='running';
   const result=controller.startWildBattle(requested);

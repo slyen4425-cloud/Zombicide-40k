@@ -34,3 +34,15 @@ test('historical R10 rollback remains byte-pinned and original index remains unc
  assert.equal(blob(fs.readFileSync(path.join(root,'index.html'))),'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646');
  assert.equal(blob(fs.readFileSync(path.join(root,'tests/fixtures/gensrpg-phase12-r10-capture-original-owner-20261018.js.txt'))),'c6ea3c101a6861b99f8bc064d2d1fec874e7266b');
 });
+
+test('Android Capture entry releases pre-fight modals and focuses top-layer arena',()=>{
+ const entry=read('assets/gensrpg/capture/capture-official-wild-entry-v1.mjs');
+ assert.match(entry,/zIndex:'2147483647'/);
+ assert.match(entry,/shell\.tabIndex=-1/);
+ assert.match(entry,/entry\.ui\.shell\.focus\(\{preventScroll:true\}\)/);
+ for(const id of ['captureExploreModal','captureEncounterModal','captureBattleSetupModal','captureBattleLiveModal']){
+  assert.ok(entry.includes("'"+id+"'"),id+" must be released on game-to-battle transition");
+ }
+ assert.doesNotMatch(entry,/history\.(?:back|pushState|replaceState)\(/,
+  'battle must not depend on Android Back or take over Shell navigation');
+});

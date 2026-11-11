@@ -120,8 +120,10 @@ test('native Play enters Capture-owned fullscreen from a tap and keeps Sac and t
   'native Explorer frame may not hide the owner HUD in its own fullscreen layer');
  assert.doesNotMatch(html,/id="adventure-play-frame"[^>]*allowfullscreen/,
   'the parent owns fullscreen and all accessible Sac, equipe and title actions');
- assert.match(launch,/adventure-play-hud'\)\.hidden=false/,
-  'Capture-owned HUD stays displayed while the map runs');
+ assert.match(launch,/resetAdventureCombatHud\(\);/,
+  'Capture HUD is restored on the native Exploration map');
+ assert.match(app,/\$\('adventure-play-hud'\)\.hidden=!activePlayingSheet/,
+  'Capture HUD is visible in exploration, not native Combat');
  assert.match(app,/adventure-fullscreen'\)\.addEventListener\('click'/,
   'browser fullscreen must remain an explicit player choice');
 });

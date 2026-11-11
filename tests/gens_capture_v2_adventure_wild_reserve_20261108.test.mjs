@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import {
  createAdventureSessionV1,applyAdventureCombatResultV1,
+ createAdventureStoreV1,recoverAdventureDefeatedPartyV1,
  DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1
 } from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 import {writeAdventurePlayingPartyV1}
@@ -81,7 +82,8 @@ test('native KO does not revive anyone; team defeat applies only the configured 
  assert.equal(commit(session(['a','b','a'],over),e).session.status,'finished');
  const restored=commit(session(),e);
  assert.equal(restored.session.party.active.hp,null);
- assert.deepEqual(restored.session.party.reserve.map(m=>m.hp),[0,0]);
+ assert.deepEqual(restored.session.party.reserve.map(m=>m.hp),[null,null],
+  'Every member of the defeated party must recover under the creator restore policy');
 });
 test('native result validates all member IDs/species/HP with no partial save mutation',()=>{
  const s=session(),correct=[['owned-1','a',0],['owned-2','b',9],['owned-3','a',2]];
@@ -107,4 +109,39 @@ test('legacy one-creature grant/result unchanged, no empty reserve field added',
  const result=commit(s,e);
  assert.equal(result.session.party.active.hp,15);
  assert.equal(result.award.outcome,'victory');
+});
+
+test('six wounded/KO party members recover under the creator rule and persist after save/reload',()=>{
+ const members=[['owned-1','a',0],['owned-2','b',0],['owned-3','a',0],
+  ['owned-4','b',0],['owned-5','a',0],['owned-6','b',0]];
+ const before=session(['a','b','a','b','a','b']);
+ const recovered=commit(before,native('defeat',members,'wild-six'));
+ assert.deepEqual([recovered.session.party.active,...recovered.session.party.reserve]
+  .map(m=>m.hp),[null,null,null,null,null,null]);
+ assert.deepEqual([recovered.session.party.active,...recovered.session.party.reserve]
+  .map(m=>m.instanceId),members.map(m=>m[0]),
+  'Keep saved party order and identity');
+ assert.equal(recovered.session.rules.combat.hpMultiplier,0.25,
+  'Null HP is projected back to full game HP via official Combat at 25 %');
+ const services={};
+ vm.runInNewContext(readFileSync(new URL('../assets/gensrpg/core/storage-v1.js',import.meta.url),'utf8'),services);
+ const values=new Map(),storage={
+  getItem:k=>values.get(k)??null,
+  setItem:(k,v)=>values.set(k,v),
+  removeItem:k=>values.delete(k)
+ };
+ const store=createAdventureStoreV1({storage,coreStorage:services.GensStorageV1,
+  key:'gensrpg.capture.v2.adventure.slot.v1:recovery-check'});
+ store.create(before);
+ store.save(recovered.session);
+ assert.deepEqual([store.load().party.active,...store.load().party.reserve]
+  .map(m=>m.hp),Array(6).fill(null));
+ assert.equal(commit(store.load(),native('defeat',members,'wild-six')).applied,false,
+  'No duplicate post-combat reward/recovery from replay');
+ const oldSave={...recovered.session,party:{...recovered.session.party,
+  reserve:recovered.session.party.reserve.map(m=>({...m,hp:0}))}};
+ const repaired=recoverAdventureDefeatedPartyV1({session:oldSave,now:date});
+ assert.deepEqual(repaired.party.reserve.map(m=>m.hp),Array(5).fill(null),
+  'Already saved buggy reserve HP must recover after a true defeat');
+ assert.equal(before.party.active.hp,null,'Input session and original creature remain immutable');
 });

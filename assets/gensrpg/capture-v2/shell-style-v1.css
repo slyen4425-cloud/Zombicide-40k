@@ -86,3 +86,6 @@
 #gensCaptureV2Root:not([data-view="home"]) iframe{
  display:block;width:100%;height:100%;max-width:none;max-height:none;
  border:0;border-radius:0;margin:0;padding:0}
+
+/* Do not cover native combat HP with Shell navigation controls. */
+#gensCaptureV2Root[data-view="adventure"][data-adventure-combat-active="true"] > .gensCaptureV2NativeBar{display:none!important}

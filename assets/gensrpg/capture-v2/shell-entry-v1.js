@@ -98,6 +98,7 @@
     nativeTitle.textContent=info.label;
     notice.textContent=info.label;
     host.dataset.view=kind;
+    host.dataset.adventureCombatActive='false';
     // Presentation-only placement of the shared return control: Combat's
     // official editor footer and Exploration's toolbars use different corners.
     // This derived family does not own or inspect either Lab's DOM.
@@ -155,6 +156,12 @@
       requestId,merchants,error
     },root.location.origin);
   });
+  // The Shell alone owns this bar: the child only requests combat visibility.
+  function setAdventureCombatVisibility(visible){
+    if(!host||current!=="adventure"||typeof visible!=="boolean")return false;
+    host.dataset.adventureCombatActive=String(visible);
+    return true;
+  }
   function home(){
     if(!host)return false;
     if(gameFullscreenActive())void exitGameFullscreen();
@@ -162,6 +169,7 @@
     stage.replaceChildren();
     current=null;host.dataset.view="home";host.dataset.menu="main";
     delete host.dataset.nativeFamily;
+    delete host.dataset.adventureCombatActive;
     nativeTitle.textContent="";
     notice.textContent="Choisis comment commencer.";
     return true;
@@ -259,5 +267,6 @@
   if(shell.register("capture",start)!==true)throw new Error("Capture Shell registration refused");
   if(returnShell.register("capture",home)!==true)throw new Error("Capture return registration refused");
   root.GensCaptureV2=Object.freeze({start,stop,open,home,status,
-    requestGameFullscreen,exitGameFullscreen,gameFullscreenActive,onGameFullscreenChange});
+    requestGameFullscreen,exitGameFullscreen,gameFullscreenActive,onGameFullscreenChange,
+    setAdventureCombatVisibility});
 })(typeof window!=="undefined"?window:globalThis);

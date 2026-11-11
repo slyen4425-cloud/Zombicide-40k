@@ -863,8 +863,9 @@ export function recoverAdventureDefeatedPartyV1({session,now}={}){
  if(state.status!=='playing'||state.lastAward?.outcome!=='defeat'||
     normalizeAdventureRulesV1(state.rules).combat.defeatPolicy!=='restore')return state;
  const members=[state.party.active,...(state.party.reserve??[])];
- if(!members.some(member=>member.hp===0))return state;
- const recovered=member=>member.hp===0?{...member,hp:null}:member;
+ if(!members.some(member=>member.hp!==null))return state;
+ // A confirmed full-party restore heals injured saved members as well as KO.
+ const recovered=member=>member.hp!==null?{...member,hp:null}:member;
  const updated=freeze({...state,updatedAt:iso(now??state.updatedAt,'now'),
   party:{...state.party,active:recovered(state.party.active),
    reserve:(state.party.reserve??[]).map(recovered)}});

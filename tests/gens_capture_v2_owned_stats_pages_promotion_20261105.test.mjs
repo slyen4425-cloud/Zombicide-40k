@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-// The selected Capture candidate is an immutable commit, not a moving branch.
+// Certified global-assets ancestry: 14e216c7 -> 9eef5847, fast-forward two commits, 0 removed historical images; GH compare verified for Sylvorne review.\n// The selected Capture candidate is an immutable commit, not a moving branch.
 // The actual CI-verified candidate is approved by the release PR; the existing
 // publisher checks out that exact SHA, validates Lab owners and proves HTTPS
 // provenance. Never hardcode a former release SHA as a second release authority.
@@ -24,9 +24,9 @@ test('Monster Capture release pins one immutable candidate and proves the select
 test('published Monster Capture stays isolated and retains exact certified original visual author',()=>{
  assert.equal(file.officialVisuals.repository,'slyen4425-cloud/GenSrpg_labo_combat_dynamique');
  assert.equal(file.officialVisuals.ref,'global-assets');
- assert.equal(file.officialVisuals.sha,'14e216c7fa27fa768d9be090ceaef829a76ff161',
-  'certified descendant retains all 80 approved icons and adds 18 UI medallions without replacing existing artwork');
- assert.equal(file.officialVisuals.certifiedCiRun,42637727242,
+ assert.equal(file.officialVisuals.sha,'9eef5847a2b9907c493d9575a5c148b09d41a5bf',
+  'certified descendant preserves 80 icon baseline and adds Sylvorne original face/back/portrait; only immutable media author may change');
+ assert.equal(file.officialVisuals.certifiedCiRun,42914840627,
   'updated immutable visual SHA must be certified by Laboratory CI before promotion');
  const workflow=fs.readFileSync(new URL('../.github/workflows/main.yml',import.meta.url),'utf8');
  assert.match(workflow,/steps\.preview_labs\.outputs\.combat/);

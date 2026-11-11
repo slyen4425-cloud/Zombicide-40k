@@ -13,7 +13,7 @@ import {
  summonAdventureCreatureWithFragmentsV1,grantAdventureCreatureFragmentXpV1
 } from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 import {projectAdventureCombatAwardV1} from '../assets/gensrpg/capture-v2/adventure-result-presentation-v1.mjs';
-import {adventureFragmentItemIdV1,normalizeAdventureFragmentRulesV1}
+import {adventureFragmentItemIdV1,normalizeAdventureFragmentRulesV1,rollAdventureFragmentDropV1}
  from '../assets/gensrpg/capture-v2/adventure-fragments-v1.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
@@ -246,4 +246,30 @@ test('XP at level cap and a disabled XP policy preserve fragment balance',()=>{
  assert.throws(()=>xp(zero,'gorice','zero-convert',zero.party.active.instanceId,1),
   /disabled/);
  assert.equal(count(zero,'gorice'),1);
+});
+
+test('new showcase worlds roll a matching fragment at 30 percent, while legacy/custom policies stay intact',()=>{
+ assert.equal(SHOWCASE_ADVENTURE_RULES_V1.fragmentRecruitment.dropChancePercent,30);
+ assert.equal(Object.hasOwn(DEFAULT_ADVENTURE_RULES_V1,'fragmentRecruitment'),false);
+ const preset=SHOWCASE_ADVENTURE_RULES_V1.fragmentRecruitment;
+ const hit=rollAdventureFragmentDropV1({
+  rules:preset,speciesId:'gemmor',
+  random:(()=>{let n=0;return ()=>n++===0?0.299:0.0;})()
+ });
+ assert.deepEqual(hit,{itemId:'fragment:gemmor',quantity:1});
+ assert.equal(rollAdventureFragmentDropV1({
+  rules:preset,speciesId:'gemmor',random:()=>0.3
+ }),null,'30% is excluded: only a roll strictly under 30% succeeds');
+ assert.equal(rollAdventureFragmentDropV1({
+  rules:preset,speciesId:'ailevent',random:()=>0.5
+ }),null,'default chance applies to every official species');
+ const altered=structuredClone(preset);
+ altered.perSpecies.gemmor={dropChancePercent:80};
+ assert.deepEqual(rollAdventureFragmentDropV1({
+  rules:altered,speciesId:'gemmor',
+  random:(()=>{let n=0;return ()=>n++===0?0.5:0.0;})()
+ }),{itemId:'fragment:gemmor',quantity:1},'per-species author override wins');
+ assert.equal(rollAdventureFragmentDropV1({
+  rules:altered,speciesId:'ailevent',random:()=>0.5
+ }),null,'other species retain 30%');
 });

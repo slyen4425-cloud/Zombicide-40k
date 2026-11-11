@@ -55,7 +55,9 @@ export const SHOWCASE_ADVENTURE_RULES_V1=freeze({
   ]
  },
  // Only new Showcase worlds opt in; old saves retain their historical rules.
- fragmentRecruitment:DEFAULT_ADVENTURE_FRAGMENTS_V1
+ // Showcase only: every defeated wild species may yield its own fragment.
+ // A creator can override the chance per species. Historical saves are untouched.
+ fragmentRecruitment:{...DEFAULT_ADVENTURE_FRAGMENTS_V1,dropChancePercent:30}
 });
 function object(value,label){
  if(!value||typeof value!=='object'||Array.isArray(value))

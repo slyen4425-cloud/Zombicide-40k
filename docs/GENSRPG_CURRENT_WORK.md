@@ -1,3 +1,14 @@
+## 2026-11-11 — Vitrine : chance de fragment 30 % par espèce (extension du lot objets/drops #382)
+
+- **Demande** : toute créature sauvage vaincue dans le parcours vitrine a 30 % de chance de donner un fragment correspondant à son espèce, quantité 1. Conservé dans l'éditeur officiel, sans réglage caché.
+- **START** : branche existante d'authoring unifié `work/gensrpg-capture-items-drops-unified-2026-11-10` @ `6a95a8474ca611b91467e6ae2834ea587ab78951` (PR #382, draft). Une seule autorité : `SHOWCASE_ADVENTURE_RULES_V1` dans `adventure-contract-v1.mjs`. Le résultat de combat et son reçu unique restent propriétaires du tirage.
+- **Périmètre** : le seul preset des **nouvelles** parties vitrine remplace la chance par défaut 100 % par 30 %. Les sauvegardes existantes, valeurs personnalisées et overrides par espèce ne sont pas réécrits ; aucun changement au catalogue natif ni à `DEFAULT_ADVENTURE_FRAGMENTS_V1`.
+- **Fichiers** : `adventure-contract-v1.mjs`, test des fragments, présent suivi. Tests : jet 29,9 % accordé, 30 % refusé, quantité 1 de la bonne espèce, override conservé, sauvegarde legacy sans fragments intacte.
+- **Hors lot** : éventuels combats multi-adversaires et collecte par adversaire ; l'autorité actuelle du reçu travaille avec l'espèce du premier adversaire. Ne pas promettre une règle multi-ennemis tant que son contrat CombatResult n'est pas étendu.
+- **Gate** : CI/Chromium exact SHA, dépendances des PR #379/#380/#382, site Pages en HTTPS + contrôle téléphone ; aucune publication automatique ni GREEN anticipée.
+
+---
+
 ## 2026-11-10 — Capture V2 : un seul éditeur objets, économie et drops par créature (C2, NON PUBLIÉ)
 - **Demande utilisateur** : ne plus afficher le même formulaire d'objets à plusieurs endroits (préparation Aventure et éditeur), conserver un seul écran d'édition, et affecter les drops à chaque monstre publié au meilleur endroit. Les PNJ et objets physiques de cartes restent propriété Exploration.
 - **START exact AVANT modifications** : `f1a2ba260796b997954820c353e797e83c54c142` (tête du lot marchands #380, parent dépendant du lot objets #379), checkpoint `checkpoint/gensrpg-start-capture-items-drops-unified-2026-11-10`, branche `work/gensrpg-capture-items-drops-unified-2026-11-10`. **Chaîne de dépendance : #379 → #380 → ce lot.**

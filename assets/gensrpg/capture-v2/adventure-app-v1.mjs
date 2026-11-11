@@ -361,6 +361,8 @@ function getStarterSpeciesIds(){
 }
 function fillPublicSpecies(){
  const starters=$('adventure-starter'),enemies=$('adventure-enemy'),drops=$('adventure-drop-species');
+ const filter=$('adventure-drop-filter'),previousFilter=filter.value;
+ filter.replaceChildren(option('','Toutes les créatures'));
  starters.replaceChildren(option('','Choisir une créature publiée…'));
  enemies.replaceChildren();drops.replaceChildren();
  for(const card of published){
@@ -368,7 +370,9 @@ function fillPublicSpecies(){
   starters.append(option(card.id,card.name+(playable?'':' · capacité non prête'),!playable));
   enemies.append(option(card.id,card.name));
   drops.append(option(card.id,card.name));
+  filter.append(option(card.id,card.name));
  }
+ if(published.some(card=>card.id===previousFilter))filter.value=previousFilter;
  const allowed=published.filter(eligibleForNewGame).length;
  text($('adventure-bestiary-count'),published.length+' créature(s) dans le Bestiaire · '+
   allowed+' avec au moins une capacité utilisable');
@@ -376,6 +380,7 @@ function fillPublicSpecies(){
  $('adventure-create').disabled=allowed===0;
  if(allowed)starters.value=published.find(eligibleForNewGame).id;
  renderStarterReserveSelectors();
+ renderMonsterFragmentEditor();
 }
 function row(caption,remove){
  const holder=document.createElement('div');holder.className='rule-row';
@@ -424,6 +429,34 @@ function editDropRule(index){
  $('adventure-drop-edit-cancel').hidden=false;
  $('adventure-drop-chance').focus();
 }
+// Monster-oriented editing projects only the official Combat Bestiary and
+// AdventureRules. No separate loot registry or monster progression engine.
+function renderMonsterFragmentEditor(){
+ const id=$('adventure-drop-species').value;
+ const policy=rules.fragmentRecruitment??DEFAULT_ADVENTURE_FRAGMENTS_V1;
+ const override=rules.fragmentRecruitment?.perSpecies?.[id];
+ const exists=published.some(card=>card.id===id);
+ $('adventure-monster-fragments-save').disabled=!exists;
+ $('adventure-monster-fragments-default').disabled=!exists||!override;
+ $('adventure-monster-fragments-chance').value=
+  String(override?.dropChancePercent??policy.dropChancePercent);
+ $('adventure-monster-fragments-min').value=String(override?.dropMin??policy.dropMin);
+ $('adventure-monster-fragments-max').value=String(override?.dropMax??policy.dropMax);
+ const name=published.find(card=>card.id===id)?.name;
+ text($('adventure-monster-fragments-status'),!name
+  ?'Choisis un monstre publié dans la liste des drops.'
+  :name+(override?' : chance et quantités particulières enregistrées dans la règle.':
+    ' : valeurs générales appliquées.')+
+    (rules.fragmentRecruitment?.enabled?'':' Les fragments sont désactivés dans cette aventure.'));
+}
+function renderPreparationLootSummary(){
+ const unique=new Set(rules.loot.drops.map(drop=>drop.speciesId)).size;
+ text($('adventure-loot-preparation-count'),
+  rules.loot.items.length+' objet(s) · '+rules.loot.drops.length+
+  ' règle(s) de drop sur '+unique+' espèce(s)'+
+  (published.length?' parmi '+published.length+' publiées':'')+
+  ' · '+(rules.economy?.merchants.length??0)+' marchand(s) configuré(s).');
+}
 function renderItemRules(){
  const itemList=$('adventure-items'),dropList=$('adventure-drops');
  const needle=$('adventure-item-search').value.trim().toLocaleLowerCase('fr');
@@ -465,7 +498,16 @@ function renderItemRules(){
  for(const item of rules.loot.items)selector.append(option(item.id,item.name));
  if(rules.loot.items.some(x=>x.id===selected))selector.value=selected;
  $('adventure-drop-add').disabled=!published.length||!rules.loot.items.length;
- dropList.replaceChildren(...(rules.loot.drops.length?rules.loot.drops.map((drop,index)=>{
+ const filterId=$('adventure-drop-filter').value;
+ const visibleDrops=rules.loot.drops.map((drop,index)=>({drop,index}))
+  .filter(entry=>!filterId||entry.drop.speciesId===filterId);
+ const covered=new Set(rules.loot.drops.map(drop=>drop.speciesId)).size;
+ text($('adventure-drop-summary'),
+  (filterId?(published.find(card=>card.id===filterId)?.name??filterId)+
+    ' : '+visibleDrops.length+' drop(s)':'Toutes les créatures : '+rules.loot.drops.length+
+    ' règle(s) de drop')+' · '+covered+' / '+published.length+
+    ' espèces publiées avec au moins un drop configuré.');
+ dropList.replaceChildren(...(visibleDrops.length?visibleDrops.map(({drop,index})=>{
   const holder=row((published.find(c=>c.id===drop.speciesId)?.name??drop.speciesId)+
    ' → '+(rules.loot.items.find(i=>i.id===drop.itemId)?.name??drop.itemId)+
    ' · '+drop.chancePercent+' % · '+drop.minQuantity+'–'+drop.maxQuantity,()=>{
@@ -477,7 +519,11 @@ function renderItemRules(){
   edit.textContent='Modifier';
   edit.addEventListener('click',guarded(()=>editDropRule(index)));
   holder.append(edit);return holder;
- }): [document.createTextNode('Aucun drop : aucune récompense aléatoire implicite.')]));
+ }): [document.createTextNode(filterId
+   ?'Aucun objet droppable configuré pour ce monstre. Les autres créatures ne sont pas modifiées.'
+   :'Aucun drop : aucune récompense aléatoire implicite.')]));
+ renderPreparationLootSummary();
+ renderMonsterFragmentEditor();
  economyEditor?.render();
 }
 async function loadOfficialItemTemplates(){
@@ -492,6 +538,9 @@ async function loadOfficialItemTemplates(){
   selector.replaceChildren(option('','Sans icône officielle'));
   for(const item of availableItemVisuals())selector.append(option(item.id,item.name));
   $('adventure-item-import').disabled=!itemTemplates.items.length;
+  if(itemTemplates.items.length)
+   $('adventure-item-import').textContent='Importer les '+itemTemplates.items.length+
+    ' objets et drops officiels illustrés';
   text($('adventure-item-icon-status'),itemTemplates.items.length
    ?itemTemplates.items.length+' objets officiels importables, '+
      (itemTemplates.icons?.length??0)+' icônes supplémentaires utilisables manuellement.'
@@ -1459,12 +1508,77 @@ $('adventure-save-control').addEventListener('click',guarded(()=>{
  stateMessage('Choix du créateur/MJ enregistrés. La connexion des invités et les actions MJ seront raccordées ultérieurement.');
 }));
 $('adventure-save-rules').addEventListener('click',guarded(()=>{
+ const current=store.load();
+ saveCurrentAdventureRules();
+ stateMessage(current?'Règles de la partie enregistrées.':'Brouillon de réglages enregistré : il sera restauré après rechargement.');
+}));
+// The preparation screen and the specialist editor are just two views of
+// the SAME rules and Core store. Save before Shell replaces the iframe.
+function saveCurrentAdventureRules(){
  rules=fromFields();
  const current=store.load();
  if(current)store.save({...current,rules,updatedAt:new Date().toISOString()});
  else draftStore.save(rules);
  renderItemRules();showSave();updatePreview();
- stateMessage(current?'Règles de la partie enregistrées.':'Brouillon de réglages enregistré : il sera restauré après rechargement.');
+}
+function navigateToAdventureOwner(destination){
+ const shell=window.parent!==window?window.parent.GensCaptureV2:null;
+ if(shell?.status?.().view==='adventure'||shell?.status?.().view==='items'){
+  if(shell.open?.(destination)===true)return;
+ }
+ const relative=destination==='items'?'./adventure.html?editor=items':'./adventure.html';
+ const target=new URL(relative,import.meta.url);
+ if(target.origin!==window.location.origin)
+  throw Error('Éditeur Capture : navigation hors origine refusée');
+ window.location.assign(target.href);
+}
+$('adventure-open-item-editor').addEventListener('click',guarded(()=>{
+ if(!store)throw Error('Sauvegarde du jeu indisponible');
+ saveCurrentAdventureRules();
+ navigateToAdventureOwner('items');
+}));
+$('adventure-return-preparation').addEventListener('click',guarded(()=>{
+ if(!store)throw Error('Sauvegarde du jeu indisponible');
+ saveCurrentAdventureRules();
+ navigateToAdventureOwner('adventure');
+}));
+$('adventure-drop-filter').addEventListener('change',()=>{
+ const speciesId=$('adventure-drop-filter').value;
+ // When focusing one species, edit that very same official monster's drop
+ // and fragment settings. Clearing the filter returns to the full registry.
+ if(speciesId&&published.some(card=>card.id===speciesId))
+  $('adventure-drop-species').value=speciesId;
+ renderItemRules();
+});
+$('adventure-drop-species').addEventListener('change',renderMonsterFragmentEditor);
+$('adventure-monster-fragments-save').addEventListener('click',guarded(()=>{
+ const speciesId=$('adventure-drop-species').value;
+ if(!published.some(card=>card.id===speciesId))
+  throw Error('Espèce absente du Bestiaire officiel');
+ const current=fromFields(),global=current.fragmentRecruitment??{
+  ...DEFAULT_ADVENTURE_FRAGMENTS_V1,enabled:false
+ };
+ const old=global.perSpecies?.[speciesId]??{};
+ const override={...old,
+  dropChancePercent:numberFrom('adventure-monster-fragments-chance'),
+  dropMin:numberFrom('adventure-monster-fragments-min'),
+  dropMax:numberFrom('adventure-monster-fragments-max')};
+ rules=normalizeAdventureRulesV1({...current,fragmentRecruitment:{
+  ...global,perSpecies:{...global.perSpecies,[speciesId]:override}
+ }});
+ renderItemRules();updatePreview();
+ stateMessage('Fragments de '+published.find(c=>c.id===speciesId).name+
+  ' personnalisés dans le brouillon. Enregistre les paramètres.');
+}));
+$('adventure-monster-fragments-default').addEventListener('click',guarded(()=>{
+ const speciesId=$('adventure-drop-species').value;
+ const current=fromFields();
+ const global=current.fragmentRecruitment;
+ if(!global?.perSpecies?.[speciesId])return;
+ const perSpecies={...global.perSpecies};delete perSpecies[speciesId];
+ rules=normalizeAdventureRulesV1({...current,fragmentRecruitment:{...global,perSpecies}});
+ renderItemRules();updatePreview();
+ stateMessage('Ce monstre utilise de nouveau les valeurs générales de fragments. Enregistre les paramètres.');
 }));
 $('adventure-item-edit-cancel').addEventListener('click',resetItemEditor);
 $('adventure-item-search').addEventListener('input',renderItemRules);

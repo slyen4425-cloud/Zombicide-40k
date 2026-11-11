@@ -383,3 +383,19 @@ body[data-adventure-item-editor="true"] .rule-row>.sheet-item-icon{
  body[data-adventure-item-editor="true"] #adventure-items{max-height:28vh}
  body[data-adventure-item-editor="true"] .adventure-columns>details{padding:10px}
 }
+
+/* Capture economy remains ONE real editor. Preparing a game shows only an
+   inventory/drop summary and the owner-navigation link; no shadow form. */
+body:not([data-adventure-item-editor="true"]) #adventure-item-authoring{display:none!important}
+body[data-adventure-item-editor="true"] #adventure-loot-preparation-summary{display:none!important}
+#adventure-loot-preparation-summary{padding:8px 0}
+#adventure-loot-preparation-count{display:block;font-size:12px;line-height:1.5;color:#bceadb}
+#adventure-item-authoring #adventure-drop-summary,
+#adventure-item-authoring #adventure-monster-fragments-status{
+ display:block;margin:7px 0;font-size:12px;color:#cae9e4
+}
+#adventure-item-authoring #adventure-drop-filter{width:100%;max-width:440px}
+#adventure-item-authoring #adventure-monster-fragments-panel{
+ margin:14px 0;padding:10px;border:1px solid #2a5159;border-radius:10px
+}
+#adventure-item-authoring #adventure-drops .rule-row>span{flex:1;min-width:0}

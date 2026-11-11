@@ -139,9 +139,9 @@ test('six wounded/KO party members recover under the creator rule and persist af
  assert.equal(commit(store.load(),native('defeat',members,'wild-six')).applied,false,
   'No duplicate post-combat reward/recovery from replay');
  const oldSave={...recovered.session,party:{...recovered.session.party,
-  reserve:recovered.session.party.reserve.map(m=>({...m,hp:0}))}};
+  reserve:recovered.session.party.reserve.map((m,i)=>({...m,hp:i%2===0?0:11}))}};
  const repaired=recoverAdventureDefeatedPartyV1({session:oldSave,now:date});
  assert.deepEqual(repaired.party.reserve.map(m=>m.hp),Array(5).fill(null),
-  'Already saved buggy reserve HP must recover after a true defeat');
+  'Both injured and KO reserves must recover after a real defeat');
  assert.equal(before.party.active.hp,null,'Input session and original creature remain immutable');
 });

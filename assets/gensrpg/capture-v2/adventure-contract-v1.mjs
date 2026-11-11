@@ -769,7 +769,9 @@ export function applyAdventureCombatResultV1({
   party:(()=>{
    if(nativeMembers!==null){
     const [original,...reserves]=originalMembers
-     .map((member,index)=>({...progressed.get(member.instanceId),hp:nativeMembers[index].hp}));
+     .map((member,index)=>({...progressed.get(member.instanceId),
+      // Null explicitly asks the official Combat HP projector for full scaled PV.
+      hp:recover?null:nativeMembers[index].hp}));
     const replacement=original.hp===0?reserves.findIndex(member=>member.hp>0):-1;
     if(replacement>=0){
      const next=reserves.splice(replacement,1)[0];
@@ -778,11 +780,15 @@ export function applyAdventureCombatResultV1({
     // After a genuine defeat with no remaining reserves, use only the
     // creator's existing restore/KO policy. No auto-revive on flee or win.
     return {...state.party,
-      active:recover&&original.hp===0?{...original,hp:null}:original,
+      active:original,
       reserve:reserves};
    }
    // Historical 1v1 result path stays unchanged for saved old sessions.
    const available=(state.party.reserve??[]).map(member=>progressed.get(member.instanceId));
+   // Older results have no per-member Combat payload. The saved policy still
+   // applies to the ENTIRE party after a verified team defeat, not one fighter.
+   if(recover)return {...state.party,active:{...original,hp:null},
+    reserve:available.map(member=>({...member,hp:null}))};
    const replacement=defeated?available.findIndex(member=>member.hp!==0):-1;
    const knockedOut={...original,level,xp:total,
     hp:replacement>=0?0:recover?null:gameOver?0:hp==null?state.party.active.hp:hp};
@@ -854,11 +860,14 @@ export function grantAdventureCreatureFragmentXpV1({
 // Never heal a manual HP=0 edit or another outcome; never change the bestiary.
 export function recoverAdventureDefeatedPartyV1({session,now}={}){
  const state=assertSession(session);
- if(state.status!=='playing'||state.party.active.hp!==0||
-    state.lastAward?.outcome!=='defeat'||
+ if(state.status!=='playing'||state.lastAward?.outcome!=='defeat'||
     normalizeAdventureRulesV1(state.rules).combat.defeatPolicy!=='restore')return state;
+ const members=[state.party.active,...(state.party.reserve??[])];
+ if(!members.some(member=>member.hp===0))return state;
+ const recovered=member=>member.hp===0?{...member,hp:null}:member;
  const updated=freeze({...state,updatedAt:iso(now??state.updatedAt,'now'),
-  party:{...state.party,active:{...state.party.active,hp:null}}});
+  party:{...state.party,active:recovered(state.party.active),
+   reserve:(state.party.reserve??[]).map(recovered)}});
  assertSession(updated);
  return updated;
 }

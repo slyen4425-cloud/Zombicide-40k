@@ -1,3 +1,12 @@
+## 2026-11-12 — Publisher unique des récompenses de dresseurs (lot C2 à certifier)
+- Base immuable : GenSRPG `main@cacd2b4eeb9ea65ebf17320c9a9317662135910e`, checkpoint `checkpoint/gensrpg-start-trainer-rewards-publisher-20261112`, branche `work/gensrpg-trainer-rewards-publisher-2026-11-12`.
+- Source Capture issue de PR #410 fusionnée dans la **branche de source** `work/gensrpg-capture-trainer-test-paths-source-2026-11-12@0a7e49cc3d5fefcae30657987f33050763278124` ; les tests de PR source #410 étaient GREEN sur `f7b9ad9bc73763e26f224b98aa1d49a43023f489`.
+- La source Capture référence uniquement Exploration `main@46e4e3559c17dfb6bd3d7afbdb1f3d8caed93048`, certifié par CI `43301155708` et Pages `43301155674` **SUCCESS**.
+- Seul `tools/capture_v2_pages_preview_pin.json` sélectionne le SHA officiel publié : aucune duplication d'Exploration/Combat, pas de ref flottante, pas d'autre portefeuille ni d'identifiant manuel. Code et média des autres modes, ancien `index.html`, PWA et vieux mondes sont protégés.
+- Porte de sortie : tests et CI exacte du nouveau SHA source fusionné, CI + Pages publisher sur cette branche, budget site `<=900 MiB`, tests Chromium des duels/récompenses/retour et provenance HTTPS puis merge sur main, contrôle PWA et checkpoint GREEN. Interdiction de déclarer « déployé » avant contrôle.
+
+---
+
 ## 2026-11-12 — Publication des duels depuis les cartes du Builder
 
 - START `checkpoint/gensrpg-start-capture-trainer-test-paths-publisher-2026-11-12` sur `main@8143d9335a644d605372e75872f1760557d1addc`, checkpoint `checkpoint/gensrpg-capture-trainer-engagement-publisher-green-2026-11-12`. Branche `work/gensrpg-capture-trainer-test-paths-publisher-2026-11-12`. La base est servie par Pages `43256639162` et sa CI d’architecture est verte (`43256639527`).

@@ -3,11 +3,18 @@ name: GenSrpG architecture sentinels
 on:
   push:
     branches:
-      - 'work/gensrpg-*'
+      - main
   pull_request:
     branches:
       - main
   workflow_dispatch:
+
+# Do not duplicate full CI for the same code on feature-branch push + PR.
+# New commits supersede only obsolete checks for the SAME pull request.
+# Never cancel a main-branch run or another pull request.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('architecture-pr-{0}', github.event.pull_request.number) || format('architecture-ref-{0}', github.ref) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -1118,8 +1125,9 @@ jobs:
       - name: Verrouiller l’autorité Core des chemins de loots Dungeon
         run: node tests/gens_asset_resolver_loot_owner_v1.test.cjs
 
+  # Independent runner: browser coverage is mandatory, but need not wait for
+  # the 360+ architecture checks. Both jobs must be green before PR merge.
   browser-sentinel:
-    needs: architecture-sentinels
     runs-on: ubuntu-24.04
     steps:
       - name: Récupérer le dépôt

@@ -154,7 +154,7 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   const resultDialog=adventure.locator('#adventure-result-dialog:visible');
   await resultDialog.waitFor({timeout:15000});
   assert.equal(await adventure.locator('#adventure-result-title').textContent(),'Fuite');
-  const receipt=await adventure.locator('#adventure-result-rows').innerText();
+  const receipt=await adventure.locator('#adventure-result-rows').textContent();
   assert.match(receipt,/XP de l’équipe/,'new Showcase games split XP across the saved team');
   assert.match(receipt,/Créature 1 · Lumilo/,'the official native fighter must be identified individually');
   assert.match(receipt,/\+0 XP/);

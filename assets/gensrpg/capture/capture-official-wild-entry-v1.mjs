@@ -7,6 +7,17 @@ import {createCaptureNativeLabSceneV1} from './capture-native-lab-scene-v1.mjs';
 import {createCaptureSavedProfileLabMigrationV1} from './saved-profile-lab-migration-v1.mjs';
 
 let active = null;
+export function focusCaptureOfficialBattleLayerV1({shell,closeModal=globalThis.captureCloseModal}={}){
+ if(!shell||typeof shell.focus!=='function')
+  throw new TypeError('Official Capture battle dialog is required');
+ // Close only the four pre-fight modals owned by Capture. The same
+ // versioned owner mounts the arena; never touch global Shell navigation.
+ if(typeof closeModal==='function'){
+  for(const id of ['captureExploreModal','captureEncounterModal',
+    'captureBattleSetupModal','captureBattleLiveModal'])closeModal(id);
+ }
+ shell.focus({preventScroll:true});
+}
 const text = value => typeof value === 'string' ? value.trim() : '';
 
 function worldOwners() {
@@ -61,8 +72,11 @@ function createDialog(){
  shell.setAttribute('role','dialog');
  shell.setAttribute('aria-modal','true');
  shell.setAttribute('aria-label','Combat officiel Monster Capture');
+ // Android fullscreen/PWA: focus must enter the arena layer, not remain
+ // on the pre-fight editor/encounter UI beneath it.
+ shell.tabIndex=-1;
  Object.assign(shell.style,{
-  position:'fixed',inset:'0',zIndex:'2147482000',display:'flex',
+  position:'fixed',inset:'0',zIndex:'2147483647',display:'flex',
   alignItems:'center',justifyContent:'center',padding:'max(10px,env(safe-area-inset-top))',
   background:'rgba(9,18,16,.96)',color:'#f5faf6',
   fontFamily:'system-ui,sans-serif',overflow:'auto'
@@ -262,9 +276,10 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
    }
   }
   if(active!==entry||entry.closed)return false;
-  if(typeof globalThis.captureCloseModal==='function'){
-   globalThis.captureCloseModal('captureEncounterModal');
-  }
+  // Release only the known Capture pre-fight overlays. A setup modal can
+  // otherwise cover the arena on Android until hardware Back hides it.
+  // No global navigation, new combat owner or persistent game changes.
+  focusCaptureOfficialBattleLayerV1({shell:entry.ui.shell});
   entry.ui.status.textContent='Combat officiel du Labo en cours.';
   entry.ui.status.dataset.phase='running';
   const result=controller.startWildBattle(requested);

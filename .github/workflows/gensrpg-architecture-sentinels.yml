@@ -27,6 +27,9 @@ jobs:
         # checkpoint exact, et non sur l'index du produit amendé aujourd'hui.
         run: bash tests/gens_phase12_certified_r07_r08_history_20261024.sh
 
+      - name: Vérifier la vraie transition Combat Android et le focus de l’arène
+        run: node --test tests/gens_capture_real_wild_button_v1.test.cjs
+
       - name: Verrouiller le transfert propriétaire de la transition Hub Capture Phase 9
         run: |
           node tests/gens_phase9_capture_hub_entry_owner_transfer_v1.test.cjs

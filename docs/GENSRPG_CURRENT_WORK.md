@@ -1,3 +1,12 @@
+## 2026-11-12 — Capture V2 adopte les duels depuis les cartes du Builder
+
+- START `checkpoint/gensrpg-start-capture-trainer-test-paths-source-2026-11-12` sur `6ac0b0fd4ea6921879ccb0b4b649262151b5665d`, checkpoint `checkpoint/gensrpg-capture-trainer-engagement-source-green-2026-11-12`. Branche `work/gensrpg-capture-trainer-test-paths-source-2026-11-12`.
+- Le Labo Exploration raccorde les dresseurs à Tester et à Jouer du World Builder. Les essais utilisent l’équipe officielle de prévisualisation de Combat. Le journal d’Aventure conserve ses règles de sauvegarde et son équipe réelle.
+- Chromium paysage a reproduit « Terminer » et « Fermer » sur la base, puis validé le duel et la réserve dans Tester, le combat direct depuis Jouer du World Builder et le parcours Aventure avec victoire persistée.
+- Exploration PR #421 sur `main@0c0f12c37ff994fd9783b7170fe288e7513db3c6`, CI `43272605675` et Pages `43272605773`. Valider la livraison officielle et le publisher GenSRPG sur leurs SHA exacts.
+
+---
+
 ## 2026-11-12 — Capture V2 adopte le déclenchement configurable des duels
 
 - START `checkpoint/gensrpg-start-capture-trainer-engagement-source-2026-11-12` sur `b3a9f3812b20645b6226c8350c6775bb4b9874f9`, certifié par `checkpoint/gensrpg-capture-trainer-source-green-2026-11-12`. Branche `work/gensrpg-capture-trainer-engagement-source-2026-11-12`.

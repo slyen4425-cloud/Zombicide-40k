@@ -1,3 +1,12 @@
+## 2026-11-12 — Publication des dresseurs Capture V2
+
+- START `checkpoint/gensrpg-start-capture-trainer-publisher-2026-11-12` sur `main@0688e4a80299aad7d60c32ff343d47b55c3fe5e0`, servi par Pages `43232693202`. Branche `work/gensrpg-capture-trainer-publisher-2026-11-12`.
+- GenSRPG adopte la source Capture de la PR #404 avec les SHA des deux labos `main` certifiés. Le publisher conserve le pin unique et les mêmes médias.
+- Source `b3a9f3812b20645b6226c8350c6775bb4b9874f9`. Combat `b700d477565fef69f79f5e36fcf16cb71a268c97` (Pages `43233288207`) et Exploration `48f90925a0b9ce051cbd2769c26fde2afda9932b` (Pages `43234471518`) issus de leurs branches main.
+- Le parcours navigateur lance un défi après dialogue, bat le dresseur, vérifie la sauvegarde, recharge la partie et constate que le défi ne se relance pas. Vérifier la CI du publisher, le budget Pages et le SHA HTTPS.
+
+---
+
 ## 2026-11-12 — Publication des décors de combat Capture V2
 
 - START `checkpoint/gensrpg-start-capture-arena-publisher-2026-11-12` sur `main@600c0517c5b7a4b7875844fede8c452ac408b63c`, dernier publisher vert (Pages `43202287097`). Branche `work/gensrpg-capture-arena-publisher-2026-11-12`.

@@ -35,7 +35,7 @@ test('actual physical Pages files preserve the six-member Adventure to Explorati
  assert.match(explorer,/readScopedAdventurePlayingPartyV1/,'Explorer must validate read-only scoped party');
  assert.match(explorer,/reserveMembers/,'Explorer must retain all saved reserve members');
  assert.match(bridge,/localReserve:adventureParty\.reserve\?\?\[\]/,'Explorer must pass reserve to native Combat');
- assert.match(combat,/buildCaptureWildReserveSourceV1/,'native Combat must own the full roster');
+ assert.match(combat,/return buildCaptureEncounterRosterSourceV1\(/,'native Combat must build the full encounter roster');
  assert.match(combat,/skillIdsByRosterMember/,'native Combat must configure every roster fighter');
  assert.match(lifecycle,/members\?\.some\(member=>member\.hp>0\)/,'one KO must not end a battle if reserve survives');
 });

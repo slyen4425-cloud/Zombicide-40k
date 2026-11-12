@@ -92,6 +92,25 @@ test('victory persists the exact fractional native HP and acknowledges it only o
  assert.equal(commit(fx.store,raw).applied,false);
  assert.equal(fx.writes,writes);
 });
+test('a trainer victory is saved with its area and actor in the native result transaction',()=>{
+ const fx=fixture();
+ const make=(id,outcome)=>{
+  const raw=envelope({encounterId:'encounter-'+id,returnToken:'return-'+id,outcome});
+  raw.snapshot.source='npc-trainer';
+  raw.snapshot.context.trainerActorId='dresseur-1';
+  raw.snapshot.opponents=[{creatureId:'real-wild',level:2},{creatureId:'real-wild',level:5}];
+  return raw;
+ };
+ assert.equal(commit(fx.store,make('flee','fled')).applied,true);
+ assert.equal(fx.store.load().trainerVictories,undefined);
+ const victory=make('win','victory');
+ assert.equal(commit(fx.store,victory).applied,true);
+ assert.deepEqual(fx.store.load().trainerVictories,[{areaId:'real-area',actorId:'dresseur-1'}]);
+ assert.equal(commit(fx.store,victory).applied,false);
+ const writes=fx.writes;
+ assert.throws(()=>commit(fx.store,make('replay','victory')),/dresseur.*battu/i);
+ assert.equal(fx.writes,writes);
+});
 test('repeat CombatResult is acknowledged without any second XP, loot roll or storage write',()=>{
  const fx=fixture();
  commit(fx.store);

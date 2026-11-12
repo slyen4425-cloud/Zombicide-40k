@@ -444,6 +444,18 @@ export function updateAdventureCameraPolicyV1({session,angleDeg,zoomPercent,now}
  assertSession(updated);
  return updated;
 }
+export function normalizeAdventureTrainerVictoriesV1(raw) {
+ if(!Array.isArray(raw))throw new TypeError('Trainer victories must be an array');
+ const seen=new Set();
+ return Object.freeze(raw.map(entry=>{
+  const record=exact(entry,['areaId','actorId'],'trainer victory');
+  const areaId=label(record.areaId,'trainer areaId'),actorId=label(record.actorId,'trainer actorId');
+  const key=JSON.stringify([areaId,actorId]);
+  if(seen.has(key))throw new RangeError('Duplicate trainer victory');
+  seen.add(key);
+  return Object.freeze({areaId,actorId});
+ }));
+}
 function assertSession(session){
  const v=object(session,'AdventureSession');
  if(v.schema!==ADVENTURE_SAVE_SCHEMA_V1||v.version!==1)
@@ -546,6 +558,7 @@ function assertSession(session){
  if(!Array.isArray(v.processedEncounterKeys))
   throw new TypeError('processedEncounterKeys must be an array');
  v.processedEncounterKeys.forEach(x=>identity(x,'processedEncounterKey'));
+ if(Object.hasOwn(v,'trainerVictories'))normalizeAdventureTrainerVictoriesV1(v.trainerVictories);
  return v;
 }
 export function createAdventureSessionV1({
@@ -629,6 +642,18 @@ export function applyAdventureCombatResultV1({
  const cards=publishedAdventureSpeciesV1(bestiaryCards);
  if(!cards.some(c=>c.id===state.party.active.speciesId))
   throw new RangeError('Owned creature no longer in published Bestiaire; save preserved without rewards');
+ const trainer=snapshot.source==='npc-trainer' ? {
+  areaId:label(snapshot.context?.areaId,'trainer areaId'),
+  actorId:label(snapshot.context?.trainerActorId,'trainer actorId')
+ } : null;
+ if(trainer){
+  if(!Array.isArray(snapshot.opponents)||snapshot.opponents.length<1||snapshot.opponents.length>6||
+     snapshot.opponents.some(member=>!Number.isSafeInteger(member?.level)||member.level<1||
+       member.level>9999||!cards.some(card=>card.id===member.creatureId)))
+   throw new RangeError('Équipe du dresseur absente du Bestiaire publié ou niveau invalide');
+  if(state.trainerVictories?.some(entry=>entry.areaId===trainer.areaId&&entry.actorId===trainer.actorId))
+   throw new RangeError('Ce dresseur a déjà été battu dans cette partie');
+ }
  const enemyId=identity(snapshot.opponents?.[0]?.creatureId,'opponent.creatureId');
  const enemy=cards.find(c=>c.id===enemyId);
  if(!enemy)throw new RangeError('Opponent is not a creature in the published bestiaire: '+enemyId);
@@ -801,6 +826,9 @@ export function applyAdventureCombatResultV1({
   ...(heroState===undefined?{}:{hero:heroState}),
   inventory:{currency:state.inventory.currency+currency,items:itemCounts},
   processedEncounterKeys:[...state.processedEncounterKeys,key],
+  ...(trainer&&result.outcome==='victory'?{
+   trainerVictories:[...(state.trainerVictories??[]),trainer]
+  }:{}),
   lastAward:award
  });
  assertSession(updated);

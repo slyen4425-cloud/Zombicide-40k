@@ -1,3 +1,12 @@
+## 2026-11-12 — Publication des décors de combat Capture V2
+
+- START `checkpoint/gensrpg-start-capture-arena-publisher-2026-11-12` sur `main@600c0517c5b7a4b7875844fede8c452ac408b63c`, dernier publisher vert (Pages `43202287097`). Branche `work/gensrpg-capture-arena-publisher-2026-11-12`.
+- GenSRPG publie une nouvelle source Capture immuable par le pin unique. Exploration `main` conserve les réglages par monde, zone et bâtiment. Combat `main@9b8fe770b531abf4f8191a746e0fdcc43f7abbae` fournit son catalogue et son rendu.
+- Source Capture PR #402 `bc71b233c7f4614366ffe24ab128c2ec9afbb733`. Exploration PR #418 fusionnée sur `main@02bb3844bdeb1277e615026617cdf6b41857f320` avec CI `43228279544`. CI et Pages Exploration `43228279873` réussies, provenance HTTPS conforme. Le publisher contrôle les SHA exacts à l’assemblage.
+- Tester le choix par nom dans le World Builder, la recharge de la carte puis le décor natif effectivement décodé depuis Jouer en Chromium paysage. Vérifier la CI des deux propriétaires, le budget Pages et la provenance HTTPS des trois SHA. Retour arrière par le pin Capture `67193a08633f199761860d0a5eb187e7a7d42404`.
+
+---
+
 ## 2026-11-10 — Livraison GenSRPG : objets, drops, économie et PNJ marchands (C2, CANDIDAT)
 - **START avant modifications** : publisher `main@d31e3556a582e7de13c808765b8a6180d1841e7e`, checkpoint `checkpoint/gensrpg-start-publisher-items-npc-merchant-2026-11-10`, branche `work/gensrpg-publisher-items-npc-merchant-2026-11-10`. Dernière restauration ciblée main : PR #384, aucun contenu auteur supprimé ni double autorité.
 - **Seule publication** : modifier exclusivement le pin source `tools/capture_v2_pages_preview_pin.json.sha` depuis `17c8b04418ceea9993dc7257b862d8016dba8009` vers `e6e8c5fe2c1053736dc49052fb5cf203aa25eb89` (lot Capture PR #383). Ne pas fusionner une copie partielle de source dans `main`, ne pas créer un deuxième publisher ni toucher à `index.html`.

@@ -43,7 +43,7 @@ const readSelectedAdventureSave=async element=>element.evaluate(async()=>{
  return selected;
 });
 
-test('Adventure starts from the Pages menu and saves a native encounter once at the exact map point',
+test('Adventure applies the saved World Builder arena and commits a native encounter at the exact map point',
  {timeout:180000},async()=>{
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  let browser,context;
@@ -86,6 +86,22 @@ test('Adventure starts from the Pages menu and saves a native encounter once at 
    world=setAreaEncounterRandomEnabled(world,area.id,true);
    saveWorldAssemblerDraft(localStorage,world);
   },scope+'vendor/exploration-lab/');
+  const editor=await context.newPage();
+  await editor.goto(base+scope+'vendor/exploration-lab/world-assembler.html');
+  async function openCombatArenaSettings(){
+   await editor.locator('#open-selected-area').tap();
+   await editor.locator('#area-combat-arenas > summary').tap();
+  }
+  await openCombatArenaSettings();
+  await editor.locator('#world-combat-arena').selectOption({label:'Neige'});
+  await editor.locator('#area-combat-arena').selectOption({label:'Ville'});
+  await editor.reload();
+  await openCombatArenaSettings();
+  await editor.locator('#area-combat-arena:not([disabled])').waitFor();
+  assert.equal(await editor.locator('#area-combat-arena').inputValue(),'city');
+  assert.equal(await editor.locator('#world-combat-arena').inputValue(),'snow');
+  await editor.close();
+  await page.bringToFront();
   await adventure.locator('#adventure-play').tap();
   const map=adventure.frameLocator('#adventure-play-frame');
   const canvas=map.locator('#sculpt-canvas');
@@ -120,6 +136,17 @@ test('Adventure starts from the Pages menu and saves a native encounter once at 
     missing
    }),{cause:error});
   }
+  const arena=fight.locator('[data-combat-arena][data-arena-theme="city"]');
+  await arena.waitFor();
+  const arenaImage=await arena.evaluate(async element=>{
+   const background=getComputedStyle(element).getPropertyValue('--arena-background-image').trim();
+   const image=new Image();
+   image.src=background.slice(5,-2);
+   await image.decode();
+   return {url:image.src,width:image.naturalWidth};
+  });
+  assert.match(arenaImage.url,/arena_city_01[.]webp/);
+  assert.ok(arenaImage.width>0,'the official backdrop must decode in the native arena');
   assert.equal(await fight.locator('[data-combat-skill]').count(),1,'only the true level-one skill is available');
   await fight.locator('[data-encounter-flee]').tap();
   await battle.waitFor({state:'detached'});

@@ -1,3 +1,12 @@
+## 2026-11-12 — Publication des duels depuis les cartes du Builder
+
+- START `checkpoint/gensrpg-start-capture-trainer-test-paths-publisher-2026-11-12` sur `main@8143d9335a644d605372e75872f1760557d1addc`, checkpoint `checkpoint/gensrpg-capture-trainer-engagement-publisher-green-2026-11-12`. Branche `work/gensrpg-capture-trainer-test-paths-publisher-2026-11-12`. La base est servie par Pages `43256639162` et sa CI d’architecture est verte (`43256639527`).
+- Le publisher adopte la source Capture immuable qui épingle le correctif Exploration. Combat garde son moteur officiel. Les essais du Builder et les combats de l’équipe Aventure utilisent leurs périmètres de sauvegarde respectifs.
+- Capture PR #408 `53fb6a00427708c6b2626d3adb481cfa50926fcb`. Exploration PR #421 `main@0c0f12c37ff994fd9783b7170fe288e7513db3c6` avec CI `43272605675` et Pages `43272605773`. Chromium couvre les parcours Tester, Jouer du Builder et Aventure avec le moteur Combat officiel.
+- Contrôler les parcours Chromium, le budget Pages et les fichiers réellement servis en HTTPS. Retour arrière par le pin Capture `6ac0b0fd4ea6921879ccb0b4b649262151b5665d`.
+
+---
+
 ## 2026-11-12 — Publication des duels de dresseur configurables
 
 - START `checkpoint/gensrpg-start-capture-trainer-engagement-publisher-2026-11-12` sur `main@2c5405f171722280d9d21bc96ce31cca7ed6e182`, checkpoint `checkpoint/gensrpg-capture-trainer-publisher-green-2026-11-12`. Branche `work/gensrpg-capture-trainer-engagement-publisher-2026-11-12`. Le duel de base de la PR #405 est servi par Pages `43254842277`.

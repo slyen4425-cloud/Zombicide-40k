@@ -1,3 +1,14 @@
+## 2026-11-12 — Récompenses des dresseurs dans le Core Capture (C2, candidat non publié)
+- START : source Capture publiée `53fb6a00427708c6b2626d3adb481cfa50926fcb` (PR #408), checkpoint `checkpoint/gensrpg-start-trainer-rewards-source-20261112`, branche `work/gensrpg-trainer-rewards-source-2026-11-12`. Publisher `main@cacd2b4eeb9ea65ebf17320c9a9317662135910e` inchangé.
+- Autorité unique : `AdventureRules.loot.items` pour le catalogue, `AdventureSession.inventory` pour monnaie et objets, `applyAdventureCombatResultV1` pour les récompenses. Exploration pourra transmettre `context.trainerReward` (montant et références d'objets) comme donnée de scénario optionnelle, non comme résultat Combat, sans créer de deuxième inventaire.
+- Implémentation : gain fixe en pièces et en objets après victoire seulement, même commit et même reçu que l'XP et `trainerVictories`; replay et défaite/fuite zéro gain. Un item retiré de l'éditeur n'est jamais inventé : ligne avertissement explicite sur le résultat.
+- Réutilisation du pont same-origin existant : exposer en lecture seule noms d'objets et nom de monnaie dans l'éditeur PNJ, sans dupliquer le catalogue.
+- Protégés : sauvegardes anciennes, fragments, monnaies et marchands, résultats Combats, 4 modes, PWA, sources Combat et Exploration, médias et index historique.
+- Tests : ajout aux sentinelles existantes de commit Combat et marchand/catalogue ; tests unitaires et navigateur PNJ, comparaison du vrai résultat, CI source C2, adoption Exploration puis pin publisher, Pages HTTPS et validation smartphone. Aucun merge/publication sans GREEN des propriétaires.
+- Dépendance : lot Exploration séparé pour la fiche PNJ et le transport de l'attribution ; aucune modification de ce dépôt depuis le publisher pour l'interface Exploration.
+
+---
+
 ## 2026-11-12 — Capture V2 adopte les duels depuis les cartes du Builder
 
 - START `checkpoint/gensrpg-start-capture-trainer-test-paths-source-2026-11-12` sur `6ac0b0fd4ea6921879ccb0b4b649262151b5665d`, checkpoint `checkpoint/gensrpg-capture-trainer-engagement-source-green-2026-11-12`. Branche `work/gensrpg-capture-trainer-test-paths-source-2026-11-12`.

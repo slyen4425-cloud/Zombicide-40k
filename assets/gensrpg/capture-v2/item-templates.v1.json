@@ -81,6 +81,16 @@
       "chancePercent": 20,
       "minQuantity": 1,
       "maxQuantity": 1
+    },
+    {
+      "id": "perle-krakenor",
+      "name": "Perle d’encre de Krakenor",
+      "speciesId": "crea_mer_3",
+      "iconPath": "./item-icons/drop_pieuvre_perle_encre.png",
+      "saleValue": 10,
+      "chancePercent": 20,
+      "minQuantity": 1,
+      "maxQuantity": 1
     }
   ],
   "icons": [
@@ -93,11 +103,6 @@
       "id": "visuel-liane-venimeuse",
       "name": "Fleur venimeuse (Liane venimeuse)",
       "iconPath": "./item-icons/drop_liane_venimeuse_fleur_venimeuse.png"
-    },
-    {
-      "id": "visuel-pieuvre",
-      "name": "Perle d’encre (Pieuvre)",
-      "iconPath": "./item-icons/drop_pieuvre_perle_encre.png"
     },
     {
       "id": "visuel-peste-noire",

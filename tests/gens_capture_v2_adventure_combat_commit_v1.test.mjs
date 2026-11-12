@@ -111,6 +111,57 @@ test('a trainer victory is saved with its area and actor in the native result tr
  assert.throws(()=>commit(fx.store,make('replay','victory')),/dresseur.*battu/i);
  assert.equal(fx.writes,writes);
 });
+test('trainer-specific money and canonical item reward commit exactly once with victory',()=>{
+ const fx=fixture(),before=fx.store.load();
+ fx.store.save({...before,rules:{...before.rules,loot:{
+  ...before.rules.loot,currencyPerVictory:7,
+  items:[{id:'item-gem',name:'Gemme des bois',saleValue:5}]
+ }}});
+ const raw=envelope();
+ raw.snapshot.source='npc-trainer';
+ raw.snapshot.context.trainerActorId='npc-gardienne';
+ raw.snapshot.context.trainerReward={currency:30,items:[{itemId:'item-gem',quantity:3}]};
+ raw.snapshot.opponents=[{creatureId:'real-wild',level:2}];
+ const receipt=commit(fx.store,raw);
+ assert.equal(receipt.applied,true);
+ assert.equal(receipt.award.currency,37);
+ assert.deepEqual(receipt.award.drops,[{itemId:'item-gem',quantity:3}]);
+ assert.equal(fx.store.load().inventory.currency,37);
+ assert.equal(fx.store.load().inventory.items['item-gem'],3);
+ assert.deepEqual(fx.store.load().trainerVictories,[{areaId:'real-area',actorId:'npc-gardienne'}]);
+ const writes=fx.writes;
+ assert.equal(commit(fx.store,raw).applied,false);
+ assert.equal(fx.writes,writes,'no second reward or storage write');
+ assert.equal(fx.store.load().inventory.items['item-gem'],3);
+});
+test('trainer loss or escape never grants configured rewards and old NPCs remain valid',()=>{
+ for(const outcome of ['defeat','fled']){
+  const fx=fixture(),raw=envelope({outcome});
+  raw.snapshot.source='npc-trainer';raw.snapshot.context.trainerActorId='guard';
+  raw.snapshot.context.trainerReward={currency:200,items:[{itemId:'item-gem',quantity:3}]};
+  raw.snapshot.opponents=[{creatureId:'real-wild',level:2}];
+  const receipt=commit(fx.store,raw);
+  assert.equal(receipt.award.currency,0);
+  assert.deepEqual(receipt.award.drops,[]);
+  assert.deepEqual(fx.store.load().inventory.items,{});
+ }
+});
+test('invalid reward payload rejects before save, retired catalog item is skipped with visible warning',()=>{
+ const fx=fixture(),bad=envelope();
+ bad.snapshot.source='npc-trainer';bad.snapshot.context.trainerActorId='guard';
+ bad.snapshot.opponents=[{creatureId:'real-wild',level:2}];
+ bad.snapshot.context.trainerReward={currency:-1,items:[]};
+ const previous=JSON.stringify(fx.store.load()),writes=fx.writes;
+ assert.throws(()=>commit(fx.store,bad),/trainerReward.currency/);
+ assert.equal(fx.writes,writes);
+ assert.equal(JSON.stringify(fx.store.load()),previous);
+ bad.snapshot.context.trainerReward={currency:12,items:[{itemId:'retired-item',quantity:1}]};
+ const result=commit(fx.store,bad);
+ assert.equal(result.award.currency,12);
+ assert.deepEqual(result.award.drops,[]);
+ assert.match(result.award.rewardWarnings[0],/retired-item/);
+ assert.equal(fx.store.load().inventory.items['retired-item'],undefined);
+});
 test('repeat CombatResult is acknowledged without any second XP, loot roll or storage write',()=>{
  const fx=fixture();
  commit(fx.store);

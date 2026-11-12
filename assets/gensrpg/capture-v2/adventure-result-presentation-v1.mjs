@@ -49,6 +49,9 @@ export function projectAdventureCombatAwardV1({session,award,bestiaryCards=[]}={
    ...xpRows,
    Object.freeze({label:'XP du héros',value:'+'+saved.heroXp+' XP'}),
    Object.freeze({label:'Monnaie',value:'+'+saved.currency}),
-   Object.freeze({label:'Objets',value:drops.length?drops.join(', '):'Aucun objet'})
+   Object.freeze({label:'Objets',value:drops.length?drops.join(', '):'Aucun objet'}),
+   ...(saved.rewardWarnings?.length?[Object.freeze({
+    label:'Récompense indisponible',value:saved.rewardWarnings.join(' · ')
+   })]:[])
   ])});
 }

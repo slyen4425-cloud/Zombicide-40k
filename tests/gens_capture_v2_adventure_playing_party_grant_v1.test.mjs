@@ -46,6 +46,17 @@ test('projects the exact fractional HP saved after native combat',()=>{
  const session={...f.session,party:{active:{...f.session.party.active,hp}}};
  assert.equal(writeAdventurePlayingPartyV1({...f,session}).active.hp,hp);
 });
+test('a defeated trainer is projected to its own world and area without changing the save',()=>{
+ const f=fixture();
+ const trainerVictories=[{areaId:'area-1',actorId:'npc-1'}];
+ const session={...f.session,trainerVictories};
+ const grant=writeAdventurePlayingPartyV1({...f,session});
+ assert.deepEqual(grant.trainerVictories,trainerVictories);
+ assert.equal(Object.isFrozen(grant.trainerVictories[0]),true);
+ assert.deepEqual(session.trainerVictories,trainerVictories);
+ assert.throws(()=>writeAdventurePlayingPartyV1({...f,session:{...session,
+  trainerVictories:[...trainerVictories,...trainerVictories]}}),/Duplicate trainer victory/);
+});
 test('refuses stale save, wrong WorldDocument and uncertified unpublished species before writing',()=>{
  const variants=[
   f=>({session:{...f.session,status:'configured'}}),

@@ -1,7 +1,7 @@
 // Capture Aventure owns the saved party. This emits a short-lived, versioned
 // PROJECTION of its actual member to the first-party Exploration runtime.
 // It never creates an actor, battle, level, creature definition or XP source.
-import {ADVENTURE_SAVE_SCHEMA_V1,availableAdventureStatPointsV1} from './adventure-contract-v1.mjs';
+import {ADVENTURE_SAVE_SCHEMA_V1,availableAdventureStatPointsV1,normalizeAdventureTrainerVictoriesV1} from './adventure-contract-v1.mjs';
 import {ADVENTURE_PUBLISHED_GRANT_SCHEMA_V1} from './adventure-publication-grant-v1.mjs';
 import {assertOfficialAdventureWorldIdV1} from './adventure-world-choice-v1.mjs';
 
@@ -99,6 +99,9 @@ export function writeAdventurePlayingPartyV1({
   partyRef:'adventure-party:'+sessionId,
   active:members[0],
   ...(rawReserve.length?{reserve:Object.freeze(members.slice(1))}:{}),
+  ...(Object.hasOwn(session,'trainerVictories')?{
+   trainerVictories:normalizeAdventureTrainerVictoriesV1(session.trainerVictories)
+  }:{}),
   combatHpMultiplier:multiplier
  });
  storage.setItem(ADVENTURE_PLAYING_PARTY_SCHEMA_V1+':'+sessionId,

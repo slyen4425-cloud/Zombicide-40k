@@ -1,3 +1,11 @@
+### 2026-11-12 — Adoption du raccordement PNJ depuis Exploration main certifié
+- Exploration PR #422 (fenêtre PNJ) puis #423 (récompenses), suivies de PR #424 (stabilisation CI test uniquement) : `main@46e4e3559c17dfb6bd3d7afbdb1f3d8caed93048`.
+- Certification exacte : Exploration CI `43301155708` **SUCCESS**, publication Pages `43301155674` **SUCCESS**, checkpoint `checkpoint/exploration-trainer-rewards-ci-pages-green-20261112`.
+- Cette source Capture C2 adopte le même SHA dans l'unique `source-pins-v1.json`. `AdventureSession.inventory` demeure la seule autorité pour les objets/or et `processedEncounterKeys` le reçu anti-doublon.
+- À valider encore : nouvelle CI Capture sur le pin 46e4e355, fusion de la PR source #410, publisher de la seule application GenSRPG, Pages/HTTPS final. Les PR anciennes ou V80 restent inchangées.
+
+---
+
 ## 2026-11-12 — Récompenses des dresseurs dans le Core Capture (C2, candidat non publié)
 - START : source Capture publiée `53fb6a00427708c6b2626d3adb481cfa50926fcb` (PR #408), checkpoint `checkpoint/gensrpg-start-trainer-rewards-source-20261112`, branche `work/gensrpg-trainer-rewards-source-2026-11-12`. Publisher `main@cacd2b4eeb9ea65ebf17320c9a9317662135910e` inchangé.
 - Autorité unique : `AdventureRules.loot.items` pour le catalogue, `AdventureSession.inventory` pour monnaie et objets, `applyAdventureCombatResultV1` pour les récompenses. Exploration pourra transmettre `context.trainerReward` (montant et références d'objets) comme donnée de scénario optionnelle, non comme résultat Combat, sans créer de deuxième inventaire.

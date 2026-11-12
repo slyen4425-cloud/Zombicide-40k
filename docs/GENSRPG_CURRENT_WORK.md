@@ -1,3 +1,12 @@
+## 2026-11-12 — Capture V2 adopte le déclenchement configurable des duels
+
+- START `checkpoint/gensrpg-start-capture-trainer-engagement-source-2026-11-12` sur `b3a9f3812b20645b6226c8350c6775bb4b9874f9`, certifié par `checkpoint/gensrpg-capture-trainer-source-green-2026-11-12`. Branche `work/gensrpg-capture-trainer-engagement-source-2026-11-12`.
+- Le Labo Exploration possède le réglage du PNJ et son déclenchement en jeu. La source Capture adopte le SHA certifié d’Exploration `main` par le pin existant. Les contrats Combat et Aventure restent les propriétaires de l’exécution et de la sauvegarde du résultat.
+- Exploration PR #420, `main@e2e5b2861b41fc868412e2c7f06197e904f9cbf0` (CI `43254533593`). En Chromium paysage, le joueur peut refuser puis gagner le duel proposé. La victoire survit au rechargement. Approcher l’autre dresseur au joystick lance le combat et la fuite rend la main à l’exploration.
+- Vérifier la publication HTTPS d’Exploration et la livraison du SHA source. Le `main` historique adopte ensuite cette source immuable via son publisher Pages.
+
+---
+
 ## 2026-11-12 — Sauvegarder l’issue des combats de dresseurs
 
 - START `checkpoint/gensrpg-start-capture-trainer-results-2026-11-12` sur la source Capture `bc71b233c7f4614366ffe24ab128c2ec9afbb733`. Branche `work/gensrpg-capture-trainer-results-2026-11-12`.

@@ -94,10 +94,10 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
    'all twelve real uploaded pictures must be selectable in the single editor');
   await frame.locator('#adventure-items .rule-row').first()
    .getByRole('button',{name:'Modifier'}).tap();
-  await frame.locator('#adventure-item-icon').selectOption('visuel-pieuvre');
+  await frame.locator('#adventure-item-icon').selectOption('visuel-liane-venimeuse');
   await frame.locator('#adventure-item-add').tap();
   assert.equal(await frame.locator('#adventure-items img.sheet-item-icon').count(),1,
-   'unassigned author picture is usable without pretending Pieuvre is Krakenor');
+   'remaining unassigned author picture is usable without inventing a species');
 
   const templateSpecies=await frame.locator('body').evaluate(async()=>{
    const response=await fetch('./item-templates.v1.json',{cache:'no-store'});
@@ -105,27 +105,27 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
    return (await response.json()).items.map(item=>item.speciesId);
   });
   const publishedIds=new Set(officialSpecies.map(x=>x.id));
-  assert.equal(templateSpecies.length,8);
+  assert.equal(templateSpecies.length,9);
   assert.ok(templateSpecies.every(id=>publishedIds.has(id)),
    'every automatic creature drop must refer to the actual published Combat Bestiary');
   await frame.locator('#adventure-item-import').tap();
-  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9);
-  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
+  assert.equal(await frame.locator('#adventure-items .rule-row').count(),10);
+  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),10);
   const images=frame.locator('#adventure-items img.sheet-item-icon');
-  assert.equal(await images.count(),9);
+  assert.equal(await images.count(),10);
   await images.first().evaluate(img=>img.decode());
   await images.nth(1).evaluate(img=>img.decode());
   await frame.locator('#adventure-save-rules').tap();
   await page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')
    .evaluate(iframe=>iframe.contentWindow.location.reload());
   await frame.locator('#adventure-drop-species:not([disabled])').waitFor({timeout:40000});
-  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9,
-   'imported items persist through the one AdventureRules save owner');
-  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
+  assert.equal(await frame.locator('#adventure-items .rule-row').count(),10,
+   'nine imported items persist through the one AdventureRules save owner');
+  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),10);
   await frame.locator('#adventure-item-import').tap();
-  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9,
+  assert.equal(await frame.locator('#adventure-items .rule-row').count(),10,
    "reimport must never duplicate the author's items");
-  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
+  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),10);
 
   // Real native UI: edit world currency + a merchant that sells an authored
   // item for coins AND a second resource, without any NPC/map duplication.
@@ -157,7 +157,7 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   assert.equal(await frame.locator('#adventure-merchants .rule-row').count(),1,
    'merchant persists with the canonical AdventureRules draft');
   assert.equal(await frame.locator('#adventure-merchant-offers .rule-row').count(),1);
-  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9,
+  assert.equal(await frame.locator('#adventure-items .rule-row').count(),10,
    'merchant configuration may not create or duplicate item definitions');
 
   // The drop editor uses ONE official species registry, not a second
@@ -168,7 +168,7 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   assert.equal(await frame.locator('#adventure-drops .rule-row').count(),1,
    'one authored imported drop is visible for this published species');
   await frame.locator('#adventure-drop-filter').selectOption('');
-  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9,
+  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),10,
    'other monster drops remain present after switching the filter');
 
   // Override ONLY the selected monster's fragment chance and quantities.
@@ -187,17 +187,17 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   await frame.locator('#adventure-return-preparation').tap();
   await page.waitForFunction(()=>window.GensCaptureV2?.status?.().view==='adventure');
   await frame.locator('#adventure-loot-panel summary').first().tap();
-  await frame.locator('#adventure-loot-preparation-count').filter({hasText:/9 objet\(s\)/})
+  await frame.locator('#adventure-loot-preparation-count').filter({hasText:/10 objet\(s\)/})
    .waitFor({timeout:40000});
   assert.equal(await frame.locator('#adventure-item-authoring').isVisible(),false,
    'preplay must not expose a second catalogue or merchant editor');
   assert.match(await frame.locator('#adventure-loot-preparation-count').innerText(),
-   /9 objet\(s\).*9 règle\(s\) de drop/s);
+   /10 objet\(s\).*10 règle\(s\) de drop/s);
   await frame.locator('#adventure-open-item-editor').tap();
   await page.waitForFunction(()=>window.GensCaptureV2?.status?.().view==='items');
   await frame.locator('#adventure-drop-species:not([disabled])').waitFor({timeout:40000});
-  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9);
-  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
+  assert.equal(await frame.locator('#adventure-items .rule-row').count(),10);
+  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),10);
   assert.equal(await frame.locator('#adventure-money-plural').inputValue(),'jetons');
   await frame.locator('#adventure-drop-species').selectOption(templateSpecies[0]);
   assert.equal(await frame.locator('#adventure-monster-fragments-chance').inputValue(),'33');

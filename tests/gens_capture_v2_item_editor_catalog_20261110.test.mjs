@@ -59,12 +59,12 @@ test('import official item templates once without rewriting custom author object
  assert.equal(b.loot.items.length,2);assert.equal(b.loot.drops.length,2);
 });
 
-test('eight author-uploaded PNGs map only to verified published Bestiary species',()=>{
+test('nine author-uploaded PNGs map only to verified published Bestiary species',()=>{
  const catalog=JSON.parse(file('item-templates.v1.json'));
  const normalized=normalizeCaptureItemTemplatesV1(catalog);
- assert.equal(normalized.items.length,8);
+ assert.equal(normalized.items.length,9);
  const officialSpecies=['crea_ailevent','crea_crys_2','gorice','crea_nat_1',
-  'kitsune_lunaire','crea_lumilo','crea_mossback','crea_tox_2'];
+  'kitsune_lunaire','crea_lumilo','crea_mossback','crea_tox_2','crea_mer_3'];
  assert.deepEqual(normalized.items.map(x=>x.speciesId),officialSpecies);
  const provenance=JSON.parse(file('item-icons/provenance.v1.json'));
  assert.equal(provenance.iconCount,12);
@@ -82,20 +82,25 @@ test('eight author-uploaded PNGs map only to verified published Bestiary species
  }
  const first=materializeCaptureItemTemplatesV1({
   rules:SHOWCASE_ADVENTURE_RULES_V1,templates:catalog});
- assert.equal(first.addedItems,8);
- assert.equal(first.addedDrops,8);
+ assert.equal(first.addedItems,9);
+ assert.equal(first.addedDrops,9);
  const second=materializeCaptureItemTemplatesV1({
   rules:normalizeAdventureRulesV1({...SHOWCASE_ADVENTURE_RULES_V1,loot:first.loot}),
   templates:catalog});
  assert.equal(second.addedItems,0);
  assert.equal(second.addedDrops,0);
- // Four uploaded icons have no confirmed same-named published creature ID yet.
+ // Current Combat main publishes Krakenor (crea_mer_3) using its Pieuvre
+ // visual asset. This is the verified identity for the new ink-pearl drop.
+ const krakenor=normalized.items.find(x=>x.speciesId==='crea_mer_3');
+ assert.equal(krakenor?.id,'perle-krakenor');
+ assert.equal(krakenor.iconPath,'./item-icons/drop_pieuvre_perle_encre.png');
+ // Three other icons have no safely validated matching named species yet.
  const unassigned=['drop_heriplante_bourgeon_epineux.png',
-  'drop_liane_venimeuse_fleur_venimeuse.png','drop_pieuvre_perle_encre.png',
+  'drop_liane_venimeuse_fleur_venimeuse.png',
   'drop_peste_noire_spore_pestilentielle.png'];
  assert.ok(unassigned.every(icon=>approved.has(icon)));
  assert.ok(unassigned.every(icon=>!normalized.items.some(x=>x.iconPath.endsWith(icon))));
- assert.equal(normalized.icons.length,4,'unassigned illustrations remain selectable, not autoloot');
+ assert.equal(normalized.icons.length,3,'unassigned illustrations remain selectable, not autoloot');
  assert.deepEqual(normalized.icons.map(x=>x.iconPath.split('/').at(-1)),unassigned);
  for(const artwork of normalized.icons){
   const png=readFileSync(new URL(root+artwork.iconPath.replace('./',''),import.meta.url));

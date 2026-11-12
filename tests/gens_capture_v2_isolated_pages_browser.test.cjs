@@ -181,6 +181,135 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
  }
 });
+test('Adventure wins a native trainer battle and remembers the defeated NPC after reload',
+ {timeout:180000},async()=>{
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ let browser,context;
+ try{
+  browser=await chromium.launch({headless:true});
+  context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true,
+   locale:'fr-FR',serviceWorkers:'block'});
+  await context.addInitScript(()=>{window.supabase={createClient:()=>({})};});
+  const page=await context.newPage();
+  await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
+  const base='http://127.0.0.1:'+server.address().port;
+  const missing=[];
+  page.on('response',response=>{
+   if(response.status()>=400&&response.url().startsWith(base+scope))
+    missing.push(response.status()+' '+response.url());
+  });
+  const start=async()=>{
+   await page.goto(base+scope+'index.html',{waitUntil:'domcontentloaded'});
+   await page.locator('button.gensRootModeCard.capture').tap();
+   await page.locator('[data-capture-v2-view="adventure"]').tap();
+  };
+  await start();
+  const adventure=page.frameLocator('#gensCaptureV2Root iframe');
+  const starter=adventure.locator('#adventure-starter:not([disabled])');
+  await starter.selectOption('crea_lumilo');
+  await adventure.locator('#adventure-create').tap();
+  await starter.evaluate(async()=>{
+   const [{createAdventureStoreV1},{createAdventurePortfolioStoreV1}]=await Promise.all([
+    import('./adventure-contract-v1.mjs'),import('./adventure-portfolio-store-v1.mjs')
+   ]);
+   const storage=localStorage,coreStorage=window.GensStorageV1;
+   const legacyStore=createAdventureStoreV1({storage,coreStorage});
+   const store=createAdventurePortfolioStoreV1({storage,coreStorage,legacyStore});
+   const session=store.load();
+   store.save({...session,party:{...session.party,active:{
+    ...session.party.active,level:20,xp:38000,statAllocations:{health:200,light:160}
+   }}});
+  });
+  // Place the trainer on a blank world with wild encounters disabled.
+  await starter.evaluate(async(_,vendor)=>{
+   const [{createBlankWorldBuilderDraft,setWorldCombatArena},{saveWorldAssemblerDraft}]=await Promise.all([
+    import(vendor+'src/builder/world-builder-draft.js'),
+    import(vendor+'src/builder/world-assembler-handoff.js')
+   ]);
+   let world=createBlankWorldBuilderDraft({id:'adventure-trainer-pages-test',width:36*28,height:24*21});
+   const area=world.areas.find(item=>item.id===world.initialAreaId);
+   const spawn=area.spawns.find(item=>item.id===world.initialSpawnId);
+   world.areas[0].actors.push({id:'local-trainer',actorDefinitionId:'exploration:npc:generic-v1',
+    x:spawn.x+30,y:spawn.y,npc:{kind:'trainer',name:'Lina',dialogue:'Salut !\nOn se bat ?',
+     trainerRoster:[{creatureId:'crea_ombre_2',level:2},{creatureId:'crea_ombre_2',level:5}]}});
+   world=setWorldCombatArena(world,{areaId:area.id,arenaId:'city'});
+   saveWorldAssemblerDraft(localStorage,world);
+  },scope+'vendor/exploration-lab/');
+  await adventure.locator('#adventure-play').tap();
+  const map=adventure.frameLocator('#adventure-play-frame');
+  const canvas=map.locator('#sculpt-canvas');
+  await map.locator('#play-menu-button:visible').waitFor();
+  const point=await canvas.evaluate(()=>window.__sculptPlayProbe().actor);
+  await map.locator('#npc-talk:visible').tap();
+  assert.equal(await map.locator('#npc-dialogue-text').textContent(),'Salut !');
+  await map.locator('#npc-dialogue-next').tap();
+  assert.equal(await map.locator('#npc-dialogue-next').textContent(),'Combattre');
+  await map.locator('#npc-dialogue-next').tap();
+  const battle=map.locator('.combat-overlay__frame');
+  await battle.waitFor({state:'attached'});
+  const fight=map.frameLocator('.combat-overlay__frame');
+  try{
+   await fight.locator('[data-bridge-status][data-ready="true"]').waitFor({state:'attached'});
+  }catch(error){
+   throw new Error('Native duel did not start: '+JSON.stringify({
+    src:await battle.getAttribute('src'),
+    status:await fight.locator('[data-bridge-status]').textContent({timeout:1000}).catch(()=>null),
+    missing
+   }),{cause:error});
+  }
+  const arena=fight.locator('[data-combat-arena][data-arena-theme="city"]');
+  await arena.waitFor();
+  const arenaImage=await arena.evaluate(async element=>{
+   const background=getComputedStyle(element).getPropertyValue('--arena-background-image').trim();
+   const image=new Image();
+   image.src=background.slice(5,-2);
+   await image.decode();
+   return {url:image.src,width:image.naturalWidth};
+  });
+  assert.match(arenaImage.url,/arena_city_01[.]webp/);
+  assert.ok(arenaImage.width>0,'the official backdrop must decode in the native arena');
+  assert.equal(await fight.locator('[data-combat-skill]').count(),5,'the real level-20 starter uses its unlocked skills');
+  const bench=fight.locator('[data-enemy-reserve-member-id]:not([hidden])');
+  assert.equal(await bench.count(),1,'the trainer has a real second combatant');
+  const deadline=Date.now()+45000;
+  while(Date.now()<deadline&&await battle.count()){
+   const ability=fight.locator('[data-combat-skill]:not([disabled])').first();
+   if(await ability.count())await ability.tap({timeout:400}).catch(()=>{});
+   await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  await battle.waitFor({state:'detached'});
+  // Real CombatResult is committed in GenSRPG Core before this UI receipt.
+  const resultDialog=adventure.locator('#adventure-result-dialog:visible');
+  await resultDialog.waitFor({timeout:15000});
+  assert.equal(await adventure.locator('#adventure-result-title').textContent(),'Victoire');
+  const receipt=await adventure.locator('#adventure-result-rows').textContent();
+  assert.match(receipt,/Créature 1 · Lumilo/);
+  await adventure.locator('#adventure-result-close').tap();
+  await resultDialog.waitFor({state:'hidden'});
+  const save=await readSelectedAdventureSave(adventure.locator('#adventure-play'));
+  assert.equal(save.party.active.level,20);
+  assert.equal(save.lastAward.outcome,'victory');
+  assert.equal(save.trainerVictories?.[0]?.actorId,'local-trainer');
+  assert.equal(save.trainerVictories?.length,1);
+  assert.equal(save.processedEncounterKeys.length,1);
+  assert.deepEqual(await canvas.evaluate(()=>window.__sculptPlayProbe().actor),point);
+  await start();
+  await adventure.locator('#adventure-play').tap();
+  await map.locator('#play-menu-button:visible').waitFor();
+  assert.deepEqual(await canvas.evaluate(()=>window.__sculptPlayProbe().actor),point);
+  const reopened=await readSelectedAdventureSave(adventure.locator('#adventure-play'));
+  assert.equal(reopened.sessionId,save.sessionId,'resume the same selected independent save');
+  assert.deepEqual(reopened.processedEncounterKeys,save.processedEncounterKeys);
+  assert.equal(reopened.lastAward.outcome,'victory');
+  assert.deepEqual(reopened.trainerVictories,save.trainerVictories);
+  await map.locator('#npc-talk:visible').tap();
+  await map.locator('#npc-dialogue-next').tap();
+  assert.equal(await map.locator('#npc-dialogue-next').textContent(),'Terminer');
+ }finally{
+  await context?.close();await browser?.close();
+  server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
+ }
+});
 test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves root unchanged',
  {timeout:180000},async()=>{
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));

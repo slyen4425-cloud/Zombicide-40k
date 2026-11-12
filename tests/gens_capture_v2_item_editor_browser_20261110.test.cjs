@@ -119,11 +119,11 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   await page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')
    .evaluate(iframe=>iframe.contentWindow.location.reload());
   await frame.locator('#adventure-drop-species:not([disabled])').waitFor({timeout:40000});
-  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9,
+  assert.equal(await frame.locator('#adventure-items .rule-row').count(),10,
    'nine imported items persist through the one AdventureRules save owner');
   assert.equal(await frame.locator('#adventure-drops .rule-row').count(),10);
   await frame.locator('#adventure-item-import').tap();
-  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9,
+  assert.equal(await frame.locator('#adventure-items .rule-row').count(),10,
    "reimport must never duplicate the author's items");
   assert.equal(await frame.locator('#adventure-drops .rule-row').count(),10);
 
@@ -157,7 +157,7 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   assert.equal(await frame.locator('#adventure-merchants .rule-row').count(),1,
    'merchant persists with the canonical AdventureRules draft');
   assert.equal(await frame.locator('#adventure-merchant-offers .rule-row').count(),1);
-  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9,
+  assert.equal(await frame.locator('#adventure-items .rule-row').count(),10,
    'merchant configuration may not create or duplicate item definitions');
 
   // The drop editor uses ONE official species registry, not a second
@@ -168,7 +168,7 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   assert.equal(await frame.locator('#adventure-drops .rule-row').count(),1,
    'one authored imported drop is visible for this published species');
   await frame.locator('#adventure-drop-filter').selectOption('');
-  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9,
+  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),10,
    'other monster drops remain present after switching the filter');
 
   // Override ONLY the selected monster's fragment chance and quantities.
@@ -187,12 +187,12 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   await frame.locator('#adventure-return-preparation').tap();
   await page.waitForFunction(()=>window.GensCaptureV2?.status?.().view==='adventure');
   await frame.locator('#adventure-loot-panel summary').first().tap();
-  await frame.locator('#adventure-loot-preparation-count').filter({hasText:/9 objet\(s\)/})
+  await frame.locator('#adventure-loot-preparation-count').filter({hasText:/10 objet\(s\)/})
    .waitFor({timeout:40000});
   assert.equal(await frame.locator('#adventure-item-authoring').isVisible(),false,
    'preplay must not expose a second catalogue or merchant editor');
   assert.match(await frame.locator('#adventure-loot-preparation-count').innerText(),
-   /9 objet\(s\).*9 règle\(s\) de drop/s);
+   /10 objet\(s\).*10 règle\(s\) de drop/s);
   await frame.locator('#adventure-open-item-editor').tap();
   await page.waitForFunction(()=>window.GensCaptureV2?.status?.().view==='items');
   await frame.locator('#adventure-drop-species:not([disabled])').waitFor({timeout:40000});

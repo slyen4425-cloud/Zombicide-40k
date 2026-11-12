@@ -39,10 +39,26 @@ test('Android Capture entry releases pre-fight modals and focuses top-layer aren
  const entry=read('assets/gensrpg/capture/capture-official-wild-entry-v1.mjs');
  assert.match(entry,/zIndex:'2147483647'/);
  assert.match(entry,/shell\.tabIndex=-1/);
- assert.match(entry,/entry\.ui\.shell\.focus\(\{preventScroll:true\}\)/);
+ assert.match(entry,/focusCaptureOfficialBattleLayerV1\(\{shell:entry\.ui\.shell\}\)/);
  for(const id of ['captureExploreModal','captureEncounterModal','captureBattleSetupModal','captureBattleLiveModal']){
   assert.ok(entry.includes("'"+id+"'"),id+" must be released on game-to-battle transition");
  }
  assert.doesNotMatch(entry,/history\.(?:back|pushState|replaceState)\(/,
   'battle must not depend on Android Back or take over Shell navigation');
+});
+
+test('the actual Capture entry runs the four owned modal closures before focusing the arena',async()=>{
+ const {focusCaptureOfficialBattleLayerV1}=await import('../assets/gensrpg/capture/capture-official-wild-entry-v1.mjs');
+ const effects=[];
+ const shell={focus(options){effects.push(['focus',options]);}};
+ focusCaptureOfficialBattleLayerV1({shell,closeModal:id=>effects.push(['close',id])});
+ assert.deepEqual(effects,[
+  ['close','captureExploreModal'],['close','captureEncounterModal'],
+  ['close','captureBattleSetupModal'],['close','captureBattleLiveModal'],
+  ['focus',{preventScroll:true}]
+ ]);
+ assert.throws(()=>focusCaptureOfficialBattleLayerV1({shell:null,closeModal:()=>{}}),/dialog/);
+ let focusCount=0;
+ focusCaptureOfficialBattleLayerV1({shell:{focus(){focusCount++}},closeModal:null});
+ assert.equal(focusCount,1,'the arena still receives focus when no legacy modal handler exists');
 });

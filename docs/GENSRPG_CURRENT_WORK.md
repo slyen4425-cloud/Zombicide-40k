@@ -2,6 +2,7 @@
 
 - START `checkpoint/gensrpg-start-capture-trainer-results-2026-11-12` sur la source Capture `bc71b233c7f4614366ffe24ab128c2ec9afbb733`. Branche `work/gensrpg-capture-trainer-results-2026-11-12`.
 - GenSRPG Aventure enregistre le dresseur battu dans la sauvegarde du monde et de la partie, dans le même commit que le résultat Combat. Exploration reçoit uniquement une projection en lecture seule.
+- Combat `main@b700d477565fef69f79f5e36fcf16cb71a268c97` (CI `43233288931`, Pages `43233288207`) et Exploration `main@48f90925a0b9ce051cbd2769c26fde2afda9932b` (CI `43234471581`) certifiés sur leurs sources exactes.
 - Vérifier la reprise, le rejeu d’un résultat et la compatibilité des parties existantes. Lancer les tests d’interface après certification des deux labos.
 
 ---

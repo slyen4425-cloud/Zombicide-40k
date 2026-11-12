@@ -181,7 +181,7 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
  }
 });
-test('Adventure wins a native trainer battle and remembers the defeated NPC after reload',
+test('Adventure offers a duel, remembers the victory and starts aggressive trainer battles on approach',
  {timeout:180000},async()=>{
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  let browser,context;
@@ -232,6 +232,9 @@ test('Adventure wins a native trainer battle and remembers the defeated NPC afte
    world.areas[0].actors.push({id:'local-trainer',actorDefinitionId:'exploration:npc:generic-v1',
     x:spawn.x+30,y:spawn.y,npc:{kind:'trainer',name:'Lina',dialogue:'Salut !\nOn se bat ?',
      trainerRoster:[{creatureId:'crea_ombre_2',level:2},{creatureId:'crea_ombre_2',level:5}]}});
+   area.actors.push({id:'aggressive-trainer',actorDefinitionId:'exploration:npc:generic-v1',
+    x:spawn.x+112,y:spawn.y,npc:{kind:'trainer',name:'Rami',dialogue:'Je garde le passage.',
+     trainerEngagement:'aggressive',trainerRoster:[{creatureId:'crea_ombre_2',level:7}]}});
    world=setWorldCombatArena(world,{areaId:area.id,arenaId:'city'});
    saveWorldAssemblerDraft(localStorage,world);
   },scope+'vendor/exploration-lab/');
@@ -243,9 +246,15 @@ test('Adventure wins a native trainer battle and remembers the defeated NPC afte
   await map.locator('#npc-talk:visible').tap();
   assert.equal(await map.locator('#npc-dialogue-text').textContent(),'Salut !');
   await map.locator('#npc-dialogue-next').tap();
-  assert.equal(await map.locator('#npc-dialogue-next').textContent(),'Combattre');
-  await map.locator('#npc-dialogue-next').tap();
   const battle=map.locator('.combat-overlay__frame');
+  const acceptDuel=map.getByRole('button',{name:'Accepter le duel'});
+  await map.locator('#npc-dialogue-duel-offer:visible').waitFor();
+  await map.getByRole('button',{name:'Refuser',exact:true}).tap();
+  await map.locator('#npc-dialogue-overlay').waitFor({state:'hidden'});
+  assert.equal(await battle.count(),0,'refusing the duel must leave the player on the map');
+  await map.locator('#npc-talk:visible').tap();
+  await map.locator('#npc-dialogue-next').tap();
+  await acceptDuel.tap();
   await battle.waitFor({state:'attached'});
   const fight=map.frameLocator('.combat-overlay__frame');
   try{
@@ -305,6 +314,31 @@ test('Adventure wins a native trainer battle and remembers the defeated NPC afte
   await map.locator('#npc-talk:visible').tap();
   await map.locator('#npc-dialogue-next').tap();
   assert.equal(await map.locator('#npc-dialogue-next').textContent(),'Terminer');
+  await map.locator('#npc-dialogue-next').tap();
+  assert.equal(await battle.count(),0,'the aggressive trainer is still outside interaction range');
+
+  // Real touch input moves the hero into range without activating NPC speech.
+  const stick=await map.locator('#navigation-stick').boundingBox();
+  const center={x:stick.x+stick.width/2,y:stick.y+stick.height/2};
+  const touch=await context.newCDPSession(page);
+  await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[center]});
+  try{
+   await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:center.x+40,y:center.y}]});
+   await fight.locator('[data-bridge-status][data-ready="true"]').waitFor({state:'attached',timeout:30000});
+  }finally{
+   await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+   await touch.detach();
+  }
+  assert.equal(await map.locator('#npc-dialogue-overlay').isVisible(),false);
+  assert.match(await map.locator('#sculpt-encounter-summary').textContent(),/Rami/);
+  await fight.locator('[data-encounter-flee]').tap();
+  await battle.waitFor({state:'detached'});
+  await resultDialog.waitFor();
+  assert.equal(await adventure.locator('#adventure-result-title').textContent(),'Fuite');
+  await adventure.locator('#adventure-result-close').tap();
+  const escaped=await readSelectedAdventureSave(adventure.locator('#adventure-play'));
+  assert.deepEqual(escaped.trainerVictories,save.trainerVictories);
+  assert.equal(escaped.processedEncounterKeys.length,2);
  }finally{
   await context?.close();await browser?.close();
   server.closeAllConnections();await new Promise(resolve=>server.close(resolve));

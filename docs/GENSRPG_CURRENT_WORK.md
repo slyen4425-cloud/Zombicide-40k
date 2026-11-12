@@ -1,3 +1,11 @@
+## 2026-11-12 — Publication des duels de dresseur configurables
+
+- START `checkpoint/gensrpg-start-capture-trainer-engagement-publisher-2026-11-12` sur `main@2c5405f171722280d9d21bc96ce31cca7ed6e182`, checkpoint `checkpoint/gensrpg-capture-trainer-publisher-green-2026-11-12`. Branche `work/gensrpg-capture-trainer-engagement-publisher-2026-11-12`. Le duel de base de la PR #405 est servi par Pages `43254842277`.
+- Source Capture de la PR #406 `6ac0b0fd4ea6921879ccb0b4b649262151b5665d`, validation `43255216099` et `43255216156`. Exploration PR #420 `main@e2e5b2861b41fc868412e2c7f06197e904f9cbf0`, CI `43254533593` et Pages `43254533640`. Combat `main@b700d477565fef69f79f5e36fcf16cb71a268c97`.
+- Chromium paysage valide le refus, le duel proposé avec une vraie réserve, la victoire persistée et l’attaque agressive déclenchée au joystick. Le publisher protège les autres modules et vérifie les sources exactes, le budget Pages et le SHA HTTPS. Retour arrière via le pin Capture `b3a9f3812b20645b6226c8350c6775bb4b9874f9`.
+
+---
+
 ## 2026-11-12 — Publication des dresseurs Capture V2
 
 - START `checkpoint/gensrpg-start-capture-trainer-publisher-2026-11-12` sur `main@0688e4a80299aad7d60c32ff343d47b55c3fe5e0`, servi par Pages `43232693202`. Branche `work/gensrpg-capture-trainer-publisher-2026-11-12`.

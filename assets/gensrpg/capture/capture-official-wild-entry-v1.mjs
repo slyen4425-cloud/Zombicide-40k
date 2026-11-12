@@ -7,6 +7,17 @@ import {createCaptureNativeLabSceneV1} from './capture-native-lab-scene-v1.mjs';
 import {createCaptureSavedProfileLabMigrationV1} from './saved-profile-lab-migration-v1.mjs';
 
 let active = null;
+export function focusCaptureOfficialBattleLayerV1({shell,closeModal=globalThis.captureCloseModal}={}){
+ if(!shell||typeof shell.focus!=='function')
+  throw new TypeError('Official Capture battle dialog is required');
+ // Close only the four pre-fight modals owned by Capture. The same
+ // versioned owner mounts the arena; never touch global Shell navigation.
+ if(typeof closeModal==='function'){
+  for(const id of ['captureExploreModal','captureEncounterModal',
+    'captureBattleSetupModal','captureBattleLiveModal'])closeModal(id);
+ }
+ shell.focus({preventScroll:true});
+}
 const text = value => typeof value === 'string' ? value.trim() : '';
 
 function worldOwners() {
@@ -268,13 +279,7 @@ export async function startCaptureOfficialWildEntryV1(creatureId){
   // Release only the known Capture pre-fight overlays. A setup modal can
   // otherwise cover the arena on Android until hardware Back hides it.
   // No global navigation, new combat owner or persistent game changes.
-  if(typeof globalThis.captureCloseModal==='function'){
-   for(const id of ['captureExploreModal','captureEncounterModal',
-     'captureBattleSetupModal','captureBattleLiveModal']){
-    globalThis.captureCloseModal(id);
-   }
-  }
-  entry.ui.shell.focus({preventScroll:true});
+  focusCaptureOfficialBattleLayerV1({shell:entry.ui.shell});
   entry.ui.status.textContent='Combat officiel du Labo en cours.';
   entry.ui.status.dataset.phase='running';
   const result=controller.startWildBattle(requested);

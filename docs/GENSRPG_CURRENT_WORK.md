@@ -1,3 +1,12 @@
+## 2026-11-12 — Capture V2 adopte les décors de combat du World Builder
+
+- START `checkpoint/gensrpg-start-capture-arena-source-2026-11-12` sur la source publiée `67193a08633f199761860d0a5eb187e7a7d42404`. Branche `work/gensrpg-capture-arena-source-2026-11-12`.
+- Cette source Capture consomme le SHA certifié d’Exploration `main` pour les décors. Exploration possède la configuration et le passage au combat. Combat `main@9b8fe770b531abf4f8191a746e0fdcc43f7abbae` possède le catalogue et le rendu.
+- Exploration PR #418, main `02bb3844bdeb1277e615026617cdf6b41857f320`, CI `43228279544` réussie. Les tests locaux couvrent la compatibilité des mondes et des journaux de combat.
+- Le pin Exploration est le seul changement de livraison. Vérifier la CI du SHA source et passer par une PR de publication sur le `main` historique, depuis son publisher unique.
+
+---
+
 ## 2026-11-10 — Raccord PNJ marchand : dernier pin officiel Exploration (C2, EN VALIDATION)
 - **Propriétaire publié dans son dépôt** : Labo Exploration PR #410 fusionnée dans son unique `main@5db0f09c827206eccf1de740965975a3acfedbf6`. Source métier certifiée `e376d6435e8abf61ed396c052710e1253c6dfa74` (ancêtre exact de main), `verify-and-assemble` run `42895507158` SUCCESS, `core-tests`, `native-https-pixels`, `modern-combat-encounter` SUCCESS.
 - **Source Capture** : la seule définition `assets/gensrpg/capture-v2/source-pins-v1.json.exploration.sha` pointe vers le SHA métier certifié `e376d6435e8abf61ed396c052710e1253c6dfa74` (pas vers une branche mouvante), sans modifier Combat main `718d02793dacb8e6db97df36d4431f64336e3121`.

@@ -1,3 +1,11 @@
+## 2026-11-13 — Monster Capture V2 : choix immédiat des 12 héros officiels
+- START source `eb410131239bdd9f59d17320c9c750709d2255e1` ; checkpoint `checkpoint/gensrpg-start-hero-selection-20261113` ; branche `work/gensrpg-capture-hero-gallery-20261113`.
+- Cause racine : la préparation native `adventure-app-v1.mjs` ne lisait que `UserHeroStore.list()` (héros personnels préinstallés), tandis que les 12 héros certifiés étaient dans le catalogue officiel Exploration. Ils étaient invisibles avant la création de partie et cachés sous les réglages avancés.
+- Contrat : seule Exploration détient `assets/exploration/actors/official/catalog.json`, `loadOfficialHeroCatalogV1`, `installOfficialHeroPresetV1`, `UserHeroStoreV1`. Capture n'affiche que 12 cartes illustrées sous « Mon héros » et transmet l'ID `hero.user.<UUID>` existant au `AdventureSession`. Un choix installe seulement son modèle ; un modèle déjà identique en mémoire locale est réutilisé par comparaison des PNG sources. Aucun import des 576 sprites dans le dépôt Capture et aucun ID manuel.
+- Systèmes gelés : seul moteur Explorer, les 8 directions, Hero Editor, starter Bestiary, règles/XP, mondes et sauvegardes ; Survie/Dungeon/PvP inchangés.
+- Gates : test tactile Chromium de 12 cartes affichées avant « Créer », tap réel + ID installé ; CI Capture, budget Pages, vérification du trio de SHAs en HTTPS, PWA mobile. Cette branche est une source candidate, pas un deuxième publisher ni une publication.
+- Une PR de pin en racine `main` sera nécessaire après CI et raccordement du correctif neige Explorateur.
+
 ## 2026-11-12 — PNJ mobiles : adoption candidate du Labo Exploration
 - START sur source Capture `0a7e49cc3d5fefcae30657987f33050763278124`, checkpoint `checkpoint/gensrpg-start-npc-wander-source-20261112`, branche `work/gensrpg-npc-wander-source-2026-11-12`.
 - Exploration PR #425 fusionnée sur `main@0c1727f86a62bd8dc428b50bf73d2a4163b30225`, CI exacte `43310865951` **SUCCESS** ; le contrôle Pages main `43310866023` reste à vérifier avant livraison.

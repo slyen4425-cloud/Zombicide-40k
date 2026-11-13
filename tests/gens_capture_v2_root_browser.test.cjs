@@ -107,6 +107,21 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
     throw new Error('Official Bestiary starter never became playable: '+
       JSON.stringify({observed,pageErrors:errors})+'; '+String(error));
   }
+  assert.equal(await adventureFrame.locator('#adventure-advanced-panel').getAttribute('open'),null,
+   'simple mode starts with all advanced settings closed');
+  const initialStarter=await adventureFrame.locator('#adventure-starter').inputValue();
+  await adventureFrame.locator('#adventure-starter-cards .adventure-starter-card').first().tap();
+  await adventureFrame.locator('#adventure-starter-picker').waitFor({state:'visible'});
+  const realOfficialCards=adventureFrame.locator('#adventure-starter-gallery .adventure-gallery-card:not([disabled])');
+  assert.ok(await realOfficialCards.count()>0,'the illustrated picker reads official playable creatures');
+  await realOfficialCards.first().tap();
+  assert.equal(await adventureFrame.locator('#adventure-starter').inputValue(),initialStarter,
+    'visual selection writes the original canonical starter field');
+  assert.equal(await adventureFrame.locator('#adventure-starter-picker').isVisible(),false,
+    'the real Bestiary modal closes after a selection');
+  await adventureFrame.locator('#adventure-advanced-panel > summary').tap();
+  assert.equal(await adventureFrame.locator('#adventure-advanced-panel').getAttribute('open'),'',
+    'advanced settings must be visibly accessible in one gesture');
   assert.equal(await adventureFrame.locator('#adventure-rules-panel').getAttribute('open'),null,
    'new game opens without developer settings exposed by default');
   assert.equal(await adventureFrame.locator('#adventure-loot-panel').getAttribute('open'),null);
@@ -158,6 +173,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await adventureFrame.locator('#adventure-create:not([disabled])').waitFor({timeout:25000});
   assert.equal(await adventureFrame.locator('#adventure-xp-base').inputValue(),'733',
    'pre-game creator settings must survive actual iframe teardown and re-entry');
+  await adventureFrame.locator('#adventure-advanced-panel > summary').tap();
   await adventureFrame.locator('#adventure-rules-panel > summary').tap();
   assert.equal(await adventureFrame.locator('#adventure-gm-enabled').isChecked(),true,
    'creator MJ preference must survive real iframe teardown before first game');

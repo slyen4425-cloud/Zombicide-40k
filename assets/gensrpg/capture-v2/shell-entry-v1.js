@@ -9,6 +9,7 @@
     // opened exactly the same Sculpt URL, so it is removed from the game menu.
     builder:{label:"Terrain et exploration 2,5D",path:"vendor/exploration-lab/sculpt-lab.html",family:"exploration"},
     world:{label:"Carte du monde",path:"vendor/exploration-lab/world-assembler.html",family:"exploration"},
+    heroes:{label:"Héros et apparences",path:"vendor/exploration-lab/hero-editor.html",family:"exploration"},
     // Four native entry points, ONE actual Lab Combat editor. Combat main
     // (SHA-pinned PR #156) owns ?tab= routing, native state and all rules.
     // Never click tabs from the consumer or implement a parallel editor.
@@ -24,6 +25,7 @@
   // grouped by the player's task rather than by implementation laboratory.
   const EDITOR_GROUPS=Object.freeze([
     Object.freeze({id:"world",title:"Monde",items:Object.freeze(["world","builder"])}),
+    Object.freeze({id:"heroes",title:"Héros",items:Object.freeze(["heroes"])}),
     Object.freeze({id:"combat",title:"Créatures et combat",items:Object.freeze(
       ["creature","skills","combat","bestiary","music"])}),
     Object.freeze({id:"economy",title:"Objets et économie",items:Object.freeze(["items"])})

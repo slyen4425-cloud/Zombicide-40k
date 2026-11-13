@@ -1,3 +1,13 @@
+## 2026-11-13 — Publication globale GenSRPG : Aventure + Combat + Exploration
+- START publisher `main@75fdaedea499e210f8133edf3154e34711f9aef1`, checkpoint `checkpoint/gensrpg-start-global-labs-publisher-20261113`, branche `work/gensrpg-global-labs-publisher-20261113`. Checkpoint source `checkpoint/gensrpg-start-global-labs-source-20261113` sur `7aaa50ac5fddb22d4c0dced4513ac71b8dfcb7fd`.
+- Source Capture unique candidate `019c8e06a8ec7de0c83b9e5da15b18fe524ee136` : démarrage simplifié + galerie illustrée PR #416 (fusionnée dans la source), errance PNJ Exploration PR #413 fusionnée, deux laboratoires via `assets/gensrpg/capture-v2/source-pins-v1.json`.
+- Combat **main** `30b668e832014285a641f165f857b968ba87052e` (Rugissement Vyrâme 8+10, descriptions de charges et colorisation ; Laboratory CI `43394216984`, GitHub Pages `43394216587` SUCCESS).
+- Exploration **main** `0c1727f86a62bd8dc428b50bf73d2a4163b30225` (PNJ 2,5D mobiles ; CI `43310865951`, Pages `43310866023` SUCCESS).
+- **Seul changement fonctionnel du publisher :** `tools/capture_v2_pages_preview_pin.json.sha` passe de `0a7e49cc3d5fefcae30657987f33050763278124` à `019c8e06a8ec7de0c83b9e5da15b18fe524ee136`. Le pin visuel `global-assets@9eef5847a2b9907c493d9575a5c148b09d41a5bf` reste inchangé. Aucun nouveau moteur, copie de labo, éditeur secondaire ni inventaire, aucune suppression ou migration de carte/sauvegarde. Modes Survie, Dungeon et PvP inchangés.
+- **Gates obligatoires :** CI complète source Capture au SHA exact, tests publisher (budget <=900 MiB, ownership, vraie navigation Chromium, commandes PNJ, sauvegardes, recoloration), CI de PR publisher puis merge `main`, Pages SUCCESS, provenance réellement servie en HTTPS, contrôle de l'activation PWA Android paysage. Pas de déclaration « publié » avant ces preuves. Rollback par l'ancien pin ci-dessus.
+
+---
+
 ## 2026-11-12 — Publisher unique des récompenses de dresseurs (lot C2 à certifier)
 - Base immuable : GenSRPG `main@cacd2b4eeb9ea65ebf17320c9a9317662135910e`, checkpoint `checkpoint/gensrpg-start-trainer-rewards-publisher-20261112`, branche `work/gensrpg-trainer-rewards-publisher-2026-11-12`.
 - Source Capture issue de PR #410 fusionnée dans la **branche de source** `work/gensrpg-capture-trainer-test-paths-source-2026-11-12@0a7e49cc3d5fefcae30657987f33050763278124` ; les tests de PR source #410 étaient GREEN sur `f7b9ad9bc73763e26f224b98aa1d49a43023f489`.

@@ -122,6 +122,20 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   }
   assert.equal(await adventureFrame.locator('#adventure-advanced-panel').getAttribute('open'),null,
    'simple mode starts with all advanced settings closed');
+  const nativeHeroes=adventureFrame.locator('#adventure-official-hero-grid .adventure-official-hero-card');
+  await nativeHeroes.first().waitFor({state:'visible',timeout:45000});
+  assert.equal(await nativeHeroes.count(),12,
+   'the first game preparation displays all twelve official Exploration heroes');
+  assert.equal(await adventureFrame.locator('#adventure-hero-choice').count(),1,
+   'the official hero gallery uses the one existing AdventureSession selector');
+  // Tap a real published model and prove it installs only the chosen 8-direction
+  // HeroDefinition in the one native Exploration IndexedDB before game creation.
+  await nativeHeroes.first().tap();
+  await page.waitForFunction(()=>{
+   const doc=document.querySelector('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')?.contentDocument;
+   return /^hero\\.user\\.[a-f0-9-]{36}$/.test(doc?.querySelector('#adventure-hero-choice')?.value??'');
+  },null,{timeout:45000});
+  assert.equal(await nativeHeroes.first().getAttribute('aria-pressed'),'true');
   const initialStarter=await adventureFrame.locator('#adventure-starter').inputValue();
   await adventureFrame.locator('#adventure-starter-cards .adventure-starter-card').first().tap();
   await adventureFrame.locator('#adventure-starter-picker').waitFor({state:'visible'});

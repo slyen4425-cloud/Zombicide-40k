@@ -41,6 +41,19 @@
     <option value="">Chargement des mondes officiels…</option>
    </select>
    <output id="adventure-world-status" role="status" aria-live="polite">Les mondes sont enregistrés dans le World Builder Exploration.</output>
+   <section class="adventure-hero-section" aria-labelledby="adventure-hero-heading">
+    <h3 id="adventure-hero-heading">Mon héros</h3>
+    <p class="hint">Choisis directement parmi les 12 modèles officiels du Labo Exploration, ou utilise un héros personnel déjà enregistré.</p>
+    <div id="adventure-official-hero-grid" class="adventure-official-hero-grid" aria-label="Les 12 héros officiels" aria-live="polite"></div>
+    <details class="adventure-hero-personal">
+     <summary>Mes héros enregistrés</summary>
+     <label for="adventure-hero-choice">Héros de cette nouvelle partie</label>
+     <select id="adventure-hero-choice" aria-label="Héros sélectionné pour la nouvelle partie">
+      <option value="">Aucun héros personnalisé</option>
+     </select>
+    </details>
+    <p id="adventure-hero-choice-status" class="hint" role="status" aria-live="polite">Chargement du catalogue officiel Exploration…</p>
+   </section>
    <label for="adventure-starter-count">Nombre de créatures de départ</label>
    <select id="adventure-starter-count" aria-label="Nombre de créatures au début de l'aventure">
     <option value="1" selected>1 créature</option>
@@ -90,12 +103,7 @@
    <p class="hint">Facultatif : personnalise la caméra, l'XP, les objets, le multijoueur et les règles du créateur. Les valeurs actuelles sont conservées si tu ne modifies rien.</p>
    <div class="adventure-advanced-sections">
     <details id="adventure-start-options" class="adventure-options">
-     <summary>Héros et caméra de départ</summary>
-    <label for="adventure-hero-choice">Héros (bibliothèque Exploration)</label>
-    <select id="adventure-hero-choice" aria-label="Héros officiel de la partie">
-     <option value="">Aucun héros personnalisé</option>
-    </select>
-    <p id="adventure-hero-choice-status" class="hint">Chargement des héros enregistrés dans Exploration…</p>
+     <summary>Caméra de départ</summary>
     <fieldset class="adventure-camera-start">
      <legend>Caméra avant de jouer</legend>
      <p class="hint">Cadre initial plus près du sol et plus zoomé. Le zoom restera libre pendant le jeu.</p>

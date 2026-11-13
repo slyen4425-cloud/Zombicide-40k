@@ -472,3 +472,65 @@ body[data-adventure-item-editor="true"] #adventure-loot-preparation-summary{disp
  .adventure-gallery-card{min-height:104px;padding:6px}
  .adventure-starter-card{min-height:75px}
 }
+
+
+/* Desktop-only Adventure HUD: the phone landscape layout remains the
+   reference for input and in-world placement. These rules enlarge reading
+   surfaces and buttons on mouse-driven PC viewports only. */
+@media (min-width: 1100px) and (min-height: 680px) and (pointer: fine) {
+  .adventure-columns {
+    max-width: 1580px;
+    grid-template-columns: minmax(360px, 720px) minmax(380px, 820px);
+    gap: 20px;
+  }
+  .adventure-columns > section,
+  .adventure-columns > details {
+    padding: 20px;
+  }
+  #adventure-play-hud {
+    max-width: min(650px, 55vw);
+    top: max(76px, calc(env(safe-area-inset-top) + 65px));
+    gap: 10px;
+  }
+  #adventure-play-hud button {
+    min-height: 52px;
+    padding: 10px 16px;
+    font-size: 16px;
+  }
+  #adventure-play-sheet {
+    width: min(1120px, calc(100vw - 80px));
+    max-height: calc(100dvh - 48px);
+    padding: 20px;
+  }
+  #adventure-play-sheet .sheet-header h2 {
+    font-size: 27px;
+  }
+  #adventure-sheet-content {
+    max-height: calc(100dvh - 205px);
+  }
+  .sheet-tabs button {
+    min-height: 50px;
+    font-size: 15px;
+  }
+  .sheet-profile-top {
+    grid-template-columns: minmax(175px, 240px) minmax(0, 1fr);
+    gap: 22px;
+    padding: 17px;
+  }
+  .sheet-display-name { font-size: 30px !important; }
+  .sheet-profile-subtitle { font-size: 15px; }
+  .sheet-vital { min-width: 105px; padding: 10px 14px; }
+  .sheet-vital strong { font-size: 22px; }
+  .sheet-stat-grid {
+    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+    gap: 10px;
+  }
+  .sheet-stat-card { padding: 12px; }
+  .sheet-stat-name { font-size: 14px; }
+  .sheet-stat-value { font-size: 26px; }
+  .sheet-item-name { font-size: 15px; }
+  #adventure-result-dialog {
+    width: min(610px, calc(100vw - 80px));
+    max-height: calc(100dvh - 48px);
+  }
+}

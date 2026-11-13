@@ -6,6 +6,9 @@ test('Capture V2 has one GenSrpg-owned Adventure page without duplicating native
  const shell=read('assets/gensrpg/capture-v2/shell-entry-v1.js');
  const html=read('assets/gensrpg/capture-v2/adventure.html');
  const ui=read('assets/gensrpg/capture-v2/adventure-app-v1.mjs');
+ assert.match(shell,/heroes:\{label:"Héros et apparences",path:"vendor\/exploration-lab\/hero-editor\.html",family:"exploration"\}/,
+  'éditeur héros officiel exposé par une unique destination');
+ assert.match(shell,/id:"heroes",title:"Héros",items:Object\.freeze\(\["heroes"\]\)/);
  assert.match(shell,/adventure:\{label:"Jouer"/,
   'the single GenSRPG Adventure owner must appear as the game entry');
  assert.match(shell,/path:"assets\/gensrpg\/capture-v2\/adventure.html",family:"capture"/);

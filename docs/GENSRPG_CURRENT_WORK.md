@@ -1,3 +1,39 @@
+## 2026-11-12 — PNJ mobiles : adoption candidate du Labo Exploration
+- START sur source Capture `0a7e49cc3d5fefcae30657987f33050763278124`, checkpoint `checkpoint/gensrpg-start-npc-wander-source-20261112`, branche `work/gensrpg-npc-wander-source-2026-11-12`.
+- Exploration PR #425 fusionnée sur `main@0c1727f86a62bd8dc428b50bf73d2a4163b30225`, CI exacte `43310865951` **SUCCESS** ; le contrôle Pages main `43310866023` reste à vérifier avant livraison.
+- La source Capture change **uniquement** le SHA Exploration et sa preuve CI dans l'unique `assets/gensrpg/capture-v2/source-pins-v1.json`. L'errance PNJ reste la propriété de la navigation/Collision World d'Exploration. Aucun état, moteur, sauvegarde, bestiaire, monnaie ou inventaire n'est copié dans Capture.
+- La PR de publisher GenSRPG sera distincte : adoption d'un SHA source certifié, checks Android paysage/Chromium, CI et Pages sur le vrai `main`, checkpoint GREEN et contrôle PWA. Ne pas fusionner le publisher si Pages Exploration ou Capture sont rouges.
+
+---
+
+### 2026-11-12 — Adoption du raccordement PNJ depuis Exploration main certifié
+- Exploration PR #422 (fenêtre PNJ) puis #423 (récompenses), suivies de PR #424 (stabilisation CI test uniquement) : `main@46e4e3559c17dfb6bd3d7afbdb1f3d8caed93048`.
+- Certification exacte : Exploration CI `43301155708` **SUCCESS**, publication Pages `43301155674` **SUCCESS**, checkpoint `checkpoint/exploration-trainer-rewards-ci-pages-green-20261112`.
+- Cette source Capture C2 adopte le même SHA dans l'unique `source-pins-v1.json`. `AdventureSession.inventory` demeure la seule autorité pour les objets/or et `processedEncounterKeys` le reçu anti-doublon.
+- À valider encore : nouvelle CI Capture sur le pin 46e4e355, fusion de la PR source #410, publisher de la seule application GenSRPG, Pages/HTTPS final. Les PR anciennes ou V80 restent inchangées.
+
+---
+
+## 2026-11-12 — Récompenses des dresseurs dans le Core Capture (C2, candidat non publié)
+- START : source Capture publiée `53fb6a00427708c6b2626d3adb481cfa50926fcb` (PR #408), checkpoint `checkpoint/gensrpg-start-trainer-rewards-source-20261112`, branche `work/gensrpg-trainer-rewards-source-2026-11-12`. Publisher `main@cacd2b4eeb9ea65ebf17320c9a9317662135910e` inchangé.
+- Autorité unique : `AdventureRules.loot.items` pour le catalogue, `AdventureSession.inventory` pour monnaie et objets, `applyAdventureCombatResultV1` pour les récompenses. Exploration pourra transmettre `context.trainerReward` (montant et références d'objets) comme donnée de scénario optionnelle, non comme résultat Combat, sans créer de deuxième inventaire.
+- Implémentation : gain fixe en pièces et en objets après victoire seulement, même commit et même reçu que l'XP et `trainerVictories`; replay et défaite/fuite zéro gain. Un item retiré de l'éditeur n'est jamais inventé : ligne avertissement explicite sur le résultat.
+- Réutilisation du pont same-origin existant : exposer en lecture seule noms d'objets et nom de monnaie dans l'éditeur PNJ, sans dupliquer le catalogue.
+- Protégés : sauvegardes anciennes, fragments, monnaies et marchands, résultats Combats, 4 modes, PWA, sources Combat et Exploration, médias et index historique.
+- Tests : ajout aux sentinelles existantes de commit Combat et marchand/catalogue ; tests unitaires et navigateur PNJ, comparaison du vrai résultat, CI source C2, adoption Exploration puis pin publisher, Pages HTTPS et validation smartphone. Aucun merge/publication sans GREEN des propriétaires.
+- Dépendance : lot Exploration séparé pour la fiche PNJ et le transport de l'attribution ; aucune modification de ce dépôt depuis le publisher pour l'interface Exploration.
+
+---
+
+## 2026-11-12 — Capture V2 adopte les duels depuis les cartes du Builder
+
+- START `checkpoint/gensrpg-start-capture-trainer-test-paths-source-2026-11-12` sur `6ac0b0fd4ea6921879ccb0b4b649262151b5665d`, checkpoint `checkpoint/gensrpg-capture-trainer-engagement-source-green-2026-11-12`. Branche `work/gensrpg-capture-trainer-test-paths-source-2026-11-12`.
+- Le Labo Exploration raccorde les dresseurs à Tester et à Jouer du World Builder. Les essais utilisent l’équipe officielle de prévisualisation de Combat. Le journal d’Aventure conserve ses règles de sauvegarde et son équipe réelle.
+- Chromium paysage a reproduit « Terminer » et « Fermer » sur la base, puis validé le duel et la réserve dans Tester, le combat direct depuis Jouer du World Builder et le parcours Aventure avec victoire persistée.
+- Exploration PR #421 sur `main@0c0f12c37ff994fd9783b7170fe288e7513db3c6`, CI `43272605675` et Pages `43272605773`. Valider la livraison officielle et le publisher GenSRPG sur leurs SHA exacts.
+
+---
+
 ## 2026-11-12 — Capture V2 adopte le déclenchement configurable des duels
 
 - START `checkpoint/gensrpg-start-capture-trainer-engagement-source-2026-11-12` sur `b3a9f3812b20645b6226c8350c6775bb4b9874f9`, certifié par `checkpoint/gensrpg-capture-trainer-source-green-2026-11-12`. Branche `work/gensrpg-capture-trainer-engagement-source-2026-11-12`.

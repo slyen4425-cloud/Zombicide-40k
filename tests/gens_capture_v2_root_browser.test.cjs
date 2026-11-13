@@ -74,8 +74,8 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.locator('#gensGameHome:visible').count(),0);
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   const buttons=page.locator('#gensCaptureV2Root [data-capture-v2-view]');
-  assert.equal(await buttons.count(),9,
-   'seven native Lab destinations, one item editor and one game; no duplicate 2.5D Tester');
+  assert.equal(await buttons.count(),10,
+   'eight native Lab destinations including the real hero editor, one item editor and one game');
   assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="economy"] [data-capture-v2-view="items"]').count(),1,
    'one official item editor is grouped under Objets et économie');
   assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu > button').count(),2,
@@ -84,7 +84,20 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
    'Carte du monde and native Terrain 2.5D live in the SAME menu group');
   assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').count(),0,
    'the old duplicate Exploration 2.5D entry must be gone');
-  // The single Adventure game entry and seven genuinely distinct Lab
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="heroes"] [data-capture-v2-view="heroes"]').count(),1,
+   'hero editor appears once, in the Héros editor group');
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="heroes"]').tap();
+  assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),'heroes');
+  const heroFrame=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
+  await heroFrame.locator('#hero-official-grid .hero-preset').first().waitFor({timeout:45000});
+  assert.equal(await heroFrame.locator('#hero-official-grid .hero-preset').count(),12,
+   'all twelve original official hero models must be offered in the same native Exploration editor');
+  assert.equal(await heroFrame.locator('input#hero-image[type="file"]').count(),1,
+   'author may still import any PNG/WebP of their own, without being restricted to presets');
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),null);
+  // The single Adventure game entry and eight genuinely distinct Lab
   // destinations preserve the original native URLs and fullscreen.
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
   const adventureFrame=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
@@ -107,6 +120,21 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
     throw new Error('Official Bestiary starter never became playable: '+
       JSON.stringify({observed,pageErrors:errors})+'; '+String(error));
   }
+  assert.equal(await adventureFrame.locator('#adventure-advanced-panel').getAttribute('open'),null,
+   'simple mode starts with all advanced settings closed');
+  const initialStarter=await adventureFrame.locator('#adventure-starter').inputValue();
+  await adventureFrame.locator('#adventure-starter-cards .adventure-starter-card').first().tap();
+  await adventureFrame.locator('#adventure-starter-picker').waitFor({state:'visible'});
+  const realOfficialCards=adventureFrame.locator('#adventure-starter-gallery .adventure-gallery-card:not([disabled])');
+  assert.ok(await realOfficialCards.count()>0,'the illustrated picker reads official playable creatures');
+  await realOfficialCards.first().tap();
+  assert.equal(await adventureFrame.locator('#adventure-starter').inputValue(),initialStarter,
+    'visual selection writes the original canonical starter field');
+  assert.equal(await adventureFrame.locator('#adventure-starter-picker').isVisible(),false,
+    'the real Bestiary modal closes after a selection');
+  await adventureFrame.locator('#adventure-advanced-panel > summary').tap();
+  assert.equal(await adventureFrame.locator('#adventure-advanced-panel').getAttribute('open'),'',
+    'advanced settings must be visibly accessible in one gesture');
   assert.equal(await adventureFrame.locator('#adventure-rules-panel').getAttribute('open'),null,
    'new game opens without developer settings exposed by default');
   assert.equal(await adventureFrame.locator('#adventure-loot-panel').getAttribute('open'),null);
@@ -158,6 +186,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await adventureFrame.locator('#adventure-create:not([disabled])').waitFor({timeout:25000});
   assert.equal(await adventureFrame.locator('#adventure-xp-base').inputValue(),'733',
    'pre-game creator settings must survive actual iframe teardown and re-entry');
+  await adventureFrame.locator('#adventure-advanced-panel > summary').tap();
   await adventureFrame.locator('#adventure-rules-panel > summary').tap();
   assert.equal(await adventureFrame.locator('#adventure-gm-enabled').isChecked(),true,
    'creator MJ preference must survive real iframe teardown before first game');

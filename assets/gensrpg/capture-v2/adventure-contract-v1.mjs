@@ -456,6 +456,23 @@ export function normalizeAdventureTrainerVictoriesV1(raw) {
   return Object.freeze({areaId,actorId});
  }));
 }
+// Instance-scoped NPC victory reward. This is only a transport contract;
+// the official Adventure item catalogue and wallet stay the sole authority.
+export function normalizeAdventureTrainerRewardV1(raw){
+ const reward=exact(raw,['currency','items'],'trainerReward');
+ const currency=integer(reward.currency,'trainerReward.currency',0,100000000);
+ if(!Array.isArray(reward.items)||reward.items.length>24)
+  throw new RangeError('trainerReward.items must contain up to 24 entries');
+ const seen=new Set();
+ const items=reward.items.map((rawItem,index)=>{
+  const entry=exact(rawItem,['itemId','quantity'],'trainerReward.items['+index+']');
+  const itemId=identity(entry.itemId,'trainerReward.itemId');
+  if(seen.has(itemId))throw new RangeError('Duplicate trainer reward item '+itemId);
+  seen.add(itemId);
+  return Object.freeze({itemId,quantity:integer(entry.quantity,'trainerReward.quantity',1,9999)});
+ });
+ return Object.freeze({currency,items:Object.freeze(items)});
+}
 function assertSession(session){
  const v=object(session,'AdventureSession');
  if(v.schema!==ADVENTURE_SAVE_SCHEMA_V1||v.version!==1)
@@ -646,6 +663,8 @@ export function applyAdventureCombatResultV1({
   areaId:label(snapshot.context?.areaId,'trainer areaId'),
   actorId:label(snapshot.context?.trainerActorId,'trainer actorId')
  } : null;
+ const trainerReward=trainer&&Object.hasOwn(snapshot.context??{},'trainerReward')
+  ?normalizeAdventureTrainerRewardV1(snapshot.context.trainerReward):null;
  if(trainer){
   if(!Array.isArray(snapshot.opponents)||snapshot.opponents.length<1||snapshot.opponents.length>6||
      snapshot.opponents.some(member=>!Number.isSafeInteger(member?.level)||member.level<1||
@@ -688,9 +707,10 @@ export function applyAdventureCombatResultV1({
   xp:shares.get(member.instanceId),levelBefore:member.level,
   levelAfter:progressed.get(member.instanceId).level
  }));
- const currency=result.outcome==='victory'?state.rules.loot.currencyPerVictory:0;
+ const currency=result.outcome==='victory'
+  ?integer(state.rules.loot.currencyPerVictory+(trainerReward?.currency??0),'victory currency',0,1000000000):0;
  const itemCounts={...state.inventory.items};
- const drops=[];
+ const drops=[],rewardWarnings=[];
  if(result.outcome==='victory'){
   for(const drop of state.rules.loot.drops.filter(d=>d.speciesId===enemyId)){
    if(roll(random)*100>=drop.chancePercent)continue;
@@ -698,6 +718,22 @@ export function applyAdventureCombatResultV1({
     Math.floor(roll(random)*(drop.maxQuantity-drop.minQuantity+1));
    itemCounts[drop.itemId]=(itemCounts[drop.itemId]||0)+quantity;
    drops.push({itemId:drop.itemId,quantity});
+  }
+  // Trainer-specific fixed loot uses the SAME official item inventory and
+  // the SAME CombatResult receipt. Deleted item definitions are not invented:
+  // show an explicit warning, but never strand a won battle or lose its save.
+  if(trainerReward){
+   const known=new Set(state.rules.loot.items.map(item=>item.id));
+   for(const entry of trainerReward.items){
+    if(!known.has(entry.itemId)){
+     rewardWarnings.push('Objet de dresseur indisponible : '+entry.itemId);
+     continue;
+    }
+    const next=integer((itemCounts[entry.itemId]??0)+entry.quantity,
+     'trainer inventory quantity',1);
+    itemCounts[entry.itemId]=next;
+    drops.push({itemId:entry.itemId,quantity:entry.quantity});
+   }
   }
   // Commit fragment rewards under the SAME CombatResult encounter receipt.
   // Historical saves without fragment rules keep their exact loot behavior.
@@ -772,6 +808,7 @@ export function applyAdventureCombatResultV1({
  const award=freeze({
   encounterId,enemyId,outcome:result.outcome,xp:amount,
   levelBefore:before,levelAfter:level,currency,drops,heroXp,
+  ...(rewardWarnings.length?{rewardWarnings}:{}),
   ...(state.rules.xp.distribution==='all'?{memberXp}:{})
  });
  // The creator chooses recovery or terminal game over in the save's rules.
@@ -824,7 +861,8 @@ export function applyAdventureCombatResultV1({
    return {...state.party,active:knockedOut};
   })(),
   ...(heroState===undefined?{}:{hero:heroState}),
-  inventory:{currency:state.inventory.currency+currency,items:itemCounts},
+  inventory:{currency:integer(state.inventory.currency+currency,
+   'saved adventure currency',0),items:itemCounts},
   processedEncounterKeys:[...state.processedEncounterKeys,key],
   ...(trainer&&result.outcome==='victory'?{
    trainerVictories:[...(state.trainerVictories??[]),trainer]

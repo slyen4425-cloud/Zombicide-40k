@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {availableAdventureMerchantsForNpcV1}
+import {availableAdventureMerchantsForNpcV1,availableAdventureItemsForNpcRewardV1}
  from '../assets/gensrpg/capture-v2/adventure-merchant-catalog-bridge-v1.mjs';
 import {DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,
  createAdventureSessionV1,createAdventureStoreV1}
@@ -41,6 +41,22 @@ test('NPC merchant list is read ONLY from the Core-owned rules draft or active A
  assert.deepEqual(await availableAdventureMerchantsForNpcV1({storage:s,coreStorage}),
   [{id:'merchant-forest',name:'Marchand renommé'}],
   'session owner wins over draft and rename preserves stable internal reference');
+});
+test('the NPC reward selector reads names ONLY from official Capture inventory rules',async()=>{
+ const s=storage();
+ const draft=createAdventureRulesDraftStoreV1({storage:s,coreStorage});
+ const configured=normalizeAdventureRulesV1({...catalog,loot:{
+  ...catalog.loot,items:[{id:'item-gem',name:'Gemme',saleValue:5}]
+ }});
+ draft.save(configured);
+ assert.deepEqual(await availableAdventureItemsForNpcRewardV1({storage:s,coreStorage}),{
+  currencyLabel:'jetons',items:[{id:'item-gem',name:'Gemme'}]
+ });
+ const shell=source('shell-entry-v1.js');
+ assert.match(shell,/gensrpg.exploration.npc.reward.catalog.request.v1/);
+ assert.match(shell,/availableAdventureItemsForNpcRewardV1/);
+ assert.match(shell,/event.source!==frame.contentWindow/);
+ assert.match(shell,/event.origin!==root.location.origin/);
 });
 test('Shell transports catalog by name, never stores merchant inventory or shows raw identifiers',()=>{
  const shell=source('shell-entry-v1.js');

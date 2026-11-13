@@ -50,41 +50,21 @@
     <option value="5">5 créatures</option>
     <option value="6">6 créatures</option>
    </select>
-   <label for="adventure-starter">Créature active de départ</label>
-   <select id="adventure-starter" aria-label="Créature de départ publiée" disabled>
-    <option value="">Chargement du Bestiaire…</option>
-   </select>
-   <div id="adventure-starter-reserve" class="fields" aria-label="Créatures de réserve initiales"></div>
+   <section class="adventure-starter-section" aria-labelledby="adventure-team-heading">
+    <h3 id="adventure-team-heading">Mon équipe de départ</h3>
+    <p class="hint">Touche une carte pour choisir une créature dans le Bestiaire officiel.</p>
+    <div id="adventure-starter-cards" class="adventure-starter-cards" aria-live="polite"></div>
+   </section>
+   <!-- The existing select values remain the sole input to AdventureSession. -->
+   <div class="adventure-starter-native" hidden>
+    <label for="adventure-starter">Créature active de départ</label>
+    <select id="adventure-starter" aria-label="Créature de départ publiée" disabled>
+     <option value="">Chargement du Bestiaire…</option>
+    </select>
+    <div id="adventure-starter-reserve" class="fields" aria-label="Créatures de réserve initiales"></div>
+   </div>
    <p id="adventure-bestiary-count" class="hint"></p>
-   <label for="adventure-hero-choice">Héros (bibliothèque Exploration)</label>
-   <select id="adventure-hero-choice" aria-label="Héros officiel de la partie">
-    <option value="">Aucun héros personnalisé</option>
-   </select>
-   <p id="adventure-hero-choice-status" class="hint">Chargement des héros enregistrés dans Exploration…</p>
-   <fieldset class="adventure-camera-start">
-    <legend>Caméra avant de jouer</legend>
-    <p class="hint">Cadre initial plus près du sol et plus zoomé. Le zoom restera libre pendant le jeu.</p>
-    <label for="adventure-creator-camera-angle">Inclinaison de la caméra
-     <select id="adventure-creator-camera-angle" aria-label="Angle de caméra au début de la partie">
-      <option value="35">35° — très bas</option>
-      <option value="40">40°</option>
-      <option value="45" selected>45° — conseillé</option>
-      <option value="50">50°</option>
-      <option value="55">55° — classique</option>
-      <option value="60">60°</option>
-      <option value="65">65°</option>
-      <option value="70">70°</option>
-      <option value="75">75°</option>
-      <option value="80">80°</option>
-      <option value="85">85°</option>
-      <option value="90">90° — du dessus</option>
-     </select>
-    </label>
-    <label for="adventure-creator-camera-zoom">Zoom de départ
-     <input id="adventure-creator-camera-zoom" type="range" min="100" max="240" step="5" value="205">
-     <output id="adventure-creator-camera-zoom-value" for="adventure-creator-camera-zoom">205 %</output>
-    </label>
-   </fieldset>
+
    <div class="actions">
     <button type="button" id="adventure-create" disabled>Créer une nouvelle partie</button>
     <button type="button" id="adventure-resume">Afficher la sauvegarde</button>
@@ -105,6 +85,42 @@
    </section>
    <div class="actions"><button type="button" id="adventure-world-builder">🌍 Créer ou modifier le monde</button></div>
   </section>
+  <details id="adventure-advanced-panel" class="adventure-options adventure-advanced-shell">
+   <summary>⚙️ Réglages avancés de l'aventure</summary>
+   <p class="hint">Facultatif : personnalise la caméra, l'XP, les objets, le multijoueur et les règles du créateur. Les valeurs actuelles sont conservées si tu ne modifies rien.</p>
+   <div class="adventure-advanced-sections">
+    <details id="adventure-start-options" class="adventure-options">
+     <summary>Héros et caméra de départ</summary>
+    <label for="adventure-hero-choice">Héros (bibliothèque Exploration)</label>
+    <select id="adventure-hero-choice" aria-label="Héros officiel de la partie">
+     <option value="">Aucun héros personnalisé</option>
+    </select>
+    <p id="adventure-hero-choice-status" class="hint">Chargement des héros enregistrés dans Exploration…</p>
+    <fieldset class="adventure-camera-start">
+     <legend>Caméra avant de jouer</legend>
+     <p class="hint">Cadre initial plus près du sol et plus zoomé. Le zoom restera libre pendant le jeu.</p>
+     <label for="adventure-creator-camera-angle">Inclinaison de la caméra
+      <select id="adventure-creator-camera-angle" aria-label="Angle de caméra au début de la partie">
+       <option value="35">35° — très bas</option>
+       <option value="40">40°</option>
+       <option value="45" selected>45° — conseillé</option>
+       <option value="50">50°</option>
+       <option value="55">55° — classique</option>
+       <option value="60">60°</option>
+       <option value="65">65°</option>
+       <option value="70">70°</option>
+       <option value="75">75°</option>
+       <option value="80">80°</option>
+       <option value="85">85°</option>
+       <option value="90">90° — du dessus</option>
+      </select>
+     </label>
+     <label for="adventure-creator-camera-zoom">Zoom de départ
+      <input id="adventure-creator-camera-zoom" type="range" min="100" max="240" step="5" value="205">
+      <output id="adventure-creator-camera-zoom-value" for="adventure-creator-camera-zoom">205 %</output>
+     </label>
+    </fieldset>
+    </details>
   <details id="adventure-rules-panel" class="adventure-options">
    <summary id="adventure-rules-heading">Progression</summary>
    <div class="fields">
@@ -341,7 +357,19 @@
     <button id="adventure-save-control" type="button">Enregistrer les choix du créateur</button>
    </div>
   </details>
+   </div>
+  </details>
  </div>
+ <dialog id="adventure-starter-picker" class="adventure-starter-picker" aria-labelledby="adventure-starter-picker-title">
+  <div class="adventure-picker-header">
+   <div><h2 id="adventure-starter-picker-title">Choisir une créature</h2>
+    <p class="hint">Toutes les créatures publiées du Bestiaire officiel.</p></div>
+   <button id="adventure-starter-picker-close" type="button" aria-label="Fermer le Bestiaire">✕</button>
+  </div>
+  <label for="adventure-starter-search">Rechercher une créature</label>
+  <input id="adventure-starter-search" type="search" placeholder="Nom de la créature…" autocomplete="off">
+  <div id="adventure-starter-gallery" class="adventure-starter-gallery" role="list"></div>
+ </dialog>
 </main>
 <!-- Capture parent owns fullscreen so its Sac/Équipe HUD never disappears behind the native map frame. -->
 <iframe id="adventure-play-frame" title="Monster Capture · Jouer" allow="autoplay" hidden></iframe>

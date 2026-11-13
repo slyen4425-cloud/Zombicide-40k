@@ -434,6 +434,25 @@ body[data-adventure-item-editor="true"] #adventure-loot-preparation-summary{disp
 }
 
 
+/* The twelve cards read only Exploration's official catalog.
+   Choosing one installs its existing UserHeroDefinition; this is UI, not a
+   second asset library or gameplay authority. */
+.adventure-hero-section{border:1px solid #346b68;background:#102e35;border-radius:12px;padding:11px;margin-top:12px}
+.adventure-hero-section h3{margin:2px 0 5px;font-size:16px;color:#d9fff1}
+.adventure-official-hero-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,105px),1fr));gap:8px;margin:10px 0}
+.adventure-official-hero-card{display:flex;flex-direction:column;gap:5px;align-items:center;justify-content:start;padding:8px 5px;min-width:0;min-height:129px;background:#143640;border:2px solid #356e6d;border-radius:12px}
+.adventure-official-hero-card img{height:84px;width:80px;object-fit:contain}
+.adventure-official-hero-card span{font-size:11px;text-align:center;overflow-wrap:anywhere}
+.adventure-official-hero-card[aria-pressed="true"]{border-color:#d2c276;background:#24554f}
+.adventure-hero-personal{margin-top:8px;padding:7px;border:1px solid #315c61;border-radius:8px}
+.adventure-hero-personal>summary{cursor:pointer;font-weight:700}
+@media(orientation:landscape) and (max-height:550px){
+ .adventure-hero-section{padding:8px}
+ .adventure-official-hero-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr))}
+ .adventure-official-hero-card{min-height:108px}
+ .adventure-official-hero-card img{height:67px;width:68px}
+}
+
 /* Capture V2 player entry: a small starter setup, with optional advanced rules. */
 .adventure-starter-native[hidden]{display:none!important}
 .adventure-starter-section{border:1px solid #346b68;background:#102e35;border-radius:12px;padding:11px;margin-top:12px}

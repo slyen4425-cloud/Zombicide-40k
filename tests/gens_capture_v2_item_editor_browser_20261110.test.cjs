@@ -186,6 +186,10 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   // first. The preplay view has a summary rather than a competing item form.
   await frame.locator('#adventure-return-preparation').tap();
   await page.waitForFunction(()=>window.GensCaptureV2?.status?.().view==='adventure');
+  // Simple player launch hides author controls. Reopen them through the actual
+  // visible disclosure before entering the existing loot summary.
+  assert.equal(await frame.locator('#adventure-advanced-panel').getAttribute('open'),null);
+  await frame.locator('#adventure-advanced-panel > summary').tap();
   await frame.locator('#adventure-loot-panel summary').first().tap();
   await frame.locator('#adventure-loot-preparation-count').filter({hasText:/9 objet\(s\)/})
    .waitFor({timeout:40000});

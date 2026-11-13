@@ -1,3 +1,11 @@
+## 2026-11-12 — PNJ mobiles : adoption candidate du Labo Exploration
+- START sur source Capture `0a7e49cc3d5fefcae30657987f33050763278124`, checkpoint `checkpoint/gensrpg-start-npc-wander-source-20261112`, branche `work/gensrpg-npc-wander-source-2026-11-12`.
+- Exploration PR #425 fusionnée sur `main@0c1727f86a62bd8dc428b50bf73d2a4163b30225`, CI exacte `43310865951` **SUCCESS** ; le contrôle Pages main `43310866023` reste à vérifier avant livraison.
+- La source Capture change **uniquement** le SHA Exploration et sa preuve CI dans l'unique `assets/gensrpg/capture-v2/source-pins-v1.json`. L'errance PNJ reste la propriété de la navigation/Collision World d'Exploration. Aucun état, moteur, sauvegarde, bestiaire, monnaie ou inventaire n'est copié dans Capture.
+- La PR de publisher GenSRPG sera distincte : adoption d'un SHA source certifié, checks Android paysage/Chromium, CI et Pages sur le vrai `main`, checkpoint GREEN et contrôle PWA. Ne pas fusionner le publisher si Pages Exploration ou Capture sont rouges.
+
+---
+
 ### 2026-11-12 — Adoption du raccordement PNJ depuis Exploration main certifié
 - Exploration PR #422 (fenêtre PNJ) puis #423 (récompenses), suivies de PR #424 (stabilisation CI test uniquement) : `main@46e4e3559c17dfb6bd3d7afbdb1f3d8caed93048`.
 - Certification exacte : Exploration CI `43301155708` **SUCCESS**, publication Pages `43301155674` **SUCCESS**, checkpoint `checkpoint/exploration-trainer-rewards-ci-pages-green-20261112`.

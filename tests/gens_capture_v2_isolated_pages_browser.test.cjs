@@ -43,6 +43,23 @@ const readSelectedAdventureSave=async element=>element.evaluate(async()=>{
  return selected;
 });
 
+// Use the published Bestiary gallery, never the intentionally hidden native select.
+// The single canonical select still owns AdventureSession creation and remains asserted.
+async function chooseStarterThroughBestiary(adventure,{id,name}){
+ const activeCard=adventure.locator('#adventure-starter-cards .adventure-starter-card').first();
+ await activeCard.waitFor({state:'visible',timeout:45000});
+ await activeCard.tap();
+ const dialog=adventure.locator('#adventure-starter-picker');
+ await dialog.waitFor({state:'visible'});
+ await dialog.locator('#adventure-starter-search').fill(name);
+ await dialog.locator('.adventure-gallery-card:not([disabled])').filter({hasText:name}).first().tap();
+ await dialog.waitFor({state:'hidden'});
+ const canonical=adventure.locator('#adventure-starter');
+ assert.equal(await canonical.inputValue(),id,
+  'the illustrated Bestiary choice must update the sole canonical starter selector');
+ return canonical;
+}
+
 test('Adventure applies the saved World Builder arena and commits a native encounter at the exact map point',
  {timeout:180000},async()=>{
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
@@ -67,8 +84,7 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   };
   await start();
   const adventure=page.frameLocator('#gensCaptureV2Root iframe');
-  const starter=adventure.locator('#adventure-starter:not([disabled])');
-  await starter.selectOption('crea_lumilo');
+  const starter=await chooseStarterThroughBestiary(adventure,{id:'crea_lumilo',name:'Lumilo'});
   await adventure.locator('#adventure-create').tap();
   // Use the real world authoring APIs for a plain, walkable area with a
   // guaranteed Shadow encounter. The battle journal is written by Combat.
@@ -205,8 +221,7 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
   };
   await start();
   const adventure=page.frameLocator('#gensCaptureV2Root iframe');
-  const starter=adventure.locator('#adventure-starter:not([disabled])');
-  await starter.selectOption('crea_lumilo');
+  const starter=await chooseStarterThroughBestiary(adventure,{id:'crea_lumilo',name:'Lumilo'});
   await adventure.locator('#adventure-create').tap();
   await starter.evaluate(async()=>{
    const [{createAdventureStoreV1},{createAdventurePortfolioStoreV1}]=await Promise.all([
@@ -586,6 +601,7 @@ test('real HTTPS Jouer on mobile landscape saves creator cap 250, 33 stat points
     {waitUntil:'domcontentloaded',timeout:60000});
    assert.equal(response.status(),200);
    await page.locator('#adventure-create:not([disabled])').waitFor({timeout:45000});
+   await page.locator('#adventure-advanced-panel > summary').tap();
    await page.locator('#adventure-rules-panel > summary').tap();
    await page.locator('#adventure-level-max').fill('250');
    await page.locator('#adventure-level-max').press('Tab');

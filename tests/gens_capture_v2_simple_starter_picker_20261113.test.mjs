@@ -48,7 +48,8 @@ test('Capture V2 keeps simple play visible, advanced options collapsed and origi
  const app=await read('assets/gensrpg/capture-v2/adventure-app-v1.mjs');
  assert.match(app,/starterPicker\.renderSlots\(\)/);
  assert.match(app,/starterPicker\.install\(\)/);
- assert.match(app,/createAdventureSessionV1\(\{[\s\S]*?starterIds:getStarterSpeciesIds/);
+ assert.match(app,/const starterIds=getStarterSpeciesIds\(\);/);
+ assert.match(app,/createAdventureSessionV1\(\{[\s\S]*?starterId:starterIds\[0\],starterIds,/);
 });
 
 test('Bestiary gallery changes canonical starter selectors without a second saved roster',()=>{

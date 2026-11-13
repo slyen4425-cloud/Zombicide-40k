@@ -362,11 +362,21 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
 body[data-adventure-item-editor="true"] .adventure-columns{
  display:grid;grid-template-columns:minmax(0,980px);justify-content:center;
 }
-body[data-adventure-item-editor="true"] .adventure-columns > :not(#adventure-loot-panel){
+/* The public Adventure panel now encloses Loot. In editor mode expose that
+   single existing owner and hide its sibling panels, never the parent itself. */
+body[data-adventure-item-editor="true"] .adventure-columns > :not(#adventure-advanced-panel){
+ display:none!important;
+}
+body[data-adventure-item-editor="true"] #adventure-advanced-panel{
+ display:block;grid-column:1;width:100%;max-width:980px;
+}
+body[data-adventure-item-editor="true"] #adventure-advanced-panel > summary,
+body[data-adventure-item-editor="true"] #adventure-advanced-panel > .hint,
+body[data-adventure-item-editor="true"] .adventure-advanced-sections > :not(#adventure-loot-panel){
  display:none!important;
 }
 body[data-adventure-item-editor="true"] #adventure-loot-panel{
- display:block;grid-column:1;width:100%;max-width:980px;
+ display:block;width:100%;
 }
 body[data-adventure-item-editor="true"] #adventure-loot-heading{font-size:19px}
 body[data-adventure-item-editor="true"] #adventure-item-search{

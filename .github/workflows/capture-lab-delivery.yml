@@ -66,6 +66,7 @@ jobs:
             builder.html
             world-assembler.html
             sculpt-lab.html
+            hero-editor.html
             play.html
             scripts
       - name: Read the certified public Capture visual approval (immutable)
@@ -120,7 +121,7 @@ jobs:
           done
           test ! -e _site/assets/gensrpg/capture
           cp -a exploration-lab/src exploration-lab/assets _site/vendor/exploration-lab/
-          cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html exploration-lab/sculpt-lab.html exploration-lab/play.html _site/vendor/exploration-lab/
+          cp exploration-lab/index.html exploration-lab/builder.html exploration-lab/world-assembler.html exploration-lab/sculpt-lab.html exploration-lab/hero-editor.html exploration-lab/play.html _site/vendor/exploration-lab/
           node tools/stage_capture_v2_labs.mjs combat-lab exploration-lab _site
           node tools/stage_capture_v2_official_visuals.mjs approved-adventure-visuals approved-public-preview/tools/capture_v2_pages_preview_pin.json _site
           node --test tests/gens_capture_v2_pages_delivery_v1.test.cjs

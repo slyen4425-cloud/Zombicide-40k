@@ -74,8 +74,8 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.locator('#gensGameHome:visible').count(),0);
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   const buttons=page.locator('#gensCaptureV2Root [data-capture-v2-view]');
-  assert.equal(await buttons.count(),9,
-   'seven native Lab destinations, one item editor and one game; no duplicate 2.5D Tester');
+  assert.equal(await buttons.count(),10,
+   'eight native Lab destinations including the real hero editor, one item editor and one game');
   assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="economy"] [data-capture-v2-view="items"]').count(),1,
    'one official item editor is grouped under Objets et économie');
   assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu > button').count(),2,
@@ -84,7 +84,20 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
    'Carte du monde and native Terrain 2.5D live in the SAME menu group');
   assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').count(),0,
    'the old duplicate Exploration 2.5D entry must be gone');
-  // The single Adventure game entry and seven genuinely distinct Lab
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="heroes"] [data-capture-v2-view="heroes"]').count(),1,
+   'hero editor appears once, in the Héros editor group');
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="heroes"]').tap();
+  assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),'heroes');
+  const heroFrame=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
+  await heroFrame.locator('#hero-official-grid .hero-preset').first().waitFor({timeout:45000});
+  assert.equal(await heroFrame.locator('#hero-official-grid .hero-preset').count(),12,
+   'all twelve original official hero models must be offered in the same native Exploration editor');
+  assert.equal(await heroFrame.locator('input#hero-image[type="file"]').count(),1,
+   'author may still import any PNG/WebP of their own, without being restricted to presets');
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),null);
+  // The single Adventure game entry and eight genuinely distinct Lab
   // destinations preserve the original native URLs and fullscreen.
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
   const adventureFrame=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');

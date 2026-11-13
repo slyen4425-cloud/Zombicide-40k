@@ -22,6 +22,7 @@ import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
 import {createAdventureRulesDraftStoreV1} from './adventure-rules-draft-v1.mjs';
 import {adventurePlaySheetSnapshotV1} from './adventure-play-sheet-v1.mjs';
 import {publishedCapturePortraitUrlV1} from './adventure-sheet-visual-v1.mjs';
+import {createAdventureStarterPickerV1} from './adventure-starter-picker-v1.mjs';
 import {renderAdventureSheetViewV1} from './adventure-play-sheet-view-v1.mjs';
 import {createAdventureCreatorDraftStoreV1} from './adventure-creator-draft-v1.mjs';
 import {createAdventurePortfolioStoreV1} from './adventure-portfolio-store-v1.mjs';
@@ -95,6 +96,7 @@ if(isItemEditor){
  document.querySelector('.adventure-head h1').textContent='Éditeur d’objets';
  document.querySelector('.adventure-head p').textContent=
   'Catalogue, valeur de vente et butin par espèce — même sauvegarde que Jouer.';
+ document.getElementById('adventure-advanced-panel').open=true;
  const panel=document.getElementById('adventure-loot-panel');panel.open=true;
 }
 let published=[];
@@ -327,6 +329,11 @@ function option(value,caption,disabled=false){
 function eligibleForNewGame(card){
  return Array.isArray(card.skills)&&card.skills.some(s=>s.state==='ready');
 }
+const starterPicker=createAdventureStarterPickerV1({
+ document,cards:()=>published,playable:eligibleForNewGame,
+ portraitUrl:card=>publishedCapturePortraitUrlV1({card,moduleUrl:import.meta.url}),
+ onSelection:()=>updatePreview()
+});
 function renderStarterReserveSelectors(){
  const count=Number($('adventure-starter-count').value);
  if(!Number.isSafeInteger(count)||count<1||count>6)
@@ -348,6 +355,7 @@ function renderStarterReserveSelectors(){
    ?previous[i-1]:(ready[i%ready.length]?.id??'');
   label.append(choice);host.append(label);
  }
+ starterPicker.renderSlots();
 }
 function getStarterSpeciesIds(){
  const chosen=[$('adventure-starter').value,
@@ -1181,6 +1189,7 @@ $('adventure-creator-camera-zoom').addEventListener('input',()=>{
  $('adventure-creator-camera-zoom-value').textContent=$('adventure-creator-camera-zoom').value+' %';
 });
 $('adventure-enemy').addEventListener('change',updatePreview);
+starterPicker.install();
 $('adventure-starter').addEventListener('change',updatePreview);
 $('adventure-starter-count').addEventListener('change',guarded(renderStarterReserveSelectors));
 $('adventure-create').addEventListener('click',guarded(()=>{

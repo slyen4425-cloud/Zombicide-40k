@@ -17,6 +17,7 @@ on:
       - 'tests/gens_capture_v2_compact_rpg_sheet_v1.test.mjs'
       - 'tests/gens_capture_v2_world_selection_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_progression_access_v1.test.mjs'
+      - 'tests/gens_capture_v2_simple_starter_picker_20261113.test.mjs'
       - 'tests/gens_capture_v2_adventure_rules_draft_persistence_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_creator_draft_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_play_sheet_v1.test.mjs'
@@ -107,6 +108,9 @@ jobs:
 
       - name: Éditeur d’objets Capture — catalogue, imports sans destruction, sauvegardes historiques
         run: node --test tests/gens_capture_v2_item_editor_catalog_20261110.test.mjs
+
+      - name: Capture V2 — préparation simple et galerie Bestiaire des créatures de départ
+        run: node --test tests/gens_capture_v2_simple_starter_picker_20261113.test.mjs
 
       - name: RED/GREEN — 1 à 6 créatures de départ en Aventure
         run: node --test tests/gens_capture_v2_initial_party_1to6_20261107.test.mjs

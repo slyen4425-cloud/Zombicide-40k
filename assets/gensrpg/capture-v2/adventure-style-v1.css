@@ -362,11 +362,21 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
 body[data-adventure-item-editor="true"] .adventure-columns{
  display:grid;grid-template-columns:minmax(0,980px);justify-content:center;
 }
-body[data-adventure-item-editor="true"] .adventure-columns > :not(#adventure-loot-panel){
+/* The public Adventure panel now encloses Loot. In editor mode expose that
+   single existing owner and hide its sibling panels, never the parent itself. */
+body[data-adventure-item-editor="true"] .adventure-columns > :not(#adventure-advanced-panel){
+ display:none!important;
+}
+body[data-adventure-item-editor="true"] #adventure-advanced-panel{
+ display:block;grid-column:1;width:100%;max-width:980px;
+}
+body[data-adventure-item-editor="true"] #adventure-advanced-panel > summary,
+body[data-adventure-item-editor="true"] #adventure-advanced-panel > .hint,
+body[data-adventure-item-editor="true"] .adventure-advanced-sections > :not(#adventure-loot-panel){
  display:none!important;
 }
 body[data-adventure-item-editor="true"] #adventure-loot-panel{
- display:block;grid-column:1;width:100%;max-width:980px;
+ display:block;width:100%;
 }
 body[data-adventure-item-editor="true"] #adventure-loot-heading{font-size:19px}
 body[data-adventure-item-editor="true"] #adventure-item-search{
@@ -421,4 +431,44 @@ body[data-adventure-item-editor="true"] #adventure-loot-preparation-summary{disp
  #adventure-merchant-dialog{padding:8px}
  #adventure-merchant-trades{max-height:47dvh}
  .merchant-trade-row{padding:4px;gap:5px}
+}
+
+
+/* Capture V2 player entry: a small starter setup, with optional advanced rules. */
+.adventure-starter-native[hidden]{display:none!important}
+.adventure-starter-section{border:1px solid #346b68;background:#102e35;border-radius:12px;padding:11px;margin-top:12px}
+.adventure-starter-section h3{margin:2px 0 5px;font-size:16px;color:#d9fff1}
+.adventure-starter-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:9px;margin:10px 0}
+.adventure-starter-card{display:grid;grid-template-columns:68px minmax(0,1fr);align-items:center;gap:8px;text-align:left;min-height:94px;padding:9px;background:#173944;border:1px solid #4e8b81}
+.adventure-starter-card:hover,.adventure-starter-card:focus-visible{border-color:#b1efcf;background:#1b514d}
+.adventure-starter-card-info{display:grid;gap:5px;min-width:0;font-size:12px;overflow-wrap:anywhere}
+.adventure-starter-card-info strong{color:#a5ebca;font-size:11px}
+.adventure-starter-card-info span{font-weight:800;color:#f0fff9}
+.adventure-starter-card-edit{grid-column:2;font-size:11px;color:#a7d4c6}
+.adventure-starter-portrait{width:68px;height:68px;border-radius:12px;background:#0a2837;display:grid;place-items:center;font-size:36px;color:#a8e2d9;overflow:hidden}
+.adventure-starter-portrait img{width:100%;height:100%;object-fit:contain}
+.adventure-advanced-shell{align-self:start}
+.adventure-advanced-shell>summary{font-size:17px!important}
+.adventure-advanced-sections{display:grid;gap:10px;margin-top:12px}
+.adventure-advanced-sections>details,.adventure-advanced-sections>section{padding:11px;border:1px solid #315c61;background:#0d2832;border-radius:11px;min-width:0}
+.adventure-advanced-sections>details>summary{font-size:15px;font-weight:750}
+.adventure-starter-picker{width:min(920px,calc(100vw - 22px));max-height:calc(100dvh - 22px);overflow:auto;margin:auto;border:1px solid #7ab8a9;border-radius:16px;background:#0e2833;color:#ebfff8;padding:16px;box-shadow:0 18px 55px #000c}
+.adventure-starter-picker::backdrop{background:#041016d9}
+.adventure-picker-header{display:flex;justify-content:space-between;align-items:start;gap:10px}
+.adventure-picker-header h2{margin:3px 0 8px;font-size:19px}
+.adventure-picker-header button{min-width:44px;min-height:44px}
+.adventure-starter-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,155px),1fr));gap:10px;margin-top:13px;max-height:min(58dvh,550px);overflow:auto;overscroll-behavior:contain;padding:2px}
+.adventure-gallery-card{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;justify-content:start;padding:10px;background:#143640;border:1px solid #356e6d;min-height:137px}
+.adventure-gallery-card .adventure-starter-portrait{width:88px;height:88px}
+.adventure-gallery-caption{display:grid;gap:4px;width:100%;overflow-wrap:anywhere}
+.adventure-gallery-caption strong{font-size:13px}
+.adventure-gallery-caption small{font-size:11px;color:#a4d9cb}
+.adventure-gallery-card[data-selected=true]{background:#1d6153;border:2px solid #9ff2ca}
+.adventure-gallery-card:disabled{opacity:.38}
+@media(orientation:landscape) and (max-height:550px){
+ .adventure-starter-picker{padding:10px;max-height:calc(100dvh - 8px)}
+ .adventure-starter-gallery{max-height:calc(100dvh - 151px);grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+ .adventure-gallery-card .adventure-starter-portrait{width:64px;height:64px}
+ .adventure-gallery-card{min-height:104px;padding:6px}
+ .adventure-starter-card{min-height:75px}
 }

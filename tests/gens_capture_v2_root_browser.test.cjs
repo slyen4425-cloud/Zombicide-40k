@@ -133,7 +133,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await nativeHeroes.first().tap();
   await page.waitForFunction(()=>{
    const doc=document.querySelector('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')?.contentDocument;
-   return /^hero\\.user\\.[a-f0-9-]{36}$/.test(doc?.querySelector('#adventure-hero-choice')?.value??'');
+   return /^hero\.user\.[a-f0-9-]{36}$/.test(doc?.querySelector('#adventure-hero-choice')?.value??'');
   },null,{timeout:45000});
   assert.equal(await nativeHeroes.first().getAttribute('aria-pressed'),'true');
   const initialStarter=await adventureFrame.locator('#adventure-starter').inputValue();

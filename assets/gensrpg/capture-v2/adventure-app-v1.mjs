@@ -322,6 +322,86 @@ async function fillHeroChoices(savedHeroId=null){
  picker.disabled=false;
 }
 
+
+const OFFICIAL_EXPLORATION_HERO_ROOT=new URL('../../../vendor/exploration-lab/',import.meta.url).href;
+let selectedOfficialHero=null,officialHeroBusy=false;
+// The catalog and the media installer BOTH belong to Exploration main.
+// Capture only displays choices and records the existing HeroDefinition ID.
+async function loadOfficialHeroGallery(){
+ const grid=$('adventure-official-hero-grid'),notice=$('adventure-hero-choice-status');
+ try{
+  const {loadOfficialHeroCatalogV1,installOfficialHeroPresetV1}=await import(
+   '../../../vendor/exploration-lab/src/actors/official-hero-presets-v1.js');
+  const catalog=await loadOfficialHeroCatalogV1({baseUrl:OFFICIAL_EXPLORATION_HERO_ROOT});
+  grid.replaceChildren();
+  // Installing a model fetches 48 native sprites only on an explicit tap.
+  // An identical saved hero is reused by comparing its original south frame
+  // rather than persisting a duplicate catalog or a second ID authority.
+  async function findInstalled(hero,store){
+   const candidates=(await store.list()).filter(record=>
+    record.name===hero.name&&record.mapVisual.animation.mode==='directions'&&
+    record.assets.length===49);
+   if(!candidates.length)return null;
+   const url=new URL(hero.directions.S[0],OFFICIAL_EXPLORATION_HERO_ROOT);
+   if(url.origin!==window.location.origin)throw Error('Image officielle hors origine');
+   const response=await fetch(url.href);
+   if(!response.ok)throw Error('Sprite officiel manquant : '+hero.name);
+   const reference=new Uint8Array(await response.arrayBuffer());
+   for(const record of candidates){
+    const base=record.assets.find(asset=>asset.id===record.mapVisual.assetId)?.blob;
+    if(!base||base.size!==reference.length)continue;
+    const saved=new Uint8Array(await base.arrayBuffer());
+    if(saved.every((byte,i)=>byte===reference[i]))return record;
+   }
+   return null;
+  }
+  function highlight(){
+   grid.querySelectorAll('[data-official-hero]').forEach(card=>
+    card.setAttribute('aria-pressed',String(card.dataset.officialHero===selectedOfficialHero)));
+  }
+  for(const hero of catalog.heroes){
+   const card=document.createElement('button');
+   card.type='button';card.className='adventure-official-hero-card';
+   card.dataset.officialHero=hero.id;card.setAttribute('aria-pressed','false');
+   card.setAttribute('aria-label','Choisir le héros '+hero.name);
+   const image=document.createElement('img');
+   image.loading='lazy';image.alt=hero.name;
+   image.src=new URL(hero.thumbnail,OFFICIAL_EXPLORATION_HERO_ROOT).href;
+   const label=document.createElement('span');label.textContent=hero.name;
+   card.append(image,label);
+   card.addEventListener('click',async()=>{
+    if(officialHeroBusy)return;
+    officialHeroBusy=true;
+    grid.querySelectorAll('button').forEach(button=>button.disabled=true);
+    text(notice,'Préparation des sprites de '+hero.name+'…');
+    try{
+     const store=await officialHeroStore();
+     const record=await findInstalled(hero,store)??await installOfficialHeroPresetV1({
+      hero,store,baseUrl:OFFICIAL_EXPLORATION_HERO_ROOT
+     });
+     await fillHeroChoices(record.id);
+     selectedOfficialHero=hero.id;highlight();
+     text(notice,hero.name+' sélectionné · 8 directions × 6 images. Prêt pour la nouvelle partie.');
+    }catch(error){
+     text(notice,'Héros non chargé : '+error.message+'. Aucune sauvegarde modifiée.');
+     console.error('Exploration official HeroDefinition selection',error);
+    }finally{
+     officialHeroBusy=false;
+     grid.querySelectorAll('button').forEach(button=>button.disabled=false);
+    }
+   });
+   grid.append(card);
+  }
+  $('adventure-hero-choice').addEventListener('change',()=>{
+   selectedOfficialHero=null;highlight();
+  });
+  text(notice,catalog.heroes.length+' héros officiels disponibles. Touche un portrait pour le choisir.');
+ }catch(error){
+  text(notice,'Catalogue des héros officiels indisponible : '+error.message);
+  console.error('Exploration official hero catalog',error);
+ }
+}
+
 function option(value,caption,disabled=false){
  const o=document.createElement('option');
  o.value=value;o.textContent=caption;o.disabled=disabled;return o;
@@ -1704,6 +1784,7 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   setSessionControlFields(active);
   renderItemRules();showSave();updatePreview();
   await fillHeroChoices(active?.hero?.definitionId??null);
+  await loadOfficialHeroGallery();
   await installOfficialWorldLibrary();
   stateMessage(published.length+' créatures officielles publiées, aucune créature de brouillon chargée.');
  }catch(error){

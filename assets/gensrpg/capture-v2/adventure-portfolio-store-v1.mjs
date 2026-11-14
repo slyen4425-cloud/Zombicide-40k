@@ -87,6 +87,9 @@ export function createAdventurePortfolioStoreV1({storage,coreStorage,legacyStore
    updatedAt:state.updatedAt,status:state.status,
    speciesId:state.party.active.speciesId,level:state.party.active.level,
    partySize:1+(state.party.reserve?.length??0),
+   // Read-only labels from Core. No change to the portfolio index or slot IDs.
+   worldId:state.world?.mapRef??null,
+   heroName:state.hero?.displayName??null,
    selected:state.sessionId===selectedId(index)
   })));
  }

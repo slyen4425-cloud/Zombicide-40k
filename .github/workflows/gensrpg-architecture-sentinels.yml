@@ -31,7 +31,7 @@ jobs:
           fetch-depth: 0
 
       - name: Tester les exclusions CI et le retour automatique au gate complet
-        run: python3 -m unittest discover -s tests -p gensrpg_ci_scope_capture_pin_20261114.test.py -v
+        run: python3 tests/gensrpg_ci_scope_capture_pin_20261114.test.py
 
       - name: Décider le périmètre à partir du diff Git vérifié, jamais d'un label
         id: classify

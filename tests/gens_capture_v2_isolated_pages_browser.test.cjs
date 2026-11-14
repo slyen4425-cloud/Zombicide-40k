@@ -88,6 +88,17 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   await adventure.locator('#adventure-start-new').tap();
   const starter=await chooseStarterThroughBestiary(adventure,{id:'crea_lumilo',name:'Lumilo'});
   await adventure.locator('#adventure-create').tap();
+  const creation=await adventure.locator('body').evaluate(()=>{
+   const el=id=>document.getElementById(id);
+   return {view:document.body.dataset.adventureStartView,
+    status:el('adventure-status')?.textContent,
+    summary:el('adventure-save-summary')?.textContent,
+    sessionPanelHidden:el('adventure-session-panel')?.hidden,
+    playDisabled:el('adventure-play')?.disabled,
+    portfolioIndex:localStorage.getItem('gensrpg.capture.v2.adventure.portfolio.v1')};
+  });
+  assert.equal(creation.sessionPanelHidden,false,
+   'Created session must be visible before entering Exploration: '+JSON.stringify(creation));
   // Use the real world authoring APIs for a plain, walkable area with a
   // guaranteed Shadow encounter. The battle journal is written by Combat.
   await starter.evaluate(async(_,vendor)=>{
@@ -227,6 +238,17 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
   await adventure.locator('#adventure-start-new').tap();
   const starter=await chooseStarterThroughBestiary(adventure,{id:'crea_lumilo',name:'Lumilo'});
   await adventure.locator('#adventure-create').tap();
+  const creation=await adventure.locator('body').evaluate(()=>{
+   const el=id=>document.getElementById(id);
+   return {view:document.body.dataset.adventureStartView,
+    status:el('adventure-status')?.textContent,
+    summary:el('adventure-save-summary')?.textContent,
+    sessionPanelHidden:el('adventure-session-panel')?.hidden,
+    playDisabled:el('adventure-play')?.disabled,
+    portfolioIndex:localStorage.getItem('gensrpg.capture.v2.adventure.portfolio.v1')};
+  });
+  assert.equal(creation.sessionPanelHidden,false,
+   'Created session must be visible before entering Exploration: '+JSON.stringify(creation));
   await starter.evaluate(async()=>{
    const [{createAdventureStoreV1},{createAdventurePortfolioStoreV1}]=await Promise.all([
     import('./adventure-contract-v1.mjs'),import('./adventure-portfolio-store-v1.mjs')

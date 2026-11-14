@@ -956,7 +956,7 @@ function syncCaptureRoomEntry(){
 function applyCaptureGuestSetup(){
  const guest=activeCaptureRoom?.role==='guest';
  const setup=guest?captureSharedRoomSetup:null;
- const config=$('adventure-advanced-sections');
+ const config=document.querySelector('.adventure-advanced-sections');
  for(const item of config.children){
   if(item.id!=='adventure-multiplayer-panel')item.hidden=Boolean(guest);
  }

@@ -49,7 +49,8 @@ test('guest receives room-authenticated host rules despite JSONB field ordering'
  assert.equal(captureGuestSessionMatchesHostSetupV1({
   room:room(),setup:{...setup,rules:reversed},session:guest}),true);
  assert.equal(captureGuestSessionMatchesHostSetupV1({
-  room:room(),setup,session:{...guest,party:{...guest.party,reserve:[]}}}),false);
+  room:room(),setup,session:{...guest,party:{...guest.party,reserve:[]}}}),true,
+  'later team changes do not erase the saved character’s eligibility');
  assert.equal(captureGuestSessionMatchesHostSetupV1({
   room:room(),setup,session:{...guest,rules:SHOWCASE_ADVENTURE_RULES_V1,
    world:{mapRef:'other',position:null}}}),false);

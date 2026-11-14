@@ -1597,7 +1597,10 @@ $('adventure-save-load').addEventListener('click',guardedAsync(async()=>{
  renderItemRules();showSave();updatePreview();
  refreshWorldChoices(loaded);
  await fillHeroChoices(loaded.hero?.definitionId??null);
- stateMessage('Partie '+chosen.slice(0,8)+' chargée. Les autres sauvegardes restent intactes.');
+ $('adventure-hero-name').value=loaded.hero?.displayName??'';
+ stateMessage('Partie '+chosen.slice(0,8)+' chargée'+
+  (loaded.hero?.displayName?' · héros '+loaded.hero.displayName:'')+
+  '. Les réglages du formulaire restent une préparation de nouvelle partie ; cette sauvegarde est intacte.');
 }));
 $('adventure-save-delete').addEventListener('click',guardedAsync(async()=>{
   const chosen=$('adventure-save-select').value;

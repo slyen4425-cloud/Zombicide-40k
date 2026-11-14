@@ -585,8 +585,8 @@ function assertSession(session){
 }
 export function normalizeAdventureHeroDisplayNameV1(value){
  if(typeof value!=='string')throw new TypeError('Le nom du héros doit être du texte.');
- const name=value.trim().replace(/\\s+/g,' ');
- if(!name||name.length>48||/[\\u0000-\\u001f\\u007f]/.test(name))
+ const name=value.trim().replace(/\s+/g,' ');
+ if(!name||name.length>48||/[\u0000-\u001f\u007f]/.test(name))
   throw new RangeError('Le nom du héros doit contenir 1 à 48 caractères lisibles.');
  return name;
 }

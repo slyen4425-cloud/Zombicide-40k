@@ -84,6 +84,8 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   };
   await start();
   const adventure=page.frameLocator('#gensCaptureV2Root iframe');
+  // Choose the actual new-game tab before the native Bestiary becomes visible.
+  await adventure.locator('#adventure-start-new').tap();
   const starter=await chooseStarterThroughBestiary(adventure,{id:'crea_lumilo',name:'Lumilo'});
   await adventure.locator('#adventure-create').tap();
   // Use the real world authoring APIs for a plain, walkable area with a
@@ -221,6 +223,8 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
   };
   await start();
   const adventure=page.frameLocator('#gensCaptureV2Root iframe');
+  // Choose the actual new-game tab before the native Bestiary becomes visible.
+  await adventure.locator('#adventure-start-new').tap();
   const starter=await chooseStarterThroughBestiary(adventure,{id:'crea_lumilo',name:'Lumilo'});
   await adventure.locator('#adventure-create').tap();
   await starter.evaluate(async()=>{
@@ -600,6 +604,9 @@ test('real HTTPS Jouer on mobile landscape saves creator cap 250, 33 stat points
    const response=await page.goto(base+scope+'assets/gensrpg/capture-v2/adventure.html',
     {waitUntil:'domcontentloaded',timeout:60000});
    assert.equal(response.status(),200);
+   assert.equal(await page.locator('#adventure-start-new').isVisible(),true);
+   assert.equal(await page.locator('#adventure-start-load').isVisible(),true);
+   await page.locator('#adventure-start-new').tap();
    await page.locator('#adventure-create:not([disabled])').waitFor({timeout:45000});
    await page.locator('#adventure-advanced-panel > summary').tap();
    await page.locator('#adventure-rules-panel > summary').tap();
@@ -629,7 +636,14 @@ test('real HTTPS Jouer on mobile landscape saves creator cap 250, 33 stat points
    assert.equal(saved.sessionControl.joinEnabled,true);
    assert.equal(saved.party.active.level,1,'a new real party starts at level one, not the configured maximum');
    await page.reload({waitUntil:'domcontentloaded'});
-   await page.locator('#adventure-resume').tap();
+   await page.locator('#adventure-start-load').tap();
+   const savedCard=page.locator('#adventure-save-gallery .adventure-save-card').first();
+   await savedCard.waitFor({state:'visible',timeout:45000});
+   assert.match(await savedCard.innerText(),/Monde local_Héros/,
+    'world and hero appear instead of UUID in the real saved-game card');
+   await savedCard.tap();
+   await page.locator('#adventure-save-load').tap();
+   await page.locator('#adventure-start-new').tap();
    assert.equal(await page.locator('#adventure-level-max').inputValue(),'250');
    assert.equal(await page.locator('#adventure-stat-points-per-level').inputValue(),'33');
    assert.equal(await page.locator('#adventure-combat-hp-percent').inputValue(),'40',

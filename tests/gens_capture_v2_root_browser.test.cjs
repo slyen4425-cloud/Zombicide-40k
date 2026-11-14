@@ -136,7 +136,6 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
    return /^hero\.user\.[a-f0-9-]{36}$/.test(doc?.querySelector('#adventure-hero-choice')?.value??'');
   },null,{timeout:45000});
   assert.equal(await nativeHeroes.first().getAttribute('aria-pressed'),'true');
-  await adventureFrame.locator('#adventure-player-alias').fill('Mira');
   assert.equal(await adventureFrame.locator('#adventure-player-alias').isVisible(),true,
    'Hero nickname is in the immediately visible new-game section');
   const initialStarter=await adventureFrame.locator('#adventure-starter').inputValue();
@@ -284,6 +283,9 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await adventureFrame.locator('#adventure-hero-xp-per-level').fill('400');
   await adventureFrame.locator('#adventure-hero-talent-points').fill('2');
   await adventureFrame.locator('#adventure-xp-base').fill('777');
+  // The rules-only draft screen was torn down above; type the player's name
+  // in the current NEW-game screen immediately before the authoritative save.
+  await adventureFrame.locator('#adventure-player-alias').fill('Mira');
   await adventureFrame.locator('#adventure-starter-count').selectOption('3');
   assert.equal(await adventureFrame.locator('#adventure-starter-reserve select').count(),2,
    'selecting three creatures must provide two genuine reserve choices');

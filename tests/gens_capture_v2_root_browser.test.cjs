@@ -283,8 +283,15 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await adventureFrame.locator('#adventure-hero-xp-per-level').fill('400');
   await adventureFrame.locator('#adventure-hero-talent-points').fill('2');
   await adventureFrame.locator('#adventure-xp-base').fill('777');
-  // The rules-only draft screen was torn down above; type the player's name
-  // in the current NEW-game screen immediately before the authoritative save.
+  // The rules-only draft screen was torn down above. Re-select one of the
+  // published HeroDefinitions and name it in the current new-game form.
+  // The native chooser deliberately does not invent a HeroDefinition while
+  // reopening the rules-only draft.
+  await adventureFrame.locator('#adventure-official-hero-grid .adventure-official-hero-card').first().tap();
+  await page.waitForFunction(()=>{
+   const doc=document.querySelector('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')?.contentDocument;
+   return /^hero\.user\.[a-f0-9-]{36}$/.test(doc?.querySelector('#adventure-hero-choice')?.value??'');
+  },null,{timeout:45000});
   await adventureFrame.locator('#adventure-player-alias').fill('Mira');
   await adventureFrame.locator('#adventure-starter-count').selectOption('3');
   assert.equal(await adventureFrame.locator('#adventure-starter-reserve select').count(),2,

@@ -25,9 +25,9 @@ test('invited newcomer gets a real preparation action instead of dead-end lobby'
 });
 test('guest can enter only when host world is bound and local map agrees',()=>{
  const bound={...room,worldId:'world-one',worldFingerprint:'official-fingerprint'};
- const wrong=captureRoomEntryPresentationV1({connection:guest,room:bound,session:session('g1','world-two')});
- assert.equal(wrong.enabled,false);assert.match(wrong.hint,/WorldDocument/i);
- const same=captureRoomEntryPresentationV1({connection:guest,room:bound,session:session('g1','world-one')});
+ const wrong=captureRoomEntryPresentationV1({connection:guest,room:bound,session:session('g1','world-two'),localWorldFingerprint:null});
+ assert.equal(wrong.action,'import');assert.equal(wrong.enabled,true);
+ const same=captureRoomEntryPresentationV1({connection:guest,room:bound,session:session('g1','world-one'),localWorldFingerprint:'official-fingerprint'});
  assert.equal(same.action,'enter');assert.equal(same.enabled,true);
  assert.match(same.hint,/empreinte exacte/i);
 });

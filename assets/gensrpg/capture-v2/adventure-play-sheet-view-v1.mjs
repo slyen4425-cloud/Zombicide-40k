@@ -260,6 +260,8 @@ export function renderAdventureSheetViewV1({
    const tile=node('button','sheet-collection-card');
    tile.type='button';tile.disabled=!entry.owned;
    tile.dataset.collectionOwned=String(entry.owned);
+   // Rarity belongs to the official Combat Bestiary card, even when locked.
+   tile.dataset.rarity=entry.rarity??'rare';
    tile.setAttribute('aria-label',entry.owned
     ?entry.name+' · '+entry.members.map(m=>'niveau '+m.level).join(', ')
     :'Créature non possédée : fiche verrouillée');
@@ -271,6 +273,7 @@ export function renderAdventureSheetViewV1({
    }else art.append(node('span','','◈'));
    tile.append(art,
     node('strong','',entry.owned?entry.name:'???'),
+    node('small','sheet-rarity-label',entry.rarity==='legendary'?'Légendaire':entry.rarity==='mythic'?'Mythique':'Rare'),
     node('small','',entry.owned?entry.members.map(m=>'Niv. '+m.level).join(' · '):'Non possédée'));
    tile.addEventListener('click',()=>{
     if(!entry.owned)return;

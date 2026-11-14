@@ -136,6 +136,8 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
    return /^hero\.user\.[a-f0-9-]{36}$/.test(doc?.querySelector('#adventure-hero-choice')?.value??'');
   },null,{timeout:45000});
   assert.equal(await nativeHeroes.first().getAttribute('aria-pressed'),'true');
+  assert.equal(await adventureFrame.locator('#adventure-player-alias').isVisible(),true,
+   'Hero nickname is in the immediately visible new-game section');
   const initialStarter=await adventureFrame.locator('#adventure-starter').inputValue();
   await adventureFrame.locator('#adventure-starter-cards .adventure-starter-card').first().tap();
   await adventureFrame.locator('#adventure-starter-picker').waitFor({state:'visible'});
@@ -281,6 +283,16 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await adventureFrame.locator('#adventure-hero-xp-per-level').fill('400');
   await adventureFrame.locator('#adventure-hero-talent-points').fill('2');
   await adventureFrame.locator('#adventure-xp-base').fill('777');
+  // The rules-only draft screen was torn down above. Re-select one of the
+  // published HeroDefinitions and name it in the current new-game form.
+  // The native chooser deliberately does not invent a HeroDefinition while
+  // reopening the rules-only draft.
+  await adventureFrame.locator('#adventure-official-hero-grid .adventure-official-hero-card').first().tap();
+  await page.waitForFunction(()=>{
+   const doc=document.querySelector('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')?.contentDocument;
+   return /^hero\.user\.[a-f0-9-]{36}$/.test(doc?.querySelector('#adventure-hero-choice')?.value??'');
+  },null,{timeout:45000});
+  await adventureFrame.locator('#adventure-player-alias').fill('Mira');
   await adventureFrame.locator('#adventure-starter-count').selectOption('3');
   assert.equal(await adventureFrame.locator('#adventure-starter-reserve select').count(),2,
    'selecting three creatures must provide two genuine reserve choices');
@@ -295,6 +307,9 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
    return saved?JSON.parse(saved):null;
   });
   assert.equal(stored?.schema,'gensrpg-capture-adventure-save-v1');
+  assert.equal(stored.hero?.displayName,'Mira',
+   'The new-game nickname belongs to AdventureSession, not the template hero');
+  assert.match(saved,/Héros Mira/);
   assert.equal(stored?.rules?.xp?.baseVictoryXp,777);
   assert.equal(stored?.rules?.heroProgression?.enabled,true,
     'real Aventure editor must persist author hero opt-in');
@@ -367,6 +382,12 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   // Native game handoff — no made-up map, no reused Tester. First prove the
   // actual GenSRPG origin has no WorldDocument and will not create a fake one.
   await resumed.locator('#adventure-play').tap();
+  // Hero media checks and the Exploration world preflight are async.
+  // Wait for the real validation message, not the previous Bestiary status.
+  await page.waitForFunction(()=>{
+   const doc=document.querySelector('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')?.contentDocument;
+   return /World Builder|monde jouable/i.test(doc?.querySelector('#adventure-status')?.textContent??'');
+  },null,{timeout:15000});
   assert.match(await resumed.locator('#adventure-status').textContent(),/World Builder|monde jouable/i);
   assert.equal(await resumed.locator('#adventure-play').isVisible(),true);
   const authored=await resumed.locator('#adventure-play').evaluate(async()=>{
@@ -428,6 +449,8 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
       src:w.location.pathname,probe:w.__sculptPlayProbe?.()};
   });
   assert.equal(launched.session,stored.sessionId);
+  assert.equal(launched.probe?.heroDisplayName,'Mira',
+   'The exact saved hero nickname must reach the official Exploration renderer');
   assert.match(launched.src,/vendor\/exploration-lab\/sculpt-lab\.html$/);
   assert.equal(launched.probe.editorHidden,true);
   const playArea=await resumed.locator('#adventure-play-frame').evaluate(frame=>{

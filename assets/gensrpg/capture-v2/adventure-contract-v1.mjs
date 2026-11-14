@@ -97,6 +97,13 @@ export function officialAdventureHeroDefinitionIdV1(value){
   throw new RangeError('Aventure requires an authored Exploration HeroDefinition ID');
  return value;
 }
+// A player-owned name, separate from the official HeroDefinition template ID.
+export function officialAdventureHeroDisplayNameV1(value){
+ if(typeof value!=='string'||value.trim().length<1||value.trim().length>48||
+    /[\u0000-\u001f\u007f]/.test(value))
+  throw new RangeError('Nom du héros : 1 à 48 caractères lisibles.');
+ return value.trim().normalize('NFC');
+}
 function iso(value,field){
  if(typeof value!=='string'||!Number.isFinite(Date.parse(value)))
   throw new TypeError(field+' must be a valid ISO date');
@@ -554,8 +561,11 @@ function assertSession(session){
   normalizeAdventureSessionControlV1(v.sessionControl);
  if(Object.hasOwn(v,'hero')){
   const hasDefinition=Object.hasOwn(v.hero,'definitionId');
-  const hero=exact(v.hero,hasDefinition?['progression','definitionId']:['progression'],'hero');
+  const fields=['progression',...(hasDefinition?['definitionId']:[]),
+   ...(Object.hasOwn(v.hero,'displayName')?['displayName']:[])];
+  const hero=exact(v.hero,fields,'hero');
   if(hasDefinition)officialAdventureHeroDefinitionIdV1(hero.definitionId);
+  if(Object.hasOwn(hero,'displayName'))officialAdventureHeroDisplayNameV1(hero.displayName);
   if(hero.progression!==null){
    const progress=exact(hero.progression,['xp','level','talentPoints'],'hero.progression');
    integer(progress.xp,'hero.progression.xp');
@@ -580,7 +590,7 @@ function assertSession(session){
 }
 export function createAdventureSessionV1({
  bestiaryCards,starterId,starterIds=null,rules=DEFAULT_ADVENTURE_RULES_V1,ids,now,
- heroDefinitionId=null,cameraAngle=55,cameraZoomPercent=null
+ heroDefinitionId=null,heroDisplayName=null,cameraAngle=55,cameraZoomPercent=null
 }){
  const cards=publishedAdventureSpeciesV1(bestiaryCards);
  const selected=starterIds===null?[starterId]:starterIds;
@@ -618,6 +628,7 @@ export function createAdventureSessionV1({
   },
   hero:{
    ...(heroDefinitionId===null?{}:{definitionId:officialAdventureHeroDefinitionIdV1(heroDefinitionId)}),
+   ...(heroDisplayName===null?{}:{displayName:officialAdventureHeroDisplayNameV1(heroDisplayName)}),
    progression:settings.heroProgression.enabled
     ?{xp:0,level:1,talentPoints:0}:null
   },

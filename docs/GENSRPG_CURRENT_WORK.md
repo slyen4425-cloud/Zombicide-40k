@@ -1,3 +1,10 @@
+## 2026-11-14 — Nom du héros au lancement de partie Capture
+- START `df4446361ed28850937e9707a8c029545bd27b78` ; branche `work/gensrpg-capture-hero-nickname-20261114`.
+- L'unique champ pseudo du salon multijoueur a été déplacé dans la section « Mon héros », dès la création de la partie : pas de seconde saisie concurrente.
+- Le nom facultatif (1–48 caractères) est conservé dans `AdventureSession.hero.displayName`, sans modifier les 12 modèles officiels, et transmis dans le grant existant à Exploration sous le même scope session/monde. Sauvegardes V1 historiques sans nom toujours valides.
+- Le serveur Supabase détient toujours l'identité de salon et ses pseudos ; aucun changement de schéma réseau, aucun nouveau magasin de nom ou état de locomotion.
+- Gate : contract test, authentique jeu tactile via publisher GenSRPG, CI + sources Exploration/Combat certifiées et SHA HTTPS.
+
 ## 2026-11-13 — Monster Capture V2 : choix immédiat des 12 héros officiels
 - START source `eb410131239bdd9f59d17320c9c750709d2255e1` ; checkpoint `checkpoint/gensrpg-start-hero-selection-20261113` ; branche `work/gensrpg-capture-hero-gallery-20261113`.
 - Cause racine : la préparation native `adventure-app-v1.mjs` ne lisait que `UserHeroStore.list()` (héros personnels préinstallés), tandis que les 12 héros certifiés étaient dans le catalogue officiel Exploration. Ils étaient invisibles avant la création de partie et cachés sous les réglages avancés.

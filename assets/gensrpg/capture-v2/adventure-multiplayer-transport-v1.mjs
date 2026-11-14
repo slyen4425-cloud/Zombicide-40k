@@ -106,6 +106,37 @@ export function createCaptureRoomTransportV1({client}={}){
  }
  // This operation is host-only on the server. It does not serialize the
  // WorldDocument, only its canonical identity/fingerprint from Exploration.
+ // The existing bound room identity is authoritative. This Snapshot uses
+ // the official Exploration serializer and never carries AdventureSave.
+ async function publishWorldDocument({roomId,worldId,worldFingerprint,serializedDocument}={}){
+  const id=checkUuid(roomId);
+  if(typeof worldId!=='string'||!worldId||
+     typeof worldFingerprint!=='string'||!worldFingerprint||
+     typeof serializedDocument!=='string'||serializedDocument.length<16)
+   throw new TypeError('WorldDocument Exploration officiel requis');
+  result(await client.rpc('gensrpg_capture_publish_world_document',{
+   p_room:id,p_world_id:worldId,p_world_fingerprint:worldFingerprint,
+   p_document:serializedDocument
+  }),'Partager le monde Exploration officiel');
+  if(activeRoomId===id&&typeof channel?.send==='function'){
+   try{await channel.send({type:'broadcast',
+    event:'capture-room-refresh-v1',payload:{}});}
+   catch{ /* Server upload already committed; broadcast is best-effort. */ }
+  }
+  return true;
+ }
+ async function fetchWorldDocument({roomId}={}){
+  const id=checkUuid(roomId);
+  const row=result(await client.from('gensrpg_capture_room_world_documents')
+   .select('world_id,world_fingerprint,document_text')
+   .eq('room_id',id).maybeSingle(),'Recevoir le WorldDocument du salon');
+  if(!row)return null;
+  if(typeof row.world_id!=='string'||typeof row.world_fingerprint!=='string'||
+     typeof row.document_text!=='string')
+   throw new Error('WorldDocument du créateur incomplet');
+  return Object.freeze({worldId:row.world_id,
+   worldFingerprint:row.world_fingerprint,serializedDocument:row.document_text});
+ }
  async function bindWorld({roomId,navigation}={}){
   const id=checkUuid(roomId),room=await inspectRoom(id);
   if(!room||!room.open)throw new Error('Salon Monster Capture introuvable ou fermé');
@@ -269,5 +300,6 @@ export function createCaptureRoomTransportV1({client}={}){
   if(previous)await client.removeChannel(previous);
  }
  return Object.freeze({authenticatedUserId,create,join,inspectRoom,
-  bindWorld,ownPositionSequence,reportPosition,inspectPositions,observe,leave,dispose});
+  bindWorld,publishWorldDocument,fetchWorldDocument,
+  ownPositionSequence,reportPosition,inspectPositions,observe,leave,dispose});
 }

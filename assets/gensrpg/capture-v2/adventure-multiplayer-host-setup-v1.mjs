@@ -42,7 +42,9 @@ export function captureGuestSessionMatchesHostSetupV1({session,setup,room}={}){
     session.world?.mapRef!==room.worldId||session.status==='finished')return false;
  try{
   const members=[session.party?.active,...(session.party?.reserve??[])];
-  return members.length===setup.starterCount&&
+  // Starter count is enforced at creation; captures later legitimately
+  // change the team size without making this saved hero ineligible to return.
+  return members.length>=1&&members.length<=6&&members.every(Boolean)&&
    JSON.stringify(canonical(normalizeAdventureRulesV1(session.rules)))===
     JSON.stringify(canonical(setup.rules));
  }catch{return false;}

@@ -190,6 +190,7 @@ jobs:
       - name: Aventure V2 — seule UI propriétaire, vrais éditeurs et Bestiaire non dupliqués
         run: node --test tests/gens_capture_v2_adventure_ui_owner_v1.test.mjs
           node --test tests/gens_capture_start_mode_isolation_20261114.test.mjs
+          node --test tests/gens_capture_official_hero_installer_owner_20261114.test.mjs
 
       - name: Historical Survival Dungeon game profile factory parity
         run: node --test tests/gens_capture_v2_generic_profile_owner.test.cjs

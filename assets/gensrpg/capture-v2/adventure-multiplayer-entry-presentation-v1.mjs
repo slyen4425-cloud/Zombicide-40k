@@ -22,7 +22,7 @@ export function captureRoomEntryPresentationV1({
  if(!room.worldId||!room.worldFingerprint){
   if(!session)
    return Object.freeze({visible:true,enabled:true,action:'prepare',label:'Créer mon personnage',
-    hint:'Salon rejoint. Tu peux préparer ton héros ; le monde du créateur sera proposé ensuite.'});
+    hint:'Salon rejoint. Tu peux préparer ta propre aventure ; le monde du créateur sera proposé ensuite.'});
   return Object.freeze({visible:true,enabled:false,action:'none',label:'En attente du créateur',
    hint:'Le créateur doit entrer dans son monde avant les invités.'});
  }
@@ -40,5 +40,5 @@ export function captureRoomEntryPresentationV1({
   return Object.freeze({visible:true,enabled:true,action:'prepare',label:'Créer une nouvelle partie',
    hint:'La sauvegarde sélectionnée est terminée. Crée une aventure personnelle pour ce salon.'});
  return Object.freeze({visible:true,enabled:true,action:'enter',label:'Rejoindre le monde',
-  hint:'Le créateur est entré dans le monde. Le même WorldDocument officiel est disponible sur ton appareil.'});
+  hint:'Le créateur est entré dans le monde. L’empreinte exacte du WorldDocument officiel a été vérifiée sur ton appareil.'});
 }

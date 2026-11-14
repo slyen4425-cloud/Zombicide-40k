@@ -69,7 +69,8 @@ const idField={
  moveSpeed:'adventure-move-speed',
  heroEnabled:'adventure-hero-xp-enabled',heroShare:'adventure-hero-xp-share',
  heroXpLevel:'adventure-hero-xp-per-level',heroMax:'adventure-hero-max-level',
- heroTalent:'adventure-hero-talent-points'
+ heroTalent:'adventure-hero-talent-points',
+ starterAll:'adventure-starter-allow-all'
 };
 const fragmentFields={
  enabled:'adventure-fragments-enabled',
@@ -214,6 +215,7 @@ function setFields(value){
  $(idField.heroXpLevel).value=value.heroProgression.xpPerLevel;
  $(idField.heroMax).value=value.heroProgression.maxLevel;
  $(idField.heroTalent).value=value.heroProgression.talentPointsPerLevel;
+ $(idField.starterAll).checked=value.starterSelection?.allowAllRarities??false;
  const policy=value.fragmentRecruitment??DEFAULT_ADVENTURE_FRAGMENTS_V1;
  for(const [key,id] of Object.entries(fragmentFields)){
   if(key==='enabled')$(id).checked=value.fragmentRecruitment?.enabled??false;
@@ -239,6 +241,7 @@ function fromFields(){
   combat:{hpMultiplier:numberFrom(idField.hpPercent)/100,
     defeatPolicy:$('adventure-defeat-policy').value},
   navigation:{moveSpeed:numberFrom(idField.moveSpeed)},
+  starterSelection:{allowAllRarities:$(idField.starterAll).checked},
   heroProgression:{...rules.heroProgression,
    enabled:$(idField.heroEnabled).checked,
    xpGainPercent:numberFrom(idField.heroShare),
@@ -391,7 +394,9 @@ function option(value,caption,disabled=false){
  o.value=value;o.textContent=caption;o.disabled=disabled;return o;
 }
 function eligibleForNewGame(card){
- return Array.isArray(card.skills)&&card.skills.some(s=>s.state==='ready');
+ // Only the creator's canonical rule can expand the starter pool.
+ return Array.isArray(card.skills)&&card.skills.some(s=>s.state==='ready')&&
+  ($(idField.starterAll).checked||(card.rarity??'rare')==='rare');
 }
 const starterPicker=createAdventureStarterPickerV1({
  document,cards:()=>published,playable:eligibleForNewGame,
@@ -430,18 +435,21 @@ function getStarterSpeciesIds(){
   throw new RangeError('Choix de créatures de départ incomplet.');
  for(const id of chosen)
   if(!published.some(card=>card.id===id&&eligibleForNewGame(card)))
-   throw new RangeError('Sélectionne une créature publiée et jouable pour chaque emplacement.');
+   throw new RangeError('Choisis une créature Rare jouable, ou active les autres raretés dans les réglages avancés.');
  return chosen;
 }
 function fillPublicSpecies(){
  const starters=$('adventure-starter'),enemies=$('adventure-enemy'),drops=$('adventure-drop-species');
  const filter=$('adventure-drop-filter'),previousFilter=filter.value;
  filter.replaceChildren(option('','Toutes les créatures'));
+ const previousStarter=starters.value;
  starters.replaceChildren(option('','Choisir une créature publiée…'));
  enemies.replaceChildren();drops.replaceChildren();
  for(const card of published){
   const playable=eligibleForNewGame(card);
-  starters.append(option(card.id,card.name+(playable?'':' · capacité non prête'),!playable));
+  starters.append(option(card.id,card.name+(playable?'':
+   (card.rarity??'rare')!=='rare'&&!$(idField.starterAll).checked
+    ?' · Rang réservé aux parties avancées':' · capacité non prête'),!playable));
   enemies.append(option(card.id,card.name));
   drops.append(option(card.id,card.name));
   filter.append(option(card.id,card.name));
@@ -449,10 +457,12 @@ function fillPublicSpecies(){
  if(published.some(card=>card.id===previousFilter))filter.value=previousFilter;
  const allowed=published.filter(eligibleForNewGame).length;
  text($('adventure-bestiary-count'),published.length+' créature(s) dans le Bestiaire · '+
-  allowed+' avec au moins une capacité utilisable');
+  allowed+' autorisée(s) au départ · '+
+  ($(idField.starterAll).checked?'toutes raretés autorisées':'Rare uniquement'));
  starters.disabled=enemies.disabled=drops.disabled=published.length===0;
  $('adventure-create').disabled=allowed===0;
- if(allowed)starters.value=published.find(eligibleForNewGame).id;
+ if(allowed)starters.value=published.some(card=>card.id===previousStarter&&eligibleForNewGame(card))
+  ?previousStarter:published.find(eligibleForNewGame).id;
  renderStarterReserveSelectors();
  renderMonsterFragmentEditor();
 }
@@ -704,7 +714,7 @@ function setAdventureStartView(view){
   $('adventure-world-select').value='';
   $('adventure-hero-choice').value='';
   void fillHeroChoices(null);
-  if(published.length)updatePreview();
+  if(published.length){fillPublicSpecies();updatePreview();}
  }
  for(const kind of ['new','load'])
   $('adventure-start-'+kind).setAttribute('aria-pressed',String(view===kind));
@@ -1096,9 +1106,15 @@ async function loadSelectedHeroVisual(){
    });
   }catch(error){console.warn('Portrait officiel indisponible',error);}
   if(epoch!==heroImageEpoch||!$('adventure-play-sheet').open)return;
-  if(!portrait&&!(base?.blob instanceof Blob))return;
-  const objectUrl=portrait?null:URL.createObjectURL(base.blob);
-  const url=portrait??objectUrl;
+  if(!portrait&&!(base?.blob instanceof Blob)&&
+     !record.assets.some(asset=>asset.id===record.id+'.portrait'&&asset.blob instanceof Blob))return;
+  // A user-imported fiche portrait takes priority over preset art.
+  // All blobs still belong to the ONE Exploration HeroDefinition store.
+  const personalPortrait=record.assets.find(asset=>asset.id===record.id+'.portrait');
+  const selectedBlob=personalPortrait?.blob instanceof Blob?personalPortrait.blob:
+   (!portrait?base?.blob:null);
+  const objectUrl=selectedBlob instanceof Blob?URL.createObjectURL(selectedBlob):null;
+  const url=personalPortrait?objectUrl:(portrait??objectUrl);
   if(epoch!==heroImageEpoch||!$('adventure-play-sheet').open){
    if(objectUrl)URL.revokeObjectURL(objectUrl);
    return;
@@ -1361,6 +1377,9 @@ setFields(rules);
 setSessionControlFields(null);
 for(const field of Object.values(idField))$(field).addEventListener('input',updatePreview);
 for(const field of Object.values(fragmentFields))$(field).addEventListener('input',updatePreview);
+$(idField.starterAll).addEventListener('change',guarded(()=>{
+ fillPublicSpecies();updatePreview();
+}));
 $(idField.moveSpeed).addEventListener('input',()=>{
  $('adventure-move-speed-value').textContent=$(idField.moveSpeed).value;
 });
@@ -1883,11 +1902,11 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
    projectStatEffects:projectCaptureStatEffectsV1,
    projectMaxHp:projectCaptureEncounterMaxHpV1
   });
-  fillPublicSpecies();
   const active=store.load();
   if(active){rules=normalizeAdventureRulesV1(active.rules);setFields(rules);}
   else {const draft=draftStore.load();if(draft){rules=draft;setFields(rules);}}
   setSessionControlFields(active);
+  fillPublicSpecies();
   renderItemRules();showSave();updatePreview();
   await fillHeroChoices(active?.hero?.definitionId??null);
   await loadOfficialHeroGallery();

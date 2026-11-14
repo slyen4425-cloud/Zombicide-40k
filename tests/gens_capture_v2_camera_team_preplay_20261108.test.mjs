@@ -42,7 +42,10 @@ test('preparation settings are visible and passed to native Exploration, team op
  assert.match(html,/value="45" selected/);
  assert.match(app,/currentSheetTab='team';/);
  assert.match(app,/url\.searchParams\.set\('cameraZoom'/);
- assert.match(app,/cameraZoomPercent:Number\(\$\('adventure-creator-camera-zoom'\)\.value\)/);
+ // Offline creator retains the editable camera control; a guest inherits
+ // the host's immutable camera policy instead of creating a second world setup.
+ assert.match(app,/cameraZoomPercent:guest\?\(setup\.cameraPolicy\.zoomPercent\?\?175\):Number\(\$\('adventure-creator-camera-zoom'\)\.value\)/);
+ assert.match(app,/cameraAngle:guest\?setup\.cameraPolicy\.angleDeg:Number\(\$\('adventure-creator-camera-angle'\)\.value\)/);
  assert.match(app,/zoomPercent:Number\(\$\('adventure-creator-camera-zoom'\)\.value\)/);
  assert.match(app,/text\(\$\('adventure-play-team-count'\)/);
  assert.match(view,/for\(const \[index,member\] of snapshot\.team\.entries\(\)\)/);

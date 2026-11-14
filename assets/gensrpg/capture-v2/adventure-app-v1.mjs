@@ -1000,6 +1000,8 @@ async function connectCaptureRoom(response){
  if(response.role==='guest'){
   const alias=$('adventure-player-alias').value;
   setAdventureStartView(store?.load()?'load':'new');
+  // Re-select the exact WorldDocument of an already saved guest session.
+  refreshWorldChoices(store?.load()??null);
   $('adventure-player-alias').value=alias;
   showSave();
  }

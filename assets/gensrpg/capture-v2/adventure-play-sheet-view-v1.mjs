@@ -94,7 +94,8 @@ function statGrid(stats,{availablePoints=null,onAllocate=null}={}){
  return area;
 }
 export function renderAdventureSheetViewV1({
- host,snapshot,tab,portraitUrl=null,heroVisual=null,onAllocate=null,
+ host,snapshot,tab,portraitUrl=null,heroVisual=null,collection=null,
+ resolveSpeciesPortrait=null,onOpenOwnedCreature=null,onAllocate=null,
  onSelectCreature=null,onMoveCreature=null,onMakeActive=null,
  onSummonFragment=null,onUseFragmentXp=null,resolveFragmentIcon=null,resolveItemIcon=null
 }={}){
@@ -246,6 +247,67 @@ export function renderAdventureSheetViewV1({
    reserve.append(hint('Ces créatures ne sont pas remplaçantes en combat. Leur transfert vers l’équipe sera configuré séparément.'));
    content.push(reserve);
   }
+ }else if(tab==='collection'){
+  if(!collection||!Array.isArray(collection.entries))
+   throw new TypeError('La Collection exige le Bestiaire et la partie officiels');
+  const section=node('section','sheet-collection');
+  section.append(node('h3','',`Collection · ${collection.ownedCount} / ${collection.totalCount}`),
+   hint('Créatures possédées dans ton équipe ou ton stockage. Les fiches inconnues restent verrouillées.'));
+  const grid=node('div','sheet-collection-grid');
+  const detailHost=node('section','sheet-collection-detail');
+  detailHost.append(hint('Touche une créature possédée pour consulter sa fiche.'));
+  for(const entry of collection.entries){
+   const tile=node('button','sheet-collection-card');
+   tile.type='button';tile.disabled=!entry.owned;
+   tile.dataset.collectionOwned=String(entry.owned);
+   tile.setAttribute('aria-label',entry.owned
+    ?entry.name+' · '+entry.members.map(m=>'niveau '+m.level).join(', ')
+    :'Créature non possédée : fiche verrouillée');
+   const art=node('span','sheet-collection-art');
+   const url=resolveSpeciesPortrait?.(entry.card)??null;
+   if(url){
+    const image=node('img');image.src=url;image.alt='';
+    image.loading='lazy';image.decoding='async';art.append(image);
+   }else art.append(node('span','','◈'));
+   tile.append(art,
+    node('strong','',entry.owned?entry.name:'???'),
+    node('small','',entry.owned?entry.members.map(m=>'Niv. '+m.level).join(' · '):'Non possédée'));
+   tile.addEventListener('click',()=>{
+    if(!entry.owned)return;
+    const detail=profile({kind:'creature',name:entry.name,
+     subtitle:entry.rarity==='legendary'?'Légendaire':entry.rarity==='mythic'?'Mythique':'Rare',
+     imageUrl:url,artCaption:'Aucune illustration publiée',
+     elements:Array.isArray(entry.card.elements)?entry.card.elements:[],
+     vitals:[['Exemplaires possédés',entry.members.length],
+      ['Niveaux',entry.members.map(m=>m.level).join(', ')]]});
+    if(typeof entry.card.description==='string'&&entry.card.description.trim())
+     detail.append(node('p','sheet-hint',entry.card.description));
+    const skills=Array.isArray(entry.card.skills)
+     ?entry.card.skills.filter(skill=>skill.state==='ready'):[];
+    if(skills.length){
+     const box=node('section','sheet-collection-skills');
+     box.append(node('h4','','Capacités du Bestiaire officiel'));
+     for(const skill of skills)box.append(node('p','',skill.name??'Capacité'));
+     detail.append(box);
+    }
+    const instances=node('div','sheet-collection-members');
+    for(const member of entry.members){
+     const line=node('div','sheet-collection-member');
+     line.append(node('span','',`Niveau ${member.level} · ${member.place}`));
+     if(member.place==='équipe'&&onOpenOwnedCreature){
+      const open=node('button','','Voir ses statistiques');
+      open.type='button';open.addEventListener('click',()=>onOpenOwnedCreature(member.instanceId));
+      line.append(open);
+     }
+     instances.append(line);
+    }
+    detail.append(instances);
+    detailHost.replaceChildren(detail);
+   });
+   grid.append(tile);
+  }
+  section.append(grid,detailHost);
+  content.push(section);
  }else throw new RangeError('Rubrique de fiche inconnue');
  host.replaceChildren(...content);
 }

@@ -759,7 +759,9 @@ function showSave(){
   const a=state.party.active;
   const reward=state.lastAward;
   text($('adventure-save-summary'),
-   'Partie '+state.sessionId.slice(0,8)+' · '+(card?.name??a.speciesId)+
+   'Partie '+state.sessionId.slice(0,8)+
+   (state.hero?.displayName?' · héros : '+state.hero.displayName:'')+
+   ' · '+(card?.name??a.speciesId)+
    ' · niveau '+a.level+' · '+(1+(state.party.reserve?.length??0))+
    ' créature(s) · '+a.xp+' XP · '+state.inventory.currency+' '+
    (state.rules.economy?.currency.plural??'pièces')+
@@ -894,6 +896,8 @@ $('adventure-room-host').addEventListener('click',guardedAsync(async()=>{
  if(activeCaptureRoom)throw new Error('Quitte le salon actif avant d’en créer un autre.');
  const session=store?.load();
  if(!session)throw new Error('Crée une partie Monster Capture avant de l’héberger.');
+ if(session.hero?.displayName&&!$('adventure-player-alias').value.trim())
+  $('adventure-player-alias').value=session.hero.displayName;
  onlineRoomStatus('Création du salon Monster Capture…');
  const response=await captureRoomProvider().create({
   session,name:$('adventure-player-alias').value,
@@ -1283,6 +1287,7 @@ $('adventure-create').addEventListener('click',guarded(()=>{
   rules,ids:{sessionId:id(),instanceId:id(),
    reserveInstanceIds:starterIds.slice(1).map(()=>id()),creatorId:id()},now,
   heroDefinitionId:$('adventure-hero-choice').value||null,
+  heroDisplayName:$('adventure-hero-name').value.trim()||null,
   cameraAngle:Number($('adventure-creator-camera-angle').value),
   cameraZoomPercent:Number($('adventure-creator-camera-zoom').value)
  });
@@ -1292,6 +1297,8 @@ $('adventure-create').addEventListener('click',guarded(()=>{
  const worldId=$('adventure-world-select').value;
  const created=worldId?withSelectedAdventureWorldV1(configured,worldId):configured;
  portfolio.create(created);
+ if(created.hero?.displayName&&!$('adventure-player-alias').value.trim())
+  $('adventure-player-alias').value=created.hero.displayName;
  setSessionControlFields(created);
  stateMessage('Nouvelle partie enregistrée séparément. Les anciennes sauvegardes sont conservées.');
  showSave();updatePreview();

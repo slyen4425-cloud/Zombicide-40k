@@ -29,7 +29,7 @@ export async function preflightCaptureOnlineWorldV1(input={}){
   sessionId:input.sessionId});
 }
 export async function publishCaptureInitialPositionV1({
- context,transport,navigation
+ context,transport,navigation,world,serializeOfficialWorld
 }={}){
  if(context===null)return null;
  if(!context?.room||typeof transport?.reportPosition!=='function'||
@@ -43,7 +43,15 @@ export async function publishCaptureInitialPositionV1({
  if(room.role==='host'){
   if(typeof transport.bindWorld!=='function')
    throw new TypeError('Capture server world-binding RPC is unavailable');
+  if(typeof transport.publishWorldDocument!=='function'||
+     typeof serializeOfficialWorld!=='function'||world?.id!==worldId)
+   throw new Error('Le partage du WorldDocument officiel est indisponible');
+  // The host's canonical document is validated by Exploration before ANY
+  // network publication. The room's bound identity remains authoritative.
+  const serializedDocument=serializeOfficialWorld(world);
   await transport.bindWorld({roomId:room.roomId,navigation});
+  await transport.publishWorldDocument({roomId:room.roomId,
+   worldId,worldFingerprint,serializedDocument});
  }
  return transport.reportPosition({roomId:room.roomId,navigation});
 }

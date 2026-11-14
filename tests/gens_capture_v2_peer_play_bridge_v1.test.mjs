@@ -18,6 +18,7 @@ function fake(override={}){
  const transport={
   inspectRoom:async()=>({...server,...override}),
   bindWorld:async args=>{calls.push({bind:args});return true;},
+  publishWorldDocument:async args=>{calls.push({shared:args});return true;},
   reportPosition:async args=>{calls.push({position:args});return 1;}
  };
  return {transport,calls};
@@ -34,13 +35,20 @@ test('host binds its one real world, then publishes official checkpoint',async()
  const f=fake(),room={role:'host',roomId:id,userId:hostId};
  const context=await preflightCaptureOnlineWorldV1(input(room,f.transport));
  assert.equal(context.worldId,nav.worldId);
- const seq=await publishCaptureInitialPositionV1({context,transport:f.transport,navigation:nav});
+ const seq=await publishCaptureInitialPositionV1({
+  context,transport:f.transport,navigation:nav,
+  world:input(room,f.transport).world,
+  serializeOfficialWorld:world=>JSON.stringify(world)
+ });
  assert.equal(seq,1);
- assert.equal(f.calls.length,2);
+ assert.equal(f.calls.length,3);
  assert.equal(f.calls[0].bind.roomId,id);
- assert.equal(f.calls[1].position.navigation,nav);
- assert.equal(f.calls[1].position.roomId,id);
- assert.equal('save' in f.calls[1].position,false);
+ assert.equal(f.calls[1].shared.worldId,nav.worldId);
+ assert.equal(f.calls[1].shared.worldFingerprint,nav.worldFingerprint);
+ assert.equal(f.calls[1].shared.serializedDocument,JSON.stringify(input(room,f.transport).world));
+ assert.equal(f.calls[2].position.navigation,nav);
+ assert.equal(f.calls[2].position.roomId,id);
+ assert.equal('save' in f.calls[2].position,false);
 });
 test('guest cannot enter unbound, foreign, or overwritten world, even with a local save',async()=>{
  const room={role:'guest',roomId:id,userId:guestId};

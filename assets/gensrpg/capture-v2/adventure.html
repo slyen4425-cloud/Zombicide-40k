@@ -344,12 +344,12 @@
   </details>
   <section id="adventure-multiplayer-panel" class="adventure-options" aria-labelledby="adventure-multiplayer-heading">
    <h2 id="adventure-multiplayer-heading">Partie en ligne · Monster Capture</h2>
-   <p class="hint">Crée un salon ou rejoins un ami avec son code. Les joueurs gardent leurs propres sauvegardes. Les déplacements partagés et les combats entre joueurs nécessitent encore le raccord Exploration/Combat. Le nom est choisi dans « Mon héros », au début de la partie.</p>
+   <p class="hint">Crée un salon ou rejoins un ami avec son code. Le créateur partage sa carte officielle, chaque joueur garde sa sauvegarde et son héros, et les participants se retrouvent dans le même monde Exploration. Les combats entre joueurs restent un chantier distinct.</p>
    <div class="fields">
     <label for="adventure-room-capacity">Nombre maximal de joueurs
      <input id="adventure-room-capacity" type="number" min="2" max="32" step="1" value="2">
     </label>
-    <label for="adventure-room-code">Code reçu d'un ami
+    <label for="adventure-room-code"><span id="adventure-room-code-label">Code reçu d'un ami</span>
      <input id="adventure-room-code" type="text" minlength="10" maxlength="10" spellcheck="false" autocapitalize="characters" placeholder="10 caractères">
     </label>
    </div>
@@ -362,8 +362,12 @@
     <button id="adventure-room-enter" type="button" hidden disabled>Entrer dans le monde</button>
    </div>
    <p id="adventure-room-entry-hint" class="hint" aria-live="polite" hidden></p>
+   <div class="actions" id="adventure-room-share-actions" hidden>
+    <button id="adventure-room-copy" type="button">Copier le code du salon</button>
+    <button id="adventure-room-share" type="button">Partager l’invitation</button>
+   </div>
    <output id="adventure-room-status" role="status" aria-live="polite">Pas encore connecté à un salon.</output>
-   <output id="adventure-room-positions" aria-live="polite">Positions reçues : aucune. Les avatars distants ne sont pas encore affichés.</output>
+   <output id="adventure-room-positions" aria-live="polite">Positions reçues : aucune. L’affichage des avatars distants s’active dans le monde une fois connecté.</output>
    <div id="adventure-room-members" class="rules-list" aria-label="Joueurs dans le salon"></div>
   </section>
   <details id="adventure-creator-panel" class="adventure-options">

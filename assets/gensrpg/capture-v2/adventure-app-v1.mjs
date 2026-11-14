@@ -11,6 +11,8 @@ import {projectCaptureEncounterMaxHpV1}
  from '../../../vendor/combat-lab/src/ui/capture-encounter-combat-source-v1.js';
 import {createAdventureHpProjectorV1} from './adventure-hp-projection-v1.mjs';
 import {readWorldAssemblerDraft} from '../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js';
+import {serializeWorldBuilderDraft,importWorldBuilderDocument}
+ from '../../../vendor/exploration-lab/src/builder/world-builder-draft.js';
 import {
  createNewExplorationPlay,readExplorationPlay,playWorldFingerprint
 } from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
@@ -35,6 +37,8 @@ import {withSelectedAdventureWorldV1,resolveSelectedAdventureWorldV1,
 import {createCaptureRoomTransportV1} from './adventure-multiplayer-transport-v1.mjs';
 import {createCaptureSupabaseClientV1} from './adventure-multiplayer-provider-v1.mjs';
 import {captureRoomEntryPresentationV1} from './adventure-multiplayer-entry-presentation-v1.mjs';
+import {importCaptureSharedWorldV1,preserveCaptureGuestDraftV1}
+ from './adventure-multiplayer-world-transfer-v1.mjs';
 import {preflightCaptureOnlineWorldV1,publishCaptureInitialPositionV1
 } from './adventure-multiplayer-play-bridge-v1.mjs';
 import {attachCaptureExplorationPositionEventsV1
@@ -931,9 +935,16 @@ function captureRoomProvider(){
 }
 function syncCaptureRoomEntry(){
  const button=$('adventure-room-enter'),hint=$('adventure-room-entry-hint');
+ let localWorldFingerprint=null;
+ if(lastCaptureRoomState?.worldId&&worldLibrary){
+  try{localWorldFingerprint=playWorldFingerprint(
+   worldLibrary.load(lastCaptureRoomState.worldId));}
+  catch{ /* Absent or invalid local world: offer official room import. */ }
+ }
  const p=captureRoomEntryPresentationV1({
   connection:activeCaptureRoom,room:lastCaptureRoomState,
-  session:store?.load()??null,selectedWorldId:$('adventure-world-select').value
+  session:store?.load()??null,selectedWorldId:$('adventure-world-select').value,
+  localWorldFingerprint
  });
  button.hidden=!p.visible;button.disabled=!p.enabled;
  button.textContent=p.label;text(hint,p.hint);hint.hidden=!p.visible;
@@ -941,6 +952,7 @@ function syncCaptureRoomEntry(){
 }
 function renderCaptureRoomMembers(state){
  lastCaptureRoomState=state;syncCaptureRoomEntry();
+ $('adventure-room-share-actions').hidden=!state?.open||activeCaptureRoom?.role!=='host';
  const host=$('adventure-room-members');host.replaceChildren();
  if(!state){
   captureRemotePositions.clear();renderCaptureRemotePositions();
@@ -976,7 +988,7 @@ function renderCaptureRemotePositions(){
  // C3 intentionally DOES NOT claim an avatar has been drawn. Exploration
  // alone will later display the validated peers using its official renderer.
  text($('adventure-room-positions'),'Positions reçues : '+statement+
-  ' · avatars distants pas encore affichés.');
+  ' · affichage par le moteur Exploration dans le monde.');
  activeCapturePeerRelay?.publish([...captureRemotePositions.values()]);
 }
 async function connectCaptureRoom(response){
@@ -986,6 +998,9 @@ async function connectCaptureRoom(response){
  activeCaptureRoom=response;
  captureRemotePositions.clear();renderCaptureRemotePositions();
  $('adventure-room-code').value=response.code;
+ text($('adventure-room-code-label'),response.role==='host'
+  ?'Code de ton salon':'Code du salon rejoint');
+ $('adventure-room-share-actions').hidden=response.role!=='host';
  $('adventure-room-host').disabled=true;
  $('adventure-room-join').disabled=true;
  $('adventure-room-leave').disabled=false;
@@ -1006,6 +1021,39 @@ async function connectCaptureRoom(response){
   showSave();
  }
 }
+async function copyCaptureRoomInviteCode(){
+ const code=activeCaptureRoom?.code;
+ if(typeof code!=='string'||code.length!==10)
+  throw new Error('Crée d’abord un salon pour obtenir son code.');
+ if(typeof navigator.clipboard?.writeText==='function'){
+  try{
+   await navigator.clipboard.writeText(code);
+   onlineRoomStatus('Code du salon copié : '+code);
+   return true;
+  }catch{ /* Clipboard may be blocked inside the GenSRPG iframe. */ }
+ }
+ const field=$('adventure-room-code');
+ field.focus();field.select();
+ onlineRoomStatus('Code sélectionné : utilise Copier sur ton téléphone pour le partager.');
+ return false;
+}
+$('adventure-room-copy').addEventListener('click',guardedAsync(async()=>{
+ await copyCaptureRoomInviteCode();
+}));
+$('adventure-room-share').addEventListener('click',guardedAsync(async()=>{
+ if(activeCaptureRoom?.role!=='host')throw new Error('Seul le créateur partage ce salon.');
+ const code=activeCaptureRoom.code;
+ if(typeof navigator.share==='function'){
+  try{
+   await navigator.share({title:'Monster Capture · GenSRPG',
+    text:'Rejoins ma partie Monster Capture dans GenSRPG avec le code : '+code});
+   return;
+  }catch(error){
+   if(error?.name==='AbortError')return;
+  }
+ }
+ await copyCaptureRoomInviteCode();
+}));
 $('adventure-room-host').addEventListener('click',guardedAsync(async()=>{
  if(activeCaptureRoom)throw new Error('Quitte le salon actif avant d’en créer un autre.');
  const session=store?.load();
@@ -1034,6 +1082,8 @@ $('adventure-room-leave').addEventListener('click',guardedAsync(async()=>{
  activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
  await captureRoomProvider().leave({roomId:room.roomId});
  activeCaptureRoom=null;lastCaptureRoomState=null;syncCaptureRoomEntry();
+ $('adventure-room-share-actions').hidden=true;
+ text($('adventure-room-code-label'),"Code reçu d'un ami");
  captureRemotePositions.clear();renderCaptureRemotePositions();
  $('adventure-room-members').replaceChildren();
  $('adventure-room-leave').disabled=true;
@@ -1650,7 +1700,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  // not monkey-patching Storage or a duplicate navigation loop.
  await publishCaptureInitialPositionV1({
   context:onlineContext,transport:captureRoomTransport,
-  navigation:result.navigation
+  navigation:result.navigation,world,serializeOfficialWorld:serializeWorldBuilderDraft
  });
  if(launchEpoch!==journeyLaunchEpoch)return;
  // Native Exploration consumes the original selected HeroDefinition by ID only.
@@ -1758,12 +1808,46 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
    throw error;
  }
 }));
-$('adventure-room-enter').addEventListener('click',guarded(()=>{
+$('adventure-room-enter').addEventListener('click',guardedAsync(async()=>{
  const p=syncCaptureRoomEntry();
+ if(p.action==='import'){
+  const connection=activeCaptureRoom;
+  if(!connection)throw new Error('Rejoins d’abord un salon');
+  const server=await captureRoomProvider().inspectRoom(connection.roomId);
+  const packet=await captureRoomProvider().fetchWorldDocument({roomId:connection.roomId});
+  if(!packet)
+   throw new Error('Le monde du créateur est encore en cours d’envoi. Réessaie après son entrée en jeu.');
+  // Switching to the host WorldDocument must never erase an unfinished
+  // local author draft; archive it via the ONLY official Exploration library.
+  preserveCaptureGuestDraftV1({
+   activeDraft:readWorldAssemblerDraft(window.localStorage),
+   room:server,library:worldLibrary,fingerprintOfficial:playWorldFingerprint
+  });
+  const imported=importCaptureSharedWorldV1({
+   connection,room:server,packet,library:worldLibrary,
+   importOfficial:importWorldBuilderDocument,fingerprintOfficial:playWorldFingerprint
+  });
+  const nickname=$('adventure-player-alias').value;
+  const session=store?.load();
+  setAdventureStartView(session?.world?.mapRef===imported.worldId?'load':'new');
+  refreshWorldChoices(session?.world?.mapRef===imported.worldId?session:null);
+  $('adventure-world-select').value=imported.worldId;
+  $('adventure-player-alias').value=nickname;
+  showSave();syncCaptureRoomEntry();
+  stateMessage(imported.alreadyAvailable
+   ?'Même carte officielle vérifiée. Tu peux reprendre ta partie ou créer ton héros.'
+   :'Monde du créateur importé dans Exploration. Choisis ton héros et crée ta partie pour le rejoindre.');
+  return;
+ }
  if(p.action==='prepare'){
   const nickname=$('adventure-player-alias').value;
-  setAdventureStartView('new');$('adventure-player-alias').value=nickname;
-  stateMessage('Salon rejoint : choisis un héros, une créature et le monde officiel du créateur, puis crée ta partie personnelle.');
+  const roomWorldId=lastCaptureRoomState?.worldId;
+  setAdventureStartView('new');refreshWorldChoices(null);
+  if(roomWorldId&&worldLibrary?.list().some(w=>w.id===roomWorldId))
+   $('adventure-world-select').value=roomWorldId;
+  $('adventure-player-alias').value=nickname;
+  syncCaptureRoomEntry();
+  stateMessage('Salon rejoint : choisis ton héros et une créature. Le monde officiel sera conservé pour cette nouvelle partie.');
   return;
  }
  if(p.action!=='enter')throw new Error(p.hint);

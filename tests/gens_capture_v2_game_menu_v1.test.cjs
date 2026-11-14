@@ -98,11 +98,13 @@ test('Jouer is a game-facing screen: party first, advanced progression and loot 
  assert.match(html,/<details id="adventure-loot-panel" class="adventure-options">/);
  assert.doesNotMatch(html,/<details[^>]*open(?:=|\s|>)/i,
   'advanced authoring settings must be folded for a normal player');
- for(const id of ['adventure-create','adventure-resume','adventure-play',
+ for(const id of ['adventure-start-new','adventure-start-load','adventure-save-gallery',
+  'adventure-save-load','adventure-create','adventure-play',
   'adventure-world-builder','adventure-save-rules','adventure-xp-base',
   'adventure-drop-species']){
   assert.ok(html.includes('id="'+id+'"'),'do not remove native save/game or creator option '+id);
  }
+ assert.doesNotMatch(html,/id="adventure-resume"/, 'the standalone resume tab was redundant with the native save list');
  assert.doesNotMatch(html,/Le monde doit être créé ou importé depuis le World Builder|Ces paramètres appartiennent à Aventure|Le calcul de niveau utilise le Core/);
  assert.match(style,/adventure-options>summary/);
  assert.match(style,/adventure-columns>section:first-child/);

@@ -101,6 +101,8 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   // destinations preserve the original native URLs and fullscreen.
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
   const adventureFrame=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
+  await adventureFrame.locator('body[data-adventure-start-view="choice"]').waitFor({timeout:30000});
+  await adventureFrame.locator('#adventure-start-new').tap();
   // Native Adventure is a type=module iframe; its DOM can exist BEFORE
   // the module has loaded the published Bestiary and initialized rules.
   // Wait for the real official catalog before validating its preset values.
@@ -199,6 +201,8 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
+  await adventureFrame.locator('body[data-adventure-start-view="choice"]').waitFor({timeout:30000});
+  await adventureFrame.locator('#adventure-start-new').tap();
   await adventureFrame.locator('#adventure-create:not([disabled])').waitFor({timeout:25000});
   assert.equal(await adventureFrame.locator('#adventure-xp-base').inputValue(),'733',
    'pre-game creator settings must survive actual iframe teardown and re-entry');
@@ -309,7 +313,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(stored?.schema,'gensrpg-capture-adventure-save-v1');
   assert.equal(stored.hero?.displayName,'Mira',
    'The new-game nickname belongs to AdventureSession, not the template hero');
-  assert.match(saved,/Héros Mira/);
+  assert.match(saved,/_[Mm]ira/,'friendly World_Hero title instead of a session ID');
   assert.equal(stored?.rules?.xp?.baseVictoryXp,777);
   assert.equal(stored?.rules?.heroProgression?.enabled,true,
     'real Aventure editor must persist author hero opt-in');
@@ -348,7 +352,8 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   const unchanged=await adventureFrame.locator('#adventure-create').evaluate(id=>
    localStorage.getItem('gensrpg.capture.v2.adventure.slot.v1:'+id),firstSession);
   assert.equal(unchanged,firstOriginal,'second game must never mutate the first save bytes');
-  await adventureFrame.locator('#adventure-save-select').selectOption(firstSession);
+  await adventureFrame.locator('#adventure-start-load').tap();
+  await adventureFrame.locator('#adventure-save-gallery [data-save-id="'+firstSession+'"]').tap();
   await adventureFrame.locator('#adventure-save-load').tap();
   assert.equal(await adventureFrame.locator('#adventure-xp-base').inputValue(),'777');
   const restored=await adventureFrame.locator('#adventure-create').evaluate(()=>
@@ -362,6 +367,8 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
   const resumed=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
+  await resumed.locator('body[data-adventure-start-view="choice"]').waitFor({timeout:30000});
+  await resumed.locator('#adventure-start-load').tap();
   await resumed.locator('#adventure-save-summary').waitFor({timeout:15000});
   await page.waitForFunction(()=>{
    const doc=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument;
@@ -600,12 +607,16 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(afterTitle?.sessionId,stored.sessionId,
     'native Exploration must persist the same scoped checkpoint before exit');
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
+  await resumed.locator('body[data-adventure-start-view="choice"]').waitFor({timeout:20000});
+  await resumed.locator('#adventure-start-load').tap();
+  await resumed.locator('#adventure-save-gallery [data-save-id="'+stored.sessionId+'"]').tap();
+  await resumed.locator('#adventure-save-load').tap();
   await resumed.locator('#adventure-save-summary').waitFor({timeout:15000});
-  await page.waitForFunction(id=>{
+  await page.waitForFunction(()=>{
     const doc=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument;
     return doc?.querySelector('#adventure-play:not([disabled])') &&
-      doc.querySelector('#adventure-save-summary')?.textContent?.includes(id.slice(0,8));
-  },stored.sessionId,{timeout:20000});
+      doc.querySelector('#adventure-save-summary')?.textContent?.includes('_Mira');
+  },null,{timeout:20000});
   assert.equal(await resumed.locator('#adventure-play').isVisible(),true,
     'returning to the title must allow the saved AdventureSession to resume');
   await resumed.locator('#adventure-play').tap();

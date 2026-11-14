@@ -23,19 +23,27 @@
    <p>Choisis ton équipe et lance ton aventure.</p></div>
   <output id="adventure-status" role="status" aria-live="polite">Chargement du bestiaire officiel…</output>
  </header>
+ <nav id="adventure-start-tabs" class="adventure-start-tabs" aria-label="Choix de l'aventure">
+  <button type="button" id="adventure-start-new" aria-pressed="false"><span aria-hidden="true">✦</span> Nouvelle partie</button>
+  <button type="button" id="adventure-start-load" aria-pressed="false"><span aria-hidden="true">📂</span> Charger partie</button>
+ </nav>
  <div class="adventure-columns">
   <section aria-labelledby="adventure-game-heading">
-   <h2 id="adventure-game-heading">Ma partie</h2>
-   <p class="hint">Chaque nouvelle partie est conservée séparément. Sélectionne une sauvegarde pour la reprendre, ou crée une autre aventure sans écraser les précédentes.</p>
-   <label for="adventure-save-select">Mes parties enregistrées</label>
-   <div class="adventure-save-picker">
-    <select id="adventure-save-select" aria-label="Choisir une sauvegarde Monster Capture">
+   <h2 id="adventure-game-heading">Préparer mon aventure</h2>
+   <section id="adventure-save-load-panel" aria-label="Charger une partie" hidden>
+    <h3>Mes sauvegardes</h3>
+    <p class="hint">Choisis directement un monde et un héros. Chaque partie reste indépendante.</p>
+    <div id="adventure-save-gallery" class="adventure-save-gallery" role="group" aria-label="Parties enregistrées"></div>
+    <!-- The canonical portfolio select remains the only selection authority, not a second save store. -->
+    <select id="adventure-save-select" aria-label="Sauvegarde sélectionnée" hidden>
      <option value="">Aucune partie enregistrée</option>
     </select>
-    <button type="button" id="adventure-save-load">Charger cette partie</button>
-    <button type="button" id="adventure-save-delete" disabled>Supprimer cette sauvegarde</button>
-   </div>
-   <p class="hint">Les sélecteurs ci-dessous servent uniquement à créer une <strong>nouvelle</strong> partie. Les créatures de tes sauvegardes sont listées dans « Équipe enregistrée » plus bas.</p>
+    <div class="actions">
+     <button type="button" id="adventure-save-load">Charger la partie sélectionnée</button>
+     <button type="button" id="adventure-save-delete" disabled>Supprimer cette sauvegarde</button>
+    </div>
+   </section>
+   <div id="adventure-new-config">
    <label for="adventure-world-select">Monde de l'aventure</label>
    <select id="adventure-world-select" aria-label="Choisir un monde Exploration enregistré" disabled>
     <option value="">Chargement des mondes officiels…</option>
@@ -83,10 +91,11 @@
    <p id="adventure-bestiary-count" class="hint"></p>
 
    <div class="actions">
-    <button type="button" id="adventure-create" disabled>Créer une nouvelle partie</button>
-    <button type="button" id="adventure-resume">Afficher la sauvegarde</button>
-    <button type="button" id="adventure-play" disabled>Entrer dans le monde</button>
+    <button type="button" id="adventure-create" disabled>Créer la partie</button>
    </div>
+   </div>
+   <section id="adventure-session-panel" aria-label="Partie active" hidden>
+    <div class="actions"><button type="button" id="adventure-play" disabled>Entrer dans le monde</button></div>
    <section class="save-state" aria-labelledby="adventure-save-heading">
     <h3 id="adventure-save-heading">Sauvegarde en cours</h3>
     <output id="adventure-save-summary">Aucune partie créée.</output>
@@ -100,7 +109,8 @@
      <button type="button" id="adventure-select-active" disabled>Activer la créature</button>
     </div>
    </section>
-   <div class="actions"><button type="button" id="adventure-world-builder">🌍 Créer ou modifier le monde</button></div>
+   </section>
+   <div id="adventure-world-tools" class="actions"><button type="button" id="adventure-world-builder">🌍 Créer ou modifier le monde</button></div>
   </section>
   <details id="adventure-advanced-panel" class="adventure-options adventure-advanced-shell">
    <summary>⚙️ Réglages avancés de l'aventure</summary>
@@ -395,6 +405,7 @@
  <div class="adventure-play-menu-actions">
   <button type="button" id="adventure-menu-continue">Continuer l'aventure</button>
   <button type="button" id="adventure-open-last-result" hidden>Dernier combat</button>
+  <button type="button" id="adventure-return-title" hidden>Retour à l'écran titre</button>
   <button type="button" id="adventure-fullscreen" aria-pressed="false" aria-label="Activer ou quitter le plein écran">Plein écran</button>
   <button type="button" id="adventure-menu-return-title">← Retour Monster Capture</button>
  </div>
@@ -403,7 +414,6 @@
  <header class="sheet-header">
   <div><span class="eyebrow">AVENTURE EN COURS</span><h2 id="adventure-play-sheet-title">Ma fiche</h2></div>
   <div class="sheet-header-actions">
-   <button type="button" id="adventure-return-title" aria-label="Enregistrer et revenir à l'écran titre">Écran titre</button>
    <button type="button" id="adventure-close-sheet" aria-label="Fermer la fiche et retourner au monde">Retour au monde</button>
   </div>
  </header>

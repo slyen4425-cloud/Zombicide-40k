@@ -15,7 +15,9 @@ test('Capture V2 has one GenSrpg-owned Adventure page without duplicating native
  assert.match(shell,/if\(info\.family==="capture"\)/);
  assert.match(shell,/same-origin with its active Capture session/);
  assert.match(html,/id="adventure-create"/);
- assert.match(html,/id="adventure-resume"/);
+ assert.match(html,/id="adventure-start-load"/);
+ assert.match(html,/id="adventure-save-gallery"/);
+ assert.doesNotMatch(html,/id="adventure-resume"/);
  assert.match(html,/id="adventure-save-rules"/);
  assert.match(html,/id="adventure-starter"/);
  assert.match(html,/id="adventure-drop-species"/);

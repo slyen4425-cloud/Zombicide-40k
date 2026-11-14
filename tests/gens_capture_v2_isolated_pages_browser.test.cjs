@@ -686,14 +686,24 @@ test('real HTTPS Jouer on mobile landscape saves creator cap 250, 33 stat points
     'world and hero appear instead of UUID in the real saved-game card');
    await savedCard.tap();
    await page.locator('#adventure-save-load').tap();
-   await page.locator('#adventure-start-new').tap();
+   // Loading a saved game restores its authoritative creator settings.
    assert.equal(await page.locator('#adventure-level-max').inputValue(),'250');
    assert.equal(await page.locator('#adventure-stat-points-per-level').inputValue(),'33');
    assert.equal(await page.locator('#adventure-combat-hp-percent').inputValue(),'40',
-    'resume displays saved creator HP policy without resetting to 25');
+    'loading a save preserves its HP policy');
    assert.equal(await page.locator('#adventure-hero-max-level').inputValue(),'350');
    assert.equal(await page.locator('#adventure-gm-enabled').isChecked(),true);
    assert.equal(await page.locator('#adventure-join-enabled').isChecked(),true);
+   // Nouvelle partie intentionally resets to a FRESH draft, not the loaded save.
+   await page.locator('#adventure-start-new').tap();
+   assert.equal(await page.locator('#adventure-level-max').inputValue(),'100',
+    'a new game must not inherit the last loaded saved level cap');
+   assert.equal(await page.locator('#adventure-stat-points-per-level').inputValue(),'20');
+   assert.equal(await page.locator('#adventure-combat-hp-percent').inputValue(),'25');
+   assert.equal(await page.locator('#adventure-session-panel').isVisible(),false,
+    'the previous session may not appear in Nouvelle partie');
+   assert.equal(await page.locator('#adventure-save-load-panel').isVisible(),false,
+    'save loading belongs exclusively to Charger partie');
    assert.deepEqual(bad,[],'the actual published Jouer and official assets must have zero JS and HTTP errors');
    console.log('GENSRPG_REAL_SHOWCASE_FREE_LEVEL_CAP',JSON.stringify({
     creatorCap:250,heroCap:350,statPointsPerLevel:33,hostGM:true,

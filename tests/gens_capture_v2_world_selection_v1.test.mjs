@@ -60,5 +60,8 @@ test('real Adventure uses official lazy library, never a GenSrpg world serialize
  assert.match(app,/resolveSelectedAdventureWorldV1/);
  assert.match(html,/id="adventure-world-select"/);
  assert.match(html,/id="adventure-world-status"/);
- assert.doesNotMatch(app,/serializeWorldBuilderDraft|importWorldBuilderDocument/);
+ // World transfer now consumes Exploration's native serializer/importer only.
+ // Keep the no-duplicate-owner guarantee, rather than forbidding official calls.
+ assert.match(app,/import \\{serializeWorldBuilderDraft,importWorldBuilderDocument\\}[\\s\\S]*?from ['"]\\.\\.\\/\\.\\.\\/\\.\\.\\/vendor\\/exploration-lab\\/src\\/builder\\/world-builder-draft\\.js['"]/);
+ assert.doesNotMatch(app,/\\b(?:function|const|let|class)\\s+(?:serializeWorldBuilderDraft|importWorldBuilderDocument)\\b/);
 });

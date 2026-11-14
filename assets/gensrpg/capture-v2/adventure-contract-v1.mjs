@@ -113,7 +113,7 @@ export function normalizeAdventureRulesV1(input){
  // Additive optional policy: historical v1 rules have no heroProgression.
  // Their precise old representation remains legal, and never enables hero XP.
  const {heroProgression:heroRaw,combat:combatRaw,navigation:navigationRaw,
-  fragmentRecruitment:fragmentRaw,economy:economyRaw,...legacy}=object(input,'AdventureRules');
+  fragmentRecruitment:fragmentRaw,economy:economyRaw,starterSelection:starterRaw,...legacy}=object(input,'AdventureRules');
  const navigation=navigationRaw===undefined?null:
   exact(navigationRaw,['moveSpeed'],'navigation');
  if(navigation){
@@ -129,6 +129,9 @@ export function normalizeAdventureRulesV1(input){
  number(combat.hpMultiplier,'combat.hpMultiplier',Number.EPSILON,1);
  if(!['restore','keep-ko','game-over'].includes(defeatPolicy))
   throw new RangeError('combat.defeatPolicy must be restore, keep-ko or game-over');
+ const starter=starterRaw===undefined?null:exact(starterRaw,['allowAllRarities'],'starterSelection');
+ if(starter&&typeof starter.allowAllRarities!=='boolean')
+  throw new TypeError('starterSelection.allowAllRarities must be boolean');
  const rule=exact(legacy,['schema','version','xp','progression','loot'],'AdventureRules');
  const hero=heroRaw===undefined?DEFAULT_ADVENTURE_RULES_V1.heroProgression:
   exact(heroRaw,['enabled','xpGainPercent','xpPerLevel','maxLevel',
@@ -216,6 +219,7 @@ export function normalizeAdventureRulesV1(input){
     ...(pointsRaw===undefined?{}:{statPointsPerLevel:pointsRaw}),
     ...(bands===undefined?{}:{xpBands:bands})},
   loot:{currencyPerVictory:loot.currencyPerVictory,items,drops},
+  ...(starter?{starterSelection:{allowAllRarities:starter.allowAllRarities}}:{}),
   combat:{hpMultiplier:combat.hpMultiplier,defeatPolicy},
   ...(navigation?{navigation:{moveSpeed:navigation.moveSpeed}}:{}),
   heroProgression:{enabled:hero.enabled,xpGainPercent:hero.xpGainPercent,
@@ -611,6 +615,8 @@ export function createAdventureSessionV1({
   if(!card)throw new RangeError('Créature absente du Bestiaire publié: '+speciesId);
   if(!Array.isArray(card.skills)||!card.skills.some(s=>s.state==='ready'))
    throw new RangeError('Créature sans compétence jouable publiée: '+speciesId);
+  if((card.rarity??'rare')!=='rare'&&!settings.starterSelection?.allowAllRarities)
+   throw new RangeError('Créature de départ Mythique/Légendaire : active les règles avancées.');
   return freeze({instanceId:instanceIds[index],speciesId:card.id,level:1,xp:0,hp:null,
    ...(settings.progression.statPointsPerLevel===undefined?{}:{statAllocations:{}})});
  });

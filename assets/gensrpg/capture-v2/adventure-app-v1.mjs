@@ -1062,7 +1062,7 @@ let currentHeroVisual=null;
 let heroImageEpoch=0;
 function discardHeroVisual(){
  ++heroImageEpoch;
- if(currentHeroVisual?.url)URL.revokeObjectURL(currentHeroVisual.url);
+ if(currentHeroVisual?.objectUrl)URL.revokeObjectURL(currentHeroVisual.objectUrl);
  currentHeroVisual=null;
 }
 // The image file is owned by the native Exploration HeroDefinition IndexedDB store.
@@ -1075,18 +1075,29 @@ async function loadSelectedHeroVisual(){
   const {createUserHeroStoreV1}=await import(
    '../../../vendor/exploration-lab/src/storage/user-hero-store-v1.js');
   const record=await createUserHeroStoreV1().get(id);
-  if(epoch!==heroImageEpoch||!$('adventure-play-sheet').open)return;
-  if(!record)return;
+  if(epoch!==heroImageEpoch||!$('adventure-play-sheet').open||!record)return;
   const base=record.assets.find(entry=>entry.id===record.mapVisual.assetId);
-  if(!(base?.blob instanceof Blob))return;
-  const url=URL.createObjectURL(base.blob);
+  // Published model art is NOT the 128x160 walking sprite. Resolve the
+  // actual official portrait only after matching its source image bytes.
+  // A modified/personal hero keeps its authentic user sprite fallback.
+  let portrait=null;
+  try{
+   portrait=await officialHeroPortraitUrlV1({
+    record,catalog:officialHeroCatalog,
+    rootUrl:OFFICIAL_EXPLORATION_HERO_ROOT,fetchAsset:fetch
+   });
+  }catch(error){console.warn('Portrait officiel indisponible',error);}
+  if(epoch!==heroImageEpoch||!$('adventure-play-sheet').open)return;
+  if(!portrait&&!(base?.blob instanceof Blob))return;
+  const objectUrl=portrait?null:URL.createObjectURL(base.blob);
+  const url=portrait??objectUrl;
   if(epoch!==heroImageEpoch||!$('adventure-play-sheet').open){
-   URL.revokeObjectURL(url);return;
+   if(objectUrl)URL.revokeObjectURL(objectUrl);
+   return;
   }
-  currentHeroVisual={name:record.name,url};
+  currentHeroVisual={name:session.hero?.displayName??record.name,url,objectUrl};
   if(currentSheetTab==='hero')renderPlayingSheet();
  }catch(error){
-  // Missing/unavailable local hero image is not grounds for inventing one.
   console.warn('Exploration HeroDefinition portrait unavailable',error);
  }
 }

@@ -43,6 +43,19 @@ const readSelectedAdventureSave=async element=>element.evaluate(async()=>{
  return selected;
 });
 
+// The new startup explicitly separates NEW from LOAD: after external world
+// authoring, resume the real Core save through the published card interface.
+async function loadSavedAdventureThroughGallery(adventure){
+ await adventure.locator('#adventure-start-load').tap();
+ const card=adventure.locator('#adventure-save-gallery .adventure-save-card').first();
+ await card.waitFor({state:'visible',timeout:45000});
+ assert.match(await card.innerText(),/_Héros/,
+  'a world_hero title must be used instead of technical slot IDs');
+ await card.tap();
+ await adventure.locator('#adventure-save-load').tap();
+ await adventure.locator('#adventure-play:not([disabled])').waitFor({state:'visible',timeout:45000});
+}
+
 // Use the published Bestiary gallery, never the intentionally hidden native select.
 // The single canonical select still owns AdventureSession creation and remains asserted.
 async function chooseStarterThroughBestiary(adventure,{id,name}){
@@ -133,6 +146,7 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   assert.equal(await editor.locator('#world-combat-arena').inputValue(),'snow');
   await editor.close();
   await page.bringToFront();
+  await loadSavedAdventureThroughGallery(adventure);
   await adventure.locator('#adventure-play').tap();
   const map=adventure.frameLocator('#adventure-play-frame');
   const canvas=map.locator('#sculpt-canvas');
@@ -283,6 +297,7 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
    world=setWorldCombatArena(world,{areaId:area.id,arenaId:'city'});
    saveWorldAssemblerDraft(localStorage,world);
   },scope+'vendor/exploration-lab/');
+  await loadSavedAdventureThroughGallery(adventure);
   await adventure.locator('#adventure-play').tap();
   const map=adventure.frameLocator('#adventure-play-frame');
   const canvas=map.locator('#sculpt-canvas');

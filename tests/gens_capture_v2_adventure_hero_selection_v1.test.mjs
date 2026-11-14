@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {DEFAULT_ADVENTURE_RULES_V1,createAdventureSessionV1} from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
+import {DEFAULT_ADVENTURE_RULES_V1,createAdventureSessionV1,officialAdventureHeroDisplayNameV1} from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 import {writeAdventureHeroSelectionGrantV1,ADVENTURE_HERO_SELECTION_SCHEMA_V1} from '../assets/gensrpg/capture-v2/adventure-hero-selection-grant-v1.mjs';
 const heroId='hero.user.00000000-0000-4000-8000-000000000001';
 const cards=[{id:'ally',name:'Publié',level:1,skills:[{state:'ready'}]}];
@@ -76,4 +76,25 @@ test('hero and world identity remain frozen in AdventureSession even when combat
  const before=newGame();
  const after={...before,party:{active:{...before.party.active,level:3,xp:2500}}};
  assert.equal(after.hero.definitionId,heroId);
+});
+
+test('new game stores player-owned name without renaming the official HeroDefinition',()=>{
+ const named=createAdventureSessionV1({
+  bestiaryCards:cards,starterId:'ally',heroDefinitionId:heroId,
+  heroDisplayName:' Mira ',rules:DEFAULT_ADVENTURE_RULES_V1,
+  ids:{sessionId:'session-named',instanceId:'owned-ally1'},now:'2026-11-14T01:00:00Z'
+ });
+ assert.equal(named.hero.displayName,'Mira');
+ assert.equal(named.hero.definitionId,heroId);
+ assert.equal(named.hero.progression,null);
+ const playing={...named,status:'playing',world:{mapRef:'world1',position:null}};
+ const target=storage();
+ const receipt=writeAdventureHeroSelectionGrantV1({
+  storage:target,session:playing,world,heroRecord
+ });
+ assert.equal(receipt.displayName,'Mira');
+ assert.equal(receipt.heroDefinitionId,heroId);
+ assert.equal(officialAdventureHeroDisplayNameV1(' Aurore '),'Aurore');
+ for(const invalid of ['', ' ', 'A'.repeat(49), 'A\nB'])
+  assert.throws(()=>officialAdventureHeroDisplayNameV1(invalid));
 });

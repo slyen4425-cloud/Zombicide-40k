@@ -6,7 +6,7 @@ test('single Pages publisher selects certified Capture source containing Explora
  const manifest=JSON.parse(readFileSync(new URL('../tools/capture_v2_pages_preview_pin.json',import.meta.url),'utf8'));
  assert.equal(manifest.schema,'gensrpg-capture-v2-pages-source-pin-v1');
  assert.equal(manifest.repository,'slyen4425-cloud/Zombicide-40k');
- assert.equal(manifest.sha,'bd3cf852762c67aac0c44f208b0cebf0c775e105');
+ assert.equal(manifest.sha,'114f02e640c0d7e91fa06d0e951e76c1bf0670cb');
  assert.equal(manifest.publicPath,'/preview/capture-v2-pr225/');
  assert.equal(manifest.officialVisuals.repository,'slyen4425-cloud/GenSrpg_labo_combat_dynamique');
  assert.equal(manifest.officialVisuals.ref,'global-assets');

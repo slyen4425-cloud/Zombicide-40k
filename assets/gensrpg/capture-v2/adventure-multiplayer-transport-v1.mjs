@@ -1,6 +1,6 @@
 // Monster Capture online: scoped Supabase transport, isolated from Survival.
 // Only public room metadata; no AdventureSave, localStorage, IndexedDB, or
-// z40k_* methods are ever sent, inspected or modified here.
+// cross-module Survival methods are ever sent, inspected or modified here.
 // Backend owns room membership/capacity; this client cannot authorize itself.
 import {
  ADVENTURE_SAVE_SCHEMA_V1,normalizeAdventureSessionControlSettingsV1

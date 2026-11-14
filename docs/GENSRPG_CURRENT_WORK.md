@@ -1,3 +1,11 @@
+## 2026-11-14 — Capture adopte la source Exploration 35 / 16 / 1 + route anti-traînées
+- START `b112584c0ed372a19f02a99819792bd6e594398f`, checkpoint `checkpoint/gensrpg-capture-exploration-defaults-road-start-20261114`, branche `work/gensrpg-capture-exploration-defaults-road-20261114`.
+- Seul `source-pins-v1.json` épingle Exploration main `3d773ecd9653700750d6de3f62d2255199490a17` (fusion #447 héros et #448 routes), CI source `43574733643` à valider SUCCESS avant publication.
+- Combat main, ses assets et la source Capture restent inchangés ; aucun moteur/renderer/DB copié. Les héros personnellement réglés ne sont pas réécrits : action facultative de retour aux valeurs 35/16/1 dans l'éditeur natif.
+- Gate : tests de pins, CI Capture/Chromium et publisher unique GenSRPG main au SHA validé, provenance HTTPS et test utilisateur des routes.
+
+---
+
 ## 2026-11-14 — Nom du héros au lancement de partie Capture
 - START `df4446361ed28850937e9707a8c029545bd27b78` ; branche `work/gensrpg-capture-hero-nickname-20261114`.
 - L'unique champ pseudo du salon multijoueur a été déplacé dans la section « Mon héros », dès la création de la partie : pas de seconde saisie concurrente.

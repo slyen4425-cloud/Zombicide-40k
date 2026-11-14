@@ -104,7 +104,7 @@ test('a saved AdventureSession retains a selected canonical Exploration HeroDefi
 test('native Play enters Capture-owned fullscreen from a tap and keeps Sac and title above Explorer',()=>{
  const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
  const start=app.indexOf("$('adventure-play').addEventListener");
- const end=app.indexOf("$('adventure-resume').addEventListener",start);
+ const end=app.indexOf("$('adventure-world-select').addEventListener",start);
  assert.ok(start>=0&&end>start,'real launch handler must be present');
  const launch=app.slice(start,end);
  assert.match(launch,/document\.body\.dataset\.adventurePlaying='true'/);

@@ -607,12 +607,16 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(afterTitle?.sessionId,stored.sessionId,
     'native Exploration must persist the same scoped checkpoint before exit');
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
+  await resumed.locator('body[data-adventure-start-view="choice"]').waitFor({timeout:20000});
+  await resumed.locator('#adventure-start-load').tap();
+  await resumed.locator('#adventure-save-gallery [data-save-id="'+stored.sessionId+'"]').tap();
+  await resumed.locator('#adventure-save-load').tap();
   await resumed.locator('#adventure-save-summary').waitFor({timeout:15000});
-  await page.waitForFunction(id=>{
+  await page.waitForFunction(()=>{
     const doc=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument;
     return doc?.querySelector('#adventure-play:not([disabled])') &&
-      doc.querySelector('#adventure-save-summary')?.textContent?.includes(id.slice(0,8));
-  },stored.sessionId,{timeout:20000});
+      doc.querySelector('#adventure-save-summary')?.textContent?.includes('_Mira');
+  },null,{timeout:20000});
   assert.equal(await resumed.locator('#adventure-play').isVisible(),true,
     'returning to the title must allow the saved AdventureSession to resume');
   await resumed.locator('#adventure-play').tap();

@@ -6,7 +6,8 @@
 <title>GenSrpg · Aventure Monster Capture V2</title>
 <link rel="stylesheet" href="./adventure-style-v1.css">
 </head>
-<body>
+<body data-adventure-start-view="choice">
+<script>if(new URLSearchParams(location.search).get('editor')==='items')document.body.dataset.adventureStartView='new';</script>
 <!-- Visible immediately on launch; no second editor/game engine or asset collection. -->
 <section id="adventure-launch-loading" role="status" aria-live="polite" aria-busy="true" hidden>
  <div class="adventure-loading-panel">

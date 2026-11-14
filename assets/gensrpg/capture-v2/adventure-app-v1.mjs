@@ -988,7 +988,7 @@ function renderCaptureRemotePositions(){
  // C3 intentionally DOES NOT claim an avatar has been drawn. Exploration
  // alone will later display the validated peers using its official renderer.
  text($('adventure-room-positions'),'Positions reçues : '+statement+
-  ' · avatars distants pas encore affichés.');
+  ' · affichage par le moteur Exploration dans le monde.');
  activeCapturePeerRelay?.publish([...captureRemotePositions.values()]);
 }
 async function connectCaptureRoom(response){

@@ -2,7 +2,8 @@
 // The official Exploration user-hero store owns the actual PNG/WebP files.
 // This short-lived, session-scoped projection is read only by Exploration
 // Jouer; never copy creature data, actor imagery or XP into the grant.
-import {ADVENTURE_SAVE_SCHEMA_V1,officialAdventureHeroDefinitionIdV1}
+import {ADVENTURE_SAVE_SCHEMA_V1,officialAdventureHeroDefinitionIdV1,
+ officialAdventureHeroDisplayNameV1}
  from './adventure-contract-v1.mjs';
 import {assertOfficialAdventureWorldIdV1} from './adventure-world-choice-v1.mjs';
 
@@ -37,7 +38,9 @@ export function writeAdventureHeroSelectionGrantV1({
   throw new Error('Selected hero not found in the official Exploration Hero Library');
  const grant=Object.freeze({
   schema:ADVENTURE_HERO_SELECTION_SCHEMA_V1,
-  version:1,sessionId,worldId,heroDefinitionId
+  version:1,sessionId,worldId,heroDefinitionId,
+  ...(session.hero?.displayName===undefined?{}
+    :{displayName:officialAdventureHeroDisplayNameV1(session.hero.displayName)})
  });
  storage.setItem(ADVENTURE_HERO_SELECTION_SCHEMA_V1+':'+sessionId,JSON.stringify(grant));
  return grant;

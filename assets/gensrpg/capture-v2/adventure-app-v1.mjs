@@ -214,6 +214,8 @@ function setFields(value){
  $(idField.heroXpLevel).value=value.heroProgression.xpPerLevel;
  $(idField.heroMax).value=value.heroProgression.maxLevel;
  $(idField.heroTalent).value=value.heroProgression.talentPointsPerLevel;
+ $('adventure-starter-all-rarities').checked=value.starterSelection?.allowAllRarities??false;
+ if(published.length)fillPublicSpecies();
  const policy=value.fragmentRecruitment??DEFAULT_ADVENTURE_FRAGMENTS_V1;
  for(const [key,id] of Object.entries(fragmentFields)){
   if(key==='enabled')$(id).checked=value.fragmentRecruitment?.enabled??false;
@@ -235,6 +237,7 @@ function fromFields(){
    statPointsPerLevel:numberFrom(idField.statPoints),
    ...($(idField.xpMode).value==='custom'?{xpBands:readXpBandRows()}: {})},
   loot:{...rules.loot,currencyPerVictory:numberFrom(idField.currency)},
+  starterSelection:{allowAllRarities:$('adventure-starter-all-rarities').checked},
   ...(economy===undefined?{}:{economy}),
   combat:{hpMultiplier:numberFrom(idField.hpPercent)/100,
     defeatPolicy:$('adventure-defeat-policy').value},
@@ -391,7 +394,8 @@ function option(value,caption,disabled=false){
  o.value=value;o.textContent=caption;o.disabled=disabled;return o;
 }
 function eligibleForNewGame(card){
- return Array.isArray(card.skills)&&card.skills.some(s=>s.state==='ready');
+ return Array.isArray(card.skills)&&card.skills.some(s=>s.state==='ready')&&
+  ($('adventure-starter-all-rarities').checked||(card.rarity??'rare')==='rare');
 }
 const starterPicker=createAdventureStarterPickerV1({
  document,cards:()=>published,playable:eligibleForNewGame,
@@ -436,6 +440,7 @@ function getStarterSpeciesIds(){
 function fillPublicSpecies(){
  const starters=$('adventure-starter'),enemies=$('adventure-enemy'),drops=$('adventure-drop-species');
  const filter=$('adventure-drop-filter'),previousFilter=filter.value;
+ const previousStarter=starters.value;
  filter.replaceChildren(option('','Toutes les créatures'));
  starters.replaceChildren(option('','Choisir une créature publiée…'));
  enemies.replaceChildren();drops.replaceChildren();
@@ -452,7 +457,8 @@ function fillPublicSpecies(){
   allowed+' avec au moins une capacité utilisable');
  starters.disabled=enemies.disabled=drops.disabled=published.length===0;
  $('adventure-create').disabled=allowed===0;
- if(allowed)starters.value=published.find(eligibleForNewGame).id;
+ if(allowed)starters.value=published.some(card=>card.id===previousStarter&&eligibleForNewGame(card))
+  ?previousStarter:published.find(eligibleForNewGame).id;
  renderStarterReserveSelectors();
  renderMonsterFragmentEditor();
 }
@@ -1381,6 +1387,9 @@ $('adventure-creator-camera-zoom').addEventListener('input',()=>{
 });
 $('adventure-enemy').addEventListener('change',updatePreview);
 starterPicker.install();
+$('adventure-starter-all-rarities').addEventListener('change',guarded(()=>{
+ fillPublicSpecies();updatePreview();
+}));
 $('adventure-starter').addEventListener('change',updatePreview);
 $('adventure-starter-count').addEventListener('change',guarded(renderStarterReserveSelectors));
 $('adventure-create').addEventListener('click',guarded(()=>{

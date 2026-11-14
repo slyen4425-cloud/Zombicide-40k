@@ -1085,19 +1085,23 @@ async function loadSelectedHeroVisual(){
   const record=await createUserHeroStoreV1().get(id);
   if(epoch!==heroImageEpoch||!$('adventure-play-sheet').open||!record)return;
   const base=record.assets.find(entry=>entry.id===record.mapVisual.assetId);
-  // Published model art is NOT the 128x160 walking sprite. Resolve the
-  // actual official portrait only after matching its source image bytes.
-  // A modified/personal hero keeps its authentic user sprite fallback.
+  // Exploration owns this optional portrait in the same HeroDefinition.
+  // Walking frames cannot replace an explicitly authored fiche illustration.
+  const savedPortrait=record.assets.find(entry=>entry.id===record.id+'.portrait')?.blob;
+  const hasPersonalPortrait=savedPortrait instanceof Blob;
   let portrait=null;
-  try{
-   portrait=await officialHeroPortraitUrlV1({
-    record,catalog:officialHeroCatalog,
-    rootUrl:OFFICIAL_EXPLORATION_HERO_ROOT,fetchAsset:fetch
-   });
-  }catch(error){console.warn('Portrait officiel indisponible',error);}
+  if(!hasPersonalPortrait){
+   try{
+    portrait=await officialHeroPortraitUrlV1({
+     record,catalog:officialHeroCatalog,
+     rootUrl:OFFICIAL_EXPLORATION_HERO_ROOT,fetchAsset:fetch
+    });
+   }catch(error){console.warn('Portrait officiel indisponible',error);}
+  }
   if(epoch!==heroImageEpoch||!$('adventure-play-sheet').open)return;
-  if(!portrait&&!(base?.blob instanceof Blob))return;
-  const objectUrl=portrait?null:URL.createObjectURL(base.blob);
+  if(!hasPersonalPortrait&&!portrait&&!(base?.blob instanceof Blob))return;
+  const objectUrl=hasPersonalPortrait?URL.createObjectURL(savedPortrait):
+   portrait?null:URL.createObjectURL(base.blob);
   const url=portrait??objectUrl;
   if(epoch!==heroImageEpoch||!$('adventure-play-sheet').open){
    if(objectUrl)URL.revokeObjectURL(objectUrl);

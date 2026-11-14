@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {importCaptureSharedWorldV1} from '../assets/gensrpg/capture-v2/adventure-multiplayer-world-transfer-v1.mjs';
+import {importCaptureSharedWorldV1,preserveCaptureGuestDraftV1} from '../assets/gensrpg/capture-v2/adventure-multiplayer-world-transfer-v1.mjs';
 import {captureRoomEntryPresentationV1} from '../assets/gensrpg/capture-v2/adventure-multiplayer-entry-presentation-v1.mjs';
 
 const get=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
@@ -96,4 +96,23 @@ test('UI and scoped transport call the REAL Exploration importer/library, not co
  assert.match(transport,/gensrpg_capture_publish_world_document/);
  assert.match(transport,/gensrpg_capture_room_world_documents/);
  assert.doesNotMatch(transport,/z40k_|\.from\(['"]gensrpg\.capture\.v2\.adventure/i);
+});
+
+test('guest local draft is archived additively, collision and unarchived edits never overwritten',()=>{
+ const source=official();
+ const old={id:'my-local-draft',signature:99,areas:[{id:'local'}]};
+ const result=preserveCaptureGuestDraftV1({activeDraft:old,room,
+  library:source.library,fingerprintOfficial:source.fingerprint});
+ assert.equal(result.archived,true);
+ assert.equal(source.library.load('my-local-draft'),old);
+ assert.equal(preserveCaptureGuestDraftV1({activeDraft:old,room,
+  library:source.library,fingerprintOfficial:source.fingerprint}).archived,false);
+ const unexpected={...old,signature:98};
+ assert.throws(()=>preserveCaptureGuestDraftV1({activeDraft:unexpected,room,
+  library:source.library,fingerprintOfficial:source.fingerprint}),/modifications/i);
+ assert.equal(source.library.load('my-local-draft').signature,99);
+ const sameId={...old,id:'forest-world'};
+ assert.throws(()=>preserveCaptureGuestDraftV1({activeDraft:sameId,room,
+  library:source.library,fingerprintOfficial:source.fingerprint}),/même nom/i);
+ assert.ok(!source.rows.has('forest-world'));
 });

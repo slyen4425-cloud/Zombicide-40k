@@ -26,6 +26,8 @@ import {createAdventureStarterPickerV1} from './adventure-starter-picker-v1.mjs'
 import {renderAdventureSheetViewV1} from './adventure-play-sheet-view-v1.mjs';
 import {createAdventureCreatorDraftStoreV1} from './adventure-creator-draft-v1.mjs';
 import {createAdventurePortfolioStoreV1} from './adventure-portfolio-store-v1.mjs';
+import {adventureSaveDisplayNameV1} from './adventure-save-list-presentation-v1.mjs';
+import {officialHeroPortraitUrlV1} from './adventure-hero-portrait-v1.mjs';
 import {withSelectedAdventureWorldV1,resolveSelectedAdventureWorldV1,
  activateSelectedAdventureWorldV1,checkAdventureWorldArchiveV1}
  from './adventure-world-choice-v1.mjs';
@@ -324,7 +326,7 @@ async function fillHeroChoices(savedHeroId=null){
 
 
 const OFFICIAL_EXPLORATION_HERO_ROOT=new URL('../../../vendor/exploration-lab/',import.meta.url).href;
-let selectedOfficialHero=null,officialHeroBusy=false;
+let selectedOfficialHero=null,officialHeroBusy=false,officialHeroCatalog=null;
 // The catalog and the media installer BOTH belong to Exploration main.
 // Capture only displays choices and records the existing HeroDefinition ID.
 async function loadOfficialHeroGallery(){
@@ -333,6 +335,7 @@ async function loadOfficialHeroGallery(){
   const {loadOfficialHeroCatalogV1,installOfficialHeroPresetV1}=await import(
    '../../../vendor/exploration-lab/src/actors/official-hero-presets-v1.js');
   const catalog=await loadOfficialHeroCatalogV1({baseUrl:OFFICIAL_EXPLORATION_HERO_ROOT});
+  officialHeroCatalog=catalog;
   grid.replaceChildren();
   // Installing a model fetches 48 native sprites only on an explicit tap.
   // An identical saved hero is reused by comparing its original south frame
@@ -644,22 +647,80 @@ async function loadOfficialItemTemplates(){
  renderItemRules();
 }
 
+function officialWorldLabel(worldId){
+ if(!worldId)return 'Monde local';
+ try{
+  const world=worldLibrary?.load(worldId);
+  const title=world?.name??world?.title??world?.label??world?.id;
+  const area=world?.areas?.find(a=>a.id===world.initialAreaId);
+  if(typeof title==='string'&&title.trim()&&!/^world[.:_-][a-f0-9-]{20,}$/i.test(title))
+   return title.trim();
+  if(typeof area?.label==='string'&&area.label.trim())return area.label.trim();
+  return worldId;
+ }catch{return worldId;}
+}
+function portfolioTitle(entry){
+ return adventureSaveDisplayNameV1({
+  worldName:officialWorldLabel(entry.worldId),heroName:entry.heroName
+ });
+}
+function activeSaveTitle(state){
+ return adventureSaveDisplayNameV1({
+  worldName:officialWorldLabel(state?.world?.mapRef??null),heroName:state?.hero?.displayName??null
+ });
+}
 function renderPortfolioOptions(){
  if(!portfolio)return;
- const select=$('adventure-save-select'),saved=portfolio.list();
- const active=portfolio.activeId();
+ const select=$('adventure-save-select'),gallery=$('adventure-save-gallery');
+ const saved=portfolio.list(),active=portfolio.activeId();
+ const chosen=saved.some(entry=>entry.sessionId===select.value)?select.value:active;
  select.replaceChildren(...(saved.length?saved.map(entry=>
-  option(entry.sessionId,'Partie '+entry.sessionId.slice(0,8)+
-   ' · '+(published.find(c=>c.id===entry.speciesId)?.name??entry.speciesId)+
-   ' niv. '+entry.level+' · '+entry.partySize+' créature(s)'+
-   (entry.status==='playing'?' · en cours':
-     entry.status==='finished'?' · fin de partie':' · prête')))
-   :[option('','Aucune partie enregistrée')]));
+  option(entry.sessionId,portfolioTitle(entry)))
+  :[option('','Aucune partie enregistrée')]));
  select.disabled=!saved.length;
  $('adventure-save-load').disabled=!saved.length;
-  $('adventure-save-delete').disabled=!saved.length;
- if(active&&saved.some(entry=>entry.sessionId===active))select.value=active;
+ $('adventure-save-delete').disabled=!saved.length;
+ if(chosen&&saved.some(entry=>entry.sessionId===chosen))select.value=chosen;
+ gallery.replaceChildren();
+ if(!saved.length){
+  const empty=document.createElement('p');empty.className='hint';
+  empty.textContent='Aucune partie enregistrée. Choisis Nouvelle partie pour commencer.';
+  gallery.append(empty);return;
+ }
+ for(const entry of saved){
+  const row=document.createElement('button');row.type='button';
+  row.className='adventure-save-card';row.dataset.saveId=entry.sessionId;
+  row.setAttribute('aria-pressed',String(select.value===entry.sessionId));
+  const content=document.createElement('span'),title=document.createElement('strong');
+  title.textContent=portfolioTitle(entry);
+  const note=document.createElement('small');
+  const updated=Date.parse(entry.updatedAt);
+  note.textContent=(entry.status==='playing'?'En cours':entry.status==='finished'?'Terminée':'Prête')+
+   ' · '+entry.partySize+' créature(s) · niv. '+entry.level+
+   (Number.isFinite(updated)?' · '+new Date(updated).toLocaleDateString('fr-FR'):'');
+  content.append(title,note);row.append(content);
+  row.addEventListener('click',()=>{
+   select.value=entry.sessionId;
+   gallery.querySelectorAll('.adventure-save-card').forEach(button=>
+    button.setAttribute('aria-pressed',String(button===row)));
+  });
+  gallery.append(row);
+ }
 }
+function setAdventureStartView(view){
+ if(!['choice','new','load'].includes(view))throw Error('Écran Aventure inconnu');
+ if(isItemEditor)return;
+ document.body.dataset.adventureStartView=view;
+ $('adventure-save-load-panel').hidden=view!=='load';
+ for(const kind of ['new','load'])
+  $('adventure-start-'+kind).setAttribute('aria-pressed',String(view===kind));
+ if(view==='load')renderPortfolioOptions();
+}
+for(const kind of ['new','load'])
+ $('adventure-start-'+kind).addEventListener('click',()=>setAdventureStartView(kind));
+if(!isItemEditor)setAdventureStartView('choice');
+else document.body.dataset.adventureStartView='new';
+
 function refreshWorldChoices(saved=null){
  const picker=$('adventure-world-select'),notice=$('adventure-world-status');
  if(!worldLibrary){
@@ -691,6 +752,7 @@ async function installOfficialWorldLibrary(){
   console.info('Bibliothèque multi-mondes en attente de main Exploration',error.message);
  }
  refreshWorldChoices(store?.load()??null);
+ renderPortfolioOptions();
 }
 function renderPartyActiveChoices(){
  const select=$('adventure-active-creature');
@@ -740,6 +802,7 @@ function showSave(){
  try{
   renderPortfolioOptions();
   const state=store.load();
+  $('adventure-session-panel').hidden=!state;
   $('adventure-room-host').disabled=!!activeCaptureRoom||!state?.sessionControl?.joinEnabled;
   text($('adventure-play-team-count'),String(state?1+(state.party.reserve?.length??0):0));
   renderSavedAdventureRosterV1(state); // Always reread the same persisted Core save.
@@ -763,8 +826,7 @@ function showSave(){
   const a=state.party.active;
   const reward=state.lastAward;
   text($('adventure-save-summary'),
-   'Partie '+state.sessionId.slice(0,8)+
-   (state.hero?.displayName?' · Héros '+state.hero.displayName:'')+
+   activeSaveTitle(state)+
    ' · '+(card?.name??a.speciesId)+
    ' · niveau '+a.level+' · '+(1+(state.party.reserve?.length??0))+
    ' créature(s) · '+a.xp+' XP · '+state.inventory.currency+' '+
@@ -1324,7 +1386,7 @@ $('adventure-create').addEventListener('click',guarded(()=>{
  const created=worldId?withSelectedAdventureWorldV1(configured,worldId):configured;
  portfolio.create(created);
  setSessionControlFields(created);
- stateMessage('Nouvelle partie enregistrée séparément. Les anciennes sauvegardes sont conservées.');
+ stateMessage('Partie '+activeSaveTitle(created)+' créée. Tu peux entrer dans le monde.');
  showSave();updatePreview();
 }));
 $('adventure-world-builder').addEventListener('click',guarded(()=>{
@@ -1621,7 +1683,7 @@ $('adventure-save-load').addEventListener('click',guardedAsync(async()=>{
  renderItemRules();showSave();updatePreview();
  refreshWorldChoices(loaded);
  await fillHeroChoices(loaded.hero?.definitionId??null);
- stateMessage('Partie '+chosen.slice(0,8)+' chargée. Les autres sauvegardes restent intactes.');
+ stateMessage('Partie '+activeSaveTitle(loaded)+' chargée. Les autres sauvegardes restent intactes.');
 }));
 $('adventure-save-delete').addEventListener('click',guardedAsync(async()=>{
   const chosen=$('adventure-save-select').value;
@@ -1632,7 +1694,7 @@ $('adventure-save-delete').addEventListener('click',guardedAsync(async()=>{
    throw new Error('Quitte le mode Jouer avant de supprimer une sauvegarde.');
   const chosenEntry=portfolio.list().find(entry=>entry.sessionId===chosen);
   if(!chosenEntry)throw new Error('Sauvegarde introuvable : aucune suppression.');
-  const description='Partie '+chosen.slice(0,8)+' · niveau '+chosenEntry.level;
+  const description=portfolioTitle(chosenEntry)+' · niveau '+chosenEntry.level;
   if(!window.confirm('Supprimer définitivement '+description+' ?\\n' +
    'Cette opération ne supprimera ni les autres parties ni les mondes.'))return;
   portfolio.delete(chosen);
@@ -1644,14 +1706,7 @@ $('adventure-save-delete').addEventListener('click',guardedAsync(async()=>{
   await fillHeroChoices(remaining?.hero?.definitionId??null);
   stateMessage(description+' supprimée. Les autres sauvegardes et mondes sont conservés.');
 }));
-$('adventure-resume').addEventListener('click',guarded(()=>{
- const state=store.load();
- if(!state)throw new Error('Aucune partie enregistrée à charger');
- rules=normalizeAdventureRulesV1(state.rules);
- setFields(rules);setSessionControlFields(state);
- renderItemRules();showSave();updatePreview();
- stateMessage('Sauvegarde chargée sans modifier les données.');
-}));
+
 $('adventure-save-control').addEventListener('click',guarded(()=>{
  const session=store.load();
  const settings=sessionControlFromFields(),now=new Date().toISOString();

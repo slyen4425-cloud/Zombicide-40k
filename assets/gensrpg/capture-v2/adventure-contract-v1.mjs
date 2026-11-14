@@ -100,7 +100,7 @@ export function officialAdventureHeroDefinitionIdV1(value){
 // A player-owned name, separate from the official HeroDefinition template ID.
 export function officialAdventureHeroDisplayNameV1(value){
  if(typeof value!=='string'||value.trim().length<1||value.trim().length>48||
-    /[\\u0000-\\u001f\\u007f]/.test(value))
+    /[\u0000-\u001f\u007f]/.test(value))
   throw new RangeError('Nom du héros : 1 à 48 caractères lisibles.');
  return value.trim().normalize('NFC');
 }

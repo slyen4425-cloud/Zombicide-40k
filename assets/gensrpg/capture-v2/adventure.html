@@ -380,16 +380,25 @@
   <div id="adventure-starter-gallery" class="adventure-starter-gallery" role="list"></div>
  </dialog>
 </main>
-<!-- Capture parent owns fullscreen so its Sac/Équipe HUD never disappears behind the native map frame. -->
+<!-- The native Explorer menu requests this single Capture-owned menu.
+     Existing result/fullscreen/return actions stay with their current owners. -->
 <iframe id="adventure-play-frame" title="Monster Capture · Jouer" allow="autoplay" hidden></iframe>
 <div id="adventure-play-hud" hidden>
- <button type="button" id="adventure-open-sheet" aria-haspopup="dialog" aria-controls="adventure-play-sheet">
-  Personnage · Équipe (<span id="adventure-play-team-count">0</span>) · Sac
+ <button type="button" id="adventure-open-sheet" aria-haspopup="dialog" aria-controls="adventure-play-sheet"
+  aria-label="Ouvrir l'inventaire, l'équipe et les fiches"><span aria-hidden="true">🎒</span> Inventaire
+  <span id="adventure-play-team-count" class="adventure-accessible-only">0</span>
  </button>
- <button type="button" id="adventure-open-last-result" hidden>Dernier combat</button>
- <button type="button" id="adventure-fullscreen" aria-pressed="false" aria-label="Activer ou quitter le plein écran">Plein écran</button>
- <output id="adventure-play-remote-status" aria-live="polite">Positions reçues : 0 · affichage des avatars à raccorder</output>
 </div>
+<dialog id="adventure-play-menu" aria-labelledby="adventure-play-menu-title">
+ <h2 id="adventure-play-menu-title">Menu de l'aventure</h2>
+ <p id="adventure-play-menu-world"></p>
+ <div class="adventure-play-menu-actions">
+  <button type="button" id="adventure-menu-continue">Continuer l'aventure</button>
+  <button type="button" id="adventure-open-last-result" hidden>Dernier combat</button>
+  <button type="button" id="adventure-fullscreen" aria-pressed="false" aria-label="Activer ou quitter le plein écran">Plein écran</button>
+  <button type="button" id="adventure-menu-return-title">← Retour Monster Capture</button>
+ </div>
+</dialog>
 <dialog id="adventure-play-sheet" aria-labelledby="adventure-play-sheet-title">
  <header class="sheet-header">
   <div><span class="eyebrow">AVENTURE EN COURS</span><h2 id="adventure-play-sheet-title">Ma fiche</h2></div>

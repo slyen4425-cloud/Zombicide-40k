@@ -716,8 +716,13 @@ function setAdventureStartView(view){
   $('adventure-start-'+kind).setAttribute('aria-pressed',String(view===kind));
  if(view==='load')renderPortfolioOptions();
 }
-for(const kind of ['new','load'])
- $('adventure-start-'+kind).addEventListener('click',()=>setAdventureStartView(kind));
+for(const kind of ['new','load']){
+ const button=$('adventure-start-'+kind);
+ button.addEventListener('click',()=>setAdventureStartView(kind));
+ // A visible disabled button cannot swallow taps before the ES module loads.
+ // Enable only after the real handler is installed; never simulate a click.
+ button.disabled=false;
+}
 if(!isItemEditor)setAdventureStartView('choice');
 else document.body.dataset.adventureStartView='new';
 

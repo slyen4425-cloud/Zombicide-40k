@@ -72,7 +72,7 @@ test('guest choice depends on verified official fingerprint, not merely the map 
  assert.equal(ready.enabled,true);
 });
 test('migration restricts read to members, uploads to host, keeps room binding sole owner and closes cleanly',()=>{
- const sql=get('supabase/migrations/20261114193500_gensrpg_capture_room_world_document_v1.sql');
+ const sql=get('supabase/migrations/20261114192645_gensrpg_capture_room_world_document_v1.sql');
  assert.match(sql,/ENABLE ROW LEVEL SECURITY/i);
  assert.match(sql,/REVOKE ALL ON public\.gensrpg_capture_room_world_documents FROM PUBLIC, anon, authenticated/i);
  assert.match(sql,/USING \(gensrpg_capture_private\.is_member\(room_id\)\)/);

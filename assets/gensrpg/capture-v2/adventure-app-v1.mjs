@@ -1075,7 +1075,7 @@ $('adventure-open-last-result').addEventListener('click',guarded(()=>{
 $('adventure-result-close').addEventListener('click',()=>{
  $('adventure-result-dialog').close();
 });
-let currentSheetTab='hero',currentSheetCreatureId=null;
+let currentSheetTab='hero',currentSheetCreatureId=null,currentCollectionSpeciesId=null;
 let currentHeroVisual=null;
 let heroImageEpoch=0;
 function discardHeroVisual(){
@@ -1147,6 +1147,13 @@ function renderPlayingSheet(){
  renderAdventureSheetViewV1({
   host:$('adventure-sheet-content'),snapshot,tab:currentSheetTab,
   portraitUrl,heroVisual:currentHeroVisual,
+  selectedCollectionSpeciesId:currentCollectionSpeciesId,
+  resolveCollectionPortrait:speciesId=>publishedCapturePortraitUrlV1({
+   card:published.find(item=>item.id===speciesId),moduleUrl:import.meta.url
+  }),
+  onInspectCollectionCreature:speciesId=>{
+   currentCollectionSpeciesId=speciesId;renderPlayingSheet();
+  },
   onSelectCreature:instanceId=>{currentSheetCreatureId=instanceId;renderPlayingSheet();},
   onMoveCreature:(instanceId,direction)=>{
    void updatePlayingTeam(instanceId,'move',direction).catch(sheetActionError);
@@ -1277,6 +1284,7 @@ $('adventure-open-sheet').addEventListener('click',guarded(()=>{
  if(dialog.open||activeCombatOverlayId)return;
  discardHeroVisual();
  currentSheetTab='team'; // Immediately show all 1–6 saved creatures on the map.
+  currentCollectionSpeciesId=null;
  currentSheetCreatureId=store.load()?.party?.active?.instanceId??null;
  renderPlayingSheet();
  text($('adventure-sheet-status'),'Fiche mise à jour depuis la partie sauvegardée.');
@@ -1349,6 +1357,7 @@ $('adventure-play-sheet').addEventListener('close',discardHeroVisual);
 for(const button of document.querySelectorAll('[data-adventure-sheet-tab]')){
  button.addEventListener('click',guarded(()=>{
   currentSheetTab=button.dataset.adventureSheetTab;
+  currentCollectionSpeciesId=null;
   renderPlayingSheet();
  }));
 }

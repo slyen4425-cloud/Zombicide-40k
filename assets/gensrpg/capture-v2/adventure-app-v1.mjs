@@ -1883,7 +1883,7 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   await fillHeroChoices(active?.hero?.definitionId??null);
   await loadOfficialHeroGallery();
   await installOfficialWorldLibrary();
-  stateMessage(published.length+' créatures officielles publiées, aucune créature de brouillon chargée.');
+  stateMessage('Prêt pour l’aventure : choisis Nouvelle partie ou Charger partie.');
  }catch(error){
   stateMessage('Aventure indisponible : '+error.message,true);
   $('adventure-create').disabled=true;

@@ -14,7 +14,7 @@ export function captureHostSetupFromSessionV1(session){
   sessionId:session.sessionId,
   rules:normalizeAdventureRulesV1(session.rules),
   starterCount:members.length,
-  cameraPolicy:normalizeAdventureCameraPolicyV1(session.cameraPolicy)
+  cameraPolicy:normalizeAdventureCameraPolicyV1(session.cameraPolicy??{angleDeg:55,zoomPercent:175})
  });
 }
 export function captureRoomSetupFromServerV1({room,row}={}){

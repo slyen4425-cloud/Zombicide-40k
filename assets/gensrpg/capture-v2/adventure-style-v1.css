@@ -591,3 +591,22 @@ body[data-adventure-start-view="load"] #adventure-save-load-panel{display:block}
 
 /* The specialist item editor never exposes inert adventure start controls. */
 body[data-adventure-item-editor="true"] .adventure-start-tabs{display:none!important}
+
+/* One Bestiary-backed collection: silhouettes are never interactive or detailed. */
+.sheet-collection{padding:9px;min-width:0}
+.sheet-collection h3{color:#e2f9ef;font-size:17px;margin:3px 0}
+.sheet-collection-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,145px),1fr));gap:9px;margin-top:11px}
+.sheet-collection-card{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;min-width:0;min-height:156px;padding:10px 7px;border:1px solid #397869;border-radius:12px;background:#13363c;color:#eafff6}
+button.sheet-collection-card{cursor:pointer}
+button.sheet-collection-card:focus-visible{outline:2px solid #a4f4d4}
+.sheet-collection-card.sheet-collection-locked{opacity:.55;filter:grayscale(1);cursor:not-allowed;border-color:#54636b;background:#263039}
+.sheet-collection-portrait,.sheet-collection-placeholder{width:100%;height:94px;object-fit:contain;display:grid;place-items:center;font-size:36px}
+.sheet-collection-info{display:grid;gap:3px;font-size:12px;overflow-wrap:anywhere}
+.sheet-collection-info small{color:#bdd9d2}
+.sheet-collection-description{color:#e2f3ef;padding:7px 13px}
+.sheet-collection-skills{padding:9px 13px;border-top:1px solid #34616a}
+.sheet-collection-skills h4{margin:3px 0 9px}
+.sheet-collection-skill{font-size:12px;margin:5px 0;color:#bddbd5}
+.sheet-collection-back{margin-bottom:9px;min-height:39px}
+.adventure-starter-rarity-label{display:flex;align-items:center;gap:10px;padding:10px}
+.adventure-starter-rarity-label input{min-width:20px;min-height:20px}

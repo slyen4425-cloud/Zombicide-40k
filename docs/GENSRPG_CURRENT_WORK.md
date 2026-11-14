@@ -1,3 +1,12 @@
+## 2026-11-15 — Collection Capture : fiche intégrale du Bestiaire officiel (lot isolé C1)
+- Source Capture START `63db417e8933e89b897b14cfffa27e105a1d6a1d` (ancien candidat source #457), checkpoint `checkpoint/gensrpg-start-collection-bestiary-2026-11-15`, branche `work/gensrpg-collection-bestiary-2026-11-15`.
+- Propriétaire unique : UI `assets/gensrpg/capture-v2/adventure-play-sheet-view-v1.mjs`. La Collection apparaît pendant Exploration, mais le laboratoire Exploration ne possède pas l'onglet et reste inchangé.
+- Sélection d'une espèce possédée -> fiche de Bestiaire complète intégrée, navigation retour ; image, description, cinq compétences publiées et leurs phrases explicatives, niveaux/coûts de recharge, stats/effets et résistances provenant exclusivement de `entry.card` du catalogue Combat officiel. Les espèces inconnues restent verrouillées, les instances et la sauvegarde inchangées.
+- Aucun moteur, bestiaire, inventaire, snapshot, cache, PWA, CI, règles ou donnée autoritaire recopiés. Révision DOM/CSS localisée et test de clic/retour/fiche/verrouillage, CI de source + vrai parcours mobile paysage nécessaires avant GREEN.
+- Conserver le travail CI publisher en cours PR #459 ; aucune fusion ni publication automatique avant validations.
+
+---
+
 ## 2026-11-14 — Capture adopte la source Exploration 35 / 16 / 1 + route anti-traînées
 - START `b112584c0ed372a19f02a99819792bd6e594398f`, checkpoint `checkpoint/gensrpg-capture-exploration-defaults-road-start-20261114`, branche `work/gensrpg-capture-exploration-defaults-road-20261114`.
 - Seul `source-pins-v1.json` épingle Exploration main `3d773ecd9653700750d6de3f62d2255199490a17` (fusion #447 héros et #448 routes), CI source `43574733643` à valider SUCCESS avant publication.

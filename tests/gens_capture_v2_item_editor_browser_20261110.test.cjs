@@ -186,6 +186,9 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   // first. The preplay view has a summary rather than a competing item form.
   await frame.locator('#adventure-return-preparation').tap();
   await page.waitForFunction(()=>window.GensCaptureV2?.status?.().view==='adventure');
+  await frame.locator('body[data-adventure-start-view="choice"]').waitFor({timeout:30000});
+  // The new two-button home requires an explicit Nouvelle partie choice.
+  await frame.locator('#adventure-start-new').tap();
   // Simple player launch hides author controls. Reopen them through the actual
   // visible disclosure before entering the existing loot summary.
   assert.equal(await frame.locator('#adventure-advanced-panel').getAttribute('open'),null);

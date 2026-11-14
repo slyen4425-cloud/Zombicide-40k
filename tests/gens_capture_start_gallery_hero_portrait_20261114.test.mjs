@@ -50,6 +50,10 @@ test('real startup has two center choices, a card list, and no old dropdown UI',
  assert.match(css,/#adventure-play-hud\{position:fixed;z-index:15;bottom:/);
  assert.match(css,/left:50%;right:auto;transform:translateX\(-50%\)/);
  assert.match(app,/setAdventureStartView\('choice'\)/);
+ assert.match(html,/id="adventure-start-new"[^>]*disabled/);
+ assert.match(html,/id="adventure-start-load"[^>]*disabled/);
+ assert.match(app,/button\.addEventListener\('click',\(\)=>setAdventureStartView\(kind\)\)/);
+ assert.match(app,/button\.disabled=false;/);
  assert.match(app,/portfolio\.select\(chosen\)/);
  assert.match(app,/officialHeroPortraitUrlV1\(/);
 });

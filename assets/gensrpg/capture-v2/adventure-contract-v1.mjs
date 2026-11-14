@@ -554,8 +554,13 @@ function assertSession(session){
   normalizeAdventureSessionControlV1(v.sessionControl);
  if(Object.hasOwn(v,'hero')){
   const hasDefinition=Object.hasOwn(v.hero,'definitionId');
-  const hero=exact(v.hero,hasDefinition?['progression','definitionId']:['progression'],'hero');
+  const hasName=Object.hasOwn(v.hero,'displayName');
+  const fields=['progression',...(hasDefinition?['definitionId']:[]),
+   ...(hasName?['displayName']:[])];
+  const hero=exact(v.hero,fields,'hero');
   if(hasDefinition)officialAdventureHeroDefinitionIdV1(hero.definitionId);
+  if(hasName&&normalizeAdventureHeroDisplayNameV1(hero.displayName)!==hero.displayName)
+   throw new RangeError('Nom du héros non normalisé dans la sauvegarde');
   if(hero.progression!==null){
    const progress=exact(hero.progression,['xp','level','talentPoints'],'hero.progression');
    integer(progress.xp,'hero.progression.xp');
@@ -578,9 +583,16 @@ function assertSession(session){
  if(Object.hasOwn(v,'trainerVictories'))normalizeAdventureTrainerVictoriesV1(v.trainerVictories);
  return v;
 }
+export function normalizeAdventureHeroDisplayNameV1(value){
+ if(typeof value!=='string')throw new TypeError('Le nom du héros doit être du texte.');
+ const name=value.trim().replace(/\\s+/g,' ');
+ if(!name||name.length>48||/[\\u0000-\\u001f\\u007f]/.test(name))
+  throw new RangeError('Le nom du héros doit contenir 1 à 48 caractères lisibles.');
+ return name;
+}
 export function createAdventureSessionV1({
  bestiaryCards,starterId,starterIds=null,rules=DEFAULT_ADVENTURE_RULES_V1,ids,now,
- heroDefinitionId=null,cameraAngle=55,cameraZoomPercent=null
+ heroDefinitionId=null,heroDisplayName=null,cameraAngle=55,cameraZoomPercent=null
 }){
  const cards=publishedAdventureSpeciesV1(bestiaryCards);
  const selected=starterIds===null?[starterId]:starterIds;
@@ -618,6 +630,8 @@ export function createAdventureSessionV1({
   },
   hero:{
    ...(heroDefinitionId===null?{}:{definitionId:officialAdventureHeroDefinitionIdV1(heroDefinitionId)}),
+   ...(heroDisplayName===null||heroDisplayName===''?{}:{
+     displayName:normalizeAdventureHeroDisplayNameV1(heroDisplayName)}),
    progression:settings.heroProgression.enabled
     ?{xp:0,level:1,talentPoints:0}:null
   },

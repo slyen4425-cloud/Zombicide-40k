@@ -1,0 +1,36 @@
+// Capture C4: ingest a host WorldDocument ONLY through the official
+// Exploration importer and archived WorldDocument library. This module
+// NEVER stores WorldDocuments, builds maps or modifies AdventureSave.
+export function importCaptureSharedWorldV1({
+ connection,room,packet,library,importOfficial,fingerprintOfficial
+}={}){
+ if(connection?.role!=='guest'||typeof connection.userId!=='string'||
+    !room?.open||!room.members?.some(m=>m.id===connection.userId))
+  throw new Error('Tu dois être invité authentifié dans un salon ouvert');
+ if(!room.worldId||!room.worldFingerprint)
+  throw new Error('Le créateur doit d’abord entrer dans son monde');
+ if(!packet||packet.worldId!==room.worldId||
+    packet.worldFingerprint!==room.worldFingerprint||
+    typeof packet.serializedDocument!=='string')
+  throw new Error('Le monde reçu ne correspond pas au salon authentifié');
+ if(typeof importOfficial!=='function'||typeof fingerprintOfficial!=='function'||
+    typeof library?.save!=='function'||typeof library?.list!=='function'||
+    typeof library?.load!=='function')
+  throw new TypeError('Importeur et bibliothèque WorldDocument officiels nécessaires');
+ const official=importOfficial(packet.serializedDocument);
+ if(official?.id!==room.worldId||fingerprintOfficial(official)!==room.worldFingerprint)
+  throw new Error('Empreinte du monde reçu invalide : importation refusée');
+ const exists=library.list().some(entry=>entry.id===official.id);
+ if(exists){
+  const existing=library.load(official.id);
+  if(fingerprintOfficial(existing)!==room.worldFingerprint)
+   throw new Error('Une carte locale porte déjà ce nom mais son contenu diffère. Exporte ou renomme-la dans Exploration avant d’importer la carte du salon.');
+  return Object.freeze({worldId:official.id,alreadyAvailable:true});
+ }
+ // Official library.save refuses any unconfirmed overwrite; no second codec.
+ library.save(official,{replace:false});
+ const verified=library.load(official.id);
+ if(fingerprintOfficial(verified)!==room.worldFingerprint)
+  throw new Error('Archive Exploration non conforme après importation');
+ return Object.freeze({worldId:official.id,alreadyAvailable:false});
+}

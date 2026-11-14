@@ -52,6 +52,10 @@
       <option value="">Aucun héros personnalisé</option>
      </select>
     </details>
+    <label for="adventure-hero-name">Nom de mon héros (affiché en jeu, 1 à 48 caractères)
+     <input id="adventure-hero-name" type="text" maxlength="48" autocomplete="nickname" placeholder="Ex. Luna" aria-describedby="adventure-hero-name-help">
+    </label>
+    <p id="adventure-hero-name-help" class="hint">Ce nom appartient à cette partie, pas au modèle de héros. En multijoueur, il servira de pseudo par défaut.</p>
     <p id="adventure-hero-choice-status" class="hint" role="status" aria-live="polite">Chargement du catalogue officiel Exploration…</p>
    </section>
    <label for="adventure-starter-count">Nombre de créatures de départ</label>

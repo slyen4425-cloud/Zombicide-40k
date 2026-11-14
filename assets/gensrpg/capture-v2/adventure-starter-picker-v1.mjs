@@ -61,7 +61,9 @@ export function createAdventureStarterPickerV1({document,cards,playable,portrait
    if(selected?.value===card.id)button.dataset.selected='true';
    const copy=element('span','adventure-gallery-caption');
    copy.append(element('strong',null,card.name),
-    element('small',null,ready?'Choisir cette créature':'Capacités non prêtes'));
+    element('small',null,ready?'Choisir cette créature':
+     (card.rarity&&card.rarity!=='rare'&&card.skills?.some(s=>s.state==='ready')
+      ?'Rang réservé aux options avancées':'Capacités non prêtes')));
    button.append(portrait(card),copy);
    button.addEventListener('click',()=>{
     const field=selectors()[slot];

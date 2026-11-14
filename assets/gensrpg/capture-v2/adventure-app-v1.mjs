@@ -965,6 +965,10 @@ function applyCaptureGuestSetup(){
  $('adventure-save-rules').disabled=Boolean(guest);
  $('adventure-save-control').disabled=Boolean(guest);
  $('adventure-create').textContent=guest?'Préparer mon héros pour rejoindre':'Créer la partie';
+ $('adventure-game-heading').textContent=guest?'Rejoindre la partie du créateur':'Préparer mon aventure';
+ $('adventure-start-new').textContent=guest?'Nouveau héros':'Nouvelle partie';
+ $('adventure-start-load').textContent=guest?'Reprendre mon héros':'Charger partie';
+ $('adventure-start-load').disabled=Boolean(guest);
  if(!setup)return;
  rules=setup.rules;setFields(rules);
  $('adventure-starter-count').value=String(setup.starterCount);
@@ -1913,8 +1917,8 @@ $('adventure-room-enter').addEventListener('click',guardedAsync(async()=>{
   $('adventure-player-alias').value=nickname;
   applyCaptureGuestSetup();showSave();syncCaptureRoomEntry();
   stateMessage(imported.alreadyAvailable
-   ?'Même carte officielle vérifiée. Tu peux reprendre ta partie ou créer ton héros.'
-   :'Monde du créateur importé dans Exploration. Choisis ton héros et crée ta partie pour le rejoindre.');
+   ?'Même carte officielle vérifiée. Tu peux reprendre ton héros ou en préparer un autre.'
+   :'Carte du créateur reçue. Prépare simplement ton héros et ton équipe selon les règles de sa partie.');
   return;
  }
  if(p.action==='prepare'){

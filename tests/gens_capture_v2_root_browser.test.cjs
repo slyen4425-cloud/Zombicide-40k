@@ -463,8 +463,10 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.ok(Math.abs(playArea.width-playArea.vw)<=3&&
    Math.abs(playArea.height-playArea.vh)<=3,
    'native Exploration gameplay must fill the mobile landscape viewport');
-  assert.equal(await resumed.locator('#adventure-fullscreen').isVisible(),true,
-   'manual fullscreen action must remain accessible in native gameplay');
+  assert.equal(await resumed.locator('#adventure-open-sheet').isVisible(),true,
+   'the gameplay HUD exposes a single inventory button');
+  assert.equal(await resumed.locator('#adventure-fullscreen').isVisible(),false,
+   'fullscreen belongs in the native menu, not an extra floating HUD button');
 
   // A game in progress must expose the official GenSRPG character sheet without
   // unmounting or restarting the native Exploration play frame.
@@ -477,7 +479,8 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await resumed.locator('[data-adventure-sheet-tab="team"]').getAttribute('aria-selected'),'true');
   assert.equal(await resumed.locator('#adventure-sheet-content .sheet-roster-pick').count(),3,
    'the native map team sheet must show all three saved creatures');
-  assert.match(await resumed.locator('#adventure-open-sheet').textContent(),/Équipe \(3\)/);
+  assert.match(await resumed.locator('#adventure-open-sheet').textContent(),/Inventaire/);
+  assert.equal(await resumed.locator('#adventure-play-team-count').textContent(),'3');
   await resumed.locator('#adventure-sheet-content .sheet-roster-pick').nth(1).tap();
   assert.equal(await resumed.locator('#adventure-sheet-content .sheet-roster-pick[aria-pressed="true"]').count(),1,
    'selecting a reserve creature must update the same team sheet');
@@ -577,9 +580,13 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg.exploration.play.navigation.v1')),null,
     'GenSRPG must not reuse the standalone native checkpoint');
   const playFrame=resumed.frameLocator('#adventure-play-frame');
-  // The game Menu now commits the official Exploration checkpoint and returns
-  // to the real Monster Capture title, not the obsolete standalone play.html.
+  // The native Explorer menu requests the ONE Capture-owned menu. Its actual
+  // return action commits the official Exploration checkpoint before title.
   await playFrame.locator('#play-menu-button').tap();
+  await resumed.locator('#adventure-play-menu').waitFor({state:'visible'});
+  assert.equal(await resumed.locator('#adventure-fullscreen').isVisible(),true);
+  assert.equal(await resumed.locator('#adventure-play-remote-status').count(),0);
+  await resumed.locator('#adventure-menu-return-title').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]')
     .waitFor({state:'visible',timeout:15000});
   assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),null,

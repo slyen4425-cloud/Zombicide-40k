@@ -68,6 +68,30 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
    })
   });
  }));
+ // Collection is a projection of the published Combat Bestiary and the ONE
+ // current AdventureSession (party + canonical out-of-combat storage).
+ // No owned flag, discovery log, duplicated catalogue or save keys.
+ const ownedBySpecies=new Map();
+ for(const actor of [...members,...stored]){
+  const owned=ownedBySpecies.get(actor.speciesId)??[];
+  owned.push(actor.level);ownedBySpecies.set(actor.speciesId,owned);
+ }
+ const collection=frozen(published.map(entry=>{
+  const levels=frozen([...(ownedBySpecies.get(entry.id)??[])].sort((a,b)=>b-a));
+  const owned=levels.length>0;
+  return frozen({
+   id:entry.id,name:entry.name,rarity:entry.rarity??'rare',owned,levels,
+   // Locked species are only silhouettes. No fiche, statistics or abilities.
+   ...(owned?{
+    description:entry.description??'',
+    elements:frozen([...(entry.elements??[])]),
+    skills:frozen((entry.skills??[]).map(skill=>frozen({
+     name:skill.name??null,requiredLevel:skill.requiredLevel??null,
+     state:skill.state
+    })))
+   }:{})
+  });
+ }));
  const creature=frozen({
   instanceId:selected.instanceId,speciesId:selected.speciesId,name:card.name,
   level:selected.level,xp:selected.xp,hp:vitals?vitals.currentHp:selected.hp,
@@ -98,7 +122,7 @@ export function adventurePlaySheetSnapshotV1({session,bestiaryCards,statRegistry
    ...(shown?{maxHp:shown.maxHp,hpPercent:shown.hpPercent}:{}),
    isActive:actor===active,isSelected:actor===selected});
  }));
- return frozen({sessionId:session.sessionId,hero,creature,team,
+ return frozen({sessionId:session.sessionId,hero,creature,team,collection,
   storage:frozen({count:stored.length,members:frozen(stored.map(member=>{
    const card=published.find(item=>item.id===member.speciesId);
    return frozen({instanceId:member.instanceId,speciesId:member.speciesId,

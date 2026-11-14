@@ -103,6 +103,14 @@ if(isItemEditor){
  const panel=document.getElementById('adventure-loot-panel');panel.open=true;
 }
 let published=[];
+// Opt-in measurements only (?gensPerf=1). Never alter the official owners,
+// assets or cache contract to hide slow transitions.
+const adventurePerfEnabled=new URLSearchParams(window.location.search).has('gensPerf');
+const adventurePerfBootStart=performance.now();
+function adventurePerf(label,since=adventurePerfBootStart){
+ if(adventurePerfEnabled)console.info('[GenSRPG Capture performance]',label,
+  Math.round(performance.now()-since)+'ms');
+}
 let officialCombatSha=null,officialStatRegistry=null;
 let officialCombatVitalsProjector=null;
 let store,portfolio,draftStore,creatorDraftStore,worldLibrary=null;
@@ -273,11 +281,15 @@ async function fetchPublishedBestiary(){
  // network snapshot instead of combining old Combat transfers and new pins.
  // The original Combat main publication predicate stays the sole authority.
  const releaseLoadId=crypto.randomUUID();
- const fetchJson=relative=>fetchOfficialAdventureJsonV1(
-  relative,import.meta.url,releaseLoadId,fetch);
+ const fetchJson=async relative=>{
+  const start=performance.now();
+  try{return await fetchOfficialAdventureJsonV1(relative,import.meta.url,releaseLoadId,fetch);}
+  finally{adventurePerf('official JSON '+relative.split('/').pop(),start);}
+ };
  // A single Combat source: same captureBestiaryCardsV1 publication predicate,
  // same Showcase transfers and skill definitions; immutable visual catalog as
  // certified in the GenSrpg Pages release, never a moving global-assets branch.
+ const bestiaryStart=performance.now();
  const [bundle,assets,stats,skills,delivery]=await Promise.all([
   fetchJson('../../../vendor/exploration-lab/combat-preview/data/capture/showcase/encounter-bundle.v1.json'),
   fetchJson('../../../vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json'),
@@ -285,6 +297,7 @@ async function fetchPublishedBestiary(){
   fetchJson('../../../vendor/combat-lab/data/combat/skills/catalog.v1.json'),
   fetchJson('./delivery-manifest.json')
  ]);
+ adventurePerf('official five-file bestiary transport',bestiaryStart);
  if(bundle.schema!=='capture-author-encounter-bundle-v1'||
    bundle.authorSha!==delivery?.combat?.sha||
    bundle.engineSha!==delivery.combat.sha)
@@ -1490,6 +1503,7 @@ window.addEventListener('pagehide',()=>detachShellFullscreen?.(),{once:true});
 syncFullscreenControl();
 
 const journeyLoading=$('adventure-launch-loading');
+let adventureLaunchStartedAt=null;
 let journeyLaunchEpoch=0;
 function showJourneyLoading(message){
  text($('adventure-launch-loading-status'),message);
@@ -1525,6 +1539,8 @@ window.addEventListener('message',event=>{
  if(event.data.schema==='gensrpg.exploration.play.ready.v1'){
   if(event.data.worldId!==store.load()?.world?.mapRef&&
      event.data.worldId!==readWorldAssemblerDraft(window.localStorage)?.id)return;
+  adventurePerf('play iframe ready after launch',adventureLaunchStartedAt??performance.now());
+  adventureLaunchStartedAt=null;
   dismissJourneyLoading();
  }else if(event.data.schema==='gensrpg.exploration.play.failed.v1'){
   text($('adventure-launch-loading-status'),
@@ -1539,6 +1555,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  void requestAdventureFullscreen();
  if(!journeyLoading.hidden)return; // One authoritative launch at a time.
  showJourneyLoading('Chargement du monde et des sauvegardes…');
+ adventureLaunchStartedAt=performance.now();
  const launchEpoch=++journeyLaunchEpoch;
  try{
  const selectedWorldId=$('adventure-world-select').value;
@@ -1698,6 +1715,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  activeCapturePeerRelay?.publish([...captureRemotePositions.values()]);
  // No fake fallback if pinned Exploration main lacks the official API.
  frame.src=url.href;
+ adventurePerf('play preflight until iframe navigation',adventureLaunchStartedAt);
  frame.hidden=false;
  document.querySelector('[data-adventure-app]').hidden=true;
  document.body.dataset.adventurePlaying='true';
@@ -1894,8 +1912,10 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   draftStore=createAdventureRulesDraftStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
   creatorDraftStore=createAdventureCreatorDraftStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
   const official=await fetchPublishedBestiary();
+  adventurePerf('boot after official bestiary');
   published=official.cards;officialCombatSha=official.combatSha;
   await loadOfficialItemTemplates();
+  adventurePerf('boot after item catalog');
   officialStatRegistry=official.statRegistry;
   officialCombatVitalsProjector=createAdventureHpProjectorV1({
    creatureTransfers:official.creatureTransfers,statRegistry:officialStatRegistry,
@@ -1909,9 +1929,17 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   else {const draft=draftStore.load();if(draft){rules=draft;setFields(rules);}}
   setSessionControlFields(active);
   renderItemRules();showSave();updatePreview();
-  await fillHeroChoices(active?.hero?.definitionId??null);
-  await loadOfficialHeroGallery();
-  await installOfficialWorldLibrary();
+  // Hero gallery and WorldDocument library do not depend on one another.
+  // Parallelize these independent official owners; preserve the Hero picker
+  // -> gallery sequence and never make a fallback copy of either catalog.
+  await Promise.all([
+   (async()=>{
+    await fillHeroChoices(active?.hero?.definitionId??null);
+    await loadOfficialHeroGallery();
+   })(),
+   installOfficialWorldLibrary()
+  ]);
+  adventurePerf('boot ready (world library + hero gallery)');
   stateMessage('Prêt pour l’aventure : choisis Nouvelle partie ou Charger partie.');
  }catch(error){
   stateMessage('Aventure indisponible : '+error.message,true);

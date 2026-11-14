@@ -616,3 +616,12 @@ body[data-adventure-item-editor="true"] .adventure-start-tabs{display:none!impor
  .sheet-collection-card{min-height:123px}
  .sheet-collection-art{height:70px}
 }
+
+/* Creature rarity is display-only, sourced from Combat; locked entries stay locked. */
+.sheet-collection-card[data-rarity="rare"]{--capture-rank:#3992fa}
+.sheet-collection-card[data-rarity="mythic"]{--capture-rank:#e04a58}
+.sheet-collection-card[data-rarity="legendary"]{--capture-rank:#efbf4b}
+.sheet-collection-card[data-rarity]{border:2px solid var(--capture-rank);box-shadow:inset 0 0 0 1px #0007}
+.sheet-collection-card[data-collection-owned="false"][data-rarity]{border-color:var(--capture-rank);opacity:.65}
+.sheet-collection-card[data-collection-owned="true"][data-rarity]:focus-visible{outline:3px solid var(--capture-rank);outline-offset:2px}
+.sheet-collection-card .sheet-rarity-label{color:var(--capture-rank);font-size:10px;font-weight:850;letter-spacing:.03em;text-transform:uppercase}

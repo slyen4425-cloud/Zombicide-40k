@@ -41,3 +41,21 @@ test('unowned cards stay disabled and only owned cards can show their fiche',()=
  assert.match(view,/if\(!entry\.owned\)return/);
  assert.match(view,/onOpenOwnedCreature\(member\.instanceId\)/);
 });
+
+test('rarity border and label project the one published Combat card for owned and locked creatures',()=>{
+ const view=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-play-sheet-view-v1.mjs',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-style-v1.css',import.meta.url),'utf8');
+ const result=adventureOwnedCollectionV1({session,bestiaryCards:cards});
+ assert.deepEqual(result.entries.map(x=>x.rarity),['rare','mythic','legendary']);
+ assert.match(view,/tile\.dataset\.rarity=entry\.rarity\?\?'rare'/);
+ assert.match(view,/sheet-rarity-label/);
+ for(const rank of ['rare','mythic','legendary'])
+  assert.ok(css.includes('.sheet-collection-card[data-rarity="'+rank+'"]'));
+ assert.match(view,/tile\.disabled=!entry\.owned/);
+});
+test('performance probes are opt-in and retain five source-consistent JSON transfers',()=>{
+ const code=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ assert.match(code,/has\('gensPerf'\)/);
+ assert.match(code,/Promise\.all\(\[\s*fetchJson\(/);
+ assert.match(code,/adventurePerf\('play iframe ready after launch'/);
+});

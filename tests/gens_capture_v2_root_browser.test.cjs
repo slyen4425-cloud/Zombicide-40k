@@ -382,6 +382,12 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   // Native game handoff — no made-up map, no reused Tester. First prove the
   // actual GenSRPG origin has no WorldDocument and will not create a fake one.
   await resumed.locator('#adventure-play').tap();
+  // Hero media checks and the Exploration world preflight are async.
+  // Wait for the real validation message, not the previous Bestiary status.
+  await page.waitForFunction(()=>{
+   const doc=document.querySelector('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')?.contentDocument;
+   return /World Builder|monde jouable/i.test(doc?.querySelector('#adventure-status')?.textContent??'');
+  },null,{timeout:15000});
   assert.match(await resumed.locator('#adventure-status').textContent(),/World Builder|monde jouable/i);
   assert.equal(await resumed.locator('#adventure-play').isVisible(),true);
   const authored=await resumed.locator('#adventure-play').evaluate(async()=>{

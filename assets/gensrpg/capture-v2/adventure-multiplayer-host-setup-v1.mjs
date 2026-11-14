@@ -30,13 +30,20 @@ export function captureRoomSetupFromServerV1({room,row}={}){
   sessionId:row.host_session_id,rules,starterCount:count,cameraPolicy
  });
 }
+function canonical(value){
+ if(Array.isArray(value))return value.map(canonical);
+ if(value&&typeof value==='object')return Object.fromEntries(
+  Object.entries(value).sort(([a],[b])=>a.localeCompare(b))
+   .map(([key,child])=>[key,canonical(child)]));
+ return value;
+}
 export function captureGuestSessionMatchesHostSetupV1({session,setup,room}={}){
  if(!session||!setup||!room?.open||setup.sessionId!==room.sessionId||
     session.world?.mapRef!==room.worldId||session.status==='finished')return false;
  try{
   const members=[session.party?.active,...(session.party?.reserve??[])];
   return members.length===setup.starterCount&&
-   JSON.stringify(normalizeAdventureRulesV1(session.rules))===
-    JSON.stringify(setup.rules);
+   JSON.stringify(canonical(normalizeAdventureRulesV1(session.rules)))===
+    JSON.stringify(canonical(setup.rules));
  }catch{return false;}
 }

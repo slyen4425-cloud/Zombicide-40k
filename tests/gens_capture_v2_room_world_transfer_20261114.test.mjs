@@ -116,3 +116,16 @@ test('guest local draft is archived additively, collision and unarchived edits n
   library:source.library,fingerprintOfficial:source.fingerprint}),/même nom/i);
  assert.ok(!source.rows.has('forest-world'));
 });
+
+test('host can copy or native-share the actual server invitation code; no fabricated URLs',()=>{
+ const html=get('assets/gensrpg/capture-v2/adventure.html');
+ const app=get('assets/gensrpg/capture-v2/adventure-app-v1.mjs');
+ for(const id of ['adventure-room-share-actions','adventure-room-code-label',
+  'adventure-room-copy','adventure-room-share'])
+  assert.ok(html.includes('id="'+id+'"'),'missing server-code UI '+id);
+ assert.match(app,/navigator\.clipboard\?\.writeText/);
+ assert.match(app,/navigator\.share/);
+ assert.match(app,/activeCaptureRoom\.code/);
+ assert.match(app,/adventure-room-share-actions'\)\.hidden=response\.role!=='host'/);
+ assert.doesNotMatch(app,/inviteUrl=|joinUrl=|\/\?room=/);
+});

@@ -1710,6 +1710,10 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  const launchEpoch=++journeyLaunchEpoch;
  try{
  const selectedWorldId=$('adventure-world-select').value;
+ if(activeCaptureRoom?.role==='guest'&&
+    !captureGuestSessionMatchesHostSetupV1({
+     session:store?.load(),setup:captureSharedRoomSetup,room:lastCaptureRoomState
+    }))throw new Error('Cette sauvegarde ne suit pas les règles de l’hôte. Prépare ton héros dans le salon avant d’entrer.');
  let world=readWorldAssemblerDraft(window.localStorage);
  let beforeWorldSession=store.load();
  // The preparation controls must apply to the next actual play entry even

@@ -34,3 +34,30 @@ export function importCaptureSharedWorldV1({
   throw new Error('Archive Exploration non conforme après importation');
  return Object.freeze({worldId:official.id,alreadyAvailable:false});
 }
+
+// Before switching to the guest's imported room world, the Exploration
+// library requires the current author draft to be archived unchanged.
+// Preserve it additively, using ONLY the official WorldDocument archive.
+// Never overwrite a map with the same ID but different authored content.
+export function preserveCaptureGuestDraftV1({
+ activeDraft,room,library,fingerprintOfficial
+}={}){
+ if(!activeDraft)return Object.freeze({archived:false});
+ if(!room?.worldId||!room?.worldFingerprint||
+    typeof library?.save!=='function'||typeof library?.list!=='function'||
+    typeof library?.load!=='function'||typeof fingerprintOfficial!=='function')
+  throw new TypeError('Bibliothèque et monde officiel indisponibles');
+ const currentFingerprint=fingerprintOfficial(activeDraft);
+ if(activeDraft.id===room.worldId&&currentFingerprint!==room.worldFingerprint)
+  throw new Error('Ta carte active a le même nom que celle du créateur mais un contenu différent. Enregistre-la sous un autre nom dans Exploration avant de recevoir le monde.');
+ const archived=library.list().some(entry=>entry.id===activeDraft.id);
+ if(archived){
+  if(fingerprintOfficial(library.load(activeDraft.id))!==currentFingerprint)
+   throw new Error('Enregistre les modifications de ta carte active dans le World Builder avant de rejoindre. Aucune modification écrasée.');
+  return Object.freeze({archived:false});
+ }
+ library.save(activeDraft,{replace:false});
+ if(fingerprintOfficial(library.load(activeDraft.id))!==currentFingerprint)
+  throw new Error('Sauvegarde du monde actif non conforme, changement de monde refusé');
+ return Object.freeze({archived:true});
+}

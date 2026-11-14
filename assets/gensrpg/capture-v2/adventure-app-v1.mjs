@@ -37,7 +37,8 @@ import {withSelectedAdventureWorldV1,resolveSelectedAdventureWorldV1,
 import {createCaptureRoomTransportV1} from './adventure-multiplayer-transport-v1.mjs';
 import {createCaptureSupabaseClientV1} from './adventure-multiplayer-provider-v1.mjs';
 import {captureRoomEntryPresentationV1} from './adventure-multiplayer-entry-presentation-v1.mjs';
-import {importCaptureSharedWorldV1} from './adventure-multiplayer-world-transfer-v1.mjs';
+import {importCaptureSharedWorldV1,preserveCaptureGuestDraftV1}
+ from './adventure-multiplayer-world-transfer-v1.mjs';
 import {preflightCaptureOnlineWorldV1,publishCaptureInitialPositionV1
 } from './adventure-multiplayer-play-bridge-v1.mjs';
 import {attachCaptureExplorationPositionEventsV1
@@ -1777,6 +1778,12 @@ $('adventure-room-enter').addEventListener('click',guardedAsync(async()=>{
   const packet=await captureRoomProvider().fetchWorldDocument({roomId:connection.roomId});
   if(!packet)
    throw new Error('Le monde du créateur est encore en cours d’envoi. Réessaie après son entrée en jeu.');
+  // Switching to the host WorldDocument must never erase an unfinished
+  // local author draft; archive it via the ONLY official Exploration library.
+  preserveCaptureGuestDraftV1({
+   activeDraft:readWorldAssemblerDraft(window.localStorage),
+   room:server,library:worldLibrary,fingerprintOfficial:playWorldFingerprint
+  });
   const imported=importCaptureSharedWorldV1({
    connection,room:server,packet,library:worldLibrary,
    importOfficial:importWorldBuilderDocument,fingerprintOfficial:playWorldFingerprint

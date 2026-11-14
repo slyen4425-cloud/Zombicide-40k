@@ -214,6 +214,7 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   assert.equal(save.processedEncounterKeys.length,1);
   assert.deepEqual(await canvas.evaluate(()=>window.__sculptPlayProbe().actor),point);
   await start();
+  await loadSavedAdventureThroughGallery(adventure);
   await adventure.locator('#adventure-play').tap();
   await map.locator('#play-menu-button:visible').waitFor();
   assert.deepEqual(await canvas.evaluate(()=>window.__sculptPlayProbe().actor),point);
@@ -363,6 +364,7 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
   assert.equal(save.processedEncounterKeys.length,1);
   assert.deepEqual(await canvas.evaluate(()=>window.__sculptPlayProbe().actor),point);
   await start();
+  await loadSavedAdventureThroughGallery(adventure);
   await adventure.locator('#adventure-play').tap();
   await map.locator('#play-menu-button:visible').waitFor();
   assert.deepEqual(await canvas.evaluate(()=>window.__sculptPlayProbe().actor),point);

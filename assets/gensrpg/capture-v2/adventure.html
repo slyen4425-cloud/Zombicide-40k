@@ -44,6 +44,10 @@
    <section class="adventure-hero-section" aria-labelledby="adventure-hero-heading">
     <h3 id="adventure-hero-heading">Mon héros</h3>
     <p class="hint">Choisis directement parmi les 12 modèles officiels du Labo Exploration, ou utilise un héros personnel déjà enregistré.</p>
+    <label for="adventure-player-alias">Nom de mon héros en jeu
+     <input id="adventure-player-alias" type="text" maxlength="48" autocomplete="nickname" placeholder="Ex. Aurore" aria-describedby="adventure-hero-name-hint">
+    </label>
+    <p id="adventure-hero-name-hint" class="hint">Nom affiché au-dessus du héros en exploration et repris comme pseudo du salon multijoueur. Ne renomme pas le modèle officiel.</p>
     <div id="adventure-official-hero-grid" class="adventure-official-hero-grid" aria-label="Les 12 héros officiels" aria-live="polite"></div>
     <details class="adventure-hero-personal">
      <summary>Mes héros enregistrés</summary>
@@ -322,11 +326,8 @@
   </details>
   <section id="adventure-multiplayer-panel" class="adventure-options" aria-labelledby="adventure-multiplayer-heading">
    <h2 id="adventure-multiplayer-heading">Partie en ligne · Monster Capture</h2>
-   <p class="hint">Crée un salon ou rejoins un ami avec son code. Les joueurs gardent leurs propres sauvegardes. Les déplacements partagés et les combats entre joueurs nécessitent encore le raccord Exploration/Combat.</p>
+   <p class="hint">Crée un salon ou rejoins un ami avec son code. Les joueurs gardent leurs propres sauvegardes. Les déplacements partagés et les combats entre joueurs nécessitent encore le raccord Exploration/Combat. Le nom est choisi dans « Mon héros », au début de la partie.</p>
    <div class="fields">
-    <label for="adventure-player-alias">Mon pseudo
-     <input id="adventure-player-alias" type="text" maxlength="48" autocomplete="nickname" placeholder="Joueur">
-    </label>
     <label for="adventure-room-capacity">Nombre maximal de joueurs
      <input id="adventure-room-capacity" type="number" min="2" max="32" step="1" value="2">
     </label>

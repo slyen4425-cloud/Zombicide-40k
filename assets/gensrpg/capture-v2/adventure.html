@@ -117,6 +117,13 @@
    <summary>⚙️ Réglages avancés de l'aventure</summary>
    <p class="hint">Facultatif : personnalise la caméra, l'XP, les objets, le multijoueur et les règles du créateur. Les valeurs actuelles sont conservées si tu ne modifies rien.</p>
    <div class="adventure-advanced-sections">
+    <details id="adventure-starter-rarity-options" class="adventure-options">
+     <summary>Créatures de départ</summary>
+     <label class="setting-toggle">Autoriser Mythiques et Légendaires au démarrage
+      <input id="adventure-starter-all-rarities" type="checkbox">
+     </label>
+     <p class="hint">Désactivé par défaut : le jeu vitrine commence uniquement avec des créatures Rare. Les autres rangs restent rencontrables et collectionnables.</p>
+    </details>
     <details id="adventure-start-options" class="adventure-options">
      <summary>Caméra de départ</summary>
     <fieldset class="adventure-camera-start">
@@ -383,7 +390,7 @@
  <dialog id="adventure-starter-picker" class="adventure-starter-picker" aria-labelledby="adventure-starter-picker-title">
   <div class="adventure-picker-header">
    <div><h2 id="adventure-starter-picker-title">Choisir une créature</h2>
-    <p class="hint">Toutes les créatures publiées du Bestiaire officiel.</p></div>
+    <p class="hint">Choisis une créature publiée. Mythiques et Légendaires sont disponibles seulement si l'option avancée est activée.</p></div>
    <button id="adventure-starter-picker-close" type="button" aria-label="Fermer le Bestiaire">✕</button>
   </div>
   <label for="adventure-starter-search">Rechercher une créature</label>

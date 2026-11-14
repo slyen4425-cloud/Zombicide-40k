@@ -136,6 +136,9 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
    return /^hero\.user\.[a-f0-9-]{36}$/.test(doc?.querySelector('#adventure-hero-choice')?.value??'');
   },null,{timeout:45000});
   assert.equal(await nativeHeroes.first().getAttribute('aria-pressed'),'true');
+  await adventureFrame.locator('#adventure-player-alias').fill('Mira');
+  assert.equal(await adventureFrame.locator('#adventure-player-alias').isVisible(),true,
+   'Hero nickname is in the immediately visible new-game section');
   const initialStarter=await adventureFrame.locator('#adventure-starter').inputValue();
   await adventureFrame.locator('#adventure-starter-cards .adventure-starter-card').first().tap();
   await adventureFrame.locator('#adventure-starter-picker').waitFor({state:'visible'});
@@ -295,6 +298,9 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
    return saved?JSON.parse(saved):null;
   });
   assert.equal(stored?.schema,'gensrpg-capture-adventure-save-v1');
+  assert.equal(stored.hero?.displayName,'Mira',
+   'The new-game nickname belongs to AdventureSession, not the template hero');
+  assert.match(saved,/Héros Mira/);
   assert.equal(stored?.rules?.xp?.baseVictoryXp,777);
   assert.equal(stored?.rules?.heroProgression?.enabled,true,
     'real Aventure editor must persist author hero opt-in');

@@ -436,6 +436,8 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
       src:w.location.pathname,probe:w.__sculptPlayProbe?.()};
   });
   assert.equal(launched.session,stored.sessionId);
+  assert.equal(launched.probe?.heroDisplayName,'Mira',
+   'The exact saved hero nickname must reach the official Exploration renderer');
   assert.match(launched.src,/vendor\/exploration-lab\/sculpt-lab\.html$/);
   assert.equal(launched.probe.editorHidden,true);
   const playArea=await resumed.locator('#adventure-play-frame').evaluate(frame=>{

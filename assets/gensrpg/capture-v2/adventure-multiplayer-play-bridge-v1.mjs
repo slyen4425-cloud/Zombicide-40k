@@ -29,7 +29,7 @@ export async function preflightCaptureOnlineWorldV1(input={}){
   sessionId:input.sessionId});
 }
 export async function publishCaptureInitialPositionV1({
- context,transport,navigation,world,serializeOfficialWorld
+ context,transport,navigation,world,serializeOfficialWorld,onProgress=()=>{}
 }={}){
  if(context===null)return null;
  if(!context?.room||typeof transport?.reportPosition!=='function'||
@@ -48,10 +48,16 @@ export async function publishCaptureInitialPositionV1({
    throw new Error('Le partage du WorldDocument officiel est indisponible');
   // The host's canonical document is validated by Exploration before ANY
   // network publication. The room's bound identity remains authoritative.
+  onProgress('Préparation de la carte officielle…');
   const serializedDocument=serializeOfficialWorld(world);
+  if(new TextEncoder().encode(serializedDocument).byteLength>8388608)
+   throw new Error('La carte dépasse 8 Mio. Réduis-la dans le World Builder avant de la partager.');
+  onProgress('Association du salon à ta carte…');
   await transport.bindWorld({roomId:room.roomId,navigation});
+  onProgress('Transmission de la carte à tes invités…');
   await transport.publishWorldDocument({roomId:room.roomId,
    worldId,worldFingerprint,serializedDocument});
  }
+ onProgress('Synchronisation des positions des joueurs…');
  return transport.reportPosition({roomId:room.roomId,navigation});
 }

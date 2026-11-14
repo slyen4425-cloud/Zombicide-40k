@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {captureRoomEntryPresentationV1} from '../assets/gensrpg/capture-v2/adventure-multiplayer-entry-presentation-v1.mjs';
+import {SHOWCASE_ADVENTURE_RULES_V1} from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 
 const textFile=relative=>readFileSync(new URL('../'+relative,import.meta.url),'utf8');
 const host={roomId:'r1',userId:'u1',role:'host'};
@@ -9,6 +10,9 @@ const guest={roomId:'r1',userId:'u2',role:'guest'};
 const room={open:true,sessionId:'s1',worldId:null,worldFingerprint:null,
  members:[{id:'u1',role:'host'},{id:'u2',role:'guest'}]};
 const session=(id='s1',world=null)=>({sessionId:id,world:{mapRef:world},status:'configured'});
+const hostSetup={sessionId:'s1',starterCount:2,rules:SHOWCASE_ADVENTURE_RULES_V1};
+const guestSession=(world='world-one')=>({...session('g1',world),rules:SHOWCASE_ADVENTURE_RULES_V1,
+ party:{active:{instanceId:'a'},reserve:[{instanceId:'b'}]}});
 
 test('one host session only: mismatched save cannot enter, original save can',()=>{
  const blocked=captureRoomEntryPresentationV1({connection:host,room,session:session('s2')});
@@ -16,20 +20,21 @@ test('one host session only: mismatched save cannot enter, original save can',()
  const ready=captureRoomEntryPresentationV1({connection:host,room,session:session()});
  assert.equal(ready.action,'enter');assert.equal(ready.enabled,true);
 });
-test('invited newcomer gets a real preparation action instead of dead-end lobby',()=>{
- const invited=captureRoomEntryPresentationV1({connection:guest,room,session:null});
- assert.equal(invited.action,'prepare');assert.equal(invited.enabled,true);
- assert.match(invited.hint,/propre aventure/i);
- const waiting=captureRoomEntryPresentationV1({connection:guest,room,session:session('g1','world-one')});
- assert.equal(waiting.enabled,false);assert.match(waiting.hint,/créateur doit/i);
+test('invited newcomer waits for host rules and official world, not a second empty game',()=>{
+ const missing=captureRoomEntryPresentationV1({connection:guest,room,session:null});
+ assert.equal(missing.enabled,false);assert.match(missing.hint,/configuration de l.hôte/i);
+ const waiting=captureRoomEntryPresentationV1({connection:guest,room,session:null,hostSetup});
+ assert.equal(waiting.enabled,false);assert.match(waiting.hint,/entrer en jeu/i);
 });
 test('guest can enter only when host world is bound and local map agrees',()=>{
  const bound={...room,worldId:'world-one',worldFingerprint:'official-fingerprint'};
- const wrong=captureRoomEntryPresentationV1({connection:guest,room:bound,session:session('g1','world-two'),localWorldFingerprint:null});
+ const wrong=captureRoomEntryPresentationV1({connection:guest,room:bound,session:guestSession('world-two'),hostSetup,localWorldFingerprint:null});
  assert.equal(wrong.action,'import');assert.equal(wrong.enabled,true);
- const same=captureRoomEntryPresentationV1({connection:guest,room:bound,session:session('g1','world-one'),localWorldFingerprint:'official-fingerprint'});
+ const same=captureRoomEntryPresentationV1({connection:guest,room:bound,session:guestSession(),hostSetup,localWorldFingerprint:'official-fingerprint'});
  assert.equal(same.action,'enter');assert.equal(same.enabled,true);
  assert.match(same.hint,/empreinte exacte/i);
+ const badRules=captureRoomEntryPresentationV1({connection:guest,room:bound,session:session('g1','world-one'),hostSetup,localWorldFingerprint:'official-fingerprint'});
+ assert.equal(badRules.action,'prepare','guest may not enter under independent rules');
 });
 test('unknown room, unknown member and disconnected player never obtain entry',()=>{
  assert.equal(captureRoomEntryPresentationV1({connection:guest,room:{...room,open:false},session:session()}).enabled,false);

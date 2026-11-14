@@ -89,8 +89,11 @@ test('the real Adventure click path invokes official fingerprint and guarded roo
  assert.match(s,/publishCaptureInitialPositionV1/);
  const begin=s.indexOf('const onlineContext=await preflightCaptureOnlineWorldV1(');
  const start=s.indexOf('const result=startAdventureExplorationV1(');
- const report=s.indexOf('await publishCaptureInitialPositionV1(');
  const frame=s.indexOf('frame.src=url.href;');
- assert.ok(begin>=0 && start>begin && report>start && frame>report);
+ const share=s.indexOf('pendingCaptureHostShare=shareForRoom',frame);
+ const send=s.indexOf('void publishPendingCaptureWorld()',frame);
+ assert.ok(begin>=0 && start>begin && frame>start && share>frame && send>share,
+  'native Exploration must start before any network upload blocks the host');
+ assert.doesNotMatch(s.slice(start,frame),/await publishCaptureInitialPositionV1/);
  assert.doesNotMatch(s,/\bz40k(ApplySnapshot|Subscribe|PushState)\b/);
 });

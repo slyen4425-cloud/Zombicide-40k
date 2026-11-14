@@ -39,6 +39,8 @@ import {createCaptureSupabaseClientV1} from './adventure-multiplayer-provider-v1
 import {captureRoomEntryPresentationV1} from './adventure-multiplayer-entry-presentation-v1.mjs';
 import {importCaptureSharedWorldV1,preserveCaptureGuestDraftV1}
  from './adventure-multiplayer-world-transfer-v1.mjs';
+import {captureGuestSessionMatchesHostSetupV1}
+ from './adventure-multiplayer-host-setup-v1.mjs';
 import {preflightCaptureOnlineWorldV1,publishCaptureInitialPositionV1
 } from './adventure-multiplayer-play-bridge-v1.mjs';
 import {attachCaptureExplorationPositionEventsV1
@@ -739,6 +741,7 @@ function setAdventureStartView(view){
   (view==='load'||(view==='new'&&newlyCreatedAdventureId===state.sessionId));
  $('adventure-session-panel').hidden=!showActiveSession;
  if(view==='load')renderPortfolioOptions();
+ if(view==='new'&&activeCaptureRoom?.role==='guest')applyCaptureGuestSetup();
 }
 for(const kind of ['new','load']){
  const button=$('adventure-start-'+kind);
@@ -910,7 +913,7 @@ function guardedAsync(callback){
 // The real network is started by an explicit player click, never during
 // adventure boot or legacy shell startup.
 let captureRoomTransport=null,activeCaptureRoom=null,activeCaptureExplorationEvents=null;
-let lastCaptureRoomState=null;
+let lastCaptureRoomState=null,captureSharedRoomSetup=null,pendingCaptureHostShare=null;
 let activeCapturePeerRelay=null;
 // Display-only peer projections. Never persisted and never used for movement.
 const captureRemotePositions=new Map();
@@ -944,11 +947,38 @@ function syncCaptureRoomEntry(){
  const p=captureRoomEntryPresentationV1({
   connection:activeCaptureRoom,room:lastCaptureRoomState,
   session:store?.load()??null,selectedWorldId:$('adventure-world-select').value,
-  localWorldFingerprint
+  hostSetup:captureSharedRoomSetup,localWorldFingerprint
  });
  button.hidden=!p.visible;button.disabled=!p.enabled;
  button.textContent=p.label;text(hint,p.hint);hint.hidden=!p.visible;
  return p;
+}
+function applyCaptureGuestSetup(){
+ const guest=activeCaptureRoom?.role==='guest';
+ const setup=guest?captureSharedRoomSetup:null;
+ const config=document.querySelector('.adventure-advanced-sections');
+ for(const item of config.children){
+  if(item.id!=='adventure-multiplayer-panel')item.hidden=Boolean(guest);
+ }
+ $('adventure-starter-count').disabled=Boolean(guest);
+ $('adventure-world-builder').hidden=Boolean(guest);
+ $('adventure-save-rules').disabled=Boolean(guest);
+ $('adventure-save-control').disabled=Boolean(guest);
+ $('adventure-create').textContent=guest?'Préparer mon héros pour rejoindre':'Créer la partie';
+ $('adventure-game-heading').textContent=guest?'Rejoindre la partie du créateur':'Préparer mon aventure';
+ $('adventure-start-new').textContent=guest?'Nouveau héros':'Nouvelle partie';
+ $('adventure-start-load').textContent=guest?'Reprendre mon héros':'Charger partie';
+ $('adventure-start-load').disabled=Boolean(guest);
+ if(!setup)return;
+ rules=setup.rules;setFields(rules);
+ $('adventure-starter-count').value=String(setup.starterCount);
+ renderStarterReserveSelectors();fillPublicSpecies();updatePreview();
+ $('adventure-creator-camera-angle').value=String(setup.cameraPolicy.angleDeg);
+ $('adventure-creator-camera-zoom').value=String(setup.cameraPolicy.zoomPercent??175);
+ $('adventure-creator-camera-zoom-value').textContent=$('adventure-creator-camera-zoom').value+' %';
+ const worldId=lastCaptureRoomState?.worldId;
+ if(worldId&&worldLibrary?.list().some(w=>w.id===worldId))
+  $('adventure-world-select').value=worldId;
 }
 function renderCaptureRoomMembers(state){
  lastCaptureRoomState=state;syncCaptureRoomEntry();
@@ -1011,14 +1041,18 @@ async function connectCaptureRoom(response){
   onStatus:message=>{if(message!=='Salon connecté')onlineRoomStatus(message,true);}
  });
  const state=await transport.inspectRoom(response.roomId);
+ captureSharedRoomSetup=await transport.fetchRoomSetup({roomId:response.roomId});
  renderCaptureRoomMembers(state);
  if(response.role==='guest'){
   const alias=$('adventure-player-alias').value;
-  setAdventureStartView(store?.load()?'load':'new');
-  // Re-select the exact WorldDocument of an already saved guest session.
-  refreshWorldChoices(store?.load()??null);
+  const current=store?.load();
+  const valid=captureGuestSessionMatchesHostSetupV1({
+   session:current,setup:captureSharedRoomSetup,room:state
+  });
+  setAdventureStartView(valid?'load':'new');
+  refreshWorldChoices(valid?current:null);
   $('adventure-player-alias').value=alias;
-  showSave();
+  applyCaptureGuestSetup();showSave();
  }
 }
 async function copyCaptureRoomInviteCode(){
@@ -1081,7 +1115,8 @@ $('adventure-room-leave').addEventListener('click',guardedAsync(async()=>{
  activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
  activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
  await captureRoomProvider().leave({roomId:room.roomId});
- activeCaptureRoom=null;lastCaptureRoomState=null;syncCaptureRoomEntry();
+ activeCaptureRoom=null;lastCaptureRoomState=null;captureSharedRoomSetup=null;
+ pendingCaptureHostShare=null;applyCaptureGuestSetup();syncCaptureRoomEntry();
  $('adventure-room-share-actions').hidden=true;
  text($('adventure-room-code-label'),"Code reçu d'un ami");
  captureRemotePositions.clear();renderCaptureRemotePositions();
@@ -1495,8 +1530,20 @@ $('adventure-create').addEventListener('click',guarded(()=>{
  // and its invited players still belong to exactly one saved session.
  if(activeCaptureRoom?.role==='host')
   throw new Error('Ce salon est lié à une sauvegarde. Entre avec cette partie ou quitte le salon avant d’en créer une autre.');
+ const guest=activeCaptureRoom?.role==='guest';
+ const setup=guest?captureSharedRoomSetup:null;
+ if(guest){
+  if(!setup||!lastCaptureRoomState?.worldId||!lastCaptureRoomState?.worldFingerprint)
+   throw new Error('Le créateur doit partager sa configuration et son monde avant la préparation.');
+  if(playWorldFingerprint(worldLibrary?.load(lastCaptureRoomState.worldId))!==
+     lastCaptureRoomState.worldFingerprint)
+   throw new Error('Reçois la carte du créateur avant de préparer ton héros.');
+  if(Number($('adventure-starter-count').value)!==setup.starterCount)
+   throw new Error('Le nombre de créatures est fixé par le créateur.');
+  $('adventure-world-select').value=lastCaptureRoomState.worldId;
+ }
  if(!published.length)throw new Error('Bestiaire officiel indisponible; aucun contenu fictif ne sera utilisé');
- rules=fromFields();
+ rules=guest?setup.rules:fromFields();
  const id=()=>crypto.randomUUID();
  const now=new Date().toISOString();
  const starterIds=getStarterSpeciesIds();
@@ -1506,10 +1553,10 @@ $('adventure-create').addEventListener('click',guarded(()=>{
    reserveInstanceIds:starterIds.slice(1).map(()=>id()),creatorId:id()},now,
   heroDefinitionId:$('adventure-hero-choice').value||null,
   heroDisplayName:$('adventure-player-alias').value.trim()||null,
-  cameraAngle:Number($('adventure-creator-camera-angle').value),
-  cameraZoomPercent:Number($('adventure-creator-camera-zoom').value)
+  cameraAngle:guest?setup.cameraPolicy.angleDeg:Number($('adventure-creator-camera-angle').value),
+  cameraZoomPercent:guest?(setup.cameraPolicy.zoomPercent??175):Number($('adventure-creator-camera-zoom').value)
  });
- const configured=updateAdventureSessionControlV1({
+ const configured=guest?state:updateAdventureSessionControlV1({
   session:state,settings:sessionControlFromFields(),now
  });
  const worldId=$('adventure-world-select').value;
@@ -1517,7 +1564,8 @@ $('adventure-create').addEventListener('click',guarded(()=>{
  portfolio.create(created);
  newlyCreatedAdventureId=created.sessionId;
  setSessionControlFields(created);
- stateMessage('Partie '+activeSaveTitle(created)+' créée. Tu peux entrer dans le monde.');
+ stateMessage((guest?'Héros prêt pour la partie de l’hôte : ':'Partie ')+activeSaveTitle(created)+
+  ' · '+(guest?'Règles communes reçues.':'Tu peux entrer dans le monde.'));
  showSave();updatePreview();
 }));
 $('adventure-world-builder').addEventListener('click',guarded(()=>{
@@ -1580,6 +1628,31 @@ const detachShellFullscreen=captureShellFullscreenOwner()?.onGameFullscreenChang
 window.addEventListener('pagehide',()=>detachShellFullscreen?.(),{once:true});
 syncFullscreenControl();
 
+async function publishPendingCaptureWorld(){
+ const shared=pendingCaptureHostShare;
+ if(!shared||!activeCaptureRoom||activeCaptureRoom.roomId!==shared.context.room.roomId)return;
+ const retry=$('adventure-room-retry-share'),output=$('adventure-room-share-status');
+ retry.hidden=true;
+ text(output,'Synchronisation multijoueur démarrée…');
+ try{
+  await publishCaptureInitialPositionV1({
+   ...shared,onProgress:message=>{
+    if(pendingCaptureHostShare===shared)text(output,message);
+   }
+  });
+  if(pendingCaptureHostShare!==shared)return;
+  text(output,'Monde partagé : les invités peuvent récupérer la carte et entrer.');
+  retry.hidden=true;
+ }catch(error){
+  if(pendingCaptureHostShare!==shared)return;
+  text(output,'Échec du partage réseau : '+error.message+
+   ' — tu peux continuer à jouer et réessayer depuis le salon.');
+  retry.hidden=false;
+ }
+}
+$('adventure-room-retry-share').addEventListener('click',()=>{
+ void publishPendingCaptureWorld();
+});
 const journeyLoading=$('adventure-launch-loading');
 let adventureLaunchStartedAt=null;
 let journeyLaunchEpoch=0;
@@ -1637,11 +1710,15 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  const launchEpoch=++journeyLaunchEpoch;
  try{
  const selectedWorldId=$('adventure-world-select').value;
+ if(activeCaptureRoom?.role==='guest'&&
+    !captureGuestSessionMatchesHostSetupV1({
+     session:store?.load(),setup:captureSharedRoomSetup,room:lastCaptureRoomState
+    }))throw new Error('Cette sauvegarde ne suit pas les règles de l’hôte. Prépare ton héros dans le salon avant d’entrer.');
  let world=readWorldAssemblerDraft(window.localStorage);
  let beforeWorldSession=store.load();
  // The preparation controls must apply to the next actual play entry even
  // when the player didn't reopen the creator's advanced settings.
- if(beforeWorldSession&&beforeWorldSession.status!=='finished'){
+ if(beforeWorldSession&&beforeWorldSession.status!=='finished'&&!activeCaptureRoom){
   const angleDeg=Number($('adventure-creator-camera-angle').value);
   const zoomPercent=Number($('adventure-creator-camera-zoom').value);
   if(beforeWorldSession.cameraPolicy?.angleDeg!==angleDeg||
@@ -1698,10 +1775,12 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  // Initial peer position comes from the SAME official Exploration checkpoint.
  // Future movement must wait for a documented Exploration change event,
  // not monkey-patching Storage or a duplicate navigation loop.
- await publishCaptureInitialPositionV1({
+ // Network upload is a room concern, NOT a prerequisite for rendering the
+ // host's native world. Never trap the player behind a spinning overlay.
+ const shareForRoom=onlineContext?{
   context:onlineContext,transport:captureRoomTransport,
   navigation:result.navigation,world,serializeOfficialWorld:serializeWorldBuilderDraft
- });
+ }:null;
  if(launchEpoch!==journeyLaunchEpoch)return;
  // Native Exploration consumes the original selected HeroDefinition by ID only.
  writeAdventureHeroSelectionGrantV1({storage:window.sessionStorage,
@@ -1801,6 +1880,10 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  document.querySelector('[data-adventure-app]').hidden=true;
  document.body.dataset.adventurePlaying='true';
  resetAdventureCombatHud();
+ if(shareForRoom){
+  pendingCaptureHostShare=shareForRoom;
+  void publishPendingCaptureWorld();
+ }
  // Capture's parent owns native fullscreen and keeps Sac/Équipe/Retour above
  // the official Exploration iframe. If denied, existing viewport CSS applies.
  }catch(error){
@@ -1829,14 +1912,17 @@ $('adventure-room-enter').addEventListener('click',guardedAsync(async()=>{
   });
   const nickname=$('adventure-player-alias').value;
   const session=store?.load();
-  setAdventureStartView(session?.world?.mapRef===imported.worldId?'load':'new');
-  refreshWorldChoices(session?.world?.mapRef===imported.worldId?session:null);
+  const valid=captureGuestSessionMatchesHostSetupV1({
+   session,setup:captureSharedRoomSetup,room:server
+  });
+  setAdventureStartView(valid?'load':'new');
+  refreshWorldChoices(valid?session:null);
   $('adventure-world-select').value=imported.worldId;
   $('adventure-player-alias').value=nickname;
-  showSave();syncCaptureRoomEntry();
+  applyCaptureGuestSetup();showSave();syncCaptureRoomEntry();
   stateMessage(imported.alreadyAvailable
-   ?'Même carte officielle vérifiée. Tu peux reprendre ta partie ou créer ton héros.'
-   :'Monde du créateur importé dans Exploration. Choisis ton héros et crée ta partie pour le rejoindre.');
+   ?'Même carte officielle vérifiée. Tu peux reprendre ton héros ou en préparer un autre.'
+   :'Carte du créateur reçue. Prépare simplement ton héros et ton équipe selon les règles de sa partie.');
   return;
  }
  if(p.action==='prepare'){
@@ -1846,8 +1932,8 @@ $('adventure-room-enter').addEventListener('click',guardedAsync(async()=>{
   if(roomWorldId&&worldLibrary?.list().some(w=>w.id===roomWorldId))
    $('adventure-world-select').value=roomWorldId;
   $('adventure-player-alias').value=nickname;
-  syncCaptureRoomEntry();
-  stateMessage('Salon rejoint : choisis ton héros et une créature. Le monde officiel sera conservé pour cette nouvelle partie.');
+  applyCaptureGuestSetup();syncCaptureRoomEntry();
+  stateMessage('Règles de l’hôte imposées : choisis ton héros et ton équipe, sans régler une autre partie.');
   return;
  }
  if(p.action!=='enter')throw new Error(p.hint);
@@ -1896,6 +1982,7 @@ $('adventure-save-delete').addEventListener('click',guardedAsync(async()=>{
 }));
 
 $('adventure-save-control').addEventListener('click',guarded(()=>{
+ if(activeCaptureRoom)throw new Error('Quitte le salon avant de modifier les règles du créateur.');
  const session=store.load();
  const settings=sessionControlFromFields(),now=new Date().toISOString();
  if(!session){
@@ -1925,6 +2012,7 @@ $('adventure-save-rules').addEventListener('click',guarded(()=>{
 // The preparation screen and the specialist editor are just two views of
 // the SAME rules and Core store. Save before Shell replaces the iframe.
 function saveCurrentAdventureRules(){
+ if(activeCaptureRoom)throw new Error('Les règles de l’hôte sont verrouillées pendant le salon. Quitte le salon avant de les modifier.');
  rules=fromFields();
  const current=store.load();
  if(current)store.save({...current,rules,updatedAt:new Date().toISOString()});

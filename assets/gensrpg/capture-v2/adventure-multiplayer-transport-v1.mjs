@@ -8,6 +8,8 @@ import {
 import {
  capturePeerPositionFromOfficialNavigationV1,capturePeerPositionListV1
 } from './adventure-peer-position-v1.mjs';
+import {captureHostSetupFromSessionV1,captureRoomSetupFromServerV1}
+ from './adventure-multiplayer-host-setup-v1.mjs';
 
 const ROOM_TABLE='gensrpg_capture_rooms';
 const MEMBERS_TABLE='gensrpg_capture_room_members';
@@ -83,6 +85,7 @@ export function createCaptureRoomTransportV1({client}={}){
  }
  async function create({session,name,maxPlayers=2}={}){
   const settings=verifySession(session);
+  const setup=captureHostSetupFromSessionV1(session);
   const label=displayName(name);
   if(!Number.isSafeInteger(maxPlayers)||maxPlayers<2||maxPlayers>32)
    throw new RangeError('Capacité autorisée : entre 2 et 32 joueurs.');
@@ -92,7 +95,27 @@ export function createCaptureRoomTransportV1({client}={}){
    p_host_is_gm:settings.hostIsGameMaster,
    p_permissions:settings.guestPermissions,p_display_name:label
   }),'Création du salon Capture'));
+  // The host is the ONLY rules owner. Keep an immutable projection in the
+  // room before accepting guests; abort a partial room on upload failure.
+  try{
+   result(await client.rpc('gensrpg_capture_publish_host_room_setup',{
+    p_room:reply.roomId,p_session:setup.sessionId,p_rules:setup.rules,
+    p_count:setup.starterCount,p_camera:setup.cameraPolicy
+   }),'Publier les règles du créateur');
+  }catch(error){
+   try{await client.rpc('gensrpg_capture_leave_room',{p_room:reply.roomId});}
+   catch{ /* Original upload error remains authoritative. */ }
+   throw error;
+  }
   return Object.freeze({...reply,userId,role:'host'});
+ }
+ async function fetchRoomSetup({roomId}={}){
+  const id=checkUuid(roomId),room=await inspectRoom(id);
+  if(!room?.open)throw new Error('Salon fermé : aucune configuration disponible');
+  const row=result(await client.from('gensrpg_capture_room_setups')
+   .select('room_id,host_session_id,rules,starter_count,camera_policy')
+   .eq('room_id',id).maybeSingle(),'Lire les règles du créateur');
+  return row?captureRoomSetupFromServerV1({room,row}):null;
  }
  async function join({code,name}={}){
   const invitation=typeof code==='string'?code.trim().toUpperCase():'';
@@ -299,7 +322,7 @@ export function createCaptureRoomTransportV1({client}={}){
   const previous=channel;channel=null;
   if(previous)await client.removeChannel(previous);
  }
- return Object.freeze({authenticatedUserId,create,join,inspectRoom,
+ return Object.freeze({authenticatedUserId,create,join,inspectRoom,fetchRoomSetup,
   bindWorld,publishWorldDocument,fetchWorldDocument,
   ownPositionSequence,reportPosition,inspectPositions,observe,leave,dispose});
 }

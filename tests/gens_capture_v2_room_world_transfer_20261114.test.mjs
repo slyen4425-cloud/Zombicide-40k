@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {importCaptureSharedWorldV1,preserveCaptureGuestDraftV1} from '../assets/gensrpg/capture-v2/adventure-multiplayer-world-transfer-v1.mjs';
 import {captureRoomEntryPresentationV1} from '../assets/gensrpg/capture-v2/adventure-multiplayer-entry-presentation-v1.mjs';
+import {createAdventureSessionV1,SHOWCASE_ADVENTURE_RULES_V1} from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 
 const get=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
 const guest={userId:'u2',role:'guest',roomId:'r1'};
-const room={open:true,worldId:'forest-world',worldFingerprint:'world:42',
+const room={open:true,sessionId:'host-session',worldId:'forest-world',worldFingerprint:'world:42',
  members:[{id:'u1',role:'host'},{id:'u2',role:'guest'}]};
 const original={id:'forest-world',signature:42,areas:[{id:'area-1'}]};
 const packet={worldId:room.worldId,worldFingerprint:room.worldFingerprint,
@@ -60,16 +61,30 @@ test('existing official WorldDocument with same id but different content is kept
  assert.equal(source.rows.get('forest-world').signature,99);
  assert.equal(source.logs.length,0);
 });
-test('guest choice depends on verified official fingerprint, not merely the map ID',()=>{
- const session={sessionId:'guest-save',status:'configured',
-  world:{mapRef:'forest-world'}};
+test('guest choice depends on verified fingerprint AND the host rules',()=>{
+ const hostSetup={sessionId:'host-session',rules:SHOWCASE_ADVENTURE_RULES_V1,
+  starterCount:1,cameraPolicy:{angleDeg:45,zoomPercent:175}};
+ const newGuest=createAdventureSessionV1({
+  bestiaryCards:[{id:'creature-a',name:'Moussado',rarity:'rare',
+   skills:[{slot:'a',name:'Coup',state:'ready'}]}],
+  starterId:'creature-a',starterIds:['creature-a'],rules:hostSetup.rules,
+  ids:{sessionId:'guest-save',instanceId:'guest-creature-1',creatorId:'guest-creator'},
+  now:'2026-11-14T20:30:00Z'
+ });
+ const session={...newGuest,world:{mapRef:'forest-world',position:null}};
  const need=captureRoomEntryPresentationV1({
-  connection:guest,room,session,selectedWorldId:'forest-world',localWorldFingerprint:'other'});
+  connection:guest,room,session,hostSetup,selectedWorldId:'forest-world',
+  localWorldFingerprint:'other'});
  assert.equal(need.action,'import');
  const ready=captureRoomEntryPresentationV1({
-  connection:guest,room,session,selectedWorldId:'forest-world',localWorldFingerprint:'world:42'});
+  connection:guest,room,session,hostSetup,selectedWorldId:'forest-world',
+  localWorldFingerprint:'world:42'});
  assert.equal(ready.action,'enter');
  assert.equal(ready.enabled,true);
+ const noHost=captureRoomEntryPresentationV1({
+  connection:guest,room,session,selectedWorldId:'forest-world',
+  localWorldFingerprint:'world:42'});
+ assert.equal(noHost.enabled,false,'guest cannot enter without host rules');
 });
 test('migration restricts read to members, uploads to host, keeps room binding sole owner and closes cleanly',()=>{
  const sql=get('supabase/migrations/20261114192645_gensrpg_capture_room_world_document_v1.sql');

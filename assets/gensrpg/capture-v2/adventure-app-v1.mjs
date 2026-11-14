@@ -337,27 +337,8 @@ async function loadOfficialHeroGallery(){
   const catalog=await loadOfficialHeroCatalogV1({baseUrl:OFFICIAL_EXPLORATION_HERO_ROOT});
   officialHeroCatalog=catalog;
   grid.replaceChildren();
-  // Installing a model fetches 48 native sprites only on an explicit tap.
-  // An identical saved hero is reused by comparing its original south frame
-  // rather than persisting a duplicate catalog or a second ID authority.
-  async function findInstalled(hero,store){
-   const candidates=(await store.list()).filter(record=>
-    record.name===hero.name&&record.mapVisual.animation.mode==='directions'&&
-    record.assets.length===49);
-   if(!candidates.length)return null;
-   const url=new URL(hero.directions.S[0],OFFICIAL_EXPLORATION_HERO_ROOT);
-   if(url.origin!==window.location.origin)throw Error('Image officielle hors origine');
-   const response=await fetch(url.href);
-   if(!response.ok)throw Error('Sprite officiel manquant : '+hero.name);
-   const reference=new Uint8Array(await response.arrayBuffer());
-   for(const record of candidates){
-    const base=record.assets.find(asset=>asset.id===record.mapVisual.assetId)?.blob;
-    if(!base||base.size!==reference.length)continue;
-    const saved=new Uint8Array(await base.arrayBuffer());
-    if(saved.every((byte,i)=>byte===reference[i]))return record;
-   }
-   return null;
-  }
+  // Official Exploration installer is the only authority for identity reuse,
+  // exact sprite-byte comparison and correcting an unmodified preset scale.
   function highlight(){
    grid.querySelectorAll('[data-official-hero]').forEach(card=>
     card.setAttribute('aria-pressed',String(card.dataset.officialHero===selectedOfficialHero)));
@@ -379,7 +360,7 @@ async function loadOfficialHeroGallery(){
     text(notice,'Préparation des sprites de '+hero.name+'…');
     try{
      const store=await officialHeroStore();
-     const record=await findInstalled(hero,store)??await installOfficialHeroPresetV1({
+     const record=await installOfficialHeroPresetV1({
       hero,store,baseUrl:OFFICIAL_EXPLORATION_HERO_ROOT
      });
      await fillHeroChoices(record.id);

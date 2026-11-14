@@ -96,7 +96,8 @@ function statGrid(stats,{availablePoints=null,onAllocate=null}={}){
 export function renderAdventureSheetViewV1({
  host,snapshot,tab,portraitUrl=null,heroVisual=null,onAllocate=null,
  onSelectCreature=null,onMoveCreature=null,onMakeActive=null,
- onSummonFragment=null,onUseFragmentXp=null,resolveFragmentIcon=null,resolveItemIcon=null
+ onSummonFragment=null,onUseFragmentXp=null,resolveFragmentIcon=null,resolveItemIcon=null,
+ resolveCollectionPortrait=null,selectedCollectionSpeciesId=null,onInspectCollectionCreature=null
 }={}){
  if(!host||!snapshot)throw new TypeError('A valid active Capture sheet and host are required');
  const content=[];
@@ -167,6 +168,57 @@ export function renderAdventureSheetViewV1({
    content.push(hint('Sélectionne une créature, consulte sa fiche et modifie son ordre. '+
     'La première créature non KO commencera le prochain combat. Les points sont individuels.'));
   }
+ }else if(tab==='collection'){
+  const section=node('section','sheet-collection');
+  section.append(node('h3','','Collection de créatures'));
+  section.append(hint(snapshot.collection.filter(c=>c.owned).length+' / '+
+   snapshot.collection.length+' espèces possédées. Les créatures inconnues restent grisées et leur fiche est verrouillée.'));
+  const chosen=snapshot.collection.find(entry=>
+   entry.owned&&entry.id===selectedCollectionSpeciesId);
+  if(chosen){
+   const back=node('button','sheet-collection-back','← Toute la collection');
+   back.type='button';back.addEventListener('click',()=>onInspectCollectionCreature?.(null));
+   section.append(back);
+   const card=profile({kind:'creature',name:chosen.name,
+    subtitle:({rare:'Rare',mythic:'Mythique',legendary:'Légendaire'})[chosen.rarity]??'Rare',
+    imageUrl:resolveCollectionPortrait?.(chosen.id)??null,
+    elements:chosen.elements,
+    vitals:[['Niveaux possédés',chosen.levels.join(' · ')],
+     ['Exemplaires',chosen.levels.length]]});
+   if(chosen.description)card.append(node('p','sheet-collection-description',chosen.description));
+   const skills=node('section','sheet-collection-skills');
+   skills.append(node('h4','','Capacités publiées'));
+   for(const skill of chosen.skills){
+    skills.append(node('p','sheet-collection-skill',
+     skill.name?(skill.name+' · niv. '+(skill.requiredLevel??1)):
+      'Emplacement sans capacité publiée'));
+   }
+   card.append(skills);section.append(card);
+  }else{
+   const grid=node('div','sheet-collection-grid');
+   for(const entry of snapshot.collection){
+    const control=node(entry.owned?'button':'div',
+     'sheet-collection-card'+(entry.owned?'':' sheet-collection-locked'));
+    if(entry.owned){
+     control.type='button';
+     control.addEventListener('click',()=>onInspectCollectionCreature?.(entry.id));
+    }else{
+     control.setAttribute('aria-label',entry.name+' · créature non possédée · fiche verrouillée');
+    }
+    const url=resolveCollectionPortrait?.(entry.id);
+    if(url){
+     const img=node('img','sheet-collection-portrait');
+     img.src=url;img.alt='';img.loading='lazy';img.decoding='async';
+     control.append(img);
+    }else control.append(node('span','sheet-collection-placeholder','◈'));
+    const info=node('span','sheet-collection-info');
+    info.append(node('strong','',entry.name),
+     node('small','',entry.owned?'Niv. '+entry.levels.join(', '):'Non possédée'));
+    control.append(info);grid.append(control);
+   }
+   section.append(grid);
+  }
+  content.push(section);
  }else if(tab==='inventory'){
   const section=node('section','sheet-inventory');
   const heading=node('div','sheet-inventory-heading');

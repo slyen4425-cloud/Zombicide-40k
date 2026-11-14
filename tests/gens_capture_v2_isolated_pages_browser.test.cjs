@@ -43,6 +43,19 @@ const readSelectedAdventureSave=async element=>element.evaluate(async()=>{
  return selected;
 });
 
+// The new startup explicitly separates NEW from LOAD: after external world
+// authoring, resume the real Core save through the published card interface.
+async function loadSavedAdventureThroughGallery(adventure){
+ await adventure.locator('#adventure-start-load').tap();
+ const card=adventure.locator('#adventure-save-gallery .adventure-save-card').first();
+ await card.waitFor({state:'visible',timeout:45000});
+ assert.match(await card.innerText(),/_Héros/,
+  'a world_hero title must be used instead of technical slot IDs');
+ await card.tap();
+ await adventure.locator('#adventure-save-load').tap();
+ await adventure.locator('#adventure-play:not([disabled])').waitFor({state:'visible',timeout:45000});
+}
+
 // Use the published Bestiary gallery, never the intentionally hidden native select.
 // The single canonical select still owns AdventureSession creation and remains asserted.
 async function chooseStarterThroughBestiary(adventure,{id,name}){
@@ -84,8 +97,23 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   };
   await start();
   const adventure=page.frameLocator('#gensCaptureV2Root iframe');
+  // Choose the actual new-game tab before the native Bestiary becomes visible.
+  await adventure.locator('#adventure-start-new').tap();
   const starter=await chooseStarterThroughBestiary(adventure,{id:'crea_lumilo',name:'Lumilo'});
   await adventure.locator('#adventure-create').tap();
+  const creation=await adventure.locator('body').evaluate(()=>{
+   const el=id=>document.getElementById(id);
+   return {view:document.body.dataset.adventureStartView,
+    status:el('adventure-status')?.textContent,
+    summary:el('adventure-save-summary')?.textContent,
+    sessionPanelHidden:el('adventure-session-panel')?.hidden,
+    playDisabled:el('adventure-play')?.disabled,
+    portfolioIndex:localStorage.getItem('gensrpg.capture.v2.adventure.portfolio.v1')};
+  });
+  assert.equal(creation.sessionPanelHidden,false,
+   'Created session must be visible before entering Exploration: '+JSON.stringify(creation));
+  assert.equal(creation.playDisabled,false,
+   'Created session must enable native play without errors: '+JSON.stringify(creation));
   // Use the real world authoring APIs for a plain, walkable area with a
   // guaranteed Shadow encounter. The battle journal is written by Combat.
   await starter.evaluate(async(_,vendor)=>{
@@ -118,6 +146,7 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   assert.equal(await editor.locator('#world-combat-arena').inputValue(),'snow');
   await editor.close();
   await page.bringToFront();
+  await loadSavedAdventureThroughGallery(adventure);
   await adventure.locator('#adventure-play').tap();
   const map=adventure.frameLocator('#adventure-play-frame');
   const canvas=map.locator('#sculpt-canvas');
@@ -185,6 +214,7 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   assert.equal(save.processedEncounterKeys.length,1);
   assert.deepEqual(await canvas.evaluate(()=>window.__sculptPlayProbe().actor),point);
   await start();
+  await loadSavedAdventureThroughGallery(adventure);
   await adventure.locator('#adventure-play').tap();
   await map.locator('#play-menu-button:visible').waitFor();
   assert.deepEqual(await canvas.evaluate(()=>window.__sculptPlayProbe().actor),point);
@@ -221,8 +251,23 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
   };
   await start();
   const adventure=page.frameLocator('#gensCaptureV2Root iframe');
+  // Choose the actual new-game tab before the native Bestiary becomes visible.
+  await adventure.locator('#adventure-start-new').tap();
   const starter=await chooseStarterThroughBestiary(adventure,{id:'crea_lumilo',name:'Lumilo'});
   await adventure.locator('#adventure-create').tap();
+  const creation=await adventure.locator('body').evaluate(()=>{
+   const el=id=>document.getElementById(id);
+   return {view:document.body.dataset.adventureStartView,
+    status:el('adventure-status')?.textContent,
+    summary:el('adventure-save-summary')?.textContent,
+    sessionPanelHidden:el('adventure-session-panel')?.hidden,
+    playDisabled:el('adventure-play')?.disabled,
+    portfolioIndex:localStorage.getItem('gensrpg.capture.v2.adventure.portfolio.v1')};
+  });
+  assert.equal(creation.sessionPanelHidden,false,
+   'Created session must be visible before entering Exploration: '+JSON.stringify(creation));
+  assert.equal(creation.playDisabled,false,
+   'Created session must enable native play without errors: '+JSON.stringify(creation));
   await starter.evaluate(async()=>{
    const [{createAdventureStoreV1},{createAdventurePortfolioStoreV1}]=await Promise.all([
     import('./adventure-contract-v1.mjs'),import('./adventure-portfolio-store-v1.mjs')
@@ -253,6 +298,7 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
    world=setWorldCombatArena(world,{areaId:area.id,arenaId:'city'});
    saveWorldAssemblerDraft(localStorage,world);
   },scope+'vendor/exploration-lab/');
+  await loadSavedAdventureThroughGallery(adventure);
   await adventure.locator('#adventure-play').tap();
   const map=adventure.frameLocator('#adventure-play-frame');
   const canvas=map.locator('#sculpt-canvas');
@@ -318,6 +364,7 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
   assert.equal(save.processedEncounterKeys.length,1);
   assert.deepEqual(await canvas.evaluate(()=>window.__sculptPlayProbe().actor),point);
   await start();
+  await loadSavedAdventureThroughGallery(adventure);
   await adventure.locator('#adventure-play').tap();
   await map.locator('#play-menu-button:visible').waitFor();
   assert.deepEqual(await canvas.evaluate(()=>window.__sculptPlayProbe().actor),point);
@@ -600,6 +647,9 @@ test('real HTTPS Jouer on mobile landscape saves creator cap 250, 33 stat points
    const response=await page.goto(base+scope+'assets/gensrpg/capture-v2/adventure.html',
     {waitUntil:'domcontentloaded',timeout:60000});
    assert.equal(response.status(),200);
+   assert.equal(await page.locator('#adventure-start-new').isVisible(),true);
+   assert.equal(await page.locator('#adventure-start-load').isVisible(),true);
+   await page.locator('#adventure-start-new').tap();
    await page.locator('#adventure-create:not([disabled])').waitFor({timeout:45000});
    await page.locator('#adventure-advanced-panel > summary').tap();
    await page.locator('#adventure-rules-panel > summary').tap();
@@ -629,7 +679,14 @@ test('real HTTPS Jouer on mobile landscape saves creator cap 250, 33 stat points
    assert.equal(saved.sessionControl.joinEnabled,true);
    assert.equal(saved.party.active.level,1,'a new real party starts at level one, not the configured maximum');
    await page.reload({waitUntil:'domcontentloaded'});
-   await page.locator('#adventure-resume').tap();
+   await page.locator('#adventure-start-load').tap();
+   const savedCard=page.locator('#adventure-save-gallery .adventure-save-card').first();
+   await savedCard.waitFor({state:'visible',timeout:45000});
+   assert.match(await savedCard.innerText(),/Monde local_Héros/,
+    'world and hero appear instead of UUID in the real saved-game card');
+   await savedCard.tap();
+   await page.locator('#adventure-save-load').tap();
+   await page.locator('#adventure-start-new').tap();
    assert.equal(await page.locator('#adventure-level-max').inputValue(),'250');
    assert.equal(await page.locator('#adventure-stat-points-per-level').inputValue(),'33');
    assert.equal(await page.locator('#adventure-combat-hp-percent').inputValue(),'40',

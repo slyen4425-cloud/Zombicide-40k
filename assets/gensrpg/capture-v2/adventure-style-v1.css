@@ -560,6 +560,11 @@ body[data-adventure-item-editor="true"] #adventure-loot-preparation-summary{disp
 .adventure-start-tabs button span{display:block;font-size:25px;margin-bottom:4px}
 .adventure-start-tabs button[aria-pressed="true"]{border-color:#9debd0;background:#23675e}
 body[data-adventure-start-view="choice"] .adventure-columns{display:none!important}
+/* Core portfolio belongs only to LOAD. Newly created games keep a play action
+   but never a copy of the saved-session management panel. */
+body[data-adventure-start-view="new"] #adventure-save-load-panel{display:none!important}
+body[data-adventure-start-view="new"] #adventure-session-panel .save-state{display:none!important}
+body[data-adventure-start-view="new"] .adventure-columns>section:first-child{grid-row:auto}
 body[data-adventure-start-view="choice"] .adventure-start-tabs{min-height:60dvh;align-items:center}
 body[data-adventure-start-view="choice"] .adventure-head{justify-content:center;text-align:center}
 body[data-adventure-start-view="load"] #adventure-new-config,

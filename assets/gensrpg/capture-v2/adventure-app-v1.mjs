@@ -707,13 +707,31 @@ function renderPortfolioOptions(){
   gallery.append(row);
  }
 }
+let newlyCreatedAdventureId=null;
 function setAdventureStartView(view){
  if(!['choice','new','load'].includes(view))throw Error('Écran Aventure inconnu');
  if(isItemEditor)return;
  document.body.dataset.adventureStartView=view;
  $('adventure-save-load-panel').hidden=view!=='load';
+ if(view==='new'){
+  // Never reuse the selected saved session as the NEW game's draft.
+  newlyCreatedAdventureId=null;
+  rules=normalizeAdventureRulesV1(draftStore?.load()??SHOWCASE_ADVENTURE_RULES_V1);
+  setFields(rules);
+  setSessionControlFields(null);
+  $('adventure-player-alias').value='';
+  $('adventure-world-select').value='';
+  $('adventure-hero-choice').value='';
+  void fillHeroChoices(null);
+  if(published.length)updatePreview();
+ }
  for(const kind of ['new','load'])
   $('adventure-start-'+kind).setAttribute('aria-pressed',String(view===kind));
+ // The loaded state may exist in Core storage, but is never shown in Create.
+ const state=store?.load()??null;
+ const showActiveSession=Boolean(state)&&
+  (view==='load'||(view==='new'&&newlyCreatedAdventureId===state.sessionId));
+ $('adventure-session-panel').hidden=!showActiveSession;
  if(view==='load')renderPortfolioOptions();
 }
 for(const kind of ['new','load']){
@@ -807,7 +825,10 @@ function showSave(){
  try{
   renderPortfolioOptions();
   const state=store.load();
-  $('adventure-session-panel').hidden=!state;
+  const view=document.body.dataset.adventureStartView;
+  const showActiveSession=Boolean(state)&&
+   (view==='load'||(view==='new'&&newlyCreatedAdventureId===state.sessionId));
+  $('adventure-session-panel').hidden=!showActiveSession;
   $('adventure-room-host').disabled=!!activeCaptureRoom||!state?.sessionControl?.joinEnabled;
   text($('adventure-play-team-count'),String(state?1+(state.party.reserve?.length??0):0));
   renderSavedAdventureRosterV1(state); // Always reread the same persisted Core save.
@@ -820,7 +841,8 @@ function showSave(){
   }
   // A saved adventure owns its hero name, not the reusable visual template.
   // Still permit a guest to override the room nickname before joining.
-  if(state.hero?.displayName&&!activeCaptureRoom)
+  if(state.hero?.displayName&&!activeCaptureRoom&&
+     document.body.dataset.adventureStartView==='load')
    $('adventure-player-alias').value=state.hero.displayName;
   // The picker affects the NEXT new game, not the already saved hero.
   $('adventure-hero-choice').disabled=false;
@@ -1401,6 +1423,7 @@ $('adventure-create').addEventListener('click',guarded(()=>{
  const worldId=$('adventure-world-select').value;
  const created=worldId?withSelectedAdventureWorldV1(configured,worldId):configured;
  portfolio.create(created);
+ newlyCreatedAdventureId=created.sessionId;
  setSessionControlFields(created);
  stateMessage('Partie '+activeSaveTitle(created)+' créée. Tu peux entrer dans le monde.');
  showSave();updatePreview();

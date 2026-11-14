@@ -21,6 +21,7 @@ import {projectAdventureCombatAwardV1} from './adventure-result-presentation-v1.
 import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
 import {createAdventureRulesDraftStoreV1} from './adventure-rules-draft-v1.mjs';
 import {adventurePlaySheetSnapshotV1} from './adventure-play-sheet-v1.mjs';
+import {adventureOwnedCollectionV1} from './adventure-collection-v1.mjs';
 import {publishedCapturePortraitUrlV1} from './adventure-sheet-visual-v1.mjs';
 import {createAdventureStarterPickerV1} from './adventure-starter-picker-v1.mjs';
 import {renderAdventureSheetViewV1} from './adventure-play-sheet-view-v1.mjs';
@@ -1130,11 +1131,17 @@ function renderPlayingSheet(){
   const selected=button.dataset.adventureSheetTab===currentSheetTab;
   button.setAttribute('aria-selected',String(selected));button.tabIndex=selected?0:-1;
  }
+ const collection=currentSheetTab==='collection'
+  ?adventureOwnedCollectionV1({session,bestiaryCards:published}):null;
  const card=published.find(value=>value.id===snapshot.creature.speciesId);
  const portraitUrl=publishedCapturePortraitUrlV1({card,moduleUrl:import.meta.url});
  renderAdventureSheetViewV1({
   host:$('adventure-sheet-content'),snapshot,tab:currentSheetTab,
-  portraitUrl,heroVisual:currentHeroVisual,
+  portraitUrl,heroVisual:currentHeroVisual,collection,
+  resolveSpeciesPortrait:card=>publishedCapturePortraitUrlV1({card,moduleUrl:import.meta.url}),
+  onOpenOwnedCreature:instanceId=>{
+   currentSheetCreatureId=instanceId;currentSheetTab='stats';renderPlayingSheet();
+  },
   onSelectCreature:instanceId=>{currentSheetCreatureId=instanceId;renderPlayingSheet();},
   onMoveCreature:(instanceId,direction)=>{
    void updatePlayingTeam(instanceId,'move',direction).catch(sheetActionError);

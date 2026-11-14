@@ -124,3 +124,8 @@ test('owned Collection opens full official Bestiary page with skills, explanatio
   else globalThis.document=previousDocument;
  }
 });
+
+test('Collection gallery/page hidden state remains hidden despite authored display:grid CSS',()=>{
+ const css=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-style-v1.css',import.meta.url),'utf8');
+ assert.match(css,/\.sheet-collection-grid\[hidden\],\.sheet-collection-detail\[hidden\]\{display:none!important\}/);
+});

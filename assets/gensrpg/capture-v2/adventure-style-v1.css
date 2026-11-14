@@ -583,3 +583,6 @@ body[data-adventure-start-view="load"] #adventure-save-load-panel{display:block}
  #adventure-play-hud button{min-height:50px;font-size:14px;padding:9px 17px}
 }
 @media(max-width:420px){.adventure-start-tabs{gap:9px}.adventure-start-tabs button{min-width:0;padding:8px}}
+
+/* The specialist item editor never exposes inert adventure start controls. */
+body[data-adventure-item-editor="true"] .adventure-start-tabs{display:none!important}

@@ -608,6 +608,21 @@ body[data-adventure-item-editor="true"] .adventure-start-tabs{display:none!impor
 .sheet-collection-detail .sheet-profile{margin-top:5px}
 .sheet-collection-skills{margin:10px 0}
 .sheet-collection-skills p{font-size:12px;margin:4px 0}
+.sheet-collection-back{min-height:42px;margin-bottom:10px;padding:7px 14px;border:1px solid #7ea5ad;border-radius:10px;background:#1c4651;color:#eaf9f7;font-weight:700;cursor:pointer}
+.sheet-collection-description{padding:10px 13px;margin:0;line-height:1.5;color:#e1eee9}
+.sheet-collection-skills,.sheet-collection-measures,.sheet-collection-resistances{display:grid;gap:8px;margin:12px 0;padding:10px 12px;border:1px solid #365962;border-radius:12px;background:#122d36}
+.sheet-collection-skills h4,.sheet-collection-measures h4,.sheet-collection-resistances h4,.sheet-collection-members h4{margin:0 0 4px;font-size:14px}
+.sheet-collection-skill{display:grid;gap:5px;padding:10px;background:#193a44;border:1px solid #40616a;border-radius:10px}
+.sheet-collection-skill-head{display:flex;gap:9px;align-items:center;font-size:13px}
+.sheet-collection-skill-icon{width:34px;height:34px;object-fit:contain;flex:none}
+.sheet-collection-skill-meta{color:#9de8cf;font-size:11px}
+.sheet-collection-skill-description{margin:0;color:#dcefeb;font-size:12px;line-height:1.48}
+.sheet-collection-measure-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:7px}
+.sheet-collection-measure{display:grid;gap:3px;padding:8px;background:#163b43;border-radius:8px;font-size:12px}
+.sheet-collection-measure strong{font-size:16px}
+.sheet-collection-measure small{color:#afd2d1;line-height:1.4}
+.sheet-collection-resistance-list{display:flex;gap:6px;flex-wrap:wrap}
+.sheet-collection-resistance{padding:6px 9px;border-radius:20px;background:#1c4852;border:1px solid #47757a;font-size:12px}
 .sheet-collection-members{display:grid;gap:5px;margin-top:10px}
 .sheet-collection-member{display:flex;align-items:center;flex-wrap:wrap;justify-content:space-between;gap:9px;font-size:12px}
 .sheet-collection-member button{min-height:38px}

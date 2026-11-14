@@ -99,6 +99,8 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   });
   assert.equal(creation.sessionPanelHidden,false,
    'Created session must be visible before entering Exploration: '+JSON.stringify(creation));
+  assert.equal(creation.playDisabled,false,
+   'Created session must enable native play without errors: '+JSON.stringify(creation));
   // Use the real world authoring APIs for a plain, walkable area with a
   // guaranteed Shadow encounter. The battle journal is written by Combat.
   await starter.evaluate(async(_,vendor)=>{
@@ -249,6 +251,8 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
   });
   assert.equal(creation.sessionPanelHidden,false,
    'Created session must be visible before entering Exploration: '+JSON.stringify(creation));
+  assert.equal(creation.playDisabled,false,
+   'Created session must enable native play without errors: '+JSON.stringify(creation));
   await starter.evaluate(async()=>{
    const [{createAdventureStoreV1},{createAdventurePortfolioStoreV1}]=await Promise.all([
     import('./adventure-contract-v1.mjs'),import('./adventure-portfolio-store-v1.mjs')

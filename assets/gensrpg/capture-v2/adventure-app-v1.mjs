@@ -873,8 +873,6 @@ function renderCaptureRemotePositions(){
  // alone will later display the validated peers using its official renderer.
  text($('adventure-room-positions'),'Positions reçues : '+statement+
   ' · avatars distants pas encore affichés.');
- text($('adventure-play-remote-status'),'Positions reçues : '+total+
-  ' · '+(activeCapturePeerRelay?'envoi au renderer Exploration':'affichage des avatars à raccorder'));
  activeCapturePeerRelay?.publish([...captureRemotePositions.values()]);
 }
 async function connectCaptureRoom(response){
@@ -968,6 +966,7 @@ window.addEventListener('message',event=>{
   $('adventure-play-hud').hidden=true;
   setShellAdventureCombatVisibility(true);
   if($('adventure-play-sheet').open)$('adventure-play-sheet').close();
+  if($('adventure-play-menu').open)$('adventure-play-menu').close();
  }else if(activeCombatOverlayId===visibility.encounterId){
   resetAdventureCombatHud();
  }
@@ -988,6 +987,7 @@ function showAdventureCombatResult({session,award}){
  $('adventure-result-close').focus();
 }
 $('adventure-open-last-result').addEventListener('click',guarded(()=>{
+ if($('adventure-play-menu').open)$('adventure-play-menu').close();
  const session=store?.load();
  if(!session?.lastAward)throw new Error('Aucun résultat de combat enregistré');
  showAdventureCombatResult({session,award:session.lastAward});
@@ -1188,6 +1188,29 @@ $('adventure-open-sheet').addEventListener('click',guarded(()=>{
  void loadSelectedHeroVisual();
  $('adventure-close-sheet').focus();
 }));
+// The Explorer iframe only requests this Capture-owned menu. These buttons
+// reuse the existing result, fullscreen, and save-and-title actions exactly once.
+window.addEventListener('message',event=>{
+ const frame=$('adventure-play-frame');
+ if(event.origin!==window.location.origin||event.source!==frame.contentWindow||
+    event.data?.schema!=='gensrpg.exploration.play.open-menu.v1'||
+    event.data?.sessionId!==activePlayingSheet?.sessionId||
+    frame.hidden||document.body.dataset.adventurePlaying!=='true'||
+    activeCombatOverlayId)return;
+ const label=event.data?.areaLabel;
+ $('adventure-play-menu-world').textContent=typeof label==='string'&&label.length<=80
+  ?'🌍 '+label:'Aventure';
+ $('adventure-open-last-result').hidden=!store.load()?.lastAward;
+ syncFullscreenControl();
+ if(!$('adventure-play-menu').open)$('adventure-play-menu').showModal();
+});
+$('adventure-menu-continue').addEventListener('click',()=>{
+ $('adventure-play-menu').close();
+});
+$('adventure-menu-return-title').addEventListener('click',()=>{
+ $('adventure-play-menu').close();
+ $('adventure-return-title').click();
+});
 $('adventure-return-title').addEventListener('click',()=>{
  const frame=$('adventure-play-frame');
  if(!activePlayingSheet||frame.hidden)return;
@@ -1203,6 +1226,7 @@ window.addEventListener('message',event=>{
     event.data?.schema!=='gensrpg.exploration.play.return-title.v1'||
     event.data.sessionId!==activePlayingSheet?.sessionId)return;
  if($('adventure-play-sheet').open)$('adventure-play-sheet').close();
+ if($('adventure-play-menu').open)$('adventure-play-menu').close();
  discardHeroVisual();
  activeCombatHost?.dispose();activeCombatHost=null;
  activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;

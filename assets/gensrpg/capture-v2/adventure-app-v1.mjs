@@ -1660,6 +1660,9 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  url.searchParams.set('cameraAngle',String(result.session.cameraPolicy?.angleDeg??55));
  url.searchParams.set('cameraZoom',String(result.session.cameraPolicy?.zoomPercent??175));
  url.searchParams.set('moveSpeed',String(result.session.rules.navigation?.moveSpeed??90));
+ // Diagnostic only. Exploration's existing Combat host logs click-to-ready
+ // when Capture is opened with ?gensPerf=1; normal play stays unchanged.
+ if(adventurePerfEnabled)url.searchParams.set('gensPerf','1');
  if(url.origin!==window.location.origin)
   throw new Error('Jouer doit utiliser le moteur Exploration officiel de la même origine');
  const frame=$('adventure-play-frame');

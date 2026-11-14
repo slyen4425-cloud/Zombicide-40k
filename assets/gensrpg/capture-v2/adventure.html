@@ -349,7 +349,7 @@
     <label for="adventure-room-capacity">Nombre maximal de joueurs
      <input id="adventure-room-capacity" type="number" min="2" max="32" step="1" value="2">
     </label>
-    <label for="adventure-room-code">Code reçu d'un ami
+    <label for="adventure-room-code"><span id="adventure-room-code-label">Code reçu d'un ami</span>
      <input id="adventure-room-code" type="text" minlength="10" maxlength="10" spellcheck="false" autocapitalize="characters" placeholder="10 caractères">
     </label>
    </div>
@@ -362,6 +362,10 @@
     <button id="adventure-room-enter" type="button" hidden disabled>Entrer dans le monde</button>
    </div>
    <p id="adventure-room-entry-hint" class="hint" aria-live="polite" hidden></p>
+   <div class="actions" id="adventure-room-share-actions" hidden>
+    <button id="adventure-room-copy" type="button">Copier le code du salon</button>
+    <button id="adventure-room-share" type="button">Partager l’invitation</button>
+   </div>
    <output id="adventure-room-status" role="status" aria-live="polite">Pas encore connecté à un salon.</output>
    <output id="adventure-room-positions" aria-live="polite">Positions reçues : aucune. Les avatars distants ne sont pas encore affichés.</output>
    <div id="adventure-room-members" class="rules-list" aria-label="Joueurs dans le salon"></div>

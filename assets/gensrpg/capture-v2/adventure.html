@@ -344,7 +344,7 @@
   </details>
   <section id="adventure-multiplayer-panel" class="adventure-options" aria-labelledby="adventure-multiplayer-heading">
    <h2 id="adventure-multiplayer-heading">Partie en ligne · Monster Capture</h2>
-   <p class="hint">Crée un salon ou rejoins un ami avec son code. Le créateur partage sa carte officielle, chaque joueur garde sa sauvegarde et son héros, et les participants se retrouvent dans le même monde Exploration. Les combats entre joueurs restent un chantier distinct.</p>
+   <p class="hint">Une seule partie : l’hôte fixe les règles, le monde et la taille de l’équipe de départ. Les invités choisissent uniquement leur héros et leurs créatures puis rejoignent ce monde. Chaque joueur conserve sa progression. Les combats entre joueurs restent un chantier distinct.</p>
    <div class="fields">
     <label for="adventure-room-capacity">Nombre maximal de joueurs
      <input id="adventure-room-capacity" type="number" min="2" max="32" step="1" value="2">
@@ -367,6 +367,8 @@
     <button id="adventure-room-share" type="button">Partager l’invitation</button>
    </div>
    <output id="adventure-room-status" role="status" aria-live="polite">Pas encore connecté à un salon.</output>
+   <output id="adventure-room-share-status" role="status" aria-live="polite"></output>
+   <button id="adventure-room-retry-share" type="button" hidden>Réessayer le partage de la carte</button>
    <output id="adventure-room-positions" aria-live="polite">Positions reçues : aucune. L’affichage des avatars distants s’active dans le monde une fois connecté.</output>
    <div id="adventure-room-members" class="rules-list" aria-label="Joueurs dans le salon"></div>
   </section>

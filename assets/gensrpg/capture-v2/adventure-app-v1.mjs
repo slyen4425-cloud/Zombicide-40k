@@ -952,6 +952,7 @@ function syncCaptureRoomEntry(){
 }
 function renderCaptureRoomMembers(state){
  lastCaptureRoomState=state;syncCaptureRoomEntry();
+ $('adventure-room-share-actions').hidden=!state?.open||activeCaptureRoom?.role!=='host';
  const host=$('adventure-room-members');host.replaceChildren();
  if(!state){
   captureRemotePositions.clear();renderCaptureRemotePositions();
@@ -997,6 +998,9 @@ async function connectCaptureRoom(response){
  activeCaptureRoom=response;
  captureRemotePositions.clear();renderCaptureRemotePositions();
  $('adventure-room-code').value=response.code;
+ text($('adventure-room-code-label'),response.role==='host'
+  ?'Code de ton salon':'Code du salon rejoint');
+ $('adventure-room-share-actions').hidden=response.role!=='host';
  $('adventure-room-host').disabled=true;
  $('adventure-room-join').disabled=true;
  $('adventure-room-leave').disabled=false;
@@ -1017,6 +1021,39 @@ async function connectCaptureRoom(response){
   showSave();
  }
 }
+async function copyCaptureRoomInviteCode(){
+ const code=activeCaptureRoom?.code;
+ if(typeof code!=='string'||code.length!==10)
+  throw new Error('Crée d’abord un salon pour obtenir son code.');
+ if(typeof navigator.clipboard?.writeText==='function'){
+  try{
+   await navigator.clipboard.writeText(code);
+   onlineRoomStatus('Code du salon copié : '+code);
+   return true;
+  }catch{ /* Clipboard may be blocked inside the GenSRPG iframe. */ }
+ }
+ const field=$('adventure-room-code');
+ field.focus();field.select();
+ onlineRoomStatus('Code sélectionné : utilise Copier sur ton téléphone pour le partager.');
+ return false;
+}
+$('adventure-room-copy').addEventListener('click',guardedAsync(async()=>{
+ await copyCaptureRoomInviteCode();
+}));
+$('adventure-room-share').addEventListener('click',guardedAsync(async()=>{
+ if(activeCaptureRoom?.role!=='host')throw new Error('Seul le créateur partage ce salon.');
+ const code=activeCaptureRoom.code;
+ if(typeof navigator.share==='function'){
+  try{
+   await navigator.share({title:'Monster Capture · GenSRPG',
+    text:'Rejoins ma partie Monster Capture dans GenSRPG avec le code : '+code});
+   return;
+  }catch(error){
+   if(error?.name==='AbortError')return;
+  }
+ }
+ await copyCaptureRoomInviteCode();
+}));
 $('adventure-room-host').addEventListener('click',guardedAsync(async()=>{
  if(activeCaptureRoom)throw new Error('Quitte le salon actif avant d’en créer un autre.');
  const session=store?.load();
@@ -1045,6 +1082,8 @@ $('adventure-room-leave').addEventListener('click',guardedAsync(async()=>{
  activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
  await captureRoomProvider().leave({roomId:room.roomId});
  activeCaptureRoom=null;lastCaptureRoomState=null;syncCaptureRoomEntry();
+ $('adventure-room-share-actions').hidden=true;
+ text($('adventure-room-code-label'),"Code reçu d'un ami");
  captureRemotePositions.clear();renderCaptureRemotePositions();
  $('adventure-room-members').replaceChildren();
  $('adventure-room-leave').disabled=true;

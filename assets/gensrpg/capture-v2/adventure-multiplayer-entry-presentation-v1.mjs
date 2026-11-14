@@ -3,7 +3,7 @@
 // the save; Exploration owns WorldDocument and actual game entry validation.
 // No fallback room, no save copy, no duplicated gameplay authority.
 export function captureRoomEntryPresentationV1({
- connection,room,session,selectedWorldId=''
+ connection,room,session,selectedWorldId='',localWorldFingerprint=null
 }={}){
  if(!connection)return Object.freeze({visible:false,enabled:false,action:'none',label:'Entrer dans le monde',hint:''});
  if(!room?.open||!room.members?.some(member=>member.id===connection.userId))
@@ -19,16 +19,26 @@ export function captureRoomEntryPresentationV1({
  if(connection.role!=='guest')
   return Object.freeze({visible:true,enabled:false,action:'none',label:'Connexion invalide',
    hint:'Rôle de salon inconnu.'});
+ if(!room.worldId||!room.worldFingerprint){
+  if(!session)
+   return Object.freeze({visible:true,enabled:true,action:'prepare',label:'Créer mon personnage',
+    hint:'Salon rejoint. Tu peux préparer ton héros ; le monde du créateur sera proposé ensuite.'});
+  return Object.freeze({visible:true,enabled:false,action:'none',label:'En attente du créateur',
+   hint:'Le créateur doit entrer dans son monde avant les invités.'});
+ }
+ if(localWorldFingerprint!==room.worldFingerprint)
+  return Object.freeze({visible:true,enabled:true,action:'import',label:'Recevoir le monde du créateur',
+   hint:'Le créateur partage sa carte officielle avec les membres du salon. Touche ce bouton pour l’importer sans écraser tes autres mondes.'});
  if(!session)
   return Object.freeze({visible:true,enabled:true,action:'prepare',label:'Créer mon personnage',
-   hint:'Salon rejoint ! Crée ta propre aventure et choisis le même monde officiel que le créateur. Ta sauvegarde reste personnelle.'});
- if(!room.worldId||!room.worldFingerprint)
-  return Object.freeze({visible:true,enabled:false,action:'none',label:'En attente du créateur',
-   hint:'Ton salon est rejoint. Le créateur doit d’abord entrer dans le monde pour autoriser l’arrivée des invités.'});
+   hint:'Monde reçu. Choisis ton héros et ta créature, puis crée une nouvelle aventure personnelle.'});
  const localWorldId=session.world?.mapRef||selectedWorldId;
  if(localWorldId!==room.worldId)
-  return Object.freeze({visible:true,enabled:false,action:'none',label:'Monde différent',
-   hint:'Le salon utilise une autre carte. Importe le même WorldDocument officiel dans Exploration puis crée ou choisis une sauvegarde liée à ce monde.'});
+  return Object.freeze({visible:true,enabled:true,action:'prepare',label:'Créer une partie pour ce monde',
+   hint:'Ta sauvegarde actuelle utilise un autre monde. Crée une nouvelle aventure personnelle pour rejoindre ce salon.'});
+ if(session.status==='finished')
+  return Object.freeze({visible:true,enabled:true,action:'prepare',label:'Créer une nouvelle partie',
+   hint:'La sauvegarde sélectionnée est terminée. Crée une aventure personnelle pour ce salon.'});
  return Object.freeze({visible:true,enabled:true,action:'enter',label:'Rejoindre le monde',
-  hint:'Le créateur est entré dans le monde. Rejoins avec ta propre sauvegarde. Le contrôle officiel vérifie aussi l’empreinte exacte de la carte.'});
+  hint:'Le créateur est entré dans le monde. Le même WorldDocument officiel est disponible sur ton appareil.'});
 }

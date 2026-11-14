@@ -37,6 +37,7 @@ on:
       - 'tests/gens_capture_v2_peer_observation_ui_v1.test.mjs'
       - 'tests/gens_capture_v2_peer_frame_relay_v1.test.mjs'
       - 'tests/gens_capture_v2_peer_play_bridge_v1.test.mjs'
+      - 'tests/gens_capture_v2_host_guest_entry_20261114.test.mjs'
       - 'tests/gens_capture_v2_exploration_position_events_v1.test.mjs'
       - 'supabase/migrations/20261106195000_gensrpg_capture_peer_presence_v1.sql'
       - 'supabase/migrations/20261106170500_gensrpg_capture_rooms_isolated_v1.sql'
@@ -99,6 +100,9 @@ jobs:
 
       - name: Capture C3 — vraie entrée Aventure, monde partagé validé avant sauvegarde
         run: node --test tests/gens_capture_v2_peer_play_bridge_v1.test.mjs
+
+      - name: Capture online — sauvegarde hôte liée et parcours d'entrée de l'invité
+        run: node --test tests/gens_capture_v2_host_guest_entry_20261114.test.mjs
 
       - name: Capture C3 — événements de navigation officiels, écouteur iframe et dispose
         run: node --test tests/gens_capture_v2_exploration_position_events_v1.test.mjs

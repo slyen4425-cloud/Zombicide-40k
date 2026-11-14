@@ -284,6 +284,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await adventureFrame.locator('#adventure-starter-count').selectOption('3');
   assert.equal(await adventureFrame.locator('#adventure-starter-reserve select').count(),2,
    'selecting three creatures must provide two genuine reserve choices');
+  await adventureFrame.locator('#adventure-hero-name').fill('Luna 2.5D');
   await adventureFrame.locator('#adventure-create').tap();
   const saved=await adventureFrame.locator('#adventure-save-summary').textContent();
   assert.match(saved,/niveau 1.*0 XP.*configuration enregistrée/,
@@ -295,6 +296,10 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
    return saved?JSON.parse(saved):null;
   });
   assert.equal(stored?.schema,'gensrpg-capture-adventure-save-v1');
+  assert.equal(stored?.hero?.displayName,'Luna 2.5D',
+   'authoritative AdventureSession stores the named hero per save');
+  assert.equal(await adventureFrame.locator('#adventure-player-alias').inputValue(),'Luna 2.5D',
+   'online room name inherits the chosen hero name without another identity authority');
   assert.equal(stored?.rules?.xp?.baseVictoryXp,777);
   assert.equal(stored?.rules?.heroProgression?.enabled,true,
     'real Aventure editor must persist author hero opt-in');

@@ -36,7 +36,10 @@ export const DEFAULT_ADVENTURE_RULES_V1=freeze({
  // creator can explicitly enable its independent progression and talent
  // points; this never steals or changes a creature's victory XP.
  heroProgression:{enabled:false,xpGainPercent:100,xpPerLevel:1000,
-  maxLevel:100,talentPointsPerLevel:0}
+  maxLevel:100,talentPointsPerLevel:0},
+ // Only Rare starters are permitted in the public showcase. This optional
+ // creator policy never retroactively changes an existing saved party.
+ starterSelection:{allowAllRarities:false}
 });
 // The showcase is an explicit NEW-GAME preset; historical linear saves keep
 // their exact existing progression and do not gain retroactive stat points.
@@ -113,7 +116,12 @@ export function normalizeAdventureRulesV1(input){
  // Additive optional policy: historical v1 rules have no heroProgression.
  // Their precise old representation remains legal, and never enables hero XP.
  const {heroProgression:heroRaw,combat:combatRaw,navigation:navigationRaw,
-  fragmentRecruitment:fragmentRaw,economy:economyRaw,...legacy}=object(input,'AdventureRules');
+  starterSelection:starterRaw,fragmentRecruitment:fragmentRaw,economy:economyRaw,
+  ...legacy}=object(input,'AdventureRules');
+ const starter=starterRaw===undefined?{allowAllRarities:false}:
+  exact(starterRaw,['allowAllRarities'],'starterSelection');
+ if(typeof starter.allowAllRarities!=='boolean')
+  throw new TypeError('starterSelection.allowAllRarities must be a boolean');
  const navigation=navigationRaw===undefined?null:
   exact(navigationRaw,['moveSpeed'],'navigation');
  if(navigation){
@@ -221,6 +229,7 @@ export function normalizeAdventureRulesV1(input){
   heroProgression:{enabled:hero.enabled,xpGainPercent:hero.xpGainPercent,
    xpPerLevel:hero.xpPerLevel,maxLevel:hero.maxLevel,
    talentPointsPerLevel:hero.talentPointsPerLevel},
+  starterSelection:{allowAllRarities:starter.allowAllRarities},
   ...(fragmentRaw===undefined?{}:{
    fragmentRecruitment:normalizeAdventureFragmentRulesV1(fragmentRaw)}),
   ...(economyRaw===undefined?{}:{economy:normalizeAdventureEconomyV1(economyRaw,items)})
@@ -611,6 +620,9 @@ export function createAdventureSessionV1({
   if(!card)throw new RangeError('Créature absente du Bestiaire publié: '+speciesId);
   if(!Array.isArray(card.skills)||!card.skills.some(s=>s.state==='ready'))
    throw new RangeError('Créature sans compétence jouable publiée: '+speciesId);
+  if(!settings.starterSelection.allowAllRarities&&
+     (card.rarity??'rare')!=='rare')
+   throw new RangeError('Seules les créatures Rare peuvent débuter cette aventure: '+speciesId);
   return freeze({instanceId:instanceIds[index],speciesId:card.id,level:1,xp:0,hp:null,
    ...(settings.progression.statPointsPerLevel===undefined?{}:{statAllocations:{}})});
  });

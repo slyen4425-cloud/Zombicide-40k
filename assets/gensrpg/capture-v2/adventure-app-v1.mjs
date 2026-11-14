@@ -1624,6 +1624,31 @@ const detachShellFullscreen=captureShellFullscreenOwner()?.onGameFullscreenChang
 window.addEventListener('pagehide',()=>detachShellFullscreen?.(),{once:true});
 syncFullscreenControl();
 
+async function publishPendingCaptureWorld(){
+ const shared=pendingCaptureHostShare;
+ if(!shared||!activeCaptureRoom||activeCaptureRoom.roomId!==shared.context.room.roomId)return;
+ const retry=$('adventure-room-retry-share'),output=$('adventure-room-share-status');
+ retry.hidden=true;
+ text(output,'Synchronisation multijoueur démarrée…');
+ try{
+  await publishCaptureInitialPositionV1({
+   ...shared,onProgress:message=>{
+    if(pendingCaptureHostShare===shared)text(output,message);
+   }
+  });
+  if(pendingCaptureHostShare!==shared)return;
+  text(output,'Monde partagé : les invités peuvent récupérer la carte et entrer.');
+  retry.hidden=true;
+ }catch(error){
+  if(pendingCaptureHostShare!==shared)return;
+  text(output,'Échec du partage réseau : '+error.message+
+   ' — tu peux continuer à jouer et réessayer depuis le salon.');
+  retry.hidden=false;
+ }
+}
+$('adventure-room-retry-share').addEventListener('click',()=>{
+ void publishPendingCaptureWorld();
+});
 const journeyLoading=$('adventure-launch-loading');
 let adventureLaunchStartedAt=null;
 let journeyLaunchEpoch=0;
@@ -1742,10 +1767,12 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  // Initial peer position comes from the SAME official Exploration checkpoint.
  // Future movement must wait for a documented Exploration change event,
  // not monkey-patching Storage or a duplicate navigation loop.
- await publishCaptureInitialPositionV1({
+ // Network upload is a room concern, NOT a prerequisite for rendering the
+ // host's native world. Never trap the player behind a spinning overlay.
+ const shareForRoom=onlineContext?{
   context:onlineContext,transport:captureRoomTransport,
   navigation:result.navigation,world,serializeOfficialWorld:serializeWorldBuilderDraft
- });
+ }:null;
  if(launchEpoch!==journeyLaunchEpoch)return;
  // Native Exploration consumes the original selected HeroDefinition by ID only.
  writeAdventureHeroSelectionGrantV1({storage:window.sessionStorage,
@@ -1845,6 +1872,10 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  document.querySelector('[data-adventure-app]').hidden=true;
  document.body.dataset.adventurePlaying='true';
  resetAdventureCombatHud();
+ if(shareForRoom){
+  pendingCaptureHostShare=shareForRoom;
+  void publishPendingCaptureWorld();
+ }
  // Capture's parent owns native fullscreen and keeps Sac/Équipe/Retour above
  // the official Exploration iframe. If denied, existing viewport CSS applies.
  }catch(error){

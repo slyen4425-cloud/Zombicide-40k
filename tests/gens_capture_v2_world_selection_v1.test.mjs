@@ -62,6 +62,10 @@ test('real Adventure uses official lazy library, never a GenSrpg world serialize
  assert.match(html,/id="adventure-world-status"/);
  // World transfer now consumes Exploration's native serializer/importer only.
  // Keep the no-duplicate-owner guarantee, rather than forbidding official calls.
- assert.match(app,/import \\{serializeWorldBuilderDraft,importWorldBuilderDocument\\}[\\s\\S]*?from ['"]\\.\\.\\/\\.\\.\\/\\.\\.\\/vendor\\/exploration-lab\\/src\\/builder\\/world-builder-draft\\.js['"]/);
- assert.doesNotMatch(app,/\\b(?:function|const|let|class)\\s+(?:serializeWorldBuilderDraft|importWorldBuilderDocument)\\b/);
+ assert.ok(app.includes("import {serializeWorldBuilderDraft,importWorldBuilderDocument}"));
+ assert.ok(app.includes("from '../../../vendor/exploration-lab/src/builder/world-builder-draft.js'"));
+ for(const symbol of ['serializeWorldBuilderDraft','importWorldBuilderDocument']){
+  for(const definition of ['function ','const ','let ','class '])
+   assert.equal(app.includes(definition+symbol),false,'Capture cannot redefine native Exploration world functions');
+ }
 });

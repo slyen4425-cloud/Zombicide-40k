@@ -14,7 +14,7 @@ test('boot is born in the choice view, before the official ES module loads',()=>
 });
 test('new adventure cannot show a previously active save or its load actions',()=>{
  assert.match(app,/let newlyCreatedAdventureId=null;/);
- assert.match(app,/if\(view==='new'\)newlyCreatedAdventureId=null;/);
+ assert.match(app,/if\(view==='new'\)\s*\{[\s\S]*?newlyCreatedAdventureId=null;/);
  assert.match(app,/const showActiveSession=Boolean\(state\)&&/);
  assert.match(app,/view==='new'&&newlyCreatedAdventureId===state\.sessionId/);
  assert.match(app,/newlyCreatedAdventureId=created\.sessionId;/);

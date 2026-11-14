@@ -2,6 +2,8 @@
 // The online server owns membership and world binding; AdventureSession owns
 // the save; Exploration owns WorldDocument and actual game entry validation.
 // No fallback room, no save copy, no duplicated gameplay authority.
+import {captureGuestSessionMatchesHostSetupV1}
+ from './adventure-multiplayer-host-setup-v1.mjs';
 export function captureRoomEntryPresentationV1({
  connection,room,session,selectedWorldId='',localWorldFingerprint=null,hostSetup=null
 }={}){
@@ -28,10 +30,7 @@ export function captureRoomEntryPresentationV1({
  if(localWorldFingerprint!==room.worldFingerprint)
   return Object.freeze({visible:true,enabled:true,action:'import',label:'Recevoir le monde du créateur',
    hint:'Le créateur partage sa carte officielle avec les membres du salon. Touche ce bouton pour l’importer sans écraser tes autres mondes.'});
- if(!session||session.status==='finished'||
-    session.world?.mapRef!==room.worldId||
-    [session.party?.active,...(session.party?.reserve??[])].length!==hostSetup.starterCount||
-    JSON.stringify(session.rules)!==JSON.stringify(hostSetup.rules))
+ if(!captureGuestSessionMatchesHostSetupV1({session,setup:hostSetup,room}))
   return Object.freeze({visible:true,enabled:true,action:'prepare',label:'Préparer mon héros pour ce salon',
    hint:'La partie et les règles de l’hôte sont imposées. Choisis seulement ton héros et '+hostSetup.starterCount+' créature(s) de départ.'});
  return Object.freeze({visible:true,enabled:true,action:'enter',label:'Rejoindre le monde',

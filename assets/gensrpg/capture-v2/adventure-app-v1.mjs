@@ -750,6 +750,10 @@ function showSave(){
    renderPartyActiveChoices();
    return;
   }
+  // A saved adventure owns its hero name, not the reusable visual template.
+  // Still permit a guest to override the room nickname before joining.
+  if(state.hero?.displayName&&!activeCaptureRoom)
+   $('adventure-player-alias').value=state.hero.displayName;
   // The picker affects the NEXT new game, not the already saved hero.
   $('adventure-hero-choice').disabled=false;
   $('adventure-play').disabled=state.status==='finished';
@@ -759,7 +763,9 @@ function showSave(){
   const a=state.party.active;
   const reward=state.lastAward;
   text($('adventure-save-summary'),
-   'Partie '+state.sessionId.slice(0,8)+' · '+(card?.name??a.speciesId)+
+   'Partie '+state.sessionId.slice(0,8)+
+   (state.hero?.displayName?' · Héros '+state.hero.displayName:'')+
+   ' · '+(card?.name??a.speciesId)+
    ' · niveau '+a.level+' · '+(1+(state.party.reserve?.length??0))+
    ' créature(s) · '+a.xp+' XP · '+state.inventory.currency+' '+
    (state.rules.economy?.currency.plural??'pièces')+
@@ -1283,6 +1289,7 @@ $('adventure-create').addEventListener('click',guarded(()=>{
   rules,ids:{sessionId:id(),instanceId:id(),
    reserveInstanceIds:starterIds.slice(1).map(()=>id()),creatorId:id()},now,
   heroDefinitionId:$('adventure-hero-choice').value||null,
+  heroDisplayName:$('adventure-player-alias').value.trim()||null,
   cameraAngle:Number($('adventure-creator-camera-angle').value),
   cameraZoomPercent:Number($('adventure-creator-camera-zoom').value)
  });

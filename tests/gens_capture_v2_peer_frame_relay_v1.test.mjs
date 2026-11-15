@@ -93,3 +93,27 @@ test('Adventure owner wires official iframe relay only during active online play
  assert.ok(create>0&&navigate>create,'relay must exist before iframe navigation');
  assert.doesNotMatch(s,/z40kApplySnapshot|z40kPushState|z40kSubscribe/);
 });
+
+test('projects server-backed player names without crossing into inventory or save authority',()=>{
+ const f=fixture();
+ f.win.dispatch(CAPTURE_PEER_FRAME_READY_V1,readyPayload());
+ f.relay.publish([{...pose,displayName:'Mira'}]);
+ const actor=f.win.received.at(-1).detail.actors[0];
+ assert.equal(actor.displayName,'Mira');
+ assert.equal(actor.actorId,guest);
+ assert.equal('updatedAt' in actor,false);
+ for(const displayName of ['', ' '.repeat(3), 'a'.repeat(49), 'X'+String.fromCharCode(10)+'Y']){
+  assert.throws(()=>f.relay.publish([{...pose,displayName}]));
+ }
+ f.relay.dispose();
+});
+test('player greeting path is scoped to the real Exploration iframe and private Capture transport',()=>{
+ const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ const transport=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-multiplayer-transport-v1.mjs',import.meta.url),'utf8');
+ assert.match(app,/event\.source!==\$\('adventure-play-frame'\)\.contentWindow/);
+ assert.match(app,/captureRemotePositions\.has\(data\.targetActorId\)/);
+ assert.match(app,/displayName:members\.get\(peer\.actorId\)/);
+ assert.match(transport,/event:'capture-peer-greeting-v1'/);
+ assert.match(transport,/targetActorId===user/);
+ assert.match(transport,/room\.members\.some\(m=>m\.id===target\)/);
+});

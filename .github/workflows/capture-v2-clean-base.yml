@@ -227,6 +227,7 @@ jobs:
             src
             data
             examples/dom-demo
+            assets/runtime/audio/music-v1
       - name: Read official Exploration from main at its certified SHA
         uses: actions/checkout@v4
         with:

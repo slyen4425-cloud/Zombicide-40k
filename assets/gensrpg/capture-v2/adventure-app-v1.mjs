@@ -3,6 +3,8 @@
 // The only gameplay model lives in adventure-contract-v1.mjs (not DOM).
 import {fetchOfficialAdventureJsonV1} from './adventure-official-json-v1.mjs';
 import {captureBestiaryCardsV1} from '../../../vendor/combat-lab/src/ui/capture-bestiary-cards-v1.js';
+import {SOUNDTRACK_STARTER_CAPTURE_PROJECT_V1}
+ from '../../../vendor/combat-lab/src/assets/soundtrack-starter-catalog-v1.js';
 import {projectCaptureEncounterOwnedStatsV1}
  from '../../../vendor/combat-lab/src/adapters/input/capture/capture-encounter-owned-stats-v1.js';
 import {projectCaptureStatEffectsV1}
@@ -1849,6 +1851,9 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  const loadingArt=new URL('./branding/monster-invoc-loading-v1.svg',import.meta.url);
  if(loadingArt.origin!==url.origin)throw Error('Illustration de transition hors origine');
  url.searchParams.set('loadingArt',loadingArt.pathname);
+ // Composer is the one canonical project; Explorer owns the audio element.
+ const mapMusic=SOUNDTRACK_STARTER_CAPTURE_PROJECT_V1.scenes['capture:exploration:map']?.music;
+ if(mapMusic)url.searchParams.set('soundtrackMusic',JSON.stringify(mapMusic));
  url.searchParams.set('adventureSession',sessionId);
  url.searchParams.set('cameraAngle',String(result.session.cameraPolicy?.angleDeg??55));
  url.searchParams.set('cameraZoom',String(result.session.cameraPolicy?.zoomPercent??175));

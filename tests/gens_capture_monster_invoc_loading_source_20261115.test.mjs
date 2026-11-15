@@ -15,7 +15,7 @@ test('only one creator image in the Capture owner, original title is depicted in
  assert.equal(media.toString('ascii',8,12),'WEBP');
  assert.equal(media.byteLength,472540,'stable optimized preview size');
  assert.equal(createHash('sha256').update(media).digest('hex'),
-  '81fc1475620b8bf0840f'); // source provenance placeholder replaced below
+  '81fc1475620b8bf0840f061bb3e57f576a73e1f7d81fe13376b799cbddd2021d');
 });
 test('launch cover and native Explorer transition share the exact same art path',()=>{
  const html=read('adventure.html'),css=read('adventure-style-v1.css'),app=read('adventure-app-v1.mjs');

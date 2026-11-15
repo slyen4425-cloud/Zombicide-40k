@@ -1,3 +1,8 @@
+## 2026-11-15 — Source Collection/Map : synchronisation des SHA officiels certifiés
+- Propriétaires maintenant GREEN et publiés : Combat `main@a6a3bce95ef08271f849cd1c871771a64291c625` (PR #323, CI 43722322207, Pages 43722321907) et Exploration `main@4a8063e526ec7c00d41b4997eb8a758c4fd76f3a` (PR #464, CI 43722132044, Pages 43722132152).
+- La première CI de la source #472 utilisait encore les anciens SHA : son import ESM `soundtrack-project-local-storage-v1.js` n’existait pas dans l’ancien vendor Combat, laissant le bouton Nouvelle partie désactivé. Réalignement des **deux pins existants** et du test, aucune copie de média ni double autorité.
+- Retester le vrai navigateur à la racine, le montage du builder source, la Collection et les quatre scènes audio. Ne pas fusionner la source dans `main` publisher ; le pin publisher doit être une PR distincte après GREEN.
+
 ## 2026-11-15 — Capture : fiche complète Collection et composition musicale unique
 - START source Capture `5221e4827cef1407a5fee2f2d2cda22ebdba74b5`, checkpoint `checkpoint/gensrpg-start-owned-collection-full-page-20261115` ; branche `work/gensrpg-owned-collection-full-page-20261115`. Ne pas fusionner directement dans le publisher principal.
 - Restauration soustractive de la fiche complète de la source #460/#461 depuis le Bestiaire officiel : sur créature possédée, page propre, cinq capacités et descriptions, statistiques/résistances, retour, verrouillage des espèces inconnues. **Aucun** changement de possession, stats, inventaire, progression ou stockage.

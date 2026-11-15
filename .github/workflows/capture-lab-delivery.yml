@@ -37,6 +37,7 @@ jobs:
           node --test tests/gens_capture_v2_pwa_cache_owner_v1.test.cjs
           node --test tests/gens_capture_v2_adventure_xp_fullscreen_20261108.test.mjs
           node --test tests/gens_capture_v2_play_resume_team_loading_20261108.test.mjs
+          node --test tests/gens_capture_monster_invoc_loading_source_20261115.test.mjs
           node --test tests/gens_capture_v2_generic_profile_owner.test.cjs
           node --test tests/gens_capture_combat_main_only_guard_20261030.test.cjs
       - name: Resolve the TWO exact, immutable Lab main SHAs

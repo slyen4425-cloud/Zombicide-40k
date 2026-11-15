@@ -42,6 +42,16 @@ const copy=(from,to)=>{
 };
 for(const folder of ['src','data','examples/dom-demo'])
  copy(path.join(combat,folder),path.join(combatOut,folder));
+// Audio is a shared bank in the Combat owner; only the *one* authored
+// victory file actually consumed by the newly certified music scene is
+// transported. We do NOT copy the whole private library or author masters.
+const victoryTrack='assets/runtime/audio/music-v1/victory-01-0b52ce2b.mp3';
+const victorySource=path.join(combat,victoryTrack);
+if(!fs.existsSync(victorySource))throw Error('Official victory track absent from Combat main');
+const victoryBytes=fs.readFileSync(victorySource);
+if(hash(victoryBytes)!=='327d2734bca243c90c3b9f0b6bbf2f93fb78a667fbe380dc1be5486e68e250fe')
+ throw Error('Unapproved victory sound: original SHA256 does not match author');
+copy(victorySource,path.join(combatOut,victoryTrack));
 const required={
  combat:[
   'examples/dom-demo/capture-editor-v2.html',

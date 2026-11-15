@@ -59,3 +59,72 @@ test('performance probes are opt-in and retain five source-consistent JSON trans
  assert.match(code,/Promise\.all\(\[\s*fetchJson\(/);
  assert.match(code,/adventurePerf\('play iframe ready after launch'/);
 });
+
+test('owned Collection opens full official Bestiary page with skills, explanations and return, without exposing unowned',()=>{
+ const previousDocument=globalThis.document;
+ const create=tag=>({
+  tag,children:[],dataset:{},events:{},attrs:{},style:{},hidden:false,
+  textContent:'',className:'',
+  append(...items){this.children.push(...items)},
+  prepend(...items){this.children.unshift(...items)},
+  replaceChildren(...items){this.children=items},
+  setAttribute(name,value){this.attrs[name]=String(value)},
+  addEventListener(name,callback){this.events[name]=callback}
+ });
+ const walk=(root,predicate)=>[...(predicate(root)?[root]:[]),
+  ...(root.children??[]).flatMap(child=>walk(child,predicate))];
+ const textContent=root=>[String(root.textContent??''),...(root.children??[]).map(textContent)].join(' ');
+ const official={...cards[0],
+  description:'Gardienne des vallées moussues.',
+  elements:['nature'],measures:[{key:'nature',label:'Nature',value:25,
+   effectSummary:'1 point = +1 % dégâts Nature'}],
+  resistances:[{element:'fire',amount:-25}],
+  skills:[
+   {state:'ready',name:'Ronce',requiredLevel:5,element:'nature',cooldownMs:12000,
+    explanation:{sentences:['Inflige 12 dégâts de Nature.',
+     'Immobilise la cible pendant 2 secondes.']}},
+   {state:'unpublished',name:'Compétence secrète'}
+  ]};
+ try{
+  globalThis.document={createElement:create};
+  const host=create('div');
+  const chosen=adventureOwnedCollectionV1({session,bestiaryCards:[official,...cards.slice(1)]});
+  renderAdventureSheetViewV1({host,snapshot:{},tab:'collection',collection:chosen,
+   resolveSpeciesPortrait:()=>null,
+   onOpenOwnedCreature:()=>{}});
+  const tiles=walk(host,e=>e.tag==='button'&&e.dataset.collectionOwned);
+  const locked=tiles.find(e=>e.dataset.collectionOwned==='false');
+  const owned=tiles.find(e=>e.dataset.collectionOwned==='true');
+  const grid=walk(host,e=>e.className==='sheet-collection-grid')[0];
+  const page=walk(host,e=>e.className==='sheet-collection-detail')[0];
+  assert.equal(locked.disabled,true);
+  locked.events.click();
+  assert.equal(page.hidden,true,'locked creature cannot reveal anything');
+  owned.events.click();
+  assert.equal(grid.hidden,true,'gallery gives way to the Bestiary page');
+  assert.equal(page.hidden,false);
+  const detail=walk(page,e=>e.dataset.collectionBestiarySpecies==='r')[0];
+  assert.ok(detail);
+  const written=textContent(detail);
+  assert.match(written,/FICHE DU BESTIAIRE OFFICIEL/);
+  assert.match(written,/Gardienne des vallées moussues/);
+  assert.match(written,/Ronce/);
+  assert.match(written,/Inflige 12 dégâts de Nature/);
+  assert.match(written,/Immobilise la cible pendant 2 secondes/);
+  assert.match(written,/1 point = \+1 % dégâts Nature/);
+  assert.match(written,/Feu : -25 %/);
+  assert.doesNotMatch(written,/Compétence secrète/,'unpublished skills stay hidden');
+  const back=walk(page,e=>e.className==='sheet-collection-back')[0];
+  back.events.click();
+  assert.equal(grid.hidden,false);
+  assert.equal(page.hidden,true);
+ }finally{
+  if(previousDocument===undefined)delete globalThis.document;
+  else globalThis.document=previousDocument;
+ }
+});
+
+test('Collection gallery/page hidden state remains hidden despite authored display:grid CSS',()=>{
+ const css=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-style-v1.css',import.meta.url),'utf8');
+ assert.match(css,/\.sheet-collection-grid\[hidden\],\.sheet-collection-detail\[hidden\]\{display:none!important\}/);
+});

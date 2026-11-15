@@ -613,7 +613,11 @@ body[data-adventure-item-editor="true"] .adventure-start-tabs{display:none!impor
 .sheet-collection-detail .sheet-profile{margin-top:5px}
 .sheet-collection-skills{margin:10px 0}
 .sheet-collection-skills p{font-size:12px;margin:4px 0}
-.sheet-collection-members{display:grid;gap:5px;margin-top:10px}
+.sheet-collection-grid[hidden],.sheet-collection-detail[hidden]{display:none!important}
+.sheet-collection-back{min-height:42px;margin-bottom:10px;padding:7px 14px;border:1px solid #7ea5ad;border-radius:10px;background:#1c4651;color:#eaf9f7;font-weight:700;cursor:pointer}
+.sheet-collection-description{padding:10px 13px;margin:0;line-height:1.5;color:#e1eee9}
+.sheet-collection-skills,.sheet-collection-measures,.sheet-collection-resistances{display:grid;gap:8px;margin:12px 0;padding:10px 12px;border:1px solid #365962;border-radius:12px;background:#122d36}
+.sheet-collection-skills h4,.sheet-collection-measures h4,.sheet-collection-resistances h4,.sheet-collection-members{display:grid;gap:5px;margin-top:10px}
 .sheet-collection-member{display:flex;align-items:center;flex-wrap:wrap;justify-content:space-between;gap:9px;font-size:12px}
 .sheet-collection-member button{min-height:38px}
 @media(orientation:landscape) and (max-height:550px){

@@ -44,7 +44,7 @@ function profile({kind,name,subtitle,imageUrl,artCaption,vitals=[],elements=[]})
  const top=node('div','sheet-profile-top');
  top.append(portraitFrame({url:imageUrl,alt:'Portrait de '+name,caption:artCaption}));
  const info=node('div','sheet-profile-info');
- info.append(node('span','sheet-overline',kind==='hero'?'PERSONNAGE':'CRÉATURE DE L’ÉQUIPE'));
+ info.append(node('span','sheet-overline',kind==='hero'?'PERSONNAGE':kind==='bestiary'?'FICHE DU BESTIAIRE OFFICIEL':'CRÉATURE DE L’ÉQUIPE'));
  info.append(node('h3','sheet-display-name',name));
  if(subtitle)info.append(node('p','sheet-profile-subtitle',subtitle));
  if(elements.length){
@@ -252,15 +252,16 @@ export function renderAdventureSheetViewV1({
    throw new TypeError('La Collection exige le Bestiaire et la partie officiels');
   const section=node('section','sheet-collection');
   section.append(node('h3','',`Collection · ${collection.ownedCount} / ${collection.totalCount}`),
-   hint('Créatures possédées dans ton équipe ou ton stockage. Les fiches inconnues restent verrouillées.'));
+   hint('Touche une créature possédée pour ouvrir sa fiche complète du Bestiaire officiel. Les autres restent verrouillées.'));
   const grid=node('div','sheet-collection-grid');
   const detailHost=node('section','sheet-collection-detail');
-  detailHost.append(hint('Touche une créature possédée pour consulter sa fiche.'));
+  detailHost.hidden=true;
+  detailHost.setAttribute('aria-live','polite');
   for(const entry of collection.entries){
    const tile=node('button','sheet-collection-card');
    tile.type='button';tile.disabled=!entry.owned;
    tile.dataset.collectionOwned=String(entry.owned);
-   // Rarity belongs to the official Combat Bestiary card, even when locked.
+   // Both rarity and content are projections of the same immutable Combat Bestiary card.
    tile.dataset.rarity=entry.rarity??'rare';
    tile.setAttribute('aria-label',entry.owned
     ?entry.name+' · '+entry.members.map(m=>'niveau '+m.level).join(', ')
@@ -276,24 +277,85 @@ export function renderAdventureSheetViewV1({
     node('small','sheet-rarity-label',entry.rarity==='legendary'?'Légendaire':entry.rarity==='mythic'?'Mythique':'Rare'),
     node('small','',entry.owned?entry.members.map(m=>'Niv. '+m.level).join(' · '):'Non possédée'));
    tile.addEventListener('click',()=>{
-    if(!entry.owned)return;
-    const detail=profile({kind:'creature',name:entry.name,
-     subtitle:entry.rarity==='legendary'?'Légendaire':entry.rarity==='mythic'?'Mythique':'Rare',
-     imageUrl:url,artCaption:'Aucune illustration publiée',
-     elements:Array.isArray(entry.card.elements)?entry.card.elements:[],
+    if(!entry.owned)return; // Never reveal an unowned Bestiary page.
+    const card=entry.card; // Single source: no copied species, stats or skill catalogue.
+    const rank=entry.rarity==='legendary'?'Légendaire':entry.rarity==='mythic'?'Mythique':'Rare';
+    const detail=profile({kind:'bestiary',name:entry.name,
+     subtitle:rank,imageUrl:url,artCaption:'Aucune illustration publiée',
+     elements:Array.isArray(card.elements)?card.elements:[],
      vitals:[['Exemplaires possédés',entry.members.length],
       ['Niveaux',entry.members.map(m=>m.level).join(', ')]]});
-    if(typeof entry.card.description==='string'&&entry.card.description.trim())
-     detail.append(node('p','sheet-hint',entry.card.description));
-    const skills=Array.isArray(entry.card.skills)
-     ?entry.card.skills.filter(skill=>skill.state==='ready'):[];
-    if(skills.length){
-     const box=node('section','sheet-collection-skills');
-     box.append(node('h4','','Capacités du Bestiaire officiel'));
-     for(const skill of skills)box.append(node('p','',skill.name??'Capacité'));
-     detail.append(box);
+    detail.dataset.collectionBestiarySpecies=entry.speciesId;
+    if(typeof card.description==='string'&&card.description.trim())
+     detail.append(node('p','sheet-collection-description',card.description));
+
+    // Read the authored Combat explanation verbatim. The UI does not recalculate effects.
+    const skills=Array.isArray(card.skills)
+     ?card.skills.filter(skill=>skill.state==='ready'):[];
+    const skillSection=node('section','sheet-collection-skills');
+    skillSection.append(node('h4','','Compétences équipées · Bestiaire officiel'));
+    if(!skills.length)skillSection.append(hint('Aucune capacité publiée pour les emplacements équipés.'));
+    for(const skill of skills){
+     const skillCard=node('article','sheet-collection-skill');
+     const heading=node('div','sheet-collection-skill-head');
+     const iconUrl=resolveSpeciesPortrait?.({portrait:skill.icon})??null;
+     if(iconUrl){
+      const image=node('img','sheet-collection-skill-icon');
+      image.alt='';image.loading='lazy';image.src=iconUrl;heading.append(image);
+     }
+     heading.append(node('strong','',skill.name??'Capacité sans nom'));
+     skillCard.append(heading);
+     const metadata=[
+      skill.element?(elementLabel[skill.element]??skill.element):null,
+      Number.isFinite(skill.requiredLevel)?'Niveau '+skill.requiredLevel:null,
+      Number.isFinite(skill.cooldownMs)&&skill.cooldownMs>0
+       ?'Recharge '+(skill.cooldownMs/1000).toLocaleString('fr-FR')+' s':null
+     ].filter(Boolean);
+     if(metadata.length)skillCard.append(node('small','sheet-collection-skill-meta',metadata.join(' · ')));
+     const sentences=Array.isArray(skill.explanation?.sentences)
+      ?skill.explanation.sentences.filter(sentence=>typeof sentence==='string'&&sentence.trim()):[];
+     for(const sentence of sentences)
+      skillCard.append(node('p','sheet-collection-skill-description',sentence));
+     if(!sentences.length)
+      skillCard.append(hint('Description indisponible dans le Bestiaire officiel.'));
+     skillSection.append(skillCard);
     }
-    const instances=node('div','sheet-collection-members');
+    detail.append(skillSection);
+
+    const measures=Array.isArray(card.measures)?card.measures:[];
+    if(measures.length){
+     const stats=node('section','sheet-collection-measures');
+     stats.append(node('h4','','Caractéristiques du Bestiaire'));
+     const cells=node('div','sheet-collection-measure-grid');
+     for(const measure of measures){
+      if(!measure||!Number.isFinite(measure.value))continue;
+      const cell=node('div','sheet-collection-measure');
+      cell.append(node('span','',measure.label??measure.key??'Caractéristique'),
+       node('strong','',measure.value));
+      if(typeof measure.effectSummary==='string'&&measure.effectSummary.trim())
+       cell.append(node('small','',measure.effectSummary));
+      cells.append(cell);
+     }
+     stats.append(cells);detail.append(stats);
+    }
+    const resistances=Array.isArray(card.resistances)?card.resistances:[];
+    if(resistances.length){
+     const panel=node('section','sheet-collection-resistances');
+     panel.append(node('h4','','Résistances et vulnérabilités'));
+     const list=node('div','sheet-collection-resistance-list');
+     for(const resistance of resistances){
+      if(!Number.isFinite(resistance?.amount))continue;
+      const label=elementLabel[resistance.element]??resistance.element??'Élément';
+      list.append(node('span','sheet-collection-resistance',
+       label+' : '+(resistance.amount>0?'+':'')+resistance.amount+' %'));
+     }
+     panel.append(list);detail.append(panel);
+    }
+    if(Number.isFinite(card.evolution?.level))
+     detail.append(hint('Évolution possible au niveau '+card.evolution.level+'.'));
+
+    const instances=node('section','sheet-collection-members');
+    instances.append(node('h4','','Mes exemplaires'));
     for(const member of entry.members){
      const line=node('div','sheet-collection-member');
      line.append(node('span','',`Niveau ${member.level} · ${member.place}`));
@@ -305,7 +367,15 @@ export function renderAdventureSheetViewV1({
      instances.append(line);
     }
     detail.append(instances);
-    detailHost.replaceChildren(detail);
+    const back=node('button','sheet-collection-back','← Retour à la collection');
+    back.type='button';
+    back.addEventListener('click',()=>{
+     detailHost.hidden=true;
+     grid.hidden=false;
+    });
+    detailHost.replaceChildren(back,detail);
+    grid.hidden=true;
+    detailHost.hidden=false;
    });
    grid.append(tile);
   }

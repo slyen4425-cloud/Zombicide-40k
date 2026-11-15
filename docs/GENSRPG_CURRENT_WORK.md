@@ -1,3 +1,14 @@
+## 2026-11-15 — Source Collection/Map : synchronisation des SHA officiels certifiés
+- Propriétaires maintenant GREEN et publiés : Combat `main@a6a3bce95ef08271f849cd1c871771a64291c625` (PR #323, CI 43722322207, Pages 43722321907) et Exploration `main@4a8063e526ec7c00d41b4997eb8a758c4fd76f3a` (PR #464, CI 43722132044, Pages 43722132152).
+- La première CI de la source #472 utilisait encore les anciens SHA : son import ESM `soundtrack-project-local-storage-v1.js` n’existait pas dans l’ancien vendor Combat, laissant le bouton Nouvelle partie désactivé. Réalignement des **deux pins existants** et du test, aucune copie de média ni double autorité.
+- Retester le vrai navigateur à la racine, le montage du builder source, la Collection et les quatre scènes audio. Ne pas fusionner la source dans `main` publisher ; le pin publisher doit être une PR distincte après GREEN.
+
+## 2026-11-15 — Capture : fiche complète Collection et composition musicale unique
+- START source Capture `5221e4827cef1407a5fee2f2d2cda22ebdba74b5`, checkpoint `checkpoint/gensrpg-start-owned-collection-full-page-20261115` ; branche `work/gensrpg-owned-collection-full-page-20261115`. Ne pas fusionner directement dans le publisher principal.
+- Restauration soustractive de la fiche complète de la source #460/#461 depuis le Bestiaire officiel : sur créature possédée, page propre, cinq capacités et descriptions, statistiques/résistances, retour, verrouillage des espèces inconnues. **Aucun** changement de possession, stats, inventaire, progression ou stockage.
+- La configuration musicale de la Map provient exclusivement du `SoundtrackProjectV1` déjà possédé par Combat (scène `capture:exploration:map` avec quatre pistes par défaut), sauvegardé par le Composer sur l'origine commune ; la source Capture relaie uniquement l'objet de configuration au player natif Exploration via URL same-origin vérifiée. Pas de lecteur ni de catalogue de musique dans Capture, MP3 conservés dans Exploration.
+- Dépendances : Combat PR de 4 pistes et persistance à certifier, Exploration PR de lecture Map et rendu natif à certifier. Pins immuables seront actualisés UNIQUEMENT après fusion main et CI des laboratoires. Publisher encore distinct, budget Pages ≤900 Mio, browser/HTTPS obligatoire, les quatre modes PWA sauvegardes inchangés.
+
 ## 2026-11-15 — Intégration ciblée : ombres réelles des maisons et UI musique en quatre onglets
 - Source START `checkpoint/gensrpg-start-four-tab-audio-house-shadow-source-20261115` sur la source Capture immuable `e95dcbb922146c3787f96402b8e35adb29e06bb6`. Branche `work/gensrpg-four-tab-audio-house-shadow-source-20261115`.
 - Le seul fichier d'autorité des laboratoires `assets/gensrpg/capture-v2/source-pins-v1.json` adopte Combat `main@d74faffec7f2758a543c6ebdc01ecdb0b082f832` (refonte musique quatre onglets, PR #322) et Exploration `main@7bd60b8dfeeb4eb0ba37f35a5e5a4e5ba93d11fa` (régression ombre bâtiments corrigée, PR #463).

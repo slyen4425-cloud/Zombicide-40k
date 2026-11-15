@@ -1,4 +1,26 @@
-## 2026-11-15 — Collection Capture : fiche intégrale du Bestiaire officiel (lot isolé C1)
+## 2026-11-15 — C6 consolidation source : préserver Bestiaire et ajouter nom/salut Exploration
+- START vérifié : `b16121afeee7e568f2ae9b59ddfbc7074bec7231` (GREEN avec la fiche Bestiaire Collection), checkpoint `checkpoint/gensrpg-start-c6-reconcile-bestiaire-20261115`, branche `work/gensrpg-capture-c6-reconcile-bestiaire-20261115`.
+- Objet: les lots source #462/#463 partaient de `63db417e`, antérieur à l'adoption du Bestiaire `b16121af`. Reprendre leurs **seuls fichiers Capture C6**, sans remplacer `adventure-play-sheet-view-v1.mjs`, CSS ni les tests Collection.
+- Propriétaire de rendu: Exploration `main@b02523be8871013e26340cddd419e0957e798913`, CI/PAGES GREEN, pin certifié et aucun moteur copie. Monster Capture possède seulement transport/règles, Combat reste inchangé. Ne publie pas de duel réseau/PvP.
+- Gate: PR CI complète + diff source exact (Bestiaire conservé) ; publication ultérieure par pin main séparé, contrôle HTTPS, test sur deux appareils.
+
+---
+
+## 2026-11-15 — Capture C6 : adopter Exploration natif des noms et salutations
+- START : checkpoint `checkpoint/gensrpg-start-capture-c6-exploration-pin-20261115` sur `3e8f23504ec9a77fe763815d27e36537faf5536f`, branche `work/gensrpg-capture-c6-exploration-pin-20261115`.
+- Propriétaires : Capture pour le relais de présence/authentification et la sauvegarde ; Exploration `main@b02523be8871013e26340cddd419e0957e798913` pour l'avatar, le texte sur la carte et « Saluer ». Son CI main `43696130743` et son workflow Pages `43696130752` sont GREEN.
+- Périmètre : mise à jour unique du pin Exploration dans `source-pins-v1.json`, test natif du contrat Capture C6 ; Combat reste strictement `df1eb259`. Aucun changement des moteurs, de Supabase, de WorldDocument, de Survie/Dungeon/PvP ou des sauvegardes existantes.
+- La validation source précède un lot publisher distinct qui vérifie les SHAs exacts et HTTPS. Cette livraison ne constitue NI un duel joueur-vs-joueur NI la persistance du monde après sortie de l'hôte. Ces fonctions nécessitent leurs propres contrats et tests en situation.
+- Gate : tests Capture, ownership, architecture, navigateur, git diff restreint, checkpoint final GREEN ; aucun merge avant CI. 
+
+---
+
+## 2026-11-15 — Capture Monster: identité réseau et salutation contextuelle (lot C6)
+- START: source publiée certifiée `63db417e8933e89b897b14cfffa27e105a1d6a1d`; checkpoint `checkpoint/gensrpg-start-capture-multiplayer-identity-20261115`; branche `work/gensrpg-capture-multiplayer-identity-20261115`.
+- Propriétaires: AdventureSession (nom/choix visuel), transport Capture (membres RLS, positions, messages privés); Exploration natif reste le seul MapActorRenderer. Aucune nouvelle autorité de sauvegarde, de carte, Combat ou déplacement.
+- Correctifs: transmettre `displayName` dérivé des membres du salon (pas du Broadcast), projeter le nom d'une ancienne sauvegarde sans inventer un HeroDefinition et permettre un « saluer » cosmétique à portée par le pont iframe officiel, vérification salon/cible et canal privé. Les visuels personnalisés distants ne sont PAS résolus par le seul transfert de positions: ils restent hors du présent lot jusqu'à une politique de partage sûre.
+- Tests: `gens_capture_v2_adventure_hero_selection_v1.test.mjs`, `gens_capture_v2_peer_frame_relay_v1.test.mjs`, tests du transport authentifié, vérification Chromium de la scène réelle; valider SHA exact de l'Exploration source dédiée avant toute publication pin. Les opérations de progression coopérative et de départ de l'hôte sont un chantier distinct dépendant d'un contrat serveur.
+- Risques/protections: Survie/Dungeon/PvP, sauvegardes, PWA, `index.html`, assets officiels Combat et Lab Exploration, aucune suppression. Promotion uniquement après CI GREEN, checkpoint final et HTTPS. Test réel deux appareils non encore effectué pour ce lot## 2026-11-15 — Collection Capture : fiche intégrale du Bestiaire officiel (lot isolé C1)
 - Source Capture START `63db417e8933e89b897b14cfffa27e105a1d6a1d` (ancien candidat source #457), checkpoint `checkpoint/gensrpg-start-collection-bestiary-2026-11-15`, branche `work/gensrpg-collection-bestiary-2026-11-15`.
 - Propriétaire unique : UI `assets/gensrpg/capture-v2/adventure-play-sheet-view-v1.mjs`. La Collection apparaît pendant Exploration, mais le laboratoire Exploration ne possède pas l'onglet et reste inchangé.
 - Sélection d'une espèce possédée -> fiche de Bestiaire complète intégrée, navigation retour ; image, description, cinq compétences publiées et leurs phrases explicatives, niveaux/coûts de recharge, stats/effets et résistances provenant exclusivement de `entry.card` du catalogue Combat officiel. Les espèces inconnues restent verrouillées, les instances et la sauvegarde inchangées.

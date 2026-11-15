@@ -20,22 +20,6 @@ const END=[
 // root-family edits before reconstructing pre-extraction historical fixtures.
 // The immutable pre-extraction fingerprints below remain unchanged.
 function restoreHistoricalHubSnapshot(index,root){
- // Exact inverse of the reviewed Shell-only Dungeon editor micro-lot,
- // for historical snapshot construction ONLY. No runtime or fingerprint change.
- if(hash(index)==='97b3dd1dd5b71b3f7bd486694c28d4367eb4104e'){
-  let source=index.toString('utf8');
-  for(const [current,previous] of [["\n/* V16.75.8 — séparation structurelle stricte des familles */\nbody.gensDungeonTheme #survivalModEditorHubBtn{display:none!important}\nbody:not(.gensDungeonTheme) #rpgUniverseEditorHubBtn{display:none!important}\n\n</style>\n<script src=\"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2\"></script>","\n/* V16.75.8 — séparation structurelle stricte des familles */\nbody.gensDungeonTheme #survivalModEditorHubBtn{display:none!important}\nbody:not(.gensDungeonTheme) #rpgUniverseEditorHubBtn,\nbody:not(.gensDungeonTheme) #dungeonAdvancedEditorBtn{display:none!important}\n\n</style>\n<script src=\"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2\"></script>"],["  renderHome();\n}\nfunction gensShellDungeonEditorAllowed(){\n  try{\n    // Shell authority: the explicitly selected editor family wins over a\n    // previously active game profile (notably after returning from Capture).\n    const hub=globalThis.document?.getElementById?.(\"editorHub\");\n    const family=hub&&hub.style.display!==\"none\"?gensSelectedFamily:\"\";\n    if(family===\"adventure\")return true;\n    if(family===\"capture\"||family===\"survival\"||family===\"pvp\")return false;\n    const p=getActiveGameProfile?.();\n    return !!p&&p.gameStyle===\"dungeon\"&&!window.GensCaptureV1?.isProfile?.(p);\n  }catch(e){return false}\n}\nfunction applyModeEditorVisibility(){\n  let activeProfile=null;try{activeProfile=getActiveGameProfile()}catch(e){}","  renderHome();\n}\nfunction gensShellDungeonEditorAllowed(){\n  try{const p=getActiveGameProfile?.();return !!p&&p.gameStyle===\"dungeon\"&&!window.GensCaptureV1?.isProfile?.(p)}catch(e){return false}\n}\nfunction applyModeEditorVisibility(){\n  let activeProfile=null;try{activeProfile=getActiveGameProfile()}catch(e){}"]]){
-   assert.equal(source.split(current).length-1,1,
-    'invert only the one audited Dungeon editor Shell edit');
-   source=source.replace(current,previous);
-  }
-  const original=Buffer.from(source,'utf8');
-  assert.equal(hash(original),'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646',
-   'inverse must reconstruct exactly the unchanged current main Shell');
-  // Re-run the SAME complete historical reconstruction from its first step.
-  // Running only the tail would skip version-sensitive inverse stages.
-  return restoreHistoricalHubSnapshot(original,root);
- }
  // Read-only inverse of the exact Chrome hero-loop patch for historical fixtures.
  index=require('./gens_chrome_hero_recursion_source_view_20261024.cjs')(index);
  index=require('./gens_phase12_generated_wall_material_source_view_v1.cjs')(index);

@@ -28,6 +28,27 @@ for(const [scenario,p,expected] of cases){profile=p;assert.equal(context.window.
 delete context.window.gensMode151;
 profile={gameStyle:'dungeon'};
 assert.equal(context.gensShellDungeonEditorAllowed(),true,'Shell owner must work without optional V151 identity runtime');
+const hub={style:{display:'none'}};
+context.document={getElementById:id=>id==='editorHub'?hub:null};
+context.gensSelectedFamily='';
+const capture={gameStyle:'dungeon',rpgUniverse:{gameplay:{profile:'creature'}}};
+hub.style.display='block';
+for(const [label,active,family,allowed] of [
+  ['Capture editor stays isolated',capture,'capture',false],
+  ['Survival editor stays isolated',{gameStyle:'dungeon'},'survival',false],
+  ['PvP editor stays isolated',{gameStyle:'dungeon'},'pvp',false],
+  ['Adventure editor with Dungeon profile',{gameStyle:'dungeon'},'adventure',true],
+  ['Adventure editor after a Capture profile was active',capture,'adventure',true],
+  ['Adventure editor with no selected profile',null,'adventure',true]
+]){
+  profile=active;context.gensSelectedFamily=family;
+  assert.equal(context.gensShellDungeonEditorAllowed(),allowed,label);
+}
+hub.style.display='none';
+context.gensSelectedFamily='';
+profile={gameStyle:'dungeon'};
+assert.equal(context.gensShellDungeonEditorAllowed(),true,'outside the editor hub, canonical Dungeon profile remains authorized');
+
 const apply=slice('function applyModeEditorVisibility(){','function gensEnforceModeIsolation(){');
 const sync=slice('function syncEditorHubForActiveFamily(){','function updateGameplayEditorHubCards(){');
 const editor=slice('function openDungeonAdvancedEditor(){','function closeDungeonAdvancedEditor(){');
@@ -40,4 +61,5 @@ assert.equal((src.match(/if\(dae\)dae\.style\.display=/g)||[]).length,1,'exactly
 assert.ok(!editor.includes('GensCaptureV1?.isProfile'),'do not add another Capture-only gate');
 assert.ok(capability.includes('window.GensCaptureV1?.isProfile?.(p)'),'Shell uses existing Capture classification owner');
 assert.ok(!capability.includes('gensMode151'),'Shell must not depend on optional V151 bootstrap');
+assert.ok(!src.includes('body:not(.gensDungeonTheme) #dungeonAdvancedEditorBtn{display:none!important}'),'CSS theme must not act as a second Dungeon editor visibility authority');
 console.log(JSON.stringify({scenario:'Single owner of Dungeon editor access',cases:cases.length,onlyCanonicalIdentity:true,singleVisibilityWriter:true,noCaptureOnlyPatch:true}));

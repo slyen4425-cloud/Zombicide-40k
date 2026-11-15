@@ -1,3 +1,10 @@
+## 2026-11-15 — Intérieurs de maison liés : réparation officielle dans Exploration
+- PR propriétaire #471 fusionnée sur Exploration `main@bf166ab4003e1f8f99aa6c6fa34ccfe05c3312e1` (murs, niveaux, escaliers, porte/retour, inspecteur compact), à la suite des PR #468 (2048 objets/plateau 16/falaises) et #469 (ombres globales par visuel). Aucun labo dupliqué.
+- Validation préalable au raccordement : source Exploration main CI `43738119662` et Pages `43738119686` à confirmer GREEN, puis source Capture PR #476 test/browser-sentinels GREEN, publisher PR #477 pin-only GREEN et taille <=900 Mio, publication main/HTTPS à SHA exact. Protéger les travaux d'autres agents et garder toute la source Capture hors du main publisher.
+- Visuel à confirmer par utilisateur sur PC et Pixel après déploiement : maison liée depuis la carte -> panneau murs/étages/retour, sauvegarde, passage sortie/arrivée, ombres arbres par modèle.
+
+---
+
 ## 2026-11-15 — Ombres globales par modèle : source officielle Exploration GREEN
 - Auteur : réglage commun pour les 400 arbres du même visuel, exceptions d'instances préservées. Source propriétaire Exploration PR #469 fusionnée en `main@73996dd3e9a53c93766871a68ea916a2d4cf6e6b` ; CI `43733763355` et publication Pages `43733763258` SUCCESS. Checkpoint `checkpoint/exploration-shadow-model-profiles-green-pages-20261115`.
 - Les mêmes pins de la PR source Capture #476 transportent désormais l'ensemble des corrections : 2048 objets, plateau 16, occlusion des falaises, ombres globales par modèle. E main uniquement et certificat CI exact. Combat main inchangé.

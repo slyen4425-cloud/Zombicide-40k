@@ -98,3 +98,21 @@ test('new game stores player-owned name without renaming the official HeroDefini
  for(const invalid of ['', ' ', 'A'.repeat(49), 'A\nB'])
   assert.throws(()=>officialAdventureHeroDisplayNameV1(invalid));
 });
+
+test('legacy saved player nickname reaches Exploration even without a custom hero skin',()=>{
+ const game=createAdventureSessionV1({
+  bestiaryCards:cards,starterId:'ally',heroDefinitionId:null,
+  heroDisplayName:'Luna',rules:DEFAULT_ADVENTURE_RULES_V1,
+  ids:{sessionId:'session-legacy-named',instanceId:'owned-ally1'},
+  now:'2026-11-15T04:00:00Z'
+ });
+ const target=storage();
+ const result=writeAdventureHeroSelectionGrantV1({
+  storage:target,session:{...game,status:'playing',
+   world:{mapRef:'world1',position:null}},world,heroRecord:null
+ });
+ assert.equal(result.displayName,'Luna');
+ assert.equal(result.heroDefinitionId,null,'never fabricate a hero asset ID');
+ assert.deepEqual(JSON.parse(target.getItem(
+  ADVENTURE_HERO_SELECTION_SCHEMA_V1+':session-legacy-named')),result);
+});

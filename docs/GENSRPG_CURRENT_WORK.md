@@ -1,3 +1,12 @@
+## 2026-11-15 — Capture Monster: identité réseau et salutation contextuelle (lot C6)
+- START: source publiée certifiée `63db417e8933e89b897b14cfffa27e105a1d6a1d`; checkpoint `checkpoint/gensrpg-start-capture-multiplayer-identity-20261115`; branche `work/gensrpg-capture-multiplayer-identity-20261115`.
+- Propriétaires: AdventureSession (nom/choix visuel), transport Capture (membres RLS, positions, messages privés); Exploration natif reste le seul MapActorRenderer. Aucune nouvelle autorité de sauvegarde, de carte, Combat ou déplacement.
+- Correctifs: transmettre `displayName` dérivé des membres du salon (pas du Broadcast), projeter le nom d'une ancienne sauvegarde sans inventer un HeroDefinition et permettre un « saluer » cosmétique à portée par le pont iframe officiel, vérification salon/cible et canal privé. Les visuels personnalisés distants ne sont PAS résolus par le seul transfert de positions: ils restent hors du présent lot jusqu'à une politique de partage sûre.
+- Tests: `gens_capture_v2_adventure_hero_selection_v1.test.mjs`, `gens_capture_v2_peer_frame_relay_v1.test.mjs`, tests du transport authentifié, vérification Chromium de la scène réelle; valider SHA exact de l'Exploration source dédiée avant toute publication pin. Les opérations de progression coopérative et de départ de l'hôte sont un chantier distinct dépendant d'un contrat serveur.
+- Risques/protections: Survie/Dungeon/PvP, sauvegardes, PWA, `index.html`, assets officiels Combat et Lab Exploration, aucune suppression. Promotion uniquement après CI GREEN, checkpoint final et HTTPS. Test réel deux appareils non encore effectué pour ce lot.
+
+---
+
 ## 2026-11-14 — Capture adopte la source Exploration 35 / 16 / 1 + route anti-traînées
 - START `b112584c0ed372a19f02a99819792bd6e594398f`, checkpoint `checkpoint/gensrpg-capture-exploration-defaults-road-start-20261114`, branche `work/gensrpg-capture-exploration-defaults-road-20261114`.
 - Seul `source-pins-v1.json` épingle Exploration main `3d773ecd9653700750d6de3f62d2255199490a17` (fusion #447 héros et #448 routes), CI source `43574733643` à valider SUCCESS avant publication.

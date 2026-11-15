@@ -1,3 +1,9 @@
+## 2026-11-15 — Source Capture : publier réglages d'ombres via le propriétaire Exploration
+- START source Capture `b7b384b082a266c2ba6d4748b227f2543a946276` de PR #472 (13/13 GREEN), checkpoint `checkpoint/gensrpg-start-shadow-controls-source-20261115` et branche `work/gensrpg-shadow-controls-source-20261115`.
+- Laboratoire Exploration propriétaire des ombres `main@05ccc80874a27ab19f184897ac659c5b2abd1c4a` (PR #465, CI 43727372188 et Pages 43727372096 GREEN), pin officiel mis à jour à ce SHA exact. Combat `main@a6a3bce95ef08271f849cd1c871771a64291c625` inchangé.
+- Réglages dans le **même** `WorldObjectPlacement.overrides.shadow`, panneau replié Auto/Personnalisé, largeur/hauteur/X/Y/opacité, undo et export WorldDocument ; aucun module/shadow renderer copié dans Capture. Les quatre corrections précédentes (Collection, mouvement héros idle-only, chargement complet, musique Aventure) restent dans la même source.
+- Périmètre : uniquement pins, test de pin et journal source ; brancher dans publisher par nouveau pin après PR source GREEN, sans fusionner la branche source dans le publisher main. Budget Pages <=900 Mio et preuve HTTPS obligatoires.
+
 ## 2026-11-15 — Source Collection/Map : synchronisation des SHA officiels certifiés
 - Propriétaires maintenant GREEN et publiés : Combat `main@a6a3bce95ef08271f849cd1c871771a64291c625` (PR #323, CI 43722322207, Pages 43722321907) et Exploration `main@4a8063e526ec7c00d41b4997eb8a758c4fd76f3a` (PR #464, CI 43722132044, Pages 43722132152).
 - La première CI de la source #472 utilisait encore les anciens SHA : son import ESM `soundtrack-project-local-storage-v1.js` n’existait pas dans l’ancien vendor Combat, laissant le bouton Nouvelle partie désactivé. Réalignement des **deux pins existants** et du test, aucune copie de média ni double autorité.

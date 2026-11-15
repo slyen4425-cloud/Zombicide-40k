@@ -1027,6 +1027,22 @@ function renderCaptureRemotePositions(){
   .filter(peer=>members.has(peer.actorId))
   .map(peer=>({...peer,displayName:members.get(peer.actorId)})));
 }
+// The official Exploration Play scene requests a greeting without owning
+// any Supabase credentials, room access, or actor authority.
+window.addEventListener('message',event=>{
+ if(event.origin!==window.location.origin||
+    event.source!==$('adventure-play-frame').contentWindow)return;
+ const data=event.data;
+ if(data?.schema!=='gensrpg.exploration.play.peer-greet.v1')return;
+ const room=activeCaptureRoom,session=store?.load();
+ if(!room||!session||data.sessionId!==session.sessionId||
+    !captureRemotePositions.has(data.targetActorId))return;
+ void captureRoomProvider().greet({
+  roomId:room.roomId,targetActorId:data.targetActorId
+ }).then(()=>onlineRoomStatus('👋 Salutation envoyée'))
+   .catch(error=>onlineRoomStatus('Salutation impossible : '+error.message,true));
+});
+
 async function connectCaptureRoom(response){
  const transport=captureRoomProvider();
  // Separate authorization: the server already validated this user and the
@@ -1044,6 +1060,15 @@ async function connectCaptureRoom(response){
   roomId:response.roomId,userId:response.userId,
   onChange:renderCaptureRoomMembers,
   onPositions:updateCaptureRemotePositions,
+  onGreeting:()=>{
+   const frame=$('adventure-play-frame');
+   const sessionId=store?.load()?.sessionId;
+   if(!sessionId||frame.hidden||!frame.contentWindow)return;
+   try{frame.contentWindow.dispatchEvent(new frame.contentWindow.CustomEvent(
+    'gensrpg.exploration.play.peer-greeting-received.v1',
+    {detail:{sessionId}}
+   ));}catch{/* Navigation may be unloading; no gameplay state is affected. */}
+  },
   onStatus:message=>{if(message!=='Salon connecté')onlineRoomStatus(message,true);}
  });
  const state=await transport.inspectRoom(response.roomId);

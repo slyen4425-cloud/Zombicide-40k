@@ -1019,7 +1019,13 @@ function renderCaptureRemotePositions(){
  // alone will later display the validated peers using its official renderer.
  text($('adventure-room-positions'),'Positions reçues : '+statement+
   ' · affichage par le moteur Exploration dans le monde.');
- activeCapturePeerRelay?.publish([...captureRemotePositions.values()]);
+ // Names come exclusively from the RLS-protected room membership, not
+ // from untrusted position broadcasts or remote save files.
+ const members=new Map((lastCaptureRoomState?.members??[])
+  .map(member=>[member.id,member.name]));
+ activeCapturePeerRelay?.publish([...captureRemotePositions.values()]
+  .filter(peer=>members.has(peer.actorId))
+  .map(peer=>({...peer,displayName:members.get(peer.actorId)})));
 }
 async function connectCaptureRoom(response){
  const transport=captureRoomProvider();
@@ -1872,7 +1878,13 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
     onReady:()=>onlineRoomStatus('Affichage des joueurs distants raccordé à Exploration')
    })
   :null;
- activeCapturePeerRelay?.publish([...captureRemotePositions.values()]);
+ // Names come exclusively from the RLS-protected room membership, not
+ // from untrusted position broadcasts or remote save files.
+ const members=new Map((lastCaptureRoomState?.members??[])
+  .map(member=>[member.id,member.name]));
+ activeCapturePeerRelay?.publish([...captureRemotePositions.values()]
+  .filter(peer=>members.has(peer.actorId))
+  .map(peer=>({...peer,displayName:members.get(peer.actorId)})));
  // No fake fallback if pinned Exploration main lacks the official API.
  frame.src=url.href;
  adventurePerf('play preflight until iframe navigation',adventureLaunchStartedAt);

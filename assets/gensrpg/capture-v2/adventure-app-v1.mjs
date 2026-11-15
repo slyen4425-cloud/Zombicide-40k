@@ -1844,6 +1844,11 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  const url=new URL('../../../vendor/exploration-lab/sculpt-lab.html',import.meta.url);
  const sessionId=result.session.sessionId;
  url.searchParams.set('play','1');
+ // Explorer reuses its native loading masks; only one artwork URI on this
+ // same origin is passed by Capture, without copying media into the lab.
+ const loadingArt=new URL('./branding/monster-invoc-loading-v1.svg',import.meta.url);
+ if(loadingArt.origin!==url.origin)throw Error('Illustration de transition hors origine');
+ url.searchParams.set('loadingArt',loadingArt.pathname);
  url.searchParams.set('adventureSession',sessionId);
  url.searchParams.set('cameraAngle',String(result.session.cameraPolicy?.angleDeg??55));
  url.searchParams.set('cameraZoom',String(result.session.cameraPolicy?.zoomPercent??175));

@@ -240,11 +240,13 @@ export function createCaptureRoomTransportV1({client}={}){
    ownActorId:user,previousSequences
   });
  }
- async function observe({roomId,userId,onChange,onStatus,onPositions}={}){
+ async function observe({roomId,userId,onChange,onStatus,onPositions,onGreeting}={}){
   const id=checkUuid(roomId),user=checkUuid(userId);
   if(typeof onChange!=='function')throw new TypeError('Callback salle requis');
   if(onPositions!==undefined&&typeof onPositions!=='function')
    throw new TypeError('Le lecteur des positions doit être un callback');
+  if(onGreeting!==undefined&&typeof onGreeting!=='function')
+   throw new TypeError('Le destinataire du salut doit être un callback');
   await dispose();
   activeRoomId=id;
   const generation=subscriptionGeneration;
@@ -295,6 +297,12 @@ export function createCaptureRoomTransportV1({client}={}){
   // Never trust positions in Broadcast payloads. The room member's RLS
   // SELECT is the ONLY source of received coordinates, area and revision.
   next.on('broadcast',{event:'capture-peer-position-changed-v1'},updatePositions);
+  // Cosmetic peer greeting. The sender's identity is never trusted from the
+  // broadcast payload; only a private member may send, and only the
+  // addressed actor receives this short-lived, non-persistent notification.
+  next.on('broadcast',{event:'capture-peer-greeting-v1'},event=>{
+   if(current()&&event?.payload?.targetActorId===user)onGreeting?.();
+  });
   next.subscribe(status=>{
    if(!current())return;
    if(status==='SUBSCRIBED'){
@@ -310,6 +318,20 @@ export function createCaptureRoomTransportV1({client}={}){
   update();updatePositions();
   return Object.freeze({roomId:id,topic:ROOM_TOPIC+id});
  }
+ async function greet({roomId,targetActorId}={}){
+  const id=checkUuid(roomId),target=checkUuid(targetActorId);
+  const user=await authenticatedUserId();
+  if(target===user)throw new Error('Tu ne peux pas te saluer toi-même');
+  if(activeRoomId!==id||!channel)throw new Error('Salon non connecté');
+  const room=await inspectRoom(id);
+  if(!room?.open||!room.members.some(m=>m.id===user)||
+     !room.members.some(m=>m.id===target))
+   throw new Error('Le destinataire ne fait plus partie du salon');
+  const response=await channel.send({type:'broadcast',
+   event:'capture-peer-greeting-v1',payload:{targetActorId:target}});
+  if(response!=='ok')throw new Error('Salutation non transmise');
+  return true;
+ }
  async function leave({roomId}={}){
   const id=checkUuid(roomId);
   try{result(await client.rpc('gensrpg_capture_leave_room',{p_room:id}),
@@ -324,5 +346,5 @@ export function createCaptureRoomTransportV1({client}={}){
  }
  return Object.freeze({authenticatedUserId,create,join,inspectRoom,fetchRoomSetup,
   bindWorld,publishWorldDocument,fetchWorldDocument,
-  ownPositionSequence,reportPosition,inspectPositions,observe,leave,dispose});
+  ownPositionSequence,reportPosition,inspectPositions,observe,greet,leave,dispose});
 }

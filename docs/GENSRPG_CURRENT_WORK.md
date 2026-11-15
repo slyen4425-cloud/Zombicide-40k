@@ -1,3 +1,12 @@
+## 2026-11-15 — Capture C6 : adopter Exploration natif des noms et salutations
+- START : checkpoint `checkpoint/gensrpg-start-capture-c6-exploration-pin-20261115` sur `3e8f23504ec9a77fe763815d27e36537faf5536f`, branche `work/gensrpg-capture-c6-exploration-pin-20261115`.
+- Propriétaires : Capture pour le relais de présence/authentification et la sauvegarde ; Exploration `main@b02523be8871013e26340cddd419e0957e798913` pour l'avatar, le texte sur la carte et « Saluer ». Son CI main `43696130743` et son workflow Pages `43696130752` sont GREEN.
+- Périmètre : mise à jour unique du pin Exploration dans `source-pins-v1.json`, test natif du contrat Capture C6 ; Combat reste strictement `df1eb259`. Aucun changement des moteurs, de Supabase, de WorldDocument, de Survie/Dungeon/PvP ou des sauvegardes existantes.
+- La validation source précède un lot publisher distinct qui vérifie les SHAs exacts et HTTPS. Cette livraison ne constitue NI un duel joueur-vs-joueur NI la persistance du monde après sortie de l'hôte. Ces fonctions nécessitent leurs propres contrats et tests en situation.
+- Gate : tests Capture, ownership, architecture, navigateur, git diff restreint, checkpoint final GREEN ; aucun merge avant CI. 
+
+---
+
 ## 2026-11-15 — Capture Monster: identité réseau et salutation contextuelle (lot C6)
 - START: source publiée certifiée `63db417e8933e89b897b14cfffa27e105a1d6a1d`; checkpoint `checkpoint/gensrpg-start-capture-multiplayer-identity-20261115`; branche `work/gensrpg-capture-multiplayer-identity-20261115`.
 - Propriétaires: AdventureSession (nom/choix visuel), transport Capture (membres RLS, positions, messages privés); Exploration natif reste le seul MapActorRenderer. Aucune nouvelle autorité de sauvegarde, de carte, Combat ou déplacement.

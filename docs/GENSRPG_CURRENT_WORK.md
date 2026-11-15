@@ -1,3 +1,9 @@
+## 2026-11-15 — Capture source : reprendre la correction de relief du laboratoire officiel
+- START source `5379f1102c027d0fd27cd7b9ae1e7d8e0cbbd56b`, checkpoint `checkpoint/gensrpg-start-relief16-dense-forest-source-20261115`, branche `work/gensrpg-relief16-dense-forest-source-20261115`. La source transporte toujours le lot ombres de la PR #474, sans la fusionner dans le publisher main.
+- Propriétaire Exploration : PR #468 fusionnée sur `main@ce59c71d60d233ed3354fd945c96b31423f95c44` ; CI source main `43731721532` et Pages `43731721546` à vérifier GREEN avant adoption finale. Corrige objet 256→2048 sans troncature, quickbar 7→16, haut/bas de falaises et masque de profondeur terrain, sans écrire de gameplay alternatif.
+- Seuls fichiers Capture changés : SHA + CI du pin existant `assets/gensrpg/capture-v2/source-pins-v1.json`, test du SHA, ce journal. Combat main `a6a3bce95ef08271f849cd1c871771a64291c625` immuable. Aucun fichier média, moteur, données joueur ni WorldDocument copié.
+- Validation obligatoire : Explorateur CI+Pages+HTTPS SHA exact, CI source Capture et navigateurs, puis publication dans une PR publisher distincte (simple pin de source + test), budget Pages <=900 Mio, CI main, Pages, HTTPS, PWA PC/Pixel. Ni la source ni le publisher ne peuvent être déclarés livrés avant ces preuves.
+
 ## 2026-11-15 — Source Capture : publier réglages d'ombres via le propriétaire Exploration
 - START source Capture `b7b384b082a266c2ba6d4748b227f2543a946276` de PR #472 (13/13 GREEN), checkpoint `checkpoint/gensrpg-start-shadow-controls-source-20261115` et branche `work/gensrpg-shadow-controls-source-20261115`.
 - Laboratoire Exploration propriétaire des ombres `main@05ccc80874a27ab19f184897ac659c5b2abd1c4a` (PR #465, CI 43727372188 et Pages 43727372096 GREEN), pin officiel mis à jour à ce SHA exact. Combat `main@a6a3bce95ef08271f849cd1c871771a64291c625` inchangé.

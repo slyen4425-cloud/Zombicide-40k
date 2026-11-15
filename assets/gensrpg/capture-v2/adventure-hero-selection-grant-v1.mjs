@@ -30,7 +30,16 @@ export function writeAdventureHeroSelectionGrantV1({
  if(requestedId===undefined){
   if(heroRecord!==null&&heroRecord!==undefined)
    throw new Error('No hero selection recorded in the authoritative AdventureSession');
-  return null; // legacy game, never invent a hero ID or create a false grant.
+  // Legacy adventures can still own a real player nickname. Project the
+  // existing saved name without inventing a HeroDefinition or changing Save.
+  if(session.hero?.displayName===undefined)return null;
+  const grant=Object.freeze({
+   schema:ADVENTURE_HERO_SELECTION_SCHEMA_V1,version:1,
+   sessionId,worldId,heroDefinitionId:null,
+   displayName:officialAdventureHeroDisplayNameV1(session.hero.displayName)
+  });
+  storage.setItem(ADVENTURE_HERO_SELECTION_SCHEMA_V1+':'+sessionId,JSON.stringify(grant));
+  return grant;
  }
  const heroDefinitionId=officialAdventureHeroDefinitionIdV1(requestedId);
  if(!heroRecord||heroRecord.schema!=='gensrpg-exploration-user-hero-v1'||

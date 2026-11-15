@@ -53,7 +53,7 @@ jobs:
             src
             data
             examples/dom-demo
-            assets/runtime/audio/music-v1/victory-01-0b52ce2b.mp3
+            assets/runtime/audio/music-v1
       - name: Checkout Exploration only from approved main
         uses: actions/checkout@v4
         with:

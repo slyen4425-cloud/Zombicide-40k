@@ -42,9 +42,27 @@ const authored=new Map(provenance.files.map(row=>{
  return [iconRoot+row.name,row];
 }));
 assert.equal(authored.size,12,"all uploaded icon filenames must be unique");
-const legacyEntries=gitEntries.filter(x=>!authored.has(x.file));
+// Only this one explicitly authenticated creator cover is allowed to extend
+// the frozen image inventory. It is not a migrated historic asset or one of
+// the twelve creature drop icons, and its bytes must match the verified source.
+const loadingCoverPath="assets/gensrpg/capture-v2/branding/monster-invoc-loading-v1.svg";
+const loadingCoverGitBlob="e95a159b001927daeae1df17020735b00cedb0ba";
+const cover=gitEntries.filter(x=>x.file===loadingCoverPath);
+assert.equal(cover.length,1,"exactly one official creator loading cover");
+assert.equal(cover[0].stage,"0");
+assert.equal(cover[0].mode,"100644");
+assert.equal(cover[0].sha,loadingCoverGitBlob,
+ "official loading artwork changed without a new explicit inventory review");
+const coverText=fs.readFileSync(path.join(root,loadingCoverPath),"utf8");
+const webpMatch=coverText.match(/xlink:href="data:image\/webp;base64,([A-Za-z0-9+/=]+)"/);
+assert.ok(webpMatch,"cover must contain a single embedded WebP, without remote dependencies");
+const webpBytes=Buffer.from(webpMatch[1],"base64");
+assert.equal(webpBytes.length,472540);
+assert.equal(crypto.createHash("sha256").update(webpBytes).digest("hex"),
+ "81fc1475620b8bf0840f061bb3e57f576a73e1f7d81fe13376b799cbddd2021d");
+const legacyEntries=gitEntries.filter(x=>!authored.has(x.file)&&x.file!==loadingCoverPath);
 assert.equal(legacyEntries.length,manifest.images.length,
- "all frozen historic images must remain accounted for, with only 12 approved new icons");
+ "all 173 frozen historic images must remain accounted for separately from the approved icons and cover");
 const map=new Map(manifest.images.map(row=>[row.path,row]));
 assert.equal(map.size,manifest.images.length,"duplicate paths in inventory");
 const counts={};
@@ -99,8 +117,9 @@ assert.deepEqual(duplicates,[
 // file. This inventory does not perform any rename, rewrite or fallback.
 console.log(JSON.stringify({
   scenario:"Phase 11 A0 Git-tree image inventory",
-  total:manifest.images.length+addedEntries.length,
+  total:manifest.images.length+addedEntries.length+cover.length,
   legacyTotal:manifest.images.length,authoredCaptureDropIcons:addedEntries.length,
+  approvedCreatorCover:cover.length,
   counts,
   duplicates:duplicates.map(x=>x.name),
   actualProductionUsage:"not determined; Rule 26 exact index audit required",

@@ -72,7 +72,7 @@ test('a new-game selector may reset but a saved 6-party is always rendered from 
  assert.match(ui,/\[state\.party\.active,\.\.\.\(state\.party\.reserve\?\?\[\]\)\]/);
  assert.match(html,/id="adventure-saved-roster-members"/);
  assert.match(html,/nouvelle.*partie/);
- assert.match(html,/class="adventure-loading-brand"[^>]*>GenSRPG</);
+ assert.match(html,/class="adventure-loading-brand"[^>]*>Monster InvoC</);
 });
 test('native Play is never shown before a source-authenticated first-frame ready message',()=>{
  const ui=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');

@@ -304,11 +304,16 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
    after its real first paint, not after HTML iframe load. */
 #adventure-launch-loading[hidden]{display:none!important}
 #adventure-launch-loading{position:fixed;inset:0;z-index:3200;
- display:grid;place-items:center;background:#07151d;color:#eafff6;
- text-align:center;overflow:auto;overscroll-behavior:contain;padding:22px}
-.adventure-loading-panel{width:min(440px,100%);display:grid;justify-items:center;
- gap:14px;padding:26px 18px;border:1px solid #336e6d;border-radius:18px;
- background:#11232dcf;box-shadow:0 16px 40px #0005}
+ display:grid;place-items:end center;
+ /* One branded author asset, shared by launch and Explorer transitions. */
+ background:#07151d url('./branding/monster-invoc-loading-v1.svg') center 46% / cover no-repeat;
+ color:#eafff6;text-align:center;overflow:auto;overscroll-behavior:contain;
+ padding:clamp(12px,3vh,25px)}
+.adventure-loading-panel{width:min(475px,94%);display:grid;justify-items:center;
+ gap:9px;padding:13px 17px;border:1px solid #567e81;border-radius:15px;
+ background:rgba(6,15,28,.78);box-shadow:0 10px 36px #0008;
+ backdrop-filter:blur(3px)}
+.adventure-loading-brand{display:none}
 .adventure-loading-brand{font-size:clamp(30px,7vw,47px);font-weight:900;
  letter-spacing:.075em;color:#caffde;text-shadow:0 0 21px #1673589c}
 .adventure-loading-spinner{display:block;width:46px;height:46px;border-radius:50%;

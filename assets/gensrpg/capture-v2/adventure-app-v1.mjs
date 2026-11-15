@@ -3,8 +3,10 @@
 // The only gameplay model lives in adventure-contract-v1.mjs (not DOM).
 import {fetchOfficialAdventureJsonV1} from './adventure-official-json-v1.mjs';
 import {captureBestiaryCardsV1} from '../../../vendor/combat-lab/src/ui/capture-bestiary-cards-v1.js';
-import {SOUNDTRACK_STARTER_CAPTURE_PROJECT_V1}
+import {SOUNDTRACK_STARTER_CAPTURE_PROJECT_V1,SOUNDTRACK_STARTER_CATALOG_V1}
  from '../../../vendor/combat-lab/src/assets/soundtrack-starter-catalog-v1.js';
+import {readOfficialSoundtrackProjectV1}
+ from '../../../vendor/combat-lab/src/contracts/soundtrack-project-local-storage-v1.js';
 import {projectCaptureEncounterOwnedStatsV1}
  from '../../../vendor/combat-lab/src/adapters/input/capture/capture-encounter-owned-stats-v1.js';
 import {projectCaptureStatEffectsV1}
@@ -1852,8 +1854,22 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  if(loadingArt.origin!==url.origin)throw Error('Illustration de transition hors origine');
  url.searchParams.set('loadingArt',loadingArt.pathname);
  // Composer is the one canonical project; Explorer owns the audio element.
- const mapMusic=SOUNDTRACK_STARTER_CAPTURE_PROJECT_V1.scenes['capture:exploration:map']?.music;
- if(mapMusic)url.searchParams.set('soundtrackMusic',JSON.stringify(mapMusic));
+ // Local storage is the SAME validated SoundtrackProject saved by the
+ // official Composer, not a second Capture audio-settings database.
+ let authoredSoundtrack=null;
+ try{
+  authoredSoundtrack=readOfficialSoundtrackProjectV1(window.localStorage,
+   SOUNDTRACK_STARTER_CAPTURE_PROJECT_V1.projectId,SOUNDTRACK_STARTER_CATALOG_V1);
+ }catch(error){
+  console.warn('Bande-son enregistrée non reconnue : pistes officielles conservées',error);
+ }
+ const fallbackMap=SOUNDTRACK_STARTER_CAPTURE_PROJECT_V1.scenes['capture:exploration:map'].music;
+ const composedMap=authoredSoundtrack?.scenes['capture:exploration:map'];
+ // A deliberately empty playlist mutes the map; a missing scene retains the 4 defaults.
+ const mapMusic=composedMap?(composedMap.music??{
+   tracks:[],order:'sequence',volume:0,fadeMs:0,repeat:false
+ }):fallbackMap;
+ url.searchParams.set('soundtrackMusic',JSON.stringify(mapMusic));
  url.searchParams.set('adventureSession',sessionId);
  url.searchParams.set('cameraAngle',String(result.session.cameraPolicy?.angleDeg??55));
  url.searchParams.set('cameraZoom',String(result.session.cameraPolicy?.zoomPercent??175));

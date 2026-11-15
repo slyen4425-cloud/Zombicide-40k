@@ -102,7 +102,7 @@ test('projects server-backed player names without crossing into inventory or sav
  assert.equal(actor.displayName,'Mira');
  assert.equal(actor.actorId,guest);
  assert.equal('updatedAt' in actor,false);
- for(const displayName of ['', ' '.repeat(3), 'a'.repeat(49), 'X\\nY']){
+ for(const displayName of ['', ' '.repeat(3), 'a'.repeat(49), 'X'+String.fromCharCode(10)+'Y']){
   assert.throws(()=>f.relay.publish([{...pose,displayName}]));
  }
  f.relay.dispose();

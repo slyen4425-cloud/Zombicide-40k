@@ -54,7 +54,7 @@ assert.equal(cover[0].mode,"100644");
 assert.equal(cover[0].sha,loadingCoverGitBlob,
  "official loading artwork changed without a new explicit inventory review");
 const coverText=fs.readFileSync(path.join(root,loadingCoverPath),"utf8");
-const webpMatch=coverText.match(/xlink:href="data:image\\/webp;base64,([A-Za-z0-9+/=]+)"/);
+const webpMatch=coverText.match(/xlink:href="data:image\/webp;base64,([A-Za-z0-9+/=]+)"/);
 assert.ok(webpMatch,"cover must contain a single embedded WebP, without remote dependencies");
 const webpBytes=Buffer.from(webpMatch[1],"base64");
 assert.equal(webpBytes.length,472540);

@@ -2,11 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
-test('single Pages publisher selects certified Capture source containing Exploration hero/road/menu/shadow/performance work',()=>{
+test('single Pages publisher selects certified Monster InvoC source with official victory audio, Exploration editor fixes and loading art',()=>{
  const manifest=JSON.parse(readFileSync(new URL('../tools/capture_v2_pages_preview_pin.json',import.meta.url),'utf8'));
  assert.equal(manifest.schema,'gensrpg-capture-v2-pages-source-pin-v1');
  assert.equal(manifest.repository,'slyen4425-cloud/Zombicide-40k');
- assert.equal(manifest.sha,'7329494e804810b1fcdc3a2aac9df47b0b9d678a');
+ assert.equal(manifest.sha,'5c8ee1c21932287f9f54d221513ab339e781b64b');
  assert.equal(manifest.publicPath,'/preview/capture-v2-pr225/');
  assert.equal(manifest.officialVisuals.repository,'slyen4425-cloud/GenSrpg_labo_combat_dynamique');
  assert.equal(manifest.officialVisuals.ref,'global-assets');

@@ -11,15 +11,19 @@ const keys=(value,allowed)=>value&&typeof value==='object'&&
 const validScope=value=>typeof value==='string'&&value.length>0&&
  value.length<=130&&!/[\u0000-\u001f\u007f]/.test(value);
 function position(value,ownActorId){
- if(!keys(value,['actorId','areaId','x','y','seq','updatedAt'])||
+ if(!keys(value,['actorId','areaId','x','y','seq','updatedAt','displayName'])||
   !ID.test(value.actorId)||value.actorId===ownActorId||
   !validScope(value.areaId)||
   !Number.isFinite(value.x)||value.x<0||value.x>1000000||
   !Number.isFinite(value.y)||value.y<0||value.y>1000000||
-  !Number.isSafeInteger(value.seq)||value.seq<1)
+  !Number.isSafeInteger(value.seq)||value.seq<1||
+  (value.displayName!==undefined&&(typeof value.displayName!=='string'||
+   !value.displayName.trim()||value.displayName.trim().length>48||
+   /[\u0000-\u001f\u007f]/.test(value.displayName))))
   throw new TypeError('Une position distante officielle est requise');
  return Object.freeze({actorId:value.actorId,areaId:value.areaId,
-  x:value.x,y:value.y,seq:value.seq});
+  x:value.x,y:value.y,seq:value.seq,
+  ...(value.displayName===undefined?{}:{displayName:value.displayName.trim()})});
 }
 export function attachCapturePeerFrameRelayV1({
  frame,origin,sessionId,worldId,worldFingerprint,ownActorId,onReady

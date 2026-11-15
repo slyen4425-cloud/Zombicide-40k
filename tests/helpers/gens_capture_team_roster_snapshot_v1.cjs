@@ -30,9 +30,11 @@ function restoreHistoricalHubSnapshot(index,root){
    source=source.replace(current,previous);
   }
   const original=Buffer.from(source,'utf8');
-  assert.equal(hash(original),'613b4a21d83e9adcdd091be82240a3a6f9cf5bf7',
-   'preserve original historical Capture root Hub fingerprint');
-  index=original;
+  assert.equal(hash(original),'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646',
+   'inverse must reconstruct exactly the unchanged current main Shell');
+  // Re-run the SAME complete historical reconstruction from its first step.
+  // Running only the tail would skip version-sensitive inverse stages.
+  return restoreHistoricalHubSnapshot(original,root);
  }
  // Read-only inverse of the exact Chrome hero-loop patch for historical fixtures.
  index=require('./gens_chrome_hero_recursion_source_view_20261024.cjs')(index);

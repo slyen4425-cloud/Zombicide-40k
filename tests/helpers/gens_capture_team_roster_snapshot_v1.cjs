@@ -164,6 +164,20 @@ function restoreHistoricalHubSnapshot(index,root){
   assert.equal(index.length,7933755,'Phase 9 Hub post-S2 rollback length');
   assert.equal(hash(index),'613b4a21d83e9adcdd091be82240a3a6f9cf5bf7','Phase 9 Hub post-S2 rollback blob');
  }
+ // Exact inverse of the reviewed Shell-only Dungeon editor micro-lot,
+ // for historical snapshot construction ONLY. No runtime or fingerprint change.
+ if(hash(index)==='97b3dd1dd5b71b3f7bd486694c28d4367eb4104e'){
+  let source=index.toString('utf8');
+  for(const [current,previous] of [["\n/* V16.75.8 — séparation structurelle stricte des familles */\nbody.gensDungeonTheme #survivalModEditorHubBtn{display:none!important}\nbody:not(.gensDungeonTheme) #rpgUniverseEditorHubBtn{display:none!important}\n\n</style>\n<script src=\"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2\"></script>","\n/* V16.75.8 — séparation structurelle stricte des familles */\nbody.gensDungeonTheme #survivalModEditorHubBtn{display:none!important}\nbody:not(.gensDungeonTheme) #rpgUniverseEditorHubBtn,\nbody:not(.gensDungeonTheme) #dungeonAdvancedEditorBtn{display:none!important}\n\n</style>\n<script src=\"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2\"></script>"],["  renderHome();\n}\nfunction gensShellDungeonEditorAllowed(){\n  try{\n    // Shell authority: the explicitly selected editor family wins over a\n    // previously active game profile (notably after returning from Capture).\n    const hub=globalThis.document?.getElementById?.(\"editorHub\");\n    const family=hub&&hub.style.display!==\"none\"?gensSelectedFamily:\"\";\n    if(family===\"adventure\")return true;\n    if(family===\"capture\"||family===\"survival\"||family===\"pvp\")return false;\n    const p=getActiveGameProfile?.();\n    return !!p&&p.gameStyle===\"dungeon\"&&!window.GensCaptureV1?.isProfile?.(p);\n  }catch(e){return false}\n}\nfunction applyModeEditorVisibility(){\n  let activeProfile=null;try{activeProfile=getActiveGameProfile()}catch(e){}","  renderHome();\n}\nfunction gensShellDungeonEditorAllowed(){\n  try{const p=getActiveGameProfile?.();return !!p&&p.gameStyle===\"dungeon\"&&!window.GensCaptureV1?.isProfile?.(p)}catch(e){return false}\n}\nfunction applyModeEditorVisibility(){\n  let activeProfile=null;try{activeProfile=getActiveGameProfile()}catch(e){}"]]){
+   assert.equal(source.split(current).length-1,1,
+    'invert only the one audited Dungeon editor Shell edit');
+   source=source.replace(current,previous);
+  }
+  const original=Buffer.from(source,'utf8');
+  assert.equal(hash(original),'613b4a21d83e9adcdd091be82240a3a6f9cf5bf7',
+   'preserve original historical Capture root Hub fingerprint');
+  index=original;
+ }
  const h=hash(index);
  if(h==='b64eae3650081af624155c8a4b8e47e4a1791658')return index;
  const fixture=require('../fixtures/gens_phase9_capture_root_hub_exact_edits_v1.json');

@@ -1,3 +1,11 @@
+## 2026-11-15 — Ombres globales par modèle : source officielle Exploration GREEN
+- Auteur : réglage commun pour les 400 arbres du même visuel, exceptions d'instances préservées. Source propriétaire Exploration PR #469 fusionnée en `main@73996dd3e9a53c93766871a68ea916a2d4cf6e6b` ; CI `43733763355` et publication Pages `43733763258` SUCCESS. Checkpoint `checkpoint/exploration-shadow-model-profiles-green-pages-20261115`.
+- Les mêmes pins de la PR source Capture #476 transportent désormais l'ensemble des corrections : 2048 objets, plateau 16, occlusion des falaises, ombres globales par modèle. E main uniquement et certificat CI exact. Combat main inchangé.
+- L'unique WorldDocument du Labo conserve les profils de visuels; aucun renderer/asset propriétaire copié dans Capture, ni shadow ID manuel ni persistance alternative dans le hub. Source #476 reste isolée, puis publisher #477 doit épingler son SHA final seulement après CI GREEN source et budget Pages. Ne pas fusionner la source dans main publisher.
+- Retour créateur à solliciter après CI+Pages+HTTPS principal : changer l'ombre de 400 arbres avec une seule manipulation, vérifier les exceptions et tester le panneau repliable sur Pixel/PC.
+
+---
+
 ## 2026-11-15 — Capture source : reprendre la correction de relief du laboratoire officiel
 - START source `5379f1102c027d0fd27cd7b9ae1e7d8e0cbbd56b`, checkpoint `checkpoint/gensrpg-start-relief16-dense-forest-source-20261115`, branche `work/gensrpg-relief16-dense-forest-source-20261115`. La source transporte toujours le lot ombres de la PR #474, sans la fusionner dans le publisher main.
 - Propriétaire Exploration : PR #468 fusionnée sur `main@ce59c71d60d233ed3354fd945c96b31423f95c44` ; CI source main `43731721532` et Pages `43731721546` à vérifier GREEN avant adoption finale. Corrige objet 256→2048 sans troncature, quickbar 7→16, haut/bas de falaises et masque de profondeur terrain, sans écrire de gameplay alternatif.

@@ -6,7 +6,7 @@ test('single Pages publisher selects certified Monster InvoC source with officia
  const manifest=JSON.parse(readFileSync(new URL('../tools/capture_v2_pages_preview_pin.json',import.meta.url),'utf8'));
  assert.equal(manifest.schema,'gensrpg-capture-v2-pages-source-pin-v1');
  assert.equal(manifest.repository,'slyen4425-cloud/Zombicide-40k');
- assert.equal(manifest.sha,'5379f1102c027d0fd27cd7b9ae1e7d8e0cbbd56b');
+ assert.equal(manifest.sha,'beba2a3c68422791e1b01d9ec1c5cee24ed98383');
  assert.equal(manifest.publicPath,'/preview/capture-v2-pr225/');
  assert.equal(manifest.officialVisuals.repository,'slyen4425-cloud/GenSrpg_labo_combat_dynamique');
  assert.equal(manifest.officialVisuals.ref,'global-assets');

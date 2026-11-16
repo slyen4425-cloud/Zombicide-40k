@@ -94,7 +94,8 @@ const injected=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
 const previewInjected=[...previewBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
   .map(m=>stripQuery(m[1]));
 
-assert.equal(injected.length,32,'GitHub Pages must inject the current 32-module production list, including Dungeon real-event placement');
+assert.equal(injected.length,33,'GitHub Pages must inject 33 modules, including deterministic Dungeon World Session Bridge and real-event placement');
+assert.equal(injected.filter(x=>x==='assets/dungeon/dungeon-world-session-bridge-167832.js').length,1,'the built-world selection owner must be loaded once in the physical Pages root');
 assert.equal(injected.filter(x=>x==='assets/dungeon/dungeon-event-runtime-fix-167878.js').length,1,'Dungeon event spawn placement must have exactly one production script load');
 assert.deepEqual(previewInjected,injected.filter(x=>x!=='assets/gensrpg/core/storage-v1.js'),'preview must reproduce Pages additions while inheriting Core storage from source index');
 assert.equal(injected.at(-2),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap entry must stay immediately before final Shell authority');
@@ -108,7 +109,7 @@ const productionDirect=buildPrelude.includeBuildPrelude([
   ].includes(x)),
   ...injected
 ],workflow);
-assert.equal(new Set(productionDirect).size,92,'production composition includes the explicit profile repair prelude and the single Capture combat core owner');
+assert.equal(new Set(productionDirect).size,93,'production composition includes one explicit authored Dungeon selection owner, the profile repair prelude and the single Capture combat core owner');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,112,'R11 must retire exactly 17 previously disabled named script tags from 129');

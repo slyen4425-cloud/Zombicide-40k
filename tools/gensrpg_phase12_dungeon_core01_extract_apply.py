@@ -431,6 +431,14 @@ def verify():
                         expected_after,n=re.subn(expression,value,expected_after)
                         assert n==1, f"R16 current graph match count changed: {expression}"
                         break
+            # The active Pages composition has one newly explicit Dungeon
+            # session-selection module; the historical R01 baseline remains 92.
+            if path==PATH_GRAPH and current_blob=="97b3dd1dd5b71b3f7bd486694c28d4367eb4104e" and "size,93,'production composition" in updated and "size,92,'production composition" in expected_after:
+                assert updated.count("size,93,'production composition")==1
+                assert updated.count("assert.equal(injected.length,33,")==1
+                assert updated.count("x==='assets/dungeon/dungeon-world-session-bridge-167832.js'")==1
+                assert expected_after.count("size,92,'production composition")==1
+                expected_after=expected_after.replace("size,92,'production composition","size,93,'production composition",1)
             # The saved-Hub preview adds one explicit, unreachable classic JS
             # file to physical inventory (159 -> 160), with NO new loaded
             # runtime authority. R01's original extraction remains byte-pinned;

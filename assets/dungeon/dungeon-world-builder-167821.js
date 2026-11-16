@@ -349,7 +349,7 @@ function renderAll(){
   renderNodes(g);renderConnectionSelectors(g);renderEdges(g);renderCaches(g);renderGraph(g);renderValidation(g);
 }
 function open(){ensureStyles();ensureLauncher();ensureModal();DOC.getElementById("drc300Modal")?.classList.add("open");if(!activeId)activeId=loadLibrary()[0]?.id||"";renderAll()}
-function close(){DOC?.getElementById("drc300Modal")?.classList.remove("open")}
+function close(){DOC?.getElementById("drc300Modal")?.classList.remove("open");try{ROOT.DungeonWorldSessionBridge167832?.renderBuiltWorlds?.()}catch(e){console.warn("Dungeon built library refresh",e)}}
 function newDungeonUI(){const d=createDungeon({name:"Nouveau donjon"});activeId=d.id;renderAll();autosave("Nouveau donjon créé")}
 function saveMetaUI(){const g=current();if(!g)return;g.name=String(DOC.getElementById("drc300Name")?.value||"Nouveau donjon").trim()||"Nouveau donjon";g.notes=String(DOC.getElementById("drc300Notes")?.value||"");upsertDungeon(g);autosave("Donjon");renderAll()}
 function duplicateUI(){const g=current();if(!g)return;const copy=duplicateDungeon(g.id);if(copy){activeId=copy.id;renderAll();autosave("Copie du donjon créée")}}

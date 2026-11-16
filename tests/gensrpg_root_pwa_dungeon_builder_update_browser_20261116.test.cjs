@@ -65,3 +65,51 @@ test('installed old root PWA relaunch updates to the real Dungeon Builder script
   await new Promise(resolve=>server.close(resolve));
  }
 });
+
+test('old installed Capture shortcut opens the GenSRPG module chooser with ZERO manual click in mobile Chromium',{timeout:60000},async()=>{
+ const handoff=fs.readFileSync(path.join(root,'assets/gensrpg/shell/capture-v2-from-main-entry-v1.js'),'utf8');
+ const prefix='/Zombicide-40k/';
+ let previewLoads=0,rootLoads=0;
+ const server=http.createServer((req,res)=>{
+   const pathname=new URL(req.url,'http://127.0.0.1').pathname;
+   res.setHeader('Cache-Control','no-store');
+   if(pathname===prefix+'preview/capture-v2-pr225/assets/gensrpg/shell/capture-v2-from-main-entry-v1.js'){
+     res.setHeader('Content-Type','text/javascript');res.end(handoff);return;
+   }
+   if(pathname===prefix+'preview/capture-v2-pr225/' || pathname===prefix+'preview/capture-v2-pr225/index.html'){
+     previewLoads++;res.setHeader('Content-Type','text/html');
+     res.end('<!doctype html><html><head><script src="assets/gensrpg/shell/capture-v2-from-main-entry-v1.js"></script></head><body><main id="capture-only">CAPTURE PREVIEW</main></body></html>');
+     return;
+   }
+   if(pathname===prefix || pathname===prefix+'index.html'){
+     rootLoads++;res.setHeader('Content-Type','text/html');
+     res.end('<!doctype html><html><body><main id="gensrpg-module-chooser"><button>Monster InvoC</button><button>Dungeon</button><button>Survie</button><button>PvP</button></main></body></html>');
+     return;
+   }
+   res.writeHead(404).end('not found');
+ });
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ let browser;
+ try{
+   browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
+   const ctx=await browser.newContext({viewport:{width:915,height:412},isMobile:true,hasTouch:true,locale:'fr-FR',serviceWorkers:'allow'});
+   await ctx.addInitScript(()=>{
+     const orig=window.matchMedia.bind(window);
+     window.matchMedia=(query)=>query==='(display-mode: standalone)'
+       ?{matches:true,media:query,addListener(){},removeListener(){}}:orig(query);
+   });
+   const page=await ctx.newPage();
+   const base='http://127.0.0.1:'+server.address().port+prefix;
+   await page.goto(base+'preview/capture-v2-pr225/',{waitUntil:'domcontentloaded'});
+   await page.waitForURL(base,{timeout:20000});
+   assert.equal(await page.locator('#gensrpg-module-chooser button').count(),4,
+     'launch must expose the four module choices from the official app root');
+   assert.equal(await page.locator('#capture-only').count(),0,
+     'no forced Capture landing on installed icon launch');
+   assert.equal(previewLoads,1);assert.equal(rootLoads,1);
+   await ctx.close();
+ }finally{
+   await browser?.close();server.closeAllConnections?.();server.closeIdleConnections?.();
+   await new Promise(resolve=>server.close(resolve));
+ }
+});

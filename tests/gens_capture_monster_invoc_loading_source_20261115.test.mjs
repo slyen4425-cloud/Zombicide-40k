@@ -22,7 +22,9 @@ test('launch cover and native Explorer transition share the exact same art path'
  assert.match(css,/branding\/monster-invoc-loading-v1\.svg/);
  assert.match(css,/#adventure-launch-loading\[hidden\]\{display:none!important\}/);
  assert.match(html,/class="adventure-loading-brand" aria-label="Monster InvoC"/);
- assert.match(app,/url\.searchParams\.set\('loadingArt',loadingArt\.pathname\)/);
+ assert.match(app,/activeLoadingImages\.launch\?\.\[0\]\?\?loadingArt\.pathname/);
+ assert.match(app,/loadingArtZone/);
+ assert.match(app,/loadingArtCombat/);
  assert.match(app,/loadingArt\.origin!==url\.origin/);
  assert.match(app,/event\.data\.schema==='gensrpg\.exploration\.play\.ready\.v1'/);
  assert.match(app,/dismissJourneyLoading\(\)/);
@@ -30,10 +32,10 @@ test('launch cover and native Explorer transition share the exact same art path'
 
 test('official transport pins exactly one certified victory MP3 and latest Exploration owner',()=>{
  const pins=JSON.parse(read('source-pins-v1.json'));
- assert.equal(pins.combat.sha,'3279ac65950ecc92ea74821f7179bd5b3386b867');
+ assert.equal(pins.combat.sha,'62509f44136dddc5646aee75533723eb3f17b21b');
  assert.equal(pins.exploration.sha,'382f1566b46b1d980782acb885a906bf38aa6fe4');
  assert.equal(pins.combat.ref,'main');assert.equal(pins.exploration.ref,'main');
- assert.equal(pins.combat.certifiedCiRun,43770337789);
+ assert.equal(pins.combat.certifiedCiRun,43856156976);
  assert.equal(pins.exploration.certifiedCiRun,43861825191);
  assert.equal(pins.legacyCaptureRuntime,false);
  const stage=readFileSync(new URL('../tools/stage_capture_v2_labs.mjs',import.meta.url),'utf8');

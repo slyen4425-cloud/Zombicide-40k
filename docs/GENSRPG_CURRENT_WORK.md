@@ -4,6 +4,16 @@
 - Référence unique d'Exploration actualisée vers `382f1566b46b1d980782acb885a906bf38aa6fe4`, CI main cible `43861825191` (sa conclusion doit être SUCCESS) ; propriétaire Pages main cible `43861825235` (SUCCESS + HTTPS à prouver). Source C4 ne rend rien public directement. PR source doit être GREEN Architecture, Browser, static delivery, Firefox, provenance/autorité avant merge **staging uniquement**.
 - Publisher GenSRPG en branche distincte et pin-only après source certifiée, test budget <=900 Mio, HTTPS SHA exact et caches PWA ; validation visuelle finale Pixel/PC réservée à l'auteur. Pas de modification Dungeon, PvP, Survie ou du Service Worker. Rollback source `d079bb2a6d7678b06a6dc43d2a766663b7408e02`.
 
+## 2026-11-16 — Collection Bestiaire officiel, chargements personnalisés, fin des jingles (CANDIDAT NON LIVE)
+- START source Capture sur staging `work/gensrpg-exploration-depth-waypoints-source-20261115@9fe6a922b75b84b762d9215c3ba2cad306324533`, checkpoint `checkpoint/gensrpg-start-collection-loading-audio-20261116`, branche `work/gensrpg-collection-loading-audio-20261116`. Dernier GREEN = base, nouveau lot à certifier.
+- Capture Collection : supprimer le faux renderer Bestiaire et afficher `vendor/combat-lab/examples/dom-demo/bestiary.html?embedded=1#<speciesId>` uniquement pour les espèces possédées ; la feuille d'équipe et les sauvegardes restent dans Capture.
+- Créateur Capture : bibliothèque locale unique IndexedDB des illustrations de lancement, zones, combat ; 12 images/type, formats images validés, rotation, URLs Blob révoquées, fallback Monster InvoC ; aucune image auteur ajoutée aux bibliothèques distribuées.
+- Résultat : event `gensrpg.capture.combat.result-dismissed.v1` sur fermeture réelle du dialogue XP/récompenses ; Exploration possède l'overlay et dispose le moteur de musique officiel au terme de la fenêtre, sans second lecteur.
+- Chantiers dépendants : Combat owner `work/lab-bestiary-embedded-20261116` ; Exploration owner `work/exploration-combat-loading-art-20261116` ; mettre à jour les pins *uniquement après* PR propriétaires CI/Pages GREEN.
+- Protections : aucun changement XP/drops, stats, CombatResult, WorldDocument, collision/falaise C3, Survie, Dungeon, PvP, PWA/SW, assets/labos copiés ou sauvegardes. Gate : tests Node+Chromium paysage, CI SHA exact, provenance, taille <=900 Mio, publisher indépendant puis HTTP/PWA Pixel/PC. Ne pas appeler LIVE sans ces preuves.
+
+- Réconciliation C4 avec #491 : conserver Exploration main@382f1566 (CI 43861825191, Pages 43861825235), et promouvoir Combat main@62509f44 (CI 43856156976). Tests à relancer au SHA réconcilié, PWA NON PUBLIÉE.
+
 ## 2026-11-16 — C3 mixed cliff depth (Pixel) source Capture, pending publisher
 - START staging `9fe6a922b75b84b762d9215c3ba2cad306324533`, checkpoint `checkpoint/gensrpg-cliff-mixed-c3-source-start-20261116`, branche `work/gensrpg-cliff-mixed-c3-source-20261116` ; changelog source uniquement (aucun code moteur copié).
 - Retour auteur après PWA `main@e587bdc57fd27a7ee6ec80fe9c9853ef12247940` : corps du héros toujours masqué entre façades superposées ; l'ancien tri `wallBehindFoot&&!wallInFrontOfFoot` annulait le replay du héros. Exploration propriétaire PR #479 C3 corrige le compositing par face, garde les masques et collision C2.

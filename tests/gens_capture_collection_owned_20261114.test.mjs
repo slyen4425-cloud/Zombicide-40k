@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {adventureOwnedCollectionV1} from '../assets/gensrpg/capture-v2/adventure-collection-v1.mjs';
+import {renderAdventureSheetViewV1} from '../assets/gensrpg/capture-v2/adventure-play-sheet-view-v1.mjs';
 
 const cards=[
  {id:'r',name:'Planta',portrait:{assetId:'official:planta'},rarity:'rare',
@@ -105,15 +106,13 @@ test('owned Collection opens full official Bestiary page with skills, explanatio
   assert.equal(page.hidden,false);
   const detail=walk(page,e=>e.dataset.collectionBestiarySpecies==='r')[0];
   assert.ok(detail);
-  const written=textContent(detail);
-  assert.match(written,/FICHE DU BESTIAIRE OFFICIEL/);
-  assert.match(written,/Gardienne des vallées moussues/);
-  assert.match(written,/Ronce/);
-  assert.match(written,/Inflige 12 dégâts de Nature/);
-  assert.match(written,/Immobilise la cible pendant 2 secondes/);
-  assert.match(written,/1 point = \+1 % dégâts Nature/);
-  assert.match(written,/Feu : -25 %/);
-  assert.doesNotMatch(written,/Compétence secrète/,'unpublished skills stay hidden');
+  assert.equal(detail.tag,'iframe','Collection embeds the same published Combat Bestiary document');
+  assert.equal(detail.title,'Fiche officielle du Bestiaire : Planta');
+  const bestiaryPage=new URL(detail.src);
+  assert.ok(bestiaryPage.pathname.endsWith('/vendor/combat-lab/examples/dom-demo/bestiary.html'));
+  assert.equal(bestiaryPage.searchParams.get('embedded'),'1');
+  assert.equal(decodeURIComponent(bestiaryPage.hash.slice(1)),'r');
+  assert.doesNotMatch(textContent(page),/Compétence secrète/);
   const back=walk(page,e=>e.className==='sheet-collection-back')[0];
   back.events.click();
   assert.equal(grid.hidden,false);

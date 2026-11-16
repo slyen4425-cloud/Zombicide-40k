@@ -151,6 +151,24 @@
      </label>
     </fieldset>
     </details>
+  <details id="adventure-loading-art-editor" class="adventure-options">
+   <summary>Illustrations des écrans de chargement</summary>
+   <p class="hint">Ajoute plusieurs images pour chaque transition. Elles restent dans ta bibliothèque locale ; rotation à chaque utilisation. Sans image ajoutée, l'illustration officielle Monster InvoC est conservée.</p>
+   <div class="fields">
+    <label>Type de chargement
+     <select id="adventure-loading-art-scene">
+      <option value="launch">Lancement de l'aventure</option>
+      <option value="zone">Passage entre les zones</option>
+      <option value="combat">Préparation du combat</option>
+     </select>
+    </label>
+    <label>Ajouter des illustrations (PNG, JPEG, WebP ou GIF, 8 Mio maximum chacune)
+     <input id="adventure-loading-art-files" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
+    </label>
+   </div>
+   <div id="adventure-loading-art-list" class="adventure-loading-art-list" aria-live="polite"></div>
+   <output id="adventure-loading-art-status" role="status" aria-live="polite"></output>
+  </details>
   <details id="adventure-rules-panel" class="adventure-options">
    <summary id="adventure-rules-heading">Progression</summary>
    <div class="fields">

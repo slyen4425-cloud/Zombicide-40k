@@ -71,7 +71,7 @@ test('installed legacy Capture shortcut opens GenSRPG HUB immediately, without a
 test('published Capture PWA redirects at document HEAD, ahead of expensive mode bootstrap',()=>{
  const html=built('preview/capture-v2-pr225/index.html');
  const handoff='<script src="assets/gensrpg/shell/capture-v2-from-main-entry-v1.js"></script>';
- const pos=html.indexOf(handoff),headClose=html.search(/<\\/head>/i);
+ const pos=html.indexOf(handoff),headClose=html.toLowerCase().indexOf('</head>');
  assert.ok(pos>0&&pos<headClose,
    'installed shortcut must route to the HUB before the Capture runtime is parsed');
  assert.equal(html.split(handoff).length-1,1,'only one official handoff');

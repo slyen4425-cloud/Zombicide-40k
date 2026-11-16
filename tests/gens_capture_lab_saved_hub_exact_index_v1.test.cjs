@@ -6,9 +6,9 @@ const root=require('node:path').resolve(__dirname,'..');
 const read=name=>fs.readFileSync(require('node:path').join(root,name));
 const blob=value=>crypto.createHash('sha1').update('blob '+value.length+'\0').update(value).digest('hex');
 const indexBytes=read('index.html');
-assert.equal(indexBytes.length,1722603,'uploaded index from the exact staging SHA must match');
-assert.equal(blob(indexBytes),'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646',
- 'uploaded index1.zip/index.html(1).txt has the same blob as staging PR #175');
+assert.equal(indexBytes.length,1722970,'current certified Dungeon Shell index has the exact audited length');
+assert.equal(blob(indexBytes),'97b3dd1dd5b71b3f7bd486694c28d4367eb4104e',
+ 'current certified Shell includes only the approved Dungeon editor entry patch above the historical Capture source');
 const html=indexBytes.toString('utf8');
 const original='assets/gensrpg/capture/legacy-monolith-functions-v1.js';
 const world='assets/gensrpg/capture/world-exploration-v1.js';

@@ -47,7 +47,7 @@ test('Pages uses same verified payload publisher AFTER site preparation and BEFO
 test('staged payload stays dormant; historic public index, SW and real profiles unchanged',()=>{
  const index=fs.readFileSync(path.join(root,'index.html'));
  const sw=read('service-worker.js');
- assert.equal(gitblob(index),'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646');
+ assert.equal(gitblob(index),'97b3dd1dd5b71b3f7bd486694c28d4367eb4104e');
  assert.ok(!index.includes(Buffer.from('vendor/combat-lab/')),'no automatic Combat install');
  assert.ok(!index.includes(Buffer.from('runtime-data/')),'no extra public UI owner');
  assert.ok(!sw.includes('vendor/combat-lab/'),'no premature PWA precache');

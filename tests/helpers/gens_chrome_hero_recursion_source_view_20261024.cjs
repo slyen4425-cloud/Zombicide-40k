@@ -11,6 +11,7 @@ const {execFileSync}=require('node:child_process');
 const hash=x=>crypto.createHash('sha1').update(Buffer.from('blob '+x.length+'\0')).update(x).digest('hex');
 const PATCHED='cc355585acab68958bd349ffcf8fa0de4eab9b0d';
 const ORIGINAL='260f00aa179c939f35188ca854f9875971ce8a7b';
+const CERTIFIED_DUNGEON_INDEX='97b3dd1dd5b71b3f7bd486694c28d4367eb4104e';
 const upload=require('../fixtures/gens_profile_save_upload_exact_edits_20261025.json');
 function beforeChrome(input){
  let index=Buffer.from(input);
@@ -56,5 +57,5 @@ function sourceForHistoricalSentinel(input){
 }
 module.exports=sourceForHistoricalSentinel;
 module.exports.beforeChrome=beforeChrome;
-module.exports.accepts=input=>[PATCHED,upload.toBlob].includes(hash(Buffer.from(input)));
+module.exports.accepts=input=>[PATCHED,upload.toBlob,CERTIFIED_DUNGEON_INDEX].includes(hash(Buffer.from(input)));
 if(require.main===module)process.stdout.write(sourceForHistoricalSentinel(require('node:fs').readFileSync(0)));

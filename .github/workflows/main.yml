@@ -228,6 +228,7 @@ jobs:
           # The existing installed-PWA update banner compares the public HTML
           # release marker; stamp the TWO existing markers, not the source.
           node tools/version_pwa_release_shell.mjs _site/index.html "$GITHUB_SHA"
+          node tools/install_root_pwa_autoupdate_release_20261116.mjs _site/service-worker.js _site/index.html
           fi
 
           mkdir -p _site/icons
@@ -517,6 +518,7 @@ jobs:
           node --test capture-v2-source/tests/gens_capture_v2_atomic_bestiary_cache_20261108.test.mjs
           node --test tests/gens_capture_v2_auto_update_20261107.test.mjs
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
+          node --test tests/gensrpg_pwa_root_preview_launch_identity_20261116.test.cjs
           node --test tests/gens_capture_v2_preparation_publish_20261107.test.mjs
           node --test tests/gens_capture_v2_play_ux_publish_20261108.test.mjs
           node --test tests/gens_capture_v2_encounter_bridge_site.test.cjs
@@ -544,6 +546,9 @@ jobs:
 
       - name: Tester MAIN → Capture V2 officiel → Jouer natif → MAIN en Chromium mobile
         run: node --test tests/gens_capture_v2_root_main_entry_browser_20261107.test.cjs
+
+      - name: Tester la PWA installee, la mise a jour auto et l acces Builder Dungeon (Chromium mobile)
+        run: node --test tests/gensrpg_root_pwa_dungeon_builder_update_browser_20261116.test.cjs
 
       - name: Tester checkout de la preuve HTTPS dans le runner Pages distinct
         run: node --test tests/gens_capture_v2_pages_deploy_checkout.test.cjs

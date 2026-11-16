@@ -38,9 +38,16 @@ test('real public Shell unchanged, no alternate Combat runtime or premature PWA 
  const {stampWorkerForCommit,stampShellForCommit}=await import('../tools/version_pwa_release_worker.mjs');
  const releaseSha=process.env.GITHUB_SHA;
  assert.match(releaseSha||'',/^[0-9a-f]{40}$/,'release must have an immutable build SHA');
- const expectedWorker=stampWorkerForCommit(rel(root,'service-worker.js').toString('utf8'),releaseSha);
- assert.deepEqual(sw,Buffer.from(expectedWorker,'utf8'),
-   'PWA built output may change ONLY the single root cache version for this exact release');
+ const stampedWorker=stampWorkerForCommit(rel(root,'service-worker.js').toString('utf8'),releaseSha);
+ const stampedHtml=stampShellForCommit(source,releaseSha);
+ const {prepareRootPwaInstalledUpdate}=await import('../tools/install_root_pwa_autoupdate_release_20261116.mjs');
+ const expectedRoot=prepareRootPwaInstalledUpdate(stampedWorker,stampedHtml);
+ assert.deepEqual(sw,Buffer.from(expectedRoot.worker,'utf8'),
+   'PWA worker may change ONLY its release SHA plus the certified bounded install/early activation transformation');
+ assert.ok(html.includes("reg.waiting.postMessage({type:'SKIP_WAITING'});"),
+   'published Shell must activate a waiting installed PWA update automatically');
+ assert.ok(html.includes("worker.postMessage({type:'SKIP_WAITING'});"),
+   'published Shell must activate the latest installed PWA update automatically');
  // Public HTML must announce its actual release rather than the old frozen
  // 16.168 marker: an installed older PWA compares those existing markers.
  const expectedRelease='gensrpg-release-'+releaseSha.slice(0,12);

@@ -1705,7 +1705,10 @@ const loadingArtObjectUrls=new Set(),loadingArtPreviewUrls=new Set();
 const loadingArtRotation={launch:0,zone:0,combat:0};
 function loadingArtLibrary(){
  if(!loadingArtLibraryPromise)
-  loadingArtLibraryPromise=createAdventureLoadingArtLibraryV1();
+  loadingArtLibraryPromise=createAdventureLoadingArtLibraryV1().catch(error=>{
+   loadingArtLibraryPromise=null;
+   throw error;
+  });
  return loadingArtLibraryPromise;
 }
 function revokeLoadingArt(urls){
@@ -1759,10 +1762,16 @@ async function prepareLoadingArtworkForPlay(){
  let library;
  try{library=await loadingArtLibrary();}
  catch(error){console.warn('Bibliothèque locale inaccessible',error);return scenes;}
- for(const scene of ['launch','zone','combat']){
-  const urls=await library.urls(scene);
-  for(const url of urls)loadingArtObjectUrls.add(url);
-  scenes[scene]=captureLoadingArtSequenceV1(urls,loadingArtRotation[scene]++);
+ try{
+  for(const scene of ['launch','zone','combat']){
+   const urls=await library.urls(scene);
+   for(const url of urls)loadingArtObjectUrls.add(url);
+   scenes[scene]=captureLoadingArtSequenceV1(urls,loadingArtRotation[scene]++);
+  }
+ }catch(error){
+  revokeLoadingArt(loadingArtObjectUrls);
+  console.warn('Bibliothèque de chargement non lisible, art officiel conservé',error);
+  return {};
  }
  const cover=scenes.launch?.[0]??null;
  const loading=$('adventure-launch-loading');

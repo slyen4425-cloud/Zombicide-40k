@@ -194,7 +194,8 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   assert.ok(arenaImage.width>0,'the official backdrop must decode in the native arena');
   assert.equal(await fight.locator('[data-combat-skill]').count(),1,'only the true level-one skill is available');
   await fight.locator('[data-encounter-flee]').tap();
-  await battle.waitFor({state:'detached'});
+  await battle.waitFor({state:'hidden'});
+   assert.equal(await battle.count(),1,'the official Combat iframe stays retained until reward dismissal');
   // Real CombatResult is committed in GenSRPG Core before this UI receipt.
   const resultDialog=adventure.locator('#adventure-result-dialog:visible');
   await resultDialog.waitFor({timeout:15000});
@@ -207,6 +208,7 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   assert.match(receipt,/Objets/);
   await adventure.locator('#adventure-result-close').tap();
   await resultDialog.waitFor({state:'hidden'});
+   await battle.waitFor({state:'detached'});
   const save=await readSelectedAdventureSave(adventure.locator('#adventure-play'));
   assert.equal(save.party.active.level,1);
   assert.equal(save.party.active.xp,0);
@@ -342,12 +344,13 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
   const bench=fight.locator('[data-enemy-reserve-member-id]:not([hidden])');
   assert.equal(await bench.count(),1,'the trainer has a real second combatant');
   const deadline=Date.now()+45000;
-  while(Date.now()<deadline&&await battle.count()){
+  while(Date.now()<deadline&&await battle.isVisible()){
    const ability=fight.locator('[data-combat-skill]:not([disabled])').first();
    if(await ability.count())await ability.tap({timeout:400}).catch(()=>{});
    await new Promise(resolve=>setTimeout(resolve,100));
   }
-  await battle.waitFor({state:'detached'});
+  await battle.waitFor({state:'hidden'});
+   assert.equal(await battle.count(),1,'the official Combat iframe stays retained until reward dismissal');
   // Real CombatResult is committed in GenSRPG Core before this UI receipt.
   const resultDialog=adventure.locator('#adventure-result-dialog:visible');
   await resultDialog.waitFor({timeout:15000});
@@ -356,6 +359,7 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
   assert.match(receipt,/Créature 1 · Lumilo/);
   await adventure.locator('#adventure-result-close').tap();
   await resultDialog.waitFor({state:'hidden'});
+   await battle.waitFor({state:'detached'});
   const save=await readSelectedAdventureSave(adventure.locator('#adventure-play'));
   assert.equal(save.party.active.level,20);
   assert.equal(save.lastAward.outcome,'victory');
@@ -394,10 +398,13 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
   assert.equal(await map.locator('#npc-dialogue-overlay').isVisible(),false);
   assert.match(await map.locator('#sculpt-encounter-summary').textContent(),/Rami/);
   await fight.locator('[data-encounter-flee]').tap();
-  await battle.waitFor({state:'detached'});
+  await battle.waitFor({state:'hidden'});
+   assert.equal(await battle.count(),1,'the official Combat iframe stays retained until reward dismissal');
   await resultDialog.waitFor();
   assert.equal(await adventure.locator('#adventure-result-title').textContent(),'Fuite');
   await adventure.locator('#adventure-result-close').tap();
+  await resultDialog.waitFor({state:'hidden'});
+  await battle.waitFor({state:'detached'});
   const escaped=await readSelectedAdventureSave(adventure.locator('#adventure-play'));
   assert.deepEqual(escaped.trainerVictories,save.trainerVictories);
   assert.equal(escaped.processedEncounterKeys.length,2);

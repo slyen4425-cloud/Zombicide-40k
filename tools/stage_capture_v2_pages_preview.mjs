@@ -58,6 +58,20 @@ const copyFile=(rel,dst=rel)=>{
 };
 for(const rel of ['index.html','service-worker.js','manifest.webmanifest'])
   copyFile(rel);
+
+ // The preview is a distinct installable app: its ORIGINAL manifest shares
+ // the GenSRPG name/icon although its start URL and scope are Capture-only.
+ // Change staged presentation labels, never its persistent identity/scope.
+ const previewManifestFile=path.join(trial,'manifest.webmanifest');
+ const previewManifest=JSON.parse(fs.readFileSync(previewManifestFile,'utf8'));
+ if(previewManifest.id!=='./'||previewManifest.scope!=='./'||
+    previewManifest.start_url!=='./'||previewManifest.display!=='standalone'||
+    previewManifest.name!=='GenSrpG'||previewManifest.short_name!=='GenSrpG')
+   throw Error('Unexpected Capture preview manifest identity; refuse to alter PWA scope or ID');
+ previewManifest.name='Monster InvoC — Capture';
+ previewManifest.short_name='InvoC Capture';
+ previewManifest.description='Mode Capture distinct de la PWA GenSRPG principale (Dungeon et Survie).';
+ fs.writeFileSync(previewManifestFile,JSON.stringify(previewManifest,null,2)+'\n');
 // The immutable Capture source is NOT the release version. Every main or PR
 // deploy must install a new worker and publish matching HTML version markers
 // even if tools/capture_v2_pages_preview_pin.json is unchanged. Cache scopes

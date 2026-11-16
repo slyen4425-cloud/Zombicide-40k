@@ -648,3 +648,15 @@ body[data-adventure-item-editor="true"] .adventure-start-tabs{display:none!impor
   height:calc(100dvh - 175px);min-height:220px;
  }
 }
+
+/* Creator's local loading illustrations: one gallery, no duplicate game assets. */
+.adventure-loading-art-list{display:grid;gap:8px;margin:10px 0}
+.adventure-loading-art-item{display:flex;align-items:center;gap:10px;padding:6px;
+ border:1px solid #45636a;border-radius:10px;background:#102c34}
+.adventure-loading-art-item img{width:100px;height:56px;object-fit:contain;border-radius:6px}
+.adventure-loading-art-item span{flex:1;min-width:0;overflow-wrap:anywhere}
+.adventure-loading-art-item button{min-height:40px}
+#adventure-launch-loading[data-custom-art="true"]{
+ background-image:linear-gradient(180deg,#07151d22 28%,#07151de0),var(--capture-custom-art);
+ background-position:center;background-size:cover;
+}

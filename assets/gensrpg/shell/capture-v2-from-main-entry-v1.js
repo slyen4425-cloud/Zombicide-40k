@@ -2,7 +2,26 @@
 // Only staged into the official isolated Capture preview by the existing
 // GenSRPG Pages publisher. No game, engine, save or SW mutation.
 (function(root){
-  const fromMain=new URLSearchParams(root.location.search).get('entry')==='gensrpg-main';
+  const params=new URLSearchParams(root.location.search);
+  const fromMain=params.get('entry')==='gensrpg-main';
+  // Android may have installed the older, separately scoped Capture preview
+  // under the same GenSRPG-looking icon. Open the SINGLE official app root
+  // on standalone launch instead of requiring the user to tap a footer link.
+  // Explicit Capture visits remain untouched, including from the main app.
+  const standalone=(root.matchMedia?.('(display-mode: standalone)')?.matches===true)
+    ||root.navigator?.standalone===true;
+  const mainHref=new URL('../../',root.location.href).href;
+  // Reuse the same semantic Shell navigation link as the existing footer.
+  // The architecture guard forbids any module from replacing global location.
+  // A synthetic activation of this existing link contract is the only early
+  // handoff for a legacy preview shortcut; voluntary Capture selection stays.
+  if(standalone&&!fromMain&&params.get('launch')!=='capture'){
+    const homeLink=root.document.createElement('a');
+    homeLink.href=mainHref;
+    homeLink.click();
+    // If a host blocks automatic cross-scope navigation, the existing
+    // footer link below stays available; no storage or worker is touched.
+  }
   root.document.addEventListener('DOMContentLoaded',()=>{
     const doc=root.document;
     if(fromMain){
@@ -15,7 +34,7 @@
     const host=header||doc.body;
     if(!host)throw new Error('Capture preview navigation host missing');
     const back=doc.createElement('a');
-    back.href=new URL('../../',root.location.href).href;
+    back.href=mainHref;
     back.className='gensCaptureReturnToMain';
     back.textContent=fromMain?'← Retour à GenSRPG':'← GenSRPG : accueil / Dungeon';
     if(!fromMain){

@@ -44,3 +44,38 @@ test('direct installed Capture launch never forces Capture mode, and offers main
    if(!query)assert.match(added[0].textContent,/GenSRPG.*Dungeon/);
  }
 });
+
+test('installed legacy Capture shortcut opens GenSRPG HUB immediately, without a footer tap',()=>{
+ const src=read('assets/gensrpg/shell/capture-v2-from-main-entry-v1.js');
+ const rootUrl='https://slyen4425-cloud.github.io/Zombicide-40k/';
+ const previewUrl=rootUrl+'preview/capture-v2-pr225/';
+ function run(query,standalone){
+   let clicked=null,listeners=0;
+   const location={href:previewUrl+query,search:query};
+   const doc={addEventListener(){listeners++},
+     createElement(){return {href:'',click(){clicked=this.href}}}};
+   const window={document:doc,location,
+     matchMedia:()=>({matches:standalone}),
+     navigator:{standalone:false}};
+   vm.runInNewContext(src,{window,URL,URLSearchParams});
+   return {clicked,listeners};
+ }
+ assert.deepEqual(run('',true),{clicked:rootUrl,listeners:1},
+   'home icon must follow existing Shell link to the real four-module HUB before Capture bootstrap');
+ assert.deepEqual(run('?entry=gensrpg-main',true),{clicked:null,listeners:1},
+   'choosing Capture explicitly inside GenSRPG must still open Capture');
+ assert.deepEqual(run('?launch=capture',true),{clicked:null,listeners:1},
+   'an explicit Capture deep link must remain possible');
+ assert.deepEqual(run('',false),{clicked:null,listeners:1},
+   'normal browser preview link remains unchanged');
+});
+test('published Capture PWA redirects at document HEAD, ahead of expensive mode bootstrap',()=>{
+ const html=built('preview/capture-v2-pr225/index.html');
+ const handoff='<script src="assets/gensrpg/shell/capture-v2-from-main-entry-v1.js"></script>';
+ const pos=html.indexOf(handoff),headClose=html.toLowerCase().indexOf('</head>');
+ assert.ok(pos>0&&pos<headClose,
+   'installed shortcut must route to the HUB before the Capture runtime is parsed');
+ assert.equal(html.split(handoff).length-1,1,'only one official handoff');
+ assert.equal(html.includes('window.location.reload('),false,
+   'do not introduce a full-reload launcher hack');
+});

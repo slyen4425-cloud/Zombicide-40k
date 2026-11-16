@@ -70,6 +70,7 @@ import {normalizeCaptureItemTemplatesV1,materializeCaptureItemTemplatesV1}
  from './item-templates-v1.mjs';
 import {installAdventureEconomyEditorV1} from './adventure-economy-editor-v1.mjs';
 import {installAdventureMerchantPlayV1} from './adventure-merchant-play-v1.mjs';
+import {createAdventureLoadingArtLibraryV1,captureLoadingArtSequenceV1} from './adventure-loading-art-v1.mjs';
 
 const $=id=>document.getElementById(id);
 const status=$('adventure-status');
@@ -1490,6 +1491,7 @@ window.addEventListener('message',event=>{
  resetAdventureCombatHud();
  dismissJourneyLoading();
  frame.hidden=true;frame.src='about:blank';
+ revokeLoadingArt(loadingArtObjectUrls);
  document.body.dataset.adventurePlaying='false';
  $('adventure-play-hud').hidden=true;
  document.querySelector('[data-adventure-app]').hidden=false;
@@ -1688,6 +1690,86 @@ async function publishPendingCaptureWorld(){
 $('adventure-room-retry-share').addEventListener('click',()=>{
  void publishPendingCaptureWorld();
 });
+
+let loadingArtLibraryPromise=null;
+const loadingArtObjectUrls=new Set(),loadingArtPreviewUrls=new Set();
+const loadingArtRotation={launch:0,zone:0,combat:0};
+function loadingArtLibrary(){
+ if(!loadingArtLibraryPromise)
+  loadingArtLibraryPromise=createAdventureLoadingArtLibraryV1();
+ return loadingArtLibraryPromise;
+}
+function revokeLoadingArt(urls){
+ for(const value of urls)URL.revokeObjectURL(value);
+ urls.clear();
+}
+async function refreshLoadingArtEditor(){
+ revokeLoadingArt(loadingArtPreviewUrls);
+ const scene=$('adventure-loading-art-scene').value;
+ const entries=await (await loadingArtLibrary()).list(scene);
+ const host=$('adventure-loading-art-list');
+ host.replaceChildren();
+ if(!entries.length){
+  const empty=document.createElement('p');empty.className='hint';
+  empty.textContent='Aucune illustration ajoutée : Monster InvoC par défaut.';
+  host.append(empty);
+ }
+ for(const entry of entries){
+  const item=document.createElement('div');item.className='adventure-loading-art-item';
+  const image=document.createElement('img');
+  const objectUrl=URL.createObjectURL(entry.blob);
+  loadingArtPreviewUrls.add(objectUrl);image.src=objectUrl;image.alt=entry.name;
+  const label=document.createElement('span');label.textContent=entry.name;
+  const remove=document.createElement('button');remove.type='button';
+  remove.textContent='Retirer';remove.setAttribute('aria-label','Retirer '+entry.name);
+  remove.addEventListener('click',async()=>{
+   try{
+    await (await loadingArtLibrary()).remove(entry.id);
+    await refreshLoadingArtEditor();
+    text($('adventure-loading-art-status'),'Illustration retirée.');
+   }catch(error){text($('adventure-loading-art-status'),error.message);}
+  });
+  item.append(image,label,remove);host.append(item);
+ }
+}
+$('adventure-loading-art-scene').addEventListener('change',()=>{
+ void refreshLoadingArtEditor().catch(error=>text($('adventure-loading-art-status'),error.message));
+});
+$('adventure-loading-art-files').addEventListener('change',async event=>{
+ const input=event.currentTarget;
+ try{
+  await (await loadingArtLibrary()).add($('adventure-loading-art-scene').value,input.files);
+  input.value='';await refreshLoadingArtEditor();
+  text($('adventure-loading-art-status'),'Illustrations enregistrées.');
+ }catch(error){input.value='';text($('adventure-loading-art-status'),error.message);}
+});
+void refreshLoadingArtEditor().catch(error=>text($('adventure-loading-art-status'),error.message));
+async function prepareLoadingArtworkForPlay(){
+ revokeLoadingArt(loadingArtObjectUrls);
+ const scenes={};
+ let library;
+ try{library=await loadingArtLibrary();}
+ catch(error){console.warn('Bibliothèque locale inaccessible',error);return scenes;}
+ for(const scene of ['launch','zone','combat']){
+  const urls=await library.urls(scene);
+  for(const url of urls)loadingArtObjectUrls.add(url);
+  scenes[scene]=captureLoadingArtSequenceV1(urls,loadingArtRotation[scene]++);
+ }
+ const cover=scenes.launch?.[0]??null;
+ const loading=$('adventure-launch-loading');
+ if(cover){
+  loading.dataset.customArt='true';
+  loading.style.setProperty('--capture-custom-art','url("'+cover+'")');
+ }else{
+  delete loading.dataset.customArt;
+  loading.style.removeProperty('--capture-custom-art');
+ }
+ return scenes;
+}
+window.addEventListener('pagehide',()=>{
+ revokeLoadingArt(loadingArtObjectUrls);
+ revokeLoadingArt(loadingArtPreviewUrls);
+},{once:true});
 const journeyLoading=$('adventure-launch-loading');
 let adventureLaunchStartedAt=null;
 let journeyLaunchEpoch=0;
@@ -1741,6 +1823,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  void requestAdventureFullscreen();
  if(!journeyLoading.hidden)return; // One authoritative launch at a time.
  showJourneyLoading('Chargement du monde et des sauvegardes…');
+ const activeLoadingImages=await prepareLoadingArtworkForPlay();
  adventureLaunchStartedAt=performance.now();
  const launchEpoch=++journeyLaunchEpoch;
  try{
@@ -1852,7 +1935,11 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  // same origin is passed by Capture, without copying media into the lab.
  const loadingArt=new URL('./branding/monster-invoc-loading-v1.svg',import.meta.url);
  if(loadingArt.origin!==url.origin)throw Error('Illustration de transition hors origine');
- url.searchParams.set('loadingArt',loadingArt.pathname);
+ url.searchParams.set('loadingArt',activeLoadingImages.launch?.[0]??loadingArt.pathname);
+ if(activeLoadingImages.zone?.length)
+  url.searchParams.set('loadingArtZone',JSON.stringify(activeLoadingImages.zone));
+ if(activeLoadingImages.combat?.length)
+  url.searchParams.set('loadingArtCombat',JSON.stringify(activeLoadingImages.combat));
  // Composer is the one canonical project; Explorer owns the audio element.
  // Local storage is the SAME validated SoundtrackProject saved by the
  // official Composer, not a second Capture audio-settings database.

@@ -1230,6 +1230,15 @@ $('adventure-open-last-result').addEventListener('click',guarded(()=>{
 $('adventure-result-close').addEventListener('click',()=>{
  $('adventure-result-dialog').close();
 });
+ // All close paths (button, Escape, dialog.close) release the official Combat
+ // iframe and its SoundtrackSession. XP/drops remain the saved Core award.
+$('adventure-result-dialog').addEventListener('close',()=>{
+ const sessionId=store?.load()?.sessionId;
+ if(!sessionId)return;
+ $('adventure-play-frame').contentWindow?.postMessage({
+  schema:'gensrpg.capture.combat.result-dismissed.v1',sessionId
+ },window.location.origin);
+});
 let currentSheetTab='hero',currentSheetCreatureId=null;
 let currentHeroVisual=null;
 let heroImageEpoch=0;

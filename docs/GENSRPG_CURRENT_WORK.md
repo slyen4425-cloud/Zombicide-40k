@@ -1,3 +1,7 @@
+## 2026-11-16 — Correction source candidate : Veuve jaune finale du Combat officiel
+- Le SHA Combat `0a83a1ad` de la proposition initiale contenait l'amélioration plein écran PC mais **pas** les cinq compétences de Veuve jaune finalisées en PR #325. Ces capacités ont été fusionnées dans Combat `main@3279ac65950ecc92ea74821f7179bd5b3386b867`, CI `43770337789` et Pages `43770337655` SUCCESS.
+- Mise à jour **du seul pin Combat et de son certificat**, sans dupliquer le moteur ni ses données ; pin Exploration `main@71c50f7d9ed61d7d36f46d19265d000b5e5a3d76` inchangé. PR publisher #479 devra épingler le SHA final de cette source après CI GREEN.
+
 ## 2026-11-15 — Source Capture : adopter reliefs + passages officiels Exploration (lot C2 isolé)
 - START source approuvée `e5a35f59a305c0fd55207670710657acc9e47ad8`, checkpoint `checkpoint/gensrpg-start-exploration-depth-waypoints-source-20261115`, branche `work/gensrpg-exploration-depth-waypoints-source-20261115`.
 - Attente du GREEN sur Exploration PR #474 (reliefs, fusionnée) et #475 (repères Objets, pas encore fusionnée au départ du lot) ; **ne jamais épingler une PR** : seulement le SHA `main` du labo après ses CI et Pages certifiées.

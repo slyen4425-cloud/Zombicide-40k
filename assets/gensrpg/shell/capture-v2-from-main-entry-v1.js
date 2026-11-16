@@ -2,7 +2,24 @@
 // Only staged into the official isolated Capture preview by the existing
 // GenSRPG Pages publisher. No game, engine, save or SW mutation.
 (function(root){
-  const fromMain=new URLSearchParams(root.location.search).get('entry')==='gensrpg-main';
+  const params=new URLSearchParams(root.location.search);
+  const fromMain=params.get('entry')==='gensrpg-main';
+  // Android may have installed the older, separately scoped Capture preview
+  // under the same GenSRPG-looking icon. Open the SINGLE official app root
+  // on standalone launch instead of requiring the user to tap a footer link.
+  // Explicit Capture visits remain untouched, including from the main app.
+  const standalone=(root.matchMedia?.('(display-mode: standalone)')?.matches===true)
+    ||root.navigator?.standalone===true;
+  if(standalone&&!fromMain&&params.get('launch')!=='capture'){
+    try{
+      root.location.replace(new URL('../../',root.location.href).href);
+      return;
+    }catch(error){
+      // Browser policy may prohibit cross-scope navigation. Retain the
+      // existing visible handoff as a fallback, without deleting local data.
+      root.console?.warn?.('GenSRPG main launch handoff unavailable',error);
+    }
+  }
   root.document.addEventListener('DOMContentLoaded',()=>{
     const doc=root.document;
     if(fromMain){

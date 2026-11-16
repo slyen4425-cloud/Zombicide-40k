@@ -634,3 +634,17 @@ body[data-adventure-item-editor="true"] .adventure-start-tabs{display:none!impor
 .sheet-collection-card[data-collection-owned="false"][data-rarity]{border-color:var(--capture-rank);opacity:.65}
 .sheet-collection-card[data-collection-owned="true"][data-rarity]:focus-visible{outline:3px solid var(--capture-rank);outline-offset:2px}
 .sheet-collection-card .sheet-rarity-label{color:var(--capture-rank);font-size:10px;font-weight:850;letter-spacing:.03em;text-transform:uppercase}
+
+/* Collection hosts the official Bestiary document; never restyle its cards/icons. */
+.sheet-collection-detail .sheet-bestiary-embed{
+ display:block;width:100%;height:max(300px,calc(100dvh - 200px));max-height:720px;
+ border:1px solid #416b70;border-radius:12px;background:#101d2e;
+}
+.sheet-collection-detail .sheet-collection-members{
+ margin:10px 0;padding:10px;border:1px solid #365962;border-radius:10px;
+}
+@media(orientation:landscape) and (max-height:550px){
+ .sheet-collection-detail .sheet-bestiary-embed{
+  height:calc(100dvh - 175px);min-height:220px;
+ }
+}

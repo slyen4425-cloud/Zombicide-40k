@@ -22,7 +22,9 @@ test('launch cover and native Explorer transition share the exact same art path'
  assert.match(css,/branding\/monster-invoc-loading-v1\.svg/);
  assert.match(css,/#adventure-launch-loading\[hidden\]\{display:none!important\}/);
  assert.match(html,/class="adventure-loading-brand" aria-label="Monster InvoC"/);
- assert.match(app,/url\.searchParams\.set\('loadingArt',loadingArt\.pathname\)/);
+ assert.match(app,/activeLoadingImages\.launch\?\.\[0\]\?\?loadingArt\.pathname/);
+ assert.match(app,/loadingArtZone/);
+ assert.match(app,/loadingArtCombat/);
  assert.match(app,/loadingArt\.origin!==url\.origin/);
  assert.match(app,/event\.data\.schema==='gensrpg\.exploration\.play\.ready\.v1'/);
  assert.match(app,/dismissJourneyLoading\(\)/);

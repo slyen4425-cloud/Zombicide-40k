@@ -85,10 +85,14 @@ const stagedPwa=releasePreviewPwaForCommit(
 fs.writeFileSync(path.join(trial,'service-worker.js'),stagedPwa.worker);
 const previewHtml=enableAutomaticPreviewActivation(stagedPwa.html);
 const handoffTag='<script src="assets/gensrpg/shell/capture-v2-from-main-entry-v1.js"></script>';
-if(previewHtml.split('</body>').length!==2||previewHtml.includes(handoffTag))
-  throw Error('Official Capture V2 preview must expose exactly one main-app arrival seam');
+// The handoff MUST run before the heavy preview bootstrap, otherwise an
+// installed stale shortcut opens Capture first and exposes only a footer link.
+if(previewHtml.split('</body>').length!==2||
+   (previewHtml.match(/<head\\b[^>]*>/gi)||[]).length!==1||
+   previewHtml.includes(handoffTag))
+  throw Error('Official Capture V2 preview must expose exactly one early main-app arrival seam');
 fs.writeFileSync(path.join(trial,'index.html'),
-  previewHtml.replace('</body>',handoffTag+'\n</body>'));
+  previewHtml.replace(/<head\\b[^>]*>/i,tag=>tag+'\n'+handoffTag));
 for(const filename of fs.readdirSync(source).filter(x=>/^sound_.*\.mp3$/.test(x)))
   copyFile(filename);
 for(const filename of ['icon-192.png','icon-512.png']){

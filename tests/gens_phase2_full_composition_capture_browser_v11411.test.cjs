@@ -11,7 +11,13 @@ const workflowBlock=(workflow.match(/modules = \[(.*?)\n\s*\]/s)||[])[1];
 assert.ok(workflowBlock,'GitHub Pages module injection list missing');
 const pageTags=[...workflowBlock.matchAll(/<script src=\\?"([^"\\]+)[^>]*>/g)]
   .map(m=>'<script src="'+m[1].replace(/\\/g,'')+'"></script>');
-assert.equal(pageTags.length,32,'Pages-equivalent characterization expects 32 injected modules including the Dungeon ambush event placement and final Shell authority');
+assert.equal(pageTags.length,33,'Pages-equivalent characterization must include the official built-world selection bridge alongside the Dungeon ambush event placement and final Shell authority');
+assert.equal(pageTags.filter(tag=>tag.includes('assets/dungeon/dungeon-world-session-bridge-167832.js')).length,1,'the official Dungeon built-world selection bridge must be injected exactly once');
+const authoredIndex=pageTags.findIndex(tag=>tag.includes('assets/dungeon/dungeon-authored-runtime-167839.js'));
+const bridgeIndex=pageTags.findIndex(tag=>tag.includes('assets/dungeon/dungeon-world-session-bridge-167832.js'));
+const shellIndex=pageTags.findIndex(tag=>tag.includes('assets/gensrpg/shell/module-launch-final-authority-v1.js'));
+assert.ok(authoredIndex>=0&&bridgeIndex>authoredIndex&&shellIndex>bridgeIndex,
+  'Dungeon built-world selection must load after authored runtime and before the final Shell owner');
 assert.equal(pageTags.filter(tag=>tag.includes('assets/dungeon/dungeon-event-runtime-fix-167878.js')).length,1,'the active Dungeon ambush event placement owner must be injected exactly once');
 const perfTag='<script src="assets/gensrpg/gens-mobile-combat-performance-16781022.js"></script>';
 const finalShellTag='<script src="assets/gensrpg/shell/module-launch-final-authority-v1.js"></script>';
@@ -337,17 +343,17 @@ const server=http.createServer((req,res)=>{
     await page.goto(url,{waitUntil:'commit',timeout:20000});
     await waitFullBoot();
 
-    const composition=await page.evaluate(()=>({
+    const composition=await page.evaluate((expectedModules)=>({
       startSource:String(window.startConfiguredGame||'').slice(0,500),
       coreVersion:window.DUNGEON_CORE_VERSION||'',
       gensVersion:window.GENSRPG_VERSION||'',
       runtimeBootstrap:window.GensRuntimeBootstrapV1?.VERSION||'',
       tacticalBridge:window.GensRpgTacticalCombatV2Bridge?.VERSION||'',
       shellFamily:typeof gensSelectedFamily==='undefined'?'':String(gensSelectedFamily||''),
-      pagesInjectedModules:31
-    }));
+      pagesInjectedModules:expectedModules
+    }),pageTags.length);
     console.log('[phase2-full-capture] composition',JSON.stringify(composition));
-    assert.equal(composition.pagesInjectedModules,31,'full production characterization must use the Pages module set including final Shell authority');
+    assert.equal(composition.pagesInjectedModules,33,'full production characterization must use the complete Pages module set including the official built-world selection bridge and final Shell authority');
 
     mark('open-adventure');
     await openCaptureFamily();

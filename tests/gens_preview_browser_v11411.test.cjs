@@ -67,7 +67,13 @@ async function waitReady(page){
     assert.equal(first.finalShellCount,1,'final Shell authority must occur exactly once in preview composition');
     assert.equal(first.srcs.at(-2),'assets/gensrpg/gens-mobile-combat-performance-16781022.js','performance/bootstrap must remain immediately before final Shell authority');
     assert.equal(first.srcs.at(-1),'assets/gensrpg/shell/module-launch-final-authority-v1.js','final Shell authority must remain the final preview runtime layer');
-    assert.equal(first.stubScripts,32,'all 32 runtime script slots including inherited Core storage and final Shell must execute before preview-ready');
+    const bridgePos=first.srcs.findIndex(src=>src.includes('assets/dungeon/dungeon-world-session-bridge-167832.js'));
+    const authoredPos=first.srcs.findIndex(src=>src.includes('assets/dungeon/dungeon-authored-runtime-167839.js'));
+    assert.equal(first.srcs.filter(src=>src.includes('assets/dungeon/dungeon-world-session-bridge-167832.js')).length,1,
+      'the official authored-world selection bridge must execute once in preview');
+    assert.ok(bridgePos>authoredPos&&bridgePos<first.srcs.length-1,
+      'the official authored-world selection bridge must load after authored runtime and before final Shell');
+    assert.equal(first.stubScripts,33,'all 33 runtime script slots including authored-world selection, inherited Core storage and final Shell must execute before preview-ready');
     assert.equal(first.swAttempt,1,'fixture must exercise the source PWA registration path');
     assert.equal(first.swResolved,true,'preview must replace service-worker registration with a harmless resolved stub');
     assert.equal(first.swError,'','preview PWA isolation must not reject source startup');
@@ -80,7 +86,7 @@ async function waitReady(page){
     assert.equal(second.menu,true,'GenSrpG source UI must return after reload/restart');
     assert.equal(second.preview,true,'preview isolation must be restored after reload/restart');
     assert.match(second.href,/\/preview\.html$/,'reload/restart must remain on preview.html');
-    assert.equal(second.stubScripts,32,'runtime composition including final Shell must execute exactly once after restart');
+    assert.equal(second.stubScripts,33,'all 33 runtime modules including authored-world selection and final Shell must execute exactly once after restart');
     assert.ok(previewRequests>=2,'browser restart test must request preview.html again');
     assert.equal(swRequests,0,'service-worker.js must still be isolated after restart');
     assert.deepEqual(localFailures,[],'preview local requests must not return HTTP errors');

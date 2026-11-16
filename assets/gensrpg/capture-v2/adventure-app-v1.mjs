@@ -1832,10 +1832,11 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  void requestAdventureFullscreen();
  if(!journeyLoading.hidden)return; // One authoritative launch at a time.
  showJourneyLoading('Chargement du monde et des sauvegardes…');
- const activeLoadingImages=await prepareLoadingArtworkForPlay();
  adventureLaunchStartedAt=performance.now();
  const launchEpoch=++journeyLaunchEpoch;
  try{
+ const activeLoadingImages=await prepareLoadingArtworkForPlay();
+ if(launchEpoch!==journeyLaunchEpoch)return;
  const selectedWorldId=$('adventure-world-select').value;
  if(activeCaptureRoom?.role==='guest'&&
     !captureGuestSessionMatchesHostSetupV1({

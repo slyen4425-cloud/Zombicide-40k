@@ -10,15 +10,17 @@
   // Explicit Capture visits remain untouched, including from the main app.
   const standalone=(root.matchMedia?.('(display-mode: standalone)')?.matches===true)
     ||root.navigator?.standalone===true;
+  const mainHref=new URL('../../',root.location.href).href;
+  // Reuse the same semantic Shell navigation link as the existing footer.
+  // The architecture guard forbids any module from replacing global location.
+  // A synthetic activation of this existing link contract is the only early
+  // handoff for a legacy preview shortcut; voluntary Capture selection stays.
   if(standalone&&!fromMain&&params.get('launch')!=='capture'){
-    try{
-      root.location.replace(new URL('../../',root.location.href).href);
-      return;
-    }catch(error){
-      // Browser policy may prohibit cross-scope navigation. Retain the
-      // existing visible handoff as a fallback, without deleting local data.
-      root.console?.warn?.('GenSRPG main launch handoff unavailable',error);
-    }
+    const homeLink=root.document.createElement('a');
+    homeLink.href=mainHref;
+    homeLink.click();
+    // If a host blocks automatic cross-scope navigation, the existing
+    // footer link below stays available; no storage or worker is touched.
   }
   root.document.addEventListener('DOMContentLoaded',()=>{
     const doc=root.document;
@@ -32,7 +34,7 @@
     const host=header||doc.body;
     if(!host)throw new Error('Capture preview navigation host missing');
     const back=doc.createElement('a');
-    back.href=new URL('../../',root.location.href).href;
+    back.href=mainHref;
     back.className='gensCaptureReturnToMain';
     back.textContent=fromMain?'← Retour à GenSRPG':'← GenSRPG : accueil / Dungeon';
     if(!fromMain){

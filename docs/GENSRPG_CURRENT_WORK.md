@@ -1,3 +1,34 @@
+## 2026-11-16 — Correction source candidate : Veuve jaune finale du Combat officiel
+- Le SHA Combat `0a83a1ad` de la proposition initiale contenait l'amélioration plein écran PC mais **pas** les cinq compétences de Veuve jaune finalisées en PR #325. Ces capacités ont été fusionnées dans Combat `main@3279ac65950ecc92ea74821f7179bd5b3386b867`, CI `43770337789` et Pages `43770337655` SUCCESS.
+- Mise à jour **du seul pin Combat et de son certificat**, sans dupliquer le moteur ni ses données ; pin Exploration `main@71c50f7d9ed61d7d36f46d19265d000b5e5a3d76` inchangé. PR publisher #479 devra épingler le SHA final de cette source après CI GREEN.
+
+## 2026-11-15 — Source Capture : adopter reliefs + passages officiels Exploration (lot C2 isolé)
+- START source approuvée `e5a35f59a305c0fd55207670710657acc9e47ad8`, checkpoint `checkpoint/gensrpg-start-exploration-depth-waypoints-source-20261115`, branche `work/gensrpg-exploration-depth-waypoints-source-20261115`.
+- Attente du GREEN sur Exploration PR #474 (reliefs, fusionnée) et #475 (repères Objets, pas encore fusionnée au départ du lot) ; **ne jamais épingler une PR** : seulement le SHA `main` du labo après ses CI et Pages certifiées.
+- Périmètre strict : la référence `exploration.sha` et `exploration.certifiedCiRun` dans l'unique `assets/gensrpg/capture-v2/source-pins-v1.json` du candidat Capture V2 ; conserver Combat, visuels, moteur Capture, sauvegardes, Survie, Dungeon, PvP, UI, anciens liens et média à l'identique. Aucun moteur/asset Exploration copié dans le dépôt source.
+- Gate : CI source complète, intégrité des owners, smoke Chromium vrai chemin carte → objets → passerelle / altitude, tests PWA publisher, poids ≤900 Mio, HTTPS SHA exact, puis branche publisher séparée depuis `main`. Ni source candidate ni PR ne sont une publication publique.
+
+## 2026-11-15 — Intérieurs de maison liés : réparation officielle dans Exploration
+- PR propriétaire #471 fusionnée sur Exploration `main@bf166ab4003e1f8f99aa6c6fa34ccfe05c3312e1` (murs, niveaux, escaliers, porte/retour, inspecteur compact), à la suite des PR #468 (2048 objets/plateau 16/falaises) et #469 (ombres globales par visuel). Aucun labo dupliqué.
+- Validation préalable au raccordement : source Exploration main CI `43738119662` et Pages `43738119686` à confirmer GREEN, puis source Capture PR #476 test/browser-sentinels GREEN, publisher PR #477 pin-only GREEN et taille <=900 Mio, publication main/HTTPS à SHA exact. Protéger les travaux d'autres agents et garder toute la source Capture hors du main publisher.
+- Visuel à confirmer par utilisateur sur PC et Pixel après déploiement : maison liée depuis la carte -> panneau murs/étages/retour, sauvegarde, passage sortie/arrivée, ombres arbres par modèle.
+
+---
+
+## 2026-11-15 — Ombres globales par modèle : source officielle Exploration GREEN
+- Auteur : réglage commun pour les 400 arbres du même visuel, exceptions d'instances préservées. Source propriétaire Exploration PR #469 fusionnée en `main@73996dd3e9a53c93766871a68ea916a2d4cf6e6b` ; CI `43733763355` et publication Pages `43733763258` SUCCESS. Checkpoint `checkpoint/exploration-shadow-model-profiles-green-pages-20261115`.
+- Les mêmes pins de la PR source Capture #476 transportent désormais l'ensemble des corrections : 2048 objets, plateau 16, occlusion des falaises, ombres globales par modèle. E main uniquement et certificat CI exact. Combat main inchangé.
+- L'unique WorldDocument du Labo conserve les profils de visuels; aucun renderer/asset propriétaire copié dans Capture, ni shadow ID manuel ni persistance alternative dans le hub. Source #476 reste isolée, puis publisher #477 doit épingler son SHA final seulement après CI GREEN source et budget Pages. Ne pas fusionner la source dans main publisher.
+- Retour créateur à solliciter après CI+Pages+HTTPS principal : changer l'ombre de 400 arbres avec une seule manipulation, vérifier les exceptions et tester le panneau repliable sur Pixel/PC.
+
+---
+
+## 2026-11-15 — Capture source : reprendre la correction de relief du laboratoire officiel
+- START source `5379f1102c027d0fd27cd7b9ae1e7d8e0cbbd56b`, checkpoint `checkpoint/gensrpg-start-relief16-dense-forest-source-20261115`, branche `work/gensrpg-relief16-dense-forest-source-20261115`. La source transporte toujours le lot ombres de la PR #474, sans la fusionner dans le publisher main.
+- Propriétaire Exploration : PR #468 fusionnée sur `main@ce59c71d60d233ed3354fd945c96b31423f95c44` ; CI source main `43731721532` et Pages `43731721546` à vérifier GREEN avant adoption finale. Corrige objet 256→2048 sans troncature, quickbar 7→16, haut/bas de falaises et masque de profondeur terrain, sans écrire de gameplay alternatif.
+- Seuls fichiers Capture changés : SHA + CI du pin existant `assets/gensrpg/capture-v2/source-pins-v1.json`, test du SHA, ce journal. Combat main `a6a3bce95ef08271f849cd1c871771a64291c625` immuable. Aucun fichier média, moteur, données joueur ni WorldDocument copié.
+- Validation obligatoire : Explorateur CI+Pages+HTTPS SHA exact, CI source Capture et navigateurs, puis publication dans une PR publisher distincte (simple pin de source + test), budget Pages <=900 Mio, CI main, Pages, HTTPS, PWA PC/Pixel. Ni la source ni le publisher ne peuvent être déclarés livrés avant ces preuves.
+
 ## 2026-11-15 — Source Capture : publier réglages d'ombres via le propriétaire Exploration
 - START source Capture `b7b384b082a266c2ba6d4748b227f2543a946276` de PR #472 (13/13 GREEN), checkpoint `checkpoint/gensrpg-start-shadow-controls-source-20261115` et branche `work/gensrpg-shadow-controls-source-20261115`.
 - Laboratoire Exploration propriétaire des ombres `main@05ccc80874a27ab19f184897ac659c5b2abd1c4a` (PR #465, CI 43727372188 et Pages 43727372096 GREEN), pin officiel mis à jour à ce SHA exact. Combat `main@a6a3bce95ef08271f849cd1c871771a64291c625` inchangé.

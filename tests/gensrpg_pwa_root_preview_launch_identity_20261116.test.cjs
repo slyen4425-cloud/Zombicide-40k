@@ -50,22 +50,23 @@ test('installed legacy Capture shortcut opens GenSRPG HUB immediately, without a
  const rootUrl='https://slyen4425-cloud.github.io/Zombicide-40k/';
  const previewUrl=rootUrl+'preview/capture-v2-pr225/';
  function run(query,standalone){
-   let redirected=null,listeners=0;
-   const location={href:previewUrl+query,search:query,replace(url){redirected=url}};
-   const doc={addEventListener(){listeners++}};
+   let clicked=null,listeners=0;
+   const location={href:previewUrl+query,search:query};
+   const doc={addEventListener(){listeners++},
+     createElement(){return {href:'',click(){clicked=this.href}}}};
    const window={document:doc,location,
      matchMedia:()=>({matches:standalone}),
      navigator:{standalone:false}};
    vm.runInNewContext(src,{window,URL,URLSearchParams});
-   return {redirected,listeners};
+   return {clicked,listeners};
  }
- assert.deepEqual(run('',true),{redirected:rootUrl,listeners:0},
-   'home icon must open the real four-module GenSRPG hub before Capture bootstrap');
- assert.deepEqual(run('?entry=gensrpg-main',true),{redirected:null,listeners:1},
+ assert.deepEqual(run('',true),{clicked:rootUrl,listeners:1},
+   'home icon must follow existing Shell link to the real four-module HUB before Capture bootstrap');
+ assert.deepEqual(run('?entry=gensrpg-main',true),{clicked:null,listeners:1},
    'choosing Capture explicitly inside GenSRPG must still open Capture');
- assert.deepEqual(run('?launch=capture',true),{redirected:null,listeners:1},
+ assert.deepEqual(run('?launch=capture',true),{clicked:null,listeners:1},
    'an explicit Capture deep link must remain possible');
- assert.deepEqual(run('',false),{redirected:null,listeners:1},
+ assert.deepEqual(run('',false),{clicked:null,listeners:1},
    'normal browser preview link remains unchanged');
 });
 test('published Capture PWA redirects at document HEAD, ahead of expensive mode bootstrap',()=>{

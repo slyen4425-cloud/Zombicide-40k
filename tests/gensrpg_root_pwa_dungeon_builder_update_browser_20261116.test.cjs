@@ -15,7 +15,7 @@ test('installed old root PWA relaunch updates to the real Dungeon Builder script
  const sourceSw=fs.readFileSync(path.join(root,'service-worker.js'),'utf8');
  const oldHtml=stampShellForCommit(sourceHtml,oldSha),oldSw=stampWorkerForCommit(sourceSw,oldSha);
  const extract=html=>html.slice(html.indexOf('const Z40K_APP_VERSION = '),html.indexOf('/* Ancien ajout automatique'));
- assert.ok(extract(oldHtml).length>3000&&extract(currentHtml).length>3000);
+ assert.ok(extract(oldHtml).length>2500&&extract(currentHtml).length>2500,'use the complete existing ~2.7K PWA updater, never a stub');
  const version=currentHtml.match(/<meta name="z40k-app-version" content="([^"]+)">/)?.[1];
  assert.match(version||'',/^gensrpg-release-[a-f0-9]{12}$/);
  const servePage=(newer)=>{

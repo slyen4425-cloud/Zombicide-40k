@@ -109,7 +109,7 @@ const productionDirect=buildPrelude.includeBuildPrelude([
   ].includes(x)),
   ...injected
 ],workflow);
-assert.equal(new Set(productionDirect).size,92,'production composition includes the explicit profile repair prelude and the single Capture combat core owner');
+assert.equal(new Set(productionDirect).size,93,'production composition includes one explicit authored Dungeon selection owner, the profile repair prelude and the single Capture combat core owner');
 
 const inlineIds=[...index.matchAll(/<script\b[^>]*\bid=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
 assert.equal(inlineIds.length,112,'R11 must retire exactly 17 previously disabled named script tags from 129');

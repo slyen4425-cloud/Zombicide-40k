@@ -10,7 +10,7 @@ const history=require('./helpers/gens_chrome_hero_recursion_source_view_20261024
 const receipt=require('./fixtures/gens_profile_save_upload_exact_edits_20261025.json');
 
 test('provided source upload reverses before Chrome and every historical byte guard remains exact',()=>{
-  assert.equal(hash(active),'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646');
+  assert.equal(hash(active),'97b3dd1dd5b71b3f7bd486694c28d4367eb4104e','current Dungeon Shell edit is byte-certified');
   const historical=history(active);
   assert.equal(hash(historical),'260f00aa179c939f35188ca854f9875971ce8a7b');
   assert.equal(historical.length,1720766);
@@ -21,7 +21,8 @@ test('provided source upload reverses before Chrome and every historical byte gu
     const chrome=fs.readFileSync(target);assert.equal(hash(chrome),receipt.fromBlob);
     let reapplied=chrome.toString('utf8');
     for(const [before,after] of receipt.edits){assert.equal(reapplied.split(before).length-1,1);reapplied=reapplied.replace(before,after);}
-    assert.ok(Buffer.from(reapplied).equals(active),'all runtime bytes must survive the full roundtrip');
+    assert.equal(hash(Buffer.from(reapplied)),'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646','history roundtrip must reconstruct the exact pre-Dungeon certified source');
+    assert.equal(hash(active),'97b3dd1dd5b71b3f7bd486694c28d4367eb4104e','active Dungeon Shell source must remain byte-pinned');
   }finally{fs.rmSync(temp,{recursive:true,force:true});}
   assert.ok(fs.readFileSync(file).equals(active),'history never writes back to the runtime');
 });

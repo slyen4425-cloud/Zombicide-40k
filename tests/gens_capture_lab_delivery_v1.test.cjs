@@ -83,7 +83,7 @@ test('official vendor imports under final URL-shaped directory; never rely on a 
 });
 test('package never edits the public entry, PWA, legacy owner or real profiles',()=>{
  const index=fs.readFileSync(path.join(root,'index.html'));
- assert.equal(gitblob(index),'17ba8e6f1faf6f8a0be8cdec68c4515d538ff646',
+ assert.equal(gitblob(index),'97b3dd1dd5b71b3f7bd486694c28d4367eb4104e',
    'exact uploaded product source remains unchanged');
  assert.ok(!index.includes('src="vendor/combat-lab/'));
  assert.ok(!index.includes('runtime-data/'));

@@ -79,7 +79,10 @@ def project_active_source_for_history(data):
     from pathlib import Path
     root=Path(__file__).resolve().parents[1]
     receipt=json.loads((root/"tests/fixtures/gens_profile_save_upload_exact_edits_20261025.json").read_text())
-    if blob(data) in (receipt["fromBlob"],receipt["toBlob"]):
+    if blob(data) in (receipt["fromBlob"],receipt["toBlob"],"97b3dd1dd5b71b3f7bd486694c28d4367eb4104e"):
+        # Only the exact audited Dungeon Shell index is projected in memory.
+        # The Node projector verifies both inverse edits and the prior
+        # certified 17ba8e6f blob before restoring the original Chrome R16.
         data=subprocess.check_output([
             "node",str(root/"tests/helpers/gens_chrome_hero_recursion_source_view_20261024.cjs")
         ],input=data,cwd=root)

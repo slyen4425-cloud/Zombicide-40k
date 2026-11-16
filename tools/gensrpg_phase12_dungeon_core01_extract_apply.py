@@ -394,10 +394,11 @@ def verify():
             # graph assertions (no skipping, no wildcard acceptance).
             if current_blob in ("dab5be5dedfa56c49d76d40a4cb824a0098903f0",
                                 "9f35eb833a6ede4b91399854f19bb9bef59f45ab","260f00aa179c939f35188ca854f9875971ce8a7b",
-                                 "cc355585acab68958bd349ffcf8fa0de4eab9b0d",profile_upload["toBlob"]):
+                                 "cc355585acab68958bd349ffcf8fa0de4eab9b0d",profile_upload["toBlob"],"97b3dd1dd5b71b3f7bd486694c28d4367eb4104e"):
                 # R16's only current-runtime change is the SHA-pinned Chrome
                 # profile bootstrap fix. Graph module counts remain unchanged.
                 required_size=(1772759 if current_blob.startswith("dab5") else
+                               1722970 if current_blob=="97b3dd1dd5b71b3f7bd486694c28d4367eb4104e" else
                                profile_upload["toBytes"] if current_blob==profile_upload["toBlob"] else
                                1721700 if current_blob=="cc355585acab68958bd349ffcf8fa0de4eab9b0d" else
                                1720766 if current_blob=="260f00aa179c939f35188ca854f9875971ce8a7b" else 1729855)
@@ -406,7 +407,7 @@ def verify():
                     expected_after=current_blob
                 elif path==PATH_GRAPH:
                     newer=((89,146,132) if current_blob.startswith("dab5") else
-                           (92,159,135) if current_blob==profile_upload["toBlob"] else
+                           (92,159,135) if current_blob in (profile_upload["toBlob"],"97b3dd1dd5b71b3f7bd486694c28d4367eb4104e") else
                            (91,148,134) if current_blob in ("260f00aa179c939f35188ca854f9875971ce8a7b","cc355585acab68958bd349ffcf8fa0de4eab9b0d") else (90,147,133))
                     for former,current in (
                         ("size,64,",f"size,{newer[0]},"),
@@ -414,12 +415,12 @@ def verify():
                         ("reachable.size,107,",f"reachable.size,{newer[2]},"),
                     ):
                         expected_after=expected_after.replace(former,current)
-            if current_blob in ("cc355585acab68958bd349ffcf8fa0de4eab9b0d",profile_upload["toBlob"]) and path==PATH_GRAPH:
+            if current_blob in ("cc355585acab68958bd349ffcf8fa0de4eab9b0d",profile_upload["toBlob"],"97b3dd1dd5b71b3f7bd486694c28d4367eb4104e") and path==PATH_GRAPH:
                 # R16 Chrome repair changes exactly six function bodies, not
                 # script composition. The verified current graph is pinned by
                 # this exact index blob and by the live graph assertions.
                 import re
-                physical_upload=current_blob==profile_upload["toBlob"]
+                physical_upload=current_blob in (profile_upload["toBlob"],"97b3dd1dd5b71b3f7bd486694c28d4367eb4104e")
                 for expression,value in (
                     (r"size,\d+,'production composition", "size,92,'production composition" if physical_upload else "size,91,'production composition"),
                     (r"allJs\.length,\d+,", "allJs.length,159," if physical_upload else "allJs.length,148,"),
@@ -435,7 +436,7 @@ def verify():
             # runtime authority. R01's original extraction remains byte-pinned;
             # its historical test projection must track the current approved
             # inventory rather than continue asserting the pre-preview count.
-            if path==PATH_GRAPH and current_blob==profile_upload["toBlob"] and "allJs.length" in expected_after:
+            if path==PATH_GRAPH and current_blob in (profile_upload["toBlob"],"97b3dd1dd5b71b3f7bd486694c28d4367eb4104e") and "allJs.length" in expected_after:
                 manifest=json.loads((ROOT/"docs/GENSRPG_CAPTURE_LAB_STAGED_FILES_2026-10-27.json").read_text())
                 preview_owner="assets/gensrpg/capture/preview/saved-hub-owners.js"
                 assert manifest["productionActivated"] is False, "preview cannot activate production"

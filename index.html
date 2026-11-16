@@ -1640,8 +1640,7 @@ body.dungeon-sheet #vanillaCharCard #charImage{display:block!important;width:100
 
 /* V16.75.8 — séparation structurelle stricte des familles */
 body.gensDungeonTheme #survivalModEditorHubBtn{display:none!important}
-body:not(.gensDungeonTheme) #rpgUniverseEditorHubBtn,
-body:not(.gensDungeonTheme) #dungeonAdvancedEditorBtn{display:none!important}
+body:not(.gensDungeonTheme) #rpgUniverseEditorHubBtn{display:none!important}
 
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -6639,7 +6638,16 @@ function switchGameModeFromHome(profileId){
   renderHome();
 }
 function gensShellDungeonEditorAllowed(){
-  try{const p=getActiveGameProfile?.();return !!p&&p.gameStyle==="dungeon"&&!window.GensCaptureV1?.isProfile?.(p)}catch(e){return false}
+  try{
+    // Shell authority: the explicitly selected editor family wins over a
+    // previously active game profile (notably after returning from Capture).
+    const hub=globalThis.document?.getElementById?.("editorHub");
+    const family=hub&&hub.style.display!=="none"?gensSelectedFamily:"";
+    if(family==="adventure")return true;
+    if(family==="capture"||family==="survival"||family==="pvp")return false;
+    const p=getActiveGameProfile?.();
+    return !!p&&p.gameStyle==="dungeon"&&!window.GensCaptureV1?.isProfile?.(p);
+  }catch(e){return false}
 }
 function applyModeEditorVisibility(){
   let activeProfile=null;try{activeProfile=getActiveGameProfile()}catch(e){}

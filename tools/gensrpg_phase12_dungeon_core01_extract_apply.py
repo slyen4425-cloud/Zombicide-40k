@@ -433,7 +433,7 @@ def verify():
                         break
             # The active Pages composition has one newly explicit Dungeon
             # session-selection module; the historical R01 baseline remains 92.
-            if path==PATH_GRAPH and current_blob=="97b3dd1dd5b71b3f7bd486694c28d4367eb4104e" and "size,93,'production composition" in updated:
+            if path==PATH_GRAPH and current_blob=="97b3dd1dd5b71b3f7bd486694c28d4367eb4104e" and "size,93,'production composition" in updated and "size,92,'production composition" in expected_after:
                 assert updated.count("size,93,'production composition")==1
                 assert updated.count("assert.equal(injected.length,33,")==1
                 assert updated.count("x==='assets/dungeon/dungeon-world-session-bridge-167832.js'")==1

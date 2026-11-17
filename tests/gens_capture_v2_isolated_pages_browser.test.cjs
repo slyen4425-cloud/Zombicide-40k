@@ -26,6 +26,25 @@ const server=http.createServer(async(request,response)=>{
  }catch(e){response.writeHead(404).end('Missing _site resource');}
 });
 
+const independentCaptureSource='3ecb6dd958315d0ad08130387b7bd9589486f5c5';
+const selectedPublisherSource=JSON.parse(require('node:fs').readFileSync(
+ path.resolve(__dirname,'../tools/capture_v2_pages_preview_pin.json'),'utf8')).sha;
+async function enterAdventureFromOfficialCaptureHub(page){
+ await page.locator('button.gensRootModeCard.capture').tap();
+ const hub=page.locator('#gensCaptureV2Root');
+ if(selectedPublisherSource===independentCaptureSource){
+  // A real universe must be chosen before Jouer becomes interactive.
+  // Preserve legacy Monster InvoC saves; do not force-click hidden controls.
+  const legacy=hub.locator('[data-capture-universe-select="monster-invoc"]');
+  await legacy.waitFor({state:'visible',timeout:35000});
+  assert.equal(await hub.getAttribute('data-menu'),'universes');
+  await legacy.tap();
+  await page.locator('#gensCaptureV2Root[data-menu="main"]').waitFor({state:'visible'});
+  assert.equal(await hub.getAttribute('data-menu'),'main');
+ }
+ await hub.locator('[data-capture-v2-view="adventure"]').tap();
+}
+
 // Read the real currently selected Adventure through its production Core +
 // portfolio owner. New games are independent slots; the legacy single-save
 // key deliberately stays untouched for pre-existing user sessions.
@@ -92,8 +111,7 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   });
   const start=async()=>{
    await page.goto(base+scope+'index.html',{waitUntil:'domcontentloaded'});
-   await page.locator('button.gensRootModeCard.capture').tap();
-   await page.locator('[data-capture-v2-view="adventure"]').tap();
+   await enterAdventureFromOfficialCaptureHub(page);
   };
   await start();
   const adventure=page.frameLocator('#gensCaptureV2Root iframe');
@@ -248,8 +266,7 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
   });
   const start=async()=>{
    await page.goto(base+scope+'index.html',{waitUntil:'domcontentloaded'});
-   await page.locator('button.gensRootModeCard.capture').tap();
-   await page.locator('[data-capture-v2-view="adventure"]').tap();
+   await enterAdventureFromOfficialCaptureHub(page);
   };
   await start();
   const adventure=page.frameLocator('#gensCaptureV2Root iframe');

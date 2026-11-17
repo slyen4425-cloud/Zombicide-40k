@@ -36,6 +36,7 @@
     throw new Error("Clean Capture requires the existing four-mode Shell");
   if(root.GensCaptureV2)throw new Error("Duplicate Capture module authority");
   let host=null,frame=null,stage=null,notice=null,current=null,nativeTitle=null;
+  let selectedUniverse=null,universePanel=null,universeUi=null,universeLoadEpoch=0;
   function urlFor(kind){
     const info=VIEWS[kind];
     if(!info)throw new RangeError("Unknown Capture native owner");
@@ -83,7 +84,12 @@
   }
   function open(kind,{startView=null}={}){
     if(!host)return false;
+    if(!selectedUniverse){
+      notice.textContent='Sélectionne d’abord un univers avant de jouer ou d’ouvrir ses éditeurs.';
+      return false;
+    }
     const info=VIEWS[kind],url=urlFor(kind);
+    if(!selectedUniverse.legacy)url.searchParams.set('universe',selectedUniverse.id);
     // Capture already owns one Adventure portfolio: present its native new/load
     // screens, never create a world or choose a saved session in the Shell.
     if(kind==='adventure'&&['new','load'].includes(startView))
@@ -182,15 +188,50 @@
     if(gameFullscreenActive())void exitGameFullscreen();
     if(frame){frame.src="about:blank";frame.remove();frame=null;}
     stage.replaceChildren();
-    current=null;host.dataset.view="home";host.dataset.menu="main";
+    current=null;host.dataset.view="home";
+    host.dataset.menu=selectedUniverse?'main':'universes';
     delete host.dataset.nativeFamily;
     delete host.dataset.adventureCombatActive;
     nativeTitle.textContent="";
-    notice.textContent="Choisis comment commencer.";
+    notice.textContent=selectedUniverse
+      ?'Univers '+selectedUniverse.name+' · choisis Jouer ou Éditeurs.'
+      :'Choisis un univers. Monster InvoC conserve toutes tes parties historiques.';
     return true;
   }
+  function showUniverses(){
+    if(!host)return false;
+    selectedUniverse=null;
+    home();
+    universeUi?.showList();
+    return true;
+  }
+  function selectUniverse(project){
+    if(!host)return false;
+    selectedUniverse=project;
+    return home();
+  }
+  function loadUniverseHub(){
+    const epoch=++universeLoadEpoch;
+    const load=root.GensCaptureV2UniverseUiLoaderV1??(
+      ()=>import(new URL('assets/gensrpg/capture-v2/universe-hub-ui-v1.mjs',base).href)
+    );
+    void Promise.resolve().then(load).then(module=>{
+      if(!host||epoch!==universeLoadEpoch)return;
+      return module.createCaptureUniverseHubUiV1({
+        document:root.document,root,container:universePanel,
+        notice,onSelect:selectUniverse
+      }).then(ui=>{
+        if(!host||epoch!==universeLoadEpoch){ui.stop();return;}
+        universeUi=ui;
+      });
+    }).catch(error=>{
+      if(!host||epoch!==universeLoadEpoch)return;
+      notice.textContent='Bibliothèque des univers non chargée : '+String(error?.message??error);
+      notice.dataset.error='true';
+    });
+  }
   function editors(){
-    if(!home())return false;
+    if(!selectedUniverse||!home())return false;
     host.dataset.menu="editors";
     notice.textContent="Choisis un outil de création.";
     return true;
@@ -203,7 +244,7 @@
     host.id="gensCaptureV2Root";
     host.setAttribute("aria-label","Monster Capture");
     host.dataset.view="home";
-    host.dataset.menu="main";
+    host.dataset.menu="universes";
     const header=doc.createElement("header");
     const name=doc.createElement("strong");name.textContent="Monster Capture";
     const exit=doc.createElement("button");
@@ -215,21 +256,25 @@
     const nav=doc.createElement("nav");
     nav.className="gensCaptureV2MainMenu";
     nav.setAttribute("aria-label","Menu principal Monster Capture");
-    const create=doc.createElement("button");create.type="button";
-    // A separate creation intent, not a second gameplay/iframe owner.
-    create.dataset.captureV2Start="new";
-    create.textContent="Créer un univers";
-    create.addEventListener("click",()=>open("adventure",{startView:'new'}));
     const play=doc.createElement("button");play.type="button";
     play.dataset.captureV2View="adventure";
-    play.dataset.captureV2Start="load";
-    play.textContent="Reprendre / gérer mes univers";
-    play.addEventListener("click",()=>open("adventure",{startView:'load'}));
+    play.textContent="Jouer";
+    play.addEventListener("click",()=>open("adventure"));
     const editing=doc.createElement("button");editing.type="button";
     editing.dataset.captureV2Menu="editors";
     editing.textContent="Éditeurs";
     editing.addEventListener("click",editors);
-    nav.append(create,play,editing);
+    const change=doc.createElement("button");change.type="button";
+    change.dataset.captureV2Menu="universes";
+    change.textContent="Changer d’univers";
+    change.addEventListener("click",showUniverses);
+    nav.append(play,editing,change);
+    // This real library precedes play/editor choice; a saved PARTY never
+    // masquerades as a separate GAME UNIVERSE.
+    universePanel=doc.createElement('section');
+    universePanel.className='gensCaptureV2UniversePanel';
+    universePanel.setAttribute('aria-label','Univers Monster Capture');
+    universePanel.textContent='Chargement des univers…';
     const editorPanel=doc.createElement("section");
     editorPanel.className="gensCaptureV2Editors";
     editorPanel.setAttribute("aria-label","Éditeurs Monster Capture");
@@ -268,10 +313,11 @@
     nativeTitle.className="gensCaptureV2NativeTitle";
     nativeBar.append(nativeBack,nativeTitle);
     stage=doc.createElement("div");stage.className="gensCaptureV2Stage";
-    host.append(header,nav,editorPanel,notice,nativeBar,stage);
+    host.append(header,nav,editorPanel,notice,nativeBar,stage,universePanel);
     doc.body.append(host);
     root.gensHideHomeLevels?.();
     home();
+    loadUniverseHub();
     return true;
   }
   function stop(){
@@ -279,6 +325,8 @@
     if(gameFullscreenActive())void exitGameFullscreen();
     if(frame){frame.src="about:blank";frame.remove();}
     frame=null;stage=null;notice=null;nativeTitle=null;current=null;
+    ++universeLoadEpoch;
+    universeUi?.stop();universeUi=null;universePanel=null;selectedUniverse=null;
     host.remove();host=null;
     // Only the already-established Shell returns to the four-mode home.
     root.showGensRootHome?.();
@@ -287,7 +335,7 @@
   function status(){return Object.freeze({active:!!host,view:current});}
   if(shell.register("capture",start)!==true)throw new Error("Capture Shell registration refused");
   if(returnShell.register("capture",home)!==true)throw new Error("Capture return registration refused");
-  root.GensCaptureV2=Object.freeze({start,stop,open,home,status,
+  root.GensCaptureV2=Object.freeze({start,stop,open,home,showUniverses,status,
     requestGameFullscreen,exitGameFullscreen,gameFullscreenActive,onGameFullscreenChange,
     setAdventureCombatVisibility});
 })(typeof window!=="undefined"?window:globalThis);

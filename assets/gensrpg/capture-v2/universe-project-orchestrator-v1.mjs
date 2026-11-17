@@ -21,13 +21,16 @@ export function createCaptureUniverseProjectOrchestratorV1({
   worldProjectId:(id,project)=>id===project&&worlds.list(id).length>0,
   rulesProjectId:(id,project)=>id===project&&rulesFor(id).load()!==null
  };
- async function provision(id,{copyFrom=null,fromWorldId=null,confirmed=false}={}){
+ async function provision(id){
   const project=projects.get(id);
   if(project.legacy)throw new Error('Monster InvoC conserve ses contenus historiques : aucune migration');
   if(project.status==='ready')return projects.requireReady(id);
-  if(copyFrom!==null&&confirmed!==true)
-   throw new Error('Copier un univers exige une confirmation explicite');
+  // The Capture/Core index is the only persisted authority for creation intent.
+  // A pending clone must remain a clone after refresh or power interruption.
+  const copyFrom=project.sourceId??null;
+  const fromWorldId=project.sourceWorldId??null;
   if(copyFrom===id)throw new Error('Un univers ne se copie pas lui-même');
+  if(copyFrom!==null)projects.requireReady(copyFrom);
   if(!combat.load(id)){
    if(copyFrom===null)combat.create(id,await blankCombat());
    else if(copyFrom===MONSTER_INVOC_UNIVERSE_ID_V1)
@@ -64,8 +67,12 @@ export function createCaptureUniverseProjectOrchestratorV1({
   return projects.provision(id,ready(id),verify);
  }
  async function create(name,config={}){
-  const p=projects.create(name);
-  return provision(p.id,config);
+  const sourceId=config.copyFrom??null;
+  if(sourceId!==null&&config.confirmed!==true)
+   throw new Error('Copie explicite du contenu source non confirmée');
+  const p=projects.create(name,{sourceId,
+   sourceWorldId:config.fromWorldId??null});
+  return provision(p.id);
  }
  return Object.freeze({create,provision});
 }

@@ -95,13 +95,17 @@ export function createCaptureUniverseProjectStoreV1({storage,coreStorage,makeId}
  // A game/editor cannot enter a new universe until its THREE native Lab
  // owners and Capture Rules owner have provisioned independent data refs.
  // Never claim isolation by changing a title or pointing to shared data.
- function provision(id,content){
+ function provision(id,content,verifyOwners){
   const doc=read(),existing=byId(id,doc);
   if(existing.legacy||existing.status!=='pending'||!contentShape(content))
    throw new Error('Provisionnement officiel des quatre propriétaires requis');
   const used=new Set(doc.projects.filter(p=>p.status==='ready')
    .flatMap(p=>Object.values(p.content)));
   const refs=Object.values(content);
+  const roles=['combatProjectId','heroProjectId','rulesProjectId','worldProjectId'];
+  if(!verifyOwners||roles.some(role=>typeof verifyOwners[role]!=='function')||
+     roles.some(role=>verifyOwners[role](content[role],id)!==true))
+   throw new Error('Validation officielle des contenus Combat/Exploration/Rules obligatoire');
   if(new Set(refs).size!==4||refs.some(ref=>used.has(ref)))
    throw new Error('Référence de contenu déjà utilisée par un autre univers');
   write({...doc,projects:doc.projects.map(p=>p.id===id?

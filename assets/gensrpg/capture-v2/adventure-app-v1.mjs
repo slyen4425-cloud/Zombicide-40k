@@ -33,6 +33,8 @@ import {createAdventureStarterPickerV1} from './adventure-starter-picker-v1.mjs'
 import {renderAdventureSheetViewV1} from './adventure-play-sheet-view-v1.mjs';
 import {createAdventureCreatorDraftStoreV1} from './adventure-creator-draft-v1.mjs';
 import {createAdventurePortfolioStoreV1} from './adventure-portfolio-store-v1.mjs';
+import {createCaptureUniverseProjectStoreV1} from './universe-project-store-v1.mjs';
+import {createCaptureUniverseAdventureStorageV1} from './universe-adventure-storage-v1.mjs';
 import {adventureSaveDisplayNameV1} from './adventure-save-list-presentation-v1.mjs';
 import {officialHeroPortraitUrlV1} from './adventure-hero-portrait-v1.mjs';
 import {withSelectedAdventureWorldV1,resolveSelectedAdventureWorldV1,
@@ -2293,13 +2295,25 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
 }));
 (async()=>{
  try{
-  const legacyStore=createAdventureStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
+  // Capture project identity is validated before ANY save/draft access. The
+  // old Monster InvoC URL still uses the same exact localStorage keys.
+  const universeId=new URLSearchParams(window.location.search).get('universe');
+  let adventureStorage=window.localStorage;
+  if(universeId!==null){
+   const projects=createCaptureUniverseProjectStoreV1({
+    storage:window.localStorage,coreStorage:window.GensStorageV1,
+    makeId:()=>crypto.randomUUID()
+   });
+   projects.requireReady(universeId); // Fail closed on incomplete owners.
+   adventureStorage=createCaptureUniverseAdventureStorageV1(window.localStorage,universeId);
+  }
+  const legacyStore=createAdventureStoreV1({storage:adventureStorage,coreStorage:window.GensStorageV1});
   portfolio=createAdventurePortfolioStoreV1({
-   storage:window.localStorage,coreStorage:window.GensStorageV1,legacyStore
+   storage:adventureStorage,coreStorage:window.GensStorageV1,legacyStore
   });
   store=portfolio;
-  draftStore=createAdventureRulesDraftStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
-  creatorDraftStore=createAdventureCreatorDraftStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
+  draftStore=createAdventureRulesDraftStoreV1({storage:adventureStorage,coreStorage:window.GensStorageV1});
+  creatorDraftStore=createAdventureCreatorDraftStoreV1({storage:adventureStorage,coreStorage:window.GensStorageV1});
   const official=await fetchPublishedBestiary();
   adventurePerf('boot after official bestiary');
   published=official.cards;officialCombatSha=official.combatSha;

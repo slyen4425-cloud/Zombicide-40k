@@ -55,7 +55,18 @@ test('public main Capture click opens the ONE V2 owner, Jouer is native, return 
   const back=page.locator('a.gensCaptureReturnToMain');
   await back.waitFor({state:'attached'});
   assert.equal(await back.getAttribute('href'),base);
-  await page.locator('[data-capture-v2-view="adventure"]').tap();
+  const sourcePin=JSON.parse(require('node:fs').readFileSync(
+   path.resolve(__dirname,'../tools/capture_v2_pages_preview_pin.json'),'utf8'));
+  if(sourcePin.sha==='3ecb6dd958315d0ad08130387b7bd9589486f5c5'){
+   // Follow the real universe selection, not a hidden Jouer shortcut.
+   const legacy=capture.locator('[data-capture-universe-select="monster-invoc"]');
+   await legacy.waitFor({state:'visible',timeout:35000});
+   assert.equal(await capture.getAttribute('data-menu'),'universes');
+   await legacy.tap();
+   await page.locator('#gensCaptureV2Root[data-menu="main"]').waitFor({state:'visible'});
+   assert.equal(await capture.getAttribute('data-menu'),'main');
+  }
+  await capture.locator('[data-capture-v2-view="adventure"]').tap();
   const adventure=page.frameLocator('#gensCaptureV2Root iframe');
   await adventure.locator('#adventure-create').waitFor({state:'attached',timeout:45000});
   await page.locator('.gensCaptureV2NativeBack').tap();

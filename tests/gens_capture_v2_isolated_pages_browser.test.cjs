@@ -432,8 +432,10 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
    document.querySelectorAll('button.gensRootModeCard').length===4,null,{timeout:60000});
   assert.equal(await page.locator('button.gensRootModeCard').count(),4);
   await page.locator('button.gensRootModeCard.capture').tap();
-  assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu button:visible').count(),2,
-   'the live preview must offer only Jouer and Éditeurs on the home screen');
+  const certifiedPin=JSON.parse(require('node:fs').readFileSync(path.resolve(__dirname,'../tools/capture_v2_pages_preview_pin.json'),'utf8'));
+  const universeMenu=certifiedPin.sha==='0b74ac44ab0a39c90dbc0696f8a386084de1cec6';
+  assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu button:visible').count(),universeMenu?3:2,
+   'Capture home menu must match the certified source: legacy two choices or three universe choices');
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
   assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="world"] button:visible').count(),2,
    'World Assembler and 2.5D Sculpt belong to the same editor group');

@@ -1,6 +1,6 @@
 // Capture-owned UI for selecting a GAME UNIVERSE, never a saved adventure.
 // Shell remains the only navigation controller and owns the native frames.
-import {MONSTER_INVOC_UNIVERSE_ID_V1} from './universe-project-store-v1.mjs';
+import {createCaptureUniverseProjectStoreV1} from './universe-project-store-v1.mjs';
 import {loadCaptureUniverseNativeBridgeV1} from './universe-native-bridge-v1.mjs';
 const el=(doc,tag,className,text)=>{
  const node=doc.createElement(tag);
@@ -13,8 +13,14 @@ export async function createCaptureUniverseHubUiV1({
 }={}){
  if(!document||!container||typeof onSelect!=='function')
   throw new TypeError('Container Shell et callback de sélection requis');
- const api=await load({root});
- const projectStore=api.projects;
+ // Legacy Monster InvoC must be selectable even while native Lab bundles
+ // are loading. Project management remains Capture/Core Storage's owner.
+ const projectStore=createCaptureUniverseProjectStoreV1({
+  storage:root.localStorage,coreStorage:root.GensStorageV1,
+  makeId:()=>root.crypto.randomUUID()
+ });
+ let nativePromise=null;
+ const native=()=>nativePromise??=Promise.resolve().then(()=>load({root}));
  let current=null;
  const surface=el(document,'div','capture-universe-library');
  container.replaceChildren(surface);
@@ -30,7 +36,7 @@ export async function createCaptureUniverseHubUiV1({
   action.addEventListener('click',async()=>{
    action.disabled=true;
    try{
-    const item=project.status==='pending'?await api.resume(project.id):projectStore.select(project.id);
+    const item=project.status==='pending'?await (await native()).resume(project.id):projectStore.select(project.id);
     const selected=projectStore.select(item.id);
     current=selected;
     onSelect(selected);
@@ -91,9 +97,10 @@ export async function createCaptureUniverseHubUiV1({
     if(parent&&!root.confirm('Copier les données du projet choisi dans un nouvel univers indépendant ?')){
      inform('Copie annulée, les deux univers sont conservés.');return;
     }
+    const bridge=await native();
     const created=parent
-     ?await api.createCopy(name.value,parent,{confirmed:true})
-     :await api.createBlank(name.value);
+     ?await bridge.createCopy(name.value,parent,{confirmed:true})
+     :await bridge.createBlank(name.value);
     const selected=projectStore.select(created.id);
     current=selected;onSelect(selected);
     inform('Univers '+selected.name+' créé. Les autres univers sont inchangés.');

@@ -367,7 +367,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
    JSON.parse(localStorage.getItem('gensrpg.capture.v2.adventure.portfolio.v1')).selectedSessionId);
   assert.equal(restored,firstSession);
   const adventureSrc=await page.locator('#gensCaptureV2Root iframe').getAttribute('src');
-  assert.match(adventureSrc,/assets\/gensrpg\/capture-v2\/adventure\.html$/,
+  assert.match(adventureSrc,/assets\/gensrpg\/capture-v2\/adventure\.html(?:\?start=(?:new|load))?$/,
     'GenSrpg owns the Adventure configuration, not the Combat/Exploration Labs');
   assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),false);
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();

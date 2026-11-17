@@ -216,7 +216,7 @@
     nav.className="gensCaptureV2MainMenu";
     nav.setAttribute("aria-label","Menu principal Monster Capture");
     const create=doc.createElement("button");create.type="button";
-    create.dataset.captureV2View="adventure";
+    // A separate creation intent, not a second gameplay/iframe owner.
     create.dataset.captureV2Start="new";
     create.textContent="Créer un univers";
     create.addEventListener("click",()=>open("adventure",{startView:'new'}));

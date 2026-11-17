@@ -33,6 +33,8 @@ import {createAdventureStarterPickerV1} from './adventure-starter-picker-v1.mjs'
 import {renderAdventureSheetViewV1} from './adventure-play-sheet-view-v1.mjs';
 import {createAdventureCreatorDraftStoreV1} from './adventure-creator-draft-v1.mjs';
 import {createAdventurePortfolioStoreV1} from './adventure-portfolio-store-v1.mjs';
+import {createCaptureUniverseProjectStoreV1} from './universe-project-store-v1.mjs';
+import {createCaptureUniverseAdventureStorageV1} from './universe-adventure-storage-v1.mjs';
 import {adventureSaveDisplayNameV1} from './adventure-save-list-presentation-v1.mjs';
 import {officialHeroPortraitUrlV1} from './adventure-hero-portrait-v1.mjs';
 import {withSelectedAdventureWorldV1,resolveSelectedAdventureWorldV1,
@@ -126,6 +128,7 @@ function adventurePerf(label,since=adventurePerfBootStart){
 let officialCombatSha=null,officialStatRegistry=null;
 let officialCombatVitalsProjector=null;
 let store,portfolio,draftStore,creatorDraftStore,worldLibrary=null;
+let selectedUniverseId=null,universeWorldStorage=window.localStorage;
 const text=(node,value)=>{node.textContent=String(value);};
 const stateMessage=(message,error=false)=>{
  text(status,message);status.dataset.error=String(error);
@@ -287,6 +290,28 @@ function fromFields(){
  });
 }
 async function fetchPublishedBestiary(){
+ if(selectedUniverseId!==null){
+  // Native Combat database, not the global Monster InvoC showcase. Shared
+  // global assets are references only; creature/skill/rules lists are private.
+  const [{createCaptureUniverseDatabaseStoreV1},assets,delivery]=await Promise.all([
+   import('../../../vendor/combat-lab/src/contracts/capture-universe-database-store-v1.js'),
+   fetchOfficialAdventureJsonV1('../../../vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json',import.meta.url,crypto.randomUUID(),fetch),
+   fetchOfficialAdventureJsonV1('./delivery-manifest.json',import.meta.url,crypto.randomUUID(),fetch)
+  ]);
+  const snapshot=createCaptureUniverseDatabaseStoreV1({storage:window.localStorage})
+   .load(selectedUniverseId);
+  if(!snapshot)throw new Error('Catalogue de cet univers absent du Labo Combat officiel');
+  const database=snapshot.database;
+  const creatureTransfers=database.creatures;
+  return Object.freeze({
+   cards:publishedAdventureSpeciesV1(captureBestiaryCardsV1({
+    creatureTransfers,skillTransfers:database.skills.map(draft=>({draft})),
+    assetCatalog:assets,statRegistry:database.statRegistry,nativeSkills:[]
+   })),
+   combatSha:delivery.combat.sha,
+   statRegistry:database.statRegistry,creatureTransfers
+  });
+ }
  // The preview is an installed PWA: its previous worker may still serve JSON
  // cache-first even when fetch({cache:'no-store'}) is requested. One fresh,
  // unguessable boot key forces all FIVE official files to use the same new
@@ -334,7 +359,11 @@ async function fillHeroChoices(savedHeroId=null){
  const picker=$('adventure-hero-choice'),notice=$('adventure-hero-choice-status');
  picker.disabled=true;
  try{
-  const records=await (await officialHeroStore()).list();
+  const heroStore=await officialHeroStore();
+  const records=selectedUniverseId===null?await heroStore.list():
+    await (await import('../../../vendor/exploration-lab/src/storage/exploration-universe-hero-projects-v1.js'))
+     .createExplorationUniverseHeroProjectsV1({storage:window.localStorage,heroStore})
+     .list(selectedUniverseId);
   picker.replaceChildren(option('','Aucun héros personnalisé'),
    ...records.map(hero=>option(hero.id,hero.name)));
   if(savedHeroId&&records.some(hero=>hero.id===savedHeroId))picker.value=savedHeroId;
@@ -388,13 +417,28 @@ async function loadOfficialHeroGallery(){
     grid.querySelectorAll('button').forEach(button=>button.disabled=true);
     text(notice,'Préparation des sprites de '+hero.name+'…');
     try{
+     if(selectedUniverseId!==null&&!window.confirm(
+      'Importer une copie indépendante de '+hero.name+' dans cet univers ? '+
+      'Un nouveau HeroDefinition sera enregistré avec son propre identifiant.'))return;
      const store=await officialHeroStore();
-     const record=await installOfficialHeroPresetV1({
+     const officialRecord=await installOfficialHeroPresetV1({
       hero,store,baseUrl:OFFICIAL_EXPLORATION_HERO_ROOT
      });
+     let record=officialRecord;
+     if(selectedUniverseId!==null){
+      const {createExplorationUniverseHeroProjectsV1}=await import(
+       '../../../vendor/exploration-lab/src/storage/exploration-universe-hero-projects-v1.js');
+      const owner=createExplorationUniverseHeroProjectsV1({storage:window.localStorage,heroStore:store});
+      const copied=(await owner.list(selectedUniverseId)).find(x=>x.name===officialRecord.name);
+      record=copied??await owner.copy({
+       sourceHeroId:officialRecord.id,toProjectId:selectedUniverseId,
+       confirmed:true,makeId:()=>crypto.randomUUID(),now:new Date().toISOString()
+      });
+     }
      await fillHeroChoices(record.id);
      selectedOfficialHero=hero.id;highlight();
-     text(notice,hero.name+' sélectionné · 8 directions × 6 images. Prêt pour la nouvelle partie.');
+     text(notice,hero.name+' sélectionné · héros enregistré dans '+
+      (selectedUniverseId===null?'Monster InvoC':'cet univers')+'. Prêt pour la nouvelle partie.');
     }catch(error){
      text(notice,'Héros non chargé : '+error.message+'. Aucune sauvegarde modifiée.');
      console.error('Exploration official HeroDefinition selection',error);
@@ -785,7 +829,22 @@ async function installOfficialWorldLibrary(){
   // Before its API is on certified main, never create a second codec.
   const owner=await import(
    '../../../vendor/exploration-lab/src/builder/exploration-world-document-library-v1.js');
-  worldLibrary=owner.createExplorationWorldDocumentLibraryV1({storage:window.localStorage});
+  if(selectedUniverseId===null){
+   worldLibrary=owner.createExplorationWorldDocumentLibraryV1({storage:window.localStorage});
+  }else{
+   const {createExplorationUniverseWorldProjectsV1}=await import(
+    '../../../vendor/exploration-lab/src/builder/exploration-universe-world-projects-v1.js');
+   const worlds=createExplorationUniverseWorldProjectsV1({
+    storage:window.localStorage,makeId:()=>crypto.randomUUID()
+   });
+   if(!worlds.list(selectedUniverseId).length)
+    throw new Error('Cet univers ne possède aucun WorldDocument natif');
+   worldLibrary=Object.freeze({
+    list:()=>worlds.list(selectedUniverseId),
+    load:id=>worlds.load(selectedUniverseId,id),
+    activate:id=>worlds.activate(selectedUniverseId,id)
+   });
+  }
  }catch(error){
   worldLibrary=null;
   console.info('Bibliothèque multi-mondes en attente de main Exploration',error.message);
@@ -1826,7 +1885,7 @@ window.addEventListener('message',event=>{
     event.data?.sessionId!==activePlayingSheet?.sessionId)return;
  if(event.data.schema==='gensrpg.exploration.play.ready.v1'){
   if(event.data.worldId!==store.load()?.world?.mapRef&&
-     event.data.worldId!==readWorldAssemblerDraft(window.localStorage)?.id)return;
+     event.data.worldId!==readWorldAssemblerDraft(universeWorldStorage)?.id)return;
   adventurePerf('play iframe ready after launch',adventureLaunchStartedAt??performance.now());
   adventureLaunchStartedAt=null;
   dismissJourneyLoading();
@@ -1853,7 +1912,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
     !captureGuestSessionMatchesHostSetupV1({
      session:store?.load(),setup:captureSharedRoomSetup,room:lastCaptureRoomState
     }))throw new Error('Cette sauvegarde ne suit pas les règles de l’hôte. Prépare ton héros dans le salon avant d’entrer.');
- let world=readWorldAssemblerDraft(window.localStorage);
+ let world=readWorldAssemblerDraft(universeWorldStorage);
  let beforeWorldSession=store.load();
  // The preparation controls must apply to the next actual play entry even
  // when the player didn't reopen the creator's advanced settings.
@@ -1872,7 +1931,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
   world=resolveSelectedAdventureWorldV1({
    session:beforeWorldSession,worldLibrary,selectedWorldId
   });
-  const draft=readWorldAssemblerDraft(window.localStorage);
+  const draft=readWorldAssemblerDraft(universeWorldStorage);
   if(checkAdventureWorldArchiveV1({
    activeWorld:draft,archivedWorld:world,selectedWorldId,
    fingerprint:playWorldFingerprint
@@ -2074,7 +2133,7 @@ $('adventure-room-enter').addEventListener('click',guardedAsync(async()=>{
   // Switching to the host WorldDocument must never erase an unfinished
   // local author draft; archive it via the ONLY official Exploration library.
   preserveCaptureGuestDraftV1({
-   activeDraft:readWorldAssemblerDraft(window.localStorage),
+   activeDraft:readWorldAssemblerDraft(universeWorldStorage),
    room:server,library:worldLibrary,fingerprintOfficial:playWorldFingerprint
   });
   const imported=importCaptureSharedWorldV1({
@@ -2293,13 +2352,31 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
 }));
 (async()=>{
  try{
-  const legacyStore=createAdventureStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
+  // Capture project identity is validated before ANY save/draft access. The
+  // old Monster InvoC URL still uses the same exact localStorage keys.
+  const universeId=new URLSearchParams(window.location.search).get('universe');
+  selectedUniverseId=universeId;
+  if(universeId!==null){
+   const {createExplorationUniverseWorkspaceStorageV1}=
+    await import('../../../vendor/exploration-lab/src/storage/exploration-universe-workspace-storage-v1.js');
+   universeWorldStorage=createExplorationUniverseWorkspaceStorageV1(window.localStorage,universeId);
+  }
+  let adventureStorage=window.localStorage;
+  if(universeId!==null){
+   const projects=createCaptureUniverseProjectStoreV1({
+    storage:window.localStorage,coreStorage:window.GensStorageV1,
+    makeId:()=>crypto.randomUUID()
+   });
+   projects.requireReady(universeId); // Fail closed on incomplete owners.
+   adventureStorage=createCaptureUniverseAdventureStorageV1(window.localStorage,universeId);
+  }
+  const legacyStore=createAdventureStoreV1({storage:adventureStorage,coreStorage:window.GensStorageV1});
   portfolio=createAdventurePortfolioStoreV1({
-   storage:window.localStorage,coreStorage:window.GensStorageV1,legacyStore
+   storage:adventureStorage,coreStorage:window.GensStorageV1,legacyStore
   });
   store=portfolio;
-  draftStore=createAdventureRulesDraftStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
-  creatorDraftStore=createAdventureCreatorDraftStoreV1({storage:window.localStorage,coreStorage:window.GensStorageV1});
+  draftStore=createAdventureRulesDraftStoreV1({storage:adventureStorage,coreStorage:window.GensStorageV1});
+  creatorDraftStore=createAdventureCreatorDraftStoreV1({storage:adventureStorage,coreStorage:window.GensStorageV1});
   const official=await fetchPublishedBestiary();
   adventurePerf('boot after official bestiary');
   published=official.cards;officialCombatSha=official.combatSha;

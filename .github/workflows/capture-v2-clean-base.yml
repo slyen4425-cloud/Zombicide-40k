@@ -10,6 +10,7 @@ on:
       - 'index.html'
       - 'tests/gens_capture_v2_clean_boundary.test.cjs'
       - 'tests/gens_capture_v2_game_menu_v1.test.cjs'
+      - 'tests/gens_capture_universe_project_boundary_20261117.test.mjs'
       - 'tests/gens_capture_v2_item_editor_catalog_20261110.test.mjs'
       - 'tests/gens_capture_v2_item_editor_browser_20261110.test.cjs'
       - 'tests/gens_capture_v2_adventure_hero_progression_v1.test.mjs'
@@ -76,6 +77,8 @@ jobs:
         run: node --test tests/gens_capture_v2_official_pin_lineage_20261107.test.mjs
       - name: Menu de jeu Capture — groupes Monde/Combat et entrée 2.5D unique (TDD)
         run: node --test tests/gens_capture_v2_game_menu_v1.test.cjs
+      - name: Univers Capture — index unique, noms, scopes non destructifs et fail-closed
+        run: node --test tests/gens_capture_universe_project_boundary_20261117.test.mjs
 
       - name: TDD Monster Capture — salon hôte/invités isolé (RED puis GREEN)
         run: node --test tests/gens_capture_v2_multiplayer_lobby_v1.test.mjs
@@ -319,6 +322,7 @@ jobs:
         run: |
           node --test tests/gens_capture_v2_root_browser.test.cjs
           node --test tests/gens_capture_v2_item_editor_browser_20261110.test.cjs
+          node --test tests/gens_capture_universes_browser_20261117.test.cjs
           node tests/gens_dungeon_builder_visibility_after_capture_v2_browser_v1.test.cjs
           node --test tests/gens_capture_v2_pwa_upgrade_browser_v1.test.cjs
           node tests/gens_preview_external_capture_v2_browser_v1.test.cjs

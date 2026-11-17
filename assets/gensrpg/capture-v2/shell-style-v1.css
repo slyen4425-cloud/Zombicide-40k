@@ -89,3 +89,44 @@
 
 /* Do not cover native combat HP with Shell navigation controls. */
 #gensCaptureV2Root[data-view="adventure"][data-adventure-combat-active="true"] > .gensCaptureV2NativeBar{display:none!important}
+
+/* The Capture module begins with a REAL universe library. Native adventure
+   saves appear only after selecting an explicitly owned universe. */
+#gensCaptureV2Root[data-menu="universes"] > .gensCaptureV2MainMenu,
+#gensCaptureV2Root[data-menu="universes"] > .gensCaptureV2Editors{display:none}
+#gensCaptureV2Root[data-menu="main"] > .gensCaptureV2UniversePanel,
+#gensCaptureV2Root[data-menu="editors"] > .gensCaptureV2UniversePanel{display:none}
+#gensCaptureV2Root .gensCaptureV2UniversePanel{
+ width:min(100% - 28px,640px);margin:auto;max-height:calc(100dvh - 120px);
+ overflow:auto;padding:10px 7px;box-sizing:border-box;
+}
+#gensCaptureV2Root .capture-universe-library{
+ display:flex;flex-direction:column;gap:10px;margin:0 auto;min-width:0
+}
+#gensCaptureV2Root .capture-universe-library h2{
+ font-size:clamp(18px,3vw,27px);margin:0;text-align:center
+}
+#gensCaptureV2Root .capture-universe-card{
+ display:flex;align-items:stretch;gap:8px;min-height:54px
+}
+#gensCaptureV2Root .capture-universe-card .capture-universe-select{
+ flex:1;min-width:0;text-align:left;font-size:clamp(17px,2.6vw,23px);
+ border-color:#79b7ab;background:linear-gradient(110deg,#204b52,#153948)
+}
+#gensCaptureV2Root .capture-universe-card .capture-universe-rename{min-width:88px}
+#gensCaptureV2Root .capture-universe-create{
+ padding:15px;text-align:left;font-size:clamp(16px,2.3vw,20px);
+ border:1px dashed #8ec5ad;background:#163944
+}
+#gensCaptureV2Root .capture-universe-form{display:flex;flex-direction:column;gap:14px}
+#gensCaptureV2Root .capture-universe-form label{display:flex;flex-direction:column;gap:6px}
+#gensCaptureV2Root .capture-universe-form input,
+#gensCaptureV2Root .capture-universe-form select{
+ color:#eef9fb;background:#10333d;border:1px solid #7bbcaf;
+ border-radius:8px;font:16px system-ui;min-height:44px;padding:8px
+}
+@media (orientation:landscape) and (max-height:550px){
+ #gensCaptureV2Root .gensCaptureV2UniversePanel{
+  max-height:calc(100dvh - 92px)
+ }
+}

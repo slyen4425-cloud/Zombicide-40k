@@ -5,6 +5,8 @@ import {createCaptureUniverseProjectStoreV1,CAPTURE_UNIVERSE_INDEX_KEY_V1}
  from '../assets/gensrpg/capture-v2/universe-project-store-v1.mjs';
 import {createCaptureUniverseAdventureStorageV1}
  from '../assets/gensrpg/capture-v2/universe-adventure-storage-v1.mjs';
+import {createAdventureRulesDraftStoreV1} from '../assets/gensrpg/capture-v2/adventure-rules-draft-v1.mjs';
+import {SHOWCASE_ADVENTURE_RULES_V1} from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 const core={
  readJson:(s,k,f)=>{try{const raw=s.getItem(k);return raw===null?f:JSON.parse(raw)}catch{return f}},
  writeJson:(s,k,v)=>(s.setItem(k,JSON.stringify(v)),v)
@@ -77,4 +79,24 @@ test('corrupt or unknown-version universe index fails closed, never auto-clears'
 test('Shell stays presentation-only; no new world or save owner is silently installed',()=>{
  const shell=readFileSync(new URL('../assets/gensrpg/capture-v2/shell-entry-v1.js',import.meta.url),'utf8');
  assert.doesNotMatch(shell,/localStorage|indexedDB|new WorldDocument|createAdventureStore/);
+});
+
+test('REAL Capture AdventureRules draft owner persists independently across project A and B',()=>{
+ const s=memory();
+ const a=createCaptureUniverseAdventureStorageV1(s,'unv_00000001');
+ const b=createCaptureUniverseAdventureStorageV1(s,'unv_00000002');
+ const aRules=createAdventureRulesDraftStoreV1({storage:a,coreStorage:core});
+ const bRules=createAdventureRulesDraftStoreV1({storage:b,coreStorage:core});
+ assert.equal(aRules.load(),null);assert.equal(bRules.load(),null);
+ const saved=aRules.save(SHOWCASE_ADVENTURE_RULES_V1);
+ assert.equal(bRules.load(),null,'different universe has no inherited authoring rules');
+ assert.deepEqual(aRules.load(),saved,'original official rules serializer is still the writer');
+ assert.equal(s.getItem(aRules.key),null,'global legacy draft remains untouched');
+});
+test('real Adventure startup refuses missing native owner projects, but preserves legacy URL',()=>{
+ const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ assert.match(app,/projects\.requireReady\(universeId\)/);
+ assert.match(app,/createCaptureUniverseAdventureStorageV1\(window\.localStorage,universeId\)/);
+ assert.match(app,/if\(universeId!==null\)/);
+ assert.match(app,/storage:adventureStorage,coreStorage:window\.GensStorageV1/);
 });

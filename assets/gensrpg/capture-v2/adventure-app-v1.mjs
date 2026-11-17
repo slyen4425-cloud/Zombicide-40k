@@ -755,7 +755,8 @@ for(const kind of ['new','load']){
  // Enable only after the real handler is installed; never simulate a click.
  button.disabled=false;
 }
-if(!isItemEditor)setAdventureStartView('choice');
+const requestedStartView=new URLSearchParams(window.location.search).get('start');
+if(!isItemEditor)setAdventureStartView(requestedStartView==='new'||requestedStartView==='load'?requestedStartView:'choice');
 else document.body.dataset.adventureStartView='new';
 
 function refreshWorldChoices(saved=null){

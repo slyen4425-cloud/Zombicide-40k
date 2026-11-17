@@ -4,7 +4,7 @@ import {createCaptureUniverseProjectStoreV1} from './universe-project-store-v1.m
 import {createCaptureUniverseAdventureStorageV1} from './universe-adventure-storage-v1.mjs';
 import {createCaptureUniverseProjectOrchestratorV1} from './universe-project-orchestrator-v1.mjs';
 import {createAdventureRulesDraftStoreV1} from './adventure-rules-draft-v1.mjs';
-import {SHOWCASE_ADVENTURE_RULES_V1} from './adventure-contract-v1.mjs';
+import {DEFAULT_ADVENTURE_RULES_V1} from './adventure-contract-v1.mjs';
 
 const official=new URL('../../../vendor/',import.meta.url);
 export async function loadCaptureUniverseNativeBridgeV1({
@@ -48,7 +48,7 @@ export async function loadCaptureUniverseNativeBridgeV1({
  }
  const orchestrator=createCaptureUniverseProjectOrchestratorV1({
   projects,combat,worlds,heroes,rulesFor,
-  blankCombat,defaultRules:SHOWCASE_ADVENTURE_RULES_V1,
+  blankCombat,defaultRules:DEFAULT_ADVENTURE_RULES_V1,
   generateHeroId:()=>root.crypto.randomUUID()
  });
  return Object.freeze({projects,combat,worlds,heroes,rulesFor,

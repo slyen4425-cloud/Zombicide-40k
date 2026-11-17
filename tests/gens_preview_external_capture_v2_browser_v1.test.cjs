@@ -80,6 +80,13 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
     assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="economy"] [data-capture-v2-view="items"]').count(),1,
       'external Shell item editor is the existing Capture Adventure owner');
     assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').count(),1);
+    // The production entry now requires a real universe selection before
+    // Jouer / Éditeurs becomes visible. Exercise that public path, rather
+    // than bypassing the picker or making hidden controls clickable.
+    assert.equal(await page.locator('#gensCaptureV2Root').getAttribute('data-menu'),'universes');
+    await page.locator('#gensCaptureV2Root [data-capture-universe-select="monster-invoc"]').click();
+    await page.locator('#gensCaptureV2Root[data-menu="main"]').waitFor({state:'visible'});
+    assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').isVisible(),true);
     // External preview only: render each original Lab on its immutable commit.
     // Production must still require its own same-origin vendor owner.
     const diagnostics=await page.evaluate(()=>({

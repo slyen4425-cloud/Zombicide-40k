@@ -12,9 +12,14 @@ const nameValue=value=>{
  return name;
 };
 const projectShape=p=>p&&typeof p==='object'&&!Array.isArray(p)&&
- Object.keys(p).sort().join(',')==='content,id,name,status'&&
+ (Object.keys(p).sort().join(',')==='content,id,name,status'||
+  Object.keys(p).sort().join(',')==='content,id,name,sourceId,sourceWorldId,status')&&
  idPattern.test(p.id)&&nameValue(p.name)===p.name&&
  (p.status==='pending'||p.status==='ready')&&
+ (!Object.hasOwn(p,'sourceId')||
+  ((p.sourceId===null||idPattern.test(p.sourceId))&&
+   (p.sourceWorldId===null||
+    (typeof p.sourceWorldId==='string'&&/^world-[a-z0-9-]{8,80}$/.test(p.sourceWorldId)))))&&
  (p.status==='pending'?p.content===null:contentShape(p.content));
 const contentShape=c=>c&&typeof c==='object'&&!Array.isArray(c)&&
  Object.keys(c).sort().join(',')==='combatProjectId,heroProjectId,rulesProjectId,worldProjectId'&&
@@ -62,8 +67,17 @@ export function createCaptureUniverseProjectStoreV1({storage,coreStorage,makeId}
   return Object.freeze([byId(MONSTER_INVOC_UNIVERSE_ID_V1,doc),
    ...doc.projects.map(p=>byId(p.id,doc))]);
  }
- function create(name){
+ function create(name,{sourceId=null,sourceWorldId=null}={}){
   const validName=nameValue(name),doc=read();
+  if(sourceId!==null){
+   if(!idPattern.test(sourceId)||sourceId===MONSTER_INVOC_UNIVERSE_ID_V1||
+      !doc.projects.some(p=>p.id===sourceId&&p.status==='ready'))
+    throw new Error('Univers à copier absent ou non initialisé : aucun clone global');
+  }
+  if(sourceWorldId!==null&&
+     (sourceId===null||typeof sourceWorldId!=='string'||
+      !/^world-[a-z0-9-]{8,80}$/.test(sourceWorldId)))
+   throw new Error('Une carte de référence exige un univers source valide');
   const id='unv_'+String(makeId()).toLowerCase();
   if(!idPattern.test(id)||doc.projects.some(p=>p.id===id))
    throw new Error('Identifiant d’univers généré invalide ou déjà utilisé');
@@ -71,7 +85,10 @@ export function createCaptureUniverseProjectStoreV1({storage,coreStorage,makeId}
     validName.toLocaleLowerCase('fr'))||
     doc.legacyName.toLocaleLowerCase('fr')===validName.toLocaleLowerCase('fr'))
    throw new Error('Un univers porte déjà ce nom');
-  const project={id,name:validName,status:'pending',content:null};
+  // Persist intent before any cross-owner write. Retrying a partial copy
+  // must never silently create blank Combat or World files.
+  const project={id,name:validName,status:'pending',content:null,
+   sourceId,sourceWorldId};
   write({...doc,projects:[...doc.projects,project],selectedId:id});
   return byId(id);
  }

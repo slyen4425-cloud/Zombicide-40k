@@ -31,7 +31,13 @@ function scene(){
   GensCaptureV1:{isProfile:()=>true},
   GensShellModuleLaunchV1:{activeModule:()=> 'capture',register:(id,fn)=>{registeredStart=fn;return id==='capture';}},
   GensShellScreenReturnV1:{register:(id,fn)=>{registeredBack=fn;return id==='capture';}},
-  gensHideHomeLevels(){},showGensRootHome(){exitCount++}
+  gensHideHomeLevels(){},showGensRootHome(){exitCount++},
+  GensCaptureV2UniverseUiLoaderV1:()=>Promise.resolve({
+   createCaptureUniverseHubUiV1:async({onSelect})=>{
+    rootWindow.__selectUniverse=onSelect;
+    return {showList(){},stop(){}};
+   }
+  })
  };
  vm.runInNewContext(source,{window:rootWindow,URL,console},{filename:'real-capture-shell.js'});
  assert.equal(registeredStart,rootWindow.GensCaptureV2.start);
@@ -50,11 +56,14 @@ test('one 2.5D editor endpoint: no duplicate Exploration Tester menu entry or se
  assert.doesNotMatch(source,/vendor\/exploration-lab\/builder\.html/,
   'the 2D legacy Builder must not be substituted for native 2.5D');
 });
-test('real Capture Shell home is a vertical game menu, with coherent grouped editor destinations',()=>{
+test('real Capture Shell chooses a universe then shows one game and grouped editor menu',async()=>{
  const s=scene();s.rootWindow.GensCaptureV2.start();
+ assert.equal(s.body.children[0].dataset.menu,'universes');
+ for(let i=0;i<8;i++)await Promise.resolve();
+ assert.equal(typeof s.rootWindow.__selectUniverse,'function');
+ s.rootWindow.__selectUniverse({id:'monster-invoc',name:'Monster InvoC',legacy:true});
  assert.equal(s.find('captureV2View','adventure').length,1,'one native Adventure loader, not duplicate save engines');
- assert.equal(s.find('captureV2Start','new').length,1,'one Create universe action');
- assert.equal(s.find('captureV2Start','load').length,1,'one Resume/manage universe action');
+ assert.equal(s.find('captureV2Menu','universes').length,1,'one project library return');
  assert.equal(s.find('captureV2Menu','editors').length,1,'one grouped Éditeurs entry');
  assert.equal(s.find('captureV2View','builder').length,1);
  assert.equal(s.find('captureV2View','world').length,1);
@@ -63,7 +72,8 @@ test('real Capture Shell home is a vertical game menu, with coherent grouped edi
  const main=nodes.find(n=>n.className==='gensCaptureV2MainMenu');
  const editors=nodes.find(n=>n.className==='gensCaptureV2Editors');
  assert.ok(main&&editors,'main game menu and a distinct editor list must exist');
- assert.equal(main.children.filter(n=>n.tag==='button').length,3,'home displays Create, Resume/manage and Éditeurs');
+ assert.equal(main.children.filter(n=>n.tag==='button').length,3,'home shows Jouer, Éditeurs and Changer univers');
+ assert.deepEqual(main.children.map(n=>n.textContent),['Jouer','Éditeurs','Changer d’univers']);
  assert.match(css,/gensCaptureV2MainMenu/);
  assert.match(css,/gensCaptureV2Editors/);
  assert.match(css,/flex-direction:column/,'phone and PC keep a real vertical list');
@@ -85,14 +95,12 @@ test('real Capture Shell home is a vertical game menu, with coherent grouped edi
  s.rootWindow.GensCaptureV2.home();
  assert.equal(s.rootWindow.GensCaptureV2.status().view,null);
  assert.equal(all(s.body).filter(n=>n.tag==='iframe').length,0);
- s.click('captureV2Start','new');
- assert.equal(s.rootWindow.GensCaptureV2.status().view,'adventure');
- assert.match(all(s.body).find(n=>n.tag==='iframe').src,/assets\/gensrpg\/capture-v2\/adventure\.html\?start=new$/);
- s.rootWindow.GensCaptureV2.home();
- assert.equal(all(s.body).filter(n=>n.tag==='iframe').length,0);
  s.click('captureV2View','adventure');
  assert.equal(s.rootWindow.GensCaptureV2.status().view,'adventure');
- assert.match(all(s.body).find(n=>n.tag==='iframe').src,/assets\/gensrpg\/capture-v2\/adventure\.html\?start=load$/);
+ assert.match(all(s.body).find(n=>n.tag==='iframe').src,/assets\/gensrpg\/capture-v2\/adventure\.html$/);
+ s.rootWindow.GensCaptureV2.showUniverses();
+ assert.equal(s.body.children[0].dataset.menu,'universes');
+ assert.equal(all(s.body).filter(n=>n.tag==='iframe').length,0);
  s.rootWindow.GensCaptureV2.stop();
  assert.equal(s.exits(),1);
 });

@@ -755,7 +755,9 @@ for(const kind of ['new','load']){
  // Enable only after the real handler is installed; never simulate a click.
  button.disabled=false;
 }
-if(!isItemEditor)setAdventureStartView('choice');
+let captureRoomTransport=null,activeCaptureRoom=null,activeCaptureExplorationEvents=null;
+const requestedStartView=new URLSearchParams(window.location.search).get('start');
+if(!isItemEditor)setAdventureStartView(requestedStartView==='new'||requestedStartView==='load'?requestedStartView:'choice');
 else document.body.dataset.adventureStartView='new';
 
 function refreshWorldChoices(saved=null){
@@ -917,7 +919,7 @@ function guardedAsync(callback){
 // A separate Capture-only Supabase Auth namespace protects Survival players.
 // The real network is started by an explicit player click, never during
 // adventure boot or legacy shell startup.
-let captureRoomTransport=null,activeCaptureRoom=null,activeCaptureExplorationEvents=null;
+
 let lastCaptureRoomState=null,captureSharedRoomSetup=null,pendingCaptureHostShare=null;
 let activeCapturePeerRelay=null;
 // Display-only peer projections. Never persisted and never used for movement.

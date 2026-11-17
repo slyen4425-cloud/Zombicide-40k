@@ -81,9 +81,13 @@
       throw new Error("Capture authority must be same-origin and SHA-pinned");
     return url;
   }
-  function open(kind){
+  function open(kind,{startView=null}={}){
     if(!host)return false;
     const info=VIEWS[kind],url=urlFor(kind);
+    // Capture already owns one Adventure portfolio: present its native new/load
+    // screens, never create a world or choose a saved session in the Shell.
+    if(kind==='adventure'&&['new','load'].includes(startView))
+      url.searchParams.set('start',startView);
     if(frame){frame.src="about:blank";frame.remove();frame=null;}
     frame=root.document.createElement("iframe");
     frame.title=info.label;
@@ -206,20 +210,26 @@
     exit.type="button";exit.textContent="Quitter le mode";
     exit.addEventListener("click",stop);
     header.append(name,exit);
-    // Two choices on the actual game home screen. The tools are not a
-    // row of development/debug shortcuts; they live in ONE grouped editor list.
+    // Module home shows worlds before any session. Adventure itself remains
+    // the only owner of new saves, the existing portfolio and selected WorldDocument.
     const nav=doc.createElement("nav");
     nav.className="gensCaptureV2MainMenu";
     nav.setAttribute("aria-label","Menu principal Monster Capture");
+    const create=doc.createElement("button");create.type="button";
+    // A separate creation intent, not a second gameplay/iframe owner.
+    create.dataset.captureV2Start="new";
+    create.textContent="Créer un univers";
+    create.addEventListener("click",()=>open("adventure",{startView:'new'}));
     const play=doc.createElement("button");play.type="button";
     play.dataset.captureV2View="adventure";
-    play.textContent="Jouer";
-    play.addEventListener("click",()=>open("adventure"));
+    play.dataset.captureV2Start="load";
+    play.textContent="Reprendre / gérer mes univers";
+    play.addEventListener("click",()=>open("adventure",{startView:'load'}));
     const editing=doc.createElement("button");editing.type="button";
     editing.dataset.captureV2Menu="editors";
     editing.textContent="Éditeurs";
     editing.addEventListener("click",editors);
-    nav.append(play,editing);
+    nav.append(create,play,editing);
     const editorPanel=doc.createElement("section");
     editorPanel.className="gensCaptureV2Editors";
     editorPanel.setAttribute("aria-label","Éditeurs Monster Capture");

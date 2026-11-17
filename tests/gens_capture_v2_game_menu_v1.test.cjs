@@ -52,7 +52,9 @@ test('one 2.5D editor endpoint: no duplicate Exploration Tester menu entry or se
 });
 test('real Capture Shell home is a vertical game menu, with coherent grouped editor destinations',()=>{
  const s=scene();s.rootWindow.GensCaptureV2.start();
- assert.equal(s.find('captureV2View','adventure').length,1,'one Jouer entry');
+ assert.equal(s.find('captureV2View','adventure').length,1,'one native Adventure loader, not duplicate save engines');
+ assert.equal(s.find('captureV2Start','new').length,1,'one Create universe action');
+ assert.equal(s.find('captureV2Start','load').length,1,'one Resume/manage universe action');
  assert.equal(s.find('captureV2Menu','editors').length,1,'one grouped Éditeurs entry');
  assert.equal(s.find('captureV2View','builder').length,1);
  assert.equal(s.find('captureV2View','world').length,1);
@@ -61,7 +63,7 @@ test('real Capture Shell home is a vertical game menu, with coherent grouped edi
  const main=nodes.find(n=>n.className==='gensCaptureV2MainMenu');
  const editors=nodes.find(n=>n.className==='gensCaptureV2Editors');
  assert.ok(main&&editors,'main game menu and a distinct editor list must exist');
- assert.equal(main.children.filter(n=>n.tag==='button').length,2,'home only shows Jouer and Éditeurs');
+ assert.equal(main.children.filter(n=>n.tag==='button').length,3,'home displays Create, Resume/manage and Éditeurs');
  assert.match(css,/gensCaptureV2MainMenu/);
  assert.match(css,/gensCaptureV2Editors/);
  assert.match(css,/flex-direction:column/,'phone and PC keep a real vertical list');
@@ -83,9 +85,14 @@ test('real Capture Shell home is a vertical game menu, with coherent grouped edi
  s.rootWindow.GensCaptureV2.home();
  assert.equal(s.rootWindow.GensCaptureV2.status().view,null);
  assert.equal(all(s.body).filter(n=>n.tag==='iframe').length,0);
+ s.click('captureV2Start','new');
+ assert.equal(s.rootWindow.GensCaptureV2.status().view,'adventure');
+ assert.match(all(s.body).find(n=>n.tag==='iframe').src,/assets\/gensrpg\/capture-v2\/adventure\.html\?start=new$/);
+ s.rootWindow.GensCaptureV2.home();
+ assert.equal(all(s.body).filter(n=>n.tag==='iframe').length,0);
  s.click('captureV2View','adventure');
  assert.equal(s.rootWindow.GensCaptureV2.status().view,'adventure');
- assert.match(all(s.body).find(n=>n.tag==='iframe').src,/assets\/gensrpg\/capture-v2\/adventure\.html$/);
+ assert.match(all(s.body).find(n=>n.tag==='iframe').src,/assets\/gensrpg\/capture-v2\/adventure\.html\?start=load$/);
  s.rootWindow.GensCaptureV2.stop();
  assert.equal(s.exits(),1);
 });

@@ -433,7 +433,19 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
   assert.equal(await page.locator('button.gensRootModeCard').count(),4);
   await page.locator('button.gensRootModeCard.capture').tap();
   const certifiedPin=JSON.parse(require('node:fs').readFileSync(path.resolve(__dirname,'../tools/capture_v2_pages_preview_pin.json'),'utf8'));
-  const universeMenu=['0b74ac44ab0a39c90dbc0696f8a386084de1cec6','888e41e00dd6c04d0fef2b36418daafd0b500f57'].includes(certifiedPin.sha);
+  const multiUniverseSource=certifiedPin.sha==='3ecb6dd958315d0ad08130387b7bd9589486f5c5';
+  const universeMenu=['0b74ac44ab0a39c90dbc0696f8a386084de1cec6',
+   '888e41e00dd6c04d0fef2b36418daafd0b500f57','3ecb6dd958315d0ad08130387b7bd9589486f5c5'].includes(certifiedPin.sha);
+  if(multiUniverseSource){
+   // Never bypass the new official universe picker with a hidden editor click.
+   const captureHome=page.locator('#gensCaptureV2Root');
+   const legacyWorld=captureHome.locator('[data-capture-universe-select="monster-invoc"]');
+   await legacyWorld.waitFor({state:'visible',timeout:35000});
+   assert.equal(await captureHome.getAttribute('data-menu'),'universes');
+   await legacyWorld.tap();
+   await captureHome.locator('[data-capture-v2-menu="editors"]').waitFor({state:'visible'});
+   assert.equal(await captureHome.getAttribute('data-menu'),'main');
+  }
   assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu button:visible').count(),universeMenu?3:2,
    'Capture home menu must match the certified source: legacy two choices or three universe choices');
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();

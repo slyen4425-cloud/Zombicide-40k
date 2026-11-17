@@ -29,7 +29,7 @@ export function createCaptureUniverseProjectOrchestratorV1({
    throw new Error('Copier un univers exige une confirmation explicite');
   if(copyFrom===id)throw new Error('Un univers ne se copie pas lui-même');
   if(!combat.load(id)){
-   if(copyFrom===null)combat.create(id,blankCombat());
+   if(copyFrom===null)combat.create(id,await blankCombat());
    else if(copyFrom===MONSTER_INVOC_UNIVERSE_ID_V1)
     throw new Error('Copie du catalogue Monster InvoC : export officiel Combat non raccordé');
    else combat.copy({fromId:copyFrom,toId:id,confirmed:true});

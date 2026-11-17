@@ -44,3 +44,17 @@ test('official transport pins exactly one certified victory MP3 and latest Explo
  assert.match(stage,/copy\(victorySource,path\.join\(combatOut,victoryTrack\)\)/);
  assert.doesNotMatch(stage,/copy\(path\.join\(combat,'assets'\)/);
 });
+
+test('launch overlay keeps entire Monster InvoC art while filling every viewport',()=>{
+ const css=read('adventure-style-v1.css');
+ const match=css.match(/#adventure-launch-loading\\{[\\s\\S]*?\\n\\}/);
+ assert.ok(match,'one canonical launch overlay exists');
+ const rule=match[0];
+ assert.match(rule,/background-image:url\\('\.\\/branding\\/monster-invoc-loading-v1\\.svg'\\),url\\('\.\\/branding\\/monster-invoc-loading-v1\\.svg'\\)/);
+ assert.match(rule,/background-size:contain,cover/);
+ assert.doesNotMatch(rule,/center 46% \\/ cover/);
+ const custom=css.match(/#adventure-launch-loading\\[data-custom-art="true"\\]\\{[\\s\\S]*?\\n\\}/);
+ assert.ok(custom);
+ assert.match(custom[0],/background-size:contain,100% 100%,cover/);
+ assert.match(custom[0],/background-image:var\\(--capture-custom-art\\),linear-gradient/);
+});

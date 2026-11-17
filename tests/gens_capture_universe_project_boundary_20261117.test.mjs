@@ -100,3 +100,21 @@ test('real Adventure startup refuses missing native owner projects, but preserve
  assert.match(app,/if\(universeId!==null\)/);
  assert.match(app,/storage:adventureStorage,coreStorage:window\.GensStorageV1/);
 });
+
+test('a universe shares its generated ID across DIFFERENT native owners without sharing content',()=>{
+ const s=memory();let n=0;
+ const lib=createCaptureUniverseProjectStoreV1({storage:s,coreStorage:core,
+  makeId:()=>String(++n).padStart(8,'0')});
+ const a=lib.create('Un monde A'),b=lib.create('Un monde B');
+ for(const p of [a,b]){
+  const refs={combatProjectId:p.id,heroProjectId:p.id,
+   rulesProjectId:p.id,worldProjectId:p.id};
+  const verifyOwners=Object.fromEntries(Object.keys(refs).map(role=>[
+   role,(ref,id)=>ref===id&&id===p.id
+  ]));
+  assert.equal(lib.provision(p.id,refs,verifyOwners).status,'ready');
+ }
+ assert.notEqual(lib.requireReady(a.id).content.worldProjectId,
+  lib.requireReady(b.id).content.worldProjectId);
+ assert.equal(lib.requireReady(a.id).content.combatProjectId,a.id);
+});

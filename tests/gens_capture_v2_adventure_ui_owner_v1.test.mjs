@@ -44,7 +44,9 @@ test('Adventure does not pretend the Exploration editor Tester is a native Game 
  assert.match(ui,/shell\?\.open\?\.\('world'\)/);
  assert.match(ui,/vendor\/exploration-lab\/world-assembler\.html/);
  assert.match(ui,/startAdventureExplorationV1\(/);
- assert.match(ui,/readWorldAssemblerDraft\(window\.localStorage\)/);
+ assert.match(ui,/readWorldAssemblerDraft\(universeWorldStorage\)/);
+ assert.match(ui,/createExplorationUniverseWorkspaceStorageV1\(window\.localStorage,universeId\)/,
+  'world drafts use native Exploration ownership with scoped keys');
  assert.match(ui,/createNewExplorationPlay,readExplorationPlay/);
  assert.match(ui,/const sessionId=result\.session\.sessionId/);
  assert.match(ui,/url\.searchParams\.set\('adventureSession',sessionId\)/);

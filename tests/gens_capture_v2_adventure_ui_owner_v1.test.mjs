@@ -29,7 +29,10 @@ test('Capture V2 has one GenSrpg-owned Adventure page without duplicating native
  assert.match(ui,/combat-preview\/data\/capture\/showcase\/encounter-bundle\.v1\.json/);
  assert.match(ui,/capture-assets\/data\/assets\/catalog\/global-visual-assets\.v1\.json/);
  assert.match(ui,/delivery-manifest\.json/);
- assert.match(ui,/createAdventureStoreV1\(\{storage:window\.localStorage,coreStorage:window\.GensStorageV1\}\)/);
+ assert.match(ui,/let adventureStorage=window\.localStorage;/,'legacy Monster InvoC retains identical native Storage');
+ assert.match(ui,/projects\.requireReady\(universeId\)/,'another universe cannot reuse unauthorised native editors');
+ assert.match(ui,/createCaptureUniverseAdventureStorageV1\(window\.localStorage,universeId\)/);
+ assert.match(ui,/createAdventureStoreV1\(\{storage:adventureStorage,coreStorage:window\.GensStorageV1\}\)/,'same official Adventure writer');
  assert.doesNotMatch(ui+shell, /captureGameHub|captureStartBattleAutomatic|window\.resumeGame\s*=|location\.reload\(/);
 });
 test('Adventure does not pretend the Exploration editor Tester is a native Game launch',()=>{

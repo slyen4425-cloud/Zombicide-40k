@@ -19,7 +19,8 @@ const projectShape=p=>p&&typeof p==='object'&&!Array.isArray(p)&&
  (!Object.hasOwn(p,'sourceId')||
   ((p.sourceId===null||idPattern.test(p.sourceId))&&
    (p.sourceWorldId===null||
-    (typeof p.sourceWorldId==='string'&&/^world-[a-z0-9-]{8,80}$/.test(p.sourceWorldId)))))&&
+    (p.sourceId!==null&&typeof p.sourceWorldId==='string'&&
+     /^world-[a-z0-9-]{8,80}$/.test(p.sourceWorldId)))))&&
  (p.status==='pending'?p.content===null:contentShape(p.content));
 const contentShape=c=>c&&typeof c==='object'&&!Array.isArray(c)&&
  Object.keys(c).sort().join(',')==='combatProjectId,heroProjectId,rulesProjectId,worldProjectId'&&

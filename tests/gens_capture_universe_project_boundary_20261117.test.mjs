@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createCaptureUniverseProjectStoreV1,CAPTURE_UNIVERSE_INDEX_KEY_V1}
  from '../assets/gensrpg/capture-v2/universe-project-store-v1.mjs';
+import {createCaptureUniverseProjectOrchestratorV1} from '../assets/gensrpg/capture-v2/universe-project-orchestrator-v1.mjs';
 import {createCaptureUniverseAdventureStorageV1}
  from '../assets/gensrpg/capture-v2/universe-adventure-storage-v1.mjs';
 import {createAdventureRulesDraftStoreV1} from '../assets/gensrpg/capture-v2/adventure-rules-draft-v1.mjs';
@@ -117,4 +118,68 @@ test('a universe shares its generated ID across DIFFERENT native owners without 
  assert.notEqual(lib.requireReady(a.id).content.worldProjectId,
   lib.requireReady(b.id).content.worldProjectId);
  assert.equal(lib.requireReady(a.id).content.combatProjectId,a.id);
+});
+
+test('interrupted explicit copy retains source intent and resumes without ever switching to blank',async()=>{
+ const storage=memory(),projects=createCaptureUniverseProjectStoreV1({
+  storage,coreStorage:core,makeId:(()=>{let i=0;return()=>String(++i).padStart(8,'0')})()
+ });
+ const template=projects.create('Source');
+ const refs=Object.fromEntries(['combatProjectId','heroProjectId','rulesProjectId','worldProjectId']
+  .map(role=>[role,template.id]));
+ const verify=Object.fromEntries(Object.keys(refs).map(role=>[
+  role,(ref,id)=>ref===id&&id===template.id]));
+ projects.provision(template.id,refs,verify);
+ const combatData=new Map([[template.id,{projectId:template.id}]]);
+ const copied=[];
+ const combat={
+  load:id=>combatData.get(id)??null,
+  create:()=>{throw new Error('BUG: clone may never receive blank Combat data')},
+  copy:({fromId,toId,confirmed})=>{
+   assert.equal(fromId,template.id);assert.equal(confirmed,true);
+   combatData.set(toId,{projectId:toId});copied.push(toId);
+  }
+ };
+ const worldsIndex=new Map([[template.id,[{id:'world-template0001'}]]]);
+ let interrupted=true;
+ const worlds={
+  list:id=>worldsIndex.get(id)??[],
+  createBlank:()=>{throw new Error('BUG: clone may never receive blank world')},
+  copy:({fromWorldId,toProjectId})=>{
+   assert.equal(fromWorldId,'world-template0001');
+   if(interrupted){interrupted=false;throw Error('interrupted after Combat copy')}
+   worldsIndex.set(toProjectId,[{id:'world-copy00000001'}]);
+  }
+ };
+ const heroProjects=new Set([template.id]);
+ const heroes={
+  requireReady:id=>{
+   if(!heroProjects.has(id))throw Error('missing heroes');
+   return {id};
+  },createEmpty:id=>heroProjects.add(id),
+  list:async()=>[],copy:async()=>{throw Error('unexpected heroes')}
+ };
+ const rules=new Map([[template.id,{schema:'valid-rules'}]]);
+ const rulesFor=id=>({load:()=>rules.get(id)??null,save:val=>rules.set(id,val)});
+ const orchestrator=createCaptureUniverseProjectOrchestratorV1({
+  projects,combat,worlds,heroes,rulesFor,
+  blankCombat:()=>{throw Error('unexpected blank factory')},
+  defaultRules:{schema:'valid-rules'}
+ });
+ await assert.rejects(()=>orchestrator.create('Copy',{copyFrom:template.id,confirmed:true}),/interrupted/);
+ const pending=projects.list().find(p=>p.name==='Copy');
+ assert.equal(pending.status,'pending');
+ assert.equal(pending.sourceId,template.id);
+ const reloaded=createCaptureUniverseProjectStoreV1({storage,coreStorage:core,makeId:()=> '00009999'});
+ const resumer=createCaptureUniverseProjectOrchestratorV1({
+  projects:reloaded,combat,worlds,heroes,rulesFor,
+  blankCombat:()=>{throw Error('unexpected blank factory')},
+  defaultRules:{schema:'valid-rules'}
+ });
+ const finished=await resumer.provision(pending.id);
+ assert.equal(finished.status,'ready');
+ assert.equal(reloaded.get(pending.id).sourceId,template.id);
+ assert.deepEqual(copied,[pending.id],'Combat copy is idempotent on resume');
+ assert.notEqual(worlds.list(pending.id)[0].id,worlds.list(template.id)[0].id);
+ assert.equal(combat.load(template.id).projectId,template.id,'source untouched');
 });

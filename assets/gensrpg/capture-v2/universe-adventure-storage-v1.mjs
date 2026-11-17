@@ -2,7 +2,7 @@
 // Existing Monster InvoC keys remain byte-for-byte unchanged. For a new
 // universe, the exact same Core + Adventure stores own disjoint keys.
 import {MONSTER_INVOC_UNIVERSE_ID_V1} from './universe-project-store-v1.mjs';
-const allowed=/^gensrpg\\.capture\\.v2\\.adventure\\.(?:save|slot|portfolio|rules-draft|creator-draft)/;
+const allowed=key=>key.startsWith('gensrpg.capture.v2.adventure.');
 const universe=/^unv_[a-z0-9-]{8,80}$/;
 export function createCaptureUniverseAdventureStorageV1(storage,universeId){
  if(!storage||typeof storage.getItem!=='function'||typeof storage.setItem!=='function'||
@@ -13,7 +13,7 @@ export function createCaptureUniverseAdventureStorageV1(storage,universeId){
   throw new TypeError('Univers inconnu : aucune sauvegarde ouverte');
  const prefix='gensrpg.capture.v2.universe.scope.v1:'+universeId+':';
  const keyOf=key=>{
-  if(typeof key!=='string'||!allowed.test(key))
+  if(typeof key!=='string'||!allowed(key))
    throw new Error('Ce stockage appartient à un autre propriétaire, accès refusé');
   return prefix+key;
  };

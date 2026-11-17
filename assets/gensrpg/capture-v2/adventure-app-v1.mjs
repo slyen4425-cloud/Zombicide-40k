@@ -814,7 +814,22 @@ async function installOfficialWorldLibrary(){
   // Before its API is on certified main, never create a second codec.
   const owner=await import(
    '../../../vendor/exploration-lab/src/builder/exploration-world-document-library-v1.js');
-  worldLibrary=owner.createExplorationWorldDocumentLibraryV1({storage:window.localStorage});
+  if(selectedUniverseId===null){
+   worldLibrary=owner.createExplorationWorldDocumentLibraryV1({storage:window.localStorage});
+  }else{
+   const {createExplorationUniverseWorldProjectsV1}=await import(
+    '../../../vendor/exploration-lab/src/builder/exploration-universe-world-projects-v1.js');
+   const worlds=createExplorationUniverseWorldProjectsV1({
+    storage:window.localStorage,makeId:()=>crypto.randomUUID()
+   });
+   if(!worlds.list(selectedUniverseId).length)
+    throw new Error('Cet univers ne possède aucun WorldDocument natif');
+   worldLibrary=Object.freeze({
+    list:()=>worlds.list(selectedUniverseId),
+    load:id=>worlds.load(selectedUniverseId,id),
+    activate:id=>worlds.activate(selectedUniverseId,id)
+   });
+  }
  }catch(error){
   worldLibrary=null;
   console.info('Bibliothèque multi-mondes en attente de main Exploration',error.message);

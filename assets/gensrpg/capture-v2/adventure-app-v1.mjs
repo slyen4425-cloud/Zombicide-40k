@@ -417,13 +417,28 @@ async function loadOfficialHeroGallery(){
     grid.querySelectorAll('button').forEach(button=>button.disabled=true);
     text(notice,'Préparation des sprites de '+hero.name+'…');
     try{
+     if(selectedUniverseId!==null&&!window.confirm(
+      'Importer une copie indépendante de '+hero.name+' dans cet univers ? '+
+      'Un nouveau HeroDefinition sera enregistré avec son propre identifiant.'))return;
      const store=await officialHeroStore();
-     const record=await installOfficialHeroPresetV1({
+     const officialRecord=await installOfficialHeroPresetV1({
       hero,store,baseUrl:OFFICIAL_EXPLORATION_HERO_ROOT
      });
+     let record=officialRecord;
+     if(selectedUniverseId!==null){
+      const {createExplorationUniverseHeroProjectsV1}=await import(
+       '../../../vendor/exploration-lab/src/storage/exploration-universe-hero-projects-v1.js');
+      const owner=createExplorationUniverseHeroProjectsV1({storage:window.localStorage,heroStore:store});
+      const copied=(await owner.list(selectedUniverseId)).find(x=>x.name===officialRecord.name);
+      record=copied??await owner.copy({
+       sourceHeroId:officialRecord.id,toProjectId:selectedUniverseId,
+       confirmed:true,makeId:()=>crypto.randomUUID(),now:new Date().toISOString()
+      });
+     }
      await fillHeroChoices(record.id);
      selectedOfficialHero=hero.id;highlight();
-     text(notice,hero.name+' sélectionné · 8 directions × 6 images. Prêt pour la nouvelle partie.');
+     text(notice,hero.name+' sélectionné · héros enregistré dans '+
+      (selectedUniverseId===null?'Monster InvoC':'cet univers')+'. Prêt pour la nouvelle partie.');
     }catch(error){
      text(notice,'Héros non chargé : '+error.message+'. Aucune sauvegarde modifiée.');
      console.error('Exploration official HeroDefinition selection',error);

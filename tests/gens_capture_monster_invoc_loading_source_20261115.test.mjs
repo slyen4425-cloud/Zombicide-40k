@@ -44,3 +44,12 @@ test('official transport pins exactly one certified victory MP3 and latest Explo
  assert.match(stage,/copy\(victorySource,path\.join\(combatOut,victoryTrack\)\)/);
  assert.doesNotMatch(stage,/copy\(path\.join\(combat,'assets'\)/);
 });
+
+test('launch overlay keeps entire Monster InvoC art while filling every viewport',()=>{
+ const css=read('adventure-style-v1.css');
+ assert.ok(css.includes("background-image:url('./branding/monster-invoc-loading-v1.svg'),url('./branding/monster-invoc-loading-v1.svg')"));
+ assert.ok(css.includes('background-size:contain,cover'));
+ assert.ok(css.includes('background-image:var(--capture-custom-art),linear-gradient('));
+ assert.ok(css.includes('background-size:contain,100% 100%,cover'));
+ assert.ok(!css.includes("center 46% / cover no-repeat"),'cropping-only composition must not return');
+});

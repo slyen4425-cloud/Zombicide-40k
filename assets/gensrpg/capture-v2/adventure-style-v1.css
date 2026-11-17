@@ -306,7 +306,12 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
 #adventure-launch-loading{position:fixed;inset:0;z-index:3200;
  display:grid;place-items:end center;
  /* One branded author asset, shared by launch and Explorer transitions. */
- background:#07151d url('./branding/monster-invoc-loading-v1.svg') center 46% / cover no-repeat;
+ background-color:#07151d;
+ /* One physical author asset: full uncropped foreground, same asset filling
+    landscape/portrait side bands. No cropping of the Monster InvoC title. */
+ background-image:url('./branding/monster-invoc-loading-v1.svg'),url('./branding/monster-invoc-loading-v1.svg');
+ background-position:center,center;background-size:contain,cover;
+ background-repeat:no-repeat;
  color:#eafff6;text-align:center;overflow:auto;overscroll-behavior:contain;
  padding:clamp(12px,3vh,25px)}
 .adventure-loading-panel{width:min(475px,94%);display:grid;justify-items:center;
@@ -657,6 +662,10 @@ body[data-adventure-item-editor="true"] .adventure-start-tabs{display:none!impor
 .adventure-loading-art-item span{flex:1;min-width:0;overflow-wrap:anywhere}
 .adventure-loading-art-item button{min-height:40px}
 #adventure-launch-loading[data-custom-art="true"]{
- background-image:linear-gradient(180deg,#07151d22 28%,#07151de0),var(--capture-custom-art);
- background-position:center;background-size:cover;
+ /* Use the same authored local image at two visual scales, not two assets.
+    The complete foreground retains every letter and edge. */
+ background-image:var(--capture-custom-art),linear-gradient(180deg,#07151d33 28%,#07151de0),var(--capture-custom-art);
+ background-position:center,center,center;
+ background-size:contain,100% 100%,cover;
+ background-repeat:no-repeat;
 }

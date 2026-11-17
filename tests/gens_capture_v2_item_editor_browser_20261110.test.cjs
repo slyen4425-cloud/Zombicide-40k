@@ -40,6 +40,10 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   await page.waitForFunction(()=>!!window.GensCaptureV2&&
    document.querySelectorAll('button.gensRootModeCard').length===4,null,{timeout:60000});
   await page.locator('button.gensRootModeCard.capture').tap();
+  assert.equal(await page.locator('#gensCaptureV2Root').getAttribute('data-menu'),'universes',
+   'entry must show real universes before opening any editor');
+  await page.locator('#gensCaptureV2Root [data-capture-universe-select="monster-invoc"]').tap();
+  await page.locator('#gensCaptureV2Root[data-menu="main"]').waitFor({state:'visible'});
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
   await page.locator('#gensCaptureV2Root [data-editor-group="economy"] [data-capture-v2-view="items"]').tap();
   assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),'items');

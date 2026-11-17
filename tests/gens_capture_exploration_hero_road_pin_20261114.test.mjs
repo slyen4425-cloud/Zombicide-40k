@@ -7,10 +7,10 @@ test('Capture V2 consumes one certified Exploration main with hero + road render
  assert.equal(pins.schema,'gensrpg-capture-v2-official-main-pins-v1');
  assert.equal(pins.exploration.repository,'slyen4425-cloud/laboratoire_dynamique_exploration-');
  assert.equal(pins.exploration.ref,'main');
- assert.equal(pins.exploration.sha,'ec3e87511c18949e645276e6ed0fe4e7322d4a0e');
- assert.equal(pins.exploration.certifiedCiRun,44093570846);
+ assert.equal(pins.exploration.sha,'13bbd8230d8dfcef612586974b2dcb54e18e16c4');
+ assert.equal(pins.exploration.certifiedCiRun,44137364939);
  assert.equal(pins.combat.ref,'main');
- assert.equal(pins.combat.sha,'62509f44136dddc5646aee75533723eb3f17b21b',
+ assert.equal(pins.combat.sha,'72cc1b8271b4e83d3014d8f85c7addcd0aa8436e',
   'do not silently repin or duplicate the official Combat owner');
  assert.equal(pins.legacyCaptureRuntime,false);
 });

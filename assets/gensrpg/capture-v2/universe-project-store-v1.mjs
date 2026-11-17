@@ -7,7 +7,7 @@ const SCHEMA='gensrpg.capture.v2.universes.index.v1';
 const idPattern=/^unv_[a-z0-9-]{8,80}$/;
 const nameValue=value=>{
  const name=typeof value==='string'?value.trim():'';
- if(!name||name.length>80||/[\\u0000-\\u001f\\u007f]/.test(name))
+ if(!name||name.length>80||[...name].some(ch=>ch.charCodeAt(0)<32||ch.charCodeAt(0)===127))
   throw new TypeError('Nom d’univers invalide (1 à 80 caractères)');
  return name;
 };

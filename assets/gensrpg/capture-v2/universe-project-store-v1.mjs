@@ -99,14 +99,18 @@ export function createCaptureUniverseProjectStoreV1({storage,coreStorage,makeId}
   const doc=read(),existing=byId(id,doc);
   if(existing.legacy||existing.status!=='pending'||!contentShape(content))
    throw new Error('Provisionnement officiel des quatre propriétaires requis');
+  // The same generated universe ID is used by each distinct native owner,
+  // but a reference may NEVER be reused by another universe for the SAME
+  // owner. Prefixing by role avoids inventing four competing project IDs.
+  const refsByOwner=entries=>Object.entries(entries).map(([role,ref])=>role+':'+ref);
   const used=new Set(doc.projects.filter(p=>p.status==='ready')
-   .flatMap(p=>Object.values(p.content)));
-  const refs=Object.values(content);
+   .flatMap(p=>refsByOwner(p.content)));
+  const refs=refsByOwner(content);
   const roles=['combatProjectId','heroProjectId','rulesProjectId','worldProjectId'];
   if(!verifyOwners||roles.some(role=>typeof verifyOwners[role]!=='function')||
      roles.some(role=>verifyOwners[role](content[role],id)!==true))
    throw new Error('Validation officielle des contenus Combat/Exploration/Rules obligatoire');
-  if(new Set(refs).size!==4||refs.some(ref=>used.has(ref)))
+  if(refs.some(ref=>used.has(ref)))
    throw new Error('Référence de contenu déjà utilisée par un autre univers');
   write({...doc,projects:doc.projects.map(p=>p.id===id?
    {...p,status:'ready',content:{...content}}:p)});

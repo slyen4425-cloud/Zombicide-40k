@@ -54,7 +54,7 @@ test('two real independent universes survive reload, native Combat/World/Hero/Ru
   });
   assert.match(first,/^unv_[a-z0-9-]{8,80}$/);
   await lib.locator('[data-capture-v2-menu="editors"]').tap();
-  await lib.locator('[data-capture-v2-view="creatures"]').tap();
+  await lib.locator('[data-editor-group="combat"] [data-capture-v2-view="creature"]').tap();
   const frame=lib.frameLocator('iframe[data-capture-v2-native="combat"]');
   await frame.locator('[data-capture-universe-project-editor]').waitFor({timeout:45000});
   assert.equal(await frame.locator('[data-capture-universe-project-editor]').count(),1);

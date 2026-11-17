@@ -46,7 +46,10 @@ test('unfinished content cannot enter native editors, worlds, combat or save',()
  assert.throws(()=>lib.provision(p.id,{combatProjectId:p.id}),/propriétaires/);
  const refs={combatProjectId:'unv_a1234567',heroProjectId:'unv_b1234567',
   worldProjectId:'unv_c1234567',rulesProjectId:'unv_d1234567'};
- assert.equal(lib.provision(p.id,refs).status,'ready');
+ assert.throws(()=>lib.provision(p.id,refs),/Validation officielle/);
+ const verifyOwners=Object.fromEntries(Object.keys(refs).map(role=>[role,
+  (id,universe)=>id===refs[role]&&universe===p.id]));
+ assert.equal(lib.provision(p.id,refs,verifyOwners).status,'ready');
  assert.equal(lib.requireReady(p.id).content.combatProjectId,refs.combatProjectId);
  assert.throws(()=>lib.provision(p.id,refs),/propriétaires/);
 });

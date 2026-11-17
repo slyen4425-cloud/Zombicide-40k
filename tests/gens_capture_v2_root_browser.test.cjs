@@ -78,8 +78,10 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
    'eight native Lab destinations including the real hero editor, one item editor and one game');
   assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="economy"] [data-capture-v2-view="items"]').count(),1,
    'one official item editor is grouped under Objets et économie');
-  assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu > button').count(),2,
-   'the game home shows only Jouer and Éditeurs');
+  assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu > button').count(),3,
+   'the game home exposes Create universe, Resume/manage and Éditeurs');
+  assert.equal(await page.locator('#gensCaptureV2Root > nav [data-capture-v2-start="new"]').count(),1);
+  assert.equal(await page.locator('#gensCaptureV2Root > nav [data-capture-v2-start="load"]').count(),1);
   assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="world"] button').count(),2,
    'Carte du monde and native Terrain 2.5D live in the SAME menu group');
   assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').count(),0,
@@ -97,11 +99,16 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
    'author may still import any PNG/WebP of their own, without being restricted to presets');
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),null);
-  // The single Adventure game entry and eight genuinely distinct Lab
-  // destinations preserve the original native URLs and fullscreen.
+  // Both actions reuse ONE native Adventure owner, one indexed portfolio
+  // and the same official WorldDocument library, without auto-starting play.
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
   const adventureFrame=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
-  await adventureFrame.locator('body[data-adventure-start-view="choice"]').waitFor({timeout:30000});
+  await adventureFrame.locator('body[data-adventure-start-view="load"]').waitFor({timeout:30000});
+  assert.equal(await adventureFrame.locator('#adventure-save-gallery').count(),1);
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
+  await page.locator('#gensCaptureV2Root [data-capture-v2-start="new"]').tap();
+  await adventureFrame.locator('body[data-adventure-start-view="new"]').waitFor({timeout:30000});
   await adventureFrame.locator('#adventure-start-new').tap();
   // Native Adventure is a type=module iframe; its DOM can exist BEFORE
   // the module has loaded the published Bestiary and initialized rules.

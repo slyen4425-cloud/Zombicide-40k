@@ -76,6 +76,10 @@ test('real Shell: Survie, Dungeon, PvP and clean Capture remain isolated through
     assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().active),true);
     // The real V2 Shell no longer exposes raw editor buttons on the game home.
     // Traverse its visible Jouer / Éditeurs menu; do not restore the retired shortcut.
+    assert.equal(await page.locator('#gensCaptureV2Root').getAttribute('data-menu'),'universes',
+      'every fresh Capture visit must present universe selection, never last saved game');
+    await page.locator('#gensCaptureV2Root [data-capture-universe-select="monster-invoc"]').tap();
+    await page.locator('#gensCaptureV2Root[data-menu="main"]').waitFor({state:'visible'});
     await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
     assert.equal(await page.locator('#gensCaptureV2Root').getAttribute('data-menu'),'editors');
     await page.locator('#gensCaptureV2Root [data-editor-group="combat"] [data-capture-v2-view="creature"]').tap();

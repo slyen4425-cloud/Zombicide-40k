@@ -1,3 +1,9 @@
+## 2026-11-17 — Repin certifié de l'Exploration officiel dans la source Capture (CANDIDAT NON LIVE)
+- Labo officiel source unique Exploration `main@f7726a7872f6d0ea3027df491bc0697064af07d6` certifié après PR #488 (cadrage d'illustration sans `cover`), CI complet `43992977917` SUCCESS, publisher Pages `43992976709` SUCCESS, statut `pages/exploration-main-live` SUCCESS ; `main` revérifié sur ce SHA exact.
+- Dans `assets/gensrpg/capture-v2/source-pins-v1.json`, SEULE la référence Exploration `20228fdc2be728d52d02a6f37421f206d4849d0a` → `f7726a7872f6d0ea3027df491bc0697064af07d6` et `certifiedCiRun` correspondant sont changés. Référence Combat, manifestes, SW, moteur, WorldDocument et sauvegardes inchangés.
+- Le nouveau Labo possède le miroir d'objet et d'ombre, l'audit/calibration des héros et la continuité de peinture de frange sud selon matériaux canoniques. L'ancien pin masquait ces améliorations dans la preview installée. Il faut revalider le parcours réel PWA et la surface neige/herbe.
+- Règle obligatoire : refaire **tous** les tests source du nouveau HEAD de la PR #502 après repin; si et seulement si GREEN, merger dans la branche source dédiée; puis créer PR publisher séparée depuis main avec nouveau SHA source, CI/staging ≤900 Mio, HTTPS/Pixel et aucun second publisher. Aucun déploiement implicite par cette modification.
+
 ## 2026-11-17 — Accueil Monster InvoC : choix explicite des univers (CANDIDAT SOURCE, NON LIVE)
 - Retour auteur : toucher le module Capture semble ouvrir directement la partie et ne montre pas clairement qu'on peut créer plusieurs univers indépendants.
 - START source Capture officiel `6f13ad8c2973e7078a524bdd2737eb34cf294e8c` ; checkpoint `checkpoint/gensrpg-start-capture-universe-menu-20261117` ; branche `work/gensrpg-capture-v2-universe-menu-20261117` (base PR : `work/gensrpg-exploration-depth-waypoints-source-20261115`, PAS le main publisher).

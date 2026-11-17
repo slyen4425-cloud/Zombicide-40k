@@ -44,7 +44,7 @@ test('root Capture destination is the only approved same-origin V2 release and n
  const window={document,location};
  vm.runInNewContext(source,{window,URL});
  assert.equal(window.GensCaptureMainEntryV1.open(),true);
- assert.deepEqual(urls,['https://slyen4425-cloud.github.io/Zombicide-40k/preview/capture-v2-pr225/index.html?entry=gensrpg-main']);
+ assert.deepEqual(urls,['https://slyen4425-cloud.github.io/Zombicide-40k/preview/capture-v2-pr225/index.html?entry=gensrpg-main&launch=capture']);
  assert.ok(Object.isFrozen(window.GensCaptureMainEntryV1));
 });
 

@@ -3,7 +3,7 @@
 // Shell navigation only: never owns creatures, Combat, Exploration or saves.
 (function(root){
   if(root.GensCaptureMainEntryV1)throw new Error('Duplicate root Capture navigation authority');
-  const relative='preview/capture-v2-pr225/index.html?entry=gensrpg-main';
+  const relative='preview/capture-v2-pr225/index.html?entry=gensrpg-main&launch=capture';
   function destination(){
     const appRoot=new URL('./',root.document.baseURI);
     const target=new URL(relative,appRoot);

@@ -100,7 +100,7 @@ test('old installed Capture shortcut opens the GenSRPG module chooser with ZERO 
    });
    const page=await ctx.newPage();
    const base='http://127.0.0.1:'+server.address().port+prefix;
-   await page.goto(base+'preview/capture-v2-pr225/',{waitUntil:'domcontentloaded'});
+   await page.goto(base+'preview/capture-v2-pr225/?entry=gensrpg-main',{waitUntil:'domcontentloaded'});
    await page.waitForURL(base,{timeout:20000});
    assert.equal(await page.locator('#gensrpg-module-chooser button').count(),4,
      'launch must expose the four module choices from the official app root');

@@ -62,8 +62,10 @@ test('installed legacy Capture shortcut opens GenSRPG HUB immediately, without a
  }
  assert.deepEqual(run('',true),{clicked:rootUrl,listeners:1},
    'home icon must follow existing Shell link to the real four-module HUB before Capture bootstrap');
- assert.deepEqual(run('?entry=gensrpg-main',true),{clicked:null,listeners:1},
-   'choosing Capture explicitly inside GenSRPG must still open Capture');
+ assert.deepEqual(run('?entry=gensrpg-main',true),{clicked:rootUrl,listeners:1},
+   'old shortcut cannot impersonate a deliberate Capture click');
+ assert.deepEqual(run('?entry=gensrpg-main&launch=capture',true),{clicked:null,listeners:1},
+   'real Root Shell Capture click remains in Capture mode');
  assert.deepEqual(run('?launch=capture',true),{clicked:null,listeners:1},
    'an explicit Capture deep link must remain possible');
  assert.deepEqual(run('',false),{clicked:null,listeners:1},

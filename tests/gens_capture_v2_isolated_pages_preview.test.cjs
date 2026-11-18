@@ -136,6 +136,40 @@ test('exact official Lab main files and derived Showcase have one owner and veri
   }
   assert.ok(delivery.transport.length>=8);
 });
+test('Capture editor combat previews reuse the ONE signed Lab transport with music and SFX',()=>{
+ const shell=read(trial,'assets/gensrpg/capture-v2/shell-entry-v1.js').toString('utf8');
+ const canonical='vendor/exploration-lab/combat-preview/';
+ for(const item of ['creature','skills','combat','music','bestiary']){
+  const target=item==='bestiary'?'bestiary.html':'capture-editor-v2.html?tab='+item;
+  assert.ok(shell.includes('path:"'+canonical+'examples/dom-demo/'+target+'"'),
+   'Capture '+item+' must use the already shipped Combat+audio owner');
+ }
+ assert.equal((shell.match(/path:"vendor\\/combat-lab\\/examples\\/dom-demo\\//g)||[]).length,0,
+  'the light editor-only package does not own any active Capture editor route');
+ for(const name of ['capture-editor-v2.html','capture-editor-v2.js','bestiary.html']){
+  const owner='examples/dom-demo/'+name;
+  assert.equal(sha256(read(trial,'vendor/combat-lab/'+owner)),
+   sha256(read(trial,canonical+owner)),
+   'one SHA-pinned Combat editor source must be reused, never modified or forked: '+name);
+ }
+ const bank=canonical+'assets/runtime/';
+ for(const file of [
+  'audio/music-v1/battle-01-cb4ed87d.mp3',
+  'audio/music-v1/victory-01-0b52ce2b.mp3',
+  'audio-test/fire_cast.mp3',
+  'audio-test/melee_impact.mp3',
+  'audio-test/teleport.mp3'
+ ]){
+  required(trial,bank+file);
+  assert.ok(read(trial,bank+file).length>100,'Official audio is empty: '+file);
+ }
+ const privateDir=path.join(trial,bank,'audio/private-v1');
+ assert.ok(fs.readdirSync(privateDir).some(name=>name.endsWith('.mp3')),
+  'private creature and skill SFX must survive the release packaging');
+ assert.equal(fs.existsSync(path.join(trial,'vendor/combat-lab/assets/runtime/audio/private-v1')),false,
+  'do not add a second private sound bank to the lightweight editor package');
+});
+
 test('the existing single Pages publisher remains the only deployment authority',()=>{
   const text=read(root,'.github/workflows/main.yml').toString('utf8');
   assert.match(text,/name: Deploy GenSrpG to GitHub Pages/);

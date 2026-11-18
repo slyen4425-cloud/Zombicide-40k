@@ -465,6 +465,7 @@ jobs:
             data
             examples/dom-demo
             assets/runtime/audio
+            assets/runtime/audio-test
 
       - name: Checkout approved Exploration main for isolated Capture V2 preview
         uses: actions/checkout@v4
@@ -623,6 +624,7 @@ jobs:
             data
             examples/dom-demo
             assets/runtime/audio
+            assets/runtime/audio-test
       - uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/laboratoire_dynamique_exploration-

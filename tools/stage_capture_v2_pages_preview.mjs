@@ -243,7 +243,7 @@ const southRendererRel='src/render/sculpt-height-renderer.js';
 const southRendererPath=path.join(exploreDest,southRendererRel);
 const pinnedSouthRenderer=fs.readFileSync(southRendererPath,'utf8');
 const gitBlobSha=data=>crypto.createHash('sha1')
- .update('blob '+Buffer.byteLength(data)+'\\0').update(data).digest('hex');
+ .update('blob '+Buffer.byteLength(data)+String.fromCharCode(0)).update(data).digest('hex');
 const sourceSouthBlob='cc8dd1190eee4956e1b647d3825b526fcd66fc53';
 const officialSouthBlob='e20f6ccf4c717574f0e0260bc481c839e66444f8';
 if(sourcePin.exploration.sha!=='13bbd8230d8dfcef612586974b2dcb54e18e16c4'||

@@ -144,7 +144,7 @@ test('Capture editor combat previews reuse the ONE signed Lab transport with mus
   assert.ok(shell.includes('path:"'+canonical+'examples/dom-demo/'+target+'"'),
    'Capture '+item+' must use the already shipped Combat+audio owner');
  }
- assert.equal((shell.match(/path:"vendor\\/combat-lab\\/examples\\/dom-demo\\//g)||[]).length,0,
+ assert.equal(shell.includes('path:"vendor/combat-lab/examples/dom-demo/'),false,
   'the light editor-only package does not own any active Capture editor route');
  for(const name of ['capture-editor-v2.html','capture-editor-v2.js','bestiary.html']){
   const owner='examples/dom-demo/'+name;

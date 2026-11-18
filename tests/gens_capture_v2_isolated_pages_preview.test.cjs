@@ -146,12 +146,24 @@ test('Capture editor combat previews reuse the ONE signed Lab transport with mus
  }
  assert.equal(shell.includes('path:"vendor/combat-lab/examples/dom-demo/'),false,
   'the light editor-only package does not own any active Capture editor route');
- for(const name of ['capture-editor-v2.html','capture-editor-v2.js','bestiary.html']){
+ for(const name of ['capture-editor-v2.html','bestiary.html']){
   const owner='examples/dom-demo/'+name;
   assert.equal(sha256(read(trial,'vendor/combat-lab/'+owner)),
    sha256(read(trial,canonical+owner)),
    'one SHA-pinned Combat editor source must be reused, never modified or forked: '+name);
  }
+ // Preserve the EXACT original Combat JS in the verified light transport.
+ // The PWA's single generated editor route differs by ONLY a nonblocking
+ // fullscreen-await seam; engine, rules, media and authored data stay intact.
+ const original=read(trial,'vendor/combat-lab/examples/dom-demo/capture-editor-v2.js').toString('utf8');
+ const staged=read(trial,canonical+'examples/dom-demo/capture-editor-v2.js').toString('utf8');
+ const blocked='    await displayModePromise;\n';
+ const nonblocking='    // PWA Android: fullscreen can settle only after system Back. Never gate battle launch.\n'+
+  '    void displayModePromise.catch(error => console.warn("PWA fullscreen unavailable", error));\n';
+ assert.equal(staged.includes(blocked),false,'PWA must not await Android fullscreen to open the fight');
+ assert.equal(staged.split(nonblocking).length,2,'one and only one PWA launch integration seam');
+ assert.equal(staged.replace(nonblocking,blocked),original,
+  'the staged PWA editor must be identical to the official Combat source except the launch seam');
  const bank=canonical+'assets/runtime/';
  for(const file of [
   'audio/music-v1/battle-01-cb4ed87d.mp3',

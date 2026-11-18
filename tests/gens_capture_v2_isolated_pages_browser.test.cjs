@@ -494,9 +494,32 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
   const combatFrame=page.frameLocator('#gensCaptureV2Root iframe');
   await combatFrame.locator('[data-editor-test-combat]:not([disabled])')
    .waitFor({state:'visible',timeout:30000});
+  // Reproduce Android embedded-PWA fullscreen: request accepted but its
+  // promise does not settle until the user presses the system Back key.
+  // A battle must become visible from the FIRST tap, before that release.
+  await combatFrame.locator('body').evaluate(()=>{
+   Object.defineProperty(document.documentElement,'requestFullscreen',{
+    configurable:true,
+    value:()=>new Promise(resolve=>{
+     window.__gensPendingFullscreenRelease=resolve;
+    })
+   });
+  });
   await combatFrame.locator('[data-editor-test-combat]').tap();
   const arena=combatFrame.locator('[data-combat-arena]:visible');
   await arena.waitFor({timeout:30000});
+  const launchProof=await combatFrame.locator('body').evaluate(()=>({
+   fullscreenPending:typeof window.__gensPendingFullscreenRelease==='function',
+   editorHidden:document.querySelector('[data-capture-editor-human]')?.hidden===true,
+   combatVisible:document.querySelector('[data-capture-preview-shell]')?.hidden===false
+  }));
+  assert.deepEqual(launchProof,{fullscreenPending:true,editorHidden:true,combatVisible:true},
+   'First tap must launch Combat even when Android fullscreen promise is still pending');
+  // Releasing the simulated fullscreen does not start the battle: it is
+  // already running, and the normal Retour à l’éditeur still works.
+  await combatFrame.locator('body').evaluate(()=>{
+   window.__gensPendingFullscreenRelease?.();
+  });
   const geometry=await arena.evaluate(node=>{
    const rect=node.getBoundingClientRect();
    return {width:rect.width,height:rect.height,w:innerWidth,h:innerHeight};

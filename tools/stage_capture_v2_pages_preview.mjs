@@ -178,6 +178,39 @@ const bridge=stageOfficialCaptureEncounterBridge({
   combatSha:sourcePin.combat.sha,explorationSha:sourcePin.exploration.sha,
   visualsSha:approvedVisuals
 });
+// Audio regression guard: the Capture shell used the lightweight Combat editor
+// transport, which ships ONLY the victory track. The real Exploration bridge
+// already stages the exact same Combat SHA and its COMPLETE signed audio graph.
+// Reuse that existing transport for all five official Combat editor routes;
+// do not duplicate SFX/music, modify Lab source or add a second sound owner.
+if(bridge.combat?.sha!==sourcePin.combat.sha)
+ throw Error('Editor and encounter Combat SHA mismatch');
+const legacyEditor='vendor/combat-lab/examples/dom-demo/';
+const completeEditor='vendor/exploration-lab/combat-preview/examples/dom-demo/';
+for(const name of ['capture-editor-v2.html','capture-editor-v2.js','bestiary.html']){
+ const original=bytes(trial,legacyEditor+name);
+ if(digest(original)!==digest(bytes(trial,completeEditor+name)))
+  throw Error('Official editor transport differs from the signed encounter Combat main: '+name);
+}
+const canonicalAudio='vendor/exploration-lab/combat-preview/assets/runtime/';
+for(const name of [
+ 'audio/music-v1/battle-01-cb4ed87d.mp3',
+ 'audio/music-v1/victory-01-0b52ce2b.mp3',
+ 'audio-test/fire_cast.mp3',
+ 'audio-test/melee_impact.mp3',
+ 'audio-test/teleport.mp3'
+])if(!fs.statSync(path.join(trial,canonicalAudio+name)).isFile())
+ throw Error('Official Combat editor audio missing: '+name);
+if(!fs.readdirSync(path.join(trial,canonicalAudio,'audio/private-v1'))
+  .some(name=>name.endsWith('.mp3')))
+ throw Error('Official Combat private skill SFX bank missing');
+const nativeShellPath=path.join(trial,'assets/gensrpg/capture-v2/shell-entry-v1.js');
+const nativeShell=fs.readFileSync(nativeShellPath,'utf8');
+const fromRoute='path:"'+legacyEditor;
+const toRoute='path:"'+completeEditor;
+if(nativeShell.split(fromRoute).length!==6||nativeShell.includes(toRoute))
+ throw Error('Expected exactly five original official Combat editor routes');
+fs.writeFileSync(nativeShellPath,nativeShell.split(fromRoute).join(toRoute));
 const provenance={
   schema:'gensrpg-capture-v2-isolated-pages-preview-v1',
   publicPath:previewPin.publicPath,

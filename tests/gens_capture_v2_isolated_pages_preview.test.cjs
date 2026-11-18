@@ -182,6 +182,31 @@ test('Capture editor combat previews reuse the ONE signed Lab transport with mus
   'do not add a second private sound bank to the lightweight editor package');
 });
 
+test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (no fork)',()=>{
+ const provenance=json(trial,'release-provenance.v1.json');
+ const owner=provenance.explorationSouthRenderer;
+ const official='vendor/exploration-lab/src/render/sculpt-height-renderer.js';
+ assert.equal(owner?.path,official);
+ assert.equal(owner?.repository,'slyen4425-cloud/laboratoire_dynamique_exploration-');
+ assert.equal(owner?.mainSha,'ea336f885fa7fb7e1ea43ebf95c58504874d852a');
+ assert.equal(owner?.officialBlobSha,'e20f6ccf4c717574f0e0260bc481c839e66444f8');
+ assert.equal(provenance.exploration.sha,'13bbd8230d8dfcef612586974b2dcb54e18e16c4',
+   'all other Exploration modules remain pinned, never bulk-synced');
+ const bytes=read(trial,official);
+ const gitBlob=crypto.createHash('sha1')
+   .update('blob '+bytes.length+String.fromCharCode(0)).update(bytes).digest('hex');
+ assert.equal(gitBlob,owner.officialBlobSha,
+   'released south renderer differs from official Exploration main owner');
+ const text=bytes.toString('utf8');
+ assert.match(text,/ctx\.fillStyle=!drawOuterSouthRim&&pattern\?pattern:baseColor;/);
+ assert.doesNotMatch(text,/ctx\.fillStyle=baseColor;ctx\.fillRect\(0,0,totalWidth,totalHeight\)/,
+  'the old flat-color south backing MUST NOT be present in published PWA');
+ // All native scene entry points already consume this one renderer path.
+ const sculpt=read(trial,'vendor/exploration-lab/src/sculpt-lab-main.js').toString('utf8');
+ assert.match(sculpt,/drawOuterSouthRim:false/);
+ assert.match(sculpt,/drawDecorativeFringeTerrain\(\)/);
+});
+
 test('the existing single Pages publisher remains the only deployment authority',()=>{
   const text=read(root,'.github/workflows/main.yml').toString('utf8');
   assert.match(text,/name: Deploy GenSrpG to GitHub Pages/);

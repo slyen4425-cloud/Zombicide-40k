@@ -66,6 +66,14 @@ export function stageOfficialCaptureEncounterBridge({
  if(!fs.existsSync(path.join(combatRoot,audio)))
   throw Error('Official Combat main audio runtime unavailable');
  copyTree(path.join(combatRoot,audio),path.join(battle,audio));
+ // The SAME signed Combat demo resolver also references three audio-test MP3s.
+ // Keep them beside the one complete Combat delivery (no second sound bank).
+ const demoAudio='assets/runtime/audio-test';
+ for(const filename of ['fire_cast.mp3','melee_impact.mp3','teleport.mp3']){
+  if(!fs.existsSync(path.join(combatRoot,demoAudio,filename)))
+   throw Error('Official Combat demo SFX unavailable: '+filename);
+ }
+ copyTree(path.join(combatRoot,demoAudio),path.join(battle,demoAudio));
  for(const name of ['exploration-encounter.html','exploration-encounter.js',
    'exploration-native-source-v1.js','party.preview.v1.json'])
   copyFile(path.join(explorationRoot,'integration/combat-bridge',name),

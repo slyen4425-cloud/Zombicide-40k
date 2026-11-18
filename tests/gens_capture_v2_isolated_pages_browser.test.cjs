@@ -474,8 +474,23 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
   const combat=page.locator('#gensCaptureV2Root iframe');
   await combat.waitFor({state:'visible'});
   const source=await combat.getAttribute('src');
-  assert.ok(source.includes(scope+'vendor/combat-lab/examples/dom-demo/capture-editor-v2.html'),
+  assert.ok(source.includes(scope+'vendor/exploration-lab/combat-preview/examples/dom-demo/capture-editor-v2.html'),
    'Combat must load inside the single isolated Pages origin: '+source);
+  // Media must be served from the SAME signed Combat runtime the editor uses.
+  // The former lightweight editor package returned 404 for all Battle music
+  // and most private/demo SFX, while the real adventure battle had audio.
+  for(const rel of [
+   'audio/music-v1/battle-01-cb4ed87d.mp3',
+   'audio-test/fire_cast.mp3',
+   'audio-test/melee_impact.mp3',
+   'audio-test/teleport.mp3'
+  ]){
+   const response=await page.request.get(base+scope+
+    'vendor/exploration-lab/combat-preview/assets/runtime/'+rel);
+   assert.equal(response.status(),200,'Editor Combat missing native audio: '+rel);
+   assert.match(response.headers()['content-type']||'',/audio\/mpeg/);
+   assert.ok((await response.body()).length>100,'Empty official Combat audio: '+rel);
+  }
   const combatFrame=page.frameLocator('#gensCaptureV2Root iframe');
   await combatFrame.locator('[data-editor-test-combat]:not([disabled])')
    .waitFor({state:'visible',timeout:30000});

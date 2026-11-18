@@ -211,6 +211,28 @@ const toRoute='path:"'+completeEditor;
 if(nativeShell.split(fromRoute).length!==6||nativeShell.includes(toRoute))
  throw Error('Expected exactly five original official Combat editor routes');
 fs.writeFileSync(nativeShellPath,nativeShell.split(fromRoute).join(toRoute));
+// Only the PWA's generated, already-verified Combat editor launcher needs an
+// Android iframe integration adjustment. The native Lab remains byte-for-byte
+// original in its light transport; no game rules, assets, saves or Lab pin
+// change. On some Android installed PWAs, the nested requestFullscreen() or
+// orientation lock promise resolves only after system Back. It MUST NOT gate
+// session.launch(), otherwise the first Tester tap appears to do nothing.
+const officialEditorJs=bytes(trial,legacyEditor+'capture-editor-v2.js').toString('utf8');
+const editorJsPath=path.join(trial,completeEditor,'capture-editor-v2.js');
+const editorJs=fs.readFileSync(editorJsPath,'utf8');
+if(digest(Buffer.from(officialEditorJs))!==digest(Buffer.from(editorJs)))
+ throw Error('PWA adapter expected an identical certified Combat editor JS');
+const blockingFullscreenGate='    await displayModePromise;\n';
+const nonblockingFullscreenGate=
+ '    // PWA Android: fullscreen can settle only after system Back. Never gate battle launch.\n'+
+ '    void displayModePromise.catch(error => console.warn("PWA fullscreen unavailable", error));\n';
+if(editorJs.split(blockingFullscreenGate).length!==2||
+   editorJs.includes(nonblockingFullscreenGate))
+ throw Error('Official Combat editor fullscreen gate changed; refuse unsupported PWA integration');
+const pwaEditorJs=editorJs.replace(blockingFullscreenGate,nonblockingFullscreenGate);
+if(pwaEditorJs.replace(nonblockingFullscreenGate,blockingFullscreenGate)!==officialEditorJs)
+ throw Error('PWA integration changed content outside the one fullscreen-await seam');
+fs.writeFileSync(editorJsPath,pwaEditorJs);
 const provenance={
   schema:'gensrpg-capture-v2-isolated-pages-preview-v1',
   publicPath:previewPin.publicPath,

@@ -97,7 +97,10 @@
     // completes the Shell transition after the browser has painted twice.
     nativeFrame.addEventListener('load',()=>{
       if(nativeLoading!==state)return;
-      root.requestAnimationFrame(()=>root.requestAnimationFrame(()=>{
+      const afterPaint=typeof root.requestAnimationFrame==='function'
+        ?root.requestAnimationFrame.bind(root)
+        :callback=>root.setTimeout(callback,0);
+      afterPaint(()=>afterPaint(()=>{
         if(nativeLoading===state)dismissNativeLoading();
       }));
     },{once:true});

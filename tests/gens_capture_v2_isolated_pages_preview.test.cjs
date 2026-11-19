@@ -192,11 +192,15 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  // Explorer already contains it and must remain byte-identical at release.
  assert.equal(owner?.mainSha,explorationSha==='13bbd8230d8dfcef612586974b2dcb54e18e16c4'
    ? 'ea336f885fa7fb7e1ea43ebf95c58504874d852a' : explorationSha);
- assert.equal(owner?.officialBlobSha,'e20f6ccf4c717574f0e0260bc481c839e66444f8');
+ const pixelExplorationSha='1efa72151701a144687fbece77aad8e4a1052d42';
+ const expectedOfficialRendererBlob=explorationSha===pixelExplorationSha
+   ?'53545186122ce963f66cdb15172d8b145728caa7'
+   :'e20f6ccf4c717574f0e0260bc481c839e66444f8';
+ assert.equal(owner?.officialBlobSha,expectedOfficialRendererBlob);
  assert.equal(provenance.exploration.sha,explorationSha,
    'the complete native Exploration checkout must match the source pin');
  assert.ok(['13bbd8230d8dfcef612586974b2dcb54e18e16c4',
-   '4df91fdc4d5eedcf421e4767e175cba80e469bb1'].includes(explorationSha),
+   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha].includes(explorationSha),
    'release must reject unreviewed Exploration main SHAs');
  const bytes=read(trial,official);
  const gitBlob=crypto.createHash('sha1')

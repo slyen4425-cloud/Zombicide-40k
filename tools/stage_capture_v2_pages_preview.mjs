@@ -248,9 +248,13 @@ const sourceSouthBlob='cc8dd1190eee4956e1b647d3825b526fcd66fc53';
 const officialSouthBlob='e20f6ccf4c717574f0e0260bc481c839e66444f8';
 const legacyExplorationSha='13bbd8230d8dfcef612586974b2dcb54e18e16c4';
 const currentExplorationSha='4df91fdc4d5eedcf421e4767e175cba80e469bb1';
+// Exact official main release: renderer now includes mobile seam underpaint.
+const pixelExplorationSha='1efa72151701a144687fbece77aad8e4a1052d42';
+const pixelSouthBlob='53545186122ce963f66cdb15172d8b145728caa7';
 const oldSouthBacking="  ctx.fillStyle=baseColor;ctx.fillRect(0,0,totalWidth,totalHeight);";
 const officialSouthBacking="  // The outer cliff is deliberately disabled in the canonical 2.5D editor\n  // and its Tester, including the decorative south fringe. Raised last-row\n  // tops end BEFORE the bottom of this backing rectangle; a solid baseColor\n  // leaked through as the broad grey/green slanted strip on Android. Carry\n  // the EXACT same Material Registry texture underneath the raised tops.\n  // Keep the original backing for callers that explicitly draw a cliff rim.\n  // This is visual-only: no new cells, heights, collisions or saved paint.\n  ctx.fillStyle=!drawOuterSouthRim&&pattern?pattern:baseColor;\n  ctx.fillRect(0,0,totalWidth,totalHeight);";
 let southRendererOriginSha;
+let releasedSouthBlob=officialSouthBlob;
 if(sourcePin.exploration.sha===legacyExplorationSha){
  if(gitBlobSha(pinnedSouthRenderer)!==sourceSouthBlob||
     pinnedSouthRenderer.split(oldSouthBacking).length!==2)
@@ -267,6 +271,15 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
     !pinnedSouthRenderer.includes(officialSouthBacking))
   throw Error('Latest official Exploration renderer is not the certified south correction');
  southRendererOriginSha=currentExplorationSha;
+}else if(sourcePin.exploration.sha===pixelExplorationSha){
+ // Consume this exact official Exploration file unchanged. The native painter
+ // owns mobile seams; the PWA may only certify its byte-identical Git blob.
+ if(gitBlobSha(pinnedSouthRenderer)!==pixelSouthBlob||
+    !pinnedSouthRenderer.includes(officialSouthBacking)||
+    !pinnedSouthRenderer.includes('ctx.rect(x-seam,y-seam,w+2*seam,2*seam)'))
+  throw Error('Exploration mobile seam renderer differs from certified main');
+ releasedSouthBlob=pixelSouthBlob;
+ southRendererOriginSha=pixelExplorationSha;
 }else throw Error('Unreviewed Exploration renderer version; certification required');
 const provenance={
   schema:'gensrpg-capture-v2-isolated-pages-preview-v1',
@@ -278,7 +291,7 @@ const provenance={
   exploration:{repository:sourcePin.exploration.repository,ref:'main',sha:sourcePin.exploration.sha},
   explorationSouthRenderer:{repository:sourcePin.exploration.repository,
     mainSha:southRendererOriginSha,
-    officialBlobSha:officialSouthBlob,
+    officialBlobSha:releasedSouthBlob,
     path:'vendor/exploration-lab/'+southRendererRel},
   legacyCaptureRuntime:false,
   productionRootSha256:preserved['index.html'],

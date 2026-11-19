@@ -85,6 +85,10 @@ test('real Shell: Survie, Dungeon, PvP and clean Capture remain isolated through
     await page.locator('#gensCaptureV2Root [data-editor-group="combat"] [data-capture-v2-view="creature"]').tap();
     const frame=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
     await frame.waitFor({state:'attached'});
+    // Capture now shows a native loading veil until the Lab document has
+    // really loaded and painted; that veil must vanish before Shell Back.
+    await page.locator('#gensCaptureV2Root .gensCaptureV2Loading')
+      .waitFor({state:'hidden',timeout:25000});
     assert.match(await frame.getAttribute('src'),
       new RegExp('vendor/combat-lab/examples/dom-demo/capture-editor-v2[.]html'));
     assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),false,

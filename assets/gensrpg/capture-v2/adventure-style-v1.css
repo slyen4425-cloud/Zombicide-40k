@@ -69,6 +69,7 @@ output{display:block;overflow-wrap:anywhere}
    The browser's dialog top layer owns focus and Escape handling. */
 #adventure-play-hud[hidden]{display:none!important}
 body[data-adventure-combat-visible="true"] #adventure-play-hud{display:none!important}
+body[data-adventure-zone-loading="true"] #adventure-play-hud{display:none!important}
 /* One compact inventory button beside the native Explorer menu. */
 #adventure-play-hud{position:fixed;z-index:15;bottom:max(16px,env(safe-area-inset-bottom));top:auto;left:50%;right:auto;transform:translateX(-50%)}
 #adventure-open-sheet{background:#125b4d;border:2px solid #8be5ca;min-height:52px;min-width:152px;padding:10px 20px;font-size:15px;box-shadow:0 2px 14px #051016bb}

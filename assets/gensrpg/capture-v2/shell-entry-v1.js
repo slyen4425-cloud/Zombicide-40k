@@ -111,6 +111,7 @@
     notice.textContent=info.label;
     host.dataset.view=kind;
     host.dataset.adventureCombatActive='false';
+    host.dataset.adventureLoadingActive='false';
     // Presentation-only placement of the shared return control: Combat's
     // official editor footer and Exploration's toolbars use different corners.
     // This derived family does not own or inspect either Lab's DOM.
@@ -177,6 +178,13 @@
       requestId,...(isMerchant?{merchants}:{items,currencyLabel}),error
     },root.location.origin);
   });
+  // The Shell alone owns this bar. A native Portal's scoped presentation
+  // signal is projected by Capture, never by Exploration touching Shell DOM.
+  function setAdventureLoadingVisibility(visible){
+    if(!host||current!=="adventure"||typeof visible!=="boolean")return false;
+    host.dataset.adventureLoadingActive=String(visible);
+    return true;
+  }
   // The Shell alone owns this bar: the child only requests combat visibility.
   function setAdventureCombatVisibility(visible){
     if(!host||current!=="adventure"||typeof visible!=="boolean")return false;
@@ -192,6 +200,7 @@
     host.dataset.menu=selectedUniverse?'main':'universes';
     delete host.dataset.nativeFamily;
     delete host.dataset.adventureCombatActive;
+    delete host.dataset.adventureLoadingActive;
     nativeTitle.textContent="";
     notice.textContent=selectedUniverse
       ?'Univers '+selectedUniverse.name+' · choisis Jouer ou Éditeurs.'
@@ -337,5 +346,5 @@
   if(returnShell.register("capture",home)!==true)throw new Error("Capture return registration refused");
   root.GensCaptureV2=Object.freeze({start,stop,open,home,showUniverses,status,
     requestGameFullscreen,exitGameFullscreen,gameFullscreenActive,onGameFullscreenChange,
-    setAdventureCombatVisibility});
+    setAdventureCombatVisibility,setAdventureLoadingVisibility});
 })(typeof window!=="undefined"?window:globalThis);

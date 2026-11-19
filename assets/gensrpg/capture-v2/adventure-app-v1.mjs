@@ -22,7 +22,7 @@ import {
 } from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
 import {readCombatHandoff} from '../../../vendor/exploration-lab/src/encounters/combat-handoff-store.js';
 import {connectAdventureCombatHostV1} from './adventure-combat-host-v1.mjs';
-import {readScopedAdventureCombatVisibilityV1} from './adventure-combat-visibility-v1.mjs';
+import {readScopedAdventureCombatVisibilityV1,readScopedAdventureZoneLoadingV1} from './adventure-combat-visibility-v1.mjs';
 import {projectAdventureCombatAwardV1} from './adventure-result-presentation-v1.mjs';
 import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
 import {createAdventureRulesDraftStoreV1} from './adventure-rules-draft-v1.mjs';
@@ -1235,6 +1235,13 @@ window.addEventListener('pagehide',()=>{
 // consumes the already persisted AdventureSession. No second player state.
 let activePlayingSheet=null,activeCombatHost=null;
 let activeCombatOverlayId=null;
+let activeZoneLoading=false;
+function setShellAdventureLoadingVisibility(visible){
+ try{
+  const shell=window.parent!==window?window.parent.GensCaptureV2:null;
+  if(shell?.status?.().view==='adventure')shell.setAdventureLoadingVisibility?.(visible);
+ }catch{ /* Standalone Adventure does not own the parent Shell navigation. */ }
+}
 function setShellAdventureCombatVisibility(visible){
  try{
   const shell=window.parent!==window?window.parent.GensCaptureV2:null;
@@ -1246,16 +1253,28 @@ function setShellAdventureCombatVisibility(visible){
 function resetAdventureCombatHud(){
  activeCombatOverlayId=null;
  document.body.dataset.adventureCombatVisible='false';
- $('adventure-play-hud').hidden=!activePlayingSheet;
+ $('adventure-play-hud').hidden=!activePlayingSheet||activeZoneLoading;
  setShellAdventureCombatVisibility(false);
 }
 window.addEventListener('message',event=>{
  const frame=$('adventure-play-frame');
- const visibility=readScopedAdventureCombatVisibilityV1({
-  event,frameWindow:frame.contentWindow,origin:window.location.origin,
-  sessionId:activePlayingSheet?.sessionId
- });
- if(!visibility||document.body.dataset.adventurePlaying!=='true')return;
+ const scoped={event,frameWindow:frame.contentWindow,origin:window.location.origin,
+  sessionId:activePlayingSheet?.sessionId};
+ if(document.body.dataset.adventurePlaying!=='true')return;
+ const zone=readScopedAdventureZoneLoadingV1(scoped);
+ if(zone){
+  activeZoneLoading=zone.visible;
+  document.body.dataset.adventureZoneLoading=String(zone.visible);
+  $('adventure-play-hud').hidden=zone.visible||Boolean(activeCombatOverlayId)||!activePlayingSheet;
+  setShellAdventureLoadingVisibility(zone.visible||!$('adventure-launch-loading').hidden);
+  if(zone.visible){
+   if($('adventure-play-sheet').open)$('adventure-play-sheet').close();
+   if($('adventure-play-menu').open)$('adventure-play-menu').close();
+  }
+  return;
+ }
+ const visibility=readScopedAdventureCombatVisibilityV1(scoped);
+ if(!visibility)return;
  if(visibility.visible){
   activeCombatOverlayId=visibility.encounterId;
   document.body.dataset.adventureCombatVisible='true';
@@ -1855,9 +1874,11 @@ let journeyLaunchEpoch=0;
 function showJourneyLoading(message){
  text($('adventure-launch-loading-status'),message);
  journeyLoading.hidden=false;
+ setShellAdventureLoadingVisibility(true);
 }
 function dismissJourneyLoading(){
  journeyLoading.hidden=true;
+ setShellAdventureLoadingVisibility(activeZoneLoading);
 }
 function cancelPendingAdventureLaunch(){
  ++journeyLaunchEpoch; // Explicit cancellation invalidates any still-pending async preflight.
@@ -1866,6 +1887,8 @@ function cancelPendingAdventureLaunch(){
  activeCaptureExplorationEvents?.dispose();activeCaptureExplorationEvents=null;
  activeCapturePeerRelay?.dispose();activeCapturePeerRelay=null;
  activePlayingSheet=null;currentSheetCreatureId=null;
+ activeZoneLoading=false;
+ document.body.dataset.adventureZoneLoading='false';
  resetAdventureCombatHud();
  frame.hidden=true;frame.src='about:blank';
  $('adventure-play-hud').hidden=true;

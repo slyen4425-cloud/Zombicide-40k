@@ -1,3 +1,10 @@
+## 2026-11-19 — Capture consomme le correctif natif décor sud et routes sur hauts reliefs (C2)
+- START staging `1dc8668959d0d9c1ff08fddf1fdc3a0093a917e6`, checkpoint `checkpoint/gensrpg-start-fringe-road-capture-2026-11-19`, branche `work/gensrpg-fringe-road-capture-20261119`.
+- Source propriétaire Exploration **main@0128e69c290b43014a5a899804c588d805e2b4b0**, PR #502 (arbres de décor hors zone sud devant le héros; teintes des routes sur plateau alignées aux pixels, sans superposition de tuiles). CI main #44580011055, publication main à certifier. Une seule autorité : le rendu et les WorldAreas demeurent dans `laboratoire_dynamique_exploration-`; Capture ne change que le SHA certifié. Source de départ historique `f17e4aea75a49da42f7c9b945cc26e8934fc1424`.
+- Sans effet sur Combat main, Monster InvoC PNG, événements Combat, caméra de jeu max dézoom 200%, World Builder export de préset JSON, Dungeon, Survie, PvP, portails, déplacements ou sauvegardes. La correction des arbres est strictement visuelle et la frange reste non collisionnelle.
+- Tests de pin et provenance, frontières de modules et vrai Chromium sur SHA source, checkpoint C2 GREEN avant fusion staging ; publication PWA via une autre branche et un autre SHA immuable. Aucune PR de pente ancienne #316/#318 fusionnée.
+- Le vrai contrôle visuel utilisateur Pixel installé est indépendant des CI et sera noté après HTTPS.
+
 ## 2026-11-19 — Capture : adoption source unique World Builder export + caméra 200 % (C2)
 - START staging `824793cd613fd993cc754b207e734dfe37153f94`, checkpoint `checkpoint/gensrpg-start-world-builder-zoom-capture-20261119`, branche `work/gensrpg-world-builder-zoom-capture-20261119`.
 - Exploration main officiel `f17e4aea75a49da42f7c9b945cc26e8934fc1424` comprend World Builder PR #500 (export de la WorldArea sélectionnée vers le **même** format de préset JSON et round-trip avec frange décorative) et PR #501 (dézoom gameplay limité à 200 %, minimum scale .5 sur molette et slider, éditeur inchangé).

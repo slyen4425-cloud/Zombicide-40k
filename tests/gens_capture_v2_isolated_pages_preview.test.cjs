@@ -188,10 +188,16 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  const official='vendor/exploration-lab/src/render/sculpt-height-renderer.js';
  assert.equal(owner?.path,official);
  assert.equal(owner?.repository,'slyen4425-cloud/laboratoire_dynamique_exploration-');
- assert.equal(owner?.mainSha,'ea336f885fa7fb7e1ea43ebf95c58504874d852a');
+ // The old pinned Explorer needed one exact renderer patch; newer official
+ // Explorer already contains it and must remain byte-identical at release.
+ assert.equal(owner?.mainSha,explorationSha==='13bbd8230d8dfcef612586974b2dcb54e18e16c4'
+   ? 'ea336f885fa7fb7e1ea43ebf95c58504874d852a' : explorationSha);
  assert.equal(owner?.officialBlobSha,'e20f6ccf4c717574f0e0260bc481c839e66444f8');
- assert.equal(provenance.exploration.sha,'13bbd8230d8dfcef612586974b2dcb54e18e16c4',
-   'all other Exploration modules remain pinned, never bulk-synced');
+ assert.equal(provenance.exploration.sha,explorationSha,
+   'the complete native Exploration checkout must match the source pin');
+ assert.ok(['13bbd8230d8dfcef612586974b2dcb54e18e16c4',
+   '4df91fdc4d5eedcf421e4767e175cba80e469bb1'].includes(explorationSha),
+   'release must reject unreviewed Exploration main SHAs');
  const bytes=read(trial,official);
  const gitBlob=crypto.createHash('sha1')
    .update('blob '+bytes.length+String.fromCharCode(0)).update(bytes).digest('hex');

@@ -246,18 +246,28 @@ const gitBlobSha=data=>crypto.createHash('sha1')
  .update('blob '+Buffer.byteLength(data)+String.fromCharCode(0)).update(data).digest('hex');
 const sourceSouthBlob='cc8dd1190eee4956e1b647d3825b526fcd66fc53';
 const officialSouthBlob='e20f6ccf4c717574f0e0260bc481c839e66444f8';
-if(sourcePin.exploration.sha!=='13bbd8230d8dfcef612586974b2dcb54e18e16c4'||
-   gitBlobSha(pinnedSouthRenderer)!==sourceSouthBlob)
- throw Error('Exploration transport changed: south texture integration needs a new certification');
+const legacyExplorationSha='13bbd8230d8dfcef612586974b2dcb54e18e16c4';
+const currentExplorationSha='4df91fdc4d5eedcf421e4767e175cba80e469bb1';
 const oldSouthBacking="  ctx.fillStyle=baseColor;ctx.fillRect(0,0,totalWidth,totalHeight);";
 const officialSouthBacking="  // The outer cliff is deliberately disabled in the canonical 2.5D editor\n  // and its Tester, including the decorative south fringe. Raised last-row\n  // tops end BEFORE the bottom of this backing rectangle; a solid baseColor\n  // leaked through as the broad grey/green slanted strip on Android. Carry\n  // the EXACT same Material Registry texture underneath the raised tops.\n  // Keep the original backing for callers that explicitly draw a cliff rim.\n  // This is visual-only: no new cells, heights, collisions or saved paint.\n  ctx.fillStyle=!drawOuterSouthRim&&pattern?pattern:baseColor;\n  ctx.fillRect(0,0,totalWidth,totalHeight);";
-if(pinnedSouthRenderer.split(oldSouthBacking).length!==2)
- throw Error('Expected one official Exploration south-color backing seam');
-const correctedSouthRenderer=pinnedSouthRenderer.replace(oldSouthBacking,officialSouthBacking);
-if(gitBlobSha(correctedSouthRenderer)!==officialSouthBlob||
-   correctedSouthRenderer.replace(officialSouthBacking,oldSouthBacking)!==pinnedSouthRenderer)
- throw Error('PWA native south renderer differs from certified Exploration main');
-fs.writeFileSync(southRendererPath,correctedSouthRenderer);
+let southRendererOriginSha;
+if(sourcePin.exploration.sha===legacyExplorationSha){
+ if(gitBlobSha(pinnedSouthRenderer)!==sourceSouthBlob||
+    pinnedSouthRenderer.split(oldSouthBacking).length!==2)
+  throw Error('Legacy Exploration renderer differs from original certified input');
+ const correctedSouthRenderer=pinnedSouthRenderer.replace(oldSouthBacking,officialSouthBacking);
+ if(gitBlobSha(correctedSouthRenderer)!==officialSouthBlob||
+    correctedSouthRenderer.replace(officialSouthBacking,oldSouthBacking)!==pinnedSouthRenderer)
+  throw Error('Legacy south renderer adapter cannot reproduce certified official source');
+ fs.writeFileSync(southRendererPath,correctedSouthRenderer);
+ southRendererOriginSha='ea336f885fa7fb7e1ea43ebf95c58504874d852a';
+}else if(sourcePin.exploration.sha===currentExplorationSha){
+ // New canonical Exploration contains this fix; do not fork or mutate it.
+ if(gitBlobSha(pinnedSouthRenderer)!==officialSouthBlob||
+    !pinnedSouthRenderer.includes(officialSouthBacking))
+  throw Error('Latest official Exploration renderer is not the certified south correction');
+ southRendererOriginSha=currentExplorationSha;
+}else throw Error('Unreviewed Exploration renderer version; certification required');
 const provenance={
   schema:'gensrpg-capture-v2-isolated-pages-preview-v1',
   publicPath:previewPin.publicPath,
@@ -267,7 +277,7 @@ const provenance={
   combat:{repository:sourcePin.combat.repository,ref:'main',sha:sourcePin.combat.sha},
   exploration:{repository:sourcePin.exploration.repository,ref:'main',sha:sourcePin.exploration.sha},
   explorationSouthRenderer:{repository:sourcePin.exploration.repository,
-    mainSha:'ea336f885fa7fb7e1ea43ebf95c58504874d852a',
+    mainSha:southRendererOriginSha,
     officialBlobSha:officialSouthBlob,
     path:'vendor/exploration-lab/'+southRendererRel},
   legacyCaptureRuntime:false,

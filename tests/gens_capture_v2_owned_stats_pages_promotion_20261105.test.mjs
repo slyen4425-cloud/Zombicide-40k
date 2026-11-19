@@ -24,10 +24,14 @@ test('Monster Capture release pins one immutable candidate and proves the select
 test('published Monster Capture stays isolated and retains exact certified original visual author',()=>{
  assert.equal(file.officialVisuals.repository,'slyen4425-cloud/GenSrpg_labo_combat_dynamique');
  assert.equal(file.officialVisuals.ref,'global-assets');
- assert.equal(file.officialVisuals.sha,'9eef5847a2b9907c493d9575a5c148b09d41a5bf',
-  'certified descendant preserves 80 icon baseline and adds Sylvorne original face/back/portrait; only immutable media author may change');
- assert.equal(file.officialVisuals.certifiedCiRun,42914840627,
-  'updated immutable visual SHA must be certified by Laboratory CI before promotion');
+ // The original 9eef5847 author branch remains an ancestor: GitHub compare
+ // 9eef5847...cc76db7 reports 46 ahead / 0 behind (147 changed assets).
+ // The official Veuve V2 import workflow publishes this exact immutable asset
+ // catalog; Pages MUST still validate all referenced physical files and size.
+ assert.equal(file.officialVisuals.sha,'cc76db7ee8db3400890666e9888d52cba69db4c3',
+  'official Veuve V2 icons and diagonal wall are now present in a descendant of the prior author catalog');
+ assert.equal(file.officialVisuals.certifiedCiRun,44406793432,
+  'provenance is the successful author asset import; final Pages and browser checks remain mandatory');
  const workflow=fs.readFileSync(new URL('../.github/workflows/main.yml',import.meta.url),'utf8');
  assert.match(workflow,/steps\.preview_labs\.outputs\.combat/);
  assert.match(workflow,/steps\.preview_labs\.outputs\.exploration/);

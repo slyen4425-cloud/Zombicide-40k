@@ -55,15 +55,22 @@ test('public main Capture click opens the ONE V2 owner, Jouer is native, return 
   const back=page.locator('a.gensCaptureReturnToMain');
   await back.waitFor({state:'attached'});
   assert.equal(await back.getAttribute('href'),base);
-  const sourcePin=JSON.parse(require('node:fs').readFileSync(
-   path.resolve(__dirname,'../tools/capture_v2_pages_preview_pin.json'),'utf8'));
-  if(sourcePin.sha==='3ecb6dd958315d0ad08130387b7bd9589486f5c5'){
-   // Follow the real universe selection, not a hidden Jouer shortcut.
+  // Use the physically published source's universe UI, not a stale
+  // hardcoded release SHA. A new source MUST select a world before Jouer.
+  const hasUniversePicker=await fs.access(path.join(site,
+   'preview/capture-v2-pr225/assets/gensrpg/capture-v2/universe-hub-ui-v1.mjs'))
+   .then(()=>true,()=>false);
+  if(hasUniversePicker){
    const legacy=capture.locator('[data-capture-universe-select="monster-invoc"]');
    await legacy.waitFor({state:'visible',timeout:35000});
    assert.equal(await capture.getAttribute('data-menu'),'universes');
    await legacy.tap();
-   await page.locator('#gensCaptureV2Root[data-menu="main"]').waitFor({state:'visible'});
+   await capture.locator('nav.gensCaptureV2MainMenu [data-capture-v2-view="adventure"]')
+    .waitFor({state:'visible'});
+   assert.equal(await capture.getAttribute('data-menu'),'main');
+  }else{
+   await capture.locator('nav.gensCaptureV2MainMenu [data-capture-v2-view="adventure"]')
+    .waitFor({state:'visible'});
    assert.equal(await capture.getAttribute('data-menu'),'main');
   }
   await capture.locator('[data-capture-v2-view="adventure"]').tap();

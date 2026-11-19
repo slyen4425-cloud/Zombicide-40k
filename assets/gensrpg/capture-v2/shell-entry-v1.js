@@ -50,7 +50,7 @@
   async function decorateNativeLoading(state){
     let urls=[];
     try{
-      // The existing Capture IndexedDB store is the ONLY source of player
+      // The existing Capture art owner is the ONLY source of player
       // artwork. Read all three legacy categories as ONE simple gallery.
       const [libraryOwner,fadeOwner]=await Promise.all([
         import(new URL('assets/gensrpg/capture-v2/adventure-loading-art-v1.mjs',base).href),

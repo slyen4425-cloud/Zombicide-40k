@@ -466,6 +466,7 @@ jobs:
             examples/dom-demo
             assets/runtime/audio
             assets/runtime/audio-test
+            assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png
 
       - name: Checkout approved Exploration main for isolated Capture V2 preview
         uses: actions/checkout@v4
@@ -625,6 +626,7 @@ jobs:
             examples/dom-demo
             assets/runtime/audio
             assets/runtime/audio-test
+            assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png
       - uses: actions/checkout@v4
         with:
           repository: slyen4425-cloud/laboratoire_dynamique_exploration-

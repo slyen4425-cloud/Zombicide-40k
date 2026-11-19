@@ -1,3 +1,10 @@
+## 2026-11-19 — Capture : adoption source unique World Builder export + caméra 200 % (C2)
+- START staging `824793cd613fd993cc754b207e734dfe37153f94`, checkpoint `checkpoint/gensrpg-start-world-builder-zoom-capture-20261119`, branche `work/gensrpg-world-builder-zoom-capture-20261119`.
+- Exploration main officiel `f17e4aea75a49da42f7c9b945cc26e8934fc1424` comprend World Builder PR #500 (export de la WorldArea sélectionnée vers le **même** format de préset JSON et round-trip avec frange décorative) et PR #501 (dézoom gameplay limité à 200 %, minimum scale .5 sur molette et slider, éditeur inchangé).
+- CI Exploration main #44572272818, source ownership et navigateur natif ; publication Exploration main en cours de contrôle. Retenir ce SHA immuable, pas `main` mouvant. Aucun système concurrent dans Capture : seule mise à jour de la consommation du module Exploration propriétaire.
+- Combat main `61f704ac24f828721ff7ec24baed351078a409aa`, visuel PNG, galerie 10 s et jingle restent strictement inchangés. Aucune donnée utilisateur, WorldDocument/Portal/Spawn, carte existante, Donjon, Survie, PvP, service worker, racine PWA ni branche autre agent modifiés.
+- Gates : CI source + vrai navigateur/ownership sur SHA exact, checkpoint GREEN, merge staging ; publication publisher pin-only en PR séparée vers SHA fusionné, contrôle de renderer inchangé, CI Pages/HTTPS et recettage Pixel.
+
 ## 2026-11-19 — Chargement Monster InvoC PNG, raccord source unique C2
 - START sur staging officiel `da0161c5203bc46765cd361ca70289d7c1ab179e`, checkpoint `checkpoint/gensrpg-start-capture-loading-png-2026-11-19`, branche `work/gensrpg-capture-loading-png-certification-20261119`. Galerie/fondu PR #536 déjà fusionnée ; Exploration main `e0175760e686c4c911e0b91d5614aab2d0b708fe` CI #44535115973 et Pages #44535115948 SUCCESS.
 - Image auteur approuvée sur Combat `main@61f704ac24f828721ff7ec24baed351078a409aa` (CI #44521372520 ; Pages #44521370655 SUCCESS), `assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png`, blob `787a24def6d8c1865f337ce6d5fd485a7274bf02`, taille 3195270 octets.

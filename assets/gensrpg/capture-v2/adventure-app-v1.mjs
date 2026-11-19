@@ -1798,8 +1798,7 @@ function revokeLoadingArt(urls){
 }
 async function refreshLoadingArtEditor(){
  revokeLoadingArt(loadingArtPreviewUrls);
- const scene=$('adventure-loading-art-scene').value;
- const entries=await (await loadingArtLibrary()).list(scene);
+ const entries=await (await loadingArtLibrary()).list();
  const host=$('adventure-loading-art-list');
  host.replaceChildren();
  if(!entries.length){
@@ -1825,13 +1824,10 @@ async function refreshLoadingArtEditor(){
   item.append(image,label,remove);host.append(item);
  }
 }
-$('adventure-loading-art-scene').addEventListener('change',()=>{
- void refreshLoadingArtEditor().catch(error=>text($('adventure-loading-art-status'),error.message));
-});
 $('adventure-loading-art-files').addEventListener('change',async event=>{
  const input=event.currentTarget;
  try{
-  await (await loadingArtLibrary()).add($('adventure-loading-art-scene').value,input.files);
+  await (await loadingArtLibrary()).add('launch',input.files);
   input.value='';await refreshLoadingArtEditor();
   text($('adventure-loading-art-status'),'Illustrations enregistrées.');
  }catch(error){input.value='';text($('adventure-loading-art-status'),error.message);}

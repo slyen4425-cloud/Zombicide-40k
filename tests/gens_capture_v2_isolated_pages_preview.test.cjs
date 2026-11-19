@@ -48,6 +48,30 @@ test('production root remains intact and preview exists ONLY in its isolated Pag
   assert.doesNotMatch(html,/<script[^>]+src=["']assets\/gensrpg\/capture\//);
   assert.equal(fs.existsSync(path.join(trial,'assets/gensrpg/capture/runtime-data')),false);
 });
+test('author PNG is transported only inside Capture, byte-identical to certified Combat main',()=>{
+ const png='assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png';
+ const shipped='vendor/combat-lab/'+png;
+ required(trial,shipped);
+ const image=read(trial,shipped);
+ assert.equal(image.length,3195270);
+ assert.equal(crypto.createHash('sha1')
+  .update('blob '+image.length+String.fromCharCode(0)).update(image).digest('hex'),
+  '787a24def6d8c1865f337ce6d5fd485a7274bf02',
+  'the public image must be the approved author file, not a resized or stale substitute');
+ const manifest=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
+ const media=manifest.transport.filter(x=>x.path===shipped);
+ assert.equal(media.length,1,'one owner, one image transport');
+ assert.equal(media[0].role,'capture-loading-art');
+ assert.equal(media[0].size,image.length);
+ const shell=read(trial,'assets/gensrpg/capture-v2/shell-entry-v1.js').toString('utf8');
+ const css=read(trial,'assets/gensrpg/capture-v2/adventure-style-v1.css').toString('utf8');
+ assert.ok(shell.includes(shipped));
+ assert.ok(css.includes('../../../'+shipped));
+ assert.match(css,/background-size:contain,cover/);
+ assert.equal(fs.existsSync(path.join(site,'assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png')),false,
+  'the image must not escape the Capture preview to the global root');
+});
+
 test('preview PWA never shares the production cache namespace or cleanup authority',()=>{
  const production=read(site,'service-worker.js').toString('utf8');
  const candidate=read(trial,'service-worker.js').toString('utf8');
@@ -193,14 +217,16 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  assert.equal(owner?.mainSha,explorationSha==='13bbd8230d8dfcef612586974b2dcb54e18e16c4'
    ? 'ea336f885fa7fb7e1ea43ebf95c58504874d852a' : explorationSha);
  const pixelExplorationSha='1efa72151701a144687fbece77aad8e4a1052d42';
- const expectedOfficialRendererBlob=explorationSha===pixelExplorationSha
+ const warmupAudioExplorationSha='42d0f9608c17f6d56d65038ac895564252126d5e';
+ const crossfadeExplorationSha='e0175760e686c4c911e0b91d5614aab2d0b708fe';
+ const expectedOfficialRendererBlob=[pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha].includes(explorationSha)
    ?'53545186122ce963f66cdb15172d8b145728caa7'
    :'e20f6ccf4c717574f0e0260bc481c839e66444f8';
  assert.equal(owner?.officialBlobSha,expectedOfficialRendererBlob);
  assert.equal(provenance.exploration.sha,explorationSha,
    'the complete native Exploration checkout must match the source pin');
  assert.ok(['13bbd8230d8dfcef612586974b2dcb54e18e16c4',
-   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha].includes(explorationSha),
+   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha].includes(explorationSha),
    'release must reject unreviewed Exploration main SHAs');
  const bytes=read(trial,official);
  const gitBlob=crypto.createHash('sha1')

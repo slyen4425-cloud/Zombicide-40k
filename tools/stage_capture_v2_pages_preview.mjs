@@ -250,7 +250,7 @@ const currentExplorationSha='4df91fdc4d5eedcf421e4767e175cba80e469bb1';
 // Exact official main release: renderer now includes mobile seam underpaint.
 const pixelExplorationSha='1efa72151701a144687fbece77aad8e4a1052d42';
 const warmupAudioExplorationSha='42d0f9608c17f6d56d65038ac895564252126d5e';
-const crossfadeExplorationSha='c9baf53402b678e83f9fab4b7770ab800f1a5f6c';
+const crossfadeExplorationSha='e0175760e686c4c911e0b91d5614aab2d0b708fe';
 const pixelSouthBlob='53545186122ce963f66cdb15172d8b145728caa7';
 const oldSouthBacking="  ctx.fillStyle=baseColor;ctx.fillRect(0,0,totalWidth,totalHeight);";
 const officialSouthBacking="  // The outer cliff is deliberately disabled in the canonical 2.5D editor\n  // and its Tester, including the decorative south fringe. Raised last-row\n  // tops end BEFORE the bottom of this backing rectangle; a solid baseColor\n  // leaked through as the broad grey/green slanted strip on Android. Carry\n  // the EXACT same Material Registry texture underneath the raised tops.\n  // Keep the original backing for callers that explicitly draw a cliff rim.\n  // This is visual-only: no new cells, heights, collisions or saved paint.\n  ctx.fillStyle=!drawOuterSouthRim&&pattern?pattern:baseColor;\n  ctx.fillRect(0,0,totalWidth,totalHeight);";

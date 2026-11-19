@@ -206,6 +206,28 @@ test('Capture editor combat previews reuse the ONE signed Lab transport with mus
   'do not add a second private sound bank to the lightweight editor package');
 });
 
+test('native World Builder map exporter and in-game 200% dezoom are shipped once from certified Exploration',()=>{
+ const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
+ assert.equal(source.exploration.sha,'f17e4aea75a49da42f7c9b945cc26e8934fc1424');
+ const helper='vendor/exploration-lab/src/builder/world-assembler-map-preset-export-v1.js';
+ required(trial,helper);
+ const page=read(trial,'vendor/exploration-lab/world-assembler.html').toString('utf8');
+ const app=read(trial,'vendor/exploration-lab/src/builder/world-assembler-main.js').toString('utf8');
+ const exported=read(trial,helper).toString('utf8');
+ const library=read(trial,'vendor/exploration-lab/src/builder/sculpt-map-preset-library.js').toString('utf8');
+ const projection=read(trial,'vendor/exploration-lab/src/render/sculpt-camera-projection.js').toString('utf8');
+ const game=read(trial,'vendor/exploration-lab/src/sculpt-lab-main.js').toString('utf8');
+ assert.match(page,/id="export-selected-map-preset"/);
+ assert.match(page,/id="export-world"/);
+ assert.match(app,/exportWorldAreaAsMapPresetV1\(draft,selectedId\)/);
+ assert.match(exported,/createSculptMapPreset\(scene/);
+ assert.match(library,/decorativeFringe/);
+ assert.match(projection,/SCULPT_PLAY_CAMERA_ZOOM=Object\.freeze\(\{min:\.5,max:2\.4,default:1\.75\}\)/);
+ assert.match(game,/navigationTesting\?sculptPlayableCameraZoom\(requestedZoom\)/);
+ assert.match(game,/navigationTesting\?sculptPlayableCameraZoom\(desiredZoom\)/);
+ assert.doesNotMatch(page,/id="world-map-preset-select"/);
+});
+
 test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (no fork)',()=>{
  const provenance=json(trial,'release-provenance.v1.json');
  const owner=provenance.explorationSouthRenderer;
@@ -219,14 +241,15 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  const pixelExplorationSha='1efa72151701a144687fbece77aad8e4a1052d42';
  const warmupAudioExplorationSha='42d0f9608c17f6d56d65038ac895564252126d5e';
  const crossfadeExplorationSha='e0175760e686c4c911e0b91d5614aab2d0b708fe';
- const expectedOfficialRendererBlob=[pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha].includes(explorationSha)
+ const authorExportCameraExplorationSha='f17e4aea75a49da42f7c9b945cc26e8934fc1424';
+ const expectedOfficialRendererBlob=[pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha].includes(explorationSha)
    ?'53545186122ce963f66cdb15172d8b145728caa7'
    :'e20f6ccf4c717574f0e0260bc481c839e66444f8';
  assert.equal(owner?.officialBlobSha,expectedOfficialRendererBlob);
  assert.equal(provenance.exploration.sha,explorationSha,
    'the complete native Exploration checkout must match the source pin');
  assert.ok(['13bbd8230d8dfcef612586974b2dcb54e18e16c4',
-   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha].includes(explorationSha),
+   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha].includes(explorationSha),
    'release must reject unreviewed Exploration main SHAs');
  const bytes=read(trial,official);
  const gitBlob=crypto.createHash('sha1')

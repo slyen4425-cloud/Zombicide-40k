@@ -251,6 +251,7 @@ const currentExplorationSha='4df91fdc4d5eedcf421e4767e175cba80e469bb1';
 const pixelExplorationSha='1efa72151701a144687fbece77aad8e4a1052d42';
 const warmupAudioExplorationSha='42d0f9608c17f6d56d65038ac895564252126d5e';
 const crossfadeExplorationSha='e0175760e686c4c911e0b91d5614aab2d0b708fe';
+const authorExportCameraExplorationSha='f17e4aea75a49da42f7c9b945cc26e8934fc1424';
 const pixelSouthBlob='53545186122ce963f66cdb15172d8b145728caa7';
 const oldSouthBacking="  ctx.fillStyle=baseColor;ctx.fillRect(0,0,totalWidth,totalHeight);";
 const officialSouthBacking="  // The outer cliff is deliberately disabled in the canonical 2.5D editor\n  // and its Tester, including the decorative south fringe. Raised last-row\n  // tops end BEFORE the bottom of this backing rectangle; a solid baseColor\n  // leaked through as the broad grey/green slanted strip on Android. Carry\n  // the EXACT same Material Registry texture underneath the raised tops.\n  // Keep the original backing for callers that explicitly draw a cliff rim.\n  // This is visual-only: no new cells, heights, collisions or saved paint.\n  ctx.fillStyle=!drawOuterSouthRim&&pattern?pattern:baseColor;\n  ctx.fillRect(0,0,totalWidth,totalHeight);";
@@ -272,7 +273,7 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
     !pinnedSouthRenderer.includes(officialSouthBacking))
   throw Error('Latest official Exploration renderer is not the certified south correction');
  southRendererOriginSha=currentExplorationSha;
-}else if([pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha].includes(sourcePin.exploration.sha)){
+}else if([pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha].includes(sourcePin.exploration.sha)){
  // Consume this exact official Exploration file unchanged. The native painter
  // owns mobile seams; the PWA may only certify its byte-identical Git blob.
  if(gitBlobSha(pinnedSouthRenderer)!==pixelSouthBlob||

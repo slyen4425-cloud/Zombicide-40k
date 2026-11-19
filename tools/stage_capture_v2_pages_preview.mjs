@@ -233,12 +233,11 @@ const pwaEditorJs=editorJs.replace(blockingFullscreenGate,nonblockingFullscreenG
 if(pwaEditorJs.replace(nonblockingFullscreenGate,blockingFullscreenGate)!==officialEditorJs)
  throw Error('PWA integration changed content outside the one fullscreen-await seam');
 fs.writeFileSync(editorJsPath,pwaEditorJs);
-// Publisher integration of one certified native Exploration renderer file.
-// The immutable Capture candidate pins Exploration main@13bbd823; its terrain
-// engine, saves, assets, objects and browser routes are deliberately frozen.
-// We adapt only the south backing bug to the exact code/blob approved on
-// Exploration main@ea336f88. This code MUST reconstruct the official owner
-// renderer byte-for-byte, otherwise publication fails closed.
+// The source Capture candidate pins one certified Exploration main revision.
+// Legacy 13bb release alone reconstructs the officially corrected south backing;
+// all newer main revisions (including the Pixel seam painter) must be consumed
+// byte-for-byte with their independently certified Git blob, never rewritten.
+// No other engine, scene, save, asset or browser route is modified.
 const southRendererRel='src/render/sculpt-height-renderer.js';
 const southRendererPath=path.join(exploreDest,southRendererRel);
 const pinnedSouthRenderer=fs.readFileSync(southRendererPath,'utf8');

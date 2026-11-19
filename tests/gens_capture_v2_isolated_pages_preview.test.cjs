@@ -194,14 +194,15 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
    ? 'ea336f885fa7fb7e1ea43ebf95c58504874d852a' : explorationSha);
  const pixelExplorationSha='1efa72151701a144687fbece77aad8e4a1052d42';
  const warmupAudioExplorationSha='42d0f9608c17f6d56d65038ac895564252126d5e';
- const expectedOfficialRendererBlob=[pixelExplorationSha,warmupAudioExplorationSha].includes(explorationSha)
+ const crossfadeExplorationSha='c9baf53402b678e83f9fab4b7770ab800f1a5f6c';
+ const expectedOfficialRendererBlob=[pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha].includes(explorationSha)
    ?'53545186122ce963f66cdb15172d8b145728caa7'
    :'e20f6ccf4c717574f0e0260bc481c839e66444f8';
  assert.equal(owner?.officialBlobSha,expectedOfficialRendererBlob);
  assert.equal(provenance.exploration.sha,explorationSha,
    'the complete native Exploration checkout must match the source pin');
  assert.ok(['13bbd8230d8dfcef612586974b2dcb54e18e16c4',
-   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha].includes(explorationSha),
+   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha].includes(explorationSha),
    'release must reject unreviewed Exploration main SHAs');
  const bytes=read(trial,official);
  const gitBlob=crypto.createHash('sha1')

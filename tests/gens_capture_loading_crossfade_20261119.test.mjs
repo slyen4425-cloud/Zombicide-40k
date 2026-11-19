@@ -50,3 +50,19 @@ test('the edited scripts remain syntactically valid in Node',()=>{
   'assets/gensrpg/capture-v2/adventure-loading-art-v1.mjs'
  ])execFileSync(process.execPath,['--check',new URL('../'+path,import.meta.url).pathname]);
 });
+
+
+test('Monster InvoC loading art is scoped to Capture, never the Dungeon module',()=>{
+ // The official four-mode launcher remains the sole module router.
+ assert.match(shell,/if\(shell\.activeModule\(\)!=="capture"\)return false/);
+ assert.match(shell,/shell\.register\("capture",start\)/);
+ assert.match(shell,/host\.id="gensCaptureV2Root"/);
+ // The image veil is created only inside that Capture-owned Shell and its iframe.
+ assert.match(shell,/const overlay=root\.document\.createElement\('div'\);\s*overlay\.className='gensCaptureV2Loading'/);
+ assert.match(shell,/stage\.append\(overlay\)/);
+ assert.match(css,/#gensCaptureV2Root \.gensCaptureV2Loading\{/);
+ assert.match(css,/#gensCaptureV2Root \[data-native-loading="true"\]/);
+ // Never introduce a generic root PWA/Dungeon loading override.
+ assert.doesNotMatch(shell,/GensDungeon|startModuleSession\("dungeon"\)|document\.body\.append\(overlay\)/);
+ assert.doesNotMatch(css,/(?:^|\n)\s*(?:body|html|#gensDungeon)[^{]*\.gensCaptureV2Loading\{/);
+});

@@ -37,8 +37,8 @@ export async function createAdventureLoadingArtLibraryV1({
    if(!selected.length)return Object.freeze([]);
    if(selected.some(f=>!types.has(f.type)||f.size<=0||f.size>MAX_BYTES))
     throw new TypeError('Images PNG, JPEG, WebP ou GIF de 8 Mio maximum');
-   if((await library.list(scene)).length+selected.length>MAX_PER_SCENE)
-    throw new RangeError('Maximum de 12 images par type de chargement');
+   if((await library.list()).length+selected.length>MAX_PER_SCENE)
+    throw new RangeError('Maximum de 12 illustrations dans la galerie');
    const inserted=[];
    // Store real Blobs without base64, archives or copies in the published site.
    for(const file of selected){

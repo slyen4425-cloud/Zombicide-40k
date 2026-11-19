@@ -1834,6 +1834,7 @@ $('adventure-loading-art-files').addEventListener('change',async event=>{
 });
 void refreshLoadingArtEditor().catch(error=>text($('adventure-loading-art-status'),error.message));
 async function prepareLoadingArtworkForPlay(){
+ const requestedAt=journeyLaunchEpoch;
  revokeLoadingArt(loadingArtObjectUrls);
  const scenes={};
  let library;
@@ -1843,6 +1844,8 @@ async function prepareLoadingArtworkForPlay(){
   // Simple mode: the EXISTING Capture image library remains the only store.
   // All uploaded images form one ordered gallery across all loading contexts.
   const entries=(await library.list()).slice(0,12);
+  // A cancelled launch must never revive its screen or leave Blob URLs live.
+  if(requestedAt!==journeyLaunchEpoch||journeyLoading.hidden)return {};
   const urls=entries.map(record=>URL.createObjectURL(record.blob));
   for(const url of urls)loadingArtObjectUrls.add(url);
   const sequence=captureLoadingArtSequenceV1(urls,loadingArtRotation.launch++);
@@ -1851,6 +1854,9 @@ async function prepareLoadingArtworkForPlay(){
   revokeLoadingArt(loadingArtObjectUrls);
   console.warn('Bibliothèque de chargement non lisible, art officiel conservé',error);
   return {};
+ }
+ if(requestedAt!==journeyLaunchEpoch||journeyLoading.hidden){
+  revokeLoadingArt(loadingArtObjectUrls);return {};
  }
  const cover=scenes.launch?.[0]??null;
  const loading=$('adventure-launch-loading');
@@ -1862,6 +1868,7 @@ async function prepareLoadingArtworkForPlay(){
    // The common Exploration presentation helper is optional on an older
    // preview source; it does not become a second Capture loading owner.
    const artwork=await import('../../../vendor/exploration-lab/src/play/exploration-loading-art-v1.js');
+   if(requestedAt!==journeyLaunchEpoch||journeyLoading.hidden)return {};
    if(typeof artwork.mountCaptureLoadingArtCrossfadeV1==='function')
     journeyLoadingCrossfade=artwork.mountCaptureLoadingArtCrossfadeV1({
      host:loading,images:scenes.launch,documentRef:document,windowRef:window

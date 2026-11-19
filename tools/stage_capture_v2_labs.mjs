@@ -66,6 +66,26 @@ const required={
  ]
 };
 const transport=[];
+// Exact authored Monster InvoC PNG, added to the certified Combat main.
+// One transport destination under Capture only; no whole assets directory.
+const captureLoadingArt='assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png';
+const captureLoadingInput=path.join(combat,captureLoadingArt);
+if(!fs.existsSync(captureLoadingInput))throw Error('Approved Monster InvoC PNG absent from Combat main');
+const captureLoadingBytes=fs.readFileSync(captureLoadingInput);
+const loadingGitBlob=crypto.createHash('sha1')
+ .update('blob '+captureLoadingBytes.length+String.fromCharCode(0))
+ .update(captureLoadingBytes).digest('hex');
+if(captureLoadingBytes.length!==3195270||
+ loadingGitBlob!=='787a24def6d8c1865f337ce6d5fd485a7274bf02'||
+ !captureLoadingBytes.subarray(0,8).equals(Buffer.from('89504e470d0a1a0a','hex')))
+ throw Error('Monster InvoC PNG differs from the exact approved author blob');
+const captureLoadingOutput=path.join(combatOut,captureLoadingArt);
+copy(captureLoadingInput,captureLoadingOutput);
+if(!fs.readFileSync(captureLoadingOutput).equals(captureLoadingBytes))
+ throw Error('Monster InvoC PNG transport bytes changed');
+transport.push({owner:'combat',role:'capture-loading-art',
+ path:pins.combat.path+captureLoadingArt,size:captureLoadingBytes.length,
+ sha256:hash(captureLoadingBytes)});
 for(const [name,folder] of [['combat',combat],['exploration',exploration]]){
  const dest=name==='combat'?combatOut:explorationOut;
  for(const rel of required[name]){

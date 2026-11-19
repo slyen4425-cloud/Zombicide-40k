@@ -141,7 +141,7 @@
  position:absolute;inset:0;z-index:30;display:flex;align-items:flex-end;
  justify-content:center;padding:clamp(12px,3vh,24px);overflow:hidden;
  background-color:#07151d;
- background-image:url("./branding/monster-invoc-loading-v1.svg");
+ background-image:url("../../../vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png");
  background-position:center;background-repeat:no-repeat;background-size:contain;
  pointer-events:auto;
 }

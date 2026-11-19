@@ -10,7 +10,7 @@ test('Capture V2 consumes one certified Exploration main with hero + road render
  assert.equal(pins.exploration.sha,'e0175760e686c4c911e0b91d5614aab2d0b708fe');
  assert.equal(pins.exploration.certifiedCiRun,44535115973);
  assert.equal(pins.combat.ref,'main');
- assert.equal(pins.combat.sha,'2c80f57b0e5e70cac7cd22957a1ae906a64ed310',
+ assert.equal(pins.combat.sha,'61f704ac24f828721ff7ec24baed351078a409aa',
   'do not silently repin or duplicate the official Combat owner');
  assert.equal(pins.legacyCaptureRuntime,false);
 });

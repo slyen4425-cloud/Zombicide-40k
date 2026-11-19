@@ -19,7 +19,7 @@ test('only one creator image in the Capture owner, original title is depicted in
 });
 test('launch cover and native Explorer transition share the exact same art path',()=>{
  const html=read('adventure.html'),css=read('adventure-style-v1.css'),app=read('adventure-app-v1.mjs');
- assert.match(css,/branding\/monster-invoc-loading-v1\.svg/);
+ assert.ok(css.includes('vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png'));
  assert.match(css,/#adventure-launch-loading\[hidden\]\{display:none!important\}/);
  assert.match(html,/class="adventure-loading-brand" aria-label="Monster InvoC"/);
  assert.match(app,/activeLoadingImages\.launch\?\.\[0\]\?\?loadingArt\.pathname/);
@@ -32,22 +32,23 @@ test('launch cover and native Explorer transition share the exact same art path'
 
 test('official transport pins exactly one certified victory MP3 and latest Exploration owner',()=>{
  const pins=JSON.parse(read('source-pins-v1.json'));
- assert.equal(pins.combat.sha,'2c80f57b0e5e70cac7cd22957a1ae906a64ed310');
+ assert.equal(pins.combat.sha,'61f704ac24f828721ff7ec24baed351078a409aa');
  assert.equal(pins.exploration.sha,'e0175760e686c4c911e0b91d5614aab2d0b708fe');
  assert.equal(pins.combat.ref,'main');assert.equal(pins.exploration.ref,'main');
- assert.equal(pins.combat.certifiedCiRun,44409077423);
+ assert.equal(pins.combat.certifiedCiRun,44521372520);
  assert.equal(pins.exploration.certifiedCiRun,44535115973);
  assert.equal(pins.legacyCaptureRuntime,false);
  const stage=readFileSync(new URL('../tools/stage_capture_v2_labs.mjs',import.meta.url),'utf8');
  assert.match(stage,/assets\/runtime\/audio\/music-v1\/victory-01-0b52ce2b\.mp3/);
  assert.match(stage,/327d2734bca243c90c3b9f0b6bbf2f93fb78a667fbe380dc1be5486e68e250fe/);
  assert.match(stage,/copy\(victorySource,path\.join\(combatOut,victoryTrack\)\)/);
+ assert.match(stage,/787a24def6d8c1865f337ce6d5fd485a7274bf02/);
  assert.doesNotMatch(stage,/copy\(path\.join\(combat,'assets'\)/);
 });
 
 test('launch overlay keeps entire Monster InvoC art while filling every viewport',()=>{
  const css=read('adventure-style-v1.css');
- assert.ok(css.includes("background-image:url('./branding/monster-invoc-loading-v1.svg'),url('./branding/monster-invoc-loading-v1.svg')"));
+ assert.ok(css.includes("background-image:url('../../../vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png'),url('../../../vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png')"));
  assert.ok(css.includes('background-size:contain,cover'));
  assert.ok(css.includes('background-image:var(--capture-custom-art),linear-gradient('));
  assert.ok(css.includes('background-size:contain,100% 100%,cover'));

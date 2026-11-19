@@ -712,6 +712,10 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="creature"]').tap();
   const iframe=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
   await iframe.waitFor({state:'visible'});
+  // The new native-document loading mask deliberately hides the Shell back
+  // control until the actual iframe load + two paint frames have finished.
+  await page.locator('#gensCaptureV2Root .gensCaptureV2Loading')
+    .waitFor({state:'hidden',timeout:25000});
   // Native tool fills viewport; hub remains available only after explicit return.
   assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),false);
   assert.equal(await page.locator('#gensCaptureV2Root > header').isVisible(),false);

@@ -89,6 +89,8 @@
 
 /* Do not cover native combat HP with Shell navigation controls. */
 #gensCaptureV2Root[data-view="adventure"][data-adventure-combat-active="true"] > .gensCaptureV2NativeBar{display:none!important}
+/* Shell navigation remains hidden during native Exploration zone loading. */
+#gensCaptureV2Root[data-view="adventure"][data-adventure-loading-active="true"] > .gensCaptureV2NativeBar{display:none!important}
 
 /* The Capture module begins with a REAL universe library. Native adventure
    saves appear only after selecting an explicitly owned universe. */

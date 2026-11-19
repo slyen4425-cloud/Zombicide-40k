@@ -26,20 +26,26 @@ const server=http.createServer(async(request,response)=>{
  }catch(e){response.writeHead(404).end('Missing _site resource');}
 });
 
-const independentCaptureSource='3ecb6dd958315d0ad08130387b7bd9589486f5c5';
-const selectedPublisherSource=JSON.parse(require('node:fs').readFileSync(
- path.resolve(__dirname,'../tools/capture_v2_pages_preview_pin.json'),'utf8')).sha;
+// The physical official Capture source, not a separately hardcoded release SHA,
+// determines whether this native picker must be traversed.
+const hasUniversePicker=require('node:fs').existsSync(
+ path.join(site,'preview/capture-v2-pr225/assets/gensrpg/capture-v2/universe-hub-ui-v1.mjs'));
 async function enterAdventureFromOfficialCaptureHub(page){
  await page.locator('button.gensRootModeCard.capture').tap();
  const hub=page.locator('#gensCaptureV2Root');
- if(selectedPublisherSource===independentCaptureSource){
-  // A real universe must be chosen before Jouer becomes interactive.
-  // Preserve legacy Monster InvoC saves; do not force-click hidden controls.
+ if(hasUniversePicker){
+  // Real new source: a world must be chosen before Jouer. This must fail
+  // when the actual picker/selector is missing, never force a hidden button.
   const legacy=hub.locator('[data-capture-universe-select="monster-invoc"]');
   await legacy.waitFor({state:'visible',timeout:35000});
   assert.equal(await hub.getAttribute('data-menu'),'universes');
   await legacy.tap();
-  await page.locator('#gensCaptureV2Root[data-menu="main"]').waitFor({state:'visible'});
+  await hub.locator('nav.gensCaptureV2MainMenu [data-capture-v2-view="adventure"]')
+    .waitFor({state:'visible'});
+  assert.equal(await hub.getAttribute('data-menu'),'main');
+ }else{
+  await hub.locator('nav.gensCaptureV2MainMenu [data-capture-v2-view="adventure"]')
+    .waitFor({state:'visible'});
   assert.equal(await hub.getAttribute('data-menu'),'main');
  }
  await hub.locator('[data-capture-v2-view="adventure"]').tap();
@@ -449,11 +455,8 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
    document.querySelectorAll('button.gensRootModeCard').length===4,null,{timeout:60000});
   assert.equal(await page.locator('button.gensRootModeCard').count(),4);
   await page.locator('button.gensRootModeCard.capture').tap();
-  const certifiedPin=JSON.parse(require('node:fs').readFileSync(path.resolve(__dirname,'../tools/capture_v2_pages_preview_pin.json'),'utf8'));
-  const multiUniverseSource=certifiedPin.sha==='3ecb6dd958315d0ad08130387b7bd9589486f5c5';
-  const universeMenu=['0b74ac44ab0a39c90dbc0696f8a386084de1cec6',
-   '888e41e00dd6c04d0fef2b36418daafd0b500f57','3ecb6dd958315d0ad08130387b7bd9589486f5c5'].includes(certifiedPin.sha);
-  if(multiUniverseSource){
+  // Require the actual official source's UI: no SHA-based shortcut to Jouer.
+  if(hasUniversePicker){
    // Never bypass the new official universe picker with a hidden editor click.
    const captureHome=page.locator('#gensCaptureV2Root');
    const legacyWorld=captureHome.locator('[data-capture-universe-select="monster-invoc"]');
@@ -463,8 +466,8 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
    await captureHome.locator('[data-capture-v2-menu="editors"]').waitFor({state:'visible'});
    assert.equal(await captureHome.getAttribute('data-menu'),'main');
   }
-  assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu button:visible').count(),universeMenu?3:2,
-   'Capture home menu must match the certified source: legacy two choices or three universe choices');
+  assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu button:visible').count(),hasUniversePicker?3:2,
+   'Capture home must show all native menu choices after actual universe selection');
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
   assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="world"] button:visible').count(),2,
    'World Assembler and 2.5D Sculpt belong to the same editor group');

@@ -194,7 +194,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
    ? 'ea336f885fa7fb7e1ea43ebf95c58504874d852a' : explorationSha);
  const pixelExplorationSha='1efa72151701a144687fbece77aad8e4a1052d42';
  const warmupAudioExplorationSha='42d0f9608c17f6d56d65038ac895564252126d5e';
- const crossfadeExplorationSha='c9baf53402b678e83f9fab4b7770ab800f1a5f6c';
+ const crossfadeExplorationSha='e0175760e686c4c911e0b91d5614aab2d0b708fe';
  const expectedOfficialRendererBlob=[pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha].includes(explorationSha)
    ?'53545186122ce963f66cdb15172d8b145728caa7'
    :'e20f6ccf4c717574f0e0260bc481c839e66444f8';

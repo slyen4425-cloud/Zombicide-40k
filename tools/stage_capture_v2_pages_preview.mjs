@@ -255,6 +255,8 @@ const authorExportCameraExplorationSha='f17e4aea75a49da42f7c9b945cc26e8934fc1424
 const pixelSouthBlob='53545186122ce963f66cdb15172d8b145728caa7';
 const fringeRoadExplorationSha='0128e69c290b43014a5a899804c588d805e2b4b0';
 const fringeRoadSouthBlob='1a0869afc5b258e8f403f43cd26b3f417a6c8786';
+const recoveredWorldExplorationSha='da4420cef7ff4666d93fb492f246518e0c6803f9';
+const recoveredWorldSouthBlob='6c101756bdf9c58a9ae8cf3fe104e49575145748';
 const oldSouthBacking="  ctx.fillStyle=baseColor;ctx.fillRect(0,0,totalWidth,totalHeight);";
 const officialSouthBacking="  // The outer cliff is deliberately disabled in the canonical 2.5D editor\n  // and its Tester, including the decorative south fringe. Raised last-row\n  // tops end BEFORE the bottom of this backing rectangle; a solid baseColor\n  // leaked through as the broad grey/green slanted strip on Android. Carry\n  // the EXACT same Material Registry texture underneath the raised tops.\n  // Keep the original backing for callers that explicitly draw a cliff rim.\n  // This is visual-only: no new cells, heights, collisions or saved paint.\n  ctx.fillStyle=!drawOuterSouthRim&&pattern?pattern:baseColor;\n  ctx.fillRect(0,0,totalWidth,totalHeight);";
 let southRendererOriginSha;
@@ -295,6 +297,19 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
     !pinnedSouthRenderer.includes(officialSouthBacking))
    throw Error('Certified raised-road renderer differs from official Exploration main');
  releasedSouthBlob=fringeRoadSouthBlob;
+ southRendererOriginSha=sourcePin.exploration.sha;
+}else if(sourcePin.exploration.sha===recoveredWorldExplorationSha){
+ // Official owner removed tile-by-tile height tint, preserving native road
+ // paint at raised elevations and the strict WorldDocument save contract.
+ // Only ship the immutable official bytes, never patch the renderer here.
+ if(gitBlobSha(pinnedSouthRenderer)!==recoveredWorldSouthBlob||
+    pinnedSouthRenderer.includes('ctx.fillRect(rect.x,rect.y,rect.width,rect.height)')||
+    !pinnedSouthRenderer.includes('for(const {side,opacity} of info.contactShadows)')||
+    !pinnedSouthRenderer.includes('sculptPaintCellClipV1(ctx,x,y,w,h)')||
+    !pinnedSouthRenderer.includes('ctx.rect(x-seam,y-seam,w+2*seam,2*seam)')||
+    !pinnedSouthRenderer.includes(officialSouthBacking))
+   throw Error('Certified native elevated-ground renderer differs from Exploration main');
+ releasedSouthBlob=recoveredWorldSouthBlob;
  southRendererOriginSha=sourcePin.exploration.sha;
 }else throw Error('Unreviewed Exploration renderer version; certification required');
 const provenance={

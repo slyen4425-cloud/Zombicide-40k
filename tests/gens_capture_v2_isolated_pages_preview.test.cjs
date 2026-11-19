@@ -208,7 +208,7 @@ test('Capture editor combat previews reuse the ONE signed Lab transport with mus
 
 test('native World Builder map exporter and in-game 200% dezoom are shipped once from certified Exploration',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(source.exploration.sha,'0128e69c290b43014a5a899804c588d805e2b4b0');
+ assert.equal(source.exploration.sha,'da4420cef7ff4666d93fb492f246518e0c6803f9');
  const helper='vendor/exploration-lab/src/builder/world-assembler-map-preset-export-v1.js';
  required(trial,helper);
  const page=read(trial,'vendor/exploration-lab/world-assembler.html').toString('utf8');
@@ -243,16 +243,19 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  const crossfadeExplorationSha='e0175760e686c4c911e0b91d5614aab2d0b708fe';
  const authorExportCameraExplorationSha='f17e4aea75a49da42f7c9b945cc26e8934fc1424';
  const fringeRoadExplorationSha='0128e69c290b43014a5a899804c588d805e2b4b0';
- const expectedOfficialRendererBlob=explorationSha===fringeRoadExplorationSha
-   ?'1a0869afc5b258e8f403f43cd26b3f417a6c8786'
-   :[pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha].includes(explorationSha)
+ const recoveredWorldExplorationSha='da4420cef7ff4666d93fb492f246518e0c6803f9';
+ const expectedOfficialRendererBlob=explorationSha===recoveredWorldExplorationSha
+   ?'6c101756bdf9c58a9ae8cf3fe104e49575145748'
+   :explorationSha===fringeRoadExplorationSha
+    ?'1a0869afc5b258e8f403f43cd26b3f417a6c8786'
+    :[pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha].includes(explorationSha)
     ?'53545186122ce963f66cdb15172d8b145728caa7'
     :'e20f6ccf4c717574f0e0260bc481c839e66444f8';
  assert.equal(owner?.officialBlobSha,expectedOfficialRendererBlob);
  assert.equal(provenance.exploration.sha,explorationSha,
    'the complete native Exploration checkout must match the source pin');
  assert.ok(['13bbd8230d8dfcef612586974b2dcb54e18e16c4',
-   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha].includes(explorationSha),
+   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha].includes(explorationSha),
    'release must reject unreviewed Exploration main SHAs');
  const bytes=read(trial,official);
  const gitBlob=crypto.createHash('sha1')
@@ -267,7 +270,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  const sculpt=read(trial,'vendor/exploration-lab/src/sculpt-lab-main.js').toString('utf8');
  assert.match(sculpt,/drawOuterSouthRim:false/);
  assert.match(sculpt,/drawDecorativeFringeTerrain\(\)/);
- if(explorationSha===fringeRoadExplorationSha){
+ if([fringeRoadExplorationSha,recoveredWorldExplorationSha].includes(explorationSha)){
   assert.match(sculpt,/drawDecorativeFringeObjects\('back'\)/);
   assert.match(sculpt,/drawDecorativeFringeObjects\('front'\)/);
   const north=sculpt.indexOf("drawDecorativeFringeObjects('back');");
@@ -275,8 +278,20 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
   const south=sculpt.indexOf("drawDecorativeFringeObjects('front');",hero);
   assert.ok(north>=0&&hero>north&&south>hero,
    'a southern tree must layer in front of the player but own no collision');
-  assert.match(text,/const rect=sculptPaintCellBoundsV1\(ctx,x,y,w,h\)/);
-  assert.match(text,/ctx.fillRect\(rect.x,rect.y,rect.width,rect.height\)/);
+  if(explorationSha===recoveredWorldExplorationSha){
+   assert.doesNotMatch(text,/ctx.fillRect\(rect.x,rect.y,rect.width,rect.height\)/,
+    'no per-tile translucent altitude paint on a raised road or grass');
+   assert.match(text,/for\(const \{side,opacity\} of info.contactShadows\)/,
+    'actual cliff shadows remain after removing the tint');
+   assert.match(sculpt,/downloadWorldSculptRecovery\(/);
+   assert.match(sculpt,/worldLinkedBuildingWouldDisappear\(/);
+   const adapter=read(trial,'vendor/exploration-lab/src/builder/sculpt-world-area-link.js').toString('utf8');
+   assert.match(adapter,/snapshotSculptWorldAreaForRecovery\(/);
+   assert.match(sculpt,/world-recovery\.json/);
+  }else{
+   assert.match(text,/const rect=sculptPaintCellBoundsV1\(ctx,x,y,w,h\)/);
+   assert.match(text,/ctx.fillRect\(rect.x,rect.y,rect.width,rect.height\)/);
+  }
   assert.doesNotMatch(text,/ctx.fillRect\(x-1,y-1,w\+2,h\+2\)/);
  }
 });

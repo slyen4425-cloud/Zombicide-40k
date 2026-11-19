@@ -1783,6 +1783,7 @@ $('adventure-room-retry-share').addEventListener('click',()=>{
 let loadingArtLibraryPromise=null;
 const loadingArtObjectUrls=new Set(),loadingArtPreviewUrls=new Set();
 const loadingArtRotation={launch:0,zone:0,combat:0};
+let journeyLoadingCrossfade=null;
 function loadingArtLibrary(){
  if(!loadingArtLibraryPromise)
   loadingArtLibraryPromise=createAdventureLoadingArtLibraryV1().catch(error=>{
@@ -1797,8 +1798,7 @@ function revokeLoadingArt(urls){
 }
 async function refreshLoadingArtEditor(){
  revokeLoadingArt(loadingArtPreviewUrls);
- const scene=$('adventure-loading-art-scene').value;
- const entries=await (await loadingArtLibrary()).list(scene);
+ const entries=await (await loadingArtLibrary()).list();
  const host=$('adventure-loading-art-list');
  host.replaceChildren();
  if(!entries.length){
@@ -1824,40 +1824,56 @@ async function refreshLoadingArtEditor(){
   item.append(image,label,remove);host.append(item);
  }
 }
-$('adventure-loading-art-scene').addEventListener('change',()=>{
- void refreshLoadingArtEditor().catch(error=>text($('adventure-loading-art-status'),error.message));
-});
 $('adventure-loading-art-files').addEventListener('change',async event=>{
  const input=event.currentTarget;
  try{
-  await (await loadingArtLibrary()).add($('adventure-loading-art-scene').value,input.files);
+  await (await loadingArtLibrary()).add('launch',input.files);
   input.value='';await refreshLoadingArtEditor();
   text($('adventure-loading-art-status'),'Illustrations enregistrées.');
  }catch(error){input.value='';text($('adventure-loading-art-status'),error.message);}
 });
 void refreshLoadingArtEditor().catch(error=>text($('adventure-loading-art-status'),error.message));
 async function prepareLoadingArtworkForPlay(){
+ const requestedAt=journeyLaunchEpoch;
  revokeLoadingArt(loadingArtObjectUrls);
  const scenes={};
  let library;
  try{library=await loadingArtLibrary();}
  catch(error){console.warn('Bibliothèque locale inaccessible',error);return scenes;}
  try{
-  for(const scene of ['launch','zone','combat']){
-   const urls=await library.urls(scene);
-   for(const url of urls)loadingArtObjectUrls.add(url);
-   scenes[scene]=captureLoadingArtSequenceV1(urls,loadingArtRotation[scene]++);
-  }
+  // Simple mode: the EXISTING Capture image library remains the only store.
+  // All uploaded images form one ordered gallery across all loading contexts.
+  const entries=(await library.list()).slice(0,12);
+  // A cancelled launch must never revive its screen or leave Blob URLs live.
+  if(requestedAt!==journeyLaunchEpoch||journeyLoading.hidden)return {};
+  const urls=entries.map(record=>URL.createObjectURL(record.blob));
+  for(const url of urls)loadingArtObjectUrls.add(url);
+  const sequence=captureLoadingArtSequenceV1(urls,loadingArtRotation.launch++);
+  for(const scene of ['launch','zone','combat'])scenes[scene]=sequence;
  }catch(error){
   revokeLoadingArt(loadingArtObjectUrls);
   console.warn('Bibliothèque de chargement non lisible, art officiel conservé',error);
   return {};
  }
+ if(requestedAt!==journeyLaunchEpoch||journeyLoading.hidden){
+  revokeLoadingArt(loadingArtObjectUrls);return {};
+ }
  const cover=scenes.launch?.[0]??null;
  const loading=$('adventure-launch-loading');
+ journeyLoadingCrossfade?.dispose();journeyLoadingCrossfade=null;
  if(cover){
   loading.dataset.customArt='true';
   loading.style.setProperty('--capture-custom-art','url("'+cover+'")');
+  try{
+   // The common Exploration presentation helper is optional on an older
+   // preview source; it does not become a second Capture loading owner.
+   const artwork=await import('../../../vendor/exploration-lab/src/play/exploration-loading-art-v1.js');
+   if(requestedAt!==journeyLaunchEpoch||journeyLoading.hidden)return {};
+   if(typeof artwork.mountCaptureLoadingArtCrossfadeV1==='function')
+    journeyLoadingCrossfade=artwork.mountCaptureLoadingArtCrossfadeV1({
+     host:loading,images:scenes.launch,documentRef:document,windowRef:window
+    });
+  }catch(error){console.warn('Fondu de chargement indisponible',error);}
  }else{
   delete loading.dataset.customArt;
   loading.style.removeProperty('--capture-custom-art');
@@ -1877,6 +1893,7 @@ function showJourneyLoading(message){
  setShellAdventureLoadingVisibility(true);
 }
 function dismissJourneyLoading(){
+ journeyLoadingCrossfade?.dispose();journeyLoadingCrossfade=null;
  journeyLoading.hidden=true;
  setShellAdventureLoadingVisibility(activeZoneLoading);
 }
@@ -1895,6 +1912,8 @@ function cancelPendingAdventureLaunch(){
  document.body.dataset.adventurePlaying='false';
  document.querySelector('[data-adventure-app]').hidden=false;
  dismissJourneyLoading();
+ // A cancelled preflight must not retain local Blob URLs or a pending fade.
+ revokeLoadingArt(loadingArtObjectUrls);
  showSave();
 }
 $('adventure-loading-cancel').addEventListener('click',()=>{

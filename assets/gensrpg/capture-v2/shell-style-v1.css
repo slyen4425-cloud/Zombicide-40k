@@ -132,3 +132,27 @@
   max-height:calc(100dvh - 92px)
  }
 }
+
+
+/* Shell-owned document transitions: one mask while the official native
+   iframe loads. The art crossfade is presentation-only and never gates play. */
+#gensCaptureV2Root .gensCaptureV2Stage{position:relative;isolation:isolate}
+#gensCaptureV2Root .gensCaptureV2Loading{
+ position:absolute;inset:0;z-index:30;display:flex;align-items:flex-end;
+ justify-content:center;padding:clamp(12px,3vh,24px);overflow:hidden;
+ background-color:#07151d;
+ background-image:url("./branding/monster-invoc-loading-v1.svg");
+ background-position:center;background-repeat:no-repeat;background-size:contain;
+ pointer-events:auto;
+}
+#gensCaptureV2Root .gensCaptureV2LoadingLabel{
+ position:relative;z-index:1;max-width:min(92vw,590px);
+ background:rgba(6,18,26,.84);color:#f0fff6;
+ border:1px solid #648d8d;border-radius:12px;
+ box-shadow:0 8px 25px #0009;
+ padding:10px 18px;font-size:clamp(12px,2vw,17px);
+ text-align:center;pointer-events:none
+}
+#gensCaptureV2Root[data-native-loading="true"] > .gensCaptureV2NativeBar{
+ display:none!important
+}

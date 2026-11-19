@@ -37,6 +37,80 @@
   if(root.GensCaptureV2)throw new Error("Duplicate Capture module authority");
   let host=null,frame=null,stage=null,notice=null,current=null,nativeTitle=null;
   let selectedUniverse=null,universePanel=null,universeUi=null,universeLoadEpoch=0;
+  let nativeLoading=null;
+  const officialLoadingArt=new URL('assets/gensrpg/capture-v2/branding/monster-invoc-loading-v1.svg',base).href;
+  function dismissNativeLoading(){
+    if(!nativeLoading)return;
+    const previous=nativeLoading;nativeLoading=null;
+    previous.crossfade?.dispose();
+    for(const url of previous.urls)root.URL.revokeObjectURL(url);
+    previous.overlay.remove();
+    if(host)delete host.dataset.nativeLoading;
+  }
+  async function decorateNativeLoading(state){
+    let urls=[];
+    try{
+      // The existing Capture art owner is the ONLY source of player
+      // artwork. Read all three legacy categories as ONE simple gallery.
+      const [libraryOwner,fadeOwner]=await Promise.all([
+        import(new URL('assets/gensrpg/capture-v2/adventure-loading-art-v1.mjs',base).href),
+        import(new URL('vendor/exploration-lab/src/play/exploration-loading-art-v1.js',base).href)
+      ]);
+      const library=await libraryOwner.createAdventureLoadingArtLibraryV1();
+      try{
+        const records=await library.list();
+        urls=records.slice(0,12).map(record=>root.URL.createObjectURL(record.blob));
+      }finally{library.close();}
+      if(nativeLoading!==state){
+        for(const url of urls)root.URL.revokeObjectURL(url);
+        return;
+      }
+      state.urls=urls;
+      const artwork=urls.length?urls:[officialLoadingArt];
+      if(typeof fadeOwner.mountCaptureLoadingArtCrossfadeV1==='function')
+        state.crossfade=fadeOwner.mountCaptureLoadingArtCrossfadeV1({
+          host:state.overlay,images:artwork,documentRef:root.document,windowRef:root
+        });
+      else state.overlay.style.backgroundImage='url('+JSON.stringify(artwork[0])+')';
+    }catch(error){
+      for(const url of urls)if(!state.urls.includes(url))root.URL.revokeObjectURL(url);
+      // Failure of decoration never blocks the REAL native iframe readiness.
+      console.warn('Illustrations de chargement indisponibles',error);
+    }
+  }
+  function showNativeLoading(nativeFrame,label){
+    dismissNativeLoading();
+    const overlay=root.document.createElement('div');
+    overlay.className='gensCaptureV2Loading';
+    overlay.setAttribute('role','status');
+    overlay.setAttribute('aria-live','polite');
+    const message=root.document.createElement('span');
+    message.className='gensCaptureV2LoadingLabel';
+    message.textContent='Chargement · '+label;
+    overlay.append(message);
+    stage.append(overlay);
+    const state={overlay,urls:[],crossfade:null};
+    nativeLoading=state;
+    host.dataset.nativeLoading='true';
+    void decorateNativeLoading(state);
+    // Lab documents are not reconstructed by Capture: their own iframe load
+    // completes the Shell transition after the browser has painted twice.
+    nativeFrame.addEventListener('load',()=>{
+      if(nativeLoading!==state)return;
+      const afterPaint=typeof root.requestAnimationFrame==='function'
+        ?root.requestAnimationFrame.bind(root)
+        :callback=>root.setTimeout(callback,0);
+      afterPaint(()=>afterPaint(()=>{
+        if(nativeLoading===state)dismissNativeLoading();
+      }));
+    },{once:true});
+    nativeFrame.addEventListener('error',()=>{
+      if(nativeLoading===state){
+        message.textContent='Chargement indisponible · '+label;
+        state.crossfade?.dispose();state.crossfade=null;
+      }
+    },{once:true});
+  }
   function urlFor(kind){
     const info=VIEWS[kind];
     if(!info)throw new RangeError("Unknown Capture native owner");
@@ -94,6 +168,7 @@
     // screens, never create a world or choose a saved session in the Shell.
     if(kind==='adventure'&&['new','load'].includes(startView))
       url.searchParams.set('start',startView);
+    dismissNativeLoading();
     if(frame){frame.src="about:blank";frame.remove();frame=null;}
     frame=root.document.createElement("iframe");
     frame.title=info.label;
@@ -104,8 +179,9 @@
     frame.setAttribute("allow","fullscreen");
     frame.setAttribute("allowfullscreen","");
     frame.setAttribute("data-capture-v2-native",info.family);
-    frame.src=url.href;
     stage.replaceChildren(frame);
+    showNativeLoading(frame,info.label);
+    frame.src=url.href;
     current=kind;
     nativeTitle.textContent=info.label;
     notice.textContent=info.label;
@@ -193,6 +269,7 @@
   }
   function home(){
     if(!host)return false;
+    dismissNativeLoading();
     if(gameFullscreenActive())void exitGameFullscreen();
     if(frame){frame.src="about:blank";frame.remove();frame=null;}
     stage.replaceChildren();
@@ -331,6 +408,7 @@
   }
   function stop(){
     if(!host)return false;
+    dismissNativeLoading();
     if(gameFullscreenActive())void exitGameFullscreen();
     if(frame){frame.src="about:blank";frame.remove();}
     frame=null;stage=null;notice=null;nativeTitle=null;current=null;

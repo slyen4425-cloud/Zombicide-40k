@@ -1783,6 +1783,7 @@ $('adventure-room-retry-share').addEventListener('click',()=>{
 let loadingArtLibraryPromise=null;
 const loadingArtObjectUrls=new Set(),loadingArtPreviewUrls=new Set();
 const loadingArtRotation={launch:0,zone:0,combat:0};
+let journeyLoadingCrossfade=null;
 function loadingArtLibrary(){
  if(!loadingArtLibraryPromise)
   loadingArtLibraryPromise=createAdventureLoadingArtLibraryV1().catch(error=>{
@@ -1843,11 +1844,13 @@ async function prepareLoadingArtworkForPlay(){
  try{library=await loadingArtLibrary();}
  catch(error){console.warn('Bibliothèque locale inaccessible',error);return scenes;}
  try{
-  for(const scene of ['launch','zone','combat']){
-   const urls=await library.urls(scene);
-   for(const url of urls)loadingArtObjectUrls.add(url);
-   scenes[scene]=captureLoadingArtSequenceV1(urls,loadingArtRotation[scene]++);
-  }
+  // Simple mode: the EXISTING Capture image library remains the only store.
+  // All uploaded images form one ordered gallery across all loading contexts.
+  const entries=(await library.list()).slice(0,12);
+  const urls=entries.map(record=>URL.createObjectURL(record.blob));
+  for(const url of urls)loadingArtObjectUrls.add(url);
+  const sequence=captureLoadingArtSequenceV1(urls,loadingArtRotation.launch++);
+  for(const scene of ['launch','zone','combat'])scenes[scene]=sequence;
  }catch(error){
   revokeLoadingArt(loadingArtObjectUrls);
   console.warn('Bibliothèque de chargement non lisible, art officiel conservé',error);
@@ -1855,9 +1858,19 @@ async function prepareLoadingArtworkForPlay(){
  }
  const cover=scenes.launch?.[0]??null;
  const loading=$('adventure-launch-loading');
+ journeyLoadingCrossfade?.dispose();journeyLoadingCrossfade=null;
  if(cover){
   loading.dataset.customArt='true';
   loading.style.setProperty('--capture-custom-art','url("'+cover+'")');
+  try{
+   // The common Exploration presentation helper is optional on an older
+   // preview source; it does not become a second Capture loading owner.
+   const artwork=await import('../../../vendor/exploration-lab/src/play/exploration-loading-art-v1.js');
+   if(typeof artwork.mountCaptureLoadingArtCrossfadeV1==='function')
+    journeyLoadingCrossfade=artwork.mountCaptureLoadingArtCrossfadeV1({
+     host:loading,images:scenes.launch,documentRef:document,windowRef:window
+    });
+  }catch(error){console.warn('Fondu de chargement indisponible',error);}
  }else{
   delete loading.dataset.customArt;
   loading.style.removeProperty('--capture-custom-art');
@@ -1877,6 +1890,7 @@ function showJourneyLoading(message){
  setShellAdventureLoadingVisibility(true);
 }
 function dismissJourneyLoading(){
+ journeyLoadingCrossfade?.dispose();journeyLoadingCrossfade=null;
  journeyLoading.hidden=true;
  setShellAdventureLoadingVisibility(activeZoneLoading);
 }

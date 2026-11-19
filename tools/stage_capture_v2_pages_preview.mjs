@@ -277,7 +277,7 @@ const provenance={
   combat:{repository:sourcePin.combat.repository,ref:'main',sha:sourcePin.combat.sha},
   exploration:{repository:sourcePin.exploration.repository,ref:'main',sha:sourcePin.exploration.sha},
   explorationSouthRenderer:{repository:sourcePin.exploration.repository,
-    mainSha:'ea336f885fa7fb7e1ea43ebf95c58504874d852a',
+    mainSha:southRendererOriginSha,
     officialBlobSha:officialSouthBlob,
     path:'vendor/exploration-lab/'+southRendererRel},
   legacyCaptureRuntime:false,

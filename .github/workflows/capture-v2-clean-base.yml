@@ -231,6 +231,7 @@ jobs:
             data
             examples/dom-demo
             assets/runtime/audio/music-v1
+            assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png
       - name: Read official Exploration from main at its certified SHA
         uses: actions/checkout@v4
         with:

@@ -38,7 +38,7 @@
   let host=null,frame=null,stage=null,notice=null,current=null,nativeTitle=null;
   let selectedUniverse=null,universePanel=null,universeUi=null,universeLoadEpoch=0;
   let nativeLoading=null;
-  const officialLoadingArt=new URL('assets/gensrpg/capture-v2/branding/monster-invoc-loading-v1.svg',base).href;
+  const officialLoadingArt=new URL('vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png',base).href;
   function dismissNativeLoading(){
     if(!nativeLoading)return;
     const previous=nativeLoading;nativeLoading=null;

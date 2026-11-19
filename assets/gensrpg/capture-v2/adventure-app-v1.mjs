@@ -2055,7 +2055,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  url.searchParams.set('play','1');
  // Explorer reuses its native loading masks; only one artwork URI on this
  // same origin is passed by Capture, without copying media into the lab.
- const loadingArt=new URL('./branding/monster-invoc-loading-v1.svg',import.meta.url);
+ const loadingArt=new URL('../../../vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png',import.meta.url);
  if(loadingArt.origin!==url.origin)throw Error('Illustration de transition hors origine');
  url.searchParams.set('loadingArt',activeLoadingImages.launch?.[0]??loadingArt.pathname);
  if(activeLoadingImages.zone?.length)

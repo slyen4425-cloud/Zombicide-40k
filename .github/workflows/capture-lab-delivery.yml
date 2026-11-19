@@ -56,6 +56,7 @@ jobs:
             data
             examples/dom-demo
             assets/runtime/audio/music-v1
+            assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png
       - name: Checkout Exploration only from approved main
         uses: actions/checkout@v4
         with:

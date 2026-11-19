@@ -310,7 +310,7 @@ main[hidden],#adventure-play-frame[hidden]{display:none!important}
  background-color:#07151d;
  /* One physical author asset: full uncropped foreground, same asset filling
     landscape/portrait side bands. No cropping of the Monster InvoC title. */
- background-image:url('./branding/monster-invoc-loading-v1.svg'),url('./branding/monster-invoc-loading-v1.svg');
+ background-image:url('../../../vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png'),url('../../../vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png');
  background-position:center,center;background-size:contain,cover;
  background-repeat:no-repeat;
  color:#eafff6;text-align:center;overflow:auto;overscroll-behavior:contain;

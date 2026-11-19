@@ -1912,6 +1912,8 @@ function cancelPendingAdventureLaunch(){
  document.body.dataset.adventurePlaying='false';
  document.querySelector('[data-adventure-app]').hidden=false;
  dismissJourneyLoading();
+ // A cancelled preflight must not retain local Blob URLs or a pending fade.
+ revokeLoadingArt(loadingArtObjectUrls);
  showSave();
 }
 $('adventure-loading-cancel').addEventListener('click',()=>{

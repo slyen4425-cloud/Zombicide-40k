@@ -233,12 +233,11 @@ const pwaEditorJs=editorJs.replace(blockingFullscreenGate,nonblockingFullscreenG
 if(pwaEditorJs.replace(nonblockingFullscreenGate,blockingFullscreenGate)!==officialEditorJs)
  throw Error('PWA integration changed content outside the one fullscreen-await seam');
 fs.writeFileSync(editorJsPath,pwaEditorJs);
-// Publisher integration of one certified native Exploration renderer file.
-// The immutable Capture candidate pins Exploration main@13bbd823; its terrain
-// engine, saves, assets, objects and browser routes are deliberately frozen.
-// We adapt only the south backing bug to the exact code/blob approved on
-// Exploration main@ea336f88. This code MUST reconstruct the official owner
-// renderer byte-for-byte, otherwise publication fails closed.
+// Publisher integration of the ONE certified native Exploration renderer.
+// Older candidates may need the historic byte-for-byte south backing adapter.
+// Current candidates transport their actual main renderer untouched; only
+// two reviewed official renderer blobs are allowed, after main ancestry is
+// verified against the source pin. No reimplementation or silent CSS cover.
 const southRendererRel='src/render/sculpt-height-renderer.js';
 const southRendererPath=path.join(exploreDest,southRendererRel);
 const pinnedSouthRenderer=fs.readFileSync(southRendererPath,'utf8');
@@ -246,11 +245,12 @@ const gitBlobSha=data=>crypto.createHash('sha1')
  .update('blob '+Buffer.byteLength(data)+String.fromCharCode(0)).update(data).digest('hex');
 const sourceSouthBlob='cc8dd1190eee4956e1b647d3825b526fcd66fc53';
 const officialSouthBlob='e20f6ccf4c717574f0e0260bc481c839e66444f8';
+const officialPixelJoinBlob='53545186122ce963f66cdb15172d8b145728caa7';
 const legacyExplorationSha='13bbd8230d8dfcef612586974b2dcb54e18e16c4';
-const currentExplorationSha='4df91fdc4d5eedcf421e4767e175cba80e469bb1';
 const oldSouthBacking="  ctx.fillStyle=baseColor;ctx.fillRect(0,0,totalWidth,totalHeight);";
 const officialSouthBacking="  // The outer cliff is deliberately disabled in the canonical 2.5D editor\n  // and its Tester, including the decorative south fringe. Raised last-row\n  // tops end BEFORE the bottom of this backing rectangle; a solid baseColor\n  // leaked through as the broad grey/green slanted strip on Android. Carry\n  // the EXACT same Material Registry texture underneath the raised tops.\n  // Keep the original backing for callers that explicitly draw a cliff rim.\n  // This is visual-only: no new cells, heights, collisions or saved paint.\n  ctx.fillStyle=!drawOuterSouthRim&&pattern?pattern:baseColor;\n  ctx.fillRect(0,0,totalWidth,totalHeight);";
 let southRendererOriginSha;
+let publishedRendererBlob=officialSouthBlob;
 if(sourcePin.exploration.sha===legacyExplorationSha){
  if(gitBlobSha(pinnedSouthRenderer)!==sourceSouthBlob||
     pinnedSouthRenderer.split(oldSouthBacking).length!==2)
@@ -261,13 +261,19 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
   throw Error('Legacy south renderer adapter cannot reproduce certified official source');
  fs.writeFileSync(southRendererPath,correctedSouthRenderer);
  southRendererOriginSha='ea336f885fa7fb7e1ea43ebf95c58504874d852a';
-}else if(sourcePin.exploration.sha===currentExplorationSha){
- // New canonical Exploration contains this fix; do not fork or mutate it.
- if(gitBlobSha(pinnedSouthRenderer)!==officialSouthBlob||
+}else{
+ // Exploration main ancestry and checkout SHA were already verified above.
+ // Its whole native renderer is transported byte-for-byte. This release may
+ // use either the former south-backed version or its approved Pixel join fix.
+ const blob=gitBlobSha(pinnedSouthRenderer);
+ if(![officialSouthBlob,officialPixelJoinBlob].includes(blob)||
     !pinnedSouthRenderer.includes(officialSouthBacking))
-  throw Error('Latest official Exploration renderer is not the certified south correction');
- southRendererOriginSha=currentExplorationSha;
-}else throw Error('Unreviewed Exploration renderer version; certification required');
+  throw Error('Official Exploration renderer is not an approved certified blob');
+ if(blob===officialPixelJoinBlob&&!pinnedSouthRenderer.includes('const seam=.75;'))
+  throw Error('Certified Pixel join strip is missing from native Exploration renderer');
+ southRendererOriginSha=sourcePin.exploration.sha;
+ publishedRendererBlob=blob;
+}
 const provenance={
   schema:'gensrpg-capture-v2-isolated-pages-preview-v1',
   publicPath:previewPin.publicPath,
@@ -278,7 +284,7 @@ const provenance={
   exploration:{repository:sourcePin.exploration.repository,ref:'main',sha:sourcePin.exploration.sha},
   explorationSouthRenderer:{repository:sourcePin.exploration.repository,
     mainSha:southRendererOriginSha,
-    officialBlobSha:officialSouthBlob,
+    officialBlobSha:publishedRendererBlob,
     path:'vendor/exploration-lab/'+southRendererRel},
   legacyCaptureRuntime:false,
   productionRootSha256:preserved['index.html'],

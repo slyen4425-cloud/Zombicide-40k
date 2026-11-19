@@ -25,12 +25,12 @@ test('published Monster Capture stays isolated and retains exact certified origi
  assert.equal(file.officialVisuals.repository,'slyen4425-cloud/GenSrpg_labo_combat_dynamique');
  assert.equal(file.officialVisuals.ref,'global-assets');
  // The original 9eef5847 author branch remains an ancestor: GitHub compare
- // 9eef5847...cc76db7 reports 46 ahead / 0 behind (147 changed assets).
+ // The new Raiiven author archive import advances global-assets without deleting\n // the Veuve V2 or other author media; immutable SHA and import run stay pinned.
  // The official Veuve V2 import workflow publishes this exact immutable asset
  // catalog; Pages MUST still validate all referenced physical files and size.
- assert.equal(file.officialVisuals.sha,'cc76db7ee8db3400890666e9888d52cba69db4c3',
-  'official Veuve V2 icons and diagonal wall are now present in a descendant of the prior author catalog');
- assert.equal(file.officialVisuals.certifiedCiRun,44406793432,
+ assert.equal(file.officialVisuals.sha,'b45153efd5d2c4dec53d45a818131aca1cae6705',
+  'the verified canonical catalog must contain Raiiven 4 motion clips and retain Veuve jaune media');
+ assert.equal(file.officialVisuals.certifiedCiRun,44616943963,
   'provenance is the successful author asset import; final Pages and browser checks remain mandatory');
  const workflow=fs.readFileSync(new URL('../.github/workflows/main.yml',import.meta.url),'utf8');
  assert.match(workflow,/steps\.preview_labs\.outputs\.combat/);

@@ -1,3 +1,13 @@
+## 2026-11-19 — Raiiven : publication du catalogue 4 animations dans la PWA Capture V2
+- START Publisher `main@14aa03ee2992cc013ed92dbd8ce8126fe75276ec`, checkpoint `checkpoint/gensrpg-start-raiiven-animations-pwa-20261119`, branche `work/gensrpg-raiiven-animations-pwa-20261119`.
+- Source V2 immutable actuelle : `c8b687d3a42e9cbc7a467925d43f5a82232e151d`. Nouveau candidat source isolé : `work/gensrpg-raiiven-capture-v2-source-20261119` dérivé de ce SHA, mise à jour uniquement du `combat.sha` et `certifiedCiRun` dans la source V2 après certif Combat main.
+- Objectif : rendre disponibles dans l'éditeur Capture de la PWA les 4 animations Raiiven (dos mouvement 7f, dos attaque 5f, face mouvement 6f, face attaque 5f) via les IDs canoniques du seul `global-assets`. Le nom source `PROTO` de la dernière archive reste historique ; GIF 5f approuvé par l'auteur.
+- Publisher ne changera que le pin Capture V2 de l'unique source candidate et le pin du visuel officiel après publication de `global-assets`, sans recopier ZIP/atlas, toucher aux compétences, stats, sauvegardes, menus, explorateur, Dungeon, SW ou root Shell.
+- Protected : aucun saut arbitraire de modèle, aucune créature gameplay inventée — Raiiven reste visuel disponible dans les contrôles de l'éditeur ; promotion en Bestiaire dépend des données créature fournies par l'auteur.
+- Gates : main et global-assets Combat CI 5/5 / SHA exact, V2 preview source et pin officiel cohérents, tests d'éditeur, browser paysage, budget Pages <900Mio, PWA HTTPS sur SHA publié, checkpoint GREEN. État NON GREEN avant ces preuves.
+
+---
+
 ## 2026-11-19 — PWA C2 : terrain sur hauteur + secours de WorldArea en cas de Portal invalide
 - Retour visuel réel : capture auteur du 19/11, route/herbe sur plateau élevée toujours décolorée malgré #544 ; sauvegarde refusée « portal-invalid-or-duplicate » et perte d'une heure de peinture. Ne jamais prétendre que l'ancien contrôle des pixels suffisait.
 - START Publisher `main@b9a343f0496a3a73a567fc3a240fa7a5fcff0dec`, checkpoint `checkpoint/gensrpg-before-map-loss-recovery-publisher-20261119`, branche `work/gensrpg-map-loss-recovery-publisher-20261119`. Source staging Capture PR #545 distincte, ne pas écrire dans ses branches autres que le merge certifié.

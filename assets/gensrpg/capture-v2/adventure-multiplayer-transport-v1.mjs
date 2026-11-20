@@ -58,8 +58,44 @@ export function createCaptureRoomTransportV1({client}={}){
   throw new TypeError('Client Supabase authentifié requis');
  let channel=null, activeRoomId=null,subscriptionGeneration=0;
  // Only a read-through cache. Server RLS / sequenced RPC stays authoritative.
- let observedRoom=null,lastRealtimeAck=null;
+ let observedRoom=null,lastRealtimeAck=null,positionWakeState=null;
  const confirmedPositionSequences=new Map();
+ // Best-effort wake-ups use the SAME existing private channel, never another
+ // network transport. The authoritative PostgreSQL RPC must not block on
+ // a possibly 10s Broadcast acknowledgement before accepting the next pose.
+ function wakePositionReaders(id){
+  const target=channel;
+  if(activeRoomId!==id||typeof target?.send!=='function')return;
+  if(!positionWakeState||positionWakeState.channel!==target)
+   positionWakeState={channel:target,pending:false,running:false};
+  const state=positionWakeState;
+  state.pending=true;
+  if(state.running)return;
+  state.running=true;
+  void (async()=>{
+   try{
+    while(state.pending&&positionWakeState===state&&
+          activeRoomId===id&&channel===target){
+     state.pending=false;
+     try{
+      const ack=await target.send({type:'broadcast',
+       event:'capture-peer-position-changed-v1',payload:{}});
+      if(positionWakeState!==state)return;
+      if(ack==='ok')lastRealtimeAck=null;
+      else if(lastRealtimeAck!==ack){
+       lastRealtimeAck=ack;
+       console.warn('Capture private Realtime notification unavailable:',ack);
+      }
+     }catch(error){
+      if(positionWakeState===state&&lastRealtimeAck!=='exception'){
+       lastRealtimeAck='exception';
+       console.warn('Capture private Realtime notification unavailable:',error);
+      }
+     }
+    }
+   }finally{state.running=false;}
+  })();
+ }
  async function authenticatedUserId(){
   let session=result(await client.auth.getSession(),'Session Supabase')?.session;
   if(!session){
@@ -236,24 +272,10 @@ export function createCaptureRoomTransportV1({client}={}){
    throw new Error('Révision de position serveur inattendue');
   }
   confirmedPositionSequences.set(id,seq);
-  if(activeRoomId===id&&typeof channel?.send==='function'){
-   try{
-    const ack=await channel.send({type:'broadcast',
-     event:'capture-peer-position-changed-v1',payload:{}});
-    // A failed wake-up cannot undo a committed server write. Report it
-    // once per status instead of silently treating a rejected send as OK.
-    if(ack==='ok')lastRealtimeAck=null;
-    else if(lastRealtimeAck!==ack){
-     lastRealtimeAck=ack;
-     console.warn('Capture private Realtime notification unavailable:',ack);
-    }
-   }catch(error){
-    if(lastRealtimeAck!=='exception'){
-     lastRealtimeAck='exception';
-     console.warn('Capture private Realtime notification unavailable:',error);
-    }
-   }
-  }
+  // One coalesced best-effort notification after each authoritative
+  // server commit. An unavailable Realtime ACK may never stall the movement
+  // publisher; subscribers refetch only the RLS-protected position rows.
+  wakePositionReaders(id);
   return seq;
  }
  // RLS SELECT is still the only source of peer coordinates.
@@ -395,7 +417,7 @@ export function createCaptureRoomTransportV1({client}={}){
   ++subscriptionGeneration;
   activeRoomId=null;
   observedRoom=null;confirmedPositionSequences.clear();
-  lastRealtimeAck=null;
+  lastRealtimeAck=null;positionWakeState=null;
   const previous=channel;channel=null;
   if(previous)await client.removeChannel(previous);
  }

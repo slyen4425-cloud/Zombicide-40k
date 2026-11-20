@@ -1,3 +1,12 @@
+## 2026-11-20 — Raiiven : fusion de la correction adverse dans la PWA Capture V2
+- START Publisher `main@23fc2de86849c37ba39455dd5f4cdf65a4590905` ; checkpoint `checkpoint/gensrpg-start-raiiven-position-pwa-20261120` ; branche `work/gensrpg-raiiven-position-pwa-20261120` ; source V2 de départ `ebd95bc3abbf2a76b1a19089d88892b891d34815`.
+- Source candidate V2 `85a6eed527390217a83e6ecbb657c4fcbcd0a5b1` : le seul pin Combat bascule `a4f2d04961a03aa8c7fd26f1eb123b1ca957f8f5` → `88b6b19823bce7659b1ffbf0d32414e6053a9d64`, CI Combat main #44676875040 SUCCESS, sans changer Exploration ni le jeu source.
+- Publisher : un seul pin source Capture `tools/capture_v2_pages_preview_pin.json`, test d'autorisation exacte des révisions certifiées, documentation du lot. Bibliothèque officielle visuelle `global-assets@b45153efd5d2c4dec53d45a818131aca1cae6705` préservée : les 4 animations sont déjà présentes.
+- Étendue : placement adversaire Raiiven Y=45, mouvement dos 7f et les 3 autres animations validées, sans modifier les images ni les deux skills provisoires. Aucun ajout des 5 capacités proposées tant qu'elles ne sont pas approuvées.
+- Protégé : zero copie du moteur, pas de source parallèle, aucune modification Dungeon/Survie/PvP, Exploration, cache SW, root Shell, sauvegardes ou inventaire. Avant GREEN : PR checks exact SHA, vraie composition Pages, budget, navigateur paysage et publication HTTPS à partir de main. Recette manuelle Pixel distincte.
+
+---
+
 ## 2026-11-19 — Raiiven : publication du catalogue 4 animations dans la PWA Capture V2
 - START Publisher `main@14aa03ee2992cc013ed92dbd8ce8126fe75276ec`, checkpoint `checkpoint/gensrpg-start-raiiven-animations-pwa-20261119`, branche `work/gensrpg-raiiven-animations-pwa-20261119`.
 - Source V2 immutable actuelle : `c8b687d3a42e9cbc7a467925d43f5a82232e151d`. Nouveau candidat source isolé : `work/gensrpg-raiiven-capture-v2-source-20261119` dérivé de ce SHA, mise à jour uniquement du `combat.sha` et `certifiedCiRun` dans la source V2 après certif Combat main.

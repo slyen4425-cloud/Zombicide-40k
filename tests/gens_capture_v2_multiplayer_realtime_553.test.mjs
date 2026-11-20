@@ -94,11 +94,11 @@ test('issue #553: reuse existing private Realtime RLS policies, never create a s
   import.meta.url)),false);
  const transport=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-multiplayer-transport-v1.mjs',
   import.meta.url),'utf8');
- assert.match(transport,/config:\\{private:true,presence:/);
- assert.match(transport,/client\\.realtime\\.setAuth/);
+ assert.match(transport,/config:\{private:true,presence:/);
+ assert.match(transport,/client\.realtime\.setAuth/);
  assert.match(transport,/capture-peer-position-changed-v1/);
  assert.match(transport,/gensrpg_capture_report_position/);
- assert.doesNotMatch(transport,/z40k_sync_state|localStorage\\./);
+ assert.doesNotMatch(transport,/z40k_sync_state|localStorage\./);
 });
 
 test('issue #553: delayed Broadcast ACK never holds the next authoritative position RPC',async()=>{

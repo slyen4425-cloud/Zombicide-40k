@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {createCaptureRoomTransportV1}
  from '../assets/gensrpg/capture-v2/adventure-multiplayer-transport-v1.mjs';
 
@@ -86,21 +86,17 @@ test('issue #553: peer notification uses one authenticated RLS table read, ignor
  await h.transport.dispose();
 });
 
-test('issue #553: Realtime policies authorize ONLY private Capture room members',()=>{
- const sql=readFileSync(new URL('../supabase/migrations/20261120162000_gensrpg_capture_realtime_private_room_authorization_v1.sql',
-  import.meta.url),'utf8');
- assert.match(sql,/on realtime\.messages\s+for select to authenticated/i);
- assert.match(sql,/on realtime\.messages\s+for insert to authenticated/i);
- assert.match(sql,/gensrpg_capture_room_members member/i);
- assert.match(sql,/gensrpg_capture_rooms room/i);
- assert.match(sql,/member\.user_id=\(select auth\.uid\(\)\)/i);
- assert.match(sql,/room\.open=true/i);
- assert.match(sql,/gensrpg-capture-room:/);
- assert.match(sql,/extension in \('broadcast','presence'\)/);
- assert.doesNotMatch(sql,/using\s*\(\s*true\s*\)|drop\s+(?:table|policy)|delete\s+from|alter\s+table/i);
+test('issue #553: reuse existing private Realtime RLS policies, never create a second authority',()=>{
+ // Supabase production already has gensrpg_capture_realtime_read_v1 and
+ // gensrpg_capture_realtime_send_v1, installed Nov 14. This test guards
+ // against reintroducing a redundant policy migration in the #553 branch.
+ assert.equal(existsSync(new URL('../supabase/migrations/20261120162000_gensrpg_capture_realtime_private_room_authorization_v1.sql',
+  import.meta.url)),false);
  const transport=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-multiplayer-transport-v1.mjs',
   import.meta.url),'utf8');
- assert.match(transport,/config:\{private:true,presence:/);
- assert.match(transport,/client\.realtime\.setAuth/);
- assert.doesNotMatch(transport,/z40k_sync_state|localStorage\./);
+ assert.match(transport,/config:\\{private:true,presence:/);
+ assert.match(transport,/client\\.realtime\\.setAuth/);
+ assert.match(transport,/capture-peer-position-changed-v1/);
+ assert.match(transport,/gensrpg_capture_report_position/);
+ assert.doesNotMatch(transport,/z40k_sync_state|localStorage\\./);
 });

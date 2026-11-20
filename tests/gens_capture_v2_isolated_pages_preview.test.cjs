@@ -208,7 +208,7 @@ test('Capture editor combat previews reuse the ONE signed Lab transport with mus
 
 test('native World Builder map exporter and in-game 200% dezoom are shipped once from certified Exploration',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(source.exploration.sha,'da4420cef7ff4666d93fb492f246518e0c6803f9');
+ assert.equal(source.exploration.sha,'2cb75a601cadcd26d33ffdd093a07badaaa9e86f');
  const helper='vendor/exploration-lab/src/builder/world-assembler-map-preset-export-v1.js';
  required(trial,helper);
  const page=read(trial,'vendor/exploration-lab/world-assembler.html').toString('utf8');
@@ -244,7 +244,10 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  const authorExportCameraExplorationSha='f17e4aea75a49da42f7c9b945cc26e8934fc1424';
  const fringeRoadExplorationSha='0128e69c290b43014a5a899804c588d805e2b4b0';
  const recoveredWorldExplorationSha='da4420cef7ff4666d93fb492f246518e0c6803f9';
- const expectedOfficialRendererBlob=explorationSha===recoveredWorldExplorationSha
+ const stairsExplorationSha='2cb75a601cadcd26d33ffdd093a07badaaa9e86f';
+ // The stair fix changes navigation and sprite presentation only. Its
+ // canonical south terrain renderer remains byte-identical to recoveredWorld.
+ const expectedOfficialRendererBlob=[recoveredWorldExplorationSha,stairsExplorationSha].includes(explorationSha)
    ?'6c101756bdf9c58a9ae8cf3fe104e49575145748'
    :explorationSha===fringeRoadExplorationSha
     ?'1a0869afc5b258e8f403f43cd26b3f417a6c8786'
@@ -255,7 +258,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  assert.equal(provenance.exploration.sha,explorationSha,
    'the complete native Exploration checkout must match the source pin');
  assert.ok(['13bbd8230d8dfcef612586974b2dcb54e18e16c4',
-   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha].includes(explorationSha),
+   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha].includes(explorationSha),
    'release must reject unreviewed Exploration main SHAs');
  const bytes=read(trial,official);
  const gitBlob=crypto.createHash('sha1')

@@ -191,7 +191,9 @@ test('Adventure applies the saved World Builder arena and commits a native encou
    throw new Error('Official native Adventure encounter failed: '+JSON.stringify(diagnostic),{cause:error});
   }finally{await page.keyboard.up('ArrowRight');}
   const point=await canvas.evaluate(()=>window.__sculptPlayProbe().actor);
-  assert.equal(await canvas.evaluate(()=>window.__sculptEncounterProbe().creatureId),'crea_ombre_2');
+  const shadowEncounterId=await canvas.evaluate(()=>window.__sculptEncounterProbe().creatureId);
+  assert.ok(['crea_ombre_2','raiiven'].includes(shadowEncounterId),
+   'Only official native Shadow creatures can spawn on Shadow-exclusive terrain: '+shadowEncounterId);
   await map.locator('#sculpt-encounter-combat').tap();
   const battle=map.locator('.combat-overlay__frame');
   await battle.waitFor({state:'attached'});

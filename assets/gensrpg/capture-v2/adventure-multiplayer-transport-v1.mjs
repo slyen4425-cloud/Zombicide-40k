@@ -57,6 +57,45 @@ export function createCaptureRoomTransportV1({client}={}){
    !client?.rpc||!client?.from||!client?.channel||!client?.removeChannel)
   throw new TypeError('Client Supabase authentifié requis');
  let channel=null, activeRoomId=null,subscriptionGeneration=0;
+ // Only a read-through cache. Server RLS / sequenced RPC stays authoritative.
+ let observedRoom=null,lastRealtimeAck=null,positionWakeState=null;
+ const confirmedPositionSequences=new Map();
+ // Best-effort wake-ups use the SAME existing private channel, never another
+ // network transport. The authoritative PostgreSQL RPC must not block on
+ // a possibly 10s Broadcast acknowledgement before accepting the next pose.
+ function wakePositionReaders(id){
+  const target=channel;
+  if(activeRoomId!==id||typeof target?.send!=='function')return;
+  if(!positionWakeState||positionWakeState.channel!==target)
+   positionWakeState={channel:target,pending:false,running:false};
+  const state=positionWakeState;
+  state.pending=true;
+  if(state.running)return;
+  state.running=true;
+  void (async()=>{
+   try{
+    while(state.pending&&positionWakeState===state&&
+          activeRoomId===id&&channel===target){
+     state.pending=false;
+     try{
+      const ack=await target.send({type:'broadcast',
+       event:'capture-peer-position-changed-v1',payload:{}});
+      if(positionWakeState!==state)return;
+      if(ack==='ok')lastRealtimeAck=null;
+      else if(lastRealtimeAck!==ack){
+       lastRealtimeAck=ack;
+       console.warn('Capture private Realtime notification unavailable:',ack);
+      }
+     }catch(error){
+      if(positionWakeState===state&&lastRealtimeAck!=='exception'){
+       lastRealtimeAck='exception';
+       console.warn('Capture private Realtime notification unavailable:',error);
+      }
+     }
+    }
+   }finally{state.running=false;}
+  })();
+ }
  async function authenticatedUserId(){
   let session=result(await client.auth.getSession(),'Session Supabase')?.session;
   if(!session){
@@ -176,6 +215,9 @@ export function createCaptureRoomTransportV1({client}={}){
    p_room:id,p_world_id:position.worldId,
    p_world_fingerprint:position.worldFingerprint
   }),'Associer le monde Exploration au salon');
+  if(activeRoomId===id&&observedRoom?.roomId===id)
+   observedRoom=Object.freeze({...observedRoom,
+    worldId:position.worldId,worldFingerprint:position.worldFingerprint});
   if(activeRoomId===id&&typeof channel?.send==='function'){
    try{await channel.send({type:'broadcast',
     event:'capture-room-refresh-v1',payload:{}});}
@@ -191,6 +233,7 @@ export function createCaptureRoomTransportV1({client}={}){
    'Lecture révision de la position du joueur');
   const seq=Number(position?.seq??0);
   if(!Number.isSafeInteger(seq)||seq<0)throw new Error('Révision serveur de position invalide');
+  confirmedPositionSequences.set(id,seq);
   return seq;
  }
  // The only accepted position is read from the official Exploration
@@ -198,35 +241,47 @@ export function createCaptureRoomTransportV1({client}={}){
  async function reportPosition({roomId,navigation,expectedSeq}={}){
   const id=checkUuid(roomId);
   const previous=expectedSeq===undefined
-   ?await ownPositionSequence(id):expectedSeq;
+   ?(confirmedPositionSequences.get(id)??await ownPositionSequence(id)):expectedSeq;
   if(!Number.isSafeInteger(previous)||previous<0)
    throw new RangeError('Compteur de position invalide');
-  const room=await inspectRoom(id);
+  // Avoid three REST roundtrips per online pose. Every write remains checked
+  // server-side for membership, world/fingerprint, open room and expected seq.
+  const known=activeRoomId===id&&observedRoom?.roomId===id&&
+   observedRoom.worldId&&observedRoom.worldFingerprint?observedRoom:null;
+  const room=known??await inspectRoom(id);
   if(!room?.open||!room.worldId||!room.worldFingerprint)
    throw new Error('Le monde du salon n’est pas encore défini');
   const position=capturePeerPositionFromOfficialNavigationV1({
    navigation,sessionId:navigation?.sessionId,
    worldId:room.worldId,worldFingerprint:room.worldFingerprint
   });
-  const seq=Number(result(await client.rpc('gensrpg_capture_report_position',{
+  let seq;
+  try{
+   seq=Number(result(await client.rpc('gensrpg_capture_report_position',{
    p_room:id,p_world_id:position.worldId,
    p_world_fingerprint:position.worldFingerprint,
    p_area_id:position.areaId,p_x:position.x,p_y:position.y,
    p_expected_seq:previous
   }),'Publier la position officielle Exploration'));
-  if(!Number.isSafeInteger(seq)||seq!==previous+1)
-   throw new Error('Révision de position serveur inattendue');
-  if(activeRoomId===id&&typeof channel?.send==='function'){
-   try{await channel.send({type:'broadcast',
-    event:'capture-peer-position-changed-v1',payload:{}});}
-   catch{ /* No rollback: authenticated server position is already durable. */ }
+  }catch(error){
+   confirmedPositionSequences.delete(id);
+   throw error;
   }
+  if(!Number.isSafeInteger(seq)||seq!==previous+1){
+   confirmedPositionSequences.delete(id);
+   throw new Error('Révision de position serveur inattendue');
+  }
+  confirmedPositionSequences.set(id,seq);
+  // One coalesced best-effort notification after each authoritative
+  // server commit. An unavailable Realtime ACK may never stall the movement
+  // publisher; subscribers refetch only the RLS-protected position rows.
+  wakePositionReaders(id);
   return seq;
  }
- async function inspectPositions({roomId,ownActorId,previousSequences={}}={}){
-  const id=checkUuid(roomId),user=checkUuid(ownActorId);
-  const room=await inspectRoom(id);
-  if(!room?.open||!room.worldId||!room.worldFingerprint)
+ // RLS SELECT is still the only source of peer coordinates.
+ async function readScopedPeerPositions(id,user,room,previousSequences){
+  if(!room?.open||!room.worldId||!room.worldFingerprint||
+    !room.members?.some(member=>member.id===user))
    return Object.freeze({actors:Object.freeze([]),
     sequences:Object.freeze({...previousSequences})});
   const rows=result(await client.from('gensrpg_capture_peer_positions').select(
@@ -240,6 +295,10 @@ export function createCaptureRoomTransportV1({client}={}){
    ownActorId:user,previousSequences
   });
  }
+ async function inspectPositions({roomId,ownActorId,previousSequences={}}={}){
+  const id=checkUuid(roomId),user=checkUuid(ownActorId);
+  return readScopedPeerPositions(id,user,await inspectRoom(id),previousSequences);
+ }
  async function observe({roomId,userId,onChange,onStatus,onPositions,onGreeting}={}){
   const id=checkUuid(roomId),user=checkUuid(userId);
   if(typeof onChange!=='function')throw new TypeError('Callback salle requis');
@@ -247,14 +306,30 @@ export function createCaptureRoomTransportV1({client}={}){
    throw new TypeError('Le lecteur des positions doit être un callback');
   if(onGreeting!==undefined&&typeof onGreeting!=='function')
    throw new TypeError('Le destinataire du salut doit être un callback');
+  // Official private Realtime authorization requires the existing Capture
+  // JWT. This is the SAME Supabase client, not another socket or auth store.
+  if(typeof client.realtime?.setAuth==='function'){
+   const auth=result(await client.auth.getSession(),'Session Supabase')?.session;
+   if(auth?.user?.id!==user||typeof auth.access_token!=='string'||!auth.access_token)
+    throw new Error('Authentification du salon Realtime privé indisponible');
+   await client.realtime.setAuth(auth.access_token);
+  }
   await dispose();
   activeRoomId=id;
   const generation=subscriptionGeneration;
   const current=()=>activeRoomId===id&&subscriptionGeneration===generation;
   let sequences=Object.create(null),dirty=false,running=false;
+  let verifiedRoom=null;
   const update=()=>{void inspectRoom(id).then(state=>{
-   if(current())onChange(state);
-  }).catch(error=>{if(current())onStatus?.('Erreur lecture salon : '+error.message);});};
+   if(!current())return;
+   verifiedRoom=state;observedRoom=state;
+   onChange(state);
+  }).catch(error=>{
+   if(current()){
+    verifiedRoom=null;observedRoom=null;
+    onStatus?.('Erreur lecture salon : '+error.message);
+   }
+  });};
   // Realtime is only a wake-up signal. Every coordinate is fetched via
   // authenticated RLS and accepted only if its server revision advanced.
   // Coalesce overlapping signals without losing the latest notification.
@@ -265,9 +340,9 @@ export function createCaptureRoomTransportV1({client}={}){
     while(dirty&&current()){
      dirty=false;
      try{
-      const update=await inspectPositions({
-       roomId:id,ownActorId:user,previousSequences:sequences
-      });
+      const room=verifiedRoom??await inspectRoom(id);
+      if(!current())return;
+      const update=await readScopedPeerPositions(id,user,room,sequences);
       if(!current())return;
       sequences=update.sequences;
       if(update.actors.length)onPositions(update);
@@ -341,6 +416,8 @@ export function createCaptureRoomTransportV1({client}={}){
  async function dispose(){
   ++subscriptionGeneration;
   activeRoomId=null;
+  observedRoom=null;confirmedPositionSequences.clear();
+  lastRealtimeAck=null;positionWakeState=null;
   const previous=channel;channel=null;
   if(previous)await client.removeChannel(previous);
  }

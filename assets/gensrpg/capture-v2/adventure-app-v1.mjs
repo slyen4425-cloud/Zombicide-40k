@@ -1135,7 +1135,13 @@ async function connectCaptureRoom(response){
     {detail:{sessionId}}
    ));}catch{/* Navigation may be unloading; no gameplay state is affected. */}
   },
-  onStatus:message=>{if(message!=='Salon connecté')onlineRoomStatus(message,true);}
+  onStatus:message=>{
+   if(message==='Salon connecté'){
+    // Reuse the existing authenticated room reconnect notification.
+    // No second network owner or independent position poll is created.
+    activeCaptureExplorationEvents?.retryPending();
+   }else onlineRoomStatus(message,true);
+  }
  });
  const state=await transport.inspectRoom(response.roomId);
  captureSharedRoomSetup=await transport.fetchRoomSetup({roomId:response.roomId});

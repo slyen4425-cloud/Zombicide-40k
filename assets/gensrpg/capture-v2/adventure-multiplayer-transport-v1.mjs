@@ -58,7 +58,7 @@ export function createCaptureRoomTransportV1({client}={}){
   throw new TypeError('Client Supabase authentifié requis');
  let channel=null, activeRoomId=null,subscriptionGeneration=0;
  // Only a read-through cache. Server RLS / sequenced RPC stays authoritative.
- let observedRoom=null;
+ let observedRoom=null,lastRealtimeAck=null;
  const confirmedPositionSequences=new Map();
  async function authenticatedUserId(){
   let session=result(await client.auth.getSession(),'Session Supabase')?.session;
@@ -237,9 +237,22 @@ export function createCaptureRoomTransportV1({client}={}){
   }
   confirmedPositionSequences.set(id,seq);
   if(activeRoomId===id&&typeof channel?.send==='function'){
-   try{await channel.send({type:'broadcast',
-    event:'capture-peer-position-changed-v1',payload:{}});}
-   catch{ /* No rollback: authenticated server position is already durable. */ }
+   try{
+    const ack=await channel.send({type:'broadcast',
+     event:'capture-peer-position-changed-v1',payload:{}});
+    // A failed wake-up cannot undo a committed server write. Report it
+    // once per status instead of silently treating a rejected send as OK.
+    if(ack==='ok')lastRealtimeAck=null;
+    else if(lastRealtimeAck!==ack){
+     lastRealtimeAck=ack;
+     console.warn('Capture private Realtime notification unavailable:',ack);
+    }
+   }catch(error){
+    if(lastRealtimeAck!=='exception'){
+     lastRealtimeAck='exception';
+     console.warn('Capture private Realtime notification unavailable:',error);
+    }
+   }
   }
   return seq;
  }
@@ -271,6 +284,14 @@ export function createCaptureRoomTransportV1({client}={}){
    throw new TypeError('Le lecteur des positions doit être un callback');
   if(onGreeting!==undefined&&typeof onGreeting!=='function')
    throw new TypeError('Le destinataire du salut doit être un callback');
+  // Official private Realtime authorization requires the existing Capture
+  // JWT. This is the SAME Supabase client, not another socket or auth store.
+  if(typeof client.realtime?.setAuth==='function'){
+   const auth=result(await client.auth.getSession(),'Session Supabase')?.session;
+   if(auth?.user?.id!==user||typeof auth.access_token!=='string'||!auth.access_token)
+    throw new Error('Authentification du salon Realtime privé indisponible');
+   await client.realtime.setAuth(auth.access_token);
+  }
   await dispose();
   activeRoomId=id;
   const generation=subscriptionGeneration;
@@ -374,6 +395,7 @@ export function createCaptureRoomTransportV1({client}={}){
   ++subscriptionGeneration;
   activeRoomId=null;
   observedRoom=null;confirmedPositionSequences.clear();
+  lastRealtimeAck=null;
   const previous=channel;channel=null;
   if(previous)await client.removeChannel(previous);
  }

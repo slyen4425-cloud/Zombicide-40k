@@ -57,6 +57,9 @@ export function createCaptureRoomTransportV1({client}={}){
    !client?.rpc||!client?.from||!client?.channel||!client?.removeChannel)
   throw new TypeError('Client Supabase authentifié requis');
  let channel=null, activeRoomId=null,subscriptionGeneration=0;
+ // Only a read-through cache. Server RLS / sequenced RPC stays authoritative.
+ let observedRoom=null;
+ const confirmedPositionSequences=new Map();
  async function authenticatedUserId(){
   let session=result(await client.auth.getSession(),'Session Supabase')?.session;
   if(!session){
@@ -176,6 +179,9 @@ export function createCaptureRoomTransportV1({client}={}){
    p_room:id,p_world_id:position.worldId,
    p_world_fingerprint:position.worldFingerprint
   }),'Associer le monde Exploration au salon');
+  if(activeRoomId===id&&observedRoom?.roomId===id)
+   observedRoom=Object.freeze({...observedRoom,
+    worldId:position.worldId,worldFingerprint:position.worldFingerprint});
   if(activeRoomId===id&&typeof channel?.send==='function'){
    try{await channel.send({type:'broadcast',
     event:'capture-room-refresh-v1',payload:{}});}
@@ -191,6 +197,7 @@ export function createCaptureRoomTransportV1({client}={}){
    'Lecture révision de la position du joueur');
   const seq=Number(position?.seq??0);
   if(!Number.isSafeInteger(seq)||seq<0)throw new Error('Révision serveur de position invalide');
+  confirmedPositionSequences.set(id,seq);
   return seq;
  }
  // The only accepted position is read from the official Exploration
@@ -198,24 +205,37 @@ export function createCaptureRoomTransportV1({client}={}){
  async function reportPosition({roomId,navigation,expectedSeq}={}){
   const id=checkUuid(roomId);
   const previous=expectedSeq===undefined
-   ?await ownPositionSequence(id):expectedSeq;
+   ?(confirmedPositionSequences.get(id)??await ownPositionSequence(id)):expectedSeq;
   if(!Number.isSafeInteger(previous)||previous<0)
    throw new RangeError('Compteur de position invalide');
-  const room=await inspectRoom(id);
+  // Avoid three REST roundtrips per online pose. Every write remains checked
+  // server-side for membership, world/fingerprint, open room and expected seq.
+  const known=activeRoomId===id&&observedRoom?.roomId===id&&
+   observedRoom.worldId&&observedRoom.worldFingerprint?observedRoom:null;
+  const room=known??await inspectRoom(id);
   if(!room?.open||!room.worldId||!room.worldFingerprint)
    throw new Error('Le monde du salon n’est pas encore défini');
   const position=capturePeerPositionFromOfficialNavigationV1({
    navigation,sessionId:navigation?.sessionId,
    worldId:room.worldId,worldFingerprint:room.worldFingerprint
   });
-  const seq=Number(result(await client.rpc('gensrpg_capture_report_position',{
+  let seq;
+  try{
+   seq=Number(result(await client.rpc('gensrpg_capture_report_position',{
    p_room:id,p_world_id:position.worldId,
    p_world_fingerprint:position.worldFingerprint,
    p_area_id:position.areaId,p_x:position.x,p_y:position.y,
    p_expected_seq:previous
   }),'Publier la position officielle Exploration'));
-  if(!Number.isSafeInteger(seq)||seq!==previous+1)
+  }catch(error){
+   confirmedPositionSequences.delete(id);
+   throw error;
+  }
+  if(!Number.isSafeInteger(seq)||seq!==previous+1){
+   confirmedPositionSequences.delete(id);
    throw new Error('Révision de position serveur inattendue');
+  }
+  confirmedPositionSequences.set(id,seq);
   if(activeRoomId===id&&typeof channel?.send==='function'){
    try{await channel.send({type:'broadcast',
     event:'capture-peer-position-changed-v1',payload:{}});}
@@ -223,10 +243,10 @@ export function createCaptureRoomTransportV1({client}={}){
   }
   return seq;
  }
- async function inspectPositions({roomId,ownActorId,previousSequences={}}={}){
-  const id=checkUuid(roomId),user=checkUuid(ownActorId);
-  const room=await inspectRoom(id);
-  if(!room?.open||!room.worldId||!room.worldFingerprint)
+ // RLS SELECT is still the only source of peer coordinates.
+ async function readScopedPeerPositions(id,user,room,previousSequences){
+  if(!room?.open||!room.worldId||!room.worldFingerprint||
+    !room.members?.some(member=>member.id===user))
    return Object.freeze({actors:Object.freeze([]),
     sequences:Object.freeze({...previousSequences})});
   const rows=result(await client.from('gensrpg_capture_peer_positions').select(
@@ -240,6 +260,10 @@ export function createCaptureRoomTransportV1({client}={}){
    ownActorId:user,previousSequences
   });
  }
+ async function inspectPositions({roomId,ownActorId,previousSequences={}}={}){
+  const id=checkUuid(roomId),user=checkUuid(ownActorId);
+  return readScopedPeerPositions(id,user,await inspectRoom(id),previousSequences);
+ }
  async function observe({roomId,userId,onChange,onStatus,onPositions,onGreeting}={}){
   const id=checkUuid(roomId),user=checkUuid(userId);
   if(typeof onChange!=='function')throw new TypeError('Callback salle requis');
@@ -252,9 +276,17 @@ export function createCaptureRoomTransportV1({client}={}){
   const generation=subscriptionGeneration;
   const current=()=>activeRoomId===id&&subscriptionGeneration===generation;
   let sequences=Object.create(null),dirty=false,running=false;
+  let verifiedRoom=null;
   const update=()=>{void inspectRoom(id).then(state=>{
-   if(current())onChange(state);
-  }).catch(error=>{if(current())onStatus?.('Erreur lecture salon : '+error.message);});};
+   if(!current())return;
+   verifiedRoom=state;observedRoom=state;
+   onChange(state);
+  }).catch(error=>{
+   if(current()){
+    verifiedRoom=null;observedRoom=null;
+    onStatus?.('Erreur lecture salon : '+error.message);
+   }
+  });};
   // Realtime is only a wake-up signal. Every coordinate is fetched via
   // authenticated RLS and accepted only if its server revision advanced.
   // Coalesce overlapping signals without losing the latest notification.
@@ -265,9 +297,9 @@ export function createCaptureRoomTransportV1({client}={}){
     while(dirty&&current()){
      dirty=false;
      try{
-      const update=await inspectPositions({
-       roomId:id,ownActorId:user,previousSequences:sequences
-      });
+      const room=verifiedRoom??await inspectRoom(id);
+      if(!current())return;
+      const update=await readScopedPeerPositions(id,user,room,sequences);
       if(!current())return;
       sequences=update.sequences;
       if(update.actors.length)onPositions(update);
@@ -341,6 +373,7 @@ export function createCaptureRoomTransportV1({client}={}){
  async function dispose(){
   ++subscriptionGeneration;
   activeRoomId=null;
+  observedRoom=null;confirmedPositionSequences.clear();
   const previous=channel;channel=null;
   if(previous)await client.removeChannel(previous);
  }

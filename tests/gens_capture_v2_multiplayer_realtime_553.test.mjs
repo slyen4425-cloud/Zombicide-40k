@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {createCaptureRoomTransportV1}
  from '../assets/gensrpg/capture-v2/adventure-multiplayer-transport-v1.mjs';
 
@@ -13,7 +14,7 @@ const tick=()=>new Promise(resolve=>setImmediate(resolve));
 async function settle(){for(let i=0;i<10;i++)await tick();}
 function harness(){
  let seq=0,peerSeq=1;
- const queries=[],rpcCalls=[],listeners=[];
+ const queries=[],rpcCalls=[],listeners=[],authTokens=[];
  const members=[
   {user_id:host,display_name:'Hôte',role:'host',joined_at:'2026-11-20T10:00:00Z'},
   {user_id:guest,display_name:'Invité',role:'guest',joined_at:'2026-11-20T10:01:00Z'}
@@ -23,8 +24,9 @@ function harness(){
   guest_permissions:{},host_is_game_master:false,join_enabled:true,
   open:true,revision:3,world_id:'forest',world_fingerprint:'hash:1'};
  const client={
-  auth:{getSession:async()=>({data:{session:{user:{id:host}}}}),
-   signInAnonymously:async()=>({data:{session:{user:{id:host}}}})},
+  auth:{getSession:async()=>({data:{session:{user:{id:host},access_token:'test-jwt'}}}),
+   signInAnonymously:async()=>({data:{session:{user:{id:host},access_token:'test-jwt'}}})},
+  realtime:{setAuth:async token=>{authTokens.push(token);}},
   rpc:async(name)=>{
    rpcCalls.push(name);
    if(name==='gensrpg_capture_report_position')return {data:++seq};
@@ -46,7 +48,7 @@ function harness(){
    track:async()=>{},send:async()=> 'ok'};},
   removeChannel:async()=>{}
  };
- return {transport:createCaptureRoomTransportV1({client}),queries,rpcCalls,listeners,
+ return {transport:createCaptureRoomTransportV1({client}),queries,rpcCalls,listeners,authTokens,
   advance:()=>++peerSeq};
 }
 test('issue #553: consecutive official poses use server-owned seq without redundant room/membership/own-seq fetches',async()=>{
@@ -54,6 +56,7 @@ test('issue #553: consecutive official poses use server-owned seq without redund
  await h.transport.observe({roomId,userId:host,onChange:()=>{},
   onPositions:s=>seen.push(s)});
  await settle();
+ assert.deepEqual(h.authTokens,['test-jwt'],'private channel uses the original Capture JWT');
  await h.transport.reportPosition({roomId,navigation});
  const afterFirst=h.queries.length;
  await h.transport.reportPosition({roomId,navigation:{...navigation,x:12}});
@@ -79,4 +82,23 @@ test('issue #553: peer notification uses one authenticated RLS table read, ignor
   'the latest room metadata is already authenticated and cached during observe');
  assert.equal(received.at(-1).actors[0].x,102);
  await h.transport.dispose();
+});
+
+test('issue #553: Realtime policies authorize ONLY private Capture room members',()=>{
+ const sql=readFileSync(new URL('../supabase/migrations/20261120162000_gensrpg_capture_realtime_private_room_authorization_v1.sql',
+  import.meta.url),'utf8');
+ assert.match(sql,/on realtime\.messages\s+for select to authenticated/i);
+ assert.match(sql,/on realtime\.messages\s+for insert to authenticated/i);
+ assert.match(sql,/gensrpg_capture_room_members member/i);
+ assert.match(sql,/gensrpg_capture_rooms room/i);
+ assert.match(sql,/member\.user_id=\(select auth\.uid\(\)\)/i);
+ assert.match(sql,/room\.open=true/i);
+ assert.match(sql,/gensrpg-capture-room:/);
+ assert.match(sql,/extension in \('broadcast','presence'\)/);
+ assert.doesNotMatch(sql,/using\s*\(\s*true\s*\)|drop\s+(?:table|policy)|delete\s+from|alter\s+table/i);
+ const transport=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-multiplayer-transport-v1.mjs',
+  import.meta.url),'utf8');
+ assert.match(transport,/config:\{private:true,presence:/);
+ assert.match(transport,/client\.realtime\.setAuth/);
+ assert.doesNotMatch(transport,/z40k_sync_state|localStorage\./);
 });

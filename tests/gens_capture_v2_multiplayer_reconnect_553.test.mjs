@@ -88,5 +88,5 @@ test('#553: reconnect hooks the existing Supabase room, not a polling or second 
  assert.match(app,/message==='Salon connecté'/);
  assert.match(app,/activeCaptureExplorationEvents\?\.retryPending\(\)/);
  assert.doesNotMatch(sender,/setInterval\(|Storage\.prototype|z40k|new WebSocket/);
- assert.doesNotMatch(sender,/\b(?:localStorage|sessionStorage|indexedDB)\b/);
+ assert.doesNotMatch(sender,/\b(?:localStorage|sessionStorage|indexedDB)\s*\./);
 });

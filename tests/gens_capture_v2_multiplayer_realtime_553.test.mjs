@@ -12,7 +12,7 @@ const navigation={schema:'gensrpg.exploration.play-navigation.v1',
  worldFingerprint:'hash:1',currentAreaId:'area-1',x:10,y:20};
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 async function settle(){for(let i=0;i<10;i++)await tick();}
-function harness(){
+function harness({broadcastSend=null}={}){
  let seq=0,peerSeq=1;
  const queries=[],rpcCalls=[],listeners=[],authTokens=[];
  const members=[
@@ -47,7 +47,7 @@ function harness(){
   channel(){return {on(type,filter,callback){
     listeners.push({type,event:filter.event,callback});return this;
    },subscribe(){return this;},
-   track:async()=>{},send:async()=> 'ok'};},
+   track:async()=>{},send:payload=>broadcastSend?broadcastSend(payload):Promise.resolve('ok')};},
   removeChannel:async()=>{}
  };
  return {transport:createCaptureRoomTransportV1({client}),queries,rpcCalls,listeners,authTokens,
@@ -99,4 +99,30 @@ test('issue #553: reuse existing private Realtime RLS policies, never create a s
  assert.match(transport,/capture-peer-position-changed-v1/);
  assert.match(transport,/gensrpg_capture_report_position/);
  assert.doesNotMatch(transport,/z40k_sync_state|localStorage\\./);
+});
+
+test('issue #553: delayed Broadcast ACK never holds the next authoritative position RPC',async()=>{
+ let release;
+ const gate=new Promise(resolve=>{release=resolve;});
+ const wakes=[];
+ const h=harness({broadcastSend:payload=>{
+  wakes.push(payload);
+  return wakes.length===1?gate:Promise.resolve('ok');
+ }});
+ await h.transport.observe({roomId,userId:host,onChange:()=>{},onPositions:()=>{}});
+ await settle();
+ assert.equal(await h.transport.reportPosition({roomId,navigation}),1);
+ // The first wake-up remains unacknowledged for an arbitrarily long time.
+ assert.equal(wakes.length,1);
+ assert.equal(await h.transport.reportPosition({roomId,navigation:{...navigation,x:44}}),2,
+  'second server commit may NOT be blocked by the first Broadcast ACK');
+ assert.equal(await h.transport.reportPosition({roomId,navigation:{...navigation,x:55}}),3);
+ assert.equal(wakes.length,1,'notifications must coalesce while ACK is stalled');
+ release('ok');
+ await settle();
+ assert.equal(wakes.length,2,'latest committed position triggers one more wake-up');
+ assert.ok(wakes.every(x=>x.event==='capture-peer-position-changed-v1'));
+ assert.ok(wakes.every(x=>Object.keys(x.payload).length===0),
+  'no unverified coordinates ever travel in Broadcast payloads');
+ await h.transport.dispose();
 });

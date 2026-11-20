@@ -25,25 +25,25 @@ test('#553: the assembled PWA source uses precisely both certified main SHA pins
 test('#553: real staged Exploration main owns online 120ms checkpoints and stop pose',()=>{
  const play=read(staged+'vendor/exploration-lab/src/sculpt-lab-main.js');
  const visual=read(staged+'vendor/exploration-lab/src/play/exploration-peer-visual-projection-v1.js');
- assert.match(play,/time-playLastCheckpointAt>\\(playOptions\\?\\.sessionId\\?120:1500\\)/);
- assert.match(play,/else if\\(navActor\\.moving\\)\\s*\\{[\\s\\S]{0,260}persistPlayNavigationCheckpoint\\(\\)/);
- assert.match(play,/sculptPeerProjection\\.sampleForArea\\(sculptWorldAreaId\\)/);
- assert.match(play,/sculptPeerProjection\\?\\.isAnimating\\(sculptWorldAreaId,time\\)/);
+ assert.match(play,/time-playLastCheckpointAt>\(playOptions\?\.sessionId\?120:1500\)/);
+ assert.match(play,/else if\(navActor\.moving\)\s*\{[\s\S]{0,260}persistPlayNavigationCheckpoint\(\)/);
+ assert.match(play,/sculptPeerProjection\.sampleForArea\(sculptWorldAreaId\)/);
+ assert.match(play,/sculptPeerProjection\?\.isAnimating\(sculptWorldAreaId,time\)/);
  assert.match(visual,/MIN_BLEND_MS=140,MAX_BLEND_MS=340/);
  assert.match(visual,/MAX_CONTINUOUS_STEP=240/);
- assert.doesNotMatch(visual,/new WebSocket|localStorage\\.|sessionStorage\\./);
+ assert.doesNotMatch(visual,/new WebSocket|localStorage\.|sessionStorage\./);
 });
 test('#553: exact Capture runtime still owns one authenticated transport and reconnect hook',()=>{
  const transport=read(source+'adventure-multiplayer-transport-v1.mjs');
  const bridge=read(source+'adventure-multiplayer-exploration-events-v1.mjs');
  const app=read(source+'adventure-app-v1.mjs');
- assert.match(transport,/client\\.rpc\\('gensrpg_capture_report_position'/);
- assert.match(transport,/wakePositionReaders\\(id\\)/);
- assert.match(transport,/client\\.realtime\\.setAuth/);
+ assert.match(transport,/client\.rpc\('gensrpg_capture_report_position'/);
+ assert.match(transport,/wakePositionReaders\(id\)/);
+ assert.match(transport,/client\.realtime\.setAuth/);
  assert.match(transport,/readScopedPeerPositions/);
- assert.match(bridge,/gensrpg\\.exploration\\.play\\.navigation-committed\\.v1/);
- assert.match(bridge,/retryPending\\(\\)/);
- assert.match(app,/activeCaptureExplorationEvents\\?\\.retryPending\\(\\)/);
- assert.doesNotMatch(bridge,/setInterval\\(|new WebSocket|localStorage\\./);
- assert.doesNotMatch(transport,/z40k_sync_state|new WebSocket|setInterval\\(/);
+ assert.match(bridge,/gensrpg\.exploration\.play\.navigation-committed\.v1/);
+ assert.match(bridge,/retryPending\(\)/);
+ assert.match(app,/activeCaptureExplorationEvents\?\.retryPending\(\)/);
+ assert.doesNotMatch(bridge,/setInterval\(|new WebSocket|localStorage\./);
+ assert.doesNotMatch(transport,/z40k_sync_state|new WebSocket|setInterval\(/);
 });

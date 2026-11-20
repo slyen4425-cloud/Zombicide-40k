@@ -34,13 +34,15 @@ function harness(){
   },
   from(table){
    queries.push(table);
-   return {select:()=>({eq:()=>({
+   const query={
+    eq(){return this;},
     maybeSingle:async()=>({data:table==='gensrpg_capture_rooms'?room:{seq}}),
     order:async()=>({data:table==='gensrpg_capture_room_members'?members:
      [{room_id:roomId,user_id:guest,world_id:'forest',
       world_fingerprint:'hash:1',area_id:'area-1',x:100+peerSeq,y:40,
       seq:peerSeq,updated_at:'2026-11-20T10:00:00Z'}]})
-   })})};
+   };
+   return {select:()=>query};
   },
   channel(){return {on(type,filter,callback){
     listeners.push({type,event:filter.event,callback});return this;

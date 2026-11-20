@@ -42,7 +42,13 @@ export function attachCaptureExplorationPositionEventsV1({
      lastSent=value.signature;
      onStatus('Position Exploration synchronisée');
     }catch(error){
-     if(!disposed)onStatus('Position non synchronisée : '+error.message);
+     if(!disposed){
+      // The last official checkpoint survives an offline period. Do not
+      // invent a timer or a second transport: retry only on the existing
+      // room's next successful SUBSCRIBED notification.
+      if(!pending)pending=value;
+      onStatus('Position non synchronisée : '+error.message);
+     }
      break;
     }
    }
@@ -75,7 +81,13 @@ export function attachCaptureExplorationPositionEventsV1({
  }
  frame.addEventListener('load',attach);
  attach();
- return Object.freeze({dispose(){
+ return Object.freeze({
+  retryPending(){
+   if(disposed||!pending)return false;
+   void flush();
+   return true;
+  },
+  dispose(){
   if(disposed)return;
   disposed=true;pending=null;
   frame.removeEventListener('load',attach);

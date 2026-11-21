@@ -137,10 +137,13 @@ export function createCaptureShellCreatorV1({
   const shown=host.dataset.view==='home';
   host.style?.setProperty('--capture-home-shade',
    String(settings.backgroundShade/100));
-  if(shown&&backgroundUrl)
-   host.style?.setProperty('--capture-home-art',
-    'url("'+backgroundUrl+'")');
-  else host.style?.removeProperty('--capture-home-art');
+  if(shown&&backgroundUrl){
+   host.style?.setProperty('--capture-home-art','url("'+backgroundUrl+'")');
+   host.dataset.creatorWallpaper='true';
+  }else{
+   host.style?.removeProperty('--capture-home-art');
+   delete host.dataset.creatorWallpaper;
+  }
  }
  const audioFor=(url,loop=false)=>{
   if(typeof root.Audio!=='function')return null;
@@ -371,6 +374,7 @@ export function createCaptureShellCreatorV1({
    disposed=true;++epoch;active=false;stopAmbient();revokeUrls();
    loading?.close();loading=null;container.replaceChildren();
    host.style?.removeProperty('--capture-home-art');
+   delete host.dataset.creatorWallpaper;
   }
  });
 }

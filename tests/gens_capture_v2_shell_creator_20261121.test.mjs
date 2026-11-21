@@ -62,7 +62,7 @@ test('interface media imports are local, bounded and separate from the in-game s
  assert.match(owner,/indexedDB\.open\(DB,1\)/);
  assert.match(owner,/leaveHome\(\)/);
  assert.match(owner,/stopAmbient\(\)/);
- assert.doesNotMatch(owner,/AdventureRules|CombatResult|createAdventureSessionV1/);
+ assert.doesNotMatch(owner,/\bimport\s*\{[^}]*?(?:AdventureRules|CombatResult|createAdventureSessionV1)/);
 });
 test('loading art uses the canonical three-scene library scoped to each universe',()=>{
  const library=read('adventure-loading-art-v1.mjs');

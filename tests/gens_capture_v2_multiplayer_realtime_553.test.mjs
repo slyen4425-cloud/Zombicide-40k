@@ -160,3 +160,19 @@ test('issue #584: the Capture shell never treats a one-member room as a complete
   'an incomplete room subscription must reset the UI without touching the save');
  assert.doesNotMatch(fragment,/portfolio\.create|portfolio\.remove|store\.save|localStorage\.clear/);
 });
+
+test('issue #584: Héberger is the explicit single-step opt-in to joinEnabled on the canonical save',()=>{
+ const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ const start=app.indexOf("('adventure-room-host').addEventListener");
+ const end=app.indexOf("('adventure-room-join').addEventListener",start);
+ assert.ok(start>=0&&end>start,'real native Héberger action must be present');
+ const handler=app.slice(start,end);
+ assert.match(handler,/if\(!session\.sessionControl\?\.joinEnabled\)/);
+ assert.match(handler,/updateAdventureSessionControlV1/);
+ assert.match(handler,/joinEnabled:true/);
+ assert.match(handler,/store\.save\(session\)/);
+ assert.match(handler,/captureRoomProvider\(\)\.create/);
+ assert.ok(handler.indexOf('store.save(session)')<handler.indexOf('captureRoomProvider().create'),
+  'user-approved local join permission must be committed before room allocation');
+ assert.doesNotMatch(handler,/localStorage\.clear|portfolio\.remove|signOut|worldLibrary\.activate/);
+});

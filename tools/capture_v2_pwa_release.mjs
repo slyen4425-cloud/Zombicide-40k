@@ -63,11 +63,20 @@ export function enableAutomaticPreviewActivation(sourceHtml){
             z40kWaitingWorker=worker;
             z40kShowUpdateBanner();
           }`;
-  if(sourceHtml.split(waiting).length!==2||sourceHtml.split(installed).length!==2)
-    throw Error('Existing PWA Shell activation seam not uniquely identified');
+  // Attach updatefound and inspect an existing waiting worker BEFORE asking
+  // Chromium to update. Awaiting reg.update() first can miss installation,
+  // leaving an installed worker waiting behind the old PWA indefinitely.
+  // This touches only the generated Capture preview Shell, never root PWA.
+  const awaitingUpdate='      await reg.update();\n\n      if(reg.waiting){';
+  const listenerEnd='      });\n    }catch(e){}\n    z40kCheckPublishedVersion();';
+  if(sourceHtml.split(awaitingUpdate).length!==2||
+     sourceHtml.split(listenerEnd).length!==2)
+    throw Error('Preview PWA Shell update listener seam changed');
   return sourceHtml
     .replace(waiting,waiting.replace('z40kShowUpdateBanner();',
       "reg.waiting.postMessage({type:'SKIP_WAITING'});"))
     .replace(installed,installed.replace('z40kShowUpdateBanner();',
-      "worker.postMessage({type:'SKIP_WAITING'});"));
+      "worker.postMessage({type:'SKIP_WAITING'});"))
+    .replace(awaitingUpdate,'      if(reg.waiting){')
+    .replace(listenerEnd,'      });\n      void reg.update().catch(()=>{});\n    }catch(e){}\n    z40kCheckPublishedVersion();');
 }

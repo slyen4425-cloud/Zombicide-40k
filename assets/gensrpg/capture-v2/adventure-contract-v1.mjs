@@ -129,7 +129,9 @@ export function normalizeAdventureRulesV1(input){
  number(combat.hpMultiplier,'combat.hpMultiplier',Number.EPSILON,1);
  if(!['restore','keep-ko','game-over'].includes(defeatPolicy))
   throw new RangeError('combat.defeatPolicy must be restore, keep-ko or game-over');
- const starter=starterRaw===undefined?null:exact(starterRaw,['allowAllRarities'],'starterSelection');
+ const starter=starterRaw===undefined?null:object(starterRaw,'starterSelection');
+ if(starter&&Object.keys(starter).some(key=>!['allowAllRarities','startLevel'].includes(key)))
+  throw new TypeError('starterSelection unexpected option');
  if(starter&&typeof starter.allowAllRarities!=='boolean')
   throw new TypeError('starterSelection.allowAllRarities must be boolean');
  const rule=exact(legacy,['schema','version','xp','progression','loot'],'AdventureRules');
@@ -160,6 +162,11 @@ export function normalizeAdventureRulesV1(input){
   throw new RangeError('Unknown Adventure XP curve mode');
  integer(p.xpPerLevel,'xpPerLevel',1,1000000000);
  integer(p.maxLevel,'maxLevel',1);
+ if(starter?.startLevel!==undefined){
+  integer(starter.startLevel,'starterSelection.startLevel',1,9999);
+  if(starter.startLevel>p.maxLevel)
+   throw new RangeError('Niveau initial supérieur au niveau maximum de l aventure');
+ }
  if(pointsRaw!==undefined)integer(pointsRaw,'statPointsPerLevel',0,1000);
  if(p.xpCurveMode==='linear'&&bandsRaw!==undefined)
   throw new RangeError('Linear XP curve cannot declare custom bands');
@@ -180,7 +187,10 @@ export function normalizeAdventureRulesV1(input){
    throw new RangeError('XP bands must cover maxLevel');
   coreAdventureProgressionConfigV1({...p,xpBands:bands});
  }
- const loot=exact(rule.loot,['currencyPerVictory','items','drops'],'loot');
+ const {currencyMultiplier:currencyMultiplierRaw,...rawLoot}=object(rule.loot,'loot');
+ const loot=exact(rawLoot,['currencyPerVictory','items','drops'],'loot');
+ if(currencyMultiplierRaw!==undefined)
+  number(currencyMultiplierRaw,'loot.currencyMultiplier',0,100);
  integer(loot.currencyPerVictory,'currencyPerVictory',0,100000000);
  if(!Array.isArray(loot.items)||!Array.isArray(loot.drops))
   throw new TypeError('loot.items and loot.drops must be arrays');
@@ -218,8 +228,10 @@ export function normalizeAdventureRulesV1(input){
   progression:{xpCurveMode:p.xpCurveMode,xpPerLevel:p.xpPerLevel,maxLevel:p.maxLevel,
     ...(pointsRaw===undefined?{}:{statPointsPerLevel:pointsRaw}),
     ...(bands===undefined?{}:{xpBands:bands})},
-  loot:{currencyPerVictory:loot.currencyPerVictory,items,drops},
-  ...(starter?{starterSelection:{allowAllRarities:starter.allowAllRarities}}:{}),
+  loot:{currencyPerVictory:loot.currencyPerVictory,items,drops,
+    ...(currencyMultiplierRaw===undefined?{}:{currencyMultiplier:currencyMultiplierRaw})},
+  ...(starter?{starterSelection:{allowAllRarities:starter.allowAllRarities,
+    ...(starter.startLevel===undefined?{}:{startLevel:starter.startLevel})}}:{}),
   combat:{hpMultiplier:combat.hpMultiplier,defeatPolicy},
   ...(navigation?{navigation:{moveSpeed:navigation.moveSpeed}}:{}),
   heroProgression:{enabled:hero.enabled,xpGainPercent:hero.xpGainPercent,
@@ -592,9 +604,29 @@ function assertSession(session){
  if(Object.hasOwn(v,'trainerVictories'))normalizeAdventureTrainerVictoriesV1(v.trainerVictories);
  return v;
 }
+// Invert the ONE Core Progression contract, rather than maintaining a
+// competing XP table. This is called only while creating a NEW adventure.
+export function adventureStartingXpForLevelV1({level,progression,progressionCore}={}){
+ const config=coreAdventureProgressionConfigV1(progression);
+ const target=integer(level,'niveau initial',1,Math.min(9999,config.maxLevel));
+ if(target===1)return 0;
+ if(typeof progressionCore?.levelFromXp!=='function')
+  throw new TypeError('Progression Core officielle requise pour créer le niveau initial');
+ const at=xp=>progressionCore.levelFromXp(xp,config);
+ if(at(0)!==1||at(Number.MAX_SAFE_INTEGER)<target)
+  throw new RangeError('Courbe XP Core incompatible avec le niveau de départ choisi');
+ let low=0,high=Number.MAX_SAFE_INTEGER;
+ while(low+1<high){
+  const mid=low+Math.floor((high-low)/2);
+  if(at(mid)<target)low=mid;else high=mid;
+ }
+ if(at(high)!==target||at(high-1)>=target)
+  throw new RangeError('La progression officielle ne permet pas ce niveau de départ');
+ return high;
+}
 export function createAdventureSessionV1({
  bestiaryCards,starterId,starterIds=null,rules=DEFAULT_ADVENTURE_RULES_V1,ids,now,
- heroDefinitionId=null,heroDisplayName=null,cameraAngle=55,cameraZoomPercent=null
+ progressionCore=null,heroDefinitionId=null,heroDisplayName=null,cameraAngle=55,cameraZoomPercent=null
 }){
  const cards=publishedAdventureSpeciesV1(bestiaryCards);
  const selected=starterIds===null?[starterId]:starterIds;
@@ -603,6 +635,10 @@ export function createAdventureSessionV1({
  if(starterId!==selected[0])
   throw new RangeError('La première créature doit être active.');
  const settings=normalizeAdventureRulesV1(rules);
+ const startLevel=settings.starterSelection?.startLevel??1;
+ const startXp=adventureStartingXpForLevelV1({
+  level:startLevel,progression:settings.progression,progressionCore
+ });
  const sessionId=identity(ids?.sessionId,'sessionId');
  const rawIds=[ids?.instanceId,...(ids?.reserveInstanceIds??[])];
  if(rawIds.length!==selected.length)
@@ -617,7 +653,7 @@ export function createAdventureSessionV1({
    throw new RangeError('Créature sans compétence jouable publiée: '+speciesId);
   if((card.rarity??'rare')!=='rare'&&!settings.starterSelection?.allowAllRarities)
    throw new RangeError('Créature de départ Mythique/Légendaire : active les règles avancées.');
-  return freeze({instanceId:instanceIds[index],speciesId:card.id,level:1,xp:0,hp:null,
+  return freeze({instanceId:instanceIds[index],speciesId:card.id,level:startLevel,xp:startXp,hp:null,
    ...(settings.progression.statPointsPerLevel===undefined?{}:{statAllocations:{}})});
  });
  const timestamp=iso(now,'now');
@@ -725,7 +761,8 @@ export function applyAdventureCombatResultV1({
   levelAfter:progressed.get(member.instanceId).level
  }));
  const currency=result.outcome==='victory'
-  ?integer(state.rules.loot.currencyPerVictory+(trainerReward?.currency??0),'victory currency',0,1000000000):0;
+  ?integer(Math.round((state.rules.loot.currencyPerVictory+(trainerReward?.currency??0))*
+      (state.rules.loot.currencyMultiplier??1)),'victory currency',0,1000000000):0;
  const itemCounts={...state.inventory.items};
  const drops=[],rewardWarnings=[];
  if(result.outcome==='victory'){

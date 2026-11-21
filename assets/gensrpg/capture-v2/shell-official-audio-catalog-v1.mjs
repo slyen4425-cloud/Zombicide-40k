@@ -5,6 +5,10 @@ const EXPLORATION=new URL('../../../vendor/exploration-lab/',import.meta.url);
 const MUSIC_PREFIX='gensrpg:music:';
 const SOUND_PREFIX='gensrpg:sound:';
 const absolute=(base,relative)=>new URL(relative,base).href;
+// Local Playwright uses HTTP; production Pages is HTTPS. Both are same-origin
+// official paths validated below, never arbitrary remote audio URLs.
+export const isCaptureShellAudioTransportUrlV1=value=>
+ typeof value==='string'&&/^(https?:|file:)/.test(value);
 
 export function createCaptureShellOfficialAudioChoicesV1({
  soundEntries,resolveEffect,musicAssets,resolveMusic,explorationIds,explorationTracks
@@ -19,7 +23,7 @@ export function createCaptureShellOfficialAudioChoicesV1({
   if(typeof assetId!=='string'||!assetId.startsWith(
     kind==='music'?MUSIC_PREFIX:SOUND_PREFIX)||
     seen.has(assetId)||typeof label!=='string'||!label.trim()||
-    typeof url!=='string'||!url.startsWith('file:')&&!url.startsWith('https:'))
+    !isCaptureShellAudioTransportUrlV1(url))
    throw new TypeError('Entrée audio officielle invalide ou doublonnée');
   seen.add(assetId);
   return Object.freeze({assetId,label:label.trim(),kind,url,

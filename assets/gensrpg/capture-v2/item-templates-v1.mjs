@@ -86,3 +86,66 @@ export function materializeCaptureItemTemplatesV1({rules,templates}){
  return Object.freeze({loot:{...rules.loot,items,drops},
   addedItems,addedDrops,skippedConflicts});
 }
+
+
+// Builds the default loot for the *published* official Combat bestiary only.
+// One separate 50% / 1 unit item roll per creature, never a fragment roll.
+// The SAME AdventureRules loot.items/loot.drops own the result. Existing
+// authored drops, items, merchant offers and all FragmentRules stay untouched.
+// Additional creatures may have no owned PNG yet: give them a plainly named
+// unillustrated item, never impersonate another monster's uploaded artwork.
+export function materializeCapturePublishedMonsterDropsV1({
+ rules,templates,published
+}={}){
+ if(!rules?.loot||!Array.isArray(rules.loot.items)||
+    !Array.isArray(rules.loot.drops))
+  throw new TypeError('AdventureRules requis pour les drops des monstres');
+ if(!Array.isArray(published))throw new TypeError('Bestiaire officiel requis');
+ const catalog=normalizeCaptureItemTemplatesV1(templates);
+ const illustrated=new Map(catalog.items.map(item=>[item.speciesId,item]));
+ const items=[...rules.loot.items],drops=[...rules.loot.drops];
+ const byId=new Map(items.map(item=>[item.id,item]));
+ const covered=new Set(drops.map(drop=>drop.speciesId));
+ const seen=new Set();
+ let addedItems=0,addedDrops=0,withoutIllustrations=0,skippedConflicts=0;
+ for(const species of published){
+  if(!species||typeof species.id!=='string'||!species.id||
+     typeof species.name!=='string'||!species.name.trim())
+   throw new TypeError('Espèce du Bestiaire invalide');
+  if(seen.has(species.id))throw new RangeError('Espèce dupliquée dans le Bestiaire');
+  seen.add(species.id);
+  if(covered.has(species.id))continue; // Explicit authoring always wins.
+  const template=illustrated.get(species.id);
+  const templateOwner=template?byId.get(template.id):null;
+  const officialItem=template&&(!templateOwner||
+   templateOwner.iconKey===template.id)?template:null;
+  if(template&&templateOwner&&!officialItem)skippedConflicts++;
+  let itemId;
+  if(officialItem){
+   itemId=officialItem.id;
+   if(!templateOwner){
+    const item={id:itemId,name:officialItem.name,
+     saleValue:officialItem.saleValue,iconKey:officialItem.id};
+    items.push(item);byId.set(itemId,item);addedItems++;
+   }
+  }else{
+   const clean=species.id.toLocaleLowerCase('en')
+    .replace(/[^a-z0-9._-]/g,'-').slice(0,75)||'creature';
+   const base='butin-'+clean;
+   itemId=base;
+   let suffix=2;
+   while(byId.has(itemId))itemId=base.slice(0,86)+'-'+suffix++;
+   const item={id:itemId,name:('Essence de '+species.name.trim()).slice(0,80),
+    saleValue:100};
+   items.push(item);byId.set(itemId,item);addedItems++;
+   withoutIllustrations++;
+  }
+  drops.push({speciesId:species.id,itemId,
+   chancePercent:50,minQuantity:1,maxQuantity:1});
+  covered.add(species.id);addedDrops++;
+ }
+ return Object.freeze({
+  loot:{...rules.loot,items,drops},addedItems,addedDrops,
+  withoutIllustrations,skippedConflicts
+ });
+}

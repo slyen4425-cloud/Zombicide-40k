@@ -250,10 +250,19 @@
    <div id="adventure-item-authoring" aria-label="Éditeur unique objets, drops par monstre et marchands">
    <div class="actions" id="adventure-item-editor-navigation"><button id="adventure-return-preparation" type="button">← Retour à la préparation de l'aventure</button></div>
    <h3 id="adventure-item-editor-heading">Catalogue d'objets</h3>
+   <details id="adventure-item-library" class="adventure-options">
+    <summary>📚 Bibliothèque d’objets — visuels officiels</summary>
+    <p class="hint">Retrouve les icônes disponibles, sans créer de doublons.
+     Choisis un visuel pour remplir l’éditeur. Les nouveaux objets ont une valeur de 100 pièces.
+     Le bouton de préparation crée un butin à 50 % pour chaque créature publiée.
+     Les fragments conservent leurs réglages indépendants.</p>
+    <output id="adventure-item-library-count" aria-live="polite">Chargement de la bibliothèque…</output>
+    <div id="adventure-item-library-gallery" class="adventure-item-library-gallery"></div>
+   </details>
    <p class="hint" id="adventure-item-catalog-message">Les objets créés ici alimentent les règles de drop de cette aventure. Les anciennes sauvegardes restent indépendantes.</p>
    <div class="fields">
     <label>Nom de l'objet <input type="text" id="adventure-item-name" maxlength="80" placeholder="Ex. Plume d'Ailevent"></label>
-    <label>Valeur de vente <input type="number" id="adventure-item-value" min="0" max="100000000" value="0" step="1"></label>
+    <label>Valeur de vente <input type="number" id="adventure-item-value" min="0" max="100000000" value="100" step="1"></label>
     <label>Icône officielle <select id="adventure-item-icon"><option value="">Sans icône</option></select></label>
    </div>
    <div class="actions">
@@ -275,7 +284,7 @@
    <div class="fields">
     <label>Espèce publiée <select id="adventure-drop-species" disabled></select></label>
     <label>Objet <select id="adventure-drop-item"></select></label>
-    <label>Chance (%) <input id="adventure-drop-chance" type="number" min="0" max="100" value="20"></label>
+    <label>Chance (%) <input id="adventure-drop-chance" type="number" min="0" max="100" value="50"></label>
     <label>Quantité minimum <input id="adventure-drop-min" type="number" min="1" max="9999" value="1"></label>
     <label>Quantité maximum <input id="adventure-drop-max" type="number" min="1" max="9999" value="1"></label>
    </div>

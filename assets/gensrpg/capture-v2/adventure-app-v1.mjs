@@ -965,7 +965,7 @@ function showSave(){
    (view==='load'||(view==='new'&&newlyCreatedAdventureId===state.sessionId));
   $('adventure-session-panel').hidden=!showActiveSession;
   const mayHostVisibleSession=view!=='new'||newlyCreatedAdventureId===state?.sessionId;
-  $('adventure-room-host').disabled=!!activeCaptureRoom||!state?.sessionControl?.joinEnabled||!mayHostVisibleSession;
+  $('adventure-room-host').disabled=!!activeCaptureRoom||!state||state.status==='finished'||!mayHostVisibleSession;
   text($('adventure-play-team-count'),String(state?1+(state.party.reserve?.length??0):0));
   renderSavedAdventureRosterV1(state); // Always reread the same persisted Core save.
   if(!state){
@@ -1236,7 +1236,7 @@ async function connectCaptureRoom(response){
   $('adventure-room-share-actions').hidden=true;
   $('adventure-room-leave').disabled=true;
   $('adventure-room-join').disabled=false;
-  $('adventure-room-host').disabled=!store?.load()?.sessionControl?.joinEnabled;
+  $('adventure-room-host').disabled=!store?.load()||store.load().status==='finished';
   onlineRoomStatus('Connexion non confirmée : '+error.message,true);
   throw error;
  }
@@ -1276,10 +1276,23 @@ $('adventure-room-share').addEventListener('click',guardedAsync(async()=>{
 }));
 $('adventure-room-host').addEventListener('click',guardedAsync(async()=>{
  if(activeCaptureRoom)throw new Error('Quitte le salon actif avant d’en créer un autre.');
- const session=store?.load();
+ let session=store?.load();
  if(!session)throw new Error('Crée une partie Monster Capture avant de l’héberger.');
+ if(session.status==='finished')throw new Error('Cette partie est terminée. Charge ou crée une autre sauvegarde.');
  if(document.body.dataset.adventureStartView==='new'&&newlyCreatedAdventureId!==session.sessionId)
   throw new Error('Crée d’abord ta nouvelle partie, puis héberge CETTE sauvegarde.');
+ // Explicit Héberger permits guests without another hidden creator step.
+ // Update ONLY the canonical saved AdventureSession; preserve all rights.
+ if(!session.sessionControl?.joinEnabled){
+  session=updateAdventureSessionControlV1({
+   session,settings:{
+    hostIsGameMaster:session.sessionControl.hostIsGameMaster,
+    joinEnabled:true,
+    guestPermissions:session.sessionControl.guestPermissions
+   },now:new Date().toISOString()
+  });
+  store.save(session);
+ }
  onlineRoomStatus('Création du salon Monster Capture…');
  const response=await captureRoomProvider().create({
   session,name:$('adventure-player-alias').value,
@@ -1309,7 +1322,7 @@ $('adventure-room-leave').addEventListener('click',guardedAsync(async()=>{
  $('adventure-room-members').replaceChildren();
  $('adventure-room-leave').disabled=true;
  $('adventure-room-join').disabled=false;
- $('adventure-room-host').disabled=!store?.load()?.sessionControl?.joinEnabled;
+ $('adventure-room-host').disabled=!store?.load()||store.load().status==='finished';
  onlineRoomStatus('Salon quitté. Ta sauvegarde locale Monster Capture est intacte.');
 }));
 window.addEventListener('pagehide',()=>{

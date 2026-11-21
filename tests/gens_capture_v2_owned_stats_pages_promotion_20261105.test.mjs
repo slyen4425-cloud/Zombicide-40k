@@ -28,10 +28,10 @@ test('published Monster Capture stays isolated and retains exact certified origi
  // The new Raiiven author archive import advances global-assets without deleting\n // the Veuve V2 or other author media; immutable SHA and import run stay pinned.
  // The official Veuve V2 import workflow publishes this exact immutable asset
  // catalog; Pages MUST still validate all referenced physical files and size.
- assert.equal(file.officialVisuals.sha,'b45153efd5d2c4dec53d45a818131aca1cae6705',
-  'the verified canonical catalog must contain Raiiven 4 motion clips and retain Veuve jaune media');
- assert.equal(file.officialVisuals.certifiedCiRun,44616943963,
-  'provenance is the successful author asset import; final Pages and browser checks remain mandatory');
+ assert.equal(file.officialVisuals.sha,'204564e5f3e0fa5081d23927ef4dfc8b74f9cc90',
+  'certified catalog must preserve historical Raiiven/Veuve and add all 25 November media files');
+ assert.equal(file.officialVisuals.certifiedCiRun,44899212749,
+  'the 25-media SHA-bound CI is successful; final Pages and browser checks remain mandatory');
  const workflow=fs.readFileSync(new URL('../.github/workflows/main.yml',import.meta.url),'utf8');
  assert.match(workflow,/steps\.preview_labs\.outputs\.combat/);
  assert.match(workflow,/steps\.preview_labs\.outputs\.exploration/);

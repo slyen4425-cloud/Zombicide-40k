@@ -184,14 +184,35 @@ export function createCaptureShellCreatorV1({
   const p=soundPlayers.get('ambience');
   if(p){p.pause();p.currentTime=0;}
  }
- function enterHome(){
-  active=true;applyBackground();
-  if(settings.ambienceEnabled){
-   const p=soundPlayers.get('ambience');
-   if(p){p.volume=settings.menuVolume/100;
-    void p.play().catch(()=>{/* browser requires an active user gesture */});}
+ // Browser autoplay can reject an IndexedDB-loaded track on Android.
+ // Reattempt only on a real UI gesture, without replacing the selected player.
+ function startAmbient(){
+  if(!active||disposed||!settings.ambienceEnabled)return false;
+  const p=soundPlayers.get('ambience');
+  if(!p)return false;
+  p.volume=settings.menuVolume/100;
+  if(p.paused===false)return true;
+  try{
+   const playback=p.play();
+   void Promise.resolve(playback).catch(error=>{
+    if(active&&error?.name!=='NotAllowedError')
+     report('Musique d’ambiance indisponible : '+String(error?.message??error),true);
+   });
+   return true;
+  }catch(error){
+   if(error?.name!=='NotAllowedError')
+    report('Musique d’ambiance indisponible : '+String(error?.message??error),true);
+   return false;
   }
  }
+ function enterHome(){
+  active=true;applyBackground();startAmbient();
+ }
+ // The same audio owner survives the Home -> Editors transition. Listening
+ // during a game is forbidden, and a new universe always stops the old music.
+ const resumeOnGesture=()=>{if(active)startAmbient();};
+ doc.addEventListener('pointerdown',resumeOnGesture,true);
+ doc.addEventListener('keydown',resumeOnGesture,true);
  function leaveHome(){
   active=false;stopAmbient();stopPreview();applyBackground();
  }
@@ -399,6 +420,12 @@ export function createCaptureShellCreatorV1({
      try{
       stopPreview();
       await media.putCatalog(universe,slot,choice.assetId,choice.label);
+      if(slot==='ambience'){
+       // Choosing a track is an explicit opt-in, not only an import.
+       settings=normalizeCaptureShellCreatorSettingsV1({
+        ...settings,ambienceEnabled:true});
+       persist();
+      }
       await loadUniverse(universe,name);
       report('Son officiel choisi : '+choice.label);
      }catch(error){report(error.message,true);}
@@ -411,6 +438,11 @@ export function createCaptureShellCreatorV1({
    file.addEventListener('change',async()=>{
     if(!file.files?.[0])return;
     try{await media.put(universe,slot,file.files[0]);
+     if(slot==='ambience'){
+      settings=normalizeCaptureShellCreatorSettingsV1({
+       ...settings,ambienceEnabled:true});
+      persist();
+     }
      await loadUniverse(universe,name);
      report(label+' enregistré pour cet univers.');}
     catch(error){report(error.message,true);}
@@ -480,10 +512,13 @@ export function createCaptureShellCreatorV1({
    container.dataset.active='true';await render();enterHome();
   },
   hide(){container.dataset.active='false';},
-  enterHome,leaveHome,play,stopAmbient,
+  enterHome,leaveHome,play,stopAmbient,startAmbient,
   async reload(){await loadUniverse(universe,name);},
   stop(){
-   disposed=true;++epoch;active=false;stopAmbient();revokeUrls();
+   disposed=true;++epoch;active=false;
+   doc.removeEventListener('pointerdown',resumeOnGesture,true);
+   doc.removeEventListener('keydown',resumeOnGesture,true);
+   stopAmbient();revokeUrls();
    loading?.close();loading=null;container.replaceChildren();
    host.style?.removeProperty('--capture-home-art');
    delete host.dataset.creatorWallpaper;

@@ -148,3 +148,29 @@ test('official audio transport is safe under localhost browser tests AND HTTPS P
  assert.equal(isCaptureShellAudioTransportUrlV1('data:audio/mpeg;base64,abcd'),false);
  assert.equal(isCaptureShellAudioTransportUrlV1('blob:https://example.test/foo'),false);
 });
+
+test('native editor UI clicks reuse the same Capture creator sound, but not Adventure gameplay',()=>{
+ const shell=read('shell-entry-v1.js');
+ assert.match(shell,/function bindNativeEditorAudio\(nativeFrame,nativeKind\)/);
+ assert.match(shell,/nativeFrame\.contentDocument/);
+ assert.match(shell,/editorDoc\.addEventListener\('click',onClick,true\)/);
+ assert.match(shell,/creatorOwner\?\.play\('click'\)/);
+ assert.match(shell,/editorDoc\.removeEventListener\('click',onClick,true\)/);
+ assert.match(shell,/if\(kind==='adventure'\)creatorOwner\?\.leaveHome\(\)/);
+ assert.match(shell,/else creatorOwner\?\.enterHome\(\)/);
+ assert.match(shell,/if\(nativeKind==="adventure"\)return/);
+ assert.match(shell,/editorDoc\.fullscreenElement/);
+ assert.doesNotMatch(shell,/new Audio\(/);
+});
+test('music retries after gesture on Android and choosing music enables its universe preference',()=>{
+ const creator=read('shell-creator-presentation-v1.mjs');
+ assert.match(creator,/function startAmbient\(\)/);
+ assert.match(creator,/error\?\.name!=='NotAllowedError'/);
+ assert.match(creator,/doc\.addEventListener\('pointerdown',resumeOnGesture,true\)/);
+ assert.match(creator,/doc\.addEventListener\('keydown',resumeOnGesture,true\)/);
+ assert.match(creator,/doc\.removeEventListener\('pointerdown',resumeOnGesture,true\)/);
+ assert.match(creator,/if\(slot==='ambience'\)\{\s*\/\/ Choosing a track/);
+ assert.match(creator,/if\(slot==='ambience'\)\{\s*settings=normalizeCaptureShellCreatorSettingsV1/);
+ assert.match(creator,/startAmbient,\s*async reload\(/);
+ assert.match(creator,/function leaveHome\(\)\{\s*active=false;stopAmbient\(/);
+});

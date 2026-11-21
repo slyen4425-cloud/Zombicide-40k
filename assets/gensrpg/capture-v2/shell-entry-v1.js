@@ -40,7 +40,7 @@
   let host=null,frame=null,stage=null,notice=null,current=null,nativeTitle=null;
   let selectedUniverse=null,universePanel=null,universeUi=null,universeLoadEpoch=0;
   let creatorPanel=null,creatorOwner=null,creatorPromise=null;
-  let nativeLoading=null;
+  let nativeLoading=null,detachNativeEditorAudio=null;
   const officialLoadingArt=new URL('vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png',base).href;
   function dismissNativeLoading(){
     if(!nativeLoading)return;
@@ -161,6 +161,40 @@
       throw new Error("Capture authority must be same-origin and SHA-pinned");
     return url;
   }
+  // One Capture Shell audio owner for native editor controls: the game runtime
+  // remains untouched. Official Pages editor frames are same-origin.
+  function unbindNativeEditorAudio(){
+    detachNativeEditorAudio?.();detachNativeEditorAudio=null;
+  }
+  function bindNativeEditorAudio(nativeFrame,nativeKind){
+    if(nativeKind==="adventure")return;
+    nativeFrame.addEventListener("load",()=>{
+      unbindNativeEditorAudio();
+      if(frame!==nativeFrame||current!==nativeKind||!host)return;
+      let editorDoc;
+      try{editorDoc=nativeFrame.contentDocument;}catch{return;}
+      if(!editorDoc)return; // Cross-origin previews remain isolated.
+      // Parent document events do not bubble out of an iframe. Reuse the
+      // existing creator audio player, not the editor's gameplay audio.
+      const onGesture=()=>creatorOwner?.startAmbient?.();
+      const onClick=event=>{
+        if(frame!==nativeFrame||current!==nativeKind||!host||
+           editorDoc.fullscreenElement)return;
+        const control=event.target?.closest?.(
+          'button,a[href],summary,select,[role="button"],[role="tab"],'+
+          '[role="menuitem"],input[type="button"],input[type="submit"]');
+        if(control)creatorOwner?.play('click');
+      };
+      editorDoc.addEventListener('pointerdown',onGesture,true);
+      editorDoc.addEventListener('keydown',onGesture,true);
+      editorDoc.addEventListener('click',onClick,true);
+      detachNativeEditorAudio=()=>{
+        editorDoc.removeEventListener('pointerdown',onGesture,true);
+        editorDoc.removeEventListener('keydown',onGesture,true);
+        editorDoc.removeEventListener('click',onClick,true);
+      };
+    });
+  }
   function open(kind,{startView=null}={}){
     if(!host)return false;
     if(!selectedUniverse){
@@ -173,7 +207,11 @@
     // screens, never create a world or choose a saved session in the Shell.
     if(kind==='adventure'&&['new','load'].includes(startView))
       url.searchParams.set('start',startView);
-    creatorOwner?.leaveHome();
+    // Editors are still application UI: keep the configured ambience and UI
+    // sounds active. Only the actual Adventure/Jouer session owns game audio.
+    if(kind==='adventure')creatorOwner?.leaveHome();
+    else creatorOwner?.enterHome();
+    unbindNativeEditorAudio();
     dismissNativeLoading();
     if(frame){frame.src="about:blank";frame.remove();frame=null;}
     frame=root.document.createElement("iframe");
@@ -187,6 +225,7 @@
     frame.setAttribute("data-capture-v2-native",info.family);
     stage.replaceChildren(frame);
     showNativeLoading(frame,info.label);
+    bindNativeEditorAudio(frame,kind);
     frame.src=url.href;
     current=kind;
     nativeTitle.textContent=info.label;
@@ -275,6 +314,7 @@
   }
   function home(){
     if(!host)return false;
+    unbindNativeEditorAudio();
     dismissNativeLoading();
     if(gameFullscreenActive())void exitGameFullscreen();
     if(frame){frame.src="about:blank";frame.remove();frame=null;}
@@ -475,6 +515,7 @@
   }
   function stop(){
     if(!host)return false;
+    unbindNativeEditorAudio();
     dismissNativeLoading();
     if(gameFullscreenActive())void exitGameFullscreen();
     if(frame){frame.src="about:blank";frame.remove();}

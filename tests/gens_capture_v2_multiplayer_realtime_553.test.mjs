@@ -12,12 +12,13 @@ const navigation={schema:'gensrpg.exploration.play-navigation.v1',
  worldFingerprint:'hash:1',currentAreaId:'area-1',x:10,y:20};
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 async function settle(){for(let i=0;i<10;i++)await tick();}
-function harness({broadcastSend=null,userId=host}={}){
+function harness({broadcastSend=null,userId=host,initialGuests=true}={}){
  let seq=0,peerSeq=1;
  const queries=[],rpcCalls=[],listeners=[],authTokens=[];
  const members=[
   {user_id:host,display_name:'Hôte',role:'host',joined_at:'2026-11-20T10:00:00Z'},
-  {user_id:guest,display_name:'Invité',role:'guest',joined_at:'2026-11-20T10:01:00Z'}
+  ...(initialGuests?[{user_id:guest,display_name:'Invité',
+   role:'guest',joined_at:'2026-11-20T10:01:00Z'}]:[])
  ];
  const room={id:roomId,code:'ABCDEFGHJK',owner_id:host,
   adventure_session_id:'session-local',max_players:2,
@@ -39,9 +40,10 @@ function harness({broadcastSend=null,userId=host}={}){
     eq(){return this;},
     maybeSingle:async()=>({data:table==='gensrpg_capture_rooms'?room:{seq}}),
     order:async()=>({data:table==='gensrpg_capture_room_members'?members:
-     [{room_id:roomId,user_id:guest,world_id:'forest',
-      world_fingerprint:'hash:1',area_id:'area-1',x:100+peerSeq,y:40,
-      seq:peerSeq,updated_at:'2026-11-20T10:00:00Z'}]})
+     members.some(member=>member.user_id===guest)
+      ?[{room_id:roomId,user_id:guest,world_id:'forest',
+       world_fingerprint:'hash:1',area_id:'area-1',x:100+peerSeq,y:40,
+       seq:peerSeq,updated_at:'2026-11-20T10:00:00Z'}]:[]})
    };
    return {select:()=>query};
   },
@@ -52,7 +54,10 @@ function harness({broadcastSend=null,userId=host}={}){
   removeChannel:async()=>{}
  };
  return {transport:createCaptureRoomTransportV1({client}),queries,rpcCalls,listeners,authTokens,
-  advance:()=>++peerSeq};
+  advance:()=>++peerSeq,
+  addGuest:()=>{if(!members.some(m=>m.user_id===guest))
+   members.push({user_id:guest,display_name:'Invité',
+    role:'guest',joined_at:'2026-11-20T10:01:00Z'});} };
 }
 test('issue #553: consecutive official poses use server-owned seq without redundant room/membership/own-seq fetches',async()=>{
  const h=harness(),seen=[];
@@ -175,4 +180,23 @@ test('issue #584: Héberger is the explicit single-step opt-in to joinEnabled on
  assert.ok(handler.indexOf('store.save(session)')<handler.indexOf('captureRoomProvider().create'),
   'user-approved local join permission must be committed before room allocation');
  assert.doesNotMatch(handler,/localStorage\.clear|portfolio\.remove|signOut|worldLibrary\.activate/);
+});
+
+test('issue #584: a new server-verified guest becomes visible after Presence even if an old one-member snapshot was cached',async()=>{
+ const h=harness({initialGuests:false}),received=[],rooms=[];
+ await h.transport.observe({roomId,userId:host,onChange:room=>rooms.push(room),
+  onPositions:positions=>received.push(positions)});
+ await settle();
+ assert.equal(received.length,0,'host-only room has no remote actors');
+ assert.equal(rooms.at(-1)?.members?.length,1);
+ h.addGuest();
+ const presence=h.listeners.find(listener=>listener.type==='presence'&&listener.event==='sync');
+ assert.ok(presence,'single private room channel should deliver membership wake-up');
+ presence.callback();
+ await settle();
+ assert.equal(rooms.at(-1)?.members?.length,2);
+ assert.equal(received.at(-1)?.actors[0]?.actorId,guest,
+  'the RLS reader must retry with refreshed server membership, not keep a stale roster');
+ assert.equal(received.at(-1)?.actors[0]?.seq,1);
+ await h.transport.dispose();
 });

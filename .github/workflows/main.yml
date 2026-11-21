@@ -481,6 +481,8 @@ jobs:
             builder.html
             world-assembler.html
             sculpt-lab.html
+            hero-editor.html
+            npc-editor.html
             play.html
             manifest.webmanifest
             scripts
@@ -639,6 +641,8 @@ jobs:
             builder.html
             world-assembler.html
             sculpt-lab.html
+            hero-editor.html
+            npc-editor.html
             play.html
             manifest.webmanifest
             scripts

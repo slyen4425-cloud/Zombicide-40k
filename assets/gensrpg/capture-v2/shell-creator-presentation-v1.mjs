@@ -513,6 +513,8 @@ export function createCaptureShellCreatorV1({
   },
   hide(){container.dataset.active='false';},
   enterHome,leaveHome,play,stopAmbient,startAmbient,
+  wallpaper:()=>backgroundUrl?Object.freeze({
+   url:backgroundUrl,shade:settings.backgroundShade/100}):null,
   async reload(){await loadUniverse(universe,name);},
   stop(){
    disposed=true;++epoch;active=false;

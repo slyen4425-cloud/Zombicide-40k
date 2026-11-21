@@ -6,7 +6,7 @@ import {
  SHOWCASE_ADVENTURE_RULES_V1,DEFAULT_ADVENTURE_RULES_V1,
  normalizeAdventureRulesV1,createAdventureSessionV1,
  availableAdventureStatPointsV1,adventureStartingXpForLevelV1,
- calculateAdventureXpV1,coreAdventureProgressionConfigV1
+ calculateAdventureXpV1,calculateAdventureVictoryCurrencyV1,coreAdventureProgressionConfigV1
 } from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 
 const root={};root.window=root;
@@ -76,9 +76,15 @@ test('or : multiplicateur indépendant x2 et anciennes règles préservées',()=
  for(const n of [-0.1,Infinity,101,'2'])
   assert.throws(()=>normalizeAdventureRulesV1({...SHOWCASE_ADVENTURE_RULES_V1,
    loot:{...SHOWCASE_ADVENTURE_RULES_V1.loot,currencyMultiplier:n}}));
- const code=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-contract-v1.mjs',import.meta.url),'utf8');
- assert.match(code,/trainerReward\?\.currency/);
- assert.match(code,/state\.rules\.loot\.currencyMultiplier\?\?1/);
+ assert.equal(calculateAdventureVictoryCurrencyV1({rules:r}),0,
+  'aucun gain si le paramètre de base est 0');
+ const paid=normalizeAdventureRulesV1({...r,loot:{...r.loot,currencyPerVictory:150}});
+ assert.equal(calculateAdventureVictoryCurrencyV1({rules:paid}),300);
+ assert.equal(calculateAdventureVictoryCurrencyV1({rules:paid,trainerReward:{currency:50,items:[]}}),400,
+  'les bonus de dresseur utilisent le même multiplicateur');
+ assert.equal(calculateAdventureVictoryCurrencyV1({rules:SHOWCASE_ADVENTURE_RULES_V1,
+  trainerReward:{currency:50,items:[]}}),50,
+  'une ancienne partie sans multiplicateur reste ×1');
 });
 test('les réglages sont dans les volets natifs sans nouveau menu indépendant',()=>{
  const html=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure.html',import.meta.url),'utf8');

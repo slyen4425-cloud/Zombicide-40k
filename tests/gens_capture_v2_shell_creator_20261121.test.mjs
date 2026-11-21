@@ -172,7 +172,8 @@ test('music retries after gesture on Android and choosing music enables its univ
  assert.match(creator,/doc\.removeEventListener\('pointerdown',resumeOnGesture,true\)/);
  assert.match(creator,/if\(slot==='ambience'\)\{\s*\/\/ Choosing a track/);
  assert.match(creator,/if\(slot==='ambience'\)\{\s*settings=normalizeCaptureShellCreatorSettingsV1/);
- assert.match(creator,/startAmbient,\s*async reload\(/);
+ assert.match(creator,/startAmbient,\s*wallpaper:\(\)=>backgroundUrl\?Object\.freeze\(/);
+ assert.match(creator,/async reload\(/);
  assert.match(creator,/function leaveHome\(\)\{\s*active=false;stopAmbient\(/);
 });
 

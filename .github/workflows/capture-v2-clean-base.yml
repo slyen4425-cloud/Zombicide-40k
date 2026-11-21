@@ -12,6 +12,8 @@ on:
       - 'tests/gens_capture_v2_game_menu_v1.test.cjs'
       - 'tests/gens_capture_universe_project_boundary_20261117.test.mjs'
       - 'tests/gens_capture_v2_item_editor_catalog_20261110.test.mjs'
+      - 'tests/gens_capture_v2_merchant_simple_prices_20261121.test.mjs'
+      - 'tests/gens_capture_v2_economy_merchants_20261110.test.mjs'
       - 'tests/gens_capture_v2_item_editor_browser_20261110.test.cjs'
       - 'tests/gens_capture_v2_adventure_hero_progression_v1.test.mjs'
       - 'tests/gens_capture_v2_adventure_portfolio_v1.test.mjs'
@@ -124,6 +126,11 @@ jobs:
 
       - name: Éditeur d’objets Capture — catalogue, imports sans destruction, sauvegardes historiques
         run: node --test tests/gens_capture_v2_item_editor_catalog_20261110.test.mjs
+
+      - name: Marchands Capture — base objet, 2 pourcentages, PNJ et ancien format
+        run: |
+          node --test tests/gens_capture_v2_merchant_simple_prices_20261121.test.mjs
+          node --test tests/gens_capture_v2_economy_merchants_20261110.test.mjs
 
       - name: Capture V2 — préparation simple et galerie Bestiaire des créatures de départ
         run: node --test tests/gens_capture_v2_simple_starter_picker_20261113.test.mjs

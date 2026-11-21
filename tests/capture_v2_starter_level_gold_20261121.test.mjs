@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 import {
  SHOWCASE_ADVENTURE_RULES_V1,DEFAULT_ADVENTURE_RULES_V1,
- normalizeAdventureRulesV1,createAdventureSessionV1,
+ normalizeAdventureRulesV1,createAdventureSessionV1,applyAdventureCombatResultV1,
  availableAdventureStatPointsV1,adventureStartingXpForLevelV1,
  calculateAdventureXpV1,calculateAdventureVictoryCurrencyV1,coreAdventureProgressionConfigV1
 } from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
@@ -109,4 +109,18 @@ test('les réglages sont dans les volets natifs sans nouveau menu indépendant',
  assert.match(app,/progressionCore:window\.GensProgressionV1/);
  assert.match(app,/startLevel:numberFrom\(idField\.starterLevel\)/);
  assert.match(app,/currencyMultiplier:numberFrom\(idField\.goldMultiplier\)/);
+});
+
+test('une fuite interdite par le PNJ est rejetée avant tout changement de sauvegarde',()=>{
+ const state=makeState(SHOWCASE_ADVENTURE_RULES_V1);
+ const envelope={version:1,
+  snapshot:{schema:'capture-encounter-snapshot-v1',version:1,encounterId:'npc-flee-1',
+   returnToken:'ret-flee',context:{fleeAllowed:false}},
+  result:{schema:'capture-combat-result-v1',version:1,encounterId:'npc-flee-1',
+   returnToken:'ret-flee',outcome:'fled'}};
+ assert.throws(()=>applyAdventureCombatResultV1({session:state,envelope}),/fuite.*interdite/i);
+ assert.equal(state.party.active.level,1);
+ assert.equal(state.party.active.xp,0);
+ assert.equal(state.inventory.currency,0);
+ assert.deepEqual(state.processedEncounterKeys,[]);
 });

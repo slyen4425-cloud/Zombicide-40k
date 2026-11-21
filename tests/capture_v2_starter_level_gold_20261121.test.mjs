@@ -61,6 +61,18 @@ test('la courbe Core reste l autorité unique pour trouver le seuil d XP initial
  assert.equal(progressionCore.levelFromXp(start-1,config),19);
  assert.equal(progressionCore.levelFromXp(start,config),20);
 });
+test('commencer au niveau 50 suit les vrais paliers XP 20 / 40 / 60, puis progresse normalement',()=>{
+ const rules=normalizeAdventureRulesV1({...SHOWCASE_ADVENTURE_RULES_V1,
+  starterSelection:{allowAllRarities:false,startLevel:50}});
+ const s=makeState(rules);
+ const config=coreAdventureProgressionConfigV1(rules.progression);
+ const expected=19*2000+20*4000+10*6000;
+ assert.equal(s.party.active.level,50);
+ assert.equal(s.party.active.xp,expected);
+ assert.equal(progressionCore.levelFromXp(expected-1,config),49);
+ assert.equal(progressionCore.levelFromXp(expected+6000,config),51);
+ assert.equal(availableAdventureStatPointsV1(s),49*20);
+});
 test('l XP garde son multiplicateur officiel, aucun second multiplicateur ajouté',()=>{
  const base=calculateAdventureXpV1({rules:SHOWCASE_ADVENTURE_RULES_V1,
   allyLevel:20,enemyLevel:20}).xp;

@@ -434,3 +434,49 @@ test('isolated HTTPS Jouer has creator-owned unlimited level caps, Core XP bands
  assert.equal(pins.exploration.sha,explorationSha);
  assert.equal(pins.combat.sha,combatSha);
 });
+
+
+test('published World Builder retains independent incoming portals in the official Exploration owner',()=>{
+ const html=read(trial,'vendor/exploration-lab/sculpt-lab.html').toString('utf8');
+ const sculpt=read(trial,'vendor/exploration-lab/src/sculpt-lab-main.js').toString('utf8');
+ const world=read(trial,'vendor/exploration-lab/src/builder/world-builder-draft.js').toString('utf8');
+ const controls=read(trial,'vendor/exploration-lab/src/builder/sculpt-world-spawn-controls-v1.js').toString('utf8');
+ assert.ok(html.includes('id="object-waypoint-arrivals"'));
+ assert.ok(html.includes('id="object-waypoint-arrival-place"'));
+ assert.ok(world.includes('ensureWorldPortalIndependentArrivalV1'));
+ assert.ok(controls.includes('describeWorldAreaIncomingPortalsForEditorV1'));
+ assert.ok(sculpt.includes('ensureWorldPortalIndependentArrivalV1'));
+});
+test('published merchant + Combat PNJ share the certified owner and the 25-media catalog',()=>{
+ const pins=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
+ const provenance=json(trial,'release-provenance.v1.json');
+ const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
+ const adapter=read(trial,'vendor/combat-lab/src/adapters/input/capture/capture-npc-opponent-instance-v1.js').toString('utf8');
+ const economy=read(trial,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs').toString('utf8');
+ assert.equal(pins.combat.sha,'414c0324a2837dee9697e01b4fc4ec9844a61b2a');
+ assert.equal(pins.combat.certifiedCiRun,44899730762);
+ assert.equal(provenance.combat.sha,pins.combat.sha);
+ assert.equal(delivery.combat.sha,pins.combat.sha);
+ assert.equal(previewPin.officialVisuals.sha,'204564e5f3e0fa5081d23927ef4dfc8b74f9cc90');
+ assert.equal(previewPin.officialVisuals.certifiedCiRun,44899212749);
+ assert.ok(adapter.includes('export '));
+ assert.match(economy,/adventureMerchantPriceV1/);
+});
+
+test('publisher includes checked merchant catalog and canonical percent-price model only in Capture',()=>{
+ const files=['assets/gensrpg/capture-v2/adventure-economy-v1.mjs',
+  'assets/gensrpg/capture-v2/adventure-economy-editor-v1.mjs',
+  'assets/gensrpg/capture-v2/adventure-merchant-play-v1.mjs'];
+ const [core,editor,play]=files.map(p=>read(trial,p).toString('utf8'));
+ const html=read(trial,'assets/gensrpg/capture-v2/adventure.html').toString('utf8');
+ assert.match(core,/export function adventureMerchantPriceV1/);
+ assert.match(core,/sellPercent/);
+ assert.match(core,/buyPercent/);
+ assert.match(editor,/adventure-merchant-library/);
+ assert.match(editor,/getRules\(\)\.loot\.items/);
+ assert.match(play,/adventureMerchantPriceV1/);
+ assert.match(html,/id="adventure-merchant-sell-percent"/);
+ assert.match(html,/id="adventure-merchant-buy-percent"/);
+ assert.equal(fs.existsSync(path.join(site,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs')),false,
+  'Capture merchant economy must not leak to production root');
+});

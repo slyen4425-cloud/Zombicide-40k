@@ -326,6 +326,19 @@ test('preview transport can include the official Jouer entry from its certified 
 });
 
 
+test('Adventure advanced start-level and gold settings are physically present in the PWA',()=>{
+ const html=read(trial,'assets/gensrpg/capture-v2/adventure.html').toString('utf8');
+ const app=read(trial,'assets/gensrpg/capture-v2/adventure-app-v1.mjs').toString('utf8');
+ const contract=read(trial,'assets/gensrpg/capture-v2/adventure-contract-v1.mjs').toString('utf8');
+ assert.equal(html.split('id="adventure-starter-level"').length,2);
+ assert.equal(html.split('id="adventure-gold-multiplier"').length,2);
+ assert.match(app,/startLevel:numberFrom\\(idField\\.starterLevel\\)/);
+ assert.match(app,/currencyMultiplier:numberFrom\\(idField\\.goldMultiplier\\)/);
+ assert.match(app,/progressionCore:window\\.GensProgressionV1/);
+ assert.match(contract,/export function adventureStartingXpForLevelV1\\(/);
+ assert.match(contract,/export function calculateAdventureVictoryCurrencyV1\\(/);
+});
+
 test('NPC editor is the canonical native Exploration page with one visible Capture menu route',()=>{
  const npc=read(trial,'vendor/exploration-lab/npc-editor.html').toString('utf8');
  const sculpt=read(trial,'vendor/exploration-lab/sculpt-lab.html').toString('utf8');

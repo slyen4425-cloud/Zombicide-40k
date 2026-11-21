@@ -328,11 +328,11 @@ test('NPC editor is the canonical native Exploration page with one visible Captu
  const sculpt=read(trial,'vendor/exploration-lab/sculpt-lab.html').toString('utf8');
  const shell=read(trial,'assets/gensrpg/capture-v2/shell-entry-v1.js').toString('utf8');
  required(trial,'vendor/exploration-lab/src/actors/npc-editor-v1.js');
- assert.match(npc,/<h1>👥 Éditeur de PNJ — Monster InvoC<\\/h1>/);
+ assert.ok(npc.includes('<h1>👥 Éditeur de PNJ — Monster InvoC</h1>'));
  assert.match(npc,/id="npc-role"/);
  assert.match(npc,/id="npc-allow-flee"/);
  assert.match(sculpt,/id="actor-npc-workshop-open"/);
- assert.match(sculpt,/href="\\.\\/npc-editor\\.html"/);
+ assert.ok(sculpt.includes('href="./npc-editor.html"'));
  assert.equal(shell.split('path:"vendor/exploration-lab/npc-editor.html"').length,2);
  assert.match(shell,/id:"npc",title:"PNJ"/);
  assert.match(shell,/current!=="builder"&&current!=="world"&&current!=="npc"/,

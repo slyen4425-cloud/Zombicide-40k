@@ -369,6 +369,37 @@ test('Creator and default 50% items exist in ONE official Capture source',()=>{
   'all existing illustrations remain readable across the three loading contexts');
 });
 
+test('Creator audio choices reuse only the shipped official audio library without copying another engine',()=>{
+ const creator=read(trial,'assets/gensrpg/capture-v2/shell-creator-presentation-v1.mjs').toString('utf8');
+ const catalog=read(trial,'assets/gensrpg/capture-v2/shell-official-audio-catalog-v1.mjs').toString('utf8');
+ const combat='vendor/exploration-lab/combat-preview/';
+ const metadata=json(trial,combat+'data/presentation/audio/private-audio-runtime.v1.json');
+ assert.equal(metadata.schema,'gensrpg-private-audio-runtime-v1');
+ assert.equal(metadata.entries.length,metadata.count);
+ assert.ok(metadata.count>=200,'full official sound library must be present');
+ assert.ok(metadata.entries.some(entry=>entry.roles.includes('ui')),
+  'UI sound effects must exist in the official library');
+ required(trial,combat+'src/assets/private-audio-runtime-library-v1.js');
+ required(trial,combat+'src/assets/soundtrack-runtime-library-v1.js');
+ required(trial,combat+'src/assets/soundtrack-starter-catalog-v1.js');
+ required(trial,'vendor/exploration-lab/src/audio/exploration-soundtrack-v1.js');
+ for(const item of metadata.entries)
+  required(trial,combat+'assets/runtime/audio/'+item.runtimeFile);
+ for(const name of ['battle-01-cb4ed87d.mp3','victory-01-0b52ce2b.mp3'])
+  required(trial,combat+'assets/runtime/audio/music-v1/'+name);
+ for(const i of [1,2,3,4])
+  required(trial,'vendor/exploration-lab/assets/runtime/audio/exploration-v1/exploration-0'+i+'.mp3');
+ assert.match(creator,/async putCatalog\(universeId,slot,assetId,name\)/);
+ assert.match(creator,/loadCaptureShellOfficialAudioCatalogV1/);
+ assert.match(creator,/▶ Préécouter/);
+ assert.match(creator,/await media\.put\(universe,slot,file\.files\[0\]\)/);
+ assert.match(catalog,/private-audio-runtime\.v1\.json/);
+ assert.match(catalog,/soundtrackRuntimeAssetV1/);
+ assert.match(catalog,/privateAudioRuntimeAssetV1/);
+ assert.equal(fs.existsSync(path.join(trial,'vendor/combat-lab/assets/runtime/audio/private-v1')),false,
+  'never copy the signed Combat sound bank to a second location');
+});
+
 test('NPC editor is the canonical native Exploration page with one visible Capture menu route',()=>{
  const npc=read(trial,'vendor/exploration-lab/npc-editor.html').toString('utf8');
  const sculpt=read(trial,'vendor/exploration-lab/sculpt-lab.html').toString('utf8');

@@ -1798,7 +1798,9 @@ const loadingArtRotation={launch:0,zone:0,combat:0};
 let journeyLoadingCrossfade=null;
 function loadingArtLibrary(){
  if(!loadingArtLibraryPromise)
-  loadingArtLibraryPromise=createAdventureLoadingArtLibraryV1().catch(error=>{
+  loadingArtLibraryPromise=createAdventureLoadingArtLibraryV1({
+   universeId:selectedUniverseId??'monster-invoc'
+  }).catch(error=>{
    loadingArtLibraryPromise=null;
    throw error;
   });

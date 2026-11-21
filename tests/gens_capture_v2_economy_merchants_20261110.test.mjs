@@ -194,8 +194,9 @@ test('merchant editor only configures the canonical rules and never embeds an NP
  const editor=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-economy-editor-v1.mjs',import.meta.url),'utf8');
  assert.match(html,/id="adventure-economy-panel"/);
  assert.match(html,/id="adventure-money-singular"/);
- assert.match(html,/id="adventure-merchant-resource-add"/);
- assert.match(html,/id="adventure-merchant-offer-add"/);
+ assert.match(html,/id="adventure-merchant-library"/);
+ assert.match(html,/id="adventure-merchant-sell-percent"/);
+ assert.match(html,/id="adventure-merchant-buy-percent"/);
  assert.match(app,/installAdventureEconomyEditorV1/);
  assert.match(app,/rules=normalizeAdventureRulesV1\(\{\.\.\.fromFields\(\),economy/);
  assert.doesNotMatch(editor,/localStorage|sessionStorage|new Map\(|window\.location\.assign/);

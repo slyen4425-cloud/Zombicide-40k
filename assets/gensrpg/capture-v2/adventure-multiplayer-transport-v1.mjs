@@ -334,6 +334,11 @@ export function createCaptureRoomTransportV1({client}={}){
    if(!current())return;
    verifiedRoom=state;observedRoom=state;
    onChange(state);
+   // A newly joined guest can send a position before the Presence callback
+   // finishes refreshing membership. Retry the SAME RLS-scoped reader only
+   // after the authoritative roster is current: otherwise the old one-member
+   // cache can silently hide every subsequent pose from this guest.
+   updatePositions();
   }).catch(error=>{
    if(current()){
     verifiedRoom=null;observedRoom=null;

@@ -174,3 +174,23 @@ test('music retries after gesture on Android and choosing music enables its univ
  assert.match(creator,/startAmbient,\s*async reload\(/);
  assert.match(creator,/function leaveHome\(\)\{\s*active=false;stopAmbient\(/);
 });
+
+
+test('Creator wallpaper and ambience stay in Shell menus and Adventure preparation, not live play',()=>{
+ const shell=read('shell-entry-v1.js'),creator=read('shell-creator-presentation-v1.mjs');
+ const css=read('shell-style-v1.css'),adventureCss=read('adventure-style-v1.css');
+ assert.match(shell,/function bindAdventureMenuPresentation\(nativeFrame\)/);
+ assert.match(shell,/adventureDoc\.body\.dataset\.adventurePlaying==='true'/);
+ assert.match(shell,/attributeFilter:\['data-adventure-playing'\]/);
+ assert.match(shell,/if\(playing\(\)\)creatorOwner\?\.leaveHome\(\)/);
+ assert.match(shell,/else creatorOwner\?\.enterHome\(\)/);
+ assert.match(shell,/if\(kind==='adventure'\)bindAdventureMenuPresentation\(frame\)/);
+ assert.match(shell,/adventureDoc\.documentElement\.style\.removeProperty\('--capture-shell-wallpaper'\)/);
+ assert.match(shell,/creatorOwner\?\.play\('click'\)/);
+ assert.match(creator,/wallpaper:\(\)=>backgroundUrl\?Object\.freeze\(/);
+ assert.match(css, /data-view="home"\]\[data-menu="main"\] > \.gensCaptureV2MainMenu button/);
+ assert.match(css, /rgba\(28,88,96,\.81\)/);
+ assert.doesNotMatch(css,/data-menu="editors"\]\s*> \.gensCaptureV2MainMenu button\s*\{/);
+ assert.match(adventureCss,/body\[data-capture-shell-wallpaper="true"\]:not\(\[data-adventure-playing="true"\]\) main/);
+ assert.doesNotMatch(shell,/new Audio\(/);
+});

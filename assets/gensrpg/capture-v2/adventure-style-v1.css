@@ -715,3 +715,17 @@ body[data-adventure-item-editor="true"] .adventure-start-tabs{display:none!impor
  .adventure-merchant-percent-grid{gap:6px}
  .adventure-merchant-percent-grid label{padding:7px}
 }
+
+/* L'illustration reste l'habillage du menu de préparation, en lecture seule
+   depuis le Shell. Le monde jouable n'utilise jamais ce papier peint. */
+body[data-capture-shell-wallpaper="true"]:not([data-adventure-playing="true"]) main{
+ background-color:#08131c;
+ background-image:linear-gradient(
+  rgba(6,18,25,var(--capture-shell-wallpaper-shade,.55)),
+  rgba(6,18,25,var(--capture-shell-wallpaper-shade,.55))),
+  var(--capture-shell-wallpaper);
+ background-position:center,center;
+ background-size:cover,cover;
+ background-repeat:no-repeat;
+ background-attachment:fixed,fixed;
+}

@@ -195,6 +195,60 @@
       };
     });
   }
+  // Capture-owned preparation screens are application menus, NOT live play.
+  // The game is the only authority for its 'data-adventure-playing' flag.
+  function bindAdventureMenuPresentation(nativeFrame){
+    nativeFrame.addEventListener('load',()=>{
+      unbindNativeEditorAudio();
+      if(frame!==nativeFrame||current!=='adventure'||!host)return;
+      let adventureDoc;
+      try{adventureDoc=nativeFrame.contentDocument;}catch{return;}
+      if(!adventureDoc?.body)return;
+      const playing=()=>adventureDoc.body.dataset.adventurePlaying==='true';
+      const sync=()=>{
+        if(frame!==nativeFrame||current!=='adventure'||!host)return;
+        if(playing())creatorOwner?.leaveHome();
+        else creatorOwner?.enterHome();
+        const art=!playing()?creatorOwner?.wallpaper?.():null;
+        if(art?.url){
+          adventureDoc.documentElement.style.setProperty(
+            '--capture-shell-wallpaper','url('+JSON.stringify(art.url)+')');
+          adventureDoc.documentElement.style.setProperty(
+            '--capture-shell-wallpaper-shade',String(art.shade));
+          adventureDoc.body.dataset.captureShellWallpaper='true';
+        }else{
+          adventureDoc.documentElement.style.removeProperty('--capture-shell-wallpaper');
+          adventureDoc.documentElement.style.removeProperty('--capture-shell-wallpaper-shade');
+          delete adventureDoc.body.dataset.captureShellWallpaper;
+        }
+      };
+      const onGesture=()=>{if(!playing())creatorOwner?.startAmbient?.();};
+      const onClick=event=>{
+        if(playing()||frame!==nativeFrame)return;
+        const control=event.target?.closest?.(
+          'button,a[href],summary,select,[role="button"],[role="tab"],'+
+          '[role="menuitem"],input[type="button"],input[type="submit"]');
+        if(control)creatorOwner?.play('click');
+      };
+      adventureDoc.addEventListener('pointerdown',onGesture,true);
+      adventureDoc.addEventListener('keydown',onGesture,true);
+      adventureDoc.addEventListener('click',onClick,true);
+      const watcher=typeof root.MutationObserver==='function'
+       ?new root.MutationObserver(sync):null;
+      watcher?.observe(adventureDoc.body,{attributes:true,
+       attributeFilter:['data-adventure-playing']});
+      detachNativeEditorAudio=()=>{
+        watcher?.disconnect();
+        adventureDoc.removeEventListener('pointerdown',onGesture,true);
+        adventureDoc.removeEventListener('keydown',onGesture,true);
+        adventureDoc.removeEventListener('click',onClick,true);
+        adventureDoc.documentElement.style.removeProperty('--capture-shell-wallpaper');
+        adventureDoc.documentElement.style.removeProperty('--capture-shell-wallpaper-shade');
+        delete adventureDoc.body.dataset.captureShellWallpaper;
+      };
+      sync();
+    });
+  }
   function open(kind,{startView=null}={}){
     if(!host)return false;
     if(!selectedUniverse){
@@ -207,10 +261,9 @@
     // screens, never create a world or choose a saved session in the Shell.
     if(kind==='adventure'&&['new','load'].includes(startView))
       url.searchParams.set('start',startView);
-    // Editors are still application UI: keep the configured ambience and UI
-    // sounds active. Only the actual Adventure/Jouer session owns game audio.
-    if(kind==='adventure')creatorOwner?.leaveHome();
-    else creatorOwner?.enterHome();
+    // All preparation menus share the Shell atmosphere. Live Adventure play
+    // disables it via its existing data-adventure-playing state (below).
+    creatorOwner?.enterHome();
     unbindNativeEditorAudio();
     dismissNativeLoading();
     if(frame){frame.src="about:blank";frame.remove();frame=null;}
@@ -225,7 +278,8 @@
     frame.setAttribute("data-capture-v2-native",info.family);
     stage.replaceChildren(frame);
     showNativeLoading(frame,info.label);
-    bindNativeEditorAudio(frame,kind);
+    if(kind==='adventure')bindAdventureMenuPresentation(frame);
+    else bindNativeEditorAudio(frame,kind);
     frame.src=url.href;
     current=kind;
     nativeTitle.textContent=info.label;

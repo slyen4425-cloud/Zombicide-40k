@@ -224,3 +224,12 @@
  #gensCaptureV2Root[data-view="home"][data-menu="creator"]
   > .gensCaptureV2CreatorPanel{max-height:calc(100dvh - 72px);}
 }
+
+/* Menu d'accueil UNIQUEMENT : légère transparence pour laisser lire le décor.
+   Les boutons des éditeurs, du Créateur, du jeu et des autres modules restent pleins. */
+#gensCaptureV2Root[data-view="home"][data-menu="main"] > .gensCaptureV2MainMenu button{
+ background:linear-gradient(110deg,rgba(28,88,96,.81),rgba(23,59,74,.84));
+}
+#gensCaptureV2Root[data-view="home"][data-menu="main"] > .gensCaptureV2MainMenu button:hover{
+ background:linear-gradient(110deg,rgba(39,101,118,.91),rgba(27,74,89,.93));
+}

@@ -7,6 +7,13 @@ const MAX_BYTES=8*1024*1024;
 const MAX_PER_SCENE=12;
 const types=new Set(['image/png','image/jpeg','image/webp','image/gif']);
 const isScene=scene=>CAPTURE_LOADING_SCENES_V1.includes(scene);
+export const LEGACY_CAPTURE_ART_UNIVERSE_ID_V1='monster-invoc';
+export function captureArtUniverseIdV1(value=LEGACY_CAPTURE_ART_UNIVERSE_ID_V1){
+ if(value===LEGACY_CAPTURE_ART_UNIVERSE_ID_V1||
+    (typeof value==='string'&&/^unv_[a-z0-9-]{8,80}$/.test(value)))
+  return value;
+ throw new RangeError('Univers invalide pour la galerie de chargement');
+}
 const requestDone=request=>new Promise((resolve,reject)=>{
  request.onsuccess=()=>resolve(request.result);
  request.onerror=()=>reject(request.error??new Error('IndexedDB indisponible'));
@@ -14,9 +21,11 @@ const requestDone=request=>new Promise((resolve,reject)=>{
 export async function createAdventureLoadingArtLibraryV1({
  indexedDB=globalThis.indexedDB,
  uuid=()=>globalThis.crypto.randomUUID(),
- url=globalThis.URL
+ url=globalThis.URL,
+ universeId=LEGACY_CAPTURE_ART_UNIVERSE_ID_V1
 }={}){
  if(!indexedDB?.open)throw new Error('Stockage des illustrations indisponible');
+ const universe=captureArtUniverseIdV1(universeId);
  const req=indexedDB.open(DB_NAME,1);
  req.onupgradeneeded=()=>{
   if(!req.result.objectStoreNames.contains(STORE))
@@ -28,7 +37,9 @@ export async function createAdventureLoadingArtLibraryV1({
   async list(scene=null){
    if(scene!==null&&!isScene(scene))throw new RangeError('Type de chargement inconnu');
    const all=await readAll();
-   return Object.freeze(all.filter(r=>scene===null||r.scene===scene)
+   return Object.freeze(all.filter(r=>
+    (r.universeId??LEGACY_CAPTURE_ART_UNIVERSE_ID_V1)===universe&&
+    (scene===null||r.scene===scene))
     .sort((a,b)=>a.createdAt.localeCompare(b.createdAt)).map(Object.freeze));
   },
   async add(scene,files){
@@ -42,7 +53,7 @@ export async function createAdventureLoadingArtLibraryV1({
    const inserted=[];
    // Store real Blobs without base64, archives or copies in the published site.
    for(const file of selected){
-    const record={id:uuid(),scene,name:file.name,blob:file,
+    const record={id:uuid(),universeId:universe,scene,name:file.name,blob:file,
      createdAt:new Date().toISOString()};
     await requestDone(db.transaction(STORE,'readwrite').objectStore(STORE).put(record));
     inserted.push(record.id);
@@ -51,6 +62,9 @@ export async function createAdventureLoadingArtLibraryV1({
   },
   async remove(id){
    if(typeof id!=='string'||!id)throw new TypeError('Illustration inconnue');
+   const record=await requestDone(db.transaction(STORE,'readonly').objectStore(STORE).get(id));
+   if(!record||(record.universeId??LEGACY_CAPTURE_ART_UNIVERSE_ID_V1)!==universe)
+    throw new Error('Illustration absente de cet univers : aucun autre contenu modifié');
    await requestDone(db.transaction(STORE,'readwrite').objectStore(STORE).delete(id));
   },
   // Each launch supplies scoped blob URLs, revocable by the owning Capture UI.

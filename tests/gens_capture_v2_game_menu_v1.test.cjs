@@ -72,8 +72,17 @@ test('real Capture Shell chooses a universe then shows one game and grouped edit
  const main=nodes.find(n=>n.className==='gensCaptureV2MainMenu');
  const editors=nodes.find(n=>n.className==='gensCaptureV2Editors');
  assert.ok(main&&editors,'main game menu and a distinct editor list must exist');
- assert.equal(main.children.filter(n=>n.tag==='button').length,3,'home shows Jouer, Éditeurs and Changer univers');
- assert.deepEqual(main.children.map(n=>n.textContent),['Jouer','Éditeurs','Changer d’univers']);
+ assert.equal(main.children.filter(n=>n.tag==='button').length,4,
+  'home shows Jouer, Éditeurs, Créateur and Changer univers');
+ assert.deepEqual(main.children.map(n=>n.textContent),
+  ['Jouer','Éditeurs','Créateur','Changer d’univers']);
+ assert.equal(s.find('captureV2Menu','creator').length,1);
+ s.click('captureV2Menu','creator');
+ assert.equal(s.body.children[0].dataset.menu,'creator');
+ assert.equal(s.rootWindow.GensCaptureV2.status().view,null,
+   'Creator is an app-menu view, not a second gameplay/runtime iframe');
+ assert.equal(all(s.body).filter(n=>n.tag==='iframe').length,0);
+ s.rootWindow.GensCaptureV2.home();
  assert.match(css,/gensCaptureV2MainMenu/);
  assert.match(css,/gensCaptureV2Editors/);
  assert.match(css,/flex-direction:column/,'phone and PC keep a real vertical list');

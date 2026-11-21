@@ -42,7 +42,7 @@ export function assertOfficialMainHistoryPin({repository,sha,remoteUrl=null}){
    if(proof.error)throw proof.error;
    if(proof.status===0){approved=true;break;}
   }
-  if(!approved)throw Error('Pinned '+sha+' is not part of the verified official main history of '+
+  if(!approved)throw Error('Pinned '+sha+' is not part of the official main history of '+
    repository+' at '+main+' (or exceeds the bounded history); reject branch-only SHA');
   return Object.freeze({repository,pin:sha,main,ref:'refs/heads/main'});
  }finally{fs.rmSync(tmp,{recursive:true,force:true});}

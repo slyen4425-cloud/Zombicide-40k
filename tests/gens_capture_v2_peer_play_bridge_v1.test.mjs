@@ -31,6 +31,38 @@ test('offline Adventure game entry never requires or creates an online room',asy
  assert.equal(await preflightCaptureOnlineWorldV1({room:null}),null);
  assert.equal(await publishCaptureInitialPositionV1({context:null}),null);
 });
+test('online lobby with no official local map gives an actionable error without contacting server',async()=>{
+ const room={role:'host',roomId:id,userId:hostId};
+ let probes=0;
+ const transport={inspectRoom:async()=>{probes++;throw Error('must not read server');}};
+ for(const world of [null,{}, {id:'forest-1'}, {id:'forest-1',areas:[]},
+  {id:'',areas:[{id:'area-a'}]}]){
+  await assert.rejects(preflightCaptureOnlineWorldV1({
+   room,transport,world,officialFingerprint:()=>nav.worldFingerprint,
+   sessionId:'session-host'
+  }),/Aucun monde jouable.*World Builder officiel/);
+ }
+ assert.equal(probes,0,'no room/RPC/network access without an official WorldDocument');
+});
+test('incomplete room, transport or fingerprint fails visibly, never launches offline',async()=>{
+ const room={role:'host',roomId:id,userId:hostId};
+ const f=fake();
+ for(const invalid of [
+  {...input(room,f.transport),room:{roomId:id,userId:hostId}},
+  {...input(room,f.transport),room:{...room,role:'unknown'}},
+  {...input(room,f.transport),room:{...room,userId:''}}
+ ]){
+  await assert.rejects(preflightCaptureOnlineWorldV1(invalid),
+   /Salon Monster Capture invalide/);
+ }
+ await assert.rejects(preflightCaptureOnlineWorldV1({
+  ...input(room,f.transport),transport:{}
+ }),/Connexion au salon Monster Capture indisponible/);
+ await assert.rejects(preflightCaptureOnlineWorldV1({
+  ...input(room,f.transport),officialFingerprint:null
+ }),/Vérification du monde Exploration indisponible/);
+ assert.equal(f.calls.length,0,'no bind/publish/report on invalid preflight');
+});
 test('host binds its one real world, then publishes official checkpoint',async()=>{
  const f=fake(),room={role:'host',roomId:id,userId:hostId};
  const context=await preflightCaptureOnlineWorldV1(input(room,f.transport));

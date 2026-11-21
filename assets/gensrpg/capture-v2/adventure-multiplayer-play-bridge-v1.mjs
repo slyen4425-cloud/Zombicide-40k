@@ -3,10 +3,21 @@
 import {capturePeerPositionFromOfficialNavigationV1} from './adventure-peer-position-v1.mjs';
 
 function requiredContext({room,transport,world,officialFingerprint}={}){
- if(!room||!['host','guest'].includes(room.role)||typeof room.roomId!=='string'||
-  typeof room.userId!=='string'||typeof transport?.inspectRoom!=='function'||
-  typeof world?.id!=='string'||!world.id||typeof officialFingerprint!=='function')
-  throw new TypeError('Invalid canonical Capture online play context');
+ // The caller has explicitly joined or hosted a room: never silently fall
+ // back to offline play, invent a WorldDocument or reset an AdventureSave.
+ if(!room||!['host','guest'].includes(room.role)||
+  typeof room.roomId!=='string'||!room.roomId||
+  typeof room.userId!=='string'||!room.userId)
+  throw new TypeError('Salon Monster Capture invalide : quitte ce salon et rejoins-le à nouveau.');
+ // Validate only the shared Adventure/Exploration document envelope. The
+ // native Exploration owner remains responsible for detailed map validation.
+ if(!world||typeof world.id!=='string'||!world.id||
+  !Array.isArray(world.areas)||!world.areas.length)
+  throw new Error('Aucun monde jouable : ouvre le World Builder officiel, crée ou importe une carte, puis enregistre-la avant de lancer cette partie.');
+ if(typeof transport?.inspectRoom!=='function')
+  throw new Error('Connexion au salon Monster Capture indisponible : quitte ce salon et rejoins-le à nouveau.');
+ if(typeof officialFingerprint!=='function')
+  throw new Error('Vérification du monde Exploration indisponible : recharge Monster Capture, sans supprimer ta sauvegarde.');
  return {room,transport,world,officialFingerprint};
 }
 export async function preflightCaptureOnlineWorldV1(input={}){

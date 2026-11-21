@@ -137,6 +137,7 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   await frame.locator('#adventure-money-singular').fill('jeton');
   await frame.locator('#adventure-money-plural').fill('jetons');
   await frame.locator('#adventure-merchant-name').fill('Marchand témoin');
+  await frame.locator('#adventure-economy-panel > details > summary').tap();
   assert.equal(await frame.locator('#adventure-merchant-sell-value').innerText(),'+10 %');
   assert.equal(await frame.locator('#adventure-merchant-buy-value').innerText(),'-50 %');
   assert.match(await frame.locator('#adventure-merchant-price-example').innerText(),

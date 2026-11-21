@@ -524,3 +524,22 @@ test('publisher includes checked merchant catalog and canonical percent-price mo
  assert.equal(fs.existsSync(path.join(site,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs')),false,
   'Capture merchant economy must not leak to production root');
 });
+
+test('published Capture creator keeps audio active in native editors but silent inside Adventure gameplay',()=>{
+ const shell=read(trial,'assets/gensrpg/capture-v2/shell-entry-v1.js').toString('utf8');
+ const creator=read(trial,'assets/gensrpg/capture-v2/shell-creator-presentation-v1.mjs').toString('utf8');
+ const pin=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
+ assert.ok(pin.combat.sha&&pin.exploration.sha,'certified Lab pins unchanged');
+ assert.match(shell,/function bindNativeEditorAudio\(nativeFrame,nativeKind\)/);
+ assert.match(shell,/editorDoc\.addEventListener\('click',onClick,true\)/);
+ assert.match(shell,/if\(kind==='adventure'\)creatorOwner\?\.leaveHome\(\)/);
+ assert.match(shell,/else creatorOwner\?\.enterHome\(\)/);
+ assert.match(shell,/if\(nativeKind==="adventure"\)return/);
+ assert.match(shell,/editorDoc\.removeEventListener\('click',onClick,true\)/);
+ assert.match(creator,/function startAmbient\(\)/);
+ assert.match(creator,/doc\.addEventListener\('pointerdown',resumeOnGesture,true\)/);
+ assert.match(creator,/doc\.removeEventListener\('pointerdown',resumeOnGesture,true\)/);
+ assert.match(creator,/ambienceEnabled:true/);
+ assert.doesNotMatch(shell,/new Audio\(/);
+ assert.equal(fs.existsSync(path.join(trial,'vendor/combat-lab/assets/runtime/audio/private-v1')),false);
+});

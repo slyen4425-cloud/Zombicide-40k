@@ -734,6 +734,7 @@ jobs:
             "vendor/exploration-lab/combat-preview/data/capture/showcase/encounter-bundle.v1.json" \
             "vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json" \
             "vendor/combat-lab/examples/dom-demo/capture-editor-v2.html" \
+            "vendor/exploration-lab/npc-editor.html" \
             "vendor/exploration-lab/sculpt-lab.html" \
             "vendor/exploration-lab/src/sculpt-lab-main.js"; do
             mkdir -p "$dir/preview/$(dirname "$file")"

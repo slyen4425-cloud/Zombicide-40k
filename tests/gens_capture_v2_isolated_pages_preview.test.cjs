@@ -532,7 +532,8 @@ test('published Capture creator keeps audio active in native editors but silent 
  assert.ok(pin.combat.sha&&pin.exploration.sha,'certified Lab pins unchanged');
  assert.match(shell,/function bindNativeEditorAudio\(nativeFrame,nativeKind\)/);
  assert.match(shell,/editorDoc\.addEventListener\('click',onClick,true\)/);
- assert.match(shell,/if\(kind==='adventure'\)creatorOwner\?\.leaveHome\(\)/);
+ assert.match(shell,/if\(kind==='adventure'\)bindAdventureMenuPresentation\(frame\)/);
+ assert.match(shell,/if\(playing\(\)\)creatorOwner\?\.leaveHome\(\)/);
  assert.match(shell,/else creatorOwner\?\.enterHome\(\)/);
  assert.match(shell,/if\(nativeKind==="adventure"\)return/);
  assert.match(shell,/editorDoc\.removeEventListener\('click',onClick,true\)/);

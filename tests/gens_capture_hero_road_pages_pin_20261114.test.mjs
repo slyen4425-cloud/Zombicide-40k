@@ -2,13 +2,31 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
-test('single Pages publisher selects certified Monster InvoC source with official victory audio, Exploration editor fixes and loading art',()=>{
- const manifest=JSON.parse(readFileSync(new URL('../tools/capture_v2_pages_preview_pin.json',import.meta.url),'utf8'));
+const read=relative=>readFileSync(new URL('../'+relative,import.meta.url),'utf8');
+const sha40=value=>typeof value==='string'&&/^[a-f0-9]{40}$/.test(value);
+
+test('single Pages publisher consumes the ONE immutable selected Capture and official visual source',()=>{
+ const manifest=JSON.parse(read('tools/capture_v2_pages_preview_pin.json'));
  assert.equal(manifest.schema,'gensrpg-capture-v2-pages-source-pin-v1');
  assert.equal(manifest.repository,'slyen4425-cloud/Zombicide-40k');
- assert.ok(['e5a35f59a305c0fd55207670710657acc9e47ad8','0b74ac44ab0a39c90dbc0696f8a386084de1cec6','888e41e00dd6c04d0fef2b36418daafd0b500f57','3ecb6dd958315d0ad08130387b7bd9589486f5c5','5ca4481cf24ca727e09718e061f865b9c68e9b40','98606b5e7b0fe608fa5025ecc7da1b28e88c3bf3','5b4dbbf80923e6506e96a25283327ef49884e7dc','ea8292cb5234ef75a64e9279474c44e4d9db685a','2d391cc165a7a4633b7504d78c4841eab6745ce8','3a91a4dceeede1b1fa60a58a0ee18cf90b1ffae2','abdb5ec69267d279f96027577cbb81e19eaf532f','e572ebb0ee6ae770aa6ec5480f3fcbbe48bbe691','66e1ccbf59d1ee11f0838b54a46deb25503f25a8'].includes(manifest.sha), 'only previously certified or newly certified Capture source SHA is allowed');
+ assert.ok(sha40(manifest.sha),'Capture source must be an immutable full commit SHA');
  assert.equal(manifest.publicPath,'/preview/capture-v2-pr225/');
- assert.equal(manifest.officialVisuals.repository,'slyen4425-cloud/GenSrpg_labo_combat_dynamique');
+ assert.equal(manifest.officialVisuals.repository,
+  'slyen4425-cloud/GenSrpg_labo_combat_dynamique');
  assert.equal(manifest.officialVisuals.ref,'global-assets');
- assert.equal(manifest.officialVisuals.sha,'b45153efd5d2c4dec53d45a818131aca1cae6705');
+ assert.ok(sha40(manifest.officialVisuals.sha),
+  'Official visual media must be an immutable full commit SHA');
+ assert.ok(Number.isSafeInteger(manifest.officialVisuals.certifiedCiRun)&&
+  manifest.officialVisuals.certifiedCiRun>0,
+  'Visual source requires the one certified CI run');
+ const workflow=read('.github/workflows/main.yml');
+ // Protect real GitHub checkout, native owner staging and output integrity.
+ // Never maintain a second stale SHA whitelist or overwrite the author pin.
+ assert.match(workflow,/ref: \$\{\{ steps\.preview_pin\.outputs\.sha \}\}/);
+ assert.match(workflow,/ref: \$\{\{ steps\.preview_pin\.outputs\.visuals \}\}/);
+ assert.match(workflow,/node tools\/resolve_capture_v2_preview_sources\.mjs capture-v2-source\/assets\/gensrpg\/capture-v2\/source-pins-v1\.json/);
+ assert.match(workflow,/node tools\/stage_capture_v2_pages_preview\.mjs capture-v2-source preview-combat-lab preview-exploration-lab _site/);
+ assert.match(workflow,/release\.source\.commit!==pin\.sha/);
+ assert.match(workflow,/release\.deliveryManifestSha256!==hash\(manifestBytes\)/);
+ assert.match(workflow,/bridge\.legacyCaptureRuntime!==false/);
 });

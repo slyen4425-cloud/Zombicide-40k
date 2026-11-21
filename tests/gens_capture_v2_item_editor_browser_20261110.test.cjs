@@ -156,6 +156,8 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   assert.equal(await frame.locator('#adventure-money-plural').inputValue(),'jetons');
   assert.equal(await frame.locator('#adventure-merchants .rule-row').count(),1,
    'merchant persists with the canonical AdventureRules draft');
+  await frame.locator('#adventure-economy-panel > summary').tap();
+  await frame.locator('#adventure-economy-panel > details > summary').tap();
   await frame.locator('#adventure-merchants .rule-row button').first().tap();
   assert.equal(await frame.locator('#adventure-merchant-sell-percent').inputValue(),'10');
   assert.equal(await frame.locator('#adventure-merchant-buy-percent').inputValue(),'-50');

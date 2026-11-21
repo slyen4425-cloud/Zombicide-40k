@@ -164,6 +164,16 @@ export function createCaptureRoomTransportV1({client}={}){
   const reply=roomResult(result(await client.rpc('gensrpg_capture_join_room',{
    p_code:invitation,p_display_name:label
   }),'Rejoindre le salon Capture'));
+  // The server's join_room() is intentionally idempotent: an existing HOST
+  // can receive a successful room_id without being added as a guest. Never
+  // fabricate a guest identity on this client: it creates an invisible
+  // "second player" and can make the host's name look like another profile.
+  const verified=await inspectRoom(reply.roomId);
+  const participant=verified?.members?.find(member=>member.id===userId);
+  if(verified?.ownerId===userId||participant?.role==='host')
+   throw new Error('Cet appareil utilise le même profil réseau que le créateur. Deux joueurs nécessitent deux identités réseau distinctes. Aucune sauvegarde n’a été modifiée.');
+  if(!verified?.open||participant?.role!=='guest')
+   throw new Error('Rejoindre le salon n’a pas été confirmé côté serveur. Réessaie avec le code du créateur ; aucune partie locale n’a été modifiée.');
   return Object.freeze({...reply,userId,role:'guest'});
  }
  // This operation is host-only on the server. It does not serialize the

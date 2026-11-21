@@ -12,7 +12,7 @@ const navigation={schema:'gensrpg.exploration.play-navigation.v1',
  worldFingerprint:'hash:1',currentAreaId:'area-1',x:10,y:20};
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 async function settle(){for(let i=0;i<10;i++)await tick();}
-function harness({broadcastSend=null}={}){
+function harness({broadcastSend=null,userId=host}={}){
  let seq=0,peerSeq=1;
  const queries=[],rpcCalls=[],listeners=[],authTokens=[];
  const members=[
@@ -24,12 +24,13 @@ function harness({broadcastSend=null}={}){
   guest_permissions:{},host_is_game_master:false,join_enabled:true,
   open:true,revision:3,world_id:'forest',world_fingerprint:'hash:1'};
  const client={
-  auth:{getSession:async()=>({data:{session:{user:{id:host},access_token:'test-jwt'}}}),
-   signInAnonymously:async()=>({data:{session:{user:{id:host},access_token:'test-jwt'}}})},
+  auth:{getSession:async()=>({data:{session:{user:{id:userId},access_token:'test-jwt'}}}),
+   signInAnonymously:async()=>({data:{session:{user:{id:userId},access_token:'test-jwt'}}})},
   realtime:{setAuth:async token=>{authTokens.push(token);}},
   rpc:async(name)=>{
    rpcCalls.push(name);
    if(name==='gensrpg_capture_report_position')return {data:++seq};
+   if(name==='gensrpg_capture_join_room')return {data:[{room_id:roomId,room_code:room.code}]};
    return {data:null};
   },
   from(table){
@@ -124,5 +125,24 @@ test('issue #553: delayed Broadcast ACK never holds the next authoritative posit
  assert.ok(wakes.every(x=>x.event==='capture-peer-position-changed-v1'));
  assert.ok(wakes.every(x=>Object.keys(x.payload).length===0),
   'no unverified coordinates ever travel in Broadcast payloads');
+ await h.transport.dispose();
+});
+
+test('issue #584: a successful idempotent join_room RPC must NOT fake a second guest when auth is the host',async()=>{
+ const h=harness({userId:host});
+ await assert.rejects(h.transport.join({code:'ABCDEFGHJK',name:'Second appareil'}),
+  /même profil réseau que le créateur/);
+ assert.deepEqual(h.rpcCalls,['gensrpg_capture_join_room'],
+  'no extra account/saving RPC may run on an invalid identity');
+ await h.transport.dispose();
+});
+test('issue #584: only a distinct user verified as guest in the RLS membership can join',async()=>{
+ const h=harness({userId:guest});
+ const joined=await h.transport.join({code:'ABCDEFGHJK',name:'Invité'});
+ assert.equal(joined.role,'guest');
+ assert.equal(joined.userId,guest);
+ assert.equal(joined.roomId,roomId);
+ assert.ok(h.queries.includes('gensrpg_capture_rooms'));
+ assert.ok(h.queries.includes('gensrpg_capture_room_members'));
  await h.transport.dispose();
 });

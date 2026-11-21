@@ -180,6 +180,8 @@ export function createCaptureShellCreatorV1({
   universe=captureArtUniverseIdV1(nextUniverse);
   name=String(nextName??universe);
   const current=++epoch;
+  // Close the prior universe gallery without deleting any stored illustrations.
+  loading?.close();loading=null;
   stopAmbient();revokeUrls();settings=readSettings();applyBackground();
   try{
    if(!media)media=await createCaptureShellMediaLibraryV1({indexedDB:root.indexedDB});
@@ -321,13 +323,7 @@ export function createCaptureShellCreatorV1({
   const art=make(doc,'details',undefined,'captureCreatorGroup');
   art.append(make(doc,'summary','🌄 Illustrations de chargement (fondu et rotation)'));
   art.append(make(doc,'p',
-   'Cette galerie est celle utilisée par Jouer et par les transitions. Maximum de 12 images par univers ; aucune image de Donjon n’est modifiée.'));
-  const scene=make(doc,'select');
-  for(const [value,label] of [['launch','Démarrage'],['zone','Passage de zone'],
-    ['combat','Combat']]){
-   const option=make(doc,'option',label);option.value=value;scene.append(option);
-  }
-  scene.setAttribute('aria-label','Scène de chargement');
+   'Une seule galerie pour tous les chargements de Monster InvoC : les images défilent toutes les 10 secondes avec un fondu. Maximum de 12 images par univers ; aucune image de Donjon n’est modifiée.'));
   const artInput=make(doc,'input');artInput.type='file';artInput.multiple=true;
   artInput.accept='image/png,image/jpeg,image/webp,image/gif';
   artInput.setAttribute('aria-label','Ajouter plusieurs illustrations de chargement');
@@ -344,7 +340,7 @@ export function createCaptureShellCreatorV1({
     const row=make(doc,'div',undefined,'captureCreatorArtItem');
     const url=root.URL.createObjectURL(image.blob);previews.add(url);
     const thumbnail=make(doc,'img');thumbnail.src=url;thumbnail.alt=image.name;
-    const text=make(doc,'span',image.name+' · '+image.scene);
+    const text=make(doc,'span',image.name);
     const remove=make(doc,'button','Retirer');remove.type='button';
     remove.addEventListener('click',async()=>{
      try{await loading.remove(image.id);await showArt();}
@@ -357,11 +353,11 @@ export function createCaptureShellCreatorV1({
    if(!artInput.files?.length)return;
    try{
     if(!loading)await showArt();
-    await loading.add(scene.value,artInput.files);await showArt();
+    await loading.add('launch',artInput.files);await showArt();
     artInput.value='';report('Illustrations enregistrées pour cet univers.');}
    catch(error){report(error.message,true);}
   });
-  art.append(scene,artInput,artList);container.append(art);
+  art.append(artInput,artList);container.append(art);
   try{loading?.close();loading=null;await showArt();}
   catch(error){report('Galerie de chargement indisponible : '+error.message,true);}
  }

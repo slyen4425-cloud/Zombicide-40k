@@ -434,3 +434,22 @@ test('isolated HTTPS Jouer has creator-owned unlimited level caps, Core XP bands
  assert.equal(pins.exploration.sha,explorationSha);
  assert.equal(pins.combat.sha,combatSha);
 });
+
+
+test('publisher includes checked merchant catalog and canonical percent-price model only in Capture',()=>{
+ const files=['assets/gensrpg/capture-v2/adventure-economy-v1.mjs',
+  'assets/gensrpg/capture-v2/adventure-economy-editor-v1.mjs',
+  'assets/gensrpg/capture-v2/adventure-merchant-play-v1.mjs'];
+ const [core,editor,play]=files.map(p=>read(trial,p).toString('utf8'));
+ const html=read(trial,'assets/gensrpg/capture-v2/adventure.html').toString('utf8');
+ assert.match(core,/export function adventureMerchantPriceV1/);
+ assert.match(core,/sellPercent/);
+ assert.match(core,/buyPercent/);
+ assert.match(editor,/adventure-merchant-library/);
+ assert.match(editor,/getRules\(\)\.loot\.items/);
+ assert.match(play,/adventureMerchantPriceV1/);
+ assert.match(html,/id="adventure-merchant-sell-percent"/);
+ assert.match(html,/id="adventure-merchant-buy-percent"/);
+ assert.equal(fs.existsSync(path.join(site,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs')),false,
+  'Capture merchant economy must not leak to production root');
+});

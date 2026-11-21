@@ -69,3 +69,17 @@ test('real Adventure uses official lazy library, never a GenSrpg world serialize
    assert.equal(app.includes(definition+symbol),false,'Capture cannot redefine native Exploration world functions');
  }
 });
+
+test('Jouer displays absent local WorldDocument without creating a hidden fallback',()=>{
+ const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',
+  import.meta.url),'utf8');
+ const start=app.indexOf('function refreshWorldChoices(');
+ const end=app.indexOf('async function installOfficialWorldLibrary(',start);
+ assert.ok(start>=0&&end>start,'canonical world selector required');
+ const code=app.slice(start,end);
+ assert.match(code,/readWorldAssemblerDraft\(universeWorldStorage\)/);
+ assert.match(code,/Aucun monde local disponible/);
+ assert.match(code,/Aucun monde local jouable/);
+ assert.match(code,/Monde local actuel \(compatibilité\)/);
+ assert.doesNotMatch(code,/localStorage\.setItem|createBlankWorldBuilderDraft|createNewExplorationPlay|worldLibrary\.activate/);
+});

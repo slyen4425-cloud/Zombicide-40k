@@ -80,7 +80,8 @@ const idField={
  base:'adventure-xp-base',bonus:'adventure-xp-bonus',penalty:'adventure-xp-penalty',
  global:'adventure-xp-global',distribution:'adventure-xp-distribution',level:'adventure-xp-level',max:'adventure-level-max',
  statPoints:'adventure-stat-points-per-level',xpMode:'adventure-xp-mode',
- currency:'adventure-currency',hpPercent:'adventure-combat-hp-percent',
+ currency:'adventure-currency',goldMultiplier:'adventure-gold-multiplier',
+ starterLevel:'adventure-starter-level',hpPercent:'adventure-combat-hp-percent',
  moveSpeed:'adventure-move-speed',
  heroEnabled:'adventure-hero-xp-enabled',heroShare:'adventure-hero-xp-share',
  heroXpLevel:'adventure-hero-xp-per-level',heroMax:'adventure-hero-max-level',
@@ -226,6 +227,9 @@ function setFields(value){
  $(idField.xpMode).value=value.progression.xpCurveMode;
  $(idField.statPoints).value=value.progression.statPointsPerLevel??0;
  $(idField.currency).value=value.loot.currencyPerVictory;
+ $(idField.goldMultiplier).value=value.loot.currencyMultiplier??1;
+ $(idField.starterLevel).value=value.starterSelection?.startLevel??1;
+ $(idField.starterLevel).max=String(value.progression.maxLevel);
  $(idField.hpPercent).value=100*value.combat.hpMultiplier;
  economyEditor?.sync(value);
  $(idField.moveSpeed).value=value.navigation?.moveSpeed??90;
@@ -260,8 +264,10 @@ function fromFields(){
    xpPerLevel:numberFrom(idField.level),maxLevel:numberFrom(idField.max),
    statPointsPerLevel:numberFrom(idField.statPoints),
    ...($(idField.xpMode).value==='custom'?{xpBands:readXpBandRows()}: {})},
-  loot:{...rules.loot,currencyPerVictory:numberFrom(idField.currency)},
-  starterSelection:{allowAllRarities:$('adventure-starter-all-rarities').checked},
+  loot:{...rules.loot,currencyPerVictory:numberFrom(idField.currency),
+   currencyMultiplier:numberFrom(idField.goldMultiplier)},
+  starterSelection:{allowAllRarities:$('adventure-starter-all-rarities').checked,
+   startLevel:numberFrom(idField.starterLevel)},
   ...(economy===undefined?{}:{economy}),
   combat:{hpMultiplier:numberFrom(idField.hpPercent)/100,
     defeatPolicy:$('adventure-defeat-policy').value},
@@ -1681,7 +1687,7 @@ $('adventure-create').addEventListener('click',guarded(()=>{
  const starterIds=getStarterSpeciesIds();
  const state=createAdventureSessionV1({
   bestiaryCards:published,starterId:starterIds[0],starterIds,
-  rules,ids:{sessionId:id(),instanceId:id(),
+  rules,progressionCore:window.GensProgressionV1,ids:{sessionId:id(),instanceId:id(),
    reserveInstanceIds:starterIds.slice(1).map(()=>id()),creatorId:id()},now,
   heroDefinitionId:$('adventure-hero-choice').value||null,
   heroDisplayName:$('adventure-player-alias').value.trim()||null,

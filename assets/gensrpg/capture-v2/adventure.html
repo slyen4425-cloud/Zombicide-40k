@@ -123,6 +123,10 @@
       <input id="adventure-starter-all-rarities" type="checkbox">
      </label>
      <p class="hint">Désactivé par défaut : le jeu vitrine commence uniquement avec des créatures Rare. Les autres rangs restent rencontrables et collectionnables.</p>
+     <label>Niveau initial de toute l’équipe
+      <input id="adventure-starter-level" type="number" min="1" max="9999" step="1" value="1">
+     </label>
+     <p class="hint">1 par défaut ; pour commencer directement au niveau 20 ou plus, les points correspondant aux niveaux acquis sont disponibles à répartir dans la fiche de chaque créature. Ne modifie pas les niveaux des ennemis.</p>
     </details>
     <details id="adventure-start-options" class="adventure-options">
      <summary>Caméra de départ</summary>
@@ -233,6 +237,10 @@
    <summary id="adventure-loot-heading">Récompenses et objets</summary>
    <div class="fields">
     <label>Monnaie par victoire <input type="number" id="adventure-currency" min="0" max="100000000" step="1"></label>
+    <label>Multiplicateur d'or gagné (victoires et dresseurs) ×
+     <input type="number" id="adventure-gold-multiplier" min="0" max="100" step="0.1" value="1">
+    </label>
+    <p class="hint">×1 par défaut ; ×2 double les gains. Les prix des boutiques et les récompenses en objets restent inchangés. Le multiplicateur d’XP est dans « Progression » ci-dessus.</p>
    </div>
    <section id="adventure-loot-preparation-summary" aria-label="Résumé des objets et drops de cette aventure">
     <p class="hint">Les objets, les drops par monstre et les marchands se configurent dans un seul éditeur, accessible depuis Monster Capture → Éditeurs. Les modifications sont enregistrées dans les règles de cette même aventure.</p>

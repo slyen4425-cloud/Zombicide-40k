@@ -146,3 +146,17 @@ test('issue #584: only a distinct user verified as guest in the RLS membership c
  assert.ok(h.queries.includes('gensrpg_capture_room_members'));
  await h.transport.dispose();
 });
+
+test('issue #584: the Capture shell never treats a one-member room as a completed two-player session',()=>{
+ const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ assert.match(app,/state\.members\.length<2/);
+ assert.match(app,/En attente d’un autre joueur distinct/);
+ assert.match(app,/setAdventureStartView\(valid\?'load':'new',\{preserveChoices:true\}\)/);
+ assert.match(app,/Connexion non confirmée/);
+ assert.match(app,/await transport\.dispose\(\)/);
+ const fragment=app.slice(app.indexOf('async function connectCaptureRoom('),
+  app.indexOf('async function copyCaptureRoomInviteCode('));
+ assert.ok(fragment.includes('try{')&&fragment.includes('}catch(error){'),
+  'an incomplete room subscription must reset the UI without touching the save');
+ assert.doesNotMatch(fragment,/portfolio\.create|portfolio\.remove|store\.save|localStorage\.clear/);
+});

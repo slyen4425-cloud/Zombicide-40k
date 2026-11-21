@@ -2,6 +2,7 @@
 // Exploration owns proximity and NPC placement; AdventureSession owns every
 // trade. No second item registry, wallet, shop save or direct browser persistence.
 import {tradeAdventureMerchantV1} from './adventure-contract-v1.mjs';
+import {merchantUnitPriceV1} from './adventure-economy-v1.mjs';
 
 export function installAdventureMerchantPlayV1({
  window,document,frame,load,save,sessionId,bestiaryCards,
@@ -44,7 +45,15 @@ export function installAdventureMerchantPlayV1({
   rows.replaceChildren();
   const heading=document.createElement('h3');heading.textContent='Acheter';
   rows.append(heading);
-  for(const offer of merchant.offers){
+  // Simple shops derive prices from the item library at display AND trade time.
+  // Historical merchants retain their authored offers, stocks and resources.
+  const simple=Array.isArray(merchant.itemIds);
+  const offers=simple?merchant.itemIds.map(itemId=>{
+   const item=state.rules.loot.items.find(entry=>entry.id===itemId);
+   return {itemId,currencyPrice:merchantUnitPriceV1({merchant,item,kind:'buy'}),
+    resourceCosts:[],stock:null};
+  }):merchant.offers;
+  for(const offer of offers){
    const resources=offer.resourceCosts.map(cost=>
     cost.quantity+' × '+label(state,cost.itemId)).join(' + ');
    const remaining=offer.stock===null?null:Math.min(
@@ -56,7 +65,7 @@ export function installAdventureMerchantPlayV1({
    button.addEventListener('click',()=>void transact('buy',offer.itemId,quantity.value));
    rows.append(row);
   }
-  if(!merchant.offers.length){
+  if(!offers.length){
    const empty=document.createElement('p');empty.textContent='Aucun article à vendre.';
    rows.append(empty);
   }
@@ -66,8 +75,11 @@ export function installAdventureMerchantPlayV1({
    for(const [id,count] of Object.entries(state.inventory.items)){
     const article=state.rules.loot.items.find(item=>item.id===id);
     if(!article||article.saleValue<=0)continue;
+    const unit=simple?merchantUnitPriceV1({merchant,item:article,kind:'sell'}):
+      article.saleValue;
+    if(unit<=0)continue;
     const {row,quantity,button}=line(article.name,
-      article.saleValue+' '+money+' / unité · possédés : '+count,'sell');
+      unit+' '+money+' / unité · possédés : '+count,'sell');
     button.disabled=busy||count<=0;
     button.addEventListener('click',()=>void transact('sell',id,quantity.value));
     rows.append(row);

@@ -309,42 +309,37 @@
     </div>
    </details>
    <details id="adventure-economy-panel" class="adventure-options">
-    <summary>Monnaie, ressources et marchands</summary>
-    <p class="hint">Une monnaie principale, dont le nom est personnalisable. Les autres ressources sont les objets du catalogue : on peut les réclamer en paiement, sans créer un second inventaire. Aucun marchand n'apparaît en jeu avant son raccord explicite à un PNJ ou un événement Exploration.</p>
-    <div class="fields">
-     <label>Nom de la monnaie (singulier) <input id="adventure-money-singular" type="text" maxlength="40" value="pièce"></label>
-     <label>Nom de la monnaie (pluriel) <input id="adventure-money-plural" type="text" maxlength="40" value="pièces"></label>
-    </div>
-    <h3>Configurer un marchand</h3>
+    <summary>Marchands</summary>
+    <p class="hint">Sélectionne les objets depuis la bibliothèque. Le prix de base de chaque objet sert au calcul automatique : +10 % à la vente et −50 % au rachat par défaut. La boutique est liée au PNJ depuis Exploration.</p>
     <div class="fields">
      <label>Nom du marchand <input id="adventure-merchant-name" type="text" maxlength="80" placeholder="Ex. Marchand ambulant"></label>
-     <label><input id="adventure-merchant-buys" type="checkbox" checked> Peut racheter les objets au prix défini dans leur fiche</label>
     </div>
+    <h3>Objets proposés par le marchand</h3>
+    <label for="adventure-merchant-item-search">Rechercher dans la bibliothèque</label>
+    <input id="adventure-merchant-item-search" type="search" placeholder="Nom de l’objet…">
+    <div id="adventure-merchant-catalogue" class="merchant-item-catalogue" aria-label="Objets disponibles dans la bibliothèque"></div>
+    <output id="adventure-merchant-selection-count" aria-live="polite">0 objet choisi.</output>
+    <div class="merchant-percentage-controls">
+     <label for="adventure-merchant-sell-pct">Prix de vente du marchand <output id="adventure-merchant-sell-pct-value">+10 %</output></label>
+     <input id="adventure-merchant-sell-pct" type="range" min="-100" max="200" step="5" value="10">
+     <label for="adventure-merchant-buy-pct">Prix de rachat au joueur <output id="adventure-merchant-buy-pct-value">-50 %</output></label>
+     <input id="adventure-merchant-buy-pct" type="range" min="-100" max="200" step="5" value="-50">
+     <output id="adventure-merchant-price-preview" aria-live="polite">Objet de 100 pièces : vendu 110 · racheté 50 pièces</output>
+    </div>
+    <p id="adventure-merchant-legacy-note" class="hint" hidden>Ancien marchand : ses prix individuels, ses stocks et ses paiements en ressources restent actifs tant que tu ne l’enregistres pas au nouveau format. La conversion demande confirmation.</p>
     <div class="actions">
-     <button type="button" id="adventure-merchant-add">Ajouter ce marchand</button>
+     <button type="button" id="adventure-merchant-add">Créer le marchand</button>
      <button type="button" id="adventure-merchant-cancel" hidden>Annuler la modification</button>
     </div>
+    <h3>Marchands de cet univers</h3>
     <div id="adventure-merchants" class="rules-list" aria-live="polite"></div>
-    <h3>Objets proposés par un marchand</h3>
-    <div class="fields">
-     <label>Marchand <select id="adventure-merchant-select"></select></label>
-     <label>Objet à vendre <select id="adventure-merchant-item"></select></label>
-     <label>Prix dans la monnaie principale <input id="adventure-merchant-price" type="number" min="0" max="100000000" value="10" step="1"></label>
-     <label>Ressource supplémentaire (facultative) <select id="adventure-merchant-resource"></select></label>
-     <label>Quantité de ressource <input id="adventure-merchant-resource-qty" type="number" min="1" max="9999" value="1" step="1"></label>
-    </div>
-    <div class="actions"><button type="button" id="adventure-merchant-resource-add">Ajouter cette ressource au prix</button></div>
-    <div id="adventure-merchant-resource-list" class="rules-list" aria-live="polite"></div>
-    <div class="fields">
-     <label><input id="adventure-merchant-unlimited" type="checkbox" checked> Stock illimité</label>
-     <label>Stock initial si limité <input id="adventure-merchant-stock" type="number" min="0" max="100000000" value="1" step="1"></label>
-    </div>
-    <div class="actions">
-     <button type="button" id="adventure-merchant-offer-add">Ajouter cette offre</button>
-     <button type="button" id="adventure-merchant-offer-cancel" hidden>Annuler la modification</button>
-    </div>
-    <div id="adventure-merchant-offers" class="rules-list" aria-live="polite"></div>
-    <p class="hint">Les objets, prix, stocks, monnaies et règles restent modifiables par le créateur. Les achats et ventes seront enregistrés dans la sauvegarde Capture ; l'interaction PNJ sera raccordée séparément dans Exploration.</p>
+    <details class="adventure-options">
+     <summary>Monnaie de l’univers (facultatif)</summary>
+     <div class="fields">
+      <label>Nom de la monnaie (singulier) <input id="adventure-money-singular" type="text" maxlength="40" value="pièce"></label>
+      <label>Nom de la monnaie (pluriel) <input id="adventure-money-plural" type="text" maxlength="40" value="pièces"></label>
+     </div>
+    </details>
    </details>
    </div><!-- /adventure-item-authoring : même formulaire, visible seulement dans l'éditeur -->
    <details id="adventure-fragments-panel" class="adventure-options">

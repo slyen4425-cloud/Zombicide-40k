@@ -18,18 +18,28 @@ export function assertOfficialMainHistoryPin({repository,sha,remoteUrl=null}){
  const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'gensrpg-lab-main-only-'));
  try{
   execFileSync('git',['-C',tmp,'init','--quiet'],{stdio:'pipe'});
-  // Fetch only the history reachable from refs/heads/main, NOT gh-pages or
-  // any development branch. 128 commits covers a bounded release window;
-  // an older unprovable release fails closed and must be recertified.
-  execFileSync('git',['-C',tmp,'fetch','--quiet','--no-tags',
-   '--filter=blob:none','--depth=128',url,'refs/heads/main'],
-   {stdio:'pipe',timeout:120000});
-  const main=execFileSync('git',['-C',tmp,'rev-parse','FETCH_HEAD'],{encoding:'utf8'}).trim();
-  if(!/^[a-f0-9]{40}$/.test(main))throw Error('Invalid fetched official main SHA');
-  const proof=spawnSync('git',['-C',tmp,'merge-base','--is-ancestor',sha,main],
-   {encoding:'utf8',timeout:30000});
-  if(proof.status!==0)throw Error('Pinned '+sha+' is not part of the official main history of '+
+  // Fetch ONLY official main ancestry, never gh-pages or any work branch.
+  // An older immutable release can be >128 commits behind today's main:
+  // grow the proven history in bounded stages without accepting branch SHAs.
+  const windows=[128,512,2048,8192];
+  let main=null;
+  for(let i=0;i<windows.length;i++){
+   const depthArg=i===0?'--depth='+windows[i]:
+    '--deepen='+(windows[i]-windows[i-1]);
+   execFileSync('git',['-C',tmp,'fetch','--quiet','--no-tags',
+    '--filter=blob:none',depthArg,url,'refs/heads/main'],
+    {stdio:'pipe',timeout:120000});
+   const current=execFileSync('git',['-C',tmp,'rev-parse','FETCH_HEAD'],
+    {encoding:'utf8'}).trim();
+   if(!/^[a-f0-9]{40}$/.test(current))throw Error('Invalid fetched official main SHA');
+   if(main!==null&&current!==main)
+    throw Error('Official main changed during immutable SHA certification');
+   main=current;
+   const proof=spawnSync('git',['-C',tmp,'merge-base','--is-ancestor',sha,main],
+    {encoding:'utf8',timeout:30000});
+   if(proof.status===0)return Object.freeze({repository,pin:sha,main,ref:'refs/heads/main'});
+  }
+  throw Error('Pinned '+sha+' is not part of the official main history of '+
    repository+' at '+main+' (or exceeds the bounded history); reject branch-only SHA');
-  return Object.freeze({repository,pin:sha,main,ref:'refs/heads/main'});
  }finally{fs.rmSync(tmp,{recursive:true,force:true});}
 }

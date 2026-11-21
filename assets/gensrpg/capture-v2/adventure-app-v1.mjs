@@ -849,14 +849,24 @@ else document.body.dataset.adventureStartView='new';
 
 function refreshWorldChoices(saved=null){
  const picker=$('adventure-world-select'),notice=$('adventure-world-status');
+ // The native World Builder owns the document and recovery. Read its
+ // existing draft for presentation only; never manufacture a fallback map.
+ let localWorld=null;
+ try{localWorld=readWorldAssemblerDraft(universeWorldStorage);}
+ catch{/* No silent repair or deletion of a malformed author document. */}
+ const localPlayable=typeof localWorld?.id==='string'&&!!localWorld.id&&
+  Array.isArray(localWorld.areas)&&localWorld.areas.length>0;
  if(!worldLibrary){
   picker.disabled=true;
-  text(notice,'Bibliothèque officielle Exploration pas encore raccordée au main publié. Le monde local actuel reste disponible.');
+  text(notice,localPlayable
+   ?'Bibliothèque officielle Exploration momentanément indisponible. Le monde local actuel reste disponible.'
+   :'Aucun monde local jouable : ouvre le World Builder officiel, crée ou importe une carte, puis enregistre-la.');
   return;
  }
  const worlds=worldLibrary.list();
  const previous=picker.value;
- picker.replaceChildren(option('','Monde local actuel (compatibilité)'),
+ picker.replaceChildren(option('',localPlayable
+   ?'Monde local actuel (compatibilité)':'Aucun monde local disponible'),
   ...worlds.map(w=>option(w.id,w.id+' · '+w.areaCount+' zone(s)')));
  picker.disabled=false;
  if(saved?.world?.mapRef&&worlds.some(w=>w.id===saved.world.mapRef))
@@ -864,7 +874,9 @@ function refreshWorldChoices(saved=null){
  else if(worlds.some(w=>w.id===previous))picker.value=previous;
  text(notice,worlds.length
   ?worlds.length+' monde(s) enregistrés. Choisis celui de ton aventure avant de jouer.'
-  :'Aucun monde archivé : enregistre d’abord ton monde dans le World Builder officiel.');
+  :localPlayable
+   ?'Aucun monde archivé : enregistre d’abord ton monde dans le World Builder officiel.'
+   :'Aucun monde local jouable : ouvre le World Builder officiel, crée ou importe une carte, puis enregistre-la avant de jouer.');
 }
 async function installOfficialWorldLibrary(){
  try{

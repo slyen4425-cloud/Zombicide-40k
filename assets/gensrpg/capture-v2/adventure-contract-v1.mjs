@@ -253,6 +253,11 @@ export function coreAdventureProgressionConfigV1(input){
  if(p.xpCurveMode!=='custom'||!Array.isArray(p.xpBands))
   throw new RangeError('Custom Adventure XP bands are required');
  let cumulative=0,previous=1;
+ const xpThresholds={};
+ // The Core Progression owner understands per-level xpThresholds, not the
+ // creator-facing bands. Translate inside the EXISTING official adapter.
+ // No second levelFromXp or in-battle custom progression algorithm.
+ if(maxLevel>100000)throw new RangeError('Courbe XP personnalisée limitée à 100 000 niveaux');
  for(const band of p.xpBands){
   const last=integer(band.throughLevel,'xpBands.throughLevel',2);
   const cost=integer(band.xpPerLevel,'xpBands.xpPerLevel',1);
@@ -262,13 +267,15 @@ export function coreAdventureProgressionConfigV1(input){
    const segmentCost=(end-previous)*cost;
    if(!Number.isSafeInteger(segmentCost)||!Number.isSafeInteger(cumulative+segmentCost))
     throw new RangeError('Total XP threshold overflow');
+   for(let next=previous+1;next<=end;next++)
+    xpThresholds[next]=cumulative+(next-previous)*cost;
    cumulative+=segmentCost;
   }
   previous=last;
  }
  if(previous<maxLevel)throw new RangeError('XP bands do not cover maxLevel');
  return freeze({xpCurveMode:'custom',xpPerLevel:perLevel,
-  maxLevel,xpBands:p.xpBands.map(b=>({throughLevel:b.throughLevel,xpPerLevel:b.xpPerLevel}))});
+  maxLevel,xpThresholds,xpBands:p.xpBands.map(b=>({throughLevel:b.throughLevel,xpPerLevel:b.xpPerLevel}))});
 }
 // These declarations belong to the AdventureSession, not to a fabricated
 // multiplayer server or a second exploration Game Master runtime.

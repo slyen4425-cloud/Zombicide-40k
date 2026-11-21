@@ -30,7 +30,7 @@ test('production root remains intact and preview exists ONLY in its isolated Pag
   for(const f of ['index.html','service-worker.js','manifest.webmanifest','assets/gensrpg/capture-v2/shell-entry-v1.js',
    'assets/gensrpg/capture-v2/source-pins-v1.json','assets/gensrpg/capture-v2/adventure.html',
    'vendor/combat-lab/examples/dom-demo/capture-editor-v2.html',
-   'vendor/exploration-lab/sculpt-lab.html','vendor/exploration-lab/play.html',
+   'vendor/exploration-lab/sculpt-lab.html','vendor/exploration-lab/npc-editor.html','vendor/exploration-lab/play.html',
    'vendor/exploration-lab/src/sculpt-lab-main.js'])required(trial,f);
   const provenance=json(trial,'release-provenance.v1.json');
   assert.equal(provenance.schema,'gensrpg-capture-v2-isolated-pages-preview-v1');
@@ -322,6 +322,22 @@ test('preview transport can include the official Jouer entry from its certified 
   assert.match(stage,/const from=path\.join\(exploration,filename\);\s*if\(fs\.existsSync\(from\)\)fs\.copyFileSync\(from,path\.join\(exploreDest,filename\)\)/);
 });
 
+
+test('NPC editor is the canonical native Exploration page with one visible Capture menu route',()=>{
+ const npc=read(trial,'vendor/exploration-lab/npc-editor.html').toString('utf8');
+ const sculpt=read(trial,'vendor/exploration-lab/sculpt-lab.html').toString('utf8');
+ const shell=read(trial,'assets/gensrpg/capture-v2/shell-entry-v1.js').toString('utf8');
+ required(trial,'vendor/exploration-lab/src/actors/npc-editor-v1.js');
+ assert.match(npc,/<h1>👥 Éditeur de PNJ — Monster InvoC<\\/h1>/);
+ assert.match(npc,/id="npc-role"/);
+ assert.match(npc,/id="npc-allow-flee"/);
+ assert.match(sculpt,/id="actor-npc-workshop-open"/);
+ assert.match(sculpt,/href="\\.\\/npc-editor\\.html"/);
+ assert.equal(shell.split('path:"vendor/exploration-lab/npc-editor.html"').length,2);
+ assert.match(shell,/id:"npc",title:"PNJ"/);
+ assert.match(shell,/current!=="builder"&&current!=="world"&&current!=="npc"/,
+  'NPC editor must reuse same-origin merchant and reward catalog bridge');
+});
 
 test('the physical published preview contains the single native 2.5D destination and the player menu',()=>{
  const shell=read(trial,'assets/gensrpg/capture-v2/shell-entry-v1.js').toString('utf8');

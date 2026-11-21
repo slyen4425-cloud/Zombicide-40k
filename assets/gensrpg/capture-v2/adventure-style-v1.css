@@ -688,3 +688,26 @@ body[data-adventure-item-editor="true"] .adventure-start-tabs{display:none!impor
 .adventure-item-library-card small{font-size:11px;color:#c1d8df}
 @media(max-width:550px){.adventure-item-library-gallery{
  grid-template-columns:repeat(auto-fill,minmax(100px,1fr));}}
+
+
+/* Compact catalogue chooser for merchant authoring. The item registry and
+   the saved wallet remain Capture's existing canonical objects. */
+.merchant-item-catalogue{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:7px;
+ max-height:min(33dvh,280px);overflow:auto;overscroll-behavior:contain;padding:7px 2px}
+.merchant-item-choice{display:flex;align-items:center;gap:7px;min-height:49px;
+ background:#133b43;border:1px solid #326d67;border-radius:9px;padding:6px;font-size:12px;cursor:pointer}
+.merchant-item-choice:has(input:checked){border-color:#b0e6c7;background:#1c544a}
+.merchant-item-choice input{flex:none;width:19px;height:19px}
+.merchant-item-choice img{width:35px;height:35px;object-fit:contain;flex:none}
+.merchant-item-choice span{flex:1;min-width:0;overflow-wrap:anywhere}
+.merchant-item-choice small{color:#b5d8d0;white-space:nowrap}
+.merchant-percentage-controls{display:grid;gap:7px;margin:12px 0;
+ border:1px solid #356d6c;border-radius:10px;padding:11px;background:#0d2c34}
+.merchant-percentage-controls label{display:flex;justify-content:space-between;gap:10px}
+.merchant-percentage-controls input[type=range]{width:100%;min-height:32px;accent-color:#8cdebf}
+.merchant-percentage-controls output{font-variant-numeric:tabular-nums}
+@media(orientation:landscape) and (max-height:550px){
+ .merchant-item-catalogue{grid-template-columns:repeat(auto-fill,minmax(158px,1fr));max-height:29dvh}
+ .merchant-item-choice{min-height:42px;padding:4px}
+ .merchant-percentage-controls{padding:7px}
+}

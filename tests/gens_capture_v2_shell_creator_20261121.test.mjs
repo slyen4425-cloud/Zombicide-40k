@@ -88,3 +88,51 @@ test('Creator alone configures all loading art while preserving legacy scene-tag
  assert.doesNotMatch(html,/id="adventure-loading-art-files"/);
  assert.doesNotMatch(game,/refreshLoadingArtEditor/);
 });
+
+test('official audio chooser resolves immutable existing Combat/Exploration files, never copies them',async()=>{
+ const {createCaptureShellOfficialAudioChoicesV1}=
+  await import('../assets/gensrpg/capture-v2/shell-official-audio-catalog-v1.mjs');
+ const moduleUrl=new URL('../assets/gensrpg/capture-v2/shell-official-audio-catalog-v1.mjs',import.meta.url);
+ const combat=new URL('../../../vendor/exploration-lab/combat-preview/',moduleUrl);
+ const exploration=new URL('../../../vendor/exploration-lab/',moduleUrl);
+ const sfx='gensrpg:sound:divers_mp3-a1ca84e9';
+ const song='gensrpg:music:combat:battle-01';
+ const sounds=[{assetId:sfx,label:'Clic interface',runtimeFile:'private-v1/divers_mp3-a1ca84e9.mp3',roles:['ui']}];
+ const resolveEffect=assetId=>({assetId,url:new URL('assets/runtime/audio/private-v1/divers_mp3-a1ca84e9.mp3',combat).href});
+ const resolveMusic=assetId=>({assetId,url:new URL('assets/runtime/audio/music-v1/battle-01-cb4ed87d.mp3',combat).href});
+ const choices=createCaptureShellOfficialAudioChoicesV1({
+  soundEntries:sounds,resolveEffect,
+  musicAssets:[{assetId:song,kind:'music',title:'Battle 1'}],
+  resolveMusic,explorationIds:['gensrpg:music:exploration:01'],
+  explorationTracks:[{file:'exploration-01.mp3'}]
+ });
+ assert.equal(choices.effects.length,1);
+ assert.equal(choices.music.length,2);
+ assert.equal(choices.get(sfx).roles[0],'ui');
+ assert.equal(choices.get(song).url,resolveMusic(song).url);
+ assert.equal(choices.get('gensrpg:music:exploration:01').url,
+  new URL('assets/runtime/audio/exploration-v1/exploration-01.mp3',exploration).href);
+ assert.equal(choices.get('evil:external'),null);
+ assert.throws(()=>createCaptureShellOfficialAudioChoicesV1({
+  soundEntries:[{...sounds[0],runtimeFile:'../../other.mp3'}],resolveEffect,
+  musicAssets:[],resolveMusic,explorationIds:[],explorationTracks:[]
+ }),/non officielle/);
+});
+
+test('the Creator imports personal audio OR stores official asset IDs in one universe-scoped owner',()=>{
+ const creator=read('shell-creator-presentation-v1.mjs');
+ const official=read('shell-official-audio-catalog-v1.mjs');
+ assert.match(creator,/loadCaptureShellOfficialAudioCatalogV1/);
+ assert.match(creator,/async putCatalog\(universeId,slot,assetId,name\)/);
+ assert.match(creator,/await media\.putCatalog\(universe,slot,choice\.assetId,choice\.label\)/);
+ assert.match(creator,/await media\.put\(universe,slot,file\.files\[0\]\)/);
+ assert.match(creator,/const choice=\(await officialCatalog\(\)\)\.get\(record\.assetId\)/);
+ assert.match(creator,/Sons d’interface/);
+ assert.match(creator,/▶ Préécouter/);
+ assert.match(creator,/Utiliser ce son/);
+ assert.match(official,/data\/presentation\/audio\/private-audio-runtime\.v1\.json/);
+ assert.match(official,/soundtrack-starter-catalog-v1\.js/);
+ assert.match(official,/exploration-soundtrack-v1\.js/);
+ assert.doesNotMatch(creator,/audio\/private-v1\/[^'"]+\.mp3/);
+ assert.doesNotMatch(creator,/new Audio\(/);
+});

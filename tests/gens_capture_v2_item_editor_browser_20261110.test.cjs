@@ -131,28 +131,23 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
    "reimport must never duplicate the author's items");
   assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
 
-  // Real native UI: edit world currency + a merchant that sells an authored
-  // item for coins AND a second resource, without any NPC/map duplication.
-  await frame.locator('#adventure-economy-panel summary').tap();
+  // Native authoring: select items from the ONE loot catalog; merchant prices
+  // derive from saleValue and two percent sliders, not per-item offers/stocks.
+  await frame.locator('#adventure-economy-panel > summary').tap();
   await frame.locator('#adventure-money-singular').fill('jeton');
   await frame.locator('#adventure-money-plural').fill('jetons');
   await frame.locator('#adventure-merchant-name').fill('Marchand témoin');
+  assert.equal(await frame.locator('#adventure-merchant-sell-value').innerText(),'+10 %');
+  assert.equal(await frame.locator('#adventure-merchant-buy-value').innerText(),'-50 %');
+  assert.match(await frame.locator('#adventure-merchant-price-example').innerText(),
+   /vendu 110 · racheté 50/);
+  assert.equal(await frame.locator('#adventure-merchant-library input[type="checkbox"]').count(),9);
+  await frame.locator('#adventure-merchant-library input[type="checkbox"]').first().check();
+  assert.match(await frame.locator('#adventure-merchant-selected-count').innerText(),/1 objet/);
   await frame.locator('#adventure-merchant-add').tap();
   assert.equal(await frame.locator('#adventure-merchants .rule-row').count(),1);
-  assert.ok(await frame.locator('#adventure-merchant-item option[value^="fragment:"]').count()>0,
-   'a rare merchant may offer fragments of published creatures, not a fake item');
-  await frame.locator('#adventure-merchant-item').selectOption({index:0});
-  await frame.locator('#adventure-merchant-resource').selectOption({index:2});
-  await frame.locator('#adventure-merchant-resource-qty').fill('2');
-  await frame.locator('#adventure-merchant-resource-add').tap();
-  assert.equal(await frame.locator('#adventure-merchant-resource-list .rule-row').count(),1);
-  await frame.locator('#adventure-merchant-price').fill('7');
-  await frame.locator('#adventure-merchant-unlimited').uncheck();
-  await frame.locator('#adventure-merchant-stock').fill('3');
-  await frame.locator('#adventure-merchant-offer-add').tap();
-  assert.equal(await frame.locator('#adventure-merchant-offers .rule-row').count(),1);
-  assert.match(await frame.locator('#adventure-merchant-offers').innerText(),
-   /7 jetons.*stock 3/s);
+  assert.match(await frame.locator('#adventure-merchants').innerText(),
+   /1 objet.*vend \+10 %.*rachète -50 %/s);
   await frame.locator('#adventure-save-rules').tap();
   await page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')
    .evaluate(iframe=>iframe.contentWindow.location.reload());
@@ -160,7 +155,10 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   assert.equal(await frame.locator('#adventure-money-plural').inputValue(),'jetons');
   assert.equal(await frame.locator('#adventure-merchants .rule-row').count(),1,
    'merchant persists with the canonical AdventureRules draft');
-  assert.equal(await frame.locator('#adventure-merchant-offers .rule-row').count(),1);
+  await frame.locator('#adventure-merchants .rule-row button').first().tap();
+  assert.equal(await frame.locator('#adventure-merchant-sell-percent').inputValue(),'10');
+  assert.equal(await frame.locator('#adventure-merchant-buy-percent').inputValue(),'-50');
+  assert.equal(await frame.locator('#adventure-merchant-library input:checked').count(),1);
   assert.equal(await frame.locator('#adventure-items .rule-row').count(),9,
    'merchant configuration may not create or duplicate item definitions');
 

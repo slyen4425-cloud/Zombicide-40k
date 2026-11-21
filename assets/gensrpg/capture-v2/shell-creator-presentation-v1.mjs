@@ -199,6 +199,7 @@ export function createCaptureShellCreatorV1({
     }
    }
    applyBackground();
+   if(active&&settings.ambienceEnabled)enterHome();
    if(container.dataset.active==='true')await render();
   }catch(error){report('Médias du créateur indisponibles : '+error.message,true);}
  }
@@ -354,7 +355,9 @@ export function createCaptureShellCreatorV1({
   }
   artInput.addEventListener('change',async()=>{
    if(!artInput.files?.length)return;
-   try{await loading.add(scene.value,artInput.files);await showArt();
+   try{
+    if(!loading)await showArt();
+    await loading.add(scene.value,artInput.files);await showArt();
     artInput.value='';report('Illustrations enregistrées pour cet univers.');}
    catch(error){report(error.message,true);}
   });

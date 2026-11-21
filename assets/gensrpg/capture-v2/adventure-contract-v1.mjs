@@ -701,6 +701,10 @@ export function applyAdventureCombatResultV1({
   throw new RangeError('CombatResult encounterId/returnToken corrélation invalide');
  if(!['victory','defeat','fled'].includes(result.outcome))
   throw new RangeError('Unknown official Combat outcome');
+ // The NPC's immutable WorldArea snapshot controls this existing flee action.
+ // Refuse an impossible result before changing XP, the wallet or saved HP.
+ if(result.outcome==='fled'&&snapshot.context?.fleeAllowed===false)
+  throw new RangeError('La fuite est interdite pour cet adversaire PNJ');
  const key=encounterId+':'+token;
  if(state.processedEncounterKeys.includes(key))
   return {applied:false,session:state,award:null};

@@ -814,3 +814,86 @@ test('real HTTPS Jouer on mobile landscape saves creator cap 250, 33 stat points
    server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
   }
 });
+
+
+test('actual mobile Creator selects official UI sound, preserves its assetId and still accepts personal imports',
+ {timeout:120000},async()=>{
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ let browser,context;
+ const pageErrors=[];
+ try{
+  browser=await chromium.launch({headless:true});
+  context=await browser.newContext({viewport:{width:932,height:430},hasTouch:true,
+   locale:'fr-FR',serviceWorkers:'block'});
+  await context.addInitScript(()=>{window.supabase={createClient:()=>({})};});
+  const page=await context.newPage();
+  page.on('pageerror',e=>pageErrors.push(String(e)));
+  await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
+  const base='http://127.0.0.1:'+server.address().port;
+  await page.goto(base+scope+'index.html',{waitUntil:'domcontentloaded',timeout:60000});
+  await page.locator('button.gensRootModeCard.capture').tap();
+  const home=page.locator('#gensCaptureV2Root');
+  if(hasUniversePicker){
+   const legacy=home.locator('[data-capture-universe-select="monster-invoc"]');
+   await legacy.waitFor({state:'visible',timeout:35000});
+   await legacy.tap();
+  }
+  const creatorButton=home.locator('[data-capture-v2-menu="creator"]');
+  await creatorButton.waitFor({state:'visible'});
+  await creatorButton.tap();
+  const panel=home.locator('.gensCaptureV2CreatorPanel');
+  await panel.locator('.captureCreatorSoundSlot select').first().waitFor({state:'attached',timeout:45000});
+  const section=panel.locator('details.captureCreatorGroup')
+   .filter({hasText:'Sons d’interface et musique du menu'});
+  await section.locator('summary').tap();
+  const ui=section.locator('.captureCreatorSoundSlot').filter({hasText:'Bouton / clic'});
+  const music=section.locator('.captureCreatorSoundSlot').filter({hasText:'Musique du menu (boucle)'});
+  const uiSound='gensrpg:sound:divers_mp3-a1ca84e9';
+  assert.equal(await ui.locator('select option[value="'+uiSound+'"]').count(),1,
+   'official classified UI click exists in the real dropdown');
+  assert.equal(await music.locator('select option[value="gensrpg:music:combat:battle-01"]').count(),1,
+   'the real song catalogue must be selectable');
+  assert.equal(await music.locator('select option[value="gensrpg:music:exploration:01"]').count(),1,
+   'the native Exploration music collection must be reusable');
+  await ui.locator('select').selectOption(uiSound);
+  await ui.getByRole('button',{name:'Utiliser ce son'}).tap();
+  const readRecord=async()=>page.evaluate(async()=>{
+   const request=indexedDB.open('gensrpg.capture.shell-media.v1');
+   const db=await new Promise((resolve,reject)=>{
+    request.onsuccess=()=>resolve(request.result);
+    request.onerror=()=>reject(request.error);
+   });
+   const tx=db.transaction('assets','readonly');
+   const item=tx.objectStore('assets').get('monster-invoc/click');
+   const record=await new Promise((resolve,reject)=>{
+    item.onsuccess=()=>resolve(item.result);
+    item.onerror=()=>reject(item.error);
+   });
+   db.close();
+   return {assetId:record?.assetId,source:record?.source,
+    name:record?.name,blobSize:record?.blob?.size??null};
+  });
+  await page.waitForFunction(()=>document.querySelector(
+   '#gensCaptureV2Root .captureCreatorStatus')?.textContent?.includes('Son officiel choisi'),
+   null,{timeout:25000});
+  const selected=await readRecord();
+  assert.equal(selected.assetId,uiSound,'only the immutable official assetId is persisted');
+  assert.equal(selected.source,'official');
+  assert.equal(selected.blobSize,null,'do not copy 203 MP3s to IndexedDB');
+  // An imported file remains an alternative to that catalog selection.
+  const again=panel.locator('.captureCreatorSoundSlot').filter({hasText:'Bouton / clic'});
+  await again.locator('input[type=file]').setInputFiles({
+   name:'mon-clic.mp3',mimeType:'audio/mpeg',buffer:Buffer.from([73,68,51,3])
+  });
+  await page.waitForFunction(()=>document.querySelector(
+   '#gensCaptureV2Root .captureCreatorStatus')?.textContent?.includes('Bouton / clic enregistré'),
+   null,{timeout:25000});
+  const imported=await readRecord();
+  assert.equal(imported.assetId,undefined,'a personal file replaces, never duplicates, the official selection');
+  assert.equal(imported.blobSize,4,'the original creator-owned Blob still works');
+  assert.deepEqual(pageErrors,[]);
+ }finally{
+  await context?.close();await browser?.close();
+  server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
+ }
+});

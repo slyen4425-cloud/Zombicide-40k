@@ -1663,6 +1663,7 @@ installAdventureMerchantPlayV1({
 });
 economyEditor=installAdventureEconomyEditorV1({
  document,getRules:()=>rules,getPublishedSpecies:()=>published,
+ getItemIconUrl:officialItemIconUrl,
  commitEconomy:economy=>{
   const currency={singular:$('adventure-money-singular').value.trim(),
    plural:$('adventure-money-plural').value.trim()};

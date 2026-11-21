@@ -76,3 +76,15 @@ test('loading art uses the canonical three-scene library scoped to each universe
  assert.match(shell,/mountCaptureLoadingArtCrossfadeV1/);
  assert.doesNotMatch(library,/localStorage/);
 });
+
+test('Creator alone configures all loading art while preserving legacy scene-tagged images',()=>{
+ const shell=read('shell-creator-presentation-v1.mjs');
+ const game=read('adventure-app-v1.mjs');
+ const html=read('adventure.html');
+ assert.match(shell,/const images=await loading\.list\(\)/);
+ assert.match(shell,/await loading\.add\('launch',artInput\.files\)/);
+ assert.match(shell,/loading\?\.close\(\);loading=null/);
+ assert.match(game,/const entries=\(await library\.list\(\)\)\.slice\(0,12\)/);
+ assert.doesNotMatch(html,/id="adventure-loading-art-files"/);
+ assert.doesNotMatch(game,/refreshLoadingArtEditor/);
+});

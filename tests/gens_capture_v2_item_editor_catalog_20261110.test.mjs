@@ -77,8 +77,8 @@ test('eight author-uploaded PNGs map only to verified published Bestiary species
   assert.equal(png.readUInt32BE(16),512);
   assert.equal(png.readUInt32BE(20),512);
   assert.ok([4,6].includes(png[25]),'official icon must keep its alpha channel');
-  assert.equal(template.saleValue,10);
-  assert.equal(template.chancePercent,20);
+  assert.equal(template.saleValue,100);
+  assert.equal(template.chancePercent,50);
  }
  const first=materializeCaptureItemTemplatesV1({
   rules:SHOWCASE_ADVENTURE_RULES_V1,templates:catalog});

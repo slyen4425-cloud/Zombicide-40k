@@ -670,3 +670,21 @@ body[data-adventure-item-editor="true"] .adventure-start-tabs{display:none!impor
  background-size:contain,100% 100%,cover;
  background-repeat:no-repeat;
 }
+
+
+/* Bibliothèque d'objets : le catalogue visuel ne remplace PAS l'éditeur,
+   les drops, les fragments ou la source officielle du Bestiaire. */
+.adventure-item-library-gallery{display:grid;
+ grid-template-columns:repeat(auto-fill,minmax(126px,1fr));
+ gap:9px;margin:10px 0}
+.adventure-item-library-card{display:flex;flex-direction:column;
+ align-items:center;gap:5px;min-height:134px;padding:10px 8px;
+ text-align:center;border:1px solid #487483;border-radius:11px;
+ background:#153442;color:#eef8fa}
+.adventure-item-library-card:hover,
+.adventure-item-library-card:focus-visible{border-color:#91dfd4;background:#235566}
+.adventure-item-library-card img{width:66px;height:66px;object-fit:contain}
+.adventure-item-library-card span{font-weight:650;font-size:12px}
+.adventure-item-library-card small{font-size:11px;color:#c1d8df}
+@media(max-width:550px){.adventure-item-library-gallery{
+ grid-template-columns:repeat(auto-fill,minmax(100px,1fr));}}

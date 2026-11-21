@@ -68,7 +68,8 @@ import {
 } from './adventure-contract-v1.mjs';
 import {DEFAULT_ADVENTURE_FRAGMENTS_V1}
  from './adventure-fragments-v1.mjs';
-import {normalizeCaptureItemTemplatesV1,materializeCaptureItemTemplatesV1}
+import {normalizeCaptureItemTemplatesV1,materializeCaptureItemTemplatesV1,
+ materializeCapturePublishedMonsterDropsV1}
  from './item-templates-v1.mjs';
 import {installAdventureEconomyEditorV1} from './adventure-economy-editor-v1.mjs';
 import {installAdventureMerchantPlayV1} from './adventure-merchant-play-v1.mjs';
@@ -613,6 +614,40 @@ function renderPreparationLootSummary(){
   (published.length?' parmi '+published.length+' publiées':'')+
   ' · '+(rules.economy?.merchants.length??0)+' marchand(s) configuré(s).');
 }
+// Read-only gallery: the twelve official uploaded pictures, no second
+// inventory or monster registry. Clicking a card fills the ONE item editor.
+function renderItemLibrary(){
+ const gallery=$('adventure-item-library-gallery');
+ if(!gallery)return;
+ gallery.replaceChildren();
+ for(const entry of availableItemVisuals()){
+  const card=document.createElement('button');card.type='button';
+  card.className='adventure-item-library-card';
+  const image=document.createElement('img');image.loading='lazy';
+  image.src=new URL(entry.iconPath,import.meta.url).href;
+  image.alt=entry.name;
+  const name=document.createElement('span');name.textContent=entry.name;
+  const subtitle=document.createElement('small');
+  const species=Object.hasOwn(entry,'speciesId')?
+   published.find(card=>card.id===entry.speciesId):null;
+  subtitle.textContent=species?'Objet de '+species.name:
+   'Visuel disponible · attribution manuelle';
+  card.append(image,name,subtitle);
+  card.addEventListener('click',()=>{
+   $('adventure-item-icon').value=entry.id;
+   if(!activeItemEditId){
+    $('adventure-item-name').value=entry.name;
+    $('adventure-item-value').value='100';
+   }
+   stateMessage('Visuel sélectionné : vérifie le nom et ajoute l’objet.');
+  });
+  gallery.append(card);
+ }
+ const count=$('adventure-item-library-count');
+ if(count)count.textContent=availableItemVisuals().length+
+  ' icônes disponibles · '+itemTemplates.items.length+
+  ' déjà associées à une espèce. Les autres restent attribuables manuellement.';
+}
 function renderItemRules(){
  const itemList=$('adventure-items'),dropList=$('adventure-drops');
  const needle=$('adventure-item-search').value.trim().toLocaleLowerCase('fr');
@@ -689,7 +724,8 @@ async function loadOfficialItemTemplates(){
   const response=await fetch(new URL('./item-templates.v1.json',import.meta.url),
    {cache:'no-store'});
   if(!response.ok)throw Error('HTTP '+response.status);
-  itemTemplates=normalizeCaptureItemTemplatesV1(await response.json(),published);
+  // Visual library is shared; only published bestiary species gain defaults.
+  itemTemplates=normalizeCaptureItemTemplatesV1(await response.json());
   const selector=$('adventure-item-icon');
   selector.replaceChildren(option('','Sans icône officielle'));
   for(const item of availableItemVisuals())selector.append(option(item.id,item.name));
@@ -697,6 +733,7 @@ async function loadOfficialItemTemplates(){
   if(itemTemplates.items.length)
    $('adventure-item-import').textContent='Importer les '+itemTemplates.items.length+
     ' objets et drops officiels illustrés';
+  $('adventure-item-defaults').disabled=!published.length;
   text($('adventure-item-icon-status'),itemTemplates.items.length
    ?itemTemplates.items.length+' objets officiels importables, '+
      (itemTemplates.icons?.length??0)+' icônes supplémentaires utilisables manuellement.'
@@ -707,7 +744,7 @@ async function loadOfficialItemTemplates(){
   text($('adventure-item-icon-status'),
    'Catalogue visuel indisponible ; objets et récompenses manuels conservés.');
  }
- renderItemRules();
+ renderItemLibrary();renderItemRules();
 }
 
 function officialWorldLabel(worldId){
@@ -1681,7 +1718,14 @@ $('adventure-create').addEventListener('click',guarded(()=>{
   $('adventure-world-select').value=lastCaptureRoomState.worldId;
  }
  if(!published.length)throw new Error('Bestiaire officiel indisponible; aucun contenu fictif ne sera utilisé');
- rules=guest?setup.rules:fromFields();
+ // Only a NEW game receives defaults. Existing saves and guest hosts win.
+ const authored=guest?setup.rules:fromFields();
+ const prepared=guest?null:materializeCapturePublishedMonsterDropsV1({
+  rules:authored,templates:itemTemplates,published
+ });
+ rules=guest?setup.rules:normalizeAdventureRulesV1({
+  ...authored,loot:prepared.loot
+ });
  const id=()=>crypto.randomUUID();
  const now=new Date().toISOString();
  const starterIds=getStarterSpeciesIds();
@@ -2383,11 +2427,32 @@ $('adventure-item-add').addEventListener('click',guarded(()=>{
  stateMessage('Objet conservé dans le brouillon. Clique Enregistrer les paramètres.');
 }));
 $('adventure-item-import').addEventListener('click',guarded(()=>{
- const staged=materializeCaptureItemTemplatesV1({rules:fromFields(),templates:itemTemplates});
- rules=normalizeAdventureRulesV1({...fromFields(),loot:staged.loot});
+ // Historical importer retains its exact no-duplicate semantics, restricted
+ // to actual species published in the selected universe.
+ const authored=fromFields();
+ const filtered={...itemTemplates,items:itemTemplates.items.filter(t=>
+  published.some(card=>card.id===t.speciesId))};
+ const staged=materializeCaptureItemTemplatesV1({
+  rules:authored,templates:filtered
+ });
+ rules=normalizeAdventureRulesV1({...authored,loot:staged.loot});
+ resetItemEditor();renderItemRules();updatePreview();
+ stateMessage(staged.addedItems+' objets illustrés et '+staged.addedDrops+
+  ' drops officiels ajoutés (100 pièces / 50 %). Enregistre les paramètres.');
+}));
+$('adventure-item-defaults').addEventListener('click',guarded(()=>{
+ // Authoring command: add ONLY missing creature drops. Custom odds and
+ // fragment settings are never rewritten.
+ const authored=fromFields();
+ const staged=materializeCapturePublishedMonsterDropsV1({
+  rules:authored,templates:itemTemplates,published
+ });
+ rules=normalizeAdventureRulesV1({...authored,loot:staged.loot});
  resetItemEditor();renderItemRules();updatePreview();
  stateMessage(staged.addedItems+' objets et '+staged.addedDrops+
-  ' drops officiels ajoutés. Tes objets personnalisés restent intacts. Enregistre les paramètres.');
+  ' drops ajoutés (50 % chacun, valeur 100). '+
+  staged.withoutIllustrations+' créatures sans icône propre. '+
+  'Drops personnalisés et fragments conservés. Enregistre les paramètres.');
 }));
 $('adventure-drop-edit-cancel').addEventListener('click',resetDropEditor);
 $('adventure-drop-add').addEventListener('click',guarded(()=>{

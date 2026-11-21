@@ -319,7 +319,10 @@ test('preview transport can include the official Jouer entry from its certified 
   assert.equal(sparse.length,2);
   for(const [,files] of sparse)assert.match(files,/^\s*play\.html\s*$/m);
   assert.match(stage,/for\(const filename of \[[^\]]*'play\.html'[^\]]*\]\)/);
-  assert.match(stage,/const from=path\.join\(exploration,filename\);\s*if\(fs\.existsSync\(from\)\)fs\.copyFileSync\(from,path\.join\(exploreDest,filename\)\)/);
+   assert.match(stage,/const from=path\.join\(exploration,filename\);/);
+   assert.match(stage,/if\(filename==='npc-editor\.html'&&!fs\.existsSync\(from\)\)/,
+     'missing canonical NPC page must fail the build instead of publishing a broken menu');
+   assert.match(stage,/if\(fs\.existsSync\(from\)\)fs\.copyFileSync\(from,path\.join\(exploreDest,filename\)\)/);
 });
 
 

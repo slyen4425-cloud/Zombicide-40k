@@ -251,12 +251,14 @@ test('real smartphone merchant: proximity iframe opens only canonical shop and b
     ...contract.DEFAULT_ADVENTURE_RULES_V1,
     loot:{currencyPerVictory:0,items:[
      {id:'wood',name:'Bois',saleValue:0},
-     {id:'potion',name:'Potion',saleValue:4}],drops:[]},
+     {id:'potion',name:'Potion',saleValue:4},
+     {id:'relique',name:'Relique',saleValue:10}],drops:[]},
     economy:{currency:{singular:'jeton',plural:'jetons'},merchants:[{
      id:'merchant-test',name:'Marchand de la forêt',buysItems:true,
      offers:[{itemId:'potion',currencyPrice:8,
       resourceCosts:[{itemId:'wood',quantity:1}],stock:2}]
-    }]}
+    },{id:'merchant-simple',name:'Marchand simple',
+      itemIds:['relique'],sellPercent:10,buyPercent:-50}]}
    });
    const base=contract.createAdventureSessionV1({
     bestiaryCards:[card],starterId:card.id,rules,
@@ -267,9 +269,9 @@ test('real smartphone merchant: proximity iframe opens only canonical shop and b
     inventory:{currency:30,items:{wood:2}}};
    const host=await import('/assets/gensrpg/capture-v2/adventure-merchant-play-v1.mjs');
    const iframe=document.getElementById('native-explorer');
-   iframe.srcdoc='<script>window.openNativeShop=()=>parent.postMessage('+
+   iframe.srcdoc='<script>window.openNativeShop=(merchantId="merchant-test")=>parent.postMessage('+
     '{schema:"gensrpg.exploration.npc.merchant.open.v1",'+
-    'sessionId:"merchant-session",merchantId:"merchant-test",actorId:"actor-1"},'+
+    'sessionId:"merchant-session",merchantId,actorId:"actor-1"},'+
     'parent.location.origin);window.addEventListener("message",event=>{'+
     'if(event.data?.schema==="gensrpg.capture.v2.npc.merchant.closed.v1")'+
     'window.shopWasClosed=true;});</script>';
@@ -301,6 +303,25 @@ test('real smartphone merchant: proximity iframe opens only canonical shop and b
   await page.waitForFunction(()=>
    document.getElementById('native-explorer').contentWindow.shopWasClosed===true);
   assert.equal(await page.locator('#adventure-merchant-dialog').evaluate(e=>e.open),false);
+  // Same real Exploration NPC message, this time for the new percentage model.
+  await page.evaluate(()=>document.getElementById('native-explorer')
+   .contentWindow.openNativeShop('merchant-simple'));
+  await page.locator('#adventure-merchant-dialog[open]').waitFor();
+  assert.match(await page.locator('#adventure-merchant-title').innerText(),/Marchand simple/);
+  assert.match(await page.locator('#adventure-merchant-trades').innerText(),
+   /Relique · 11 jetons.*illimité/s);
+  await page.getByRole('button',{name:'Acheter'}).click();
+  await page.waitForFunction(()=>window.__merchantSession.inventory.items.relique===1);
+  assert.equal(await page.evaluate(()=>window.__merchantSession.inventory.currency),15);
+  assert.equal(await page.evaluate(()=>
+   window.__merchantSession.merchantStocks?.['merchant-simple']),undefined,
+   'modern merchant does not maintain individual stock');
+  assert.match(await page.locator('#adventure-merchant-trades').innerText(),
+   /Relique · 5 jetons \/ unité/s);
+  await page.getByRole('button',{name:'Vendre'}).click();
+  await page.waitForFunction(()=>window.__merchantSession.inventory.currency===20);
+  assert.equal(await page.evaluate(()=>window.__merchantSession.inventory.items.relique??0),0);
+  await page.locator('#adventure-merchant-close').click();
  }finally{
   await browser?.close();server.closeAllConnections();
   await new Promise(ok=>server.close(ok));

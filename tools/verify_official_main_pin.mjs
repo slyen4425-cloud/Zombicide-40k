@@ -18,17 +18,31 @@ export function assertOfficialMainHistoryPin({repository,sha,remoteUrl=null}){
  const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'gensrpg-lab-main-only-'));
  try{
   execFileSync('git',['-C',tmp,'init','--quiet'],{stdio:'pipe'});
-  // Fetch only the history reachable from refs/heads/main, NOT gh-pages or
-  // any development branch. 128 commits covers a bounded release window;
-  // an older unprovable release fails closed and must be recertified.
+  // Fetch ONLY refs/heads/main. Older certified releases can now be
+  // hundreds of commits behind main; a fixed depth=128 was a false rejection.
+  // Deepen the SAME main-only ancestry progressively, never add other refs.
+  // A pin absent from verified main ancestry still fails closed.
   execFileSync('git',['-C',tmp,'fetch','--quiet','--no-tags',
    '--filter=blob:none','--depth=128',url,'refs/heads/main'],
    {stdio:'pipe',timeout:120000});
   const main=execFileSync('git',['-C',tmp,'rev-parse','FETCH_HEAD'],{encoding:'utf8'}).trim();
   if(!/^[a-f0-9]{40}$/.test(main))throw Error('Invalid fetched official main SHA');
-  const proof=spawnSync('git',['-C',tmp,'merge-base','--is-ancestor',sha,main],
-   {encoding:'utf8',timeout:30000});
-  if(proof.status!==0)throw Error('Pinned '+sha+' is not part of the official main history of '+
+  let approved=false;
+  for(const deepen of [0,512,1024,2048]){
+   if(deepen){
+    // No shallow boundary means the whole reachable main history was
+    // already checked: a missing SHA is genuinely non-official.
+    if(!fs.existsSync(path.join(tmp,'.git','shallow')))break;
+    execFileSync('git',['-C',tmp,'fetch','--quiet','--no-tags',
+     '--filter=blob:none','--deepen='+deepen,url,'refs/heads/main'],
+     {stdio:'pipe',timeout:120000});
+   }
+   const proof=spawnSync('git',['-C',tmp,'merge-base','--is-ancestor',sha,main],
+    {encoding:'utf8',timeout:30000});
+   if(proof.error)throw proof.error;
+   if(proof.status===0){approved=true;break;}
+  }
+  if(!approved)throw Error('Pinned '+sha+' is not part of the verified official main history of '+
    repository+' at '+main+' (or exceeds the bounded history); reject branch-only SHA');
   return Object.freeze({repository,pin:sha,main,ref:'refs/heads/main'});
  }finally{fs.rmSync(tmp,{recursive:true,force:true});}

@@ -54,7 +54,7 @@ test('interface media imports are local, bounded and separate from the in-game s
  assert.throws(()=>validateCaptureShellMediaV1('ambience',{
   type:'audio/mpeg',size:22*1024*1024}),/Son/);
  assert.throws(()=>validateCaptureShellMediaV1('combat',{
-  type:'audio/mpeg',size:4}),/média/);
+  type:'audio/mpeg',size:4}),/média/i);
  const owner=read('shell-creator-presentation-v1.mjs');
  assert.match(owner,/createAdventureLoadingArtLibraryV1/);
  assert.match(owner,/universeId:universe/);

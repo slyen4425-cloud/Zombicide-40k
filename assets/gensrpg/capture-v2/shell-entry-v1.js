@@ -303,8 +303,12 @@
     selectedUniverse=project;
     const ready=home();
     // Non-blocking Shell presentation; no Combat/Exploration authority.
-    void createShellCreator().then(owner=>
-      owner?.selectUniverse(project.id,project.name)).catch(error=>
+    void createShellCreator().then(async owner=>{
+      if(!owner||!host||selectedUniverse?.id!==project.id)return;
+      await owner.selectUniverse(project.id,project.name);
+      if(host?.dataset.view==='home'&&selectedUniverse?.id===project.id)
+       owner.enterHome();
+    }).catch(error=>
       console.warn('Personnalisation du menu indisponible',error));
     return ready;
   }

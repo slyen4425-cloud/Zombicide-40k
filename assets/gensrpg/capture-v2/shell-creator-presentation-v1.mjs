@@ -5,6 +5,8 @@ import {
  createAdventureLoadingArtLibraryV1,captureArtUniverseIdV1,
  CAPTURE_LOADING_SCENES_V1
 } from './adventure-loading-art-v1.mjs';
+import {loadCaptureShellOfficialAudioCatalogV1}
+ from './shell-official-audio-catalog-v1.mjs';
 
 export const CAPTURE_SHELL_CREATOR_SETTINGS_PREFIX_V1=
  'gensrpg.capture.shell.creator.settings.v1:';
@@ -81,6 +83,19 @@ export async function createCaptureShellMediaLibraryV1({
     .objectStore(STORE).put(record));
    return Object.freeze(record);
   },
+  async putCatalog(universeId,slot,assetId,name){
+   if(slot==='background'||!CAPTURE_SHELL_MEDIA_SLOTS_V1.includes(slot)||
+      typeof assetId!=='string'||
+      !assetId.startsWith(slot==='ambience'?'gensrpg:music:':'gensrpg:sound:')||
+      !/^gensrpg:(sound|music):[a-z0-9:_-]+$/.test(assetId))
+    throw new TypeError('Référence sonore officielle invalide');
+   const record={key:key(universeId,slot),assetId,
+    name:String(name??assetId).slice(0,100),source:'official',
+    updatedAt:new Date().toISOString()};
+   await requestDone(db.transaction(STORE,'readwrite')
+    .objectStore(STORE).put(record));
+   return Object.freeze(record);
+  },
   async remove(universeId,slot){
    await requestDone(db.transaction(STORE,'readwrite')
     .objectStore(STORE).delete(key(universeId,slot)));
@@ -106,6 +121,18 @@ export function createCaptureShellCreatorV1({
  let universe='monster-invoc',name='Monster InvoC';
  let settings=DEFAULT,media=null,loading=null,disposed=false;
  let epoch=0,active=false,mediaUrls=new Map(),soundPlayers=new Map();
+ let officialCatalogPromise=null,previewPlayer=null;
+ const officialCatalog=()=>{
+  if(!officialCatalogPromise)officialCatalogPromise=
+   loadCaptureShellOfficialAudioCatalogV1().catch(error=>{
+    officialCatalogPromise=null;throw error;
+   });
+  return officialCatalogPromise;
+ };
+ const stopPreview=()=>{
+  if(!previewPlayer)return;
+  previewPlayer.pause?.();previewPlayer.src='';previewPlayer=null;
+ };
  const previews=new Set();
  const effectSlots=['click','confirm','back','error'];
  let statusLine=null,backgroundUrl=null;
@@ -125,6 +152,7 @@ export function createCaptureShellCreatorV1({
    JSON.stringify(settings));
  };
  function revokeUrls(){
+  stopPreview();
   for(const url of previews)root.URL.revokeObjectURL(url);
   previews.clear();
   for(const value of soundPlayers.values()){value.pause?.();value.src='';}
@@ -165,7 +193,7 @@ export function createCaptureShellCreatorV1({
   }
  }
  function leaveHome(){
-  active=false;stopAmbient();applyBackground();
+  active=false;stopAmbient();stopPreview();applyBackground();
  }
  function play(slot){
   if(!effectSlots.includes(slot)||!active)return false;
@@ -192,6 +220,18 @@ export function createCaptureShellCreatorV1({
    for(let i=0;i<results.length;i++){
     const record=results[i],slot=CAPTURE_SHELL_MEDIA_SLOTS_V1[i];
     if(!record)continue;
+    if(record.assetId){
+     if(slot==='background')continue;
+     try{
+      const choice=(await officialCatalog()).get(record.assetId);
+      if(!choice||choice.kind!==(slot==='ambience'?'music':'effect'))
+       throw new TypeError('Référence absente du catalogue officiel');
+      const player=audioFor(choice.url,slot==='ambience');
+      if(player)soundPlayers.set(slot,player);
+     }catch(error){report('Son officiel temporairement indisponible : '+error.message,true);}
+     continue;
+    }
+    if(!record.blob)continue;
     const url=root.URL.createObjectURL(record.blob);
     mediaUrls.set(slot,url);
     if(slot==='background')backgroundUrl=url;
@@ -207,6 +247,7 @@ export function createCaptureShellCreatorV1({
  }
  async function render(){
   if(disposed||container.dataset.active!=='true')return;
+  const renderEpoch=epoch;
   for(const url of previews)root.URL.revokeObjectURL(url);
   previews.clear();container.replaceChildren();
   const heading=make(doc,'h2','Créateur · '+name);
@@ -259,6 +300,11 @@ export function createCaptureShellCreatorV1({
   const tip=make(doc,'p',
    'Ces sons ne jouent que dans les menus de Monster Capture, jamais pendant l’exploration ou le combat.');
   sound.append(tip);
+  let catalog=null;
+  try{catalog=await officialCatalog();}
+  catch(error){sound.append(make(doc,'p',
+   'Catalogue sonore officiel indisponible ; l’import de fichier reste utilisable.'));}
+  if(disposed||renderEpoch!==epoch||container.dataset.active!=='true')return;
   function settingSlider(label,key){
    const line=make(doc,'label',label+' · '+settings[key]+' %');
    const control=make(doc,'input');control.type='range';control.min='0';
@@ -292,6 +338,73 @@ export function createCaptureShellCreatorV1({
    ['error','Erreur / refus']]){
    const group=make(doc,'div',undefined,'captureCreatorSoundSlot');
    const title=make(doc,'strong',label);
+   group.append(title);
+   const current=media?await media.get(universe,slot):null;
+   if(disposed||renderEpoch!==epoch)return;
+   const currentText=make(doc,'span',current?.name
+    ?'Actuel : '+current.name+(current.assetId?' · bibliothèque':' · importé')
+    :'Aucun son personnalisé');
+   group.append(currentText);
+   if(catalog){
+    const choices=slot==='ambience'?catalog.music:catalog.effects;
+    const search=make(doc,'input');search.type='search';
+    search.placeholder=slot==='ambience'?'Rechercher une musique…':'Rechercher un son…';
+    search.setAttribute('aria-label','Rechercher dans la bibliothèque · '+label);
+    const select=make(doc,'select');
+    select.setAttribute('aria-label','Choisir dans la bibliothèque · '+label);
+    select.style.maxWidth='min(100%,420px)';
+    const fill=()=>{
+     const previous=select.value||current?.assetId||'';
+     select.replaceChildren();
+     const blank=make(doc,'option','— Choisir un son officiel —');blank.value='';
+     select.append(blank);
+     const found=choices.filter(item=>
+      item.label.toLocaleLowerCase('fr').includes(search.value.toLocaleLowerCase('fr')));
+     const groups=slot==='ambience'
+      ?[['Musiques officielles',found]]
+      :[['Sons d’interface',found.filter(item=>item.roles.includes('ui'))],
+        ['Autres effets sonores',found.filter(item=>!item.roles.includes('ui'))]];
+     for(const [heading,items] of groups){
+      if(!items.length)continue;
+      const groupOptions=make(doc,'optgroup');groupOptions.label=heading;
+      for(const item of items){
+       const option=make(doc,'option',item.label);option.value=item.assetId;
+       groupOptions.append(option);
+      }
+      select.append(groupOptions);
+     }
+     select.value=found.some(item=>item.assetId===previous)?previous:'';
+    };
+    search.addEventListener('input',fill);fill();
+    const preview=make(doc,'button','▶ Préécouter');preview.type='button';
+    preview.addEventListener('click',()=>{
+     const choice=catalog.get(select.value);
+     if(!choice){report('Choisis d’abord un son dans la bibliothèque.',true);return;}
+     stopPreview();stopAmbient();
+     const player=audioFor(choice.url,false);
+     if(!player){report('Préécoute indisponible sur ce navigateur.',true);return;}
+     previewPlayer=player;
+     player.volume=(slot==='ambience'?settings.menuVolume:settings.interfaceVolume)/100;
+     player.addEventListener('ended',()=>{
+      if(previewPlayer===player){stopPreview();if(active&&settings.ambienceEnabled)enterHome();}
+     },{once:true});
+     void player.play().catch(()=>report('Lecture bloquée sur ce navigateur.',true));
+    });
+    const apply=make(doc,'button','Utiliser ce son');apply.type='button';
+    apply.addEventListener('click',async()=>{
+     const choice=catalog.get(select.value);
+     if(!choice||choice.kind!==(slot==='ambience'?'music':'effect')){
+      report('Sélectionne un son officiel compatible.',true);return;
+     }
+     try{
+      stopPreview();
+      await media.putCatalog(universe,slot,choice.assetId,choice.label);
+      await loadUniverse(universe,name);
+      report('Son officiel choisi : '+choice.label);
+     }catch(error){report(error.message,true);}
+    });
+    group.append(search,select,preview,apply);
+   }
    const file=make(doc,'input');file.type='file';
    file.accept='audio/mpeg,audio/wav,audio/ogg,audio/mp4,audio/aac,.mp3,.wav,.ogg,.m4a';
    file.setAttribute('aria-label','Importer '+label);
@@ -316,7 +429,7 @@ export function createCaptureShellCreatorV1({
      report('Son retiré : '+label);}
     catch(error){report(error.message,true);}
    });
-   group.append(title,file,test,reset);sound.append(group);
+   group.append(file,test,reset);sound.append(group);
   }
   container.append(sound);
 

@@ -316,35 +316,37 @@
      <label>Nom de la monnaie (pluriel) <input id="adventure-money-plural" type="text" maxlength="40" value="pièces"></label>
     </div>
     <h3>Configurer un marchand</h3>
+    <p class="hint">Le marchand utilise les objets de la bibliothèque. Aucun prix ni stock à renseigner objet par objet : seuls les deux pourcentages modifient leur valeur de base.</p>
     <div class="fields">
      <label>Nom du marchand <input id="adventure-merchant-name" type="text" maxlength="80" placeholder="Ex. Marchand ambulant"></label>
-     <label><input id="adventure-merchant-buys" type="checkbox" checked> Peut racheter les objets au prix défini dans leur fiche</label>
     </div>
+    <details class="adventure-options">
+     <summary>Objets proposés — sélection depuis la bibliothèque</summary>
+     <div class="actions">
+      <input id="adventure-merchant-search" type="search" placeholder="Rechercher dans la bibliothèque…" aria-label="Rechercher un objet à proposer">
+      <button type="button" id="adventure-merchant-all">Tout cocher</button>
+      <button type="button" id="adventure-merchant-none">Tout décocher</button>
+     </div>
+     <output id="adventure-merchant-selected-count" aria-live="polite">0 objet proposé</output>
+     <div id="adventure-merchant-library" class="adventure-merchant-library" aria-label="Objets du catalogue à proposer"></div>
+    </details>
+    <div class="adventure-merchant-percent-grid">
+     <label>Prix de vente du marchand
+      <output id="adventure-merchant-sell-value" for="adventure-merchant-sell-percent">+10 %</output>
+      <input id="adventure-merchant-sell-percent" type="range" min="-100" max="200" step="5" value="10">
+     </label>
+     <label>Prix de rachat au joueur
+      <output id="adventure-merchant-buy-value" for="adventure-merchant-buy-percent">-50 %</output>
+      <input id="adventure-merchant-buy-percent" type="range" min="-100" max="200" step="5" value="-50">
+     </label>
+    </div>
+    <output id="adventure-merchant-price-example" aria-live="polite">Objet à 100 pièces : vendu 110 · racheté 50</output>
     <div class="actions">
      <button type="button" id="adventure-merchant-add">Ajouter ce marchand</button>
      <button type="button" id="adventure-merchant-cancel" hidden>Annuler la modification</button>
     </div>
     <div id="adventure-merchants" class="rules-list" aria-live="polite"></div>
-    <h3>Objets proposés par un marchand</h3>
-    <div class="fields">
-     <label>Marchand <select id="adventure-merchant-select"></select></label>
-     <label>Objet à vendre <select id="adventure-merchant-item"></select></label>
-     <label>Prix dans la monnaie principale <input id="adventure-merchant-price" type="number" min="0" max="100000000" value="10" step="1"></label>
-     <label>Ressource supplémentaire (facultative) <select id="adventure-merchant-resource"></select></label>
-     <label>Quantité de ressource <input id="adventure-merchant-resource-qty" type="number" min="1" max="9999" value="1" step="1"></label>
-    </div>
-    <div class="actions"><button type="button" id="adventure-merchant-resource-add">Ajouter cette ressource au prix</button></div>
-    <div id="adventure-merchant-resource-list" class="rules-list" aria-live="polite"></div>
-    <div class="fields">
-     <label><input id="adventure-merchant-unlimited" type="checkbox" checked> Stock illimité</label>
-     <label>Stock initial si limité <input id="adventure-merchant-stock" type="number" min="0" max="100000000" value="1" step="1"></label>
-    </div>
-    <div class="actions">
-     <button type="button" id="adventure-merchant-offer-add">Ajouter cette offre</button>
-     <button type="button" id="adventure-merchant-offer-cancel" hidden>Annuler la modification</button>
-    </div>
-    <div id="adventure-merchant-offers" class="rules-list" aria-live="polite"></div>
-    <p class="hint">Les objets, prix, stocks, monnaies et règles restent modifiables par le créateur. Les achats et ventes seront enregistrés dans la sauvegarde Capture ; l'interaction PNJ sera raccordée séparément dans Exploration.</p>
+    <p class="hint">Les anciennes boutiques avec stock ou paiement en ressources sont conservées telles quelles. Une conversion est toujours explicite. Les achats et ventes utilisent l’inventaire et la sauvegarde Monster InvoC existants.</p>
    </details>
    </div><!-- /adventure-item-authoring : même formulaire, visible seulement dans l'éditeur -->
    <details id="adventure-fragments-panel" class="adventure-options">

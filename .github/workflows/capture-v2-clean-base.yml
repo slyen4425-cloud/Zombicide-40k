@@ -121,6 +121,10 @@ jobs:
 
       - name: Aventure V2 — contrat XP, loot, bestiaire publié, sauvegarde et résultat unique (TDD)
         run: node --test tests/gens_capture_v2_adventure_contract_v1.test.mjs
+      - name: Tester marchands historiques et prix en pourcentage
+        run: |
+          node --test tests/gens_capture_v2_economy_merchants_20261110.test.mjs
+          node --test tests/gens_capture_v2_merchant_percent_20261121.test.mjs
 
       - name: Éditeur d’objets Capture — catalogue, imports sans destruction, sauvegardes historiques
         run: node --test tests/gens_capture_v2_item_editor_catalog_20261110.test.mjs
@@ -321,8 +325,8 @@ jobs:
           npx playwright install chromium
       - name: Run real four-mode GenSrpg root and Capture V2-to-Dungeon Builder in Chromium
         run: |
-          node --test tests/gens_capture_v2_root_browser.test.cjs
           node --test tests/gens_capture_v2_item_editor_browser_20261110.test.cjs
+          node --test tests/gens_capture_v2_root_browser.test.cjs
           node --test tests/gens_capture_universes_browser_20261117.test.cjs
           node tests/gens_dungeon_builder_visibility_after_capture_v2_browser_v1.test.cjs
           node --test tests/gens_capture_v2_pwa_upgrade_browser_v1.test.cjs

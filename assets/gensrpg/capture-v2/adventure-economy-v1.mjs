@@ -49,10 +49,28 @@ export function normalizeAdventureEconomyV1(input,lootItems=[]){
   (commodity.startsWith('fragment:')&&commodity.length>'fragment:'.length);
  const seen=new Set();
  const merchants=source.merchants.map((raw,i)=>{
-  const m=exact(raw,['id','name','buysItems','offers'],'economy.merchants['+i+']');
-  const merchantId=id(m.id,'merchant.id');
+  obj(raw,'economy.merchants['+i+']');
+  const merchantId=id(raw.id,'merchant.id');
   if(seen.has(merchantId))throw new RangeError('Duplicate merchant ID '+merchantId);
   seen.add(merchantId);
+  // The simple merchant owns only a checked list and two percentage sliders.
+  // Historical merchants retain their exact authored offers/stocks/resources.
+  if(Object.hasOwn(raw,'itemIds')){
+   const m=exact(raw,['id','name','itemIds','sellPercent','buyPercent'],
+    'economy.merchants['+i+']');
+   if(!Array.isArray(m.itemIds))throw new TypeError('merchant.itemIds must be an array');
+   const items=new Set();
+   for(const item of m.itemIds){
+    const itemId=id(item,'merchant.itemId');
+    if(!existing.has(itemId))throw new RangeError('Merchant item missing from loot.items: '+itemId);
+    if(items.has(itemId))throw new RangeError('Duplicate merchant item '+itemId);
+    items.add(itemId);
+   }
+   return {id:merchantId,name:title(m.name,'merchant.name'),
+    itemIds:[...items],sellPercent:integer(m.sellPercent,'merchant.sellPercent',-100,200),
+    buyPercent:integer(m.buyPercent,'merchant.buyPercent',-100,200)};
+  }
+  const m=exact(raw,['id','name','buysItems','offers'],'economy.merchants['+i+']');
   if(typeof m.buysItems!=='boolean')throw new TypeError('merchant.buysItems must be boolean');
   if(!Array.isArray(m.offers))throw new TypeError('merchant.offers must be an array');
   const offered=new Set();
@@ -84,6 +102,13 @@ export function normalizeAdventureEconomyV1(input,lootItems=[]){
   return {id:merchantId,name:title(m.name,'merchant.name'),buysItems:m.buysItems,offers};
  });
  return freeze({currency:{singular,plural},merchants});
+}
+// Same price function for transactions, merchant screen and author preview.
+// Rounding is per unit before quantity multiplication, never on the total.
+export function adventureMerchantPriceV1(baseValue,percent){
+ integer(baseValue,'item.saleValue',0,100000000);
+ integer(percent,'merchant.pricePercent',-100,200);
+ return integer(Math.round(baseValue*(100+percent)/100),'merchant.unitPrice',0,300000000);
 }
 const multiply=(a,b,name)=>{
  const n=a*b;
@@ -124,7 +149,12 @@ export function tradeAdventureMerchantInventoryV1({
  let paidCurrency=0;
  const paidResources=[];
  if(kind==='buy'){
-  const offer=merchant.offers.find(x=>x.itemId===target);
+  const offer=Object.hasOwn(merchant,'itemIds')
+   ?(definition&&merchant.itemIds.includes(target)
+     ?{itemId:target,currencyPrice:adventureMerchantPriceV1(
+        definition.saleValue,merchant.sellPercent),resourceCosts:[],stock:null}
+     :null)
+   :merchant.offers.find(x=>x.itemId===target);
   if(!offer)throw new RangeError('Merchant does not offer this item');
   const remaining=offer.stock===null?null:
    Math.min(stocks[merchant.id]?.[target]??offer.stock,offer.stock);
@@ -146,10 +176,13 @@ export function tradeAdventureMerchantInventoryV1({
    nextStocks={...stocks,[merchant.id]:{...(stocks[merchant.id]??{}),[target]:remaining-count}};
   }
  }else if(kind==='sell'){
-  if(!merchant.buysItems)throw new RangeError('Merchant does not buy items');
+  if(!Object.hasOwn(merchant,'itemIds')&&!merchant.buysItems)
+   throw new RangeError('Merchant does not buy items');
   if(!definition)throw new RangeError('Fragment resale has no authored saleValue');
   if((items[target]??0)<count)throw new RangeError('Insufficient items to sell');
-  const price=integer(definition.saleValue,'item.saleValue',0,100000000);
+  const price=Object.hasOwn(merchant,'itemIds')
+   ?adventureMerchantPriceV1(definition.saleValue,merchant.buyPercent)
+   :integer(definition.saleValue,'item.saleValue',0,100000000);
   if(price===0)throw new RangeError('Item has no resale value');
   paidCurrency=multiply(price,count,'resale currency');
   currency=add(currency,paidCurrency,'wallet currency');

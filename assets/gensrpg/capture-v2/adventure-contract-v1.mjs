@@ -686,6 +686,13 @@ function roll(random){
   throw new RangeError('Random adapter must return a number in [0,1)');
  return value;
 }
+// Same official Adventure rules and wallet; no parallel reward engine.
+export function calculateAdventureVictoryCurrencyV1({rules,trainerReward=null}={}){
+ const cfg=normalizeAdventureRulesV1(rules);
+ const bonus=trainerReward===null?0:normalizeAdventureTrainerRewardV1(trainerReward).currency;
+ return integer(Math.round((cfg.loot.currencyPerVictory+bonus)*
+   (cfg.loot.currencyMultiplier??1)),'victory currency',0,1000000000);
+}
 export function applyAdventureCombatResultV1({
  session,envelope,bestiaryCards,progressionCore,random,now
 }){
@@ -765,8 +772,7 @@ export function applyAdventureCombatResultV1({
   levelAfter:progressed.get(member.instanceId).level
  }));
  const currency=result.outcome==='victory'
-  ?integer(Math.round((state.rules.loot.currencyPerVictory+(trainerReward?.currency??0))*
-      (state.rules.loot.currencyMultiplier??1)),'victory currency',0,1000000000):0;
+  ?calculateAdventureVictoryCurrencyV1({rules:state.rules,trainerReward}):0;
  const itemCounts={...state.inventory.items};
  const drops=[],rewardWarnings=[];
  if(result.outcome==='victory'){

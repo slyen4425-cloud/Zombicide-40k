@@ -475,6 +475,16 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
    'World Assembler and 2.5D Sculpt belong to the same editor group');
   assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').count(),0,
    'duplicated 2.5D Tester is removed, not hidden');
+  // PNJ is a first-class native editor on the SAME Capture release origin.
+  await page.locator('[data-capture-v2-view="npc"]').tap();
+  const npcFrame=page.locator('#gensCaptureV2Root iframe');
+  assert.ok((await npcFrame.getAttribute('src')).includes(
+   scope+'vendor/exploration-lab/npc-editor.html'));
+  const npc=page.frameLocator('#gensCaptureV2Root iframe');
+  await npc.locator('#npc-name').waitFor({state:'visible',timeout:25000});
+  assert.ok(await npc.locator('#npc-role').count());
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
   await page.locator('[data-capture-v2-view="creature"]').tap();
   const combat=page.locator('#gensCaptureV2Root iframe');
   await combat.waitFor({state:'visible'});

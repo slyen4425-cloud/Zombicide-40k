@@ -156,3 +156,71 @@
 #gensCaptureV2Root[data-native-loading="true"] > .gensCaptureV2NativeBar{
  display:none!important
 }
+
+
+/* World creator: a fourth *menu* entry, never an overlay over live gameplay. */
+#gensCaptureV2Root[data-view="home"][data-creator-wallpaper="true"]{
+ background-image:linear-gradient(
+  rgba(6,18,25,var(--capture-home-shade,.55)),
+  rgba(6,18,25,var(--capture-home-shade,.55))),
+  var(--capture-home-art);
+ background-size:cover,cover;background-position:center,center;
+ background-repeat:no-repeat;
+}
+#gensCaptureV2Root .gensCaptureV2CreatorPanel{display:none}
+#gensCaptureV2Root[data-view="home"][data-menu="creator"] > nav,
+#gensCaptureV2Root[data-menu="creator"] > .gensCaptureV2Editors{display:none}
+#gensCaptureV2Root[data-view="home"][data-menu="creator"]
+ > .gensCaptureV2CreatorPanel{
+ display:flex;flex-direction:column;gap:11px;
+ width:min(calc(100% - 24px),850px);margin:auto;
+ min-height:0;max-height:calc(100dvh - 110px);overflow-y:auto;
+ overscroll-behavior:contain;padding:10px 12px 24px;
+ box-sizing:border-box;
+}
+#gensCaptureV2Root .gensCaptureV2CreatorPanel h2{margin:0;font-size:21px}
+#gensCaptureV2Root .gensCaptureV2CreatorPanel p{margin:0;color:#c7dbe1}
+#gensCaptureV2Root .gensCaptureV2CreatorPanel .captureCreatorGroup{
+ padding:10px 14px;border:1px solid #476f79;border-radius:12px;
+ background:rgba(8,29,40,.85)
+}
+#gensCaptureV2Root .gensCaptureV2CreatorPanel summary{
+ cursor:pointer;font-size:16px;font-weight:650;padding:7px 2px
+}
+#gensCaptureV2Root .gensCaptureV2CreatorPanel label{
+ display:flex;flex-direction:column;gap:7px;margin:9px 0
+}
+#gensCaptureV2Root .gensCaptureV2CreatorPanel label:has(input[type=checkbox]){
+ flex-direction:row;align-items:center
+}
+#gensCaptureV2Root .gensCaptureV2CreatorPanel input[type=range]{width:min(100%,460px)}
+#gensCaptureV2Root .gensCaptureV2CreatorPanel input[type=file]{
+ padding:6px 0;max-width:100%;color:#d7eef5
+}
+#gensCaptureV2Root .gensCaptureV2CreatorPanel .captureCreatorBgPreview{
+ min-height:110px;background-size:cover;background-position:center;
+ border:1px solid #658d91;border-radius:9px;padding:12px;
+ display:flex;align-items:flex-end;margin:8px 0
+}
+#gensCaptureV2Root .captureCreatorSoundSlot{
+ display:flex;align-items:center;flex-wrap:wrap;gap:8px;
+ padding:9px 0;border-bottom:1px solid #315361
+}
+#gensCaptureV2Root .captureCreatorSoundSlot strong{min-width:120px;flex:1}
+#gensCaptureV2Root .captureCreatorArtGallery{
+ display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));
+ gap:9px;margin:12px 0
+}
+#gensCaptureV2Root .captureCreatorArtItem{
+ padding:8px;border-radius:9px;border:1px solid #4e7784;
+ display:flex;flex-direction:column;gap:8px
+}
+#gensCaptureV2Root .captureCreatorArtItem img{
+ width:100%;aspect-ratio:20 / 9;object-fit:contain
+}
+#gensCaptureV2Root .captureCreatorArtItem span{overflow-wrap:anywhere;font-size:12px}
+#gensCaptureV2Root .captureCreatorStatus[data-error="true"]{color:#ffd1bd}
+@media(max-height:550px){
+ #gensCaptureV2Root[data-view="home"][data-menu="creator"]
+  > .gensCaptureV2CreatorPanel{max-height:calc(100dvh - 72px);}
+}

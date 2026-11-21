@@ -1,201 +1,169 @@
-// Capture V2 economy editor: presentation only, no inventory state or runtime.
-import {DEFAULT_ADVENTURE_ECONOMY_V1} from './adventure-economy-v1.mjs';
+// Monster InvoC merchant editor: simple selection from the ONE Adventure loot catalog.
+// The existing AdventureRules economy remains the only data owner. Historical
+// offers/stocks/resource payments are preserved until the author explicitly converts.
+import {DEFAULT_ADVENTURE_ECONOMY_V1,adventureMerchantPriceV1}
+ from './adventure-economy-v1.mjs';
 
 export function installAdventureEconomyEditorV1({
- document,getRules,getPublishedSpecies,commitEconomy,notify
+ document,getRules,commitEconomy,notify,getItemIconUrl
 }){
  const $=id=>document.getElementById(id);
  const option=(value,label)=>{const node=document.createElement('option');
   node.value=value;node.textContent=label;return node;};
  const warn=fn=>()=>{try{fn();}catch(error){notify(error.message,true);}};
- const commodities=()=>[...getRules().loot.items,
-  ...(getRules().fragmentRecruitment?.enabled===true?(getPublishedSpecies?.()??[])
-   .map(card=>({id:'fragment:'+card.id,name:'Éclat de '+card.name})):[])];
- const itemName=id=>commodities().find(x=>x.id===id)?.name??id;
  const current=()=>getRules().economy??DEFAULT_ADVENTURE_ECONOMY_V1;
+ const items=()=>getRules().loot.items;
  const byMerchant=id=>current().merchants.find(m=>m.id===id);
- let editedMerchantId=null,editedOffer=null,resources=[];
- const numeric=(field,min=0,max=100000000)=>{
-  const value=Number($(field).value);
-  if(!Number.isSafeInteger(value)||value<min||value>max)
-   throw new RangeError('Valeur invalide pour '+field);
-  return value;
- };
+ let editedId=null,selected=new Set();
+ const isSimple=m=>Array.isArray(m.itemIds);
+ const pct=n=>(n>0?'+':'')+n+' %';
  function read(){
   const singular=$('adventure-money-singular').value.trim();
   const plural=$('adventure-money-plural').value.trim();
-  const currency={singular,plural};
-  if(!getRules().economy&&current().merchants.length===0&&
-    singular===DEFAULT_ADVENTURE_ECONOMY_V1.currency.singular&&
-    plural===DEFAULT_ADVENTURE_ECONOMY_V1.currency.plural)return undefined;
-  return {...current(),currency};
+  if(!getRules().economy&&!current().merchants.length&&
+   singular===DEFAULT_ADVENTURE_ECONOMY_V1.currency.singular&&
+   plural===DEFAULT_ADVENTURE_ECONOMY_V1.currency.plural)return undefined;
+  return {...current(),currency:{singular,plural}};
+ }
+ function clearMerchant(){
+  editedId=null;selected=new Set();
+  $('adventure-merchant-name').value='';
+  $('adventure-merchant-sell-percent').value='10';
+  $('adventure-merchant-buy-percent').value='-50';
+  $('adventure-merchant-add').textContent='Ajouter ce marchand';
+  $('adventure-merchant-cancel').hidden=true;
+  renderPercents();renderLibrary();
  }
  function sync(config){
-  editedMerchantId=null;editedOffer=null;resources=[];
   const money=config.economy?.currency??DEFAULT_ADVENTURE_ECONOMY_V1.currency;
   $('adventure-money-singular').value=money.singular;
   $('adventure-money-plural').value=money.plural;
-  clearMerchant();clearOffer();render();
+  clearMerchant();render();
  }
- function clearMerchant(){
-  editedMerchantId=null;
-  $('adventure-merchant-name').value='';
-  $('adventure-merchant-buys').checked=true;
-  $('adventure-merchant-add').textContent='Ajouter ce marchand';
-  $('adventure-merchant-cancel').hidden=true;
+ function renderPercents(){
+  const sell=Number($('adventure-merchant-sell-percent').value);
+  const buy=Number($('adventure-merchant-buy-percent').value);
+  $('adventure-merchant-sell-value').textContent=pct(sell);
+  $('adventure-merchant-buy-value').textContent=pct(buy);
+  $('adventure-merchant-price-example').textContent=
+   'Objet à 100 '+($('adventure-money-plural').value||'pièces')+
+   ' : vendu '+adventureMerchantPriceV1(100,sell)+
+   ' · racheté '+adventureMerchantPriceV1(100,buy);
  }
- function clearOffer(){
-  editedOffer=null;resources=[];
-  $('adventure-merchant-price').value='10';
-  $('adventure-merchant-unlimited').checked=true;
-  $('adventure-merchant-stock').value='1';
-  $('adventure-merchant-stock').disabled=true;
-  $('adventure-merchant-offer-add').textContent='Ajouter cette offre';
-  $('adventure-merchant-offer-cancel').hidden=true;
-  renderResources();
- }
- function renderResources(){
-  const host=$('adventure-merchant-resource-list');
+ function renderLibrary(){
+  const host=$('adventure-merchant-library');
+  const needle=$('adventure-merchant-search').value.trim().toLocaleLowerCase('fr');
+  const all=items(),visible=all.filter(x=>x.name.toLocaleLowerCase('fr').includes(needle));
   host.replaceChildren();
-  for(const cost of resources){
-   const line=document.createElement('div');line.className='rule-row';
-   const label=document.createElement('span');
-   label.textContent=itemName(cost.itemId)+' × '+cost.quantity;
-   const remove=document.createElement('button');remove.type='button';
-   remove.textContent='Retirer';
-   remove.addEventListener('click',warn(()=>{
-    resources=resources.filter(x=>x.itemId!==cost.itemId);renderResources();
-   }));
-   line.append(label,remove);host.append(line);
+  // Avoid thousands of DOM controls on landscape phones; search still covers all.
+  for(const item of visible.slice(0,120)){
+   const label=document.createElement('label');
+   label.className='adventure-merchant-item-card';
+   const checkbox=document.createElement('input');
+   checkbox.type='checkbox';checkbox.checked=selected.has(item.id);
+   checkbox.setAttribute('aria-label','Proposer '+item.name);
+   checkbox.addEventListener('change',()=>{
+    if(checkbox.checked)selected.add(item.id);else selected.delete(item.id);
+    renderLibraryCount();
+   });
+   label.append(checkbox);
+   const imageUrl=getItemIconUrl?.(item.iconKey);
+   if(imageUrl){
+    const image=document.createElement('img');image.src=imageUrl;
+    image.alt='';image.loading='lazy';label.append(image);
+   }
+   const info=document.createElement('span');info.textContent=item.name+
+    ' · '+item.saleValue+' '+($('adventure-money-plural').value||'pièces');
+   label.append(info);host.append(label);
   }
-  if(!resources.length)host.textContent='Pas de ressource supplémentaire exigée.';
+  if(!visible.length)host.textContent=all.length
+   ?'Aucun objet ne correspond à la recherche.'
+   :'Aucun objet dans le catalogue : crée ou importe des objets plus haut.';
+  if(visible.length>120){
+   const note=document.createElement('p');
+   note.textContent='120 premiers résultats affichés sur '+visible.length+
+    ' : utilise la recherche pour trouver les autres.';
+   host.append(note);
+  }
+  renderLibraryCount();
+ }
+ function renderLibraryCount(){
+  const available=new Set(items().map(x=>x.id));
+  $('adventure-merchant-selected-count').textContent=
+   [...selected].filter(id=>available.has(id)).length+
+   ' objet(s) proposés parmi '+available.size;
+ }
+ function editMerchant(merchant){
+  if(!isSimple(merchant)&&!document.defaultView.confirm(
+   'Cette boutique utilise les anciens prix, stocks ou échanges. La convertir '+ 
+   'remplacera ces paramètres par les deux pourcentages et une liste d’objets. '+
+   'Les anciennes parties ne seront pas modifiées. Continuer ?'))return;
+  editedId=merchant.id;
+  selected=new Set(isSimple(merchant)?merchant.itemIds:merchant.offers
+   .map(offer=>offer.itemId).filter(id=>items().some(item=>item.id===id)));
+  $('adventure-merchant-name').value=merchant.name;
+  $('adventure-merchant-sell-percent').value=String(isSimple(merchant)?merchant.sellPercent:10);
+  $('adventure-merchant-buy-percent').value=String(isSimple(merchant)?merchant.buyPercent:-50);
+  $('adventure-merchant-add').textContent='Enregistrer le marchand';
+  $('adventure-merchant-cancel').hidden=false;
+  renderPercents();renderLibrary();
  }
  function render(){
-  const economy=current(),items=commodities();
-  const merchantSelect=$('adventure-merchant-select');
-  const chosen=merchantSelect.value;
-  merchantSelect.replaceChildren(...economy.merchants.map(m=>option(m.id,m.name)));
-  if(economy.merchants.some(m=>m.id===chosen))merchantSelect.value=chosen;
-  else if(economy.merchants.length)merchantSelect.value=economy.merchants[0].id;
-  const itemsSelector=$('adventure-merchant-item'),selectedItem=itemsSelector.value;
-  itemsSelector.replaceChildren(...items.map(i=>option(i.id,i.name)));
-  if(items.some(i=>i.id===selectedItem))itemsSelector.value=selectedItem;
-  const resourceSelector=$('adventure-merchant-resource'),selectedResource=resourceSelector.value;
-  resourceSelector.replaceChildren(option('','Aucune (paiement en monnaie uniquement)'),
-   ...items.map(i=>option(i.id,i.name)));
-  if(items.some(i=>i.id===selectedResource))resourceSelector.value=selectedResource;
-  $('adventure-merchant-offer-add').disabled=!economy.merchants.length||!items.length;
-  $('adventure-merchant-resource-add').disabled=!items.length;
   const host=$('adventure-merchants');host.replaceChildren();
-  for(const merchant of economy.merchants){
+  for(const merchant of current().merchants){
    const line=document.createElement('div');line.className='rule-row';
    const label=document.createElement('span');
-   label.textContent=merchant.name+' · '+merchant.offers.length+' offre(s) · '+
-    (merchant.buysItems?'rachète les objets':'ne rachète pas')+
-    ' · ID : '+merchant.id;
-   const edit=document.createElement('button');edit.type='button';edit.textContent='Modifier';
-   edit.addEventListener('click',warn(()=>{
-    editedMerchantId=merchant.id;
-    $('adventure-merchant-name').value=merchant.name;
-    $('adventure-merchant-buys').checked=merchant.buysItems;
-    $('adventure-merchant-add').textContent='Enregistrer le marchand';
-    $('adventure-merchant-cancel').hidden=false;
-   }));
-   const remove=document.createElement('button');remove.type='button';remove.textContent='Supprimer';
+   label.textContent=merchant.name+' · '+(isSimple(merchant)
+    ?merchant.itemIds.length+' objet(s) · vend '+pct(merchant.sellPercent)+
+     ' · rachète '+pct(merchant.buyPercent)
+    :merchant.offers.length+' offre(s) anciennes (stock/prix conservés)');
+   const edit=document.createElement('button');edit.type='button';
+   edit.textContent=isSimple(merchant)?'Modifier':'Convertir';
+   edit.addEventListener('click',warn(()=>editMerchant(merchant)));
+   const remove=document.createElement('button');remove.type='button';
+   remove.textContent='Supprimer';
    remove.addEventListener('click',warn(()=>{
-    if(merchant.offers.length&&!document.defaultView.confirm(
-      'Supprimer '+merchant.name+' et ses '+merchant.offers.length+' offres ?'))return;
+    if(!document.defaultView.confirm('Supprimer le marchand '+merchant.name+' ?'))return;
     commitEconomy({...current(),merchants:current().merchants.filter(m=>m.id!==merchant.id)});
-    clearMerchant();clearOffer();render();
-    notify('Marchand retiré du brouillon. Enregistre les paramètres.');
+    clearMerchant();render();notify('Marchand retiré du brouillon. Enregistre les paramètres.');
    }));
    line.append(label,edit,remove);host.append(line);
   }
-  if(!economy.merchants.length)host.textContent='Aucun marchand défini. Les PNJ restent indépendants.';
-  renderOffers();
+  if(!current().merchants.length)host.textContent='Aucun marchand configuré.';
+  renderLibrary();
  }
- function renderOffers(){
-  const host=$('adventure-merchant-offers');host.replaceChildren();
-  const merchant=byMerchant($('adventure-merchant-select').value);
-  if(!merchant){host.textContent='Crée un marchand puis choisis ses objets.';return;}
-  const currency=$('adventure-money-plural').value||'pièces';
-  for(const offer of merchant.offers){
-   const line=document.createElement('div');line.className='rule-row';
-   const label=document.createElement('span');
-   label.textContent=itemName(offer.itemId)+' · '+offer.currencyPrice+' '+currency+
-    offer.resourceCosts.map(x=>' + '+x.quantity+' '+itemName(x.itemId)).join('')+
-    ' · stock '+(offer.stock===null?'illimité':offer.stock);
-   const edit=document.createElement('button');edit.type='button';edit.textContent='Modifier';
-   edit.addEventListener('click',warn(()=>{
-    editedOffer={merchantId:merchant.id,itemId:offer.itemId};
-    $('adventure-merchant-item').value=offer.itemId;
-    $('adventure-merchant-price').value=String(offer.currencyPrice);
-    $('adventure-merchant-unlimited').checked=offer.stock===null;
-    $('adventure-merchant-stock').disabled=offer.stock===null;
-    $('adventure-merchant-stock').value=String(offer.stock??1);
-    resources=offer.resourceCosts.map(x=>({...x}));
-    $('adventure-merchant-offer-add').textContent='Enregistrer cette offre';
-    $('adventure-merchant-offer-cancel').hidden=false;
-    renderResources();
-   }));
-   const remove=document.createElement('button');remove.type='button';remove.textContent='Retirer';
-   remove.addEventListener('click',warn(()=>{
-    const merchants=current().merchants.map(m=>m.id===merchant.id?
-     {...m,offers:m.offers.filter(x=>x.itemId!==offer.itemId)}:m);
-    commitEconomy({...current(),merchants});clearOffer();render();
-    notify('Offre retirée. Enregistre les paramètres.');
-   }));
-   line.append(label,edit,remove);host.append(line);
-  }
-  if(!merchant.offers.length)host.textContent='Aucune offre chez ce marchand.';
+ function isItemUsed(itemId){
+  return current().merchants.some(m=>isSimple(m)
+   ?m.itemIds.includes(itemId)
+   :m.offers.some(offer=>offer.itemId===itemId||
+     offer.resourceCosts.some(cost=>cost.itemId===itemId)));
  }
- const isItemUsed=itemId=>current().merchants.some(m=>m.offers.some(offer=>
-  offer.itemId===itemId||offer.resourceCosts.some(cost=>cost.itemId===itemId)));
- $('adventure-merchant-cancel').addEventListener('click',clearMerchant);
- $('adventure-merchant-offer-cancel').addEventListener('click',clearOffer);
- $('adventure-merchant-select').addEventListener('change',()=>{clearOffer();renderOffers();});
- $('adventure-merchant-unlimited').addEventListener('change',()=>{
-  $('adventure-merchant-stock').disabled=$('adventure-merchant-unlimited').checked;
- });
- $('adventure-merchant-resource-add').addEventListener('click',warn(()=>{
-  const itemId=$('adventure-merchant-resource').value;
-  if(!itemId)throw new RangeError('Choisis un objet-ressource.');
-  if(itemId===$('adventure-merchant-item').value)
-   throw new RangeError('Une offre ne peut pas être payée avec ce même objet.');
-  if(resources.some(r=>r.itemId===itemId))
-   throw new RangeError('Cette ressource figure déjà dans le prix.');
-  resources.push({itemId,quantity:numeric('adventure-merchant-resource-qty',1,9999)});
-  $('adventure-merchant-resource').value='';renderResources();
- }));
  $('adventure-merchant-add').addEventListener('click',warn(()=>{
   const name=$('adventure-merchant-name').value.trim();
-  const id=editedMerchantId??'merchant-'+document.defaultView.crypto.randomUUID();
-  const next={id,name,buysItems:$('adventure-merchant-buys').checked,
-   offers:editedMerchantId?(byMerchant(editedMerchantId)?.offers??[]):[]};
-  const merchants=editedMerchantId?current().merchants.map(m=>m.id===id?next:m)
-   :[...current().merchants,next];
+  if(!name||name.length>80)throw new RangeError('Nom du marchand requis (80 caractères max).');
+  const available=new Set(items().map(x=>x.id));
+  const merchant={id:editedId??'merchant-'+document.defaultView.crypto.randomUUID(),
+   name,itemIds:[...selected].filter(id=>available.has(id)),
+   sellPercent:Number($('adventure-merchant-sell-percent').value),
+   buyPercent:Number($('adventure-merchant-buy-percent').value)};
+  const merchants=editedId
+   ?current().merchants.map(m=>m.id===editedId?merchant:m)
+   :[...current().merchants,merchant];
   commitEconomy({...current(),merchants});clearMerchant();render();
-  $('adventure-merchant-select').value=id;renderOffers();
   notify('Marchand configuré. Enregistre les paramètres pour conserver ses règles.');
  }));
- $('adventure-merchant-offer-add').addEventListener('click',warn(()=>{
-  const merchantId=$('adventure-merchant-select').value;
-  const merchant=byMerchant(merchantId);
-  if(!merchant)throw new RangeError('Choisis un marchand.');
-  const itemId=$('adventure-merchant-item').value;
-  if(!itemId)throw new RangeError('Choisis un objet.');
-  const offer={itemId,currencyPrice:numeric('adventure-merchant-price'),
-   resourceCosts:resources.map(x=>({...x})),
-   stock:$('adventure-merchant-unlimited').checked?null:
-    numeric('adventure-merchant-stock')};
-  const offers=editedOffer?
-   merchant.offers.map(x=>x.itemId===editedOffer.itemId?offer:x):
-   [...merchant.offers,offer];
-  const merchants=current().merchants.map(m=>m.id===merchant.id?{...m,offers}:m);
-  commitEconomy({...current(),merchants});clearOffer();render();
-  $('adventure-merchant-select').value=merchantId;renderOffers();
-  notify('Offre configurée. Enregistre les paramètres.');
- }));
- $('adventure-money-plural').addEventListener('input',renderOffers);
+ $('adventure-merchant-cancel').addEventListener('click',clearMerchant);
+ $('adventure-merchant-search').addEventListener('input',renderLibrary);
+ for(const key of ['sell','buy']){
+  $('adventure-merchant-'+key+'-percent').addEventListener('input',renderPercents);
+ }
+ $('adventure-money-plural').addEventListener('input',()=>{renderPercents();renderLibrary();});
+ $('adventure-merchant-all').addEventListener('click',()=>{
+  selected=new Set(items().map(item=>item.id));renderLibrary();
+ });
+ $('adventure-merchant-none').addEventListener('click',()=>{
+  selected=new Set();renderLibrary();
+ });
+ clearMerchant();
  return {read,sync,render,isItemUsed};
 }

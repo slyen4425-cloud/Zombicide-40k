@@ -481,6 +481,8 @@ jobs:
             builder.html
             world-assembler.html
             sculpt-lab.html
+            hero-editor.html
+            npc-editor.html
             play.html
             manifest.webmanifest
             scripts
@@ -515,6 +517,7 @@ jobs:
           node --test capture-v2-source/tests/gens_capture_v2_result_world_archive_20261107.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_portfolio_v1.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_contract_v1.test.mjs
+          node --test capture-v2-source/tests/capture_v2_starter_level_gold_20261121.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_wild_reserve_20261108.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_xp_fullscreen_20261108.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_atomic_bestiary_cache_20261108.test.mjs
@@ -639,6 +642,8 @@ jobs:
             builder.html
             world-assembler.html
             sculpt-lab.html
+            hero-editor.html
+            npc-editor.html
             play.html
             manifest.webmanifest
             scripts
@@ -661,6 +666,7 @@ jobs:
           node --test capture-v2-source/tests/gens_capture_v2_result_world_archive_20261107.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_portfolio_v1.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_contract_v1.test.mjs
+          node --test capture-v2-source/tests/capture_v2_starter_level_gold_20261121.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_wild_reserve_20261108.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_adventure_xp_fullscreen_20261108.test.mjs
           node --test capture-v2-source/tests/gens_capture_v2_atomic_bestiary_cache_20261108.test.mjs
@@ -730,6 +736,7 @@ jobs:
             "vendor/exploration-lab/combat-preview/data/capture/showcase/encounter-bundle.v1.json" \
             "vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json" \
             "vendor/combat-lab/examples/dom-demo/capture-editor-v2.html" \
+            "vendor/exploration-lab/npc-editor.html" \
             "vendor/exploration-lab/sculpt-lab.html" \
             "vendor/exploration-lab/src/sculpt-lab-main.js"; do
             mkdir -p "$dir/preview/$(dirname "$file")"

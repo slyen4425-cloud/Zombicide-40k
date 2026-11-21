@@ -145,8 +145,10 @@ for(const folder of ['src','assets']){
 if(excludedSourceArchives.length!==6)
   throw Error('Unexpected official Exploration author ZIP count: '+excludedSourceArchives.length);
 console.log('Excluded 6 non-runtime Exploration source ZIPs from Pages:',excludedSourceArchives.join(', '));
-for(const filename of ['index.html','builder.html','world-assembler.html','sculpt-lab.html','hero-editor.html','play.html','manifest.webmanifest']){
+for(const filename of ['index.html','builder.html','world-assembler.html','sculpt-lab.html','hero-editor.html','npc-editor.html','play.html','manifest.webmanifest']){
   const from=path.join(exploration,filename);
+  if(filename==='npc-editor.html'&&!fs.existsSync(from))
+    throw Error('Certified Exploration NPC editor is missing from source');
   if(fs.existsSync(from))fs.copyFileSync(from,path.join(exploreDest,filename));
 }
 // Delegate the native Combat transport and the derived official Showcase to

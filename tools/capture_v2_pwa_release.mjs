@@ -55,28 +55,57 @@ export function releasePreviewPwaForCommit(sourceWorker,sourceHtml,releaseSha){
  */
 export function enableAutomaticPreviewActivation(sourceHtml){
   if(typeof sourceHtml!=='string')throw Error('Invalid preview PWA Shell');
-  const waiting=`      if(reg.waiting){
+  // Only the generated Capture preview's existing native registration changes.
+  // Inspect reg.installing too: when register() resolves, updatefound may
+  // already have fired. The waiting worker must never require user interaction.
+  const legacy=`      await reg.update();
+
+      if(reg.waiting){
         z40kWaitingWorker=reg.waiting;
         z40kShowUpdateBanner();
-      }`;
-  const installed=`          if(worker.state==='installed' && navigator.serviceWorker.controller){
+      }
+
+      reg.addEventListener('updatefound',()=>{
+        const worker=reg.installing;
+        if(!worker)return;
+        worker.addEventListener('statechange',()=>{
+          if(worker.state==='installed' && navigator.serviceWorker.controller){
             z40kWaitingWorker=worker;
             z40kShowUpdateBanner();
-          }`;
-  // Attach updatefound and inspect an existing waiting worker BEFORE asking
-  // Chromium to update. Awaiting reg.update() first can miss installation,
-  // leaving an installed worker waiting behind the old PWA indefinitely.
-  // This touches only the generated Capture preview Shell, never root PWA.
-  const awaitingUpdate='      await reg.update();\n\n      if(reg.waiting){';
-  const listenerEnd='      });\n    }catch(e){}\n    z40kCheckPublishedVersion();';
-  if(sourceHtml.split(awaitingUpdate).length!==2||
-     sourceHtml.split(listenerEnd).length!==2)
-    throw Error('Preview PWA Shell update listener seam changed');
-  return sourceHtml
-    .replace(waiting,waiting.replace('z40kShowUpdateBanner();',
-      "reg.waiting.postMessage({type:'SKIP_WAITING'});"))
-    .replace(installed,installed.replace('z40kShowUpdateBanner();',
-      "worker.postMessage({type:'SKIP_WAITING'});"))
-    .replace(awaitingUpdate,'      if(reg.waiting){')
-    .replace(listenerEnd,'      });\n      void reg.update().catch(()=>{});\n    }catch(e){}\n    z40kCheckPublishedVersion();');
+          }
+        });
+      });`;
+  const automatic=`      // One existing registration; handle both workers discovered BEFORE
+      // and AFTER the browser's updatefound event without polling/reloading.
+      const observedCaptureWorkers=new Set();
+      const activateCaptureCandidate=worker=>{
+        if(!worker||worker===reg.active||observedCaptureWorkers.has(worker))return;
+        observedCaptureWorkers.add(worker);
+        const requestActivation=()=>{
+          if(worker.state==='installed'){
+            z40kWaitingWorker=worker;
+            worker.postMessage({type:'SKIP_WAITING'});
+          }
+        };
+        worker.addEventListener('statechange',requestActivation);
+        requestActivation();
+      };
+      if(reg.waiting){
+        z40kWaitingWorker=reg.waiting;
+        reg.waiting.postMessage({type:'SKIP_WAITING'});
+      }
+      activateCaptureCandidate(reg.installing);
+      reg.addEventListener('updatefound',()=>activateCaptureCandidate(reg.installing));
+      void reg.update().then(()=>{
+        // update() may resolve after a worker became WAITING, even if the
+        // page missed its earlier updatefound transition.
+        if(reg.waiting){
+          z40kWaitingWorker=reg.waiting;
+          reg.waiting.postMessage({type:'SKIP_WAITING'});
+        }
+        activateCaptureCandidate(reg.installing);
+      }).catch(()=>{});`;
+  if(sourceHtml.split(legacy).length!==2)
+    throw Error('Preview PWA registration seam changed; fail closed');
+  return sourceHtml.replace(legacy,automatic);
 }

@@ -339,6 +339,23 @@ test('Adventure advanced start-level and gold settings are physically present in
  assert.ok(contract.includes('export function calculateAdventureVictoryCurrencyV1('));
 });
 
+test('Creator and default 50% items exist in ONE official Capture source',()=>{
+ const shell=read(trial,'assets/gensrpg/capture-v2/shell-entry-v1.js').toString('utf8');
+ const creator=read(trial,'assets/gensrpg/capture-v2/shell-creator-presentation-v1.mjs').toString('utf8');
+ const item=read(trial,'assets/gensrpg/capture-v2/item-templates-v1.mjs').toString('utf8');
+ const app=read(trial,'assets/gensrpg/capture-v2/adventure-app-v1.mjs').toString('utf8');
+ assert.equal(shell.split('creator.dataset.captureV2Menu="creator"').length,2,
+  'one Creator button in the existing module home');
+ assert.ok(shell.includes('path:"vendor/exploration-lab/npc-editor.html"'),
+  'Creator must preserve the existing native NPC route');
+ assert.ok(shell.includes('shell-creator-presentation-v1.mjs'),
+  'Creator module must be lazy-loaded without parallel game state');
+ assert.ok(creator.includes('createCaptureShellCreatorV1('));
+ assert.ok(item.includes('chancePercent:50,minQuantity:1,maxQuantity:1'));
+ assert.ok(item.includes('saleValue:100'));
+ assert.ok(app.includes('adventure-starter-level'));
+});
+
 test('NPC editor is the canonical native Exploration page with one visible Capture menu route',()=>{
  const npc=read(trial,'vendor/exploration-lab/npc-editor.html').toString('utf8');
  const sculpt=read(trial,'vendor/exploration-lab/sculpt-lab.html').toString('utf8');

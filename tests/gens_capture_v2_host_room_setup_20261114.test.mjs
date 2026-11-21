@@ -85,7 +85,8 @@ test('UI follows host rules and never blocks native world loading on network wor
  const html=read('assets/gensrpg/capture-v2/adventure.html');
  assert.match(transport,/gensrpg_capture_publish_host_room_setup/);
  assert.match(transport,/gensrpg_capture_room_setups/);
- assert.match(app,/rules=guest\?setup\.rules:fromFields\(\)/);
+ assert.match(app,/const authored=guest\?setup\.rules:fromFields\(\)/);
+ assert.match(app,/rules=guest\?setup\.rules:normalizeAdventureRulesV1/);
  assert.match(app,/setup\.starterCount/);
  assert.match(app,/captureGuestSessionMatchesHostSetupV1/);
  assert.match(app,/pendingCaptureHostShare=shareForRoom/);

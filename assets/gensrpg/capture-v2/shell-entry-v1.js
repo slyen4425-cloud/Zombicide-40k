@@ -398,19 +398,19 @@
     const play=doc.createElement("button");play.type="button";
     play.dataset.captureV2View="adventure";
     play.textContent="Jouer";
-    play.addEventListener("click",()=>open("adventure"));
+    play.addEventListener("click",()=>{creatorOwner?.play('confirm');open("adventure");});
     const editing=doc.createElement("button");editing.type="button";
     editing.dataset.captureV2Menu="editors";
     editing.textContent="Éditeurs";
-    editing.addEventListener("click",editors);
+    editing.addEventListener("click",()=>{creatorOwner?.play('click');editors();});
     const creator=doc.createElement("button");creator.type="button";
     creator.dataset.captureV2Menu="creator";
     creator.textContent="Créateur";
-    creator.addEventListener("click",showCreator);
+    creator.addEventListener("click",()=>{creatorOwner?.play('click');showCreator();});
     const change=doc.createElement("button");change.type="button";
     change.dataset.captureV2Menu="universes";
     change.textContent="Changer d’univers";
-    change.addEventListener("click",showUniverses);
+    change.addEventListener("click",()=>{creatorOwner?.play('back');showUniverses();});
     nav.append(play,editing,creator,change);
     // This real library precedes play/editor choice; a saved PARTY never
     // masquerades as a separate GAME UNIVERSE.
@@ -425,7 +425,7 @@
     menuBack.className="gensCaptureV2MenuBack";
     menuBack.dataset.captureV2MenuBack="main";
     menuBack.textContent="← Menu principal";
-    menuBack.addEventListener("click",home);
+    menuBack.addEventListener("click",()=>{creatorOwner?.play('back');home();});
     editorPanel.append(menuBack);
     for(const group of EDITOR_GROUPS){
       const section=doc.createElement("section");
@@ -438,7 +438,7 @@
         const button=doc.createElement("button");button.type="button";
         button.dataset.captureV2View=kind;
         button.textContent=VIEWS[kind].label;
-        button.addEventListener("click",()=>open(kind));
+        button.addEventListener("click",()=>{creatorOwner?.play('confirm');open(kind);});
         li.append(button);entries.append(li);
       }
       section.append(title,entries);editorPanel.append(section);
@@ -455,7 +455,7 @@
     nativeBack.type="button";
     nativeBack.className="gensCaptureV2NativeBack";
     nativeBack.textContent="← Monster Capture";
-    nativeBack.addEventListener("click",home);
+    nativeBack.addEventListener("click",()=>{creatorOwner?.play('back');home();});
     nativeTitle=doc.createElement("span");
     nativeTitle.className="gensCaptureV2NativeTitle";
     nativeBar.append(nativeBack,nativeTitle);

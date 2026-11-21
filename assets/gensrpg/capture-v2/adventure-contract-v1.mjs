@@ -943,7 +943,7 @@ export function tradeAdventureMerchantV1({session,bestiaryCards,...transaction}=
  const state=assertSession(session);
  if(transaction.kind==='buy'){
   const merchant=state.rules.economy?.merchants.find(m=>m.id===transaction.merchantId);
-  const offer=merchant?.offers.find(o=>o.itemId===transaction.itemId);
+  const offer=merchant?.offers?.find(o=>o.itemId===transaction.itemId);
   const fragments=[transaction.itemId,...(offer?.resourceCosts??[]).map(r=>r.itemId)]
    .filter(id=>typeof id==='string'&&id.startsWith('fragment:'));
   if(fragments.length){

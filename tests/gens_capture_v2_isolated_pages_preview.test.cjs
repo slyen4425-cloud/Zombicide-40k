@@ -532,7 +532,8 @@ test('published Capture creator keeps audio active in native editors but silent 
  assert.ok(pin.combat.sha&&pin.exploration.sha,'certified Lab pins unchanged');
  assert.match(shell,/function bindNativeEditorAudio\(nativeFrame,nativeKind\)/);
  assert.match(shell,/editorDoc\.addEventListener\('click',onClick,true\)/);
- assert.match(shell,/if\(kind==='adventure'\)creatorOwner\?\.leaveHome\(\)/);
+ assert.match(shell,/if\(kind==='adventure'\)bindAdventureMenuPresentation\(frame\)/);
+ assert.match(shell,/if\(playing\(\)\)creatorOwner\?\.leaveHome\(\)/);
  assert.match(shell,/else creatorOwner\?\.enterHome\(\)/);
  assert.match(shell,/if\(nativeKind==="adventure"\)return/);
  assert.match(shell,/editorDoc\.removeEventListener\('click',onClick,true\)/);
@@ -542,4 +543,27 @@ test('published Capture creator keeps audio active in native editors but silent 
  assert.match(creator,/ambienceEnabled:true/);
  assert.doesNotMatch(shell,/new Audio\(/);
  assert.equal(fs.existsSync(path.join(trial,'vendor/combat-lab/assets/runtime/audio/private-v1')),false);
+});
+
+
+test('published Capture menus keep the creator image and ambience while preserving native game isolation',()=>{
+ const creator=read(trial,'assets/gensrpg/capture-v2/shell-creator-presentation-v1.mjs').toString('utf8');
+ const shell=read(trial,'assets/gensrpg/capture-v2/shell-entry-v1.js').toString('utf8');
+ const menuCss=read(trial,'assets/gensrpg/capture-v2/shell-style-v1.css').toString('utf8');
+ const adventureCss=read(trial,'assets/gensrpg/capture-v2/adventure-style-v1.css').toString('utf8');
+ assert.ok(shell.includes('function bindAdventureMenuPresentation(nativeFrame)'),
+  'Jouer preparation must stay application UI until actual world entry');
+ assert.ok(shell.includes("attributeFilter:['data-adventure-playing']"),
+  'only Adventure-owned play status may toggle app ambience');
+ assert.ok(shell.includes("if(playing())creatorOwner?.leaveHome();"));
+ assert.ok(shell.includes("else creatorOwner?.enterHome();"));
+ assert.ok(shell.includes("if(kind==='adventure')bindAdventureMenuPresentation(frame);"));
+ assert.ok(creator.includes('wallpaper:()=>backgroundUrl?Object.freeze('));
+ assert.ok(menuCss.includes('rgba(28,88,96,.81)'),
+  'main menu buttons must be mildly translucent');
+ assert.ok(menuCss.includes('[data-menu="main"] > .gensCaptureV2MainMenu button'),
+  'the translucency is scoped to main menu only');
+ assert.ok(adventureCss.includes('body[data-capture-shell-wallpaper="true"]:not([data-adventure-playing="true"]) main'));
+ assert.ok(!shell.includes('new Audio('),'do not create a rival player');
+ assert.ok(!creator.includes('soundPlayers.set(\'game\''),'never create gameplay audio');
 });

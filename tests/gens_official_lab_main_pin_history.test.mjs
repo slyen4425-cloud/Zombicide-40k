@@ -9,7 +9,7 @@ import {assertOfficialMainHistoryPin} from '../tools/verify_official_main_pin.mj
 
 const git=(dir,...args)=>execFileSync('git',['-C',dir,...args],{encoding:'utf8'}).trim();
 const repo='slyen4425-cloud/GenSrpg_labo_combat_dynamique';
-function fixture(){
+function fixture(extraMainCommits=0){
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'gens-main-history-'));
  const remote=path.join(dir,'remote.git');
  execFileSync('git',['init','--quiet','--bare','--initial-branch=main',remote]);
@@ -26,7 +26,11 @@ function fixture(){
  };
  const original=commit('approved-main-release');
  git(work,'push','--quiet','-u','origin','main');
- const current=commit('new-main-release');
+ let current=commit('new-main-release');
+ for(let i=0;i<extraMainCommits;i++){
+  git(work,'commit','--quiet','--allow-empty','-m','later-main-release-'+i);
+  current=git(work,'rev-parse','HEAD');
+ }
  git(work,'push','--quiet','origin','main');
  git(work,'checkout','--quiet','-b','work/unapproved');
  const unapproved=commit('branch-only-private-change');
@@ -38,6 +42,15 @@ test('old immutable approved main release remains valid after newer official mai
   const verified=assertOfficialMainHistoryPin({repository:repo,sha:f.original,remoteUrl:f.remote});
   assert.equal(verified.pin,f.original);assert.equal(verified.main,f.current);
   assertOfficialMainHistoryPin({repository:repo,sha:f.current,remoteUrl:f.remote});
+ }finally{fs.rmSync(f.dir,{recursive:true,force:true});}
+});
+test('official main release more than 128 commits old still passes bounded ancestry verification',()=>{
+ const f=fixture(145);try{
+  const result=assertOfficialMainHistoryPin({repository:repo,sha:f.original,remoteUrl:f.remote});
+  assert.equal(result.pin,f.original);
+  assert.equal(result.main,f.current);
+  assert.throws(()=>assertOfficialMainHistoryPin({repository:repo,sha:f.unapproved,remoteUrl:f.remote}),
+   /not part of the official main history/i,'deepening must not include work branch-only SHA');
  }finally{fs.rmSync(f.dir,{recursive:true,force:true});}
 });
 test('dev branch-only revision and nonexistent pin are refused even if Git object exists',()=>{

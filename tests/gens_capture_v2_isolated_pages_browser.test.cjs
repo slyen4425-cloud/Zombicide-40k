@@ -468,8 +468,17 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
    await captureHome.locator('[data-capture-v2-menu="editors"]').waitFor({state:'visible'});
    assert.equal(await captureHome.getAttribute('data-menu'),'main');
   }
-  assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu button:visible').count(),hasUniversePicker?3:2,
+  assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu button:visible').count(),hasUniversePicker?4:3,
    'Capture home must show all native menu choices after actual universe selection');
+  // Un seul Créateur est visible depuis le menu officiel, sans sortir du Hub.
+  const creatorBtn=page.locator('#gensCaptureV2Root [data-capture-v2-menu="creator"]');
+  assert.equal(await creatorBtn.count(),1);
+  await creatorBtn.tap();
+  await page.locator('#gensCaptureV2Root .gensCaptureV2CreatorPanel[data-active="true"]')
+    .waitFor({state:'visible',timeout:25000});
+  assert.equal(await page.locator('#gensCaptureV2Root').getAttribute('data-menu'),'creator');
+  await page.locator('#gensCaptureV2Root .gensCaptureV2CreatorPanel .gensCaptureV2MenuBack').tap();
+  assert.equal(await page.locator('#gensCaptureV2Root').getAttribute('data-menu'),'main');
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
   assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="world"] button:visible').count(),2,
    'World Assembler and 2.5D Sculpt belong to the same editor group');

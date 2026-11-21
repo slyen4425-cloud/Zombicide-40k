@@ -356,6 +356,30 @@ test('Creator and default 50% items exist in ONE official Capture source',()=>{
  assert.ok(app.includes('adventure-starter-level'));
 });
 
+test('World Builder: arrival portals #517 are preserved in the actual isolated PWA',()=>{
+ const html=read(trial,'vendor/exploration-lab/sculpt-lab.html').toString('utf8');
+ const editor=read(trial,'vendor/exploration-lab/src/sculpt-lab-main.js').toString('utf8');
+ const builder=read(trial,'vendor/exploration-lab/src/builder/world-builder-draft.js').toString('utf8');
+ const controls=read(trial,'vendor/exploration-lab/src/builder/sculpt-world-spawn-controls-v1.js').toString('utf8');
+ assert.ok(html.includes('id="object-waypoint-arrivals"'));
+ assert.ok(html.includes('id="object-waypoint-arrival-place"'));
+ assert.ok(builder.includes('ensureWorldPortalIndependentArrivalV1'));
+ assert.ok(controls.includes('describeWorldAreaIncomingPortalsForEditorV1'));
+ assert.ok(editor.includes('ensureWorldPortalIndependentArrivalV1'));
+});
+test('Combat NPC and Raiiven media use certified single owners',()=>{
+ const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
+ const provenance=json(trial,'release-provenance.v1.json');
+ const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
+ const adapter=read(trial,'vendor/combat-lab/src/adapters/input/capture/capture-npc-opponent-instance-v1.js').toString('utf8');
+ assert.equal(source.combat.sha,'414c0324a2837dee9697e01b4fc4ec9844a61b2a');
+ assert.equal(source.combat.certifiedCiRun,44899730762);
+ assert.equal(provenance.combat.sha,source.combat.sha);
+ assert.equal(delivery.combat.sha,source.combat.sha);
+ assert.equal(previewPin.officialVisuals.sha,'204564e5f3e0fa5081d23927ef4dfc8b74f9cc90');
+ assert.equal(previewPin.officialVisuals.certifiedCiRun,44899212749);
+ assert.ok(adapter.includes('export '),'single official Combat NPC adapter expected');
+});
 test('NPC editor is the canonical native Exploration page with one visible Capture menu route',()=>{
  const npc=read(trial,'vendor/exploration-lab/npc-editor.html').toString('utf8');
  const sculpt=read(trial,'vendor/exploration-lab/sculpt-lab.html').toString('utf8');

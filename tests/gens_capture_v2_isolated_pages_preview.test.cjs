@@ -354,6 +354,19 @@ test('Creator and default 50% items exist in ONE official Capture source',()=>{
  assert.ok(item.includes('chancePercent:50,minQuantity:1,maxQuantity:1'));
  assert.ok(item.includes('saleValue:100'));
  assert.ok(app.includes('adventure-starter-level'));
+ const adventure=read(trial,'assets/gensrpg/capture-v2/adventure.html').toString('utf8');
+ assert.ok(creator.includes("await loading.add('launch',artInput.files)"),
+  'Creator alone must be able to add art to the canonical gallery');
+ assert.ok(creator.includes('const images=await loading.list()'),
+  'Creator must still show all old zone/combat-tagged images');
+ assert.ok(!creator.includes('scene.value'),
+  'Creator exposes ONE common gallery, not rival loading-scene authorities');
+ assert.ok(!adventure.includes('id="adventure-loading-art-files"'),
+  'in-game preparation must not expose a second art editor');
+ assert.ok(!app.includes('refreshLoadingArtEditor'),
+  'the adventure owns playback, never configuration');
+ assert.ok(app.includes('const entries=(await library.list()).slice(0,12)'),
+  'all existing illustrations remain readable across the three loading contexts');
 });
 
 test('NPC editor is the canonical native Exploration page with one visible Capture menu route',()=>{

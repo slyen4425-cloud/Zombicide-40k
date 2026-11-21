@@ -40,6 +40,24 @@ test('old immutable approved main release remains valid after newer official mai
   assertOfficialMainHistoryPin({repository:repo,sha:f.current,remoteUrl:f.remote});
  }finally{fs.rmSync(f.dir,{recursive:true,force:true});}
 });
+test('a previously released main SHA older than 128 commits stays provably valid',()=>{
+ const f=fixture();
+ try{
+  const work=path.join(f.dir,'work');
+  git(work,'checkout','--quiet','main');
+  for(let i=0;i<140;i++){
+   fs.writeFileSync(path.join(work,'payload.txt'),'advance-main-'+i);
+   git(work,'add','payload.txt');
+   git(work,'commit','--quiet','-m','advance-main-'+i);
+  }
+  const recent=git(work,'rev-parse','HEAD');
+  git(work,'push','--quiet','origin','main');
+  const proof=assertOfficialMainHistoryPin({repository:repo,sha:f.original,remoteUrl:f.remote});
+  assert.equal(proof.pin,f.original);
+  assert.equal(proof.main,recent);
+ }finally{fs.rmSync(f.dir,{recursive:true,force:true});}
+});
+
 test('dev branch-only revision and nonexistent pin are refused even if Git object exists',()=>{
  const f=fixture();try{
   assert.throws(()=>assertOfficialMainHistoryPin({repository:repo,sha:f.unapproved,remoteUrl:f.remote}),

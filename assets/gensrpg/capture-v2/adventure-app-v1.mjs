@@ -729,10 +729,11 @@ async function loadOfficialItemTemplates(){
   const selector=$('adventure-item-icon');
   selector.replaceChildren(option('','Sans icône officielle'));
   for(const item of availableItemVisuals())selector.append(option(item.id,item.name));
-  $('adventure-item-import').disabled=!published.length;
-  if(published.length)
-   $('adventure-item-import').textContent=
-    'Préparer un objet par monstre publié · 100 pièces / 50 %';
+  $('adventure-item-import').disabled=!itemTemplates.items.length;
+  if(itemTemplates.items.length)
+   $('adventure-item-import').textContent='Importer les '+itemTemplates.items.length+
+    ' objets et drops officiels illustrés';
+  $('adventure-item-defaults').disabled=!published.length;
   text($('adventure-item-icon-status'),itemTemplates.items.length
    ?itemTemplates.items.length+' objets officiels importables, '+
      (itemTemplates.icons?.length??0)+' icônes supplémentaires utilisables manuellement.'
@@ -2426,6 +2427,22 @@ $('adventure-item-add').addEventListener('click',guarded(()=>{
  stateMessage('Objet conservé dans le brouillon. Clique Enregistrer les paramètres.');
 }));
 $('adventure-item-import').addEventListener('click',guarded(()=>{
+ // Historical importer retains its exact no-duplicate semantics, restricted
+ // to actual species published in the selected universe.
+ const authored=fromFields();
+ const filtered={...itemTemplates,items:itemTemplates.items.filter(t=>
+  published.some(card=>card.id===t.speciesId))};
+ const staged=materializeCaptureItemTemplatesV1({
+  rules:authored,templates:filtered
+ });
+ rules=normalizeAdventureRulesV1({...authored,loot:staged.loot});
+ resetItemEditor();renderItemRules();updatePreview();
+ stateMessage(staged.addedItems+' objets illustrés et '+staged.addedDrops+
+  ' drops officiels ajoutés (100 pièces / 50 %). Enregistre les paramètres.');
+}));
+$('adventure-item-defaults').addEventListener('click',guarded(()=>{
+ // Authoring command: add ONLY missing creature drops. Custom odds and
+ // fragment settings are never rewritten.
  const authored=fromFields();
  const staged=materializeCapturePublishedMonsterDropsV1({
   rules:authored,templates:itemTemplates,published
@@ -2434,7 +2451,7 @@ $('adventure-item-import').addEventListener('click',guarded(()=>{
  resetItemEditor();renderItemRules();updatePreview();
  stateMessage(staged.addedItems+' objets et '+staged.addedDrops+
   ' drops ajoutés (50 % chacun, valeur 100). '+
-  staged.withoutIllustrations+' espèces sans icône propre. '+
+  staged.withoutIllustrations+' créatures sans icône propre. '+
   'Drops personnalisés et fragments conservés. Enregistre les paramètres.');
 }));
 $('adventure-drop-edit-cancel').addEventListener('click',resetDropEditor);

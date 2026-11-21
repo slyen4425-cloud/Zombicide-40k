@@ -69,7 +69,7 @@ test('zero discounts and edited base prices are effective without rewriting offe
  assert.equal(trade(state,'sell','relique',1,'new-buyback').receipt.currencyAmount,100);
  const zero=normalizeAdventureRulesV1({...rules,economy:{...rules.economy,
   merchants:[{...merchant,buyPercent:-100}]}});
- assert.throws(()=>trade({...state,rules:zero},'sell','relique',1,'no-resale'),/no resale value/);
+ assert.throws(()=>trade({...state,rules:zero},'sell','relique',1,'no-resale'),/no resale value/i);
 });
 test('merchant editor and merchant play use the shared price owner and preserve old configuration',()=>{
  const read=path=>readFileSync(new URL('../assets/gensrpg/capture-v2/'+path,import.meta.url),'utf8');

@@ -156,7 +156,8 @@ test('native editor UI clicks reuse the same Capture creator sound, but not Adve
  assert.match(shell,/editorDoc\.addEventListener\('click',onClick,true\)/);
  assert.match(shell,/creatorOwner\?\.play\('click'\)/);
  assert.match(shell,/editorDoc\.removeEventListener\('click',onClick,true\)/);
- assert.match(shell,/if\(kind==='adventure'\)creatorOwner\?\.leaveHome\(\)/);
+ assert.match(shell,/if\(kind==='adventure'\)bindAdventureMenuPresentation\(frame\)/);
+ assert.match(shell,/if\(playing\(\)\)creatorOwner\?\.leaveHome\(\)/);
  assert.match(shell,/else creatorOwner\?\.enterHome\(\)/);
  assert.match(shell,/if\(nativeKind==="adventure"\)return/);
  assert.match(shell,/editorDoc\.fullscreenElement/);

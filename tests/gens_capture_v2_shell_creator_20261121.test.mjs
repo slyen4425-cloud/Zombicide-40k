@@ -136,3 +136,15 @@ test('the Creator imports personal audio OR stores official asset IDs in one uni
  assert.doesNotMatch(creator,/audio\/private-v1\/[^'"]+\.mp3/);
  assert.doesNotMatch(creator,/new Audio\(/);
 });
+
+
+test('official audio transport is safe under localhost browser tests AND HTTPS Pages',async()=>{
+ const {isCaptureShellAudioTransportUrlV1}=await import(
+  '../assets/gensrpg/capture-v2/shell-official-audio-catalog-v1.mjs');
+ assert.equal(isCaptureShellAudioTransportUrlV1('http://127.0.0.1:1234/private.mp3'),true);
+ assert.equal(isCaptureShellAudioTransportUrlV1('https://slyen4425-cloud.github.io/audio.mp3'),true);
+ assert.equal(isCaptureShellAudioTransportUrlV1('file:///tests/official.mp3'),true);
+ assert.equal(isCaptureShellAudioTransportUrlV1('javascript:alert(1)'),false);
+ assert.equal(isCaptureShellAudioTransportUrlV1('data:audio/mpeg;base64,abcd'),false);
+ assert.equal(isCaptureShellAudioTransportUrlV1('blob:https://example.test/foo'),false);
+});

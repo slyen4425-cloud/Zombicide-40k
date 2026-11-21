@@ -121,6 +121,10 @@ jobs:
 
       - name: Aventure V2 — contrat XP, loot, bestiaire publié, sauvegarde et résultat unique (TDD)
         run: node --test tests/gens_capture_v2_adventure_contract_v1.test.mjs
+      - name: Tester marchands historiques et prix en pourcentage
+        run: |
+          node --test tests/gens_capture_v2_economy_merchants_20261110.test.mjs
+          node --test tests/gens_capture_v2_merchant_percent_20261121.test.mjs
 
       - name: Éditeur d’objets Capture — catalogue, imports sans destruction, sauvegardes historiques
         run: node --test tests/gens_capture_v2_item_editor_catalog_20261110.test.mjs

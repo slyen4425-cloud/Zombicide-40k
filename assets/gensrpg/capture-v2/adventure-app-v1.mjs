@@ -818,6 +818,17 @@ function renderItemRules(){
  if(rules.loot.items.some(x=>x.id===selected))selector.value=selected;
  $('adventure-drop-add').disabled=!published.length||!rules.loot.items.length;
  const filterId=$('adventure-drop-filter').value;
+ const selectedCard=published.find(card=>card.id===filterId);
+ const image=$('adventure-drop-focused-portrait');
+ const imageSrc=selectedCard?publishedCapturePortraitUrlV1({
+  card:{portrait:selectedCard.icon??selectedCard.portrait??null},
+  moduleUrl:import.meta.url
+ }):null;
+ image.hidden=!imageSrc;
+ if(imageSrc)image.src=imageSrc;
+ text($('adventure-drop-focused-description'),selectedCard
+  ?selectedCard.name+' : choisis une ressource existante, règle sa chance et sa quantité. Une ligne ci-dessous = un seul tirage après victoire.'
+  :'Aucune créature sélectionnée dans le Bestiaire officiel.');
  const visibleDrops=rules.loot.drops.map((drop,index)=>({drop,index}))
   .filter(entry=>!filterId||entry.drop.speciesId===filterId);
  const covered=new Set(rules.loot.drops.map(drop=>drop.speciesId)).size;
@@ -2644,6 +2655,10 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   chancePercent:numberFrom('adventure-drop-chance'),
   minQuantity:numberFrom('adventure-drop-min'),
   maxQuantity:numberFrom('adventure-drop-max')};
+ const duplicate=rules.loot.drops.some((entry,index)=>
+  index!==activeDropEditIndex&&entry.speciesId===speciesId&&entry.itemId===drop.itemId);
+ if(duplicate)throw new Error(
+  'Cette créature possède déjà une règle pour cet objet : clique Modifier sur la ligne existante.');
  const drops=activeDropEditIndex===null?[...rules.loot.drops,drop]:
    rules.loot.drops.map((value,index)=>index===activeDropEditIndex?drop:value);
  rules=normalizeAdventureRulesV1({...fromFields(),loot:{...rules.loot,drops}});

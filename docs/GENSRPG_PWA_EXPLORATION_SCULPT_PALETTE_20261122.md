@@ -26,6 +26,12 @@ Date : 22 novembre 2026.
 - Correction dans le **seul adaptateur de publication existant** `tools/capture_v2_pwa_release.mjs` : requête `skipWaiting()` au démarrage de l'installation et de nouveau après le préchargement, dans **le même** `event.waitUntil`. Aucun second worker, timer périodique, nouveau cache, ou modification des données utilisateur.
 - Garde statique renforcé `tests/gens_capture_v2_auto_update_20261107.test.mjs` ; maintien intégral du contrôle Chromium réel qui doit être GREEN avant fusion.
 
+## Cause du blocage de mise à jour — correction du cycle d’installation
+- Les essais Chromium successifs reproduisaient `waiting=installed` et l'ancien cache, y compris après deux appels à `skipWaiting()`.
+- Correction structurelle vérifiée sur la spécification Service Worker : **ne jamais attendre** `self.skipWaiting()` dans `install.waitUntil`, car sa promesse peut être résolue lors de l'activation, qui attend elle-même que l'installation se termine.
+- Désormais `install.waitUntil` attend **uniquement** le préchargement ; deux demandes d’activation non bloquantes sont faites avant et après celui-ci, et le message `SKIP_WAITING` reste lié à son événement.
+- Nouveau contrat unitaire : interdiction explicite de `await self.skipWaiting()` dans le cycle `install`. Contrôle Chromium installé conservé sans diminuer ses exigences.
+
 ## Gates avant GREEN
 1. Tests et garde SHA sur la PR du publisher ; `stage_capture_v2_pages_preview.mjs` doit produire le site avec les deux SHA épinglés.
 2. Tests Chromium du vrai chemin Capture V2 → Exploration, sauvegarde WorldDocument et retour ; contrôle du site assemblé sans duplication d’assets, budget Pages strict 900 Mio.

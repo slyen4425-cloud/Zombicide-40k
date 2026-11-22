@@ -76,7 +76,9 @@ export function installAdventureEconomyEditorV1({
      if(item.kind==='fragment'&&!Object.hasOwn(fragmentPricesDraft,item.id))
       fragmentPricesDraft[item.id]=100;
     }else selected.delete(item.id);
-    renderLibrary();
+    // Preserve checked nodes for keyboard/touch callers; only fragment price
+    // fields require rebuilding the card when their visibility changes.
+    if(item.kind==='fragment')renderLibrary();else renderLibraryCount();
    });
    label.append(checkbox);
    const imageUrl=item.kind==='fragment'?null:getItemIconUrl?.(item.iconKey);
@@ -115,7 +117,7 @@ export function installAdventureEconomyEditorV1({
   const available=new Set(catalog().map(x=>x.id));
   $('adventure-merchant-selected-count').textContent=
    [...selected].filter(id=>available.has(id)).length+
-   ' article(s) proposés parmi '+available.size+' disponibles';
+   ' objet(s) proposés parmi '+available.size;
  }
  function editMerchant(merchant){
   if(!isSimple(merchant)&&!document.defaultView.confirm(

@@ -281,3 +281,55 @@ test('real smartphone merchant: proximity iframe opens only canonical shop and b
   await new Promise(ok=>server.close(ok));
  }
 });
+
+test('merchant edits inside the saved NPC; official Capture commits the inventory and only merchantId is linked', 
+ {timeout:195000},async()=>{
+ await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
+ let browser;
+ try{
+  browser=await chromium.launch({headless:true});
+  const context=await browser.newContext({viewport:{width:932,height:430},
+   hasTouch:true,serviceWorkers:'block',locale:'fr-FR'});
+  await context.addInitScript(()=>{window.supabase={createClient:()=>({})}});
+  const page=await context.newPage(),errors=[];
+  page.on('pageerror',e=>errors.push(String(e)));
+  await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
+  await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',
+   {waitUntil:'domcontentloaded',timeout:60000});
+  await page.locator('button.gensRootModeCard.capture').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-universe-select="monster-invoc"]').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  assert.equal(await page.locator('[data-capture-v2-view="merchant"]').count(),0,
+   'standalone merchant navigation must be gone');
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="npc"]').tap();
+  const npc=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
+  await npc.locator('#npc-name').fill('Marchand intégré témoin');
+  await npc.locator('#npc-role').selectOption('merchant');
+  const art=await fs.readFile(path.join(site,'vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png'));
+  await npc.locator('#npc-image').setInputFiles({name:'marchand-test.png',mimeType:'image/png',buffer:art});
+  await npc.locator('#npc-save').tap();
+  await npc.locator('#npc-status:has-text("PNJ enregistré")').waitFor({timeout:60000});
+  const npcId=await npc.locator('#npc-saved').inputValue();
+  assert.match(npcId,/^npc\.user\./,'saving must keep the official minted NPC ID');
+  await npc.locator('#npc-merchant-config > summary').tap();
+  await npc.locator('#npc-merchant-configure').tap();
+  const merchant=npc.frameLocator('#npc-merchant-frame');
+  await merchant.locator('#adventure-merchant-name').waitFor({state:'visible',timeout:60000});
+  assert.equal(await merchant.locator('body').getAttribute('data-adventure-item-embed'),'npc');
+  assert.equal(await merchant.locator('#adventure-loot-global-rewards').isVisible(),false);
+  await merchant.locator('#adventure-merchant-library input[type="checkbox"]').first().check();
+  await merchant.locator('#adventure-merchant-add').click({noWaitAfter:true});
+  await npc.locator('#npc-status:has-text("Boutique enregistrée et liée")').waitFor({timeout:60000});
+  const merchantId=await npc.locator('#npc-merchant-choice').inputValue();
+  assert.match(merchantId,/^merchant-/,'the saved PNJ must receive the Capture merchantId');
+  await npc.locator('#npc-merchant-configure').tap();
+  await merchant.locator('#adventure-merchant-name').waitFor({state:'visible',timeout:60000});
+  await merchant.locator('#adventure-merchant-library input:checked').first().waitFor({timeout:40000});
+  assert.equal(await npc.locator('#npc-merchant-choice').inputValue(),merchantId,
+   'link survives reload, without creating a second shop');
+  assert.deepEqual(errors.filter(e=>/SyntaxError|Uncaught|Duplicate Capture/.test(e)),[]);
+ }finally{
+  await browser?.close();server.closeAllConnections();
+  await new Promise(ok=>server.close(ok));
+ }
+});

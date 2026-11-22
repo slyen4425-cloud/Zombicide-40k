@@ -161,7 +161,7 @@
       throw new Error("Capture authority must be same-origin and SHA-pinned");
     return url;
   }
-  function open(kind,{startView=null,returnTo=null}={}){
+  function open(kind,{startView=null,returnTo=null,npcId=null,merchantId=null,editNpcId=null}={}){
     if(!host)return false;
     if(!selectedUniverse){
       notice.textContent='Sélectionne d’abord un univers avant de jouer ou d’ouvrir ses éditeurs.';
@@ -169,7 +169,16 @@
     }
     const info=VIEWS[kind],url=urlFor(kind);
     if(!selectedUniverse.legacy)url.searchParams.set('universe',selectedUniverse.id);
-    if(kind==='merchant'&&returnTo==='npc')url.searchParams.set('returnTo','npc');
+    // Keep the selected PNJ and its linked merchant across editor iframe changes.
+    // Only IDs travel: Exploration never authors inventory, offers or prices.
+    const safeLinkedId=value=>typeof value==='string'&&
+      /^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(value);
+    if(kind==='merchant'&&returnTo==='npc'){
+      url.searchParams.set('returnTo','npc');
+      if(safeLinkedId(npcId))url.searchParams.set('npcId',npcId);
+      if(safeLinkedId(merchantId))url.searchParams.set('merchantId',merchantId);
+    }
+    if(kind==='npc'&&safeLinkedId(editNpcId))url.searchParams.set('edit',editNpcId);
     // Capture already owns one Adventure portfolio: present its native new/load
     // screens, never create a world or choose a saved session in the Shell.
     if(kind==='adventure'&&['new','load'].includes(startView))
@@ -240,7 +249,9 @@
     if(schema==="gensrpg.exploration.npc.merchant.configure.v1"){
       if(host&&frame&&current==="npc"&&
          event.origin===root.location.origin&&event.source===frame.contentWindow)
-        open("merchant",{returnTo:"npc"});
+        open("merchant",{
+          returnTo:"npc",npcId:event.data?.npcId,merchantId:event.data?.merchantId
+        });
       return;
     }
     const isMerchant=schema==="gensrpg.exploration.npc.merchant.catalog.request.v1";

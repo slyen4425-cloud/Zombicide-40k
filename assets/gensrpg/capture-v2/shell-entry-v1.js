@@ -10,6 +10,7 @@
     builder:{label:"Terrain et exploration 2,5D",path:"vendor/exploration-lab/sculpt-lab.html",family:"exploration"},
     world:{label:"Carte du monde",path:"vendor/exploration-lab/world-assembler.html",family:"exploration"},
     heroes:{label:"Héros et apparences",path:"vendor/exploration-lab/hero-editor.html",family:"exploration"},
+    npc:{label:"PNJ et dresseurs",path:"vendor/exploration-lab/npc-editor.html",family:"exploration"},
     // Four native entry points, ONE actual Lab Combat editor. Combat main
     // (SHA-pinned PR #156) owns ?tab= routing, native state and all rules.
     // Never click tabs from the consumer or implement a parallel editor.
@@ -27,7 +28,7 @@
   // Navigation is presentation-only: one destination per native owner,
   // grouped by the player's task rather than by implementation laboratory.
   const EDITOR_GROUPS=Object.freeze([
-    Object.freeze({id:"world",title:"Monde",items:Object.freeze(["world","builder"])}),
+    Object.freeze({id:"world",title:"Monde et PNJ",items:Object.freeze(["world","builder","npc"])}),
     Object.freeze({id:"heroes",title:"Héros",items:Object.freeze(["heroes"])}),
     Object.freeze({id:"combat",title:"Créatures et combat",items:Object.freeze(
       ["creature","skills","combat","bestiary","music"])}),
@@ -233,9 +234,17 @@
   // transactions and inventory are NEVER copied or owned by this Shell.
   root.addEventListener?.("message",async event=>{
     const schema=event.data?.schema;
+    // The NPC authoring UI delegates to the ONE Capture merchant editor.
+    // No merchant offers or inventory bytes cross the Exploration boundary.
+    if(schema==="gensrpg.exploration.npc.merchant.configure.v1"){
+      if(host&&frame&&current==="npc"&&
+         event.origin===root.location.origin&&event.source===frame.contentWindow)
+        open("merchant");
+      return;
+    }
     const isMerchant=schema==="gensrpg.exploration.npc.merchant.catalog.request.v1";
     const isReward=schema==="gensrpg.exploration.npc.reward.catalog.request.v1";
-    if(!host||(current!=="builder"&&current!=="world")||!frame||
+    if(!host||!["builder","world","npc"].includes(current)||!frame||
        event.source!==frame.contentWindow||event.origin!==root.location.origin||
        (!isMerchant&&!isReward))return;
     const requestId=event.data.requestId;
@@ -251,7 +260,7 @@
         items=catalog.items;currencyLabel=catalog.currencyLabel;
       }
     }catch(failure){error=String(failure?.message??failure).slice(0,180);}
-    if(frame?.contentWindow!==responder||(current!=="builder"&&current!=="world"))return;
+    if(frame?.contentWindow!==responder||!["builder","world","npc"].includes(current))return;
     responder.postMessage({
       schema:isMerchant?"gensrpg.capture.v2.npc.merchant.catalog.response.v1":
         "gensrpg.capture.v2.npc.reward.catalog.response.v1",

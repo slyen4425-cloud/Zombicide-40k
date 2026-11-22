@@ -150,6 +150,24 @@ test('exact official Lab main files and derived Showcase have one owner and veri
   const payload=JSON.parse(bytes.toString('utf8'));
   assert.equal(payload.authorSha,combatSha);
   assert.equal(payload.engineSha,combatSha);
+  const authors=new Map(payload.creatureTransfers.map(record=>[record.draft?.id,record]));
+  assert.equal(authors.size,payload.creatureTransfers.length,
+    'official encounter bundle must not duplicate Showcase identities');
+  for(const [id,element,icon] of [
+    ['Vipfer','steel','pack:capture:creature-vipfer-icon-01'],
+    ['polocendre','fire','pack:capture:creature-cheval-de-feu-icon-v1']
+  ]){
+    const creature=authors.get(id);
+    assert.ok(creature,'new author species missing in the actual shipped encounter bundle: '+id);
+    assert.deepEqual(creature.draft.elements,[element]);
+    assert.equal(creature.draft.capture.rarity,'mythic');
+    assert.equal(creature.draft.presentation.visual.icon?.assetId,icon);
+    assert.equal(creature.loadout.slots.length,5);
+  }
+  const horse=authors.get('polocendre').draft.presentation.visual;
+  assert.deepEqual(['movement','movementBack','rangedAttack','rangedAttackBack']
+    .map(key=>horse[key]?.frameCount),[6,7,5,5],
+    'PWA must ship the approved horse animation frame counts');
   const recorded=new Set();
   for(const record of delivery.transport){
     assert.match(record.path,/^vendor\/(combat-lab|exploration-lab)\//);

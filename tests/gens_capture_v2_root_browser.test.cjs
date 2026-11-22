@@ -80,15 +80,15 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await page.locator('#gensCaptureV2Root [data-capture-universe-select="monster-invoc"]').tap();
   assert.equal(await page.locator('#gensCaptureV2Root').getAttribute('data-menu'),'main');
   const buttons=page.locator('#gensCaptureV2Root [data-capture-v2-view]');
-  assert.equal(await buttons.count(),10,
-   'eight native Lab destinations including the real hero editor, one item editor and one game');
+  assert.equal(await buttons.count(),13,
+   'three Capture authoring views plus the native NPC, original labs and Jouer');
   assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="economy"] [data-capture-v2-view="items"]').count(),1,
    'one official item editor is grouped under Objets et économie');
   assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu > button').count(),3,
    'the game home exposes Create universe, Resume/manage and Éditeurs');
   assert.equal(await page.locator('#gensCaptureV2Root > nav [data-capture-v2-view="adventure"]').count(),1);
   assert.equal(await page.locator('#gensCaptureV2Root > nav [data-capture-v2-menu="universes"]').count(),1);
-  assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="world"] button').count(),2,
+  assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="world"] button').count(),3,
    'Carte du monde and native Terrain 2.5D live in the SAME menu group');
   assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').count(),0,
    'the old duplicate Exploration 2.5D entry must be gone');

@@ -154,6 +154,7 @@ function setCanonicalItemCategory(category){
   // Move the ORIGINAL authoring policy form; never clone its inputs/listeners.
   const settings=$('adventure-fragments-panel');
   if(settings.parentElement!==fragments)fragments.append(settings);
+  settings.open=true; // Fragment parameters are the actual active library tab, not a hidden accordion.
   const gallery=fragments.querySelector('[data-capture-fragment-cards]')??
    document.createElement('div');
   gallery.dataset.captureFragmentCards='true';

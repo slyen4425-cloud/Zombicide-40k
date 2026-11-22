@@ -112,7 +112,7 @@ assert.match(officialComposer,/createCaptureWorldLabWildTransactionV1/,'Hub must
 assert.match(officialComposer,/createCaptureLabHubBattleCommandV1/,'Hub must reuse the validated single command');
 assert.match(officialComposer,/delivery-manifest\.json/,'Hub must require the certified delivery manifest');
 assert.doesNotMatch(officialComposer,/window\.captureStartWildBattle\s*=|localStorage\./,'no second runtime or storage authority');
-assert.equal(staged.authoredSourceLabPin,'248f718ec924106d16999d59e5dc8310f8450180',
+assert.equal(staged.authoredSourceLabPin,'81ad362a401b7b2eb9faa811528aced9f2d6384a',
   'the approved official Combat Lab author source must be pinned to the certified Kitsune 8-frame release');
 assert.match(read('assets/gensrpg/capture/combat-lab-engine-loader-v1.mjs'),
   new RegExp(staged.authoredSourceLabPin),'one immutable Combat author SHA shared by the source loader and staged manifest');

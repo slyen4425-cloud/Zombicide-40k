@@ -3,9 +3,9 @@
   "combat": {
     "repository": "slyen4425-cloud/GenSrpg_labo_combat_dynamique",
     "ref": "main",
-    "sha": "c8a2c99ea96f06552f93c2470ea86846ae74aa2f",
+    "sha": "596846d863393a414a2d72e80f11b34cf8b5892e",
     "path": "vendor/combat-lab/",
-    "certifiedCiRun": 44970997400
+    "certifiedCiRun": 44999896492
   },
   "exploration": {
     "repository": "slyen4425-cloud/laboratoire_dynamique_exploration-",

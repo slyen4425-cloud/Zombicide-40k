@@ -766,6 +766,9 @@ body[data-capture-shell-wallpaper="true"]:not([data-adventure-playing="true"]) m
    One Capture AdventureRules editor mounted inside native Exploration;
    do not expose adventure-wide XP, victory coins, or a separate shop menu. */
 body[data-adventure-item-editor="true"] #adventure-loot-global-rewards{display:none!important}
+/* The configuration belongs to Bibliothèque → Fragments only. The game
+   preparation reads the SAME hidden fields but never renders a second form. */
+body:not([data-adventure-item-editor="true"]) #adventure-fragments-panel{display:none!important}
 body[data-adventure-item-editor="true"] #adventure-fragments-panel{display:none}
 body[data-adventure-item-editor="true"] #adventure-fragment-library-list #adventure-fragments-panel{display:block}
 body[data-adventure-item-editor="true"] #adventure-drop-filter,

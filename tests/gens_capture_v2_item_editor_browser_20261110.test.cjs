@@ -5,6 +5,7 @@ const http=require('node:http');
 const fs=require('node:fs/promises');
 const path=require('node:path');
 const {chromium}=require('playwright');
+const {PNG}=require('pngjs');
 
 const site=path.resolve(process.env.CAPTURE_V2_SITE||'_site');
 const types={'.html':'text/html;charset=utf-8','.js':'text/javascript;charset=utf-8',
@@ -313,7 +314,12 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   })),errors.slice(-5));
   await npc.locator('#npc-name').fill('Marchand intégré témoin');
   await npc.locator('#npc-role').selectOption('merchant');
-  const art=await fs.readFile(path.join(site,'vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png'));
+  // A genuine user-uploaded 64×64 PNG, not an invented Bestiary entry.
+  const png=new PNG({width:64,height:64});
+  for(let i=0;i<png.data.length;i+=4){
+   png.data[i]=64;png.data[i+1]=170;png.data[i+2]=140;png.data[i+3]=255;
+  }
+  const art=PNG.sync.write(png);
   await npc.locator('#npc-image').setInputFiles({name:'marchand-test.png',mimeType:'image/png',buffer:art});
   await npc.locator('#npc-save').tap();
   await page.waitForTimeout(1200);

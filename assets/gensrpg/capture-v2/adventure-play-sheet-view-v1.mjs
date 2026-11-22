@@ -97,7 +97,8 @@ export function renderAdventureSheetViewV1({
  host,snapshot,tab,portraitUrl=null,heroVisual=null,collection=null,
  resolveSpeciesPortrait=null,onOpenOwnedCreature=null,onAllocate=null,
  onSelectCreature=null,onMoveCreature=null,onMakeActive=null,
- onSummonFragment=null,onUseFragmentXp=null,resolveFragmentIcon=null,resolveItemIcon=null
+ onSummonFragment=null,onUseFragmentXp=null,onUseItem=null,
+ resolveFragmentIcon=null,resolveItemIcon=null
 }={}){
  if(!host||!snapshot)throw new TypeError('A valid active Capture sheet and host are required');
  const content=[];
@@ -191,6 +192,28 @@ export function renderAdventureSheetViewV1({
       image.alt='Icône de '+item.name;image.src=imageUrl;image.loading='lazy';
       row.prepend(image);
      }
+    }
+    if(item.useEffect&&onUseItem){
+     const revive=item.useEffect.type==='revive';
+     const targets=snapshot.team.filter(member=>revive?member.hp===0:
+       member.hp>0&&Number.isFinite(member.maxHp)&&member.hp<member.maxHp);
+     const controls=node('div','sheet-item-use');
+     const targetLabel=node('label','','Utiliser sur');
+     const select=node('select','sheet-item-target');
+     select.setAttribute('aria-label','Cible pour '+item.name);
+     for(const target of targets){
+      const option=node('option','',target.name+' · '+target.hp+
+        ' / '+target.maxHp+' PV');
+      option.value=target.instanceId;select.append(option);
+     }
+     targetLabel.append(select);controls.append(targetLabel);
+     const use=node('button','sheet-item-apply','Utiliser');
+     use.type='button';use.disabled=!targets.length;
+     use.addEventListener('click',()=>onUseItem(item.id,select.value));
+     controls.append(use);
+     if(!targets.length)controls.append(node('small','',
+       revive?'Aucune créature KO.':'Aucune créature blessée disponible.'));
+     row.append(controls);
     }
     if(item.fragment){
      const fragment=item.fragment;

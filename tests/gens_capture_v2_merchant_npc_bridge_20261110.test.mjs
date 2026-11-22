@@ -64,7 +64,7 @@ test('Shell transports catalog by name, never stores merchant inventory or shows
  assert.match(shell,/availableAdventureMerchantsForNpcV1/);
  assert.match(shell,/event.source!==frame.contentWindow/);
  assert.match(shell,/event.origin!==root.location.origin/);
- assert.match(shell,/current!=="builder"&&current!=="world"/,
+ assert.ok(shell.includes('!["builder","world","npc"].includes(current)'),
   'World Assembler navigates into Sculpt within the same native iframe');
  assert.doesNotMatch(shell,/merchant\.id.*textContent|merchant\.id.*innerText/);
 });

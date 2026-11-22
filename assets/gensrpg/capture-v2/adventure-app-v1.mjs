@@ -879,7 +879,7 @@ function renderItemRules(){
   ?'Éclat de '+selectedCard.name+' · '+
    (override?.dropChancePercent??fragment.dropChancePercent)+' % · '+
    (override?.dropMin??fragment.dropMin)+'–'+(override?.dropMax??fragment.dropMax)+
-   ' fragment(s)'+(fragment.enabled?'':' · désactivés pour cette aventure')
+   ' fragment(s)'+(rules.fragmentRecruitment?.enabled?'':' · désactivés pour cette aventure')
   :'Sélectionne une créature.');
  const visibleDrops=rules.loot.drops.map((drop,index)=>({drop,index}))
   .filter(entry=>!filterId||entry.drop.speciesId===filterId);

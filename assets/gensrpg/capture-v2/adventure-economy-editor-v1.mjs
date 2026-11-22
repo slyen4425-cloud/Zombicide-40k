@@ -5,7 +5,7 @@ import {DEFAULT_ADVENTURE_ECONOMY_V1,adventureMerchantPriceV1}
  from './adventure-economy-v1.mjs';
 
 export function installAdventureEconomyEditorV1({
- document,getRules,commitEconomy,notify,getItemIconUrl
+ document,getRules,commitEconomy,notify,getItemIconUrl,onMerchantCommitted
 }){
  const $=id=>document.getElementById(id);
  const option=(value,label)=>{const node=document.createElement('option');
@@ -151,7 +151,8 @@ export function installAdventureEconomyEditorV1({
    ?current().merchants.map(m=>m.id===editedId?merchant:m)
    :[...current().merchants,merchant];
   commitEconomy({...current(),merchants});clearMerchant();render();
-  notify('Marchand configuré. Enregistre les paramètres pour conserver ses règles.');
+  if(onMerchantCommitted)onMerchantCommitted(merchant.id);
+  else notify('Marchand configuré. Enregistre les paramètres pour conserver ses règles.');
  }));
  $('adventure-merchant-cancel').addEventListener('click',clearMerchant);
  $('adventure-merchant-search').addEventListener('input',renderLibrary);

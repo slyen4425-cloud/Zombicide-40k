@@ -117,7 +117,7 @@ const linkedMerchantId=(returnToNpc||isEmbeddedNpcMerchant)
  ?itemEditorParams.get('merchantId'):null;
 let libraryCategory='usable';
 let activeItemEditId=null;
-let activeDropEditIndex=null;
+let activeDropEditIndex=null,autoFocusedDropIndex=null;
 let economyEditor=null;
 let itemTemplates=Object.freeze({schema:'gensrpg-capture-item-templates-v1',version:1,items:Object.freeze([])});
 const availableItemVisuals=()=>[...itemTemplates.items,...(itemTemplates.icons??[])];
@@ -699,7 +699,7 @@ function editItem(itemId){
  $('adventure-item-name').focus();
 }
 function resetDropEditor(){
- activeDropEditIndex=null;
+ activeDropEditIndex=null;autoFocusedDropIndex=null;
  $('adventure-drop-add').textContent='Ajouter une règle de drop';
  $('adventure-drop-edit-cancel').hidden=true;
 }
@@ -714,7 +714,7 @@ function focusSelectedMonsterDrop(){
  const index=rules.loot.drops.findIndex(drop=>drop.speciesId===speciesId);
  if(index>=0){
   const drop=rules.loot.drops[index];
-  activeDropEditIndex=index;
+  activeDropEditIndex=index;autoFocusedDropIndex=index;
   $('adventure-drop-item').value=drop.itemId;
   $('adventure-drop-chance').value=String(drop.chancePercent);
   $('adventure-drop-min').value=String(drop.minQuantity);
@@ -735,7 +735,7 @@ function focusSelectedMonsterDrop(){
 function editDropRule(index){
  const drop=rules.loot.drops[index];
  if(!drop)throw new Error('Règle de drop indisponible');
- activeDropEditIndex=index;
+ activeDropEditIndex=index;autoFocusedDropIndex=null;
  $('adventure-drop-species').value=drop.speciesId;
  $('adventure-drop-filter').value=drop.speciesId;
  $('adventure-drop-item').value=drop.itemId;
@@ -2698,6 +2698,13 @@ $('adventure-item-defaults').addEventListener('click',guarded(()=>{
   'Drops personnalisés et fragments conservés. Enregistre les paramètres.');
 }));
 $('adventure-drop-edit-cancel').addEventListener('click',resetDropEditor);
+$('adventure-drop-item').addEventListener('change',()=>{
+ // A different choice from the auto-loaded primary means ADD an extra drop.
+ // Explicit "Modifier" still allows replacing the item's ID on that row.
+ if(activeDropEditIndex!==null&&autoFocusedDropIndex===activeDropEditIndex&&
+    rules.loot.drops[activeDropEditIndex]?.itemId!==$('adventure-drop-item').value)
+  resetDropEditor();
+});
 $('adventure-drop-new').addEventListener('click',()=>{
  resetDropEditor();
  const speciesId=$('adventure-drop-species').value;

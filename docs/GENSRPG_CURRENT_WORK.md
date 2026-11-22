@@ -1,3 +1,10 @@
+## 2026-11-22 — Source Capture V2 : marchands par catégories et drops par créature (C2)
+- Base immuable PWA publiée `c7861946bbb29d1a70adee5f468177011915c38f`, checkpoint `checkpoint/gensrpg-start-merchant-drop-editor-20261122`, branche `work/gensrpg-merchant-drop-editor-20261122`.
+- Propriétaires inchangés : `AdventureRules.loot.items` (objets), `fragmentRecruitment` (fragments), `economy.merchants` (offres), `AdventureSession.inventory` (soldes), `Explorer` (PNJ).
+- Périmètre : sélection de Ressources / Utilisables / Fragments par ID de l'unique bibliothèque, prix de base explicite des fragments dans les offres marchandes existantes ; sélection d'un monstre -> règle de drop en cours et paramètres de fragments canoniques automatiquement affichés ; ajout d'autres objets possible.
+- Invariants : aucune deuxième bibliothèque, aucun nouveau stockage, aucune altération de l'identité des espèces, du Combat/Exploration/Donjon/Survie, des sauvegardes, du root PWA ni de son service-worker. Les anciennes boutiques `offers` restent valides et non converties automatiquement.
+- Contrôles : tests économie/fragments, compatibilité des boutiques existantes, sentinelles éditeur (réel navigateur PC/mobile), preuve HTTPS d'un SHA source puis publisher spécifique PWA. État NON GREEN avant CI + provenance Pages.
+
 ## 2026-11-22 — Source Capture : correction PC Réserves adverses (Labo Combat main)
 - Source `work/capture-v2-audit567-source-20261121@bb11e127c11c8a69a66e518110db5d38d8f3d344`, checkpoint `checkpoint/gensrpg-before-pc-enemy-reserve-capture-20261122`, lot isolé `work/gensrpg-pc-enemy-reserve-capture-20261122`.
 - Nouveau pin Combat officiel `main@d7eeae0fdb13454cf5a9ae18a0676e6784e425e5` (PR Combat #377), CI main `45008484200` à valider SUCCESS et Pages GREEN avant fusion. Corrige le chevauchement de l'onglet Réserves adverses et de sa liste avec les noms ennemis sur PC, tests réels 1v1/2v2 et parité mobile ; les cinq capacités Polocendre déjà publiées restent inchangées.

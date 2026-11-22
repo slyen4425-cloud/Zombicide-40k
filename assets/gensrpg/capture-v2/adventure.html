@@ -300,6 +300,10 @@
     <img id="adventure-drop-focused-portrait" alt="" hidden>
     <output id="adventure-drop-focused-description">Choisis une créature pour voir ses ressources.</output>
    </div>
+   <div id="adventure-drop-fragment-settings" class="adventure-options" aria-label="Fragments de la créature sélectionnée">
+    <h3>Fragment associé</h3>
+    <output id="adventure-drop-fragment-summary" aria-live="polite">Sélectionne une créature pour voir son fragment.</output>
+   </div>
    <div class="fields">
     <label>Créature publiée <select id="adventure-drop-species" disabled></select></label>
     <label>Objet <select id="adventure-drop-item"></select></label>
@@ -309,6 +313,7 @@
    </div>
    <div class="actions">
     <button type="button" id="adventure-drop-add">Ajouter une règle de drop</button>
+    <button type="button" id="adventure-drop-new">Ajouter un autre objet</button>
     <button type="button" id="adventure-drop-edit-cancel" hidden>Annuler la modification</button>
    </div>
    <div id="adventure-drops" class="rules-list"></div>
@@ -327,6 +332,14 @@
     </div>
     <details class="adventure-options">
      <summary>Objets proposés — sélection depuis la bibliothèque</summary>
+     <label>Catégorie de la bibliothèque
+      <select id="adventure-merchant-category">
+       <option value="resource">Objets et ressources</option>
+       <option value="usable">Objets utilisables</option>
+       <option value="fragment">Fragments de créatures</option>
+      </select>
+     </label>
+     <p class="hint">Les fragments proviennent du Bestiaire officiel. Leur prix de base se règle ici ; leur drop et leur invocation restent dans Bibliothèque → Fragments.</p>
      <div class="actions">
       <input id="adventure-merchant-search" type="search" placeholder="Rechercher dans la bibliothèque…" aria-label="Rechercher un objet à proposer">
       <button type="button" id="adventure-merchant-all">Tout cocher</button>

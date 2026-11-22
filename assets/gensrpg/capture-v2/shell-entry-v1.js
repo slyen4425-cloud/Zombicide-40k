@@ -161,7 +161,7 @@
       throw new Error("Capture authority must be same-origin and SHA-pinned");
     return url;
   }
-  function open(kind,{startView=null}={}){
+  function open(kind,{startView=null,returnTo=null}={}){
     if(!host)return false;
     if(!selectedUniverse){
       notice.textContent='Sélectionne d’abord un univers avant de jouer ou d’ouvrir ses éditeurs.';
@@ -169,6 +169,7 @@
     }
     const info=VIEWS[kind],url=urlFor(kind);
     if(!selectedUniverse.legacy)url.searchParams.set('universe',selectedUniverse.id);
+    if(kind==='merchant'&&returnTo==='npc')url.searchParams.set('returnTo','npc');
     // Capture already owns one Adventure portfolio: present its native new/load
     // screens, never create a world or choose a saved session in the Shell.
     if(kind==='adventure'&&['new','load'].includes(startView))
@@ -239,7 +240,7 @@
     if(schema==="gensrpg.exploration.npc.merchant.configure.v1"){
       if(host&&frame&&current==="npc"&&
          event.origin===root.location.origin&&event.source===frame.contentWindow)
-        open("merchant");
+        open("merchant",{returnTo:"npc"});
       return;
     }
     const isMerchant=schema==="gensrpg.exploration.npc.merchant.catalog.request.v1";
@@ -254,9 +255,10 @@
     try{
       const owner=await import(new URL(
         "assets/gensrpg/capture-v2/adventure-merchant-catalog-bridge-v1.mjs",base));
-      if(isMerchant)merchants=await owner.availableAdventureMerchantsForNpcV1();
+      const options={universeId:selectedUniverse?.id??'monster-invoc'};
+      if(isMerchant)merchants=await owner.availableAdventureMerchantsForNpcV1(options);
       else{
-        const catalog=await owner.availableAdventureItemsForNpcRewardV1();
+        const catalog=await owner.availableAdventureItemsForNpcRewardV1(options);
         items=catalog.items;currencyLabel=catalog.currencyLabel;
       }
     }catch(failure){error=String(failure?.message??failure).slice(0,180);}

@@ -8,6 +8,8 @@ import {DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,
  from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 import {createAdventureRulesDraftStoreV1}
  from '../assets/gensrpg/capture-v2/adventure-rules-draft-v1.mjs';
+import {createCaptureUniverseAdventureStorageV1}
+ from '../assets/gensrpg/capture-v2/universe-adventure-storage-v1.mjs';
 
 const source=p=>readFileSync(new URL('../assets/gensrpg/capture-v2/'+p,import.meta.url),'utf8');
 const storage=()=>{
@@ -64,7 +66,7 @@ test('Shell transports catalog by name, never stores merchant inventory or shows
  assert.match(shell,/availableAdventureMerchantsForNpcV1/);
  assert.match(shell,/event.source!==frame.contentWindow/);
  assert.match(shell,/event.origin!==root.location.origin/);
- assert.match(shell,/current!=="builder"&&current!=="world"/,
+ assert.ok(shell.includes('!["builder","world","npc"].includes(current)'),
   'World Assembler navigates into Sculpt within the same native iframe');
  assert.doesNotMatch(shell,/merchant\.id.*textContent|merchant\.id.*innerText/);
 });
@@ -85,4 +87,24 @@ test('in-game shop listens only to its active Explorer iframe and uses canonical
  assert.match(shop,/hasPendingCombat\(openedSession\)/);
  assert.match(app,/installAdventureMerchantPlayV1/);
  assert.doesNotMatch(shop,/localStorage|sessionStorage/);
+});
+
+test('read-only merchant and item catalogs stay isolated per independent Capture universe',async()=>{
+ const base=storage(),alpha='unv_aaaaaaaa',beta='unv_bbbbbbbb';
+ const a=createCaptureUniverseAdventureStorageV1(base,alpha);
+ const b=createCaptureUniverseAdventureStorageV1(base,beta);
+ const owner=createAdventureRulesDraftStoreV1({storage:a,coreStorage});
+ owner.save(catalog);
+ assert.deepEqual(await availableAdventureMerchantsForNpcV1({
+  storage:base,coreStorage,universeId:alpha}),
+  [{id:'merchant-forest',name:'Marchand des bois'},
+   {id:'merchant-rare',name:'Marchand rare'}]);
+ assert.deepEqual(await availableAdventureMerchantsForNpcV1({
+  storage:base,coreStorage,universeId:beta}),[]);
+ assert.deepEqual(await availableAdventureMerchantsForNpcV1({
+  storage:base,coreStorage}),[]);
+ assert.equal(createAdventureRulesDraftStoreV1({storage:b,coreStorage}).load(),null);
+ const shell=source('shell-entry-v1.js');
+ assert.ok(shell.includes("returnTo:\"npc\""));
+ assert.ok(shell.includes("universeId:selectedUniverse?.id"));
 });

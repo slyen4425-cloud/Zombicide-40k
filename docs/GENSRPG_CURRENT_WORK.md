@@ -1,3 +1,11 @@
+## 2026-11-22 — PWA Capture V2 : marchands et drops automatiquement reliés par créature (C2)
+- Base Publisher `main@712a7698cb061bc76038690cbb16eebb918cb7cc`, checkpoint `checkpoint/gensrpg-start-merchant-drops-pwa-20261122`, branche `work/gensrpg-merchant-drops-pwa-20261122`.
+- PR source Capture V2 #612, fusion certifiée `d3be0856b4abcc24b109fc90a4ece88d81f6987d` ; 7 workflows de PR SUCCESS au SHA tête `6d563afe877e7138cc56da46333fe4561c1b7e79`.
+- Publication par un seul pin immuable `tools/capture_v2_pages_preview_pin.json`; nouveau sélecteur catégories dans boutique PNJ, fragments virtuels officiels, drops automatiquement sélectionnés avec valeurs par créature, éditeur fragment existant déplacé sans copie.
+- Pins de Combat `main@34c17c15f4ca8b457a94e49fa2f3fcfb8ca93ca0`, Exploration `main@1553c0e8f9bab89f5c1badfa64c5d41fb75cff73`, global-assets inchangés. Pas d'édition du Shell root, service-worker PWA root, inventaire, historique ni de publication de bibliothèque parallèle.
+- Sentinelle physique : fichiers Capture réellement assemblés, contrôles originaux uniques, présence du modèle fragmentPrices, non-fuite hors preview ; tests navigateur, budget et HTTPS exigés avant annonce GREEN.
+- État : en attente CI publisher et preuve GitHub Pages du commit fusionné.
+
 ## 2026-11-22 — Publisher PWA : correction PC réserves ennemies + fond complet en portrait
 - Source Capture V2 approuvée via #597 (portrait/paysage sans recadrage) et #598 (Combat PC Réserves adverses hors noms ennemis), staging immuable `work/capture-v2-audit567-source-20261121@a87997adeda0818304e09c97bace55f2016a6b21`.
 - Moteur unique Combat `main@d7eeae0fdb13454cf5a9ae18a0676e6784e425e5` (PR #377), CI `45008484200` GREEN après reprise d'une sentinelle intermittente ; Pages Combat main GREEN. Tous les tests réels du correctif HUD ont réussi.

@@ -120,3 +120,19 @@ test('one native editor with three views and no extra item/merchant registry',()
  assert.match(shell,/label:"Drops \/ Ressources"/);
  assert.doesNotMatch(js,/window\.captureItemCatalog141/);
 });
+
+test('NPC shop deep link preserves the selected saved PNJ without duplicating merchant ownership',()=>{
+ const root=new URL('../assets/gensrpg/capture-v2/',import.meta.url);
+ const shell=readFileSync(new URL('shell-entry-v1.js',root),'utf8');
+ const app=readFileSync(new URL('adventure-app-v1.mjs',root),'utf8');
+ const editor=readFileSync(new URL('adventure-economy-editor-v1.mjs',root),'utf8');
+ assert.match(shell,/merchantId:event\.data\?\.merchantId/);
+ assert.match(shell,/npcId:event\.data\?\.npcId/);
+ assert.match(shell,/url\.searchParams\.set\('npcId',npcId\)/);
+ assert.match(shell,/url\.searchParams\.set\('merchantId',merchantId\)/);
+ assert.match(shell,/url\.searchParams\.set\('edit',editNpcId\)/);
+ assert.match(app,/const npcReturnId=returnToNpc/);
+ assert.match(app,/economyEditor\?\.focusMerchant\(linkedMerchantId\)/);
+ assert.match(editor,/function focusMerchant\(merchantId\)/);
+ assert.doesNotMatch(shell,/merchantOffers|merchantStocks|saleValue:/);
+});

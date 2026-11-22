@@ -308,14 +308,6 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   // interaction; otherwise that refresh intentionally clears unsaved fields.
   await npc.locator('#npc-count:has-text("PNJ enregistrés")')
    .waitFor({state:'visible',timeout:45000});
-  console.log('NPC_DIRECT_FRAME_DIAG',JSON.stringify(await page.evaluate(()=>{
-   const frame=document.querySelector('#gensCaptureV2Root iframe');
-   return {src:frame?.src,status:window.GensCaptureV2?.status?.(),
-    title:frame?.contentDocument?.title,
-    body:frame?.contentDocument?.body?.textContent?.slice(0,240),
-    ready:frame?.contentDocument?.readyState,
-    errors:window.__npcDiagnostics??null};
-  })),errors.slice(-5));
   await npc.locator('#npc-name').fill('Marchand intégré témoin');
   await npc.locator('#npc-role').selectOption('merchant');
   // A genuine user-uploaded 64×64 PNG, not an invented Bestiary entry.
@@ -326,15 +318,6 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   const art=PNG.sync.write(png);
   await npc.locator('#npc-image').setInputFiles({name:'marchand-test.png',mimeType:'image/png',buffer:art});
   await npc.locator('#npc-save').tap();
-  await page.waitForTimeout(1200);
-  console.log('NPC_SAVE_DIAG',JSON.stringify({
-   status:await npc.locator('#npc-status').textContent(),
-   error:await npc.locator('#npc-status').getAttribute('data-error'),
-   saveDisabled:await npc.locator('#npc-save').isDisabled(),
-   name:await npc.locator('#npc-name').inputValue(),
-   chosen:await npc.locator('#npc-saved').inputValue(),
-   problems:errors.slice(-5)
-  }));
   await npc.locator('#npc-status:has-text("PNJ enregistré")').waitFor({timeout:15000});
   const npcId=await npc.locator('#npc-saved').inputValue();
   assert.match(npcId,/^npc\.user\./,'saving must keep the official minted NPC ID');

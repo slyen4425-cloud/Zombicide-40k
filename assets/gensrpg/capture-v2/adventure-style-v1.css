@@ -723,9 +723,12 @@ body[data-capture-shell-wallpaper="true"]:not([data-adventure-playing="true"]) m
  background-image:linear-gradient(
   rgba(6,18,25,var(--capture-shell-wallpaper-shade,.55)),
   rgba(6,18,25,var(--capture-shell-wallpaper-shade,.55))),
+  var(--capture-shell-wallpaper),
   var(--capture-shell-wallpaper);
- background-position:center,center;
- background-size:cover,cover;
- background-repeat:no-repeat;
- background-attachment:fixed,fixed;
+ /* Keep the SAME complete image in portrait/landscape with a cover
+    background behind it; do not crop the foreground in the preparation menu. */
+ background-position:center,center,center;
+ background-size:cover,contain,cover;
+ background-repeat:no-repeat,no-repeat,no-repeat;
+ background-attachment:fixed,fixed,fixed;
 }

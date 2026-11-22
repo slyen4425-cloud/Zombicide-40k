@@ -304,6 +304,10 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
    'standalone merchant navigation must be gone');
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="npc"]').tap();
   const npc=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
+  // IndexedDB NPC catalog must finish its initial async refresh BEFORE form
+  // interaction; otherwise that refresh intentionally clears unsaved fields.
+  await npc.locator('#npc-count:has-text("PNJ enregistrés")')
+   .waitFor({state:'visible',timeout:45000});
   console.log('NPC_DIRECT_FRAME_DIAG',JSON.stringify(await page.evaluate(()=>{
    const frame=document.querySelector('#gensCaptureV2Root iframe');
    return {src:frame?.src,status:window.GensCaptureV2?.status?.(),

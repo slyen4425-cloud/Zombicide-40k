@@ -1,0 +1,42 @@
+# PWA Genesis RPG — raccorder l’éditeur Exploration 2,5D (#521)
+
+Date : 22 novembre 2026.
+
+## Périmètre et checkpoint
+- Publication cible : PWA principale GenSRPG (module Monster InvoC / Capture V2), via l’unique `.github/workflows/main.yml`.
+- Base de la PWA `main` : `acf2c3fdca108e19f6c7e4375ed3ace9be9f36c5`.
+- Branche du lot : `work/pwa-exploration-sculpt521-publisher-20261122`; checkpoint conservé : `checkpoint/gensrpg-pwa-before-exploration-sculpt521-20261122`.
+- Capture V2 source publiée avant : `27eff9c0f1632a3271ec85e5d4f6e9a841dc49cf`.
+- Capture V2 source candidate : `58c16831ddd500e534bfb0e673b538cf8072b3d7`, modifications limitées au manifeste officiel `source-pins-v1.json` et à son test de provenance strict.
+- Exploration source officielle : `a8d9f8bd61bee7a14ab4e71e6cedc85250457f5c` (CI main `45050483870` SUCCESS ; déploiement et HTTPS `45050483881` SUCCESS).
+- Antécédent Exploration Capture V2 : `77bebb83ff176f49edff7ae49c03ba48c28202ca` ; ascendance `ahead`, sans divergence.
+- Combat : `34c17c15f4ca8b457a94e49fa2f3fcfb8ca93ca0` **inchangé** (CI `45016265619` SUCCESS).
+- Assets visuels, prix, sauvegardes, moteur Combat, liaison multijoueur, navigation racine et service-worker source **inchangés**.
+
+## Correction
+- Un seul manifeste immuable Capture V2 sélectionne les laboratoires ; aucun moteur ou atlas recopié manuellement.
+- Le test historique de la source Capture V2 est repointé sur le même SHA Exploration certifié et sur le run CI exact, sans alléger ses vérifications audio.
+- Mise à jour de `tools/capture_v2_pages_preview_pin.json` : uniquement le SHA du candidat officiel.
+- Extension bornée du garde de certification natif `tools/stage_capture_v2_pages_preview.mjs` : le nouveau SHA Exploration est autorisé **si et seulement si** le renderer garde le Git blob officiel `6c101756bdf9c58a9ae8cf3fe104e49575145748` et les invariants déjà testés.
+- Objectif de l’intégration : familles personnalisées libres (sol/route/eau), variantes d’herbe, atelier 2,5D repliable sans commandes en double ; aucun changement du runtime de jeu en dehors de la source officielle Exploration.
+
+## Régression PWA révélée par les tests navigateur
+- Sur la PR, le test réel de mise à jour de Capture V2 a échoué deux fois : le cache neuf existait mais le nouveau worker restait `installed/waiting`, avec l’ancien cache encore présent.
+- Même code du service worker source, adaptateur et test que dans la PR #617 (GREEN) : la régression traduit une course d’activation, sans rapport avec le SHA Explore ni avec les fichiers de jeu.
+- Correction dans le **seul adaptateur de publication existant** `tools/capture_v2_pwa_release.mjs` : requête `skipWaiting()` au démarrage de l'installation et de nouveau après le préchargement, dans **le même** `event.waitUntil`. Aucun second worker, timer périodique, nouveau cache, ou modification des données utilisateur.
+- Garde statique renforcé `tests/gens_capture_v2_auto_update_20261107.test.mjs` ; maintien intégral du contrôle Chromium réel qui doit être GREEN avant fusion.
+
+## Cause du blocage de mise à jour — correction du cycle d’installation
+- Les essais Chromium successifs reproduisaient `waiting=installed` et l'ancien cache, y compris après deux appels à `skipWaiting()`.
+- Correction structurelle vérifiée sur la spécification Service Worker : **ne jamais attendre** `self.skipWaiting()` dans `install.waitUntil`, car sa promesse peut être résolue lors de l'activation, qui attend elle-même que l'installation se termine.
+- Désormais `install.waitUntil` attend **uniquement** le préchargement ; deux demandes d’activation non bloquantes sont faites avant et après celui-ci, et le message `SKIP_WAITING` reste lié à son événement.
+- Nouveau contrat unitaire : interdiction explicite de `await self.skipWaiting()` dans le cycle `install`. Contrôle Chromium installé conservé sans diminuer ses exigences.
+
+## Gates avant GREEN
+1. Tests et garde SHA sur la PR du publisher ; `stage_capture_v2_pages_preview.mjs` doit produire le site avec les deux SHA épinglés.
+2. Tests Chromium du vrai chemin Capture V2 → Exploration, sauvegarde WorldDocument et retour ; contrôle du site assemblé sans duplication d’assets, budget Pages strict 900 Mio.
+3. Fusion sur `main` seulement après CI réussie ; publication par workflow unique, contrôle du `publisherCommit` et des SHA Exploration/Combat dans la provenance publique HTTPS.
+4. Pixel / PWA Android installée : validation manuelle de l’Atelier et des familles après mise à jour, sans effacer les sauvegardes.
+
+## État
+Candidat isolé, non publié tant que les gates GitHub main + HTTPS ne sont pas acquises. Les SHA antérieurs restent conservés par l’historique Git pour retour arrière.

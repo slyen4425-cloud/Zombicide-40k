@@ -79,10 +79,18 @@ test('preview worker requests skipWaiting before precache and holds activation i
  const worker=releasePreviewPwaForCommit(originalWorker,sample,a).worker;
  const install=worker.match(/self\.addEventListener\("install",event=>\{([^\n]+)\}\);/)?.[1];
  assert.ok(install,'the actual source has one installed worker authority');
- assert.match(install,/event\.waitUntil\(\(async\(\)=>\{await self\.skipWaiting\(\);const cache=await caches\.open\(CACHE_NAME\)/);
- assert.ok(install.indexOf('await self.skipWaiting()')<
-  install.indexOf('for(const file of CORE_FILES)'),
-  'activation request must not be blocked by the 140-resource precache');
+ assert.match(install,/self\.skipWaiting\(\);event\.waitUntil\(\(async\(\)=>\{const cache=await caches\.open\(CACHE_NAME\)/,
+  'request activation before precache without awaiting its activation promise');
+ assert.match(install,/for\(const file of CORE_FILES\)await cacheFresh\(cache,file\);self\.skipWaiting\(\)/,
+  'repeat a non-blocking activation request after preloading');
+ assert.equal((install.match(/self\.skipWaiting\(\)/g)||[]).length,2,
+  'exactly two non-blocking activation requests, one canonical worker');
+ assert.doesNotMatch(install,/await self\.skipWaiting\(\)/,
+  'install.waitUntil MUST NOT await activation: the two lifecycles can deadlock');
+ assert.match(worker,/self\.addEventListener\("message",event=>\{if\(event\.data&&event\.data\.type==="SKIP_WAITING"\)event\.waitUntil\(self\.skipWaiting\(\)\)\}\)/,
+  'waiting-worker activation must survive termination of the message event');
+ assert.doesNotMatch(worker,/type==="SKIP_WAITING"\)self\.skipWaiting\(\)/,
+  'an unbound skipWaiting promise may be lost while a worker is still waiting');
  assert.match(worker,/name\.startsWith\("gensrpg-preview-capture-v2-"\)/);
  assert.doesNotMatch(worker,/name\.startsWith\("gensrpg-cache-"\)&&name!==CACHE_NAME/);
 });

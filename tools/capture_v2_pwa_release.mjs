@@ -18,16 +18,14 @@ export function releasePreviewPwaForCommit(sourceWorker,sourceHtml,releaseSha){
     .replace(rootCleanup,'name.startsWith("gensrpg-preview-capture-v2-")&&name!==CACHE_NAME');
   if(scoped===sourceWorker||scoped.includes(rootCleanup))
     throw Error('Preview cache isolation failed');
-  // The pinned worker called skipWaiting() without binding its promise
-  // to the install lifetime. In mobile Chromium a newly installed release
-  // could remain WAITING behind its predecessor after reopening the app.
-  // Request activation at the START of installation, not only after a
-  // long, sequential precache. The previous release could finish install and
-  // remain WAITING behind the old PWA on Android despite the new cache being
-  // present. Bind skipWaiting to waitUntil so the installation lifecycle owns
-  // its promise, while letting cache population finish before install settles.
+  // The early skipWaiting() call must NOT be awaited by install.waitUntil:
+  // Chromium may resolve that promise only after activation, while activation
+  // itself waits for the installation lifetime to finish. Awaiting it creates
+  // a cyclic lifecycle dependency and leaves the update permanently waiting.
+  // Keep ONLY precache in waitUntil, request activation non-blockingly before
+  // and after precache (same worker / cache owner, no second authority).
   const oldInstall='self.addEventListener("install",event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE_NAME).then(async cache=>{for(const file of CORE_FILES)await cacheFresh(cache,file)}))});';
-  const activatedInstall='self.addEventListener("install",event=>{event.waitUntil((async()=>{await self.skipWaiting();const cache=await caches.open(CACHE_NAME);for(const file of CORE_FILES)await cacheFresh(cache,file)})())});';
+  const activatedInstall='self.addEventListener("install",event=>{self.skipWaiting();event.waitUntil((async()=>{const cache=await caches.open(CACHE_NAME);for(const file of CORE_FILES)await cacheFresh(cache,file);self.skipWaiting()})())});';
   if(scoped.split(oldInstall).length!==2)
     throw Error('Unknown preview install lifecycle; fail closed');
   const lifecycleWorker=scoped.replace(oldInstall,activatedInstall);
@@ -40,7 +38,17 @@ export function releasePreviewPwaForCommit(sourceWorker,sourceHtml,releaseSha){
   if(lifecycleWorker.split(rawWrite).length!==4)
     throw Error('Unknown service worker fetch cache ownership; refuse blind patch');
   const safeWrite='if((await caches.keys()).includes(CACHE_NAME)){'+rawWrite+'}';
-  const worker=lifecycleWorker.replaceAll(rawWrite,safeWrite);
+  // The installed/waiting worker may be terminated immediately after a
+  // SKIP_WAITING message. Bind its activation promise to the ExtendableMessage
+  // event lifetime, as for install. Otherwise Chromium can retain "waiting"
+  // even though the new release's cache was fully populated.
+  // This is an event-lifetime fix in the SAME canonical ServiceWorker.
+  const oldMessage='self.addEventListener("message",event=>{if(event.data&&event.data.type==="SKIP_WAITING")self.skipWaiting()});';
+  const safeMessage='self.addEventListener("message",event=>{if(event.data&&event.data.type==="SKIP_WAITING")event.waitUntil(self.skipWaiting())});';
+  const existingWorker=lifecycleWorker.replaceAll(rawWrite,safeWrite);
+  if(existingWorker.split(oldMessage).length!==2)
+    throw Error('Preview worker activation message contract changed');
+  const worker=existingWorker.replace(oldMessage,safeMessage);
   // The already-existing update checker compares these two source markers.
   // Stamp both in the published preview HTML, not in the immutable source.
   const html=stampShellForCommit(sourceHtml,releaseSha);

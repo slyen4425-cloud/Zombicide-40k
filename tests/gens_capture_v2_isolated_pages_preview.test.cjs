@@ -178,6 +178,15 @@ test('exact official Lab main files and derived Showcase have one owner and veri
     const saved=JSON.parse(read(trial,transfer).toString('utf8'));
     assert.equal(saved.draft.id,skillId,'Combat owns the canonical authored ability '+skillId);
   }
+  const fireWave=JSON.parse(read(trial,
+    'vendor/combat-lab/data/capture/showcase/cap_fire_atk_5.capture-skill-transfer-v1.json').toString('utf8')).draft;
+  assert.equal(fireWave.id,'cap_fire_atk_5','Vague incendiaire must preserve its canonical ID');
+  assert.equal(fireWave.presentation.visual.icon.assetId,'pack:capture:icon-skill-fireball-01',
+    'published PWA must show Boule de feu icon, never the previous dome icon');
+  assert.equal(fireWave.presentation.visual.travel.assetId,'pack:capture:sprite-fire-bubble-expansion-01',
+    'icon fix must keep original expanding fire-wave sprite');
+  assert.equal(fireWave.definition.effects[0].amount,25,
+    'icon-only release cannot modify fire-wave damage');
   const horse=polocendre.draft.presentation.visual;
   assert.deepEqual(['movement','movementBack','rangedAttack','rangedAttackBack']
     .map(key=>horse[key]?.frameCount),[6,7,5,5],

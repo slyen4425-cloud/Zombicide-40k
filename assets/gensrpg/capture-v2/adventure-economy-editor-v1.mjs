@@ -165,5 +165,13 @@ export function installAdventureEconomyEditorV1({
   selected=new Set();renderLibrary();
  });
  clearMerchant();
- return {read,sync,render,isItemUsed};
+ // The linked PNJ selects an existing canonical shop without duplicating data.
+ function focusMerchant(merchantId){
+  const merchant=byMerchant(merchantId);
+  if(!merchant)return false;
+  if(isSimple(merchant))editMerchant(merchant);
+  $('adventure-merchants')?.scrollIntoView?.({block:'nearest'});
+  return true;
+ }
+ return {read,sync,render,isItemUsed,focusMerchant};
 }

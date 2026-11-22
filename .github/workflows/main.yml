@@ -494,11 +494,12 @@ jobs:
           repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
           ref: ${{ steps.preview_pin.outputs.visuals }}
           path: preview-combat-assets
+          sparse-checkout-cone-mode: false
           sparse-checkout: |
-            data/assets/catalog
-            assets/library/capture/raiiven_sous_la_lune_violette.png
-            assets/library/capture/file_00000000ee088210a7c5cb3bea4d5068.png
-            assets/library/capture/file_0000000090d481f48cc94001c7925590.png
+            /data/assets/catalog/**
+            /assets/library/capture/raiiven_sous_la_lune_violette.png
+            /assets/library/capture/file_00000000ee088210a7c5cb3bea4d5068.png
+            /assets/library/capture/file_0000000090d481f48cc94001c7925590.png
 
       - name: Stage isolated native preview under the existing Pages owner
         run: |
@@ -666,8 +667,12 @@ jobs:
           repository: slyen4425-cloud/GenSrpg_labo_combat_dynamique
           ref: ${{ steps.preview_pin.outputs.visuals }}
           path: preview-combat-assets
+          sparse-checkout-cone-mode: false
           sparse-checkout: |
-            data/assets/catalog
+            /data/assets/catalog/**
+            /assets/library/capture/raiiven_sous_la_lune_violette.png
+            /assets/library/capture/file_00000000ee088210a7c5cb3bea4d5068.png
+            /assets/library/capture/file_0000000090d481f48cc94001c7925590.png
 
       - name: Build the physical Pages subdirectory from the three official SHAs
         run: |

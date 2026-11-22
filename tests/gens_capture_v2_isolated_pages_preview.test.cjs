@@ -240,8 +240,8 @@ test('Capture editor combat previews reuse the ONE signed Lab transport with mus
 
 test('native World Builder map exporter and in-game 200% dezoom are shipped once from certified Exploration',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(source.exploration.sha,'abe51d7f0634684d29772e0730719b2eb347fa98',
-   'ship the certified 21 Nov Exploration main, preserving native map export and camera');
+ assert.equal(source.exploration.sha,'c3b69270919923d130c74af1a8577fa40476eff2',
+   'ship the certified 22 Nov Exploration main, preserving native map export, camera and NPC shop');
  const helper='vendor/exploration-lab/src/builder/world-assembler-map-preset-export-v1.js';
  required(trial,helper);
  const page=read(trial,'vendor/exploration-lab/world-assembler.html').toString('utf8');
@@ -279,9 +279,10 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  const recoveredWorldExplorationSha='da4420cef7ff4666d93fb492f246518e0c6803f9';
  const stairsExplorationSha='2cb75a601cadcd26d33ffdd093a07badaaa9e86f';
   const certifiedNov21ExplorationSha='abe51d7f0634684d29772e0730719b2eb347fa98';
+  const certifiedNov22NpcExplorationSha='c3b69270919923d130c74af1a8577fa40476eff2';
  // The stair fix changes navigation and sprite presentation only. Its
  // canonical south terrain renderer remains byte-identical to recoveredWorld.
- const expectedOfficialRendererBlob=[recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha].includes(explorationSha)
+ const expectedOfficialRendererBlob=[recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha].includes(explorationSha)
    ?'6c101756bdf9c58a9ae8cf3fe104e49575145748'
    :explorationSha===fringeRoadExplorationSha
     ?'1a0869afc5b258e8f403f43cd26b3f417a6c8786'
@@ -292,7 +293,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  assert.equal(provenance.exploration.sha,explorationSha,
    'the complete native Exploration checkout must match the source pin');
  assert.ok(['13bbd8230d8dfcef612586974b2dcb54e18e16c4',
-   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha].includes(explorationSha),
+   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha].includes(explorationSha),
    'release must reject unreviewed Exploration main SHAs');
  const bytes=read(trial,official);
  const gitBlob=crypto.createHash('sha1')
@@ -307,7 +308,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  const sculpt=read(trial,'vendor/exploration-lab/src/sculpt-lab-main.js').toString('utf8');
  assert.match(sculpt,/drawOuterSouthRim:false/);
  assert.match(sculpt,/drawDecorativeFringeTerrain\(\)/);
- if([fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha].includes(explorationSha)){
+ if([fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha].includes(explorationSha)){
   assert.match(sculpt,/drawDecorativeFringeObjects\('back'\)/);
   assert.match(sculpt,/drawDecorativeFringeObjects\('front'\)/);
   const north=sculpt.indexOf("drawDecorativeFringeObjects('back');");
@@ -315,7 +316,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
   const south=sculpt.indexOf("drawDecorativeFringeObjects('front');",hero);
   assert.ok(north>=0&&hero>north&&south>hero,
    'a southern tree must layer in front of the player but own no collision');
-  if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha].includes(explorationSha)){
+  if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha].includes(explorationSha)){
    assert.doesNotMatch(text,/ctx.fillRect\(rect.x,rect.y,rect.width,rect.height\)/,
     'no per-tile translucent altitude paint on a raised road or grass');
    assert.match(text,/for\(const \{side,opacity\} of info.contactShadows\)/,
@@ -331,6 +332,25 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
   }
   assert.doesNotMatch(text,/ctx.fillRect\(x-1,y-1,w\+2,h\+2\)/);
  }
+});
+
+test('published preview carries exactly one item library, healing potions and PNJ merchant link',()=>{
+ const shell=read(trial,'assets/gensrpg/capture-v2/shell-entry-v1.js').toString('utf8');
+ const contract=read(trial,'assets/gensrpg/capture-v2/adventure-contract-v1.mjs').toString('utf8');
+ const app=read(trial,'assets/gensrpg/capture-v2/adventure-app-v1.mjs').toString('utf8');
+ const economy=read(trial,'assets/gensrpg/capture-v2/adventure-economy-editor-v1.mjs').toString('utf8');
+ const html=read(trial,'assets/gensrpg/capture-v2/adventure.html').toString('utf8');
+ const explorer=read(trial,'vendor/exploration-lab/src/actors/npc-editor-v1.js').toString('utf8');
+ assert.match(shell,/label:"Bibliothèque d’objets"/);
+ assert.match(shell,/label:"Drops \/ Ressources"/);
+ assert.match(shell,/gensrpg\.exploration\.npc\.merchant\.configure\.v1/);
+ assert.match(contract,/item\.potion\.heal/);
+ assert.match(contract,/item\.potion\.revive/);
+ assert.match(app,/useAdventureConsumableV1/);
+ assert.match(html,/id="adventure-library-view"/);
+ assert.match(html,/id="adventure-drops-view"/);
+ assert.match(economy,/function focusMerchant\(merchantId\)/);
+ assert.match(explorer,/gensrpg\.exploration\.npc\.merchant\.configure\.v1/);
 });
 
 test('the existing single Pages publisher remains the only deployment authority',()=>{

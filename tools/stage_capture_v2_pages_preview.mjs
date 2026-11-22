@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {assertOfficialMainHistoryPin} from './verify_official_main_pin.mjs';
 import {stageOfficialCaptureEncounterBridge} from './stage_capture_v2_encounter_bridge.mjs';
 import {releasePreviewPwaForCommit,enableAutomaticPreviewActivation} from './capture_v2_pwa_release.mjs';
@@ -187,6 +187,42 @@ const bridge=stageOfficialCaptureEncounterBridge({
 // do not duplicate SFX/music, modify Lab source or add a second sound owner.
 if(bridge.combat?.sha!==sourcePin.combat.sha)
  throw Error('Editor and encounter Combat SHA mismatch');
+// The author-approved presentation catalog is part of the EXACT pinned
+// Capture source. Only these three verified original PNGs are staged once.
+const artCatalog=path.join(source,'assets/gensrpg/capture-v2/shell-official-wallpapers-v1.mjs');
+if(!fs.statSync(artCatalog).isFile())
+ throw Error('Missing single canonical Capture wallpaper catalog');
+const {CAPTURE_OFFICIAL_WALLPAPERS_V1}=await import(pathToFileURL(artCatalog).href);
+if(CAPTURE_OFFICIAL_WALLPAPERS_V1.length!==3||
+   new Set(CAPTURE_OFFICIAL_WALLPAPERS_V1.map(x=>x.id)).size!==3)
+ throw Error('Three distinct official wallpapers required');
+const authorArt=[];
+for(const art of CAPTURE_OFFICIAL_WALLPAPERS_V1){
+ if(!/^vendor\/combat-lab\/assets\/library\/capture\/[a-z0-9_]+\.png$/.test(art.path)||
+    !/^[a-f0-9]{40}$/.test(art.blobSha)||!Number.isSafeInteger(art.bytes))
+  throw Error('Unsafe unpinned official art entry');
+ const relative=art.path.slice('vendor/combat-lab/'.length);
+ const input=path.join(visuals,relative),output=path.join(trial,art.path);
+ if(!fs.existsSync(input)||!fs.statSync(input).isFile())
+  throw Error('Official author file absent: '+relative);
+ const original=fs.readFileSync(input);
+ const sha=crypto.createHash('sha1')
+  .update('blob '+original.length+String.fromCharCode(0)).update(original).digest('hex');
+ if(original.length!==art.bytes||sha!==art.blobSha||
+    !original.subarray(0,8).equals(Buffer.from('89504e470d0a1a0a','hex')))
+  throw Error('Official author image bytes mismatch: '+relative);
+ if(fs.existsSync(output))throw Error('Duplicated official image: '+art.path);
+ fs.mkdirSync(path.dirname(output),{recursive:true});
+ fs.copyFileSync(input,output);
+ if(digest(bytes(trial,art.path))!==digest(original))
+  throw Error('Official image damaged during PWA transport');
+ authorArt.push({id:art.id,label:art.label,path:art.path,
+  blobSha:sha,size:original.length,sha256:digest(original)});
+}
+fs.writeFileSync(path.join(trial,
+ 'assets/gensrpg/capture-v2/official-art-provenance-v1.json'),
+ JSON.stringify({schema:'capture-three-approved-wallpapers-v1',
+ sourceSha:expectedPreviewSha,visualsSha:approvedVisuals,items:authorArt},null,2)+'\n');
 const legacyEditor='vendor/combat-lab/examples/dom-demo/';
 const completeEditor='vendor/exploration-lab/combat-preview/examples/dom-demo/';
 for(const name of ['capture-editor-v2.html','capture-editor-v2.js','bestiary.html']){

@@ -496,6 +496,9 @@ jobs:
           path: preview-combat-assets
           sparse-checkout: |
             data/assets/catalog
+            assets/library/capture/raiiven_sous_la_lune_violette.png
+            assets/library/capture/file_00000000ee088210a7c5cb3bea4d5068.png
+            assets/library/capture/file_0000000090d481f48cc94001c7925590.png
 
       - name: Stage isolated native preview under the existing Pages owner
         run: |
@@ -530,6 +533,8 @@ jobs:
           node --test capture-v2-source/tests/gens_capture_v2_atomic_bestiary_cache_20261108.test.mjs
           node --test tests/gens_capture_v2_auto_update_20261107.test.mjs
           node --test tests/gens_capture_v2_isolated_pages_preview.test.cjs
+          node --test tests/gens_capture_v2_three_wallpapers_publisher_20261122.test.cjs
+          node --test capture-v2-source/tests/gens_capture_v2_three_official_wallpapers_20261122.test.mjs
           node --test tests/gensrpg_pwa_root_preview_launch_identity_20261116.test.cjs
           node --test tests/gens_capture_v2_preparation_publish_20261107.test.mjs
           node --test tests/gens_capture_v2_play_ux_publish_20261108.test.mjs

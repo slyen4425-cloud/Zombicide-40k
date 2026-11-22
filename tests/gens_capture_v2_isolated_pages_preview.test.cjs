@@ -716,3 +716,30 @@ test('PWA portrait Capture menu paints ONE opaque wallpaper without exposing Gen
  assert.match(portrait,/grid-column:1\/-1/);
  assert.match(portrait,/\.gensCaptureReturnToMain\{/);
 });
+
+test('merchant and monster drops use one shipped Capture item catalog and original fragment controls',()=>{
+ const base='assets/gensrpg/capture-v2/';
+ const html=read(trial,base+'adventure.html').toString('utf8');
+ const economy=read(trial,base+'adventure-economy-v1.mjs').toString('utf8');
+ const merchant=read(trial,base+'adventure-economy-editor-v1.mjs').toString('utf8');
+ const shop=read(trial,base+'adventure-merchant-play-v1.mjs').toString('utf8');
+ const app=read(trial,base+'adventure-app-v1.mjs').toString('utf8');
+ assert.match(html,/id="adventure-merchant-category"/);
+ for(const kind of ['resource','usable','fragment'])
+  assert.ok(html.includes('value="'+kind+'">'),
+   'missing official item library category '+kind);
+ assert.match(economy,/fragmentPrices/);
+ assert.match(economy,/adventureMerchantPriceV1/);
+ assert.match(merchant,/getPublishedSpecies/);
+ assert.match(merchant,/fragmentPricesDraft/);
+ assert.match(shop,/merchant\.fragmentPrices/);
+ assert.match(html,/id="adventure-drop-fragment-summary"/);
+ assert.match(html,/id="adventure-drop-new"/);
+ assert.equal((html.match(/id="adventure-monster-fragments-panel"/g)||[]).length,1,
+  'existing fragment override controls must not be duplicated');
+ assert.match(app,/function focusSelectedMonsterDrop\(\)/);
+ assert.match(app,/autoFocusedDropIndex/);
+ assert.match(app,/\$\('adventure-drop-fragment-settings'\)\.append\(controls\)/);
+ assert.equal(fs.existsSync(path.join(site,base+'adventure-economy-editor-v1.mjs')),false,
+  'canonical merchant editor must stay scoped to the Capture preview');
+});

@@ -201,6 +201,12 @@ function setupCanonicalItemEditor(){
  $('adventure-library-view').hidden=itemEditorView!=='library';
  $('adventure-drops-view').hidden=itemEditorView!=='drops';
  $('adventure-economy-panel').hidden=itemEditorView!=='merchant';
+ if(itemEditorView==='drops'){
+  // The original per-creature fragment editor is relocated, never copied.
+  const controls=$('adventure-monster-fragments-panel');
+  $('adventure-drop-fragment-settings').append(controls);
+  controls.open=true;
+ }
  if(itemEditorView==='merchant'){
   $('adventure-economy-panel').open=true;
   if(isEmbeddedNpcMerchant){
@@ -697,6 +703,35 @@ function resetDropEditor(){
  $('adventure-drop-add').textContent='Ajouter une règle de drop';
  $('adventure-drop-edit-cancel').hidden=true;
 }
+// Select one species: show its persisted object drop and fragment override,
+// without creating another authoring registry or changing saved values.
+function focusSelectedMonsterDrop(){
+ const speciesId=$('adventure-drop-filter').value;
+ if(!published.some(card=>card.id===speciesId))return;
+ $('adventure-drop-species').value=speciesId;
+ $('adventure-fragment-species').value=speciesId;
+ renderMonsterFragmentEditor();
+ const index=rules.loot.drops.findIndex(drop=>drop.speciesId===speciesId);
+ if(index>=0){
+  const drop=rules.loot.drops[index];
+  activeDropEditIndex=index;
+  $('adventure-drop-item').value=drop.itemId;
+  $('adventure-drop-chance').value=String(drop.chancePercent);
+  $('adventure-drop-min').value=String(drop.minQuantity);
+  $('adventure-drop-max').value=String(drop.maxQuantity);
+  $('adventure-drop-add').textContent='Enregistrer la règle de drop';
+  $('adventure-drop-edit-cancel').hidden=false;
+ }else{
+  resetDropEditor();
+  const official=itemTemplates.items.find(item=>item.speciesId===speciesId);
+  if(official&&rules.loot.items.some(item=>item.id===official.id))
+   $('adventure-drop-item').value=official.id;
+  $('adventure-drop-chance').value='50';
+  $('adventure-drop-min').value='1';
+  $('adventure-drop-max').value='1';
+ }
+ renderItemRules();
+}
 function editDropRule(index){
  const drop=rules.loot.drops[index];
  if(!drop)throw new Error('Règle de drop indisponible');
@@ -827,9 +862,25 @@ function renderItemRules(){
  }):null;
  image.hidden=!imageSrc;
  if(imageSrc)image.src=imageSrc;
+ const selectedDrops=rules.loot.drops.filter(drop=>drop.speciesId===filterId);
+ const primary=selectedDrops[0];
+ const primaryItem=primary?rules.loot.items.find(item=>item.id===primary.itemId):null;
  text($('adventure-drop-focused-description'),selectedCard
-  ?selectedCard.name+' : choisis une ressource existante, règle sa chance et sa quantité. Une ligne ci-dessous = un seul tirage après victoire.'
+  ?selectedCard.name+' · Objet associé : '+
+   (primary?(primaryItem?.name??primary.itemId)+' · '+primary.chancePercent+
+    ' % · '+primary.minQuantity+'–'+primary.maxQuantity:
+    'aucun configuré. Ajoute un objet depuis la bibliothèque.')+
+   (selectedDrops.length>1?' · '+(selectedDrops.length-1)+' autre(s) drop(s)':'')
   :'Aucune créature sélectionnée dans le Bestiaire officiel.');
+ const fragment=rules.fragmentRecruitment??DEFAULT_ADVENTURE_FRAGMENTS_V1;
+ const override=fragment.perSpecies?.[filterId];
+ $('adventure-drop-fragment-settings').hidden=!selectedCard;
+ text($('adventure-drop-fragment-summary'),selectedCard
+  ?'Éclat de '+selectedCard.name+' · '+
+   (override?.dropChancePercent??fragment.dropChancePercent)+' % · '+
+   (override?.dropMin??fragment.dropMin)+'–'+(override?.dropMax??fragment.dropMax)+
+   ' fragment(s)'+(fragment.enabled?'':' · désactivés pour cette aventure')
+  :'Sélectionne une créature.');
  const visibleDrops=rules.loot.drops.map((drop,index)=>({drop,index}))
   .filter(entry=>!filterId||entry.drop.speciesId===filterId);
  const covered=new Set(rules.loot.drops.map(drop=>drop.speciesId)).size;
@@ -2553,16 +2604,12 @@ $('adventure-return-preparation').addEventListener('click',guarded(()=>{
  navigateToAdventureOwner(returnToNpc?'npc':'adventure');
 }));
 $('adventure-drop-filter').addEventListener('change',()=>{
- const speciesId=$('adventure-drop-filter').value;
- // When focusing one species, edit that very same official monster's drop
- // and fragment settings. Clearing the filter returns to the full registry.
- if(speciesId&&published.some(card=>card.id===speciesId))
-  $('adventure-drop-species').value=speciesId;
- renderItemRules();
+ if($('adventure-drop-filter').value)focusSelectedMonsterDrop();
+ else {resetDropEditor();renderItemRules();}
 });
 $('adventure-drop-species').addEventListener('change',()=>{
  $('adventure-drop-filter').value=$('adventure-drop-species').value;
- renderItemRules();
+ focusSelectedMonsterDrop();
 });
 $('adventure-fragment-species').addEventListener('change',renderMonsterFragmentEditor);
 $('adventure-monster-fragments-save').addEventListener('click',guarded(()=>{
@@ -2651,6 +2698,19 @@ $('adventure-item-defaults').addEventListener('click',guarded(()=>{
   'Drops personnalisés et fragments conservés. Enregistre les paramètres.');
 }));
 $('adventure-drop-edit-cancel').addEventListener('click',resetDropEditor);
+$('adventure-drop-new').addEventListener('click',()=>{
+ resetDropEditor();
+ const speciesId=$('adventure-drop-species').value;
+ const used=new Set(rules.loot.drops.filter(drop=>drop.speciesId===speciesId)
+  .map(drop=>drop.itemId));
+ const next=rules.loot.items.find(item=>!used.has(item.id));
+ if(next)$('adventure-drop-item').value=next.id;
+ $('adventure-drop-chance').value='50';
+ $('adventure-drop-min').value='1';
+ $('adventure-drop-max').value='1';
+ stateMessage(next?'Choisis un autre objet et sa probabilité.':
+  'Tous les objets sont déjà associés à cette créature.');
+});
 $('adventure-drop-add').addEventListener('click',guarded(()=>{
  const speciesId=$('adventure-drop-species').value;
  if(!published.some(card=>card.id===speciesId))
@@ -2728,7 +2788,10 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   }
   setupCanonicalItemEditor();
   setSessionControlFields(active);
-  renderItemRules();showSave();updatePreview();
+  renderItemRules();
+  if(itemEditorView==='drops'&&$('adventure-drop-filter').value)
+   focusSelectedMonsterDrop();
+  showSave();updatePreview();
   // Hero gallery and WorldDocument library do not depend on one another.
   // Parallelize these independent official owners; preserve the Hero picker
   // -> gallery sequence and never make a fallback copy of either catalog.

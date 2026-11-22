@@ -107,6 +107,8 @@ const itemEditorView=itemEditorRoute==='drops'||itemEditorRoute==='merchant'
  ?itemEditorRoute:'library';
 const returnToNpc=itemEditorView==='merchant'&&
  new URLSearchParams(window.location.search).get('returnTo')==='npc';
+const npcReturnId=returnToNpc?new URLSearchParams(window.location.search).get('npcId'):null;
+const linkedMerchantId=returnToNpc?new URLSearchParams(window.location.search).get('merchantId'):null;
 let libraryCategory='usable';
 let activeItemEditId=null;
 let activeDropEditIndex=null;
@@ -2480,7 +2482,9 @@ function saveCurrentAdventureRules(){
 function navigateToAdventureOwner(destination){
  const shell=window.parent!==window?window.parent.GensCaptureV2:null;
  if(['adventure','items','drops','merchant'].includes(shell?.status?.().view)){
-  if(shell.open?.(destination)===true)return;
+  const options=destination==='npc'&&returnToNpc
+   ?{editNpcId:npcReturnId}:undefined;
+  if(shell.open?.(destination,options)===true)return;
  }
  if(destination==='npc')throw new Error(
   'La navigation vers le PNJ exige le Shell officiel Monster InvoC');
@@ -2681,6 +2685,11 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   ]);
   adventurePerf('boot ready (world library + hero gallery)');
   stateMessage('Prêt pour l’aventure : choisis Nouvelle partie ou Charger partie.');
+  if(itemEditorView==='merchant'&&linkedMerchantId){
+   if(economyEditor?.focusMerchant(linkedMerchantId))
+    stateMessage('Boutique liée à ton PNJ sélectionnée : modifie ses offres ou son rachat.');
+   else stateMessage('La boutique liée à ce PNJ est introuvable dans cet univers : vérifie son association.',true);
+  }
  }catch(error){
   stateMessage('Aventure indisponible : '+error.message,true);
   $('adventure-create').disabled=true;

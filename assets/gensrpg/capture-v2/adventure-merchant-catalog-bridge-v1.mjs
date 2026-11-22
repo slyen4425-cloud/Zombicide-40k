@@ -3,9 +3,14 @@
 import {createAdventureStoreV1} from './adventure-contract-v1.mjs';
 import {createAdventurePortfolioStoreV1} from './adventure-portfolio-store-v1.mjs';
 import {createAdventureRulesDraftStoreV1} from './adventure-rules-draft-v1.mjs';
+import {createCaptureUniverseAdventureStorageV1}
+ from './universe-adventure-storage-v1.mjs';
+import {MONSTER_INVOC_UNIVERSE_ID_V1}
+ from './universe-project-store-v1.mjs';
 
 async function npcRulesFromOfficialCaptureV1({
- storage=globalThis.localStorage,coreStorage=globalThis.GensStorageV1
+ storage=globalThis.localStorage,coreStorage=globalThis.GensStorageV1,
+ universeId=MONSTER_INVOC_UNIVERSE_ID_V1
 }={}){
  // The Capture owner initializes its EXISTING Core Storage service.
  // The outer Shell only transports names; it never opens the wallet.
@@ -13,10 +18,15 @@ async function npcRulesFromOfficialCaptureV1({
   await import('../core/storage-v1.js');
   coreStorage=globalThis.GensStorageV1;
  }
- const legacyStore=createAdventureStoreV1({storage,coreStorage});
- const portfolio=createAdventurePortfolioStoreV1({storage,coreStorage,legacyStore});
+ // Same scoped wrapper as the native Adventure game; no second storage
+ // scheme and no cross-universe merchant/item publication.
+ const ownedStorage=createCaptureUniverseAdventureStorageV1(storage,universeId);
+ const legacyStore=createAdventureStoreV1({storage:ownedStorage,coreStorage});
+ const portfolio=createAdventurePortfolioStoreV1({
+  storage:ownedStorage,coreStorage,legacyStore});
  const live=portfolio.load();
- return live?.rules??createAdventureRulesDraftStoreV1({storage,coreStorage}).load();
+ return live?.rules??createAdventureRulesDraftStoreV1({
+  storage:ownedStorage,coreStorage}).load();
 }
 export async function availableAdventureMerchantsForNpcV1(options={}){
  const rules=await npcRulesFromOfficialCaptureV1(options);

@@ -139,6 +139,32 @@ test('real landscape UI: library, drops, fragments and NPC shop share one saved 
   await frame.locator('#adventure-merchants .rule-row').first()
    .getByRole('button',{name:'Modifier'}).tap();
   assert.equal(await frame.locator('#adventure-merchant-resale-percent').inputValue(),'40');
+
+  // Real Shell routing (same iframe, same stored AdventureRules): opening the
+  // selected PNJ's linked merchant preselects this shop and returning restores
+  // the specific saved NPC instead of losing authoring context.
+  const linkedId=await frame.locator('#adventure-merchant-select').inputValue();
+  assert.ok(linkedId,'real merchant must have a stable ID');
+  assert.equal(await page.evaluate(merchantId=>window.GensCaptureV2.open('merchant',{
+   returnTo:'npc',npcId:'npc-linked-test',merchantId
+  }),linkedId),true);
+  assert.equal(await page.locator('#gensCaptureV2Root iframe').evaluate(el=>
+   new URL(el.src).searchParams.get('npcId')),'npc-linked-test');
+  await frame.locator('#adventure-merchant-select').waitFor({state:'attached',timeout:45000});
+  await page.waitForFunction(id=>{
+   const doc=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument;
+   return doc?.querySelector('#adventure-merchant-select')?.value===id;
+  },linkedId,{timeout:45000});
+  assert.equal(await frame.locator('#adventure-merchant-select').inputValue(),linkedId);
+  assert.match(await frame.locator('#adventure-status').innerText(),/Boutique liée à ton PNJ/);
+  await frame.locator('#adventure-return-preparation').tap();
+  assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),'npc');
+  assert.equal(await page.locator('#gensCaptureV2Root iframe').evaluate(el=>
+   new URL(el.src).searchParams.get('edit')),'npc-linked-test');
+
+  // Navigate back to the same canonical merchant view for layout inspection.
+  assert.equal(await page.evaluate(()=>window.GensCaptureV2.open('merchant')),true);
+  await frame.locator('#adventure-merchant-select').waitFor({state:'attached',timeout:45000});
   const size=await frame.locator('#adventure-loot-panel').boundingBox();
   assert.ok(size&&size.width>300&&size.width<=932,'mobile landscape editor stays inside viewport');
   assert.deepEqual(errors.filter(e=>/Uncaught|SyntaxError|Duplicate Capture|Competing Capture/.test(e)),[]);

@@ -1587,7 +1587,7 @@ async function performPlayingItemUse(itemId,instanceId){
   const locks=window.navigator.locks;
   if(typeof locks?.request!=='function')
    throw new Error('Verrou de sauvegarde indisponible : potion conservée');
-  let receipt=null;
+  let receipt=null,refreshWarning=null;
   await locks.request('gensrpg.capture.v2.adventure-combat:'+play.sessionId,()=>{
    const state=store.load();
    if(state?.status!=='playing'||state.sessionId!==play.sessionId)
@@ -1602,12 +1602,16 @@ async function performPlayingItemUse(itemId,instanceId){
    if(!applied.applied)throw new Error('Action déjà prise en compte');
    store.save(applied.session); // The only Core Storage save.
    receipt=applied.receipt;
-   play.refreshParty(applied.session); // Original Explorer roster projection.
+   // After commit, a failed Exploration projection must never masquerade
+   // as an unconsumed potion. Fragment usage follows this same rule.
+   try{play.refreshParty(applied.session);}
+   catch(error){refreshWarning=String(error?.message??error);}
   });
   showSave();renderPlayingSheet();
   text($('adventure-sheet-status'),'Objet utilisé · PV : '+
-   receipt.beforeHp+' → '+receipt.afterHp+' / '+receipt.maxHp+'.');
-  $('adventure-sheet-status').dataset.error='false';
+   receipt.beforeHp+' → '+receipt.afterHp+' / '+receipt.maxHp+'.'+
+   (refreshWarning?' Sauvegardé, mais synchronisation Exploration à vérifier : '+refreshWarning:''));
+  $('adventure-sheet-status').dataset.error=String(Boolean(refreshWarning));
  }finally{consumablePending=false;}
 }
 let fragmentActionPending=false;

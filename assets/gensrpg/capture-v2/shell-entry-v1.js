@@ -18,7 +18,10 @@
     combat:{label:"Règles de combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=combat",family:"combat"},
     music:{label:"Musiques",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=music",family:"combat"},
     bestiary:{label:"Bestiaire",path:"vendor/combat-lab/examples/dom-demo/bestiary.html",family:"combat"},
-    items:{label:"Objets et drops",path:"assets/gensrpg/capture-v2/adventure.html?editor=items",family:"capture"},
+    // These routes are views of the SAME authoritative AdventureRules draft.
+    items:{label:"Bibliothèque d’objets",path:"assets/gensrpg/capture-v2/adventure.html?editor=library",family:"capture"},
+    drops:{label:"Drops / Ressources",path:"assets/gensrpg/capture-v2/adventure.html?editor=drops",family:"capture"},
+    merchant:{label:"PNJ marchand · Boutique",path:"assets/gensrpg/capture-v2/adventure.html?editor=merchant",family:"capture"},
     adventure:{label:"Jouer",path:"assets/gensrpg/capture-v2/adventure.html",family:"capture"}
   });
   // Navigation is presentation-only: one destination per native owner,
@@ -28,7 +31,8 @@
     Object.freeze({id:"heroes",title:"Héros",items:Object.freeze(["heroes"])}),
     Object.freeze({id:"combat",title:"Créatures et combat",items:Object.freeze(
       ["creature","skills","combat","bestiary","music"])}),
-    Object.freeze({id:"economy",title:"Objets et économie",items:Object.freeze(["items"])})
+    Object.freeze({id:"economy",title:"Bibliothèque et drops",items:Object.freeze(["items","drops"])}),
+    Object.freeze({id:"trading",title:"PNJ marchands",items:Object.freeze(["merchant"])})
   ]);
   const shell=root.GensShellModuleLaunchV1;
   const returnShell=root.GensShellScreenReturnV1;

@@ -1,3 +1,9 @@
+## 2026-11-22 — Source Capture : correction PC Réserves adverses (Labo Combat main)
+- Source `work/capture-v2-audit567-source-20261121@bb11e127c11c8a69a66e518110db5d38d8f3d344`, checkpoint `checkpoint/gensrpg-before-pc-enemy-reserve-capture-20261122`, lot isolé `work/gensrpg-pc-enemy-reserve-capture-20261122`.
+- Nouveau pin Combat officiel `main@d7eeae0fdb13454cf5a9ae18a0676e6784e425e5` (PR Combat #377), CI main `45008484200` à valider SUCCESS et Pages GREEN avant fusion. Corrige le chevauchement de l'onglet Réserves adverses et de sa liste avec les noms ennemis sur PC, tests réels 1v1/2v2 et parité mobile ; les cinq capacités Polocendre déjà publiées restent inchangées.
+- La branche hérite du correctif purement graphique d'orientation Shell/Adventure #597, sans ajouter de média vitrine. Aucune recopie du CSS Combat, aucune modification de PNJ/sauvegardes/Exploration/PWA root/service-worker.
+- Promotion Publisher après validation source, release physique et HTTPS ; ne jamais consommer un Combat main non certifié.
+
 ## 2026-11-22 — Préparation responsive des fonds de vitrine et chargements Capture
 - Audit demandé : un visuel panorama 20:9 ne peut pas remplir 9:20 (portrait) sans recadrage ou déformation ; proposer à l'avenir deux compositions officielles paysage/portrait depuis la même bibliothèque, sans deuxième propriétaire ni duplication.
 - Source branch `work/gensrpg-responsive-wallpaper-loading-20261122` (checkpoint `checkpoint/gensrpg-before-responsive-wallpaper-loading-20261122`). Cible : conserver **chaque bord de l'image** sur une couche `contain`, et remplir les marges avec la même image `cover` en arrière-plan. Shell accueil, menu Adventure et chargement Shell ; Adventure loading standard/personnalisé avait déjà ce mécanisme.

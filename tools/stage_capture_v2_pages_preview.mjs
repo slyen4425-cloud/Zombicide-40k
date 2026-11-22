@@ -266,6 +266,9 @@ const certifiedNov22NpcExplorationSha='c3b69270919923d130c74af1a8577fa40476eff2'
 // 22 Nov canonical Exploration asset-only replacement (CI main #45012201761, Pages GREEN).
 // Its south terrain renderer is byte-identical; preserve the owner and its verified Git blob.
 const certifiedNov22CleanedAssetsSha='de86b04f35f96df3783f1f953c7f138bc44a28f8';
+// #520 merged Exploration main: main CI 45015697925, Pages 45015697997.
+// The certified renderer Git blob is unchanged, only NPC and source assets move.
+const certifiedNov22NpcInlineSha='1553c0e8f9bab89f5c1badfa64c5d41fb75cff73';
 const recoveredWorldSouthBlob='6c101756bdf9c58a9ae8cf3fe104e49575145748';
 const oldSouthBacking="  ctx.fillStyle=baseColor;ctx.fillRect(0,0,totalWidth,totalHeight);";
 const officialSouthBacking="  // The outer cliff is deliberately disabled in the canonical 2.5D editor\n  // and its Tester, including the decorative south fringe. Raised last-row\n  // tops end BEFORE the bottom of this backing rectangle; a solid baseColor\n  // leaked through as the broad grey/green slanted strip on Android. Carry\n  // the EXACT same Material Registry texture underneath the raised tops.\n  // Keep the original backing for callers that explicitly draw a cliff rim.\n  // This is visual-only: no new cells, heights, collisions or saved paint.\n  ctx.fillStyle=!drawOuterSouthRim&&pattern?pattern:baseColor;\n  ctx.fillRect(0,0,totalWidth,totalHeight);";
@@ -308,7 +311,7 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
    throw Error('Certified raised-road renderer differs from official Exploration main');
  releasedSouthBlob=fringeRoadSouthBlob;
  southRendererOriginSha=sourcePin.exploration.sha;
-}else if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha].includes(sourcePin.exploration.sha)){
+}else if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha].includes(sourcePin.exploration.sha)){
  // Official owner removed tile-by-tile height tint, preserving native road
  // paint at raised elevations and the strict WorldDocument save contract.
  // PR #506 adds side/oblique stair travel and display exclusively outside

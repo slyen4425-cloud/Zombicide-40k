@@ -136,3 +136,15 @@ test('NPC shop deep link preserves the selected saved PNJ without duplicating me
  assert.match(editor,/function focusMerchant\(merchantId\)/);
  assert.doesNotMatch(shell,/merchantOffers|merchantStocks|saleValue:/);
 });
+
+test('a saved potion cannot be treated as failed when only Explorer refresh fails',()=>{
+ const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',
+  import.meta.url),'utf8');
+ const action=app.slice(app.indexOf('async function performPlayingItemUse('),
+  app.indexOf('let fragmentActionPending=false;'));
+ assert.match(action,/store\.save\(applied\.session\)/);
+ assert.match(action,/try\{play\.refreshParty\(applied\.session\);\}/);
+ assert.match(action,/catch\(error\)\{refreshWarning=/);
+ assert.match(action,/Sauvegardé, mais synchronisation Exploration à vérifier/);
+ assert.match(action,/receipt\.beforeHp/);
+});

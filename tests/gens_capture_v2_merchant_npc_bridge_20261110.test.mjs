@@ -66,8 +66,8 @@ test('Shell transports catalog by name, never stores merchant inventory or shows
  assert.match(shell,/availableAdventureMerchantsForNpcV1/);
  assert.match(shell,/event.source!==frame.contentWindow/);
  assert.match(shell,/event.origin!==root.location.origin/);
- assert.ok(shell.includes('!["builder","world","npc"].includes(current)'),
-  'World Assembler navigates into Sculpt within the same native iframe');
+ assert.match(shell,/current!=="builder"&&current!=="world"&&current!=="npc"/,
+  'Catalog requests include the existing native PNJ iframe in the allowed owners');
  assert.doesNotMatch(shell,/merchant\.id.*textContent|merchant\.id.*innerText/);
 });
 test('in-game shop listens only to its active Explorer iframe and uses canonical locked trades',()=>{

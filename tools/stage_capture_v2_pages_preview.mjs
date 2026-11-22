@@ -225,7 +225,8 @@ for(const art of CAPTURE_OFFICIAL_WALLPAPERS_V1){
   throw Error('Official author image bytes mismatch: '+relative);
  if(fs.existsSync(output))throw Error('Duplicated official image: '+art.path);
  fs.mkdirSync(path.dirname(output),{recursive:true});
- fs.copyFileSync(input,output);
+ // Sparse clone may expose exact Git blob bytes without a worktree PNG.
+ fs.writeFileSync(output,original);
  if(digest(bytes(trial,art.path))!==digest(original))
   throw Error('Official image damaged during PWA transport');
  authorArt.push({id:art.id,label:art.label,path:art.path,

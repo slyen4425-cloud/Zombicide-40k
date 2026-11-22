@@ -274,6 +274,10 @@ const certifiedNov22NpcInlineSha='1553c0e8f9bab89f5c1badfa64c5d41fb75cff73';
 // the native Play screen, not the height renderer. Both official main commits
 // expose byte-identical south renderer Git blob 6c101756bdf9c58a9ae8cf3fe104e49575145748.
 const certifiedNov22MultiplayerOverlapSha='77bebb83ff176f49edff7ae49c03ba48c28202ca';
+// 22 Nov sculpt palette (#521) merged; certified main CI 45050483870 and Pages 45050483881 GREEN.
+// The native sculpt-height renderer Git blob remains exactly 6c101756...
+// Only the Exploration main source pin and this strict immutable certification change.
+const certifiedNov22SculptPaletteSha='a8d9f8bd61bee7a14ab4e71e6cedc85250457f5c';
 const recoveredWorldSouthBlob='6c101756bdf9c58a9ae8cf3fe104e49575145748';
 const oldSouthBacking="  ctx.fillStyle=baseColor;ctx.fillRect(0,0,totalWidth,totalHeight);";
 const officialSouthBacking="  // The outer cliff is deliberately disabled in the canonical 2.5D editor\n  // and its Tester, including the decorative south fringe. Raised last-row\n  // tops end BEFORE the bottom of this backing rectangle; a solid baseColor\n  // leaked through as the broad grey/green slanted strip on Android. Carry\n  // the EXACT same Material Registry texture underneath the raised tops.\n  // Keep the original backing for callers that explicitly draw a cliff rim.\n  // This is visual-only: no new cells, heights, collisions or saved paint.\n  ctx.fillStyle=!drawOuterSouthRim&&pattern?pattern:baseColor;\n  ctx.fillRect(0,0,totalWidth,totalHeight);";
@@ -316,7 +320,7 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
    throw Error('Certified raised-road renderer differs from official Exploration main');
  releasedSouthBlob=fringeRoadSouthBlob;
  southRendererOriginSha=sourcePin.exploration.sha;
-}else if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha].includes(sourcePin.exploration.sha)){
+}else if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha].includes(sourcePin.exploration.sha)){
  // Official owner removed tile-by-tile height tint, preserving native road
  // paint at raised elevations and the strict WorldDocument save contract.
  // PR #506 adds side/oblique stair travel and display exclusively outside

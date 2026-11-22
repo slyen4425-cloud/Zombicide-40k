@@ -115,9 +115,13 @@ test('eight author-uploaded PNGs map only to verified published Bestiary species
 test('menu has one dedicated item editor view using the SAME Adventure owner',()=>{
  const shell=file('shell-entry-v1.js'),html=file('adventure.html');
  const app=file('adventure-app-v1.mjs'),view=file('adventure-play-sheet-view-v1.mjs');
- assert.match(shell,/items:\{label:"Objets et drops",path:"assets\/gensrpg\/capture-v2\/adventure\.html\?editor=items",family:"capture"\}/);
- assert.match(shell,/id:"economy",title:"Objets et économie"/);
- assert.match(app,/isItemEditor=new URLSearchParams/);
+ assert.ok(shell.includes('items:{label:"Bibliothèque d’objets",path:"assets/gensrpg/capture-v2/adventure.html?editor=library",family:"capture"}'));
+ assert.ok(shell.includes('drops:{label:"Drops / Ressources",path:"assets/gensrpg/capture-v2/adventure.html?editor=drops",family:"capture"}'));
+ assert.ok(shell.includes('merchant:{label:"PNJ marchand · Boutique",path:"assets/gensrpg/capture-v2/adventure.html?editor=merchant",family:"capture"}'));
+ assert.ok(shell.includes('id:"economy",title:"Bibliothèque et drops"'));
+ assert.ok(shell.includes('merchant:{label:"PNJ marchand · Boutique"'),
+  'The merchant remains a view of the single Capture authoring engine');
+ assert.match(app,/const itemEditorRoute=new URLSearchParams/);
  assert.match(app,/document\.body\.dataset\.adventureItemEditor='true'/);
  assert.match(html,/id="adventure-item-search"/);
  assert.match(html,/id="adventure-item-import" disabled/);

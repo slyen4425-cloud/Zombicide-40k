@@ -19,7 +19,10 @@
     combat:{label:"Règles de combat",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=combat",family:"combat"},
     music:{label:"Musiques",path:"vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab=music",family:"combat"},
     bestiary:{label:"Bestiaire",path:"vendor/combat-lab/examples/dom-demo/bestiary.html",family:"combat"},
-    items:{label:"Objets et drops",path:"assets/gensrpg/capture-v2/adventure.html?editor=items",family:"capture"},
+    // One AdventureRules draft, three authoring views; no duplicate shop owner.
+    items:{label:"Bibliothèque d’objets",path:"assets/gensrpg/capture-v2/adventure.html?editor=library",family:"capture"},
+    drops:{label:"Drops / Ressources",path:"assets/gensrpg/capture-v2/adventure.html?editor=drops",family:"capture"},
+    merchant:{label:"PNJ marchand · Boutique",path:"assets/gensrpg/capture-v2/adventure.html?editor=merchant",family:"capture"},
     adventure:{label:"Jouer",path:"assets/gensrpg/capture-v2/adventure.html",family:"capture"}
   });
   // Navigation is presentation-only: one destination per native owner,
@@ -30,7 +33,7 @@
     Object.freeze({id:"npc",title:"PNJ",items:Object.freeze(["npc"])}),
     Object.freeze({id:"combat",title:"Créatures et combat",items:Object.freeze(
       ["creature","skills","combat","bestiary","music"])}),
-    Object.freeze({id:"economy",title:"Objets et économie",items:Object.freeze(["items"])})
+    Object.freeze({id:"economy",title:"Bibliothèque et drops",items:Object.freeze(["items","drops","merchant"])})
   ]);
   const shell=root.GensShellModuleLaunchV1;
   const returnShell=root.GensShellScreenReturnV1;
@@ -249,7 +252,7 @@
       sync();
     });
   }
-  function open(kind,{startView=null}={}){
+  function open(kind,{startView=null,returnTo=null,npcId=null,merchantId=null,editNpcId=null}={}){
     if(!host)return false;
     if(!selectedUniverse){
       notice.textContent='Sélectionne d’abord un univers avant de jouer ou d’ouvrir ses éditeurs.';
@@ -257,6 +260,15 @@
     }
     const info=VIEWS[kind],url=urlFor(kind);
     if(!selectedUniverse.legacy)url.searchParams.set('universe',selectedUniverse.id);
+    // Selected PNJ and merchant IDs are only transported, not persisted here.
+    const safeLinkedId=value=>typeof value==='string'&&
+      /^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(value);
+    if(kind==='merchant'&&returnTo==='npc'){
+      url.searchParams.set('returnTo','npc');
+      if(safeLinkedId(npcId))url.searchParams.set('npcId',npcId);
+      if(safeLinkedId(merchantId))url.searchParams.set('merchantId',merchantId);
+    }
+    if(kind==='npc'&&safeLinkedId(editNpcId))url.searchParams.set('edit',editNpcId);
     // Capture already owns one Adventure portfolio: present its native new/load
     // screens, never create a world or choose a saved session in the Shell.
     if(kind==='adventure'&&['new','load'].includes(startView))
@@ -328,6 +340,13 @@
   // transactions and inventory are NEVER copied or owned by this Shell.
   root.addEventListener?.("message",async event=>{
     const schema=event.data?.schema;
+    if(schema==="gensrpg.exploration.npc.merchant.configure.v1"){
+      if(host&&frame&&current==="npc"&&event.origin===root.location.origin&&
+         event.source===frame.contentWindow)
+        open("merchant",{returnTo:"npc",npcId:event.data?.npcId,
+          merchantId:event.data?.merchantId});
+      return;
+    }
     const isMerchant=schema==="gensrpg.exploration.npc.merchant.catalog.request.v1";
     const isReward=schema==="gensrpg.exploration.npc.reward.catalog.request.v1";
     if(!host||(current!=="builder"&&current!=="world"&&current!=="npc")||!frame||
@@ -340,9 +359,10 @@
     try{
       const owner=await import(new URL(
         "assets/gensrpg/capture-v2/adventure-merchant-catalog-bridge-v1.mjs",base));
-      if(isMerchant)merchants=await owner.availableAdventureMerchantsForNpcV1();
+      const scope={universeId:selectedUniverse?.id??'monster-invoc'};
+      if(isMerchant)merchants=await owner.availableAdventureMerchantsForNpcV1(scope);
       else{
-        const catalog=await owner.availableAdventureItemsForNpcRewardV1();
+        const catalog=await owner.availableAdventureItemsForNpcRewardV1(scope);
         items=catalog.items;currencyLabel=catalog.currencyLabel;
       }
     }catch(failure){error=String(failure?.message??failure).slice(0,180);}

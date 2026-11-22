@@ -238,7 +238,14 @@
    </section>
    <div id="adventure-item-authoring" aria-label="Éditeur unique objets, drops par monstre et marchands">
    <div class="actions" id="adventure-item-editor-navigation"><button id="adventure-return-preparation" type="button">← Retour à la préparation de l'aventure</button></div>
-   <h3 id="adventure-item-editor-heading">Catalogue d'objets</h3>
+   <div id="adventure-library-view" aria-label="Bibliothèque d'objets">
+    <nav class="adventure-item-categories" aria-label="Catégories d'objets">
+     <button type="button" data-capture-item-category="usable">Objets utilisables</button>
+     <button type="button" data-capture-item-category="resource">Ressources</button>
+     <button type="button" data-capture-item-category="fragment">Fragments</button>
+    </nav>
+    <div id="adventure-library-records">
+   <h3 id="adventure-item-editor-heading">Bibliothèque d'objets</h3>
    <details id="adventure-item-library" class="adventure-options">
     <summary>📚 Bibliothèque d’objets — visuels officiels</summary>
     <p class="hint">Retrouve les icônes disponibles, sans créer de doublons.
@@ -251,8 +258,16 @@
    <p class="hint" id="adventure-item-catalog-message">Les objets créés ici alimentent les règles de drop de cette aventure. Les anciennes sauvegardes restent indépendantes.</p>
    <div class="fields">
     <label>Nom de l'objet <input type="text" id="adventure-item-name" maxlength="80" placeholder="Ex. Plume d'Ailevent"></label>
-    <label>Valeur de vente <input type="number" id="adventure-item-value" min="0" max="100000000" value="100" step="1"></label>
+    <label>Valeur indicative de revente <input type="number" id="adventure-item-value" min="0" max="100000000" value="100" step="1"></label>
+    <label>Catégorie <select id="adventure-item-kind"><option value="resource">Ressource</option><option value="usable">Objet utilisable</option></select></label>
     <label>Icône officielle <select id="adventure-item-icon"><option value="">Sans icône</option></select></label>
+   </div>
+   <div id="adventure-item-effect-fields" class="fields" hidden>
+    <label>Effet <select id="adventure-item-effect-type">
+     <option value="heal">Potion de soins (PV)</option>
+     <option value="revive">Potion de réanimation (% des PV max)</option>
+    </select></label>
+    <label>Puissance <input id="adventure-item-effect-value" type="number" min="1" max="1000000" value="20" step="1"></label>
    </div>
    <div class="actions">
     <button type="button" id="adventure-item-add">Ajouter cet objet</button>
@@ -264,6 +279,10 @@
    <label for="adventure-item-search">Rechercher un objet</label>
    <input type="search" id="adventure-item-search" placeholder="Nom, créature ou objet…">
    <div id="adventure-items" class="rules-list" aria-live="polite"></div>
+   </div><!-- /adventure-library-records -->
+   <div id="adventure-fragment-library-list" hidden aria-live="polite"></div>
+   </div><!-- /adventure-library-view -->
+   <div id="adventure-drops-view" aria-label="Drops et ressources">
    <h3>Drops des monstres publiés</h3>
    <p class="hint">La créature choisie détermine quels objets elle peut laisser. Chaque drop est réglable (probabilité et quantité). Le Bestiaire Combat reste seul propriétaire des espèces.</p>
    <label for="adventure-drop-filter">Afficher les règles de drop de</label>
@@ -297,6 +316,7 @@
      <button id="adventure-monster-fragments-default" type="button">Revenir aux valeurs générales</button>
     </div>
    </details>
+   </div><!-- /adventure-drops-view -->
    <details id="adventure-economy-panel" class="adventure-options">
     <summary>Monnaie, ressources et marchands</summary>
     <p class="hint">Une monnaie principale, dont le nom est personnalisable. Les autres ressources sont les objets du catalogue : on peut les réclamer en paiement, sans créer un second inventaire. Aucun marchand n'apparaît en jeu avant son raccord explicite à un PNJ ou un événement Exploration.</p>

@@ -112,6 +112,7 @@ export function installAdventureEconomyEditorV1({
   const host=$('adventure-merchants');host.replaceChildren();
   for(const merchant of current().merchants){
    const line=document.createElement('div');line.className='rule-row';
+   line.dataset.merchantId=merchant.id;
    const label=document.createElement('span');
    label.textContent=merchant.name+' · '+(isSimple(merchant)
     ?merchant.itemIds.length+' objet(s) · vend '+pct(merchant.sellPercent)+
@@ -165,5 +166,13 @@ export function installAdventureEconomyEditorV1({
   selected=new Set();renderLibrary();
  });
  clearMerchant();
- return {read,sync,render,isItemUsed};
+ // The linked PNJ selects an existing canonical shop without duplicating data.
+ function focusMerchant(merchantId){
+  const merchant=byMerchant(merchantId);
+  if(!merchant)return false;
+  if(isSimple(merchant))editMerchant(merchant);
+  $('adventure-merchants')?.scrollIntoView?.({block:'nearest'});
+  return true;
+ }
+ return {read,sync,render,isItemUsed,focusMerchant};
 }

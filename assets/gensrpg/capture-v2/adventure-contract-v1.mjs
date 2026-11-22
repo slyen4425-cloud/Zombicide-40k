@@ -54,6 +54,14 @@ export const SHOWCASE_ADVENTURE_RULES_V1=freeze({
    {throughLevel:100,xpPerLevel:10000}
   ]
  },
+ // These two V2 consumables exist only in NEW showcase drafts, never in old saves.
+ // Item effects remain editable AdventureRules data, not duplicated V1 wrappers.
+ loot:{...DEFAULT_ADVENTURE_RULES_V1.loot,items:[
+  {id:'item.potion.heal',name:'Potion de soins',saleValue:15,kind:'usable',
+   useEffect:{type:'heal',amount:20}},
+  {id:'item.potion.revive',name:'Potion de réanimation',saleValue:70,kind:'usable',
+   useEffect:{type:'revive',percent:35}}
+ ]},
  // Only new Showcase worlds opt in; old saves retain their historical rules.
  fragmentRecruitment:DEFAULT_ADVENTURE_FRAGMENTS_V1
 });
@@ -197,7 +205,7 @@ export function normalizeAdventureRulesV1(input){
  const itemIds=new Set();
  const items=loot.items.map((raw,i)=>{
   // Visual identity is optional. Historical item records stay valid byte for byte.
-  const {iconKey,...legacyItem}=object(raw,'loot.items['+i+']');
+  const {iconKey,kind,useEffect,...legacyItem}=object(raw,'loot.items['+i+']');
   const item=exact(legacyItem,['id','name','saleValue'],'loot.items['+i+']');
   const id=identity(item.id,'item.id');
   if(itemIds.has(id))throw new RangeError('Duplicate Adventure item '+id);
@@ -205,8 +213,22 @@ export function normalizeAdventureRulesV1(input){
   if(iconKey!==undefined&&
      (typeof iconKey!=='string'||!/^[a-z0-9][a-z0-9._-]{0,95}$/.test(iconKey)))
     throw new RangeError('Invalid official Capture item icon key');
-  return {id,name:label(item.name,'item.name'),saleValue:integer(item.saleValue,'item.saleValue',0,100000000),
-   ...(iconKey===undefined?{}:{iconKey})};
+  if(kind!==undefined&&!['usable','resource'].includes(kind))
+    throw new RangeError('Unknown Capture item category');
+  if(useEffect!==undefined){
+    if(kind!=='usable')throw new RangeError('Only usable items may have a use effect');
+    const effect=object(useEffect,'item.useEffect');
+    if(effect.type==='heal')exact(effect,['type','amount'],'item.useEffect');
+    else if(effect.type==='revive')exact(effect,['type','percent'],'item.useEffect');
+    else throw new RangeError('Unknown Capture item use effect');
+    integer(effect.type==='heal'?effect.amount:effect.percent,
+      'item.useEffect value',1,effect.type==='heal'?1000000:100);
+  }
+  return {id,name:label(item.name,'item.name'),
+   saleValue:integer(item.saleValue,'item.saleValue',0,100000000),
+   ...(iconKey===undefined?{}:{iconKey}),
+   ...(kind===undefined?{}:{kind}),
+   ...(useEffect===undefined?{}:{useEffect:{...useEffect}})};
  });
  const drops=loot.drops.map((raw,i)=>{
   const d=exact(raw,['speciesId','itemId','chancePercent','minQuantity','maxQuantity'],
@@ -547,6 +569,17 @@ function assertSession(session){
    identity(id,'fragment actionId');
    if(actions.has(id))throw new RangeError('Duplicate fragment action record');
    actions.add(id);
+  }
+ }
+ // Consumable actions use the same saved AdventureSession and Core Storage.
+ if(Object.hasOwn(v,'processedItemActions')){
+  if(!Array.isArray(v.processedItemActions))
+   throw new TypeError('Invalid consumable action history');
+  const actions=new Set();
+  for(const action of v.processedItemActions){
+   identity(action,'item actionId');
+   if(actions.has(action))throw new RangeError('Duplicate consumable action');
+   actions.add(action);
   }
  }
  // Merchant stock and transaction receipts live in the SAME AdventureSession.
@@ -958,6 +991,57 @@ export function tradeAdventureMerchantV1({session,bestiaryCards,...transaction}=
  const result=tradeAdventureMerchantInventoryV1({session:state,...transaction});
  if(result.applied)assertSession(result.session);
  return result;
+}
+// Canonical out-of-combat consumable use. The official Combat projector supplies
+// the real maximum HP; this module never duplicates Combat's stat formulas.
+export function useAdventureConsumableV1({
+ session,itemId,instanceId,actionId,now,projectCombatVitals
+}={}){
+ const state=assertSession(session);
+ const eventId=identity(actionId,'item actionId');
+ if((state.processedItemActions??[]).includes(eventId))
+  return {applied:false,session:state,receipt:null};
+ if(state.status!=='playing')
+  throw new RangeError('Potions utilisables uniquement pendant une partie');
+ const item=state.rules.loot.items.find(entry=>entry.id===identity(itemId,'itemId'));
+ if(item?.kind!=='usable'||!item.useEffect)
+  throw new RangeError('Objet non utilisable');
+ const count=state.inventory.items[item.id]??0;
+ if(count<1)throw new RangeError('Potion indisponible dans le Sac');
+ const members=[state.party.active,...(state.party.reserve??[])];
+ const member=members.find(actor=>actor.instanceId===identity(instanceId,'instanceId'));
+ if(!member)throw new RangeError('Créature absente de l’équipe');
+ if(typeof projectCombatVitals!=='function')
+  throw new TypeError('Projection de PV Combat officielle requise');
+ const vitals=projectCombatVitals({actor:member,
+  hpMultiplier:state.rules.combat.hpMultiplier});
+ const maxHp=vitals?.maxHp;
+ if(!Number.isFinite(maxHp)||maxHp<=0)
+  throw new RangeError('PV maximum officiels indisponibles');
+ const hp=member.hp===null?maxHp:Math.max(0,Math.min(member.hp,maxHp));
+ let nextHp;
+ if(item.useEffect.type==='heal'){
+  if(hp<=0)throw new RangeError('Une potion de soins ne réanime pas une créature KO');
+  if(hp>=maxHp)throw new RangeError('Cette créature possède déjà tous ses PV');
+  nextHp=Math.min(maxHp,hp+item.useEffect.amount);
+ }else if(item.useEffect.type==='revive'){
+  if(hp!==0)throw new RangeError('La réanimation exige une créature KO');
+  nextHp=Math.max(1,Math.ceil(maxHp*item.useEffect.percent/100));
+ }else throw new RangeError('Effet de potion inconnu');
+ const updatedMember={...member,hp:nextHp};
+ const party=member.instanceId===state.party.active.instanceId
+  ?{...state.party,active:updatedMember}
+  :{...state.party,reserve:state.party.reserve.map(actor=>
+    actor.instanceId===member.instanceId?updatedMember:actor)};
+ const itemCounts={...state.inventory.items};
+ if(count===1)delete itemCounts[item.id];else itemCounts[item.id]=count-1;
+ const updated=freeze({...state,updatedAt:iso(now??state.updatedAt,'now'),
+  party,inventory:{...state.inventory,items:itemCounts},
+  processedItemActions:[...(state.processedItemActions??[]),eventId]});
+ assertSession(updated);
+ return {applied:true,session:updated,
+  receipt:freeze({actionId:eventId,itemId:item.id,instanceId:member.instanceId,
+    beforeHp:hp,afterHp:nextHp,maxHp})};
 }
 // Fragments use the same AdventureSession and Core Progression authorities.
 export function awardAdventureSpeciesFragmentsV1({session,bestiaryCards,...event}={}){

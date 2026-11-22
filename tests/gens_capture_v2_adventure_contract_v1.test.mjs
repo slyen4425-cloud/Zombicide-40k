@@ -1,3 +1,4 @@
+import './gens_capture_v2_item_library_authority_20261122.test.mjs';
 import './gens_capture_v2_item_authoring_unification_20261110.test.mjs'; // One editor/one AdventureRules owner, species-specific drops.
 import './gens_capture_v2_merchant_npc_bridge_20261110.test.mjs';
 import './gens_capture_v2_economy_merchants_20261110.test.mjs'; // Optional merchant rules join the existing Adventure contract CI gate.

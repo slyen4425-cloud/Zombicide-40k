@@ -59,6 +59,7 @@ import {writeAdventureHeroSelectionGrantV1} from './adventure-hero-selection-gra
 import {
  DEFAULT_ADVENTURE_RULES_V1,SHOWCASE_ADVENTURE_RULES_V1,
  summonAdventureCreatureWithFragmentsV1,grantAdventureCreatureFragmentXpV1,
+ useAdventureConsumableV1,
  DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
  createAdventureSessionV1,createAdventureStoreV1,updateAdventureCameraPolicyV1,publishedAdventureSpeciesV1,
  coreAdventureProgressionConfigV1,
@@ -160,7 +161,13 @@ function setCanonicalItemCategory(category){
   }
   fragments.prepend(gallery);
  }
- if(category!=='fragment')renderItemRules();
+ if(category!=='fragment'){
+  if(!activeItemEditId){
+   $('adventure-item-kind').value=category;
+   syncItemUseEffectFields();
+  }
+  renderItemRules();
+ }
 }
 function setupCanonicalItemEditor(){
  if(!isItemEditor)return;
@@ -1550,12 +1557,51 @@ function renderPlayingSheet(){
    void performPlayingFragmentAction({
     kind:'xp',speciesId,instanceId,quantity
    }).catch(sheetActionError);
+  },
+  onUseItem:(itemId,instanceId)=>{
+   void performPlayingItemUse(itemId,instanceId).catch(sheetActionError);
   }
  });
 }
 function sheetActionError(error){
  text($('adventure-sheet-status'),error.message);
  $('adventure-sheet-status').dataset.error='true';
+}
+// Single serialized transaction owner shared with combat, fragments and shop.
+// Neither the UI nor Exploration may mutate the saved creature's HP directly.
+let consumablePending=false;
+async function performPlayingItemUse(itemId,instanceId){
+ const play=activePlayingSheet;
+ if(!play||play.sessionId!==store?.load()?.sessionId)
+  throw new Error('Aucune partie Aventure active pour utiliser cet objet');
+ if(consumablePending)return;
+ consumablePending=true;
+ try{
+  const locks=window.navigator.locks;
+  if(typeof locks?.request!=='function')
+   throw new Error('Verrou de sauvegarde indisponible : potion conservée');
+  let receipt=null;
+  await locks.request('gensrpg.capture.v2.adventure-combat:'+play.sessionId,()=>{
+   const state=store.load();
+   if(state?.status!=='playing'||state.sessionId!==play.sessionId)
+    throw new Error('La partie a changé : aucune potion consommée');
+   if(readCombatHandoff(window.localStorage,{sessionId:play.sessionId}))
+    throw new Error('Les potions du Sac sont utilisables uniquement hors combat');
+   const applied=useAdventureConsumableV1({
+    session:state,itemId,instanceId,actionId:crypto.randomUUID(),
+    now:new Date().toISOString(),
+    projectCombatVitals:officialCombatVitalsProjector
+   });
+   if(!applied.applied)throw new Error('Action déjà prise en compte');
+   store.save(applied.session); // The only Core Storage save.
+   receipt=applied.receipt;
+   play.refreshParty(applied.session); // Original Explorer roster projection.
+  });
+  showSave();renderPlayingSheet();
+  text($('adventure-sheet-status'),'Objet utilisé · PV : '+
+   receipt.beforeHp+' → '+receipt.afterHp+' / '+receipt.maxHp+'.');
+  $('adventure-sheet-status').dataset.error='false';
+ }finally{consumablePending=false;}
 }
 let fragmentActionPending=false;
 async function performPlayingFragmentAction({kind,speciesId,instanceId=null,quantity=null}){
@@ -2428,10 +2474,10 @@ function saveCurrentAdventureRules(){
 }
 function navigateToAdventureOwner(destination){
  const shell=window.parent!==window?window.parent.GensCaptureV2:null;
- if(shell?.status?.().view==='adventure'||shell?.status?.().view==='items'){
+ if(['adventure','items','drops','merchant'].includes(shell?.status?.().view)){
   if(shell.open?.(destination)===true)return;
  }
- const relative=destination==='items'?'./adventure.html?editor=items':'./adventure.html';
+ const relative=destination==='items'?'./adventure.html?editor=library':'./adventure.html';
  const target=new URL(relative,import.meta.url);
  if(target.origin!==window.location.origin)
   throw Error('Éditeur Capture : navigation hors origine refusée');

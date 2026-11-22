@@ -303,6 +303,14 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
    'standalone merchant navigation must be gone');
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="npc"]').tap();
   const npc=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
+  console.log('NPC_DIRECT_FRAME_DIAG',JSON.stringify(await page.evaluate(()=>{
+   const frame=document.querySelector('#gensCaptureV2Root iframe');
+   return {src:frame?.src,status:window.GensCaptureV2?.status?.(),
+    title:frame?.contentDocument?.title,
+    body:frame?.contentDocument?.body?.textContent?.slice(0,240),
+    ready:frame?.contentDocument?.readyState,
+    errors:window.__npcDiagnostics??null};
+  })),errors.slice(-5));
   await npc.locator('#npc-name').fill('Marchand intégré témoin');
   await npc.locator('#npc-role').selectOption('merchant');
   const art=await fs.readFile(path.join(site,'vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png'));

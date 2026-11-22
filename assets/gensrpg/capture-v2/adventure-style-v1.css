@@ -800,3 +800,15 @@ body[data-adventure-item-embed="npc"] #adventure-loot-panel>.fields{display:none
  border:1px solid #3b686b;border-radius:9px;background:#102b33;margin:9px 0}
 .adventure-drop-focused img{width:54px;height:54px;object-fit:contain;flex:none}
 #adventure-drop-focused-description{font-size:12px;line-height:1.5;color:#d3efe3}
+
+/* Inline PNJ form must display Capture validation errors; never hide the status
+   alongside the hero-sized Adventure title. */
+body[data-adventure-item-embed="npc"] .adventure-head{
+ display:flex!important;margin:0 0 7px!important;padding:0!important;
+ background:transparent!important;justify-content:flex-start!important}
+body[data-adventure-item-embed="npc"] .adventure-head>div,
+body[data-adventure-item-embed="npc"] .adventure-head h1,
+body[data-adventure-item-embed="npc"] .adventure-head .eyebrow{display:none!important}
+body[data-adventure-item-embed="npc"] #adventure-status{
+ display:block!important;width:100%;max-width:none!important;min-height:18px;
+ font-size:12px!important;padding:3px 0!important}

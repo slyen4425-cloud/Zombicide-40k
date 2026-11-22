@@ -702,6 +702,7 @@ function editDropRule(index){
  if(!drop)throw new Error('Règle de drop indisponible');
  activeDropEditIndex=index;
  $('adventure-drop-species').value=drop.speciesId;
+ $('adventure-drop-filter').value=drop.speciesId;
  $('adventure-drop-item').value=drop.itemId;
  $('adventure-drop-chance').value=String(drop.chancePercent);
  $('adventure-drop-min').value=String(drop.minQuantity);
@@ -1861,7 +1862,10 @@ economyEditor=installAdventureEconomyEditorV1({
  onMerchantCommitted:merchantId=>{
   // Save on the single Capture AdventureRules authority *before* linking
   // the PNJ by reference. No merchant catalog is persisted in Exploration.
-  if(!isEmbeddedNpcMerchant)return;
+  if(!isEmbeddedNpcMerchant){
+   stateMessage('Marchand configuré. Enregistre les paramètres de l’aventure.');
+   return;
+  }
   if(!/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(merchantId)||
      !/^[0-9a-f-]{36}$/i.test(embeddedMerchantNonce??'')||
      !/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(embeddedNpcId??''))

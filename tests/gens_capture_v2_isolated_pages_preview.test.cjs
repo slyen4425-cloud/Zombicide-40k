@@ -694,3 +694,25 @@ test('published PC enemy reserve HUD stays beside enemy names and wallpapers kee
  assert.match(game,/background-size:contain,100% 100%,cover/,
    'custom loading images remain complete at all screen ratios');
 });
+
+test('PWA portrait Capture menu paints ONE opaque wallpaper without exposing GenSRPG below it',()=>{
+ const css=read(trial,'assets/gensrpg/capture-v2/shell-style-v1.css').toString('utf8');
+ const gameCss=read(trial,'assets/gensrpg/capture-v2/adventure-style-v1.css').toString('utf8');
+ const home=css.match(/#gensCaptureV2Root\[data-view="home"\]\[data-creator-wallpaper="true"\]\{([\s\S]*?)\n\}/)?.[1];
+ assert.ok(home,'real published Capture home wallpaper exists');
+ assert.match(home,/background-color:#08121b/,'Capture must mask the root GenSRPG hub under transparent art');
+ assert.match(home,/background-size:cover,contain,cover/,'complete illustration remains uncropped');
+ assert.equal((home.match(/var\(--capture-home-art\)/g)||[]).length,1,
+  'no duplicate enlarged Kitsune behind the full art');
+ assert.match(home,/radial-gradient\(/,'gutter fill must be gradient rather than another art projection');
+ const preparation=gameCss.match(/body\[data-capture-shell-wallpaper="true"\]:not\(\[data-adventure-playing="true"\]\) main\{([\s\S]*?)\n\}/)?.[1];
+ assert.ok(preparation);
+ assert.match(preparation,/background-color:#08131c/);
+ assert.equal((preparation.match(/var\(--capture-shell-wallpaper\)/g)||[]).length,1,
+  'Jouer setup menu must not recreate the duplicated image');
+ const portrait=css.match(/@media \(orientation:portrait\) and \(max-width:650px\)\{([\s\S]*?)\n\}/)?.[1];
+ assert.ok(portrait,'real portrait header layout is published');
+ assert.match(portrait,/grid-template-columns:max-content minmax\(0,1fr\)/);
+ assert.match(portrait,/grid-column:1\/-1/);
+ assert.match(portrait,/\.gensCaptureReturnToMain\{/);
+});

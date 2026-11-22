@@ -1,3 +1,10 @@
+## 2026-11-22 — Publisher PWA Polocendre : cinq capacités avec corrections validées
+- Source unique Capture V2 fusionnée via #593 dans `work/capture-v2-audit567-source-20261121@300e592a33a56a5534773eedaa2df7371a69767d`, pointant Combat `main@a1c832b2f4c151de55f72cc53c0648aa629b2382`, CI `45005296213` GREEN et Pages GREEN.
+- Lot de publication depuis `main@afb3bd5444bf4795a80c31dac71496fd9a5bf3cb`, checkpoint `checkpoint/gensrpg-start-polocendre-skills-pwa-20261122`, branche `work/gensrpg-polocendre-skills-publisher-20261122`. Ne pas remplacer le root PWA ni la SW de production : preview isolée `/preview/capture-v2-pr225/`.
+- Livraison : les cinq compétences canoniques de Polocendre (Charge, Traînée de feu, Coup de sabot, Vague incendiaire réutilisée, Ruée explosive) et les correctifs 3 traînées distinctes, 5 dégâts sur chaque traversée, allié KO lu depuis le Roster, descriptions non répétitives. Un seul moteur Combat ; aucune copie d'asset ni double autorité.
+- Le fond importé via Créateur reste un média utilisateur local à chaque navigateur ; sa synchronisation n'est pas implicite. Un futur fond par défaut vitrine relève d'un lot séparé.
+- Pins global-assets officiels conservés inchangés ; tests de l'assemblage physique, SHA, bundle et transport, audio/menus, previews PC/mobile, CI puis preuve HTTPS publics obligatoires avant annonce de disponibilité PWA.
+
 ## 2026-11-22 — PWA Capture : Vipfer, Polocendre et bibliothèque visuelle unique
 - Départ Publisher `main@e188fe3f67369247ad25a01256eb952b6945c1fb`, checkpoint `checkpoint/gensrpg-start-vipfer-polocendre-pwa-20261122`, branche `work/gensrpg-vipfer-polocendre-publisher-20261122`. Classe C2, source et publisher séparés ; rollback conservé.
 - Le Labo Combat `main@c8a2c99ea96f06552f93c2470ea86846ae74aa2f` (PR #373), CI `44970997400` GREEN + Pages `44970997491` GREEN, fournit 25 transferts Showcase dont les nouveaux Vipfer et Polocendre. La source Capture officielle a fusionné la PR #591 : `6aed0f6e4bda09a59920a11ab0dd82f0c9a216d4`, sans changer Exploration.

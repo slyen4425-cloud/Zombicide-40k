@@ -1,3 +1,9 @@
+## 2026-11-22 — Source Capture : cinq capacités Polocendre certifiées depuis Combat main
+- START source `work/capture-v2-audit567-source-20261121@6aed0f6e4bda09a59920a11ab0dd82f0c9a216d4`, checkpoint `checkpoint/gensrpg-start-polocendre-skills-capture-20261122`, branche `work/gensrpg-polocendre-skills-capture-source-20261122`.
+- PR Combat #374 fusionnée sur `main@a1c832b2f4c151de55f72cc53c0648aa629b2382`. Compilation source unique de la fiche Polocendre et des compétences : Charge, Traînée de feu, Coup de sabot, Vague incendiaire réutilisée sans copie, Ruée explosive.
+- Run CI main `45005296213` à vérifier SUCCESS avant fusion source. Répertoire Combat vendored un seul emplacement via stage officiel, aucun miroir d'assets. Catalogue visuel `global-assets@b807389811c5a7e5236b9fdc96b7f155168d7fd7` reste à sa SHA réelle inchangée (ceci est juste un texte ; le pin officiel demeure exact).
+- Publication PWA par PR séparée après source certifiée, tests de provenances et de parcours, stabilité des menu audio/fond et saves. Aucune modification Exploration ou autres modules.
+
 ## 2026-11-22 — Capture V2 : intégration Vipfer et Polocendre sans double autorité
 - Base source `work/capture-v2-audit567-source-20261121@088a213f3b903bb5979e2121b31e55761397e4c1`, checkpoint `checkpoint/gensrpg-start-vipfer-polocendre-capture-20261122`, branche `work/gensrpg-vipfer-polocendre-capture-source-20261122`.
 - Cible Combat officiel `main@c8a2c99ea96f06552f93c2470ea86846ae74aa2f`, PR Combat #373, 2 transferts auteur officiels. CI main `44970997400` à certifier GREEN avant promotion. Exploration main et propriétaire média inchangés dans ce contrat source.

@@ -178,6 +178,13 @@ test('exact official Lab main files and derived Showcase have one owner and veri
     const saved=JSON.parse(read(trial,transfer).toString('utf8'));
     assert.equal(saved.draft.id,skillId,'Combat owns the canonical authored ability '+skillId);
   }
+  const fireWave=JSON.parse(read(trial,
+    'vendor/combat-lab/data/capture/showcase/cap_fire_atk_5.capture-skill-transfer-v1.json').toString('utf8')).draft;
+  assert.equal(fireWave.id,'cap_fire_atk_5','Vague incendiaire must preserve its canonical ID');
+  assert.equal(fireWave.presentation.visual.icon.assetId,'pack:capture:icon-skill-fireball-01',
+    'PWA must ship the fireball skill icon, not the old dome');
+  assert.equal(fireWave.presentation.visual.travel.assetId,'pack:capture:sprite-fire-bubble-expansion-01');
+  assert.equal(fireWave.definition.effects[0].amount,25);
   const horse=polocendre.draft.presentation.visual;
   assert.deepEqual(['movement','movementBack','rangedAttack','rangedAttackBack']
     .map(key=>horse[key]?.frameCount),[6,7,5,5],
@@ -596,8 +603,8 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
  const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
  const adapter=read(trial,'vendor/combat-lab/src/adapters/input/capture/capture-npc-opponent-instance-v1.js').toString('utf8');
  const economy=read(trial,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs').toString('utf8');
- assert.equal(pins.combat.sha,'d7eeae0fdb13454cf5a9ae18a0676e6784e425e5');
- assert.equal(pins.combat.certifiedCiRun,45008484200);
+ assert.equal(pins.combat.sha,'34c17c15f4ca8b457a94e49fa2f3fcfb8ca93ca0');
+ assert.equal(pins.combat.certifiedCiRun,45016265619);
  assert.equal(provenance.combat.sha,pins.combat.sha);
  assert.equal(delivery.combat.sha,pins.combat.sha);
  assert.equal(previewPin.officialVisuals.sha,'b807389811c5a7e5236b9fdc96b7f155168d7fd7');

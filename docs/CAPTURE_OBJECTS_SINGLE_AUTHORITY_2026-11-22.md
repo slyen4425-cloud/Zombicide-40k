@@ -16,6 +16,12 @@
 - Potions nouvelles par défaut du jeu vitrine : soin +20 PV ; réanimation 35 % PV max. Les fiches sont éditables ; le Sac passe par `useAdventureConsumableV1` et le même verrou/sauvegarde de session que les combats et fragments. L'inventaire ne s'affiche pas pendant le combat. Test idempotent et refus des cibles incohérentes.
 - `merchant.resalePercent` facultatif et éditable dans la boutique PNJ (100 % par défaut historique), les prix/stock d'offres restent par marchand ; la valeur `item.saleValue` appartient à la fiche référence, jamais dupliquée en état autonome.
 
+## Raccord PNJ marchand et résilience potion — suite du 22 novembre
+- Le message same-origin Exploration `gensrpg.exploration.npc.merchant.configure.v1` transporte uniquement `npcId` (définition déjà enregistrée) et `merchantId` (référence existante).
+- Le Shell Capture `open('merchant',{returnTo:'npc',npcId,merchantId})` présélectionne la boutique propre à l’univers ; le retour `open('npc',{editNpcId})` réouvre la même fiche PNJ via son paramètre `edit`, sans nouveau stockage ni catalogue.
+- L’échec de synchronisation visuelle d’Exploration après `store.save` d’une potion ne remet pas en cause la consommation déjà validée : avertir « sauvegardé, synchronisation à vérifier » comme pour les fragments, sans encourager un second clic.
+- Un test navigateur paysage vérifie la sélection du marchand après chargement asynchrone du Bestiaire et le retour vers le PNJ. Aucun merge tant que CI du nouveau SHA et test ciblé ne sont verts.
+
 ## Parcours/tests requis avant GREEN
 1. Contrats potions et consommation depuis la vraie fiche de Sac, cible réserviste comprise, double clic, reprise sauvegardée, refus en combat.
 2. Nouvelle créature publiée et ancienne créature personnalisée, rechargement, changement d'univers, import/export ; une ressource, pas de conflit et fragment intact.

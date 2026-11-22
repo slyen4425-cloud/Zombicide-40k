@@ -18,21 +18,14 @@ export function releasePreviewPwaForCommit(sourceWorker,sourceHtml,releaseSha){
     .replace(rootCleanup,'name.startsWith("gensrpg-preview-capture-v2-")&&name!==CACHE_NAME');
   if(scoped===sourceWorker||scoped.includes(rootCleanup))
     throw Error('Preview cache isolation failed');
-  // The pinned worker called skipWaiting() without binding its promise
-  // to the install lifetime. In mobile Chromium a newly installed release
-  // could remain WAITING behind its predecessor after reopening the app.
-  // Request activation at the START of installation, not only after a
-  // long, sequential precache. The previous release could finish install and
-  // remain WAITING behind the old PWA on Android despite the new cache being
-  // present. Bind skipWaiting to waitUntil so the installation lifecycle owns
-  // its promise, while letting cache population finish before install settles.
+  // The early skipWaiting() call must NOT be awaited by install.waitUntil:
+  // Chromium may resolve that promise only after activation, while activation
+  // itself waits for the installation lifetime to finish. Awaiting it creates
+  // a cyclic lifecycle dependency and leaves the update permanently waiting.
+  // Keep ONLY precache in waitUntil, request activation non-blockingly before
+  // and after precache (same worker / cache owner, no second authority).
   const oldInstall='self.addEventListener("install",event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE_NAME).then(async cache=>{for(const file of CORE_FILES)await cacheFresh(cache,file)}))});';
-  // Request activation immediately AND once after precache resolves. Chromium
-  // can retain an installed waiting worker when the first request happened
-  // before its installation settled; the late call is an idempotent safety
-  // handshake owned by the SAME install event and SAME service worker.
-  // No extra registration, polling, cache namespace, or user data mutation.
-  const activatedInstall='self.addEventListener("install",event=>{event.waitUntil((async()=>{await self.skipWaiting();const cache=await caches.open(CACHE_NAME);for(const file of CORE_FILES)await cacheFresh(cache,file);await self.skipWaiting()})())});';
+  const activatedInstall='self.addEventListener("install",event=>{self.skipWaiting();event.waitUntil((async()=>{const cache=await caches.open(CACHE_NAME);for(const file of CORE_FILES)await cacheFresh(cache,file);self.skipWaiting()})())});';
   if(scoped.split(oldInstall).length!==2)
     throw Error('Unknown preview install lifecycle; fail closed');
   const lifecycleWorker=scoped.replace(oldInstall,activatedInstall);

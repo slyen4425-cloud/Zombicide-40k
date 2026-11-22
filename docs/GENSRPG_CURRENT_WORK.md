@@ -1,3 +1,10 @@
+## 2026-11-22 — Publisher PWA : correction PC réserves ennemies + fond complet en portrait
+- Source Capture V2 approuvée via #597 (portrait/paysage sans recadrage) et #598 (Combat PC Réserves adverses hors noms ennemis), staging immuable `work/capture-v2-audit567-source-20261121@a87997adeda0818304e09c97bace55f2016a6b21`.
+- Moteur unique Combat `main@d7eeae0fdb13454cf5a9ae18a0676e6784e425e5` (PR #377), CI `45008484200` GREEN après reprise d'une sentinelle intermittente ; Pages Combat main GREEN. Tous les tests réels du correctif HUD ont réussi.
+- Publisher démarre de `main@54c212cabe3fd783ee0dca9f0ed7bafd950a5071`, checkpoint `checkpoint/gensrpg-before-pc-enemy-reserve-publisher-20261122`, branche `work/gensrpg-pc-enemy-reserve-publisher-20261122`. Conserver Polocendre publié par #596.
+- Changer exclusivement le pin de source preview, les validations de provenance et ce rapport ; aucune copie Combat, aucun nouveau média fond choisi, aucune modification du root ni du service-worker, ni des sauvegardes/Exploration/Dungeon.
+- Validation physique Pages + tests Chromium PC/téléphone + HTTP HTTPS provenance obligatoire avant statut publié.
+
 ## 2026-11-22 — Publisher PWA Polocendre : cinq capacités avec corrections validées
 - Source unique Capture V2 fusionnée via #593 dans `work/capture-v2-audit567-source-20261121@300e592a33a56a5534773eedaa2df7371a69767d`, pointant Combat `main@a1c832b2f4c151de55f72cc53c0648aa629b2382`, CI `45005296213` GREEN et Pages GREEN.
 - Lot de publication depuis `main@afb3bd5444bf4795a80c31dac71496fd9a5bf3cb`, checkpoint `checkpoint/gensrpg-start-polocendre-skills-pwa-20261122`, branche `work/gensrpg-polocendre-skills-publisher-20261122`. Ne pas remplacer le root PWA ni la SW de production : preview isolée `/preview/capture-v2-pr225/`.

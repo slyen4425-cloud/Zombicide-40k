@@ -87,6 +87,10 @@ test('preview worker requests skipWaiting before precache and holds activation i
   'same install event must repeat the activation handshake after cache settles');
  assert.equal((install.match(/await self\.skipWaiting\(\)/g)||[]).length,2,
   'early and late activation requests share exactly one ServiceWorker registration');
+ assert.match(worker,/self\.addEventListener\("message",event=>\{if\(event\.data&&event\.data\.type==="SKIP_WAITING"\)event\.waitUntil\(self\.skipWaiting\(\)\)\}\)/,
+  'waiting-worker activation must survive termination of the message event');
+ assert.doesNotMatch(worker,/type==="SKIP_WAITING"\)self\.skipWaiting\(\)/,
+  'an unbound skipWaiting promise may be lost while a worker is still waiting');
  assert.match(worker,/name\.startsWith\("gensrpg-preview-capture-v2-"\)/);
  assert.doesNotMatch(worker,/name\.startsWith\("gensrpg-cache-"\)&&name!==CACHE_NAME/);
 });

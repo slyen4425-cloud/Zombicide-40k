@@ -56,19 +56,37 @@ export function normalizeAdventureEconomyV1(input,lootItems=[]){
   // The simple merchant owns only a checked list and two percentage sliders.
   // Historical merchants retain their exact authored offers/stocks/resources.
   if(Object.hasOwn(raw,'itemIds')){
-   const m=exact(raw,['id','name','itemIds','sellPercent','buyPercent'],
+   const baseFields=['id','name','itemIds','sellPercent','buyPercent'];
+   const hasFragmentPrices=Object.hasOwn(raw,'fragmentPrices');
+   const m=exact(raw,hasFragmentPrices?[...baseFields,'fragmentPrices']:baseFields,
     'economy.merchants['+i+']');
    if(!Array.isArray(m.itemIds))throw new TypeError('merchant.itemIds must be an array');
    const items=new Set();
    for(const item of m.itemIds){
     const itemId=id(item,'merchant.itemId');
-    if(!existing.has(itemId))throw new RangeError('Merchant item missing from loot.items: '+itemId);
+    if(!isCommodity(itemId))throw new RangeError('Merchant item missing from loot.items or official fragments: '+itemId);
     if(items.has(itemId))throw new RangeError('Duplicate merchant item '+itemId);
     items.add(itemId);
    }
+   // A fragment is NOT a duplicate loot.items record: its catalog key is
+   // fragment:<officialSpeciesId>. The merchant owns only its purchase price.
+   const fragmentPrices={};
+   if(hasFragmentPrices){
+    obj(m.fragmentPrices,'merchant.fragmentPrices');
+    for(const [fragmentId,price] of Object.entries(m.fragmentPrices)){
+     id(fragmentId,'merchant.fragmentPrices ID');
+     if(!fragmentId.startsWith('fragment:')||!items.has(fragmentId))
+      throw new RangeError('Unselected fragment price '+fragmentId);
+     fragmentPrices[fragmentId]=integer(price,'merchant.fragment price',1,100000000);
+    }
+   }
+   for(const itemId of items)if(itemId.startsWith('fragment:')&&
+     !Object.hasOwn(fragmentPrices,itemId))
+    throw new RangeError('Missing merchant fragment price '+itemId);
    return {id:merchantId,name:title(m.name,'merchant.name'),
     itemIds:[...items],sellPercent:integer(m.sellPercent,'merchant.sellPercent',-100,200),
-    buyPercent:integer(m.buyPercent,'merchant.buyPercent',-100,200)};
+    buyPercent:integer(m.buyPercent,'merchant.buyPercent',-100,200),
+    ...(hasFragmentPrices?{fragmentPrices}:{})};
   }
   const m=exact(raw,['id','name','buysItems','offers'],'economy.merchants['+i+']');
   if(typeof m.buysItems!=='boolean')throw new TypeError('merchant.buysItems must be boolean');
@@ -150,9 +168,10 @@ export function tradeAdventureMerchantInventoryV1({
  const paidResources=[];
  if(kind==='buy'){
   const offer=Object.hasOwn(merchant,'itemIds')
-   ?(definition&&merchant.itemIds.includes(target)
+   ?(merchant.itemIds.includes(target)
      ?{itemId:target,currencyPrice:adventureMerchantPriceV1(
-        definition.saleValue,merchant.sellPercent),resourceCosts:[],stock:null}
+        definition?.saleValue??merchant.fragmentPrices?.[target],
+        merchant.sellPercent),resourceCosts:[],stock:null}
      :null)
    :merchant.offers.find(x=>x.itemId===target);
   if(!offer)throw new RangeError('Merchant does not offer this item');

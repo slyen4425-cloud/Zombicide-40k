@@ -19,6 +19,23 @@
  padding:clamp(12px,2vw,22px) clamp(12px,3vw,30px)}
 #gensCaptureV2Root[data-view="home"] > header strong{
  font-size:clamp(22px,4.5vw,34px);letter-spacing:.04em}
+/* Portrait menu: the title, Quitter and GenSRPG return link never overlap. */
+@media (orientation:portrait) and (max-width:650px){
+ #gensCaptureV2Root[data-view="home"] > header{
+  display:grid;grid-template-columns:max-content minmax(0,1fr);
+  gap:7px 10px;align-items:center;
+ }
+ #gensCaptureV2Root[data-view="home"] > header strong{
+  grid-column:1/-1;min-width:0;font-size:clamp(20px,5vw,26px);
+  letter-spacing:.01em;white-space:normal;
+ }
+ #gensCaptureV2Root[data-view="home"] > header > button{justify-self:start}
+ #gensCaptureV2Root[data-view="home"] > header .gensCaptureReturnToMain{
+  display:block;min-width:0;max-width:100%;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  text-align:right;color:#afe7e1;font-size:12px;
+ }
+}
 #gensCaptureV2Root[data-view="home"] > nav,
 #gensCaptureV2Root[data-view="home"] > .gensCaptureV2Editors{
  width:min(100% - 32px,520px);margin:auto;min-height:0;overflow-y:auto;
@@ -141,8 +158,15 @@
  position:absolute;inset:0;z-index:30;display:flex;align-items:flex-end;
  justify-content:center;padding:clamp(12px,3vh,24px);overflow:hidden;
  background-color:#07151d;
- background-image:url("../../../vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png");
- background-position:center;background-repeat:no-repeat;background-size:contain;
+ /* Same certified artwork twice: uncut foreground at all aspect ratios,
+    cropped fill behind the margins. Never stretch or produce blank bands. */
+ background-image:
+  url("../../../vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png"),
+  linear-gradient(180deg,#07151d20,#07151d88),
+  url("../../../vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png");
+ background-position:center,center,center;
+ background-repeat:no-repeat,no-repeat,no-repeat;
+ background-size:contain,100% 100%,cover;
  pointer-events:auto;
 }
 #gensCaptureV2Root .gensCaptureV2LoadingLabel{
@@ -160,12 +184,18 @@
 
 /* World creator: a fourth *menu* entry, never an overlay over live gameplay. */
 #gensCaptureV2Root[data-view="home"][data-creator-wallpaper="true"]{
+ /* Opaque canvas hides the historical GenSRPG hub even under transparent PNG pixels. */
+ background-color:#08121b;
  background-image:linear-gradient(
   rgba(6,18,25,var(--capture-home-shade,.55)),
   rgba(6,18,25,var(--capture-home-shade,.55))),
-  var(--capture-home-art);
- background-size:cover,cover;background-position:center,center;
- background-repeat:no-repeat;
+  var(--capture-home-art),
+  radial-gradient(ellipse at 50% 10%,#204a4b 0%,#102c36 42%,#08121b 84%);
+ /* Single uncropped image at every orientation. Gradient fills portrait gutters
+    without painting a second, larger creature. */
+ background-size:cover,contain,cover;
+ background-position:center,center,center;
+ background-repeat:no-repeat,no-repeat,no-repeat;
 }
 #gensCaptureV2Root .gensCaptureV2CreatorPanel{display:none}
 #gensCaptureV2Root[data-view="home"][data-menu="creator"] > nav,
@@ -198,7 +228,8 @@
  padding:6px 0;max-width:100%;color:#d7eef5
 }
 #gensCaptureV2Root .gensCaptureV2CreatorPanel .captureCreatorBgPreview{
- min-height:110px;background-size:cover;background-position:center;
+ min-height:110px;background-size:contain;background-position:center;
+ background-repeat:no-repeat;background-color:#07151d;
  border:1px solid #658d91;border-radius:9px;padding:12px;
  display:flex;align-items:flex-end;margin:8px 0
 }
@@ -223,4 +254,13 @@
 @media(max-height:550px){
  #gensCaptureV2Root[data-view="home"][data-menu="creator"]
   > .gensCaptureV2CreatorPanel{max-height:calc(100dvh - 72px);}
+}
+
+/* Menu d'accueil UNIQUEMENT : légère transparence pour laisser lire le décor.
+   Les boutons des éditeurs, du Créateur, du jeu et des autres modules restent pleins. */
+#gensCaptureV2Root[data-view="home"][data-menu="main"] > .gensCaptureV2MainMenu button{
+ background:linear-gradient(110deg,rgba(28,88,96,.81),rgba(23,59,74,.84));
+}
+#gensCaptureV2Root[data-view="home"][data-menu="main"] > .gensCaptureV2MainMenu button:hover{
+ background:linear-gradient(110deg,rgba(39,101,118,.91),rgba(27,74,89,.93));
 }

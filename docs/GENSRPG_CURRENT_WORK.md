@@ -1,3 +1,35 @@
+## 2026-11-22 — Source Capture V2 : marchands par catégories et drops par créature (C2)
+- Base immuable PWA publiée `c7861946bbb29d1a70adee5f468177011915c38f`, checkpoint `checkpoint/gensrpg-start-merchant-drop-editor-20261122`, branche `work/gensrpg-merchant-drop-editor-20261122`.
+- Propriétaires inchangés : `AdventureRules.loot.items` (objets), `fragmentRecruitment` (fragments), `economy.merchants` (offres), `AdventureSession.inventory` (soldes), `Explorer` (PNJ).
+- Périmètre : sélection de Ressources / Utilisables / Fragments par ID de l'unique bibliothèque, prix de base explicite des fragments dans les offres marchandes existantes ; sélection d'un monstre -> règle de drop en cours et paramètres de fragments canoniques automatiquement affichés ; ajout d'autres objets possible.
+- Invariants : aucune deuxième bibliothèque, aucun nouveau stockage, aucune altération de l'identité des espèces, du Combat/Exploration/Donjon/Survie, des sauvegardes, du root PWA ni de son service-worker. Les anciennes boutiques `offers` restent valides et non converties automatiquement.
+- Contrôles : tests économie/fragments, compatibilité des boutiques existantes, sentinelles éditeur (réel navigateur PC/mobile), preuve HTTPS d'un SHA source puis publisher spécifique PWA. État NON GREEN avant CI + provenance Pages.
+
+## 2026-11-22 — Source Capture : correction PC Réserves adverses (Labo Combat main)
+- Source `work/capture-v2-audit567-source-20261121@bb11e127c11c8a69a66e518110db5d38d8f3d344`, checkpoint `checkpoint/gensrpg-before-pc-enemy-reserve-capture-20261122`, lot isolé `work/gensrpg-pc-enemy-reserve-capture-20261122`.
+- Nouveau pin Combat officiel `main@d7eeae0fdb13454cf5a9ae18a0676e6784e425e5` (PR Combat #377), CI main `45008484200` à valider SUCCESS et Pages GREEN avant fusion. Corrige le chevauchement de l'onglet Réserves adverses et de sa liste avec les noms ennemis sur PC, tests réels 1v1/2v2 et parité mobile ; les cinq capacités Polocendre déjà publiées restent inchangées.
+- La branche hérite du correctif purement graphique d'orientation Shell/Adventure #597, sans ajouter de média vitrine. Aucune recopie du CSS Combat, aucune modification de PNJ/sauvegardes/Exploration/PWA root/service-worker.
+- Promotion Publisher après validation source, release physique et HTTPS ; ne jamais consommer un Combat main non certifié.
+
+## 2026-11-22 — Préparation responsive des fonds de vitrine et chargements Capture
+- Audit demandé : un visuel panorama 20:9 ne peut pas remplir 9:20 (portrait) sans recadrage ou déformation ; proposer à l'avenir deux compositions officielles paysage/portrait depuis la même bibliothèque, sans deuxième propriétaire ni duplication.
+- Source branch `work/gensrpg-responsive-wallpaper-loading-20261122` (checkpoint `checkpoint/gensrpg-before-responsive-wallpaper-loading-20261122`). Cible : conserver **chaque bord de l'image** sur une couche `contain`, et remplir les marges avec la même image `cover` en arrière-plan. Shell accueil, menu Adventure et chargement Shell ; Adventure loading standard/personnalisé avait déjà ce mécanisme.
+- Aucun nouveau média choisi/généré ; pas de modification du `global-assets`, des préférences IndexedDB/localStorage, de la musique, des sauvegardes, du jeu, ni du root PWA.
+- Tests de propriété source : éviter le `cover` seul en avant, vérifier que l'art entier et la copie couvrante utilisent la même variable/image ; CSS seulement dans les propriétaires Capture distincts.
+- Changer ensuite uniquement l'actif officiel vitrine paysage et portrait lorsque les deux visuels seront approuvés ; promotion PWA isolée après CI de source complète et publisher séparé.
+
+## 2026-11-22 — Source Capture : cinq capacités Polocendre certifiées depuis Combat main
+- START source `work/capture-v2-audit567-source-20261121@6aed0f6e4bda09a59920a11ab0dd82f0c9a216d4`, checkpoint `checkpoint/gensrpg-start-polocendre-skills-capture-20261122`, branche `work/gensrpg-polocendre-skills-capture-source-20261122`.
+- PR Combat #374 fusionnée sur `main@a1c832b2f4c151de55f72cc53c0648aa629b2382`. Compilation source unique de la fiche Polocendre et des compétences : Charge, Traînée de feu, Coup de sabot, Vague incendiaire réutilisée sans copie, Ruée explosive.
+- Run CI main `45005296213` à vérifier SUCCESS avant fusion source. Répertoire Combat vendored un seul emplacement via stage officiel, aucun miroir d'assets. Catalogue visuel `global-assets@b807389811c5a7e5236b9fdc96b7f155168d7fd7` reste à sa SHA réelle inchangée (ceci est juste un texte ; le pin officiel demeure exact).
+- Publication PWA par PR séparée après source certifiée, tests de provenances et de parcours, stabilité des menu audio/fond et saves. Aucune modification Exploration ou autres modules.
+
+## 2026-11-22 — Capture V2 : intégration Vipfer et Polocendre sans double autorité
+- Base source `work/capture-v2-audit567-source-20261121@088a213f3b903bb5979e2121b31e55761397e4c1`, checkpoint `checkpoint/gensrpg-start-vipfer-polocendre-capture-20261122`, branche `work/gensrpg-vipfer-polocendre-capture-source-20261122`.
+- Cible Combat officiel `main@c8a2c99ea96f06552f93c2470ea86846ae74aa2f`, PR Combat #373, 2 transferts auteur officiels. CI main `44970997400` à certifier GREEN avant promotion. Exploration main et propriétaire média inchangés dans ce contrat source.
+- Aucun transfert de créature copié localement ; seule la référence SHA/CI du Combat change. Base déjà munie du correctif menu audio/fond #586, sans changement de Shell, sauvegardes, Monster InvoC runtime ou autres modules.
+- Tests source et navigateur PWA puis publication par unique publisher `main`, pin du visuel global-assets certifié `b807389811c5a7e5236b9fdc96b7f155168d7fd7`. Aucun merge si une CI pertinente est rouge.
+
 ## 2026-11-21 — Capture : diagnostic canonique de l'entrée multijoueur sans monde (PR #582)
 - Signalement auteur (Jouer) : message brut anglais « Invalid canonical Capture online play context », liste « Monde local actuel (compatibilité) » et aucun WorldDocument archivé. Le parcours vient de `adventure-app-v1.mjs` → `preflightCaptureOnlineWorldV1` qui exige salle/auth, transport et vrai `WorldDocument` avant l'écriture de la session ou d'une position serveur.
 - START source actuelle `work/capture-v2-audit567-source-20261121@fa907181f557ebbfa7a7da1017daf96d71f745e1`, checkpoint `checkpoint/gensrpg-start-capture-online-play-context-20261121`, branche `work/gensrpg-capture-online-play-context-20261121`. Ne pas modifier directement le staging ni le `main` publisher.

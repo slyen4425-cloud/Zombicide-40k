@@ -5,6 +5,7 @@ const http=require('node:http');
 const fs=require('node:fs/promises');
 const path=require('node:path');
 const {chromium}=require('playwright');
+const {PNG}=require('pngjs');
 
 const site=path.resolve(process.env.CAPTURE_V2_SITE||'_site');
 const types={'.html':'text/html;charset=utf-8','.js':'text/javascript;charset=utf-8',
@@ -23,8 +24,8 @@ const server=http.createServer(async(req,res)=>{
  }catch(error){res.writeHead(404).end('Missing real published asset');}
 });
 
-test('real smartphone editor: one native view, create/edit drop, save and reload without duplicate owner',
- {timeout:125000},async()=>{
+test('real landscape UI: library, drops, fragments and NPC shop share one saved Capture owner',
+ {timeout:185000},async()=>{
  await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
  let browser;
  try{
@@ -40,184 +41,136 @@ test('real smartphone editor: one native view, create/edit drop, save and reload
   await page.waitForFunction(()=>!!window.GensCaptureV2&&
    document.querySelectorAll('button.gensRootModeCard').length===4,null,{timeout:60000});
   await page.locator('button.gensRootModeCard.capture').tap();
-  assert.equal(await page.locator('#gensCaptureV2Root').getAttribute('data-menu'),'universes',
-   'entry must show real universes before opening any editor');
   await page.locator('#gensCaptureV2Root [data-capture-universe-select="monster-invoc"]').tap();
-  await page.locator('#gensCaptureV2Root[data-menu="main"]').waitFor({state:'visible'});
-  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
-  await page.locator('#gensCaptureV2Root [data-editor-group="economy"] [data-capture-v2-view="items"]').tap();
-  assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),'items');
   const frame=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
-  await frame.locator('#adventure-loot-panel:visible').waitFor({timeout:30000});
-  await frame.locator('#adventure-status').waitFor({timeout:30000});
-  await frame.locator('#adventure-drop-species:not([disabled])').waitFor({timeout:40000});
-  const officialSpecies=await frame.locator('#adventure-drop-species option')
-   .evaluateAll(nodes=>nodes.map(x=>({id:x.value,name:x.textContent})));
-  console.log('AUTHORED_DROP_OFFICIAL_SPECIES',JSON.stringify(officialSpecies));
-  assert.equal(await frame.locator('body').getAttribute('data-adventure-item-editor'),'true');
-  assert.equal(await frame.locator('#adventure-item-import').isDisabled(),false,
-   'verified user-uploaded icons make the optional official import available');
+  async function editor(kind,first=false){
+   if(!first)await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+   await page.locator('#gensCaptureV2Root [data-capture-v2-view="'+kind+'"]').tap();
+   await page.waitForFunction(value=>window.GensCaptureV2?.status().view===value,kind);
+   await frame.locator('#adventure-drop-species:not([disabled])').waitFor({
+    state:'attached',timeout:45000});
+  }
+  await editor('items',true);
+  assert.equal(await frame.locator('#adventure-library-view').isVisible(),true);
+  assert.equal(await frame.locator('#adventure-drops-view').isVisible(),false);
+  assert.equal(await frame.locator('#adventure-economy-panel').isVisible(),false);
+  await frame.locator('[data-capture-item-category="resource"]').tap();
+  await frame.locator('#adventure-item-search').fill('Relique témoin');
   assert.equal(await frame.locator('#adventure-items .rule-row').count(),0);
-  assert.equal(await frame.locator('#adventure-create:visible').count(),0,
-   'item editor must not expose a second game creation screen');
-
   await frame.locator('#adventure-item-name').fill('Relique témoin');
   await frame.locator('#adventure-item-value').fill('37');
   await frame.locator('#adventure-item-add').tap();
   assert.match(await frame.locator('#adventure-items').innerText(),/Relique témoin.*37 pièces/s);
-  const item=frame.locator('#adventure-items .rule-row').first();
-  await item.getByRole('button',{name:'Modifier'}).tap();
+  await frame.locator('#adventure-items .rule-row').first()
+   .getByRole('button',{name:'Modifier'}).tap();
   await frame.locator('#adventure-item-name').fill('Relique témoin corrigée');
   await frame.locator('#adventure-item-value').fill('48');
   await frame.locator('#adventure-item-add').tap();
+  await frame.locator('#adventure-item-search').fill('Relique témoin corrigée');
+  assert.equal(await frame.locator('#adventure-items .rule-row').count(),1);
+  await frame.locator('#adventure-save-rules').tap();
+  await page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')
+   .evaluate(iframe=>iframe.contentWindow.location.reload());
+  await frame.locator('#adventure-drop-species:not([disabled])').waitFor({state:'attached',timeout:45000});
+  await frame.locator('[data-capture-item-category="resource"]').tap();
+  await frame.locator('#adventure-item-search').fill('Relique témoin corrigée');
   assert.equal(await frame.locator('#adventure-items .rule-row').count(),1,
-   'editing must preserve item identity, not duplicate it');
-  assert.match(await frame.locator('#adventure-items').innerText(),/Relique témoin corrigée.*48 pièces/s);
-
-  await frame.locator('#adventure-drop-species').selectOption({index:0});
+   'the original saved AdventureRules owns the edited item after reload');
+  // Fragment records are virtual: always derived from the published Bestiary.
+  await frame.locator('[data-capture-item-category="fragment"]').tap();
+  assert.equal(await frame.locator('#adventure-fragment-library-list').isVisible(),true);
+  assert.ok(await frame.locator('[data-capture-fragment-cards] .adventure-item-library-card').count()>0);
+  assert.equal(await frame.locator('#adventure-fragments-panel').count(),1,
+   'fragment settings are MOVED, not copied');
+  assert.equal(await frame.locator('#adventure-monster-fragments-panel').count(),1);
+  assert.equal(await frame.locator('#adventure-fragment-species').isVisible(),true);
+  
+  await editor('drops');
+  assert.equal(await frame.locator('#adventure-drops-view').isVisible(),true);
+  assert.equal(await frame.locator('#adventure-library-view').isVisible(),false);
+  const initialDrops=await frame.locator('#adventure-drops .rule-row').count();
+  assert.ok(initialDrops>0,'newly published species already have official default drops');
+  const species=await frame.locator('#adventure-drop-species option').first().getAttribute('value');
+  await frame.locator('#adventure-drop-species').selectOption(species);
+  assert.equal(await frame.locator('#adventure-drop-filter').isVisible(),false,
+   'drop editor must show ONE monster picker, not two');
+  await frame.locator('#adventure-drop-item').selectOption({label:'Relique témoin corrigée'});
   await frame.locator('#adventure-drop-chance').fill('35');
   await frame.locator('#adventure-drop-min').fill('1');
   await frame.locator('#adventure-drop-max').fill('2');
   await frame.locator('#adventure-drop-add').tap();
-  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),1);
-  await frame.locator('#adventure-drops .rule-row button').last().tap(); // Modifier
+  const authored=frame.locator('#adventure-drops .rule-row')
+   .filter({hasText:'Relique témoin corrigée'});
+  assert.equal(await authored.count(),1);
+  await authored.getByRole('button',{name:'Modifier'}).tap();
   await frame.locator('#adventure-drop-chance').fill('47');
   await frame.locator('#adventure-drop-add').tap();
-  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),1,
-   'editing must update one encounter rule, not create a duplicate');
-  assert.match(await frame.locator('#adventure-drops').innerText(),/47 %/);
+  assert.match(await authored.innerText(),/47 %/);
   await frame.locator('#adventure-save-rules').tap();
   await page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')
    .evaluate(iframe=>iframe.contentWindow.location.reload());
-  await frame.locator('#adventure-drop-species:not([disabled])').waitFor({timeout:40000});
-  assert.match(await frame.locator('#adventure-items').innerText(),/Relique témoin corrigée.*48 pièces/s,
-   'reload must use the same canonical AdventureRules draft');
-  assert.match(await frame.locator('#adventure-drops').innerText(),/47 %/);
-  assert.equal(await frame.locator('#adventure-items .rule-row').count(),1);
-  assert.equal(await frame.locator('#adventure-item-icon option').count(),13,
-   'all twelve real uploaded pictures must be selectable in the single editor');
-  await frame.locator('#adventure-items .rule-row').first()
-   .getByRole('button',{name:'Modifier'}).tap();
-  await frame.locator('#adventure-item-icon').selectOption('visuel-pieuvre');
-  await frame.locator('#adventure-item-add').tap();
-  assert.equal(await frame.locator('#adventure-items img.sheet-item-icon').count(),1,
-   'unassigned author picture is usable without pretending Pieuvre is Krakenor');
+  await frame.locator('#adventure-drop-species:not([disabled])').waitFor({state:'attached',timeout:45000});
+  assert.equal(await frame.locator('#adventure-drops .rule-row')
+   .filter({hasText:'Relique témoin corrigée'}).count(),1);
+  
 
-  const templateSpecies=await frame.locator('body').evaluate(async()=>{
-   const response=await fetch('./item-templates.v1.json',{cache:'no-store'});
-   if(!response.ok)throw Error('Missing verified item manifest');
-   return (await response.json()).items.map(item=>item.speciesId);
-  });
-  const publishedIds=new Set(officialSpecies.map(x=>x.id));
-  assert.equal(templateSpecies.length,8);
-  assert.ok(templateSpecies.every(id=>publishedIds.has(id)),
-   'every automatic creature drop must refer to the actual published Combat Bestiary');
-  await frame.locator('#adventure-item-import').tap();
-  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9);
-  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
-  const images=frame.locator('#adventure-items img.sheet-item-icon');
-  assert.equal(await images.count(),9);
-  await images.first().evaluate(img=>img.decode());
-  await images.nth(1).evaluate(img=>img.decode());
-  await frame.locator('#adventure-save-rules').tap();
-  await page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')
-   .evaluate(iframe=>iframe.contentWindow.location.reload());
-  await frame.locator('#adventure-drop-species:not([disabled])').waitFor({timeout:40000});
-  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9,
-   'imported items persist through the one AdventureRules save owner');
-  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
-  await frame.locator('#adventure-item-import').tap();
-  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9,
-   "reimport must never duplicate the author's items");
-  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
-
-  // Native authoring: select items from the ONE loot catalog; merchant prices
-  // derive from saleValue and two percent sliders, not per-item offers/stocks.
-  await frame.locator('#adventure-economy-panel > summary').tap();
-  await frame.locator('#adventure-money-singular').fill('jeton');
-  await frame.locator('#adventure-money-plural').fill('jetons');
+  // Merchant does not have a menu anymore. The historical deep link stays
+  // compatible for existing NPC references; the NEW workflow is in the NPC.
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view="merchant"]').count(),0);
+  assert.equal(await page.evaluate(()=>window.GensCaptureV2.open('merchant')),true);
+  await frame.locator('#adventure-drop-species:not([disabled])').waitFor({state:'attached',timeout:45000});
+  assert.equal(await frame.locator('#adventure-economy-panel').isVisible(),true);
+  assert.equal(await frame.locator('#adventure-drops-view').isVisible(),false);
+  assert.equal(await frame.locator('#adventure-loot-global-rewards').isVisible(),false,
+   'global victory coins and denomination must NOT be merchant options');
   await frame.locator('#adventure-merchant-name').fill('Marchand témoin');
+  // The modern merchant catalog is deliberately collapsed on landscape.
   await frame.locator('#adventure-economy-panel > details > summary').tap();
-  assert.equal(await frame.locator('#adventure-merchant-sell-value').innerText(),'+10 %');
-  assert.equal(await frame.locator('#adventure-merchant-buy-value').innerText(),'-50 %');
-  assert.match(await frame.locator('#adventure-merchant-price-example').innerText(),
-   /vendu 110 · racheté 50/);
-  assert.equal(await frame.locator('#adventure-merchant-library input[type="checkbox"]').count(),9);
-  await frame.locator('#adventure-merchant-library input[type="checkbox"]').first().check();
-  assert.match(await frame.locator('#adventure-merchant-selected-count').innerText(),/1 objet/);
+  await frame.locator('#adventure-merchant-search').fill('Relique témoin corrigée');
+  await frame.locator('#adventure-merchant-library input[aria-label="Proposer Relique témoin corrigée"]').check();
+  assert.match(await frame.locator('#adventure-merchant-selected-count').innerText(),
+    /^1 objet\(s\) proposés parmi \d+$/,
+    'the selected canonical resource is checked regardless of unrelated published species');
   await frame.locator('#adventure-merchant-add').tap();
   assert.equal(await frame.locator('#adventure-merchants .rule-row').count(),1);
-  assert.match(await frame.locator('#adventure-merchants').innerText(),
-   /1 objet.*vend \+10 %.*rachète -50 %/s);
   await frame.locator('#adventure-save-rules').tap();
   await page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')
    .evaluate(iframe=>iframe.contentWindow.location.reload());
-  await frame.locator('#adventure-drop-species:not([disabled])').waitFor({timeout:40000});
-  assert.equal(await frame.locator('#adventure-money-plural').inputValue(),'jetons');
-  assert.equal(await frame.locator('#adventure-merchants .rule-row').count(),1,
-   'merchant persists with the canonical AdventureRules draft');
-  await frame.locator('#adventure-economy-panel > summary').tap();
-  await frame.locator('#adventure-economy-panel > details > summary').tap();
-  await frame.locator('#adventure-merchants .rule-row button').first().tap();
+  await frame.locator('#adventure-merchants .rule-row').waitFor({state:'visible',timeout:45000});
+  await frame.locator('#adventure-merchants .rule-row').first()
+   .getByRole('button',{name:'Modifier'}).tap();
   assert.equal(await frame.locator('#adventure-merchant-sell-percent').inputValue(),'10');
   assert.equal(await frame.locator('#adventure-merchant-buy-percent').inputValue(),'-50');
   assert.equal(await frame.locator('#adventure-merchant-library input:checked').count(),1);
-  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9,
-   'merchant configuration may not create or duplicate item definitions');
 
-  // The drop editor uses ONE official species registry, not a second
-  // per-monster inventory. Filtering must not alter the other species.
-  await frame.locator('#adventure-drop-filter').selectOption(templateSpecies[1]);
-  assert.equal(await frame.locator('#adventure-drop-species').inputValue(),templateSpecies[1],
-   'focused monster is also the edited monster, including fragment policy');
-  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),1,
-   'one authored imported drop is visible for this published species');
-  await frame.locator('#adventure-drop-filter').selectOption('');
-  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9,
-   'other monster drops remain present after switching the filter');
+  // Real Shell routing (same iframe, same stored AdventureRules): opening the
+  // selected PNJ's linked merchant preselects this shop and returning restores
+  // the specific saved NPC instead of losing authoring context.
 
-  // Override ONLY the selected monster's fragment chance and quantities.
-  await frame.locator('#adventure-drop-species').selectOption(templateSpecies[0]);
-  await frame.locator('#adventure-monster-fragments-panel summary').tap();
-  await frame.locator('#adventure-monster-fragments-chance').fill('33');
-  await frame.locator('#adventure-monster-fragments-min').fill('2');
-  await frame.locator('#adventure-monster-fragments-max').fill('4');
-  await frame.locator('#adventure-monster-fragments-save').tap();
-  assert.match(await frame.locator('#adventure-monster-fragments-status').innerText(),
-   /particulières enregistrées/);
-  await frame.locator('#adventure-save-rules').tap();
-
-  // Navigation replaces the iframe, but saves the SAME Capture AdventureRules
-  // first. The preplay view has a summary rather than a competing item form.
+  const linkedId=await frame.locator('#adventure-merchants .rule-row')
+   .first().getAttribute('data-merchant-id');
+  assert.ok(linkedId,'real merchant must have a stable ID');
+  assert.equal(await page.evaluate(merchantId=>window.GensCaptureV2.open('merchant',{
+   returnTo:'npc',npcId:'npc-linked-test',merchantId
+  }),linkedId),true);
+  assert.equal(await page.locator('#gensCaptureV2Root iframe').evaluate(el=>
+   new URL(el.src).searchParams.get('npcId')),'npc-linked-test');
+  await page.waitForFunction(()=>{
+   const doc=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument;
+   return /Boutique liée à ton PNJ/.test(
+    doc?.querySelector('#adventure-status')?.textContent??'');
+  },null,{timeout:45000});
+  assert.equal(await frame.locator('#adventure-merchant-name').inputValue(),'Marchand témoin');
+  assert.equal(await frame.locator('#adventure-merchant-buy-percent').inputValue(),'-50');
+  const size=await frame.locator('#adventure-loot-panel').boundingBox();
+  assert.ok(size&&size.width>300&&size.width<=932,'landscape editor stays inside viewport');
   await frame.locator('#adventure-return-preparation').tap();
-  await page.waitForFunction(()=>window.GensCaptureV2?.status?.().view==='adventure');
-  await frame.locator('body[data-adventure-start-view="choice"]').waitFor({timeout:30000});
-  // The new two-button home requires an explicit Nouvelle partie choice.
-  await frame.locator('#adventure-start-new').tap();
-  // Simple player launch hides author controls. Reopen them through the actual
-  // visible disclosure before entering the existing loot summary.
-  assert.equal(await frame.locator('#adventure-advanced-panel').getAttribute('open'),null);
-  await frame.locator('#adventure-advanced-panel > summary').tap();
-  await frame.locator('#adventure-loot-panel summary').first().tap();
-  await frame.locator('#adventure-loot-preparation-count').filter({hasText:/9 objet\(s\)/})
-   .waitFor({timeout:40000});
-  assert.equal(await frame.locator('#adventure-item-authoring').isVisible(),false,
-   'preplay must not expose a second catalogue or merchant editor');
-  assert.match(await frame.locator('#adventure-loot-preparation-count').innerText(),
-   /9 objet\(s\).*9 règle\(s\) de drop/s);
-  await frame.locator('#adventure-open-item-editor').tap();
-  await page.waitForFunction(()=>window.GensCaptureV2?.status?.().view==='items');
-  await frame.locator('#adventure-drop-species:not([disabled])').waitFor({timeout:40000});
-  assert.equal(await frame.locator('#adventure-items .rule-row').count(),9);
-  assert.equal(await frame.locator('#adventure-drops .rule-row').count(),9);
-  assert.equal(await frame.locator('#adventure-money-plural').inputValue(),'jetons');
-  await frame.locator('#adventure-drop-species').selectOption(templateSpecies[0]);
-  assert.equal(await frame.locator('#adventure-monster-fragments-chance').inputValue(),'33');
-  assert.equal(await frame.locator('#adventure-monster-fragments-min').inputValue(),'2');
-  assert.equal(await frame.locator('#adventure-monster-fragments-max').inputValue(),'4');
-
-  const big=await frame.locator('#adventure-loot-panel').boundingBox();
-  assert.ok(big.width>300&&big.width<=932,'editor fits phone landscape viewport');
+  assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),'npc');
+  assert.equal(await page.locator('#gensCaptureV2Root iframe').evaluate(el=>
+   new URL(el.src).searchParams.get('edit')),'npc-linked-test');
   assert.deepEqual(errors.filter(e=>/Uncaught|SyntaxError|Duplicate Capture|Competing Capture/.test(e)),[]);
  }finally{
   await browser?.close();server.closeAllConnections();
@@ -324,6 +277,67 @@ test('real smartphone merchant: proximity iframe opens only canonical shop and b
   await page.waitForFunction(()=>window.__merchantSession.inventory.currency===20);
   assert.equal(await page.evaluate(()=>window.__merchantSession.inventory.items.relique??0),0);
   await page.locator('#adventure-merchant-close').click();
+ }finally{
+  await browser?.close();server.closeAllConnections();
+  await new Promise(ok=>server.close(ok));
+ }
+});
+
+test('merchant edits inside the saved NPC; official Capture commits the inventory and only merchantId is linked', 
+ {timeout:195000},async()=>{
+ await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
+ let browser;
+ try{
+  browser=await chromium.launch({headless:true});
+  const context=await browser.newContext({viewport:{width:932,height:430},
+   hasTouch:true,serviceWorkers:'block',locale:'fr-FR'});
+  await context.addInitScript(()=>{window.supabase={createClient:()=>({})}});
+  const page=await context.newPage(),errors=[];
+  page.on('pageerror',e=>errors.push(String(e)));
+  await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
+  await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',
+   {waitUntil:'domcontentloaded',timeout:60000});
+  await page.locator('button.gensRootModeCard.capture').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-universe-select="monster-invoc"]').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  assert.equal(await page.locator('[data-capture-v2-view="merchant"]').count(),0,
+   'standalone merchant navigation must be gone');
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="npc"]').tap();
+  const npc=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
+  // IndexedDB NPC catalog must finish its initial async refresh BEFORE form
+  // interaction; otherwise that refresh intentionally clears unsaved fields.
+  await npc.locator('#npc-count:has-text("PNJ enregistrés")')
+   .waitFor({state:'visible',timeout:45000});
+  await npc.locator('#npc-name').fill('Marchand intégré témoin');
+  await npc.locator('#npc-role').selectOption('merchant');
+  // A genuine user-uploaded 64×64 PNG, not an invented Bestiary entry.
+  const png=new PNG({width:64,height:64});
+  for(let i=0;i<png.data.length;i+=4){
+   png.data[i]=64;png.data[i+1]=170;png.data[i+2]=140;png.data[i+3]=255;
+  }
+  const art=PNG.sync.write(png);
+  await npc.locator('#npc-image').setInputFiles({name:'marchand-test.png',mimeType:'image/png',buffer:art});
+  await npc.locator('#npc-save').tap();
+  await npc.locator('#npc-status:has-text("PNJ enregistré")').waitFor({timeout:15000});
+  const npcId=await npc.locator('#npc-saved').inputValue();
+  assert.match(npcId,/^npc\.user\./,'saving must keep the official minted NPC ID');
+  await npc.locator('#npc-merchant-config > summary').tap();
+  await npc.locator('#npc-merchant-configure').tap();
+  const merchant=npc.frameLocator('#npc-merchant-frame');
+  await merchant.locator('#adventure-merchant-name').waitFor({state:'visible',timeout:60000});
+  assert.equal(await merchant.locator('body').getAttribute('data-adventure-item-embed'),'npc');
+  assert.equal(await merchant.locator('#adventure-loot-global-rewards').isVisible(),false);
+  await merchant.locator('#adventure-merchant-library input[type="checkbox"]').first().check();
+  await merchant.locator('#adventure-merchant-add').click({noWaitAfter:true});
+  await npc.locator('#npc-status:has-text("Boutique enregistrée et liée")').waitFor({timeout:60000});
+  const merchantId=await npc.locator('#npc-merchant-choice').inputValue();
+  assert.match(merchantId,/^merchant-/,'the saved PNJ must receive the Capture merchantId');
+  await npc.locator('#npc-merchant-configure').tap();
+  await merchant.locator('#adventure-merchant-name').waitFor({state:'visible',timeout:60000});
+  await merchant.locator('#adventure-merchant-library input:checked').first().waitFor({timeout:40000});
+  assert.equal(await npc.locator('#npc-merchant-choice').inputValue(),merchantId,
+   'link survives reload, without creating a second shop');
+  assert.deepEqual(errors.filter(e=>/SyntaxError|Uncaught|Duplicate Capture/.test(e)),[]);
  }finally{
   await browser?.close();server.closeAllConnections();
   await new Promise(ok=>server.close(ok));

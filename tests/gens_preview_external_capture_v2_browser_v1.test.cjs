@@ -73,8 +73,8 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
     assert.equal(owner.modeCount,4);
     await page.locator('button.gensRootModeCard.capture').click();
     await page.locator('#gensCaptureV2Root').waitFor({state:'visible'});
-    assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view]').count(),11,
-      'external Shell has eight native Lab destinations, one Jouer, one item editor and the Creator view');
+    assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view]').count(),12,
+      'external Shell has eight native Lab destinations, one Jouer, library/drops editors and Creator; merchant lives in NPC');
     assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="heroes"] [data-capture-v2-view="heroes"]').count(),1,
       'one native Exploration hero editor, never a duplicated editor');
     assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="economy"] [data-capture-v2-view="items"]').count(),1,

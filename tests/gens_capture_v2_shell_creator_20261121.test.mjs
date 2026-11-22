@@ -156,7 +156,8 @@ test('native editor UI clicks reuse the same Capture creator sound, but not Adve
  assert.match(shell,/editorDoc\.addEventListener\('click',onClick,true\)/);
  assert.match(shell,/creatorOwner\?\.play\('click'\)/);
  assert.match(shell,/editorDoc\.removeEventListener\('click',onClick,true\)/);
- assert.match(shell,/if\(kind==='adventure'\)creatorOwner\?\.leaveHome\(\)/);
+ assert.match(shell,/if\(kind==='adventure'\)bindAdventureMenuPresentation\(frame\)/);
+ assert.match(shell,/if\(playing\(\)\)creatorOwner\?\.leaveHome\(\)/);
  assert.match(shell,/else creatorOwner\?\.enterHome\(\)/);
  assert.match(shell,/if\(nativeKind==="adventure"\)return/);
  assert.match(shell,/editorDoc\.fullscreenElement/);
@@ -171,6 +172,62 @@ test('music retries after gesture on Android and choosing music enables its univ
  assert.match(creator,/doc\.removeEventListener\('pointerdown',resumeOnGesture,true\)/);
  assert.match(creator,/if\(slot==='ambience'\)\{\s*\/\/ Choosing a track/);
  assert.match(creator,/if\(slot==='ambience'\)\{\s*settings=normalizeCaptureShellCreatorSettingsV1/);
- assert.match(creator,/startAmbient,\s*async reload\(/);
+ assert.match(creator,/startAmbient,\s*wallpaper:\(\)=>backgroundUrl\?Object\.freeze\(/);
+ assert.match(creator,/async reload\(/);
  assert.match(creator,/function leaveHome\(\)\{\s*active=false;stopAmbient\(/);
+});
+
+
+test('Creator wallpaper and ambience stay in Shell menus and Adventure preparation, not live play',()=>{
+ const shell=read('shell-entry-v1.js'),creator=read('shell-creator-presentation-v1.mjs');
+ const css=read('shell-style-v1.css'),adventureCss=read('adventure-style-v1.css');
+ assert.match(shell,/function bindAdventureMenuPresentation\(nativeFrame\)/);
+ assert.match(shell,/adventureDoc\.body\.dataset\.adventurePlaying==='true'/);
+ assert.match(shell,/attributeFilter:\['data-adventure-playing'\]/);
+ assert.match(shell,/if\(playing\(\)\)creatorOwner\?\.leaveHome\(\)/);
+ assert.match(shell,/else creatorOwner\?\.enterHome\(\)/);
+ assert.match(shell,/if\(kind==='adventure'\)bindAdventureMenuPresentation\(frame\)/);
+ assert.match(shell,/adventureDoc\.documentElement\.style\.removeProperty\('--capture-shell-wallpaper'\)/);
+ assert.match(shell,/creatorOwner\?\.play\('click'\)/);
+ assert.match(creator,/wallpaper:\(\)=>backgroundUrl\?Object\.freeze\(/);
+ assert.match(css, /data-view="home"\]\[data-menu="main"\] > \.gensCaptureV2MainMenu button/);
+ assert.match(css, /rgba\(28,88,96,\.81\)/);
+ assert.doesNotMatch(css,/data-menu="editors"\]\s*> \.gensCaptureV2MainMenu button\s*\{/);
+ assert.match(adventureCss,/body\[data-capture-shell-wallpaper="true"\]:not\(\[data-adventure-playing="true"\]\) main/);
+ assert.doesNotMatch(shell,/new Audio\(/);
+});
+
+// The Creator owns exactly one image URL. An opaque gradient canvas fills
+// portrait margins; the historic GenSRPG hub must never bleed through.
+test('Creator wallpaper uses ONE complete image and opaque backgrounds in both orientations',()=>{
+ const shell=read('shell-style-v1.css');
+ const game=read('adventure-style-v1.css');
+ const home=shell.match(/#gensCaptureV2Root\[data-view="home"\]\[data-creator-wallpaper="true"\]\{([\s\S]*?)\n\}/)?.[1];
+ assert.ok(home,'real Capture home wallpaper style exists');
+ assert.match(home,/background-color:#08121b/);
+ assert.match(home,/background-size:cover,contain,cover/);
+ assert.equal((home.match(/var\(--capture-home-art\)/g)||[]).length,1,
+  'the SAME transparent hero image must never render at two scales');
+ assert.match(home,/radial-gradient\(/,'gutter fill is geometry, not another monster image');
+ const intro=shell.slice(shell.indexOf('#gensCaptureV2Root \.gensCaptureV2Loading{'));
+ assert.match(intro,/background-size:contain,100% 100%,cover/);
+ assert.match(game,/#adventure-launch-loading\{[^}]*background-size:contain,cover/s);
+ const prep=game.match(/body\[data-capture-shell-wallpaper="true"\]:not\(\[data-adventure-playing="true"\]\) main\{([\s\S]*?)\n\}/)?.[1];
+ assert.ok(prep,'real Adventure preparation wallpaper style exists');
+ assert.match(prep,/background-color:#08131c/);
+ assert.match(prep,/background-size:cover,contain,cover/);
+ assert.equal((prep.match(/var\(--capture-shell-wallpaper\)/g)||[]).length,1);
+ assert.match(prep,/radial-gradient\(/);
+ // Preserve the existing single authority; never export the local Creator image to gameplay.
+ assert.doesNotMatch(game,/background-image:.*gensrpg\.capture\.shell\.creator\.settings/);
+});
+test('portrait Capture header wraps title above the button and back link',()=>{
+ const shell=read('shell-style-v1.css');
+ const portrait=shell.match(/@media \(orientation:portrait\) and \(max-width:650px\)\{([\s\S]*?)\n\}/)?.[1];
+ assert.ok(portrait,'portrait-only layout defined');
+ assert.match(portrait,/> header\{/);
+ assert.match(portrait,/grid-template-columns:max-content minmax\(0,1fr\)/);
+ assert.match(portrait,/> header strong\{\s*grid-column:1\/-1/);
+ assert.match(portrait,/\.gensCaptureReturnToMain\{/);
+ assert.match(portrait,/text-overflow:ellipsis/);
 });

@@ -164,7 +164,21 @@ test('exact official Lab main files and derived Showcase have one owner and veri
     assert.equal(creature.draft.presentation.visual.icon?.assetId,icon);
     assert.equal(creature.loadout.slots.length,5);
   }
-  const horse=authors.get('polocendre').draft.presentation.visual;
+  const polocendre=authors.get('polocendre');
+  const newSkills=[
+    'polocendre-charge','polocendre-trainee-feu','polocendre-coup-sabot',
+    'cap_fire_atk_5','polocendre-ruee-explosive'
+  ];
+  assert.deepEqual(polocendre.draft.skillIds,newSkills,
+    'published PWA must equip Polocendre with its four authored skills and the single existing Vague incendiaire');
+  assert.deepEqual(polocendre.loadout.slots.map(slot=>slot.skillId),newSkills,
+    'published PWA must preserve the exact five combat slots without fallback to demo fireball');
+  for(const skillId of newSkills.filter(id=>id.startsWith('polocendre-'))){
+    const transfer='vendor/combat-lab/data/capture/showcase/'+skillId+'.capture-skill-transfer-v1.json';
+    const saved=JSON.parse(read(trial,transfer).toString('utf8'));
+    assert.equal(saved.draft.id,skillId,'Combat owns the canonical authored ability '+skillId);
+  }
+  const horse=polocendre.draft.presentation.visual;
   assert.deepEqual(['movement','movementBack','rangedAttack','rangedAttackBack']
     .map(key=>horse[key]?.frameCount),[6,7,5,5],
     'PWA must ship the approved horse animation frame counts');

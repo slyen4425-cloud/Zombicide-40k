@@ -12,24 +12,26 @@ const navigation={schema:'gensrpg.exploration.play-navigation.v1',
  worldFingerprint:'hash:1',currentAreaId:'area-1',x:10,y:20};
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 async function settle(){for(let i=0;i<10;i++)await tick();}
-function harness({broadcastSend=null}={}){
+function harness({broadcastSend=null,userId=host,initialGuests=true}={}){
  let seq=0,peerSeq=1;
  const queries=[],rpcCalls=[],listeners=[],authTokens=[];
  const members=[
   {user_id:host,display_name:'Hôte',role:'host',joined_at:'2026-11-20T10:00:00Z'},
-  {user_id:guest,display_name:'Invité',role:'guest',joined_at:'2026-11-20T10:01:00Z'}
+  ...(initialGuests?[{user_id:guest,display_name:'Invité',
+   role:'guest',joined_at:'2026-11-20T10:01:00Z'}]:[])
  ];
  const room={id:roomId,code:'ABCDEFGHJK',owner_id:host,
   adventure_session_id:'session-local',max_players:2,
   guest_permissions:{},host_is_game_master:false,join_enabled:true,
   open:true,revision:3,world_id:'forest',world_fingerprint:'hash:1'};
  const client={
-  auth:{getSession:async()=>({data:{session:{user:{id:host},access_token:'test-jwt'}}}),
-   signInAnonymously:async()=>({data:{session:{user:{id:host},access_token:'test-jwt'}}})},
+  auth:{getSession:async()=>({data:{session:{user:{id:userId},access_token:'test-jwt'}}}),
+   signInAnonymously:async()=>({data:{session:{user:{id:userId},access_token:'test-jwt'}}})},
   realtime:{setAuth:async token=>{authTokens.push(token);}},
   rpc:async(name)=>{
    rpcCalls.push(name);
    if(name==='gensrpg_capture_report_position')return {data:++seq};
+   if(name==='gensrpg_capture_join_room')return {data:[{room_id:roomId,room_code:room.code}]};
    return {data:null};
   },
   from(table){
@@ -38,9 +40,10 @@ function harness({broadcastSend=null}={}){
     eq(){return this;},
     maybeSingle:async()=>({data:table==='gensrpg_capture_rooms'?room:{seq}}),
     order:async()=>({data:table==='gensrpg_capture_room_members'?members:
-     [{room_id:roomId,user_id:guest,world_id:'forest',
-      world_fingerprint:'hash:1',area_id:'area-1',x:100+peerSeq,y:40,
-      seq:peerSeq,updated_at:'2026-11-20T10:00:00Z'}]})
+     members.some(member=>member.user_id===guest)
+      ?[{room_id:roomId,user_id:guest,world_id:'forest',
+       world_fingerprint:'hash:1',area_id:'area-1',x:100+peerSeq,y:40,
+       seq:peerSeq,updated_at:'2026-11-20T10:00:00Z'}]:[]})
    };
    return {select:()=>query};
   },
@@ -51,7 +54,10 @@ function harness({broadcastSend=null}={}){
   removeChannel:async()=>{}
  };
  return {transport:createCaptureRoomTransportV1({client}),queries,rpcCalls,listeners,authTokens,
-  advance:()=>++peerSeq};
+  advance:()=>++peerSeq,
+  addGuest:()=>{if(!members.some(m=>m.user_id===guest))
+   members.push({user_id:guest,display_name:'Invité',
+    role:'guest',joined_at:'2026-11-20T10:01:00Z'});} };
 }
 test('issue #553: consecutive official poses use server-owned seq without redundant room/membership/own-seq fetches',async()=>{
  const h=harness(),seen=[];
@@ -124,5 +130,73 @@ test('issue #553: delayed Broadcast ACK never holds the next authoritative posit
  assert.ok(wakes.every(x=>x.event==='capture-peer-position-changed-v1'));
  assert.ok(wakes.every(x=>Object.keys(x.payload).length===0),
   'no unverified coordinates ever travel in Broadcast payloads');
+ await h.transport.dispose();
+});
+
+test('issue #584: a successful idempotent join_room RPC must NOT fake a second guest when auth is the host',async()=>{
+ const h=harness({userId:host});
+ await assert.rejects(h.transport.join({code:'ABCDEFGHJK',name:'Second appareil'}),
+  /même profil réseau que le créateur/);
+ assert.deepEqual(h.rpcCalls,['gensrpg_capture_join_room'],
+  'no extra account/saving RPC may run on an invalid identity');
+ await h.transport.dispose();
+});
+test('issue #584: only a distinct user verified as guest in the RLS membership can join',async()=>{
+ const h=harness({userId:guest});
+ const joined=await h.transport.join({code:'ABCDEFGHJK',name:'Invité'});
+ assert.equal(joined.role,'guest');
+ assert.equal(joined.userId,guest);
+ assert.equal(joined.roomId,roomId);
+ assert.ok(h.queries.includes('gensrpg_capture_rooms'));
+ assert.ok(h.queries.includes('gensrpg_capture_room_members'));
+ await h.transport.dispose();
+});
+
+test('issue #584: the Capture shell never treats a one-member room as a completed two-player session',()=>{
+ const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ assert.match(app,/state\.members\.length<2/);
+ assert.match(app,/En attente d’un autre joueur distinct/);
+ assert.match(app,/setAdventureStartView\(valid\?'load':'new',\{preserveChoices:true\}\)/);
+ assert.match(app,/Connexion non confirmée/);
+ assert.match(app,/await transport\.dispose\(\)/);
+ const fragment=app.slice(app.indexOf('async function connectCaptureRoom('),
+  app.indexOf('async function copyCaptureRoomInviteCode('));
+ assert.ok(fragment.includes('try{')&&fragment.includes('}catch(error){'),
+  'an incomplete room subscription must reset the UI without touching the save');
+ assert.doesNotMatch(fragment,/portfolio\.create|portfolio\.remove|store\.save|localStorage\.clear/);
+});
+
+test('issue #584: Héberger is the explicit single-step opt-in to joinEnabled on the canonical save',()=>{
+ const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ const start=app.indexOf("('adventure-room-host').addEventListener");
+ const end=app.indexOf("('adventure-room-join').addEventListener",start);
+ assert.ok(start>=0&&end>start,'real native Héberger action must be present');
+ const handler=app.slice(start,end);
+ assert.match(handler,/if\(!session\.sessionControl\?\.joinEnabled\)/);
+ assert.match(handler,/updateAdventureSessionControlV1/);
+ assert.match(handler,/joinEnabled:true/);
+ assert.match(handler,/store\.save\(session\)/);
+ assert.match(handler,/captureRoomProvider\(\)\.create/);
+ assert.ok(handler.indexOf('store.save(session)')<handler.indexOf('captureRoomProvider().create'),
+  'user-approved local join permission must be committed before room allocation');
+ assert.doesNotMatch(handler,/localStorage\.clear|portfolio\.remove|signOut|worldLibrary\.activate/);
+});
+
+test('issue #584: a new server-verified guest becomes visible after Presence even if an old one-member snapshot was cached',async()=>{
+ const h=harness({initialGuests:false}),received=[],rooms=[];
+ await h.transport.observe({roomId,userId:host,onChange:room=>rooms.push(room),
+  onPositions:positions=>received.push(positions)});
+ await settle();
+ assert.equal(received.length,0,'host-only room has no remote actors');
+ assert.equal(rooms.at(-1)?.members?.length,1);
+ h.addGuest();
+ const presence=h.listeners.find(listener=>listener.type==='presence'&&listener.event==='sync');
+ assert.ok(presence,'single private room channel should deliver membership wake-up');
+ presence.callback();
+ await settle();
+ assert.equal(rooms.at(-1)?.members?.length,2);
+ assert.equal(received.at(-1)?.actors[0]?.actorId,guest,
+  'the RLS reader must retry with refreshed server membership, not keep a stale roster');
+ assert.equal(received.at(-1)?.actors[0]?.seq,1);
  await h.transport.dispose();
 });

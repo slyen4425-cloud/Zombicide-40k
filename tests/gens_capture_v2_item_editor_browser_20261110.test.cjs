@@ -164,16 +164,14 @@ test('real landscape UI: library, drops, fragments and NPC shop share one saved 
   },null,{timeout:45000});
   assert.equal(await frame.locator('#adventure-merchant-select').inputValue(),linkedId);
   assert.match(await frame.locator('#adventure-status').innerText(),/Boutique liée à ton PNJ/);
+  // The linked shop is now fully loaded; measure its actual visible layout
+  // rather than a freshly recreated iframe in a transient loading state.
+  const size=await frame.locator('#adventure-loot-panel').boundingBox();
+  assert.ok(size&&size.width>300&&size.width<=932,'mobile landscape editor stays inside viewport');
   await frame.locator('#adventure-return-preparation').tap();
   assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),'npc');
   assert.equal(await page.locator('#gensCaptureV2Root iframe').evaluate(el=>
    new URL(el.src).searchParams.get('edit')),'npc-linked-test');
-
-  // Navigate back to the same canonical merchant view for layout inspection.
-  assert.equal(await page.evaluate(()=>window.GensCaptureV2.open('merchant')),true);
-  await frame.locator('#adventure-merchant-select').waitFor({state:'attached',timeout:45000});
-  const size=await frame.locator('#adventure-loot-panel').boundingBox();
-  assert.ok(size&&size.width>300&&size.width<=932,'mobile landscape editor stays inside viewport');
   assert.deepEqual(errors.filter(e=>/Uncaught|SyntaxError|Duplicate Capture|Competing Capture/.test(e)),[]);
  }finally{
   await browser?.close();server.closeAllConnections();

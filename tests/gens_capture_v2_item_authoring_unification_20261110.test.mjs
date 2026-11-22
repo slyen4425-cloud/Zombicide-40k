@@ -21,7 +21,8 @@ test('Monster Capture has one editor for items, monster drops and merchants; pre
  assert.match(css,/body\[data-adventure-item-editor="true"\] #adventure-loot-preparation-summary\{display:none!important\}/);
  assert.match(app,/saveCurrentAdventureRules\(\);\s*navigateToAdventureOwner\('items'\)/);
  assert.ok(app.includes("navigateToAdventureOwner(returnToNpc?'npc':'adventure')"));
- assert.match(app,/shell\.open\?\.\(destination\)/);
+ assert.match(app,/shell\.open\?\.\(destination,options\)/);
+ assert.match(app,/destination==='npc'&&returnToNpc/);
  assert.match(app,/store\.save\(\{\.\.\.current,rules,updatedAt:/);
  assert.match(app,/draftStore\.save\(rules\)/);
  assert.doesNotMatch(app,/window\.open\(/,'no parallel editor window');

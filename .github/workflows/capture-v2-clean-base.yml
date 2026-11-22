@@ -38,6 +38,7 @@ on:
       - 'tests/gens_capture_v2_multiplayer_realtime_553.test.mjs'
       - 'tests/gens_capture_v2_multiplayer_reconnect_553.test.mjs'
       - 'tests/gens_capture_v2_multiplayer_two_distinct_users_584.test.mjs'
+      - 'tests/gens_capture_v2_multiplayer_invitation_link_584.test.mjs'
       - 'tests/gens_capture_v2_peer_observation_ui_v1.test.mjs'
       - 'tests/gens_capture_v2_peer_frame_relay_v1.test.mjs'
       - 'tests/gens_capture_v2_peer_play_bridge_v1.test.mjs'
@@ -106,6 +107,9 @@ jobs:
           node --test tests/gens_capture_v2_multiplayer_realtime_553.test.mjs
           node --test tests/gens_capture_v2_multiplayer_reconnect_553.test.mjs
           node --test tests/gens_capture_v2_multiplayer_two_distinct_users_584.test.mjs
+
+      - name: Multijoueur #584 — invitation partageable sans compte, univers ou sauvegarde hôte
+        run: node --test tests/gens_capture_v2_multiplayer_invitation_link_584.test.mjs
 
       - name: Capture C3 — positions distantes présentées sans deuxième renderer
         run: node --test tests/gens_capture_v2_peer_observation_ui_v1.test.mjs

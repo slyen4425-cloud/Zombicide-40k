@@ -43,6 +43,8 @@ import {withSelectedAdventureWorldV1,resolveSelectedAdventureWorldV1,
 import {createCaptureRoomTransportV1} from './adventure-multiplayer-transport-v1.mjs';
 import {createCaptureSupabaseClientV1} from './adventure-multiplayer-provider-v1.mjs';
 import {captureRoomEntryPresentationV1} from './adventure-multiplayer-entry-presentation-v1.mjs';
+import {parseCaptureRoomInviteCodeV1,captureRoomInvitationUrlV1}
+ from './adventure-multiplayer-invite-v1.mjs';
 import {importCaptureSharedWorldV1,preserveCaptureGuestDraftV1}
  from './adventure-multiplayer-world-transfer-v1.mjs';
 import {captureGuestSessionMatchesHostSetupV1}
@@ -1039,9 +1041,20 @@ for(const kind of ['new','load']){
  button.disabled=false;
 }
 let captureRoomTransport=null,activeCaptureRoom=null,activeCaptureExplorationEvents=null;
-const requestedStartView=new URLSearchParams(window.location.search).get('start');
-if(!isItemEditor)setAdventureStartView(requestedStartView==='new'||requestedStartView==='load'?requestedStartView:'choice');
-else document.body.dataset.adventureStartView='new';
+const startParams=new URLSearchParams(window.location.search);
+const requestedStartView=startParams.get('start');
+const requestedInviteCode=parseCaptureRoomInviteCodeV1(startParams.get('invite'));
+if(!isItemEditor){
+ setAdventureStartView(requestedInviteCode?'new':
+  requestedStartView==='new'||requestedStartView==='load'?requestedStartView:'choice');
+ if(requestedInviteCode){
+  // The invite is a code only. It never imports another user's save or
+  // signs into their profile. Explicit Rejoindre is still required.
+  $('adventure-room-code').value=requestedInviteCode;
+  onlineRoomStatus('Invitation prête : indique ton pseudo, puis touche « Rejoindre par code ».');
+  requestAnimationFrame(()=>$('adventure-multiplayer-panel')?.scrollIntoView({block:'start'}));
+ }
+}else document.body.dataset.adventureStartView='new';
 
 function refreshWorldChoices(saved=null){
  const picker=$('adventure-world-select'),notice=$('adventure-world-status');
@@ -1454,14 +1467,22 @@ $('adventure-room-copy').addEventListener('click',guardedAsync(async()=>{
 $('adventure-room-share').addEventListener('click',guardedAsync(async()=>{
  if(activeCaptureRoom?.role!=='host')throw new Error('Seul le créateur partage ce salon.');
  const code=activeCaptureRoom.code;
+ // The invitation contains ONLY the room code; never a locally scoped
+ // universe ID, another hero profile or the host's AdventureSession.
+ const invitation=captureRoomInvitationUrlV1({code,sourceUrl:import.meta.url});
  if(typeof navigator.share==='function'){
   try{
    await navigator.share({title:'Monster Capture · GenSRPG',
-    text:'Rejoins ma partie Monster Capture dans GenSRPG avec le code : '+code});
+    text:'Rejoins ma partie Monster Capture :',url:invitation});
    return;
-  }catch(error){
-   if(error?.name==='AbortError')return;
-  }
+  }catch(error){if(error?.name==='AbortError')return;}
+ }
+ if(typeof navigator.clipboard?.writeText==='function'){
+  try{
+   await navigator.clipboard.writeText(invitation);
+   onlineRoomStatus('Lien d’invitation copié : partage-le avec ton ami.');
+   return;
+  }catch{/* Local clipboard blocked; code remains the official fallback. */}
  }
  await copyCaptureRoomInviteCode();
 }));

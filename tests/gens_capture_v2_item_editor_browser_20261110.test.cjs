@@ -316,7 +316,16 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   const art=await fs.readFile(path.join(site,'vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png'));
   await npc.locator('#npc-image').setInputFiles({name:'marchand-test.png',mimeType:'image/png',buffer:art});
   await npc.locator('#npc-save').tap();
-  await npc.locator('#npc-status:has-text("PNJ enregistré")').waitFor({timeout:60000});
+  await page.waitForTimeout(1200);
+  console.log('NPC_SAVE_DIAG',JSON.stringify({
+   status:await npc.locator('#npc-status').textContent(),
+   error:await npc.locator('#npc-status').getAttribute('data-error'),
+   saveDisabled:await npc.locator('#npc-save').isDisabled(),
+   name:await npc.locator('#npc-name').inputValue(),
+   chosen:await npc.locator('#npc-saved').inputValue(),
+   problems:errors.slice(-5)
+  }));
+  await npc.locator('#npc-status:has-text("PNJ enregistré")').waitFor({timeout:15000});
   const npcId=await npc.locator('#npc-saved').inputValue();
   assert.match(npcId,/^npc\.user\./,'saving must keep the official minted NPC ID');
   await npc.locator('#npc-merchant-config > summary').tap();

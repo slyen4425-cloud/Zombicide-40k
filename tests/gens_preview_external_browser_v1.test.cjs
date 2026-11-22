@@ -25,6 +25,16 @@ const DUNGEON_ID='game_profile_dungeon_demo';
   page.setDefaultTimeout(45000);
   page.setDefaultNavigationTimeout(60000);
 
+  // The external HTML preview installs additional scripts AFTER the Shell
+  // functions first become available. Those early globals are not an
+  // interaction-ready signal: wait for the preview's existing load gate.
+  async function waitForPreviewReady(){
+    await page.waitForFunction(()=>(
+      document.documentElement?.dataset?.gensrpgPreviewReady==='1' &&
+      !document.getElementById('gensrpgPreviewLoadGate')
+    ),null,{timeout:60000});
+  }
+
   const pageErrors=[];
   const consoleErrors=[];
   const failed=[];
@@ -46,6 +56,7 @@ const DUNGEON_ID='game_profile_dungeon_demo';
       typeof window.GensCaptureSessionStartV1==='object' &&
       typeof window.startConfiguredGame==='function'
     ));
+    await waitForPreviewReady();
 
     const state=await page.evaluate(()=>({
       title:document.title,
@@ -79,6 +90,7 @@ const DUNGEON_ID='game_profile_dungeon_demo';
       typeof window.GensCaptureV1==='object' &&
       typeof window.gensProfileContentFamily155==='function'
     ));
+    await waitForPreviewReady();
 
     let captureCardText='';
 
@@ -108,6 +120,7 @@ const DUNGEON_ID='game_profile_dungeon_demo';
           typeof window.openGensFamily==='function' &&
           typeof window.gensProfileContentFamily155==='function'
         ));
+        await waitForPreviewReady();
         const rootCard2=page.locator('button.gensRootModeCard.'+family);
         await rootCard2.waitFor({state:'visible'});
         await rootCard2.click();

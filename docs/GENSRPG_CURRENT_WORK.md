@@ -1,3 +1,10 @@
+## 2026-11-22 — Préparation responsive des fonds de vitrine et chargements Capture
+- Audit demandé : un visuel panorama 20:9 ne peut pas remplir 9:20 (portrait) sans recadrage ou déformation ; proposer à l'avenir deux compositions officielles paysage/portrait depuis la même bibliothèque, sans deuxième propriétaire ni duplication.
+- Source branch `work/gensrpg-responsive-wallpaper-loading-20261122` (checkpoint `checkpoint/gensrpg-before-responsive-wallpaper-loading-20261122`). Cible : conserver **chaque bord de l'image** sur une couche `contain`, et remplir les marges avec la même image `cover` en arrière-plan. Shell accueil, menu Adventure et chargement Shell ; Adventure loading standard/personnalisé avait déjà ce mécanisme.
+- Aucun nouveau média choisi/généré ; pas de modification du `global-assets`, des préférences IndexedDB/localStorage, de la musique, des sauvegardes, du jeu, ni du root PWA.
+- Tests de propriété source : éviter le `cover` seul en avant, vérifier que l'art entier et la copie couvrante utilisent la même variable/image ; CSS seulement dans les propriétaires Capture distincts.
+- Changer ensuite uniquement l'actif officiel vitrine paysage et portrait lorsque les deux visuels seront approuvés ; promotion PWA isolée après CI de source complète et publisher séparé.
+
 ## 2026-11-22 — Source Capture : cinq capacités Polocendre certifiées depuis Combat main
 - START source `work/capture-v2-audit567-source-20261121@6aed0f6e4bda09a59920a11ab0dd82f0c9a216d4`, checkpoint `checkpoint/gensrpg-start-polocendre-skills-capture-20261122`, branche `work/gensrpg-polocendre-skills-capture-source-20261122`.
 - PR Combat #374 fusionnée sur `main@a1c832b2f4c151de55f72cc53c0648aa629b2382`. Compilation source unique de la fiche Polocendre et des compétences : Charge, Traînée de feu, Coup de sabot, Vague incendiaire réutilisée sans copie, Ruée explosive.

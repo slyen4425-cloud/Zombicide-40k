@@ -141,8 +141,15 @@
  position:absolute;inset:0;z-index:30;display:flex;align-items:flex-end;
  justify-content:center;padding:clamp(12px,3vh,24px);overflow:hidden;
  background-color:#07151d;
- background-image:url("../../../vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png");
- background-position:center;background-repeat:no-repeat;background-size:contain;
+ /* Same certified artwork twice: uncut foreground at all aspect ratios,
+    cropped fill behind the margins. Never stretch or produce blank bands. */
+ background-image:
+  url("../../../vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png"),
+  linear-gradient(180deg,#07151d20,#07151d88),
+  url("../../../vendor/combat-lab/assets/library/capture/file_0000000089ec81f4a7bdfd03220f487c.png");
+ background-position:center,center,center;
+ background-repeat:no-repeat,no-repeat,no-repeat;
+ background-size:contain,100% 100%,cover;
  pointer-events:auto;
 }
 #gensCaptureV2Root .gensCaptureV2LoadingLabel{
@@ -163,9 +170,13 @@
  background-image:linear-gradient(
   rgba(6,18,25,var(--capture-home-shade,.55)),
   rgba(6,18,25,var(--capture-home-shade,.55))),
+  var(--capture-home-art),
   var(--capture-home-art);
- background-size:cover,cover;background-position:center,center;
- background-repeat:no-repeat;
+ /* The full image remains visible in BOTH phone orientations. A second
+    projection fills portrait/landscape margins; never distort the art. */
+ background-size:cover,contain,cover;
+ background-position:center,center,center;
+ background-repeat:no-repeat,no-repeat,no-repeat;
 }
 #gensCaptureV2Root .gensCaptureV2CreatorPanel{display:none}
 #gensCaptureV2Root[data-view="home"][data-menu="creator"] > nav,
@@ -198,7 +209,8 @@
  padding:6px 0;max-width:100%;color:#d7eef5
 }
 #gensCaptureV2Root .gensCaptureV2CreatorPanel .captureCreatorBgPreview{
- min-height:110px;background-size:cover;background-position:center;
+ min-height:110px;background-size:contain;background-position:center;
+ background-repeat:no-repeat;background-color:#07151d;
  border:1px solid #658d91;border-radius:9px;padding:12px;
  display:flex;align-items:flex-end;margin:8px 0
 }

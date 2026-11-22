@@ -66,3 +66,19 @@ test('Monster InvoC loading art is scoped to Capture, never the Dungeon module',
  assert.doesNotMatch(shell,/GensDungeon|startModuleSession\("dungeon"\)|document\.body\.append\(overlay\)/);
  assert.doesNotMatch(css,/(?:^|\n)\s*(?:body|html|#gensDungeon)[^{]*\.gensCaptureV2Loading\{/);
 });
+
+// A portrait render cannot both fill the screen and preserve the entire
+// 20:9 frame using one scale. The existing foreground contain + back cover
+// are the explicit safe fallback until native portrait artwork is authored.
+test('all three loading contexts preserve an uncut foreground across orientation',()=>{
+ const adventure=file('assets/gensrpg/capture-v2/adventure-style-v1.css');
+ const defaultLoading=adventure.slice(adventure.indexOf('#adventure-launch-loading{'),
+   adventure.indexOf('.adventure-loading-panel{'));
+ assert.match(defaultLoading,/background-size:contain,cover/);
+ const custom=adventure.slice(adventure.indexOf('#adventure-launch-loading[data-custom-art="true"]'));
+ assert.match(custom,/background-size:contain,100% 100%,cover/);
+ const shellLoading=css.slice(css.indexOf('#gensCaptureV2Root \.gensCaptureV2Loading{'),
+   css.indexOf('#gensCaptureV2Root \.gensCaptureV2LoadingLabel{'));
+ assert.match(shellLoading,/background-size:contain,100% 100%,cover/);
+ assert.match(shellLoading,/background-position:center,center,center/);
+});

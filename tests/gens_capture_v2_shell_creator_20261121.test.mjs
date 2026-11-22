@@ -196,3 +196,21 @@ test('Creator wallpaper and ambience stay in Shell menus and Adventure preparati
  assert.match(adventureCss,/body\[data-capture-shell-wallpaper="true"\]:not\(\[data-adventure-playing="true"\]\) main/);
  assert.doesNotMatch(shell,/new Audio\(/);
 });
+
+// The official vitrine wallpaper has one image owner (Shell/Creator or a
+// future published default). CSS projects it whole before filling the gutters.
+test('Creator wallpaper and Shell loading show complete art in both phone orientations',()=>{
+ const shell=read('shell-style-v1.css');
+ const game=read('adventure-style-v1.css');
+ const home=shell.slice(shell.indexOf('#gensCaptureV2Root[data-view="home"][data-creator-wallpaper="true"]'));
+ assert.match(home,/background-size:cover,contain,cover/);
+ assert.match(home,/var\(--capture-home-art\),\s*var\(--capture-home-art\)/);
+ const intro=shell.slice(shell.indexOf('#gensCaptureV2Root \.gensCaptureV2Loading{'));
+ assert.match(intro,/background-size:contain,100% 100%,cover/);
+ assert.match(game,/#adventure-launch-loading\{[^}]*background-size:contain,cover/s);
+ const adventure=game.slice(game.indexOf('body[data-capture-shell-wallpaper="true"]'));
+ assert.match(adventure,/background-size:cover,contain,cover/);
+ assert.match(adventure,/var\(--capture-shell-wallpaper\),\s*var\(--capture-shell-wallpaper\)/);
+ // No extra source of truth or personalized wallpaper copied to the game.
+ assert.doesNotMatch(game,/background-image:.*gensrpg\.capture\.shell\.creator\.settings/);
+});

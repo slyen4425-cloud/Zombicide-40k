@@ -8,7 +8,9 @@ const load=path=>readFileSync(new URL('../assets/gensrpg/capture-v2/'+path,impor
 test('Monster Capture has one editor for items, monster drops and merchants; preplay is just its doorway',()=>{
  const shell=load('shell-entry-v1.js'),html=load('adventure.html');
  const app=load('adventure-app-v1.mjs'),css=load('adventure-style-v1.css');
- assert.match(shell,/items:\{label:"Objets et drops",path:"assets\/gensrpg\/capture-v2\/adventure\.html\?editor=items"/);
+ assert.ok(shell.includes('items:{label:"Bibliothèque d’objets",path:"assets/gensrpg/capture-v2/adventure.html?editor=library"'));
+ assert.ok(shell.includes('drops:{label:"Drops / Ressources",path:"assets/gensrpg/capture-v2/adventure.html?editor=drops"'));
+ assert.ok(shell.includes('merchant:{label:"PNJ marchand · Boutique",path:"assets/gensrpg/capture-v2/adventure.html?editor=merchant"'));
  assert.match(html,/id="adventure-loot-preparation-summary"/);
  assert.match(html,/id="adventure-open-item-editor"/);
  assert.match(html,/id="adventure-item-authoring"/);

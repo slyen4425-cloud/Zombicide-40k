@@ -1,3 +1,9 @@
+## 2026-11-22 — Capture V2 : intégration Vipfer et Polocendre sans double autorité
+- Base source `work/capture-v2-audit567-source-20261121@088a213f3b903bb5979e2121b31e55761397e4c1`, checkpoint `checkpoint/gensrpg-start-vipfer-polocendre-capture-20261122`, branche `work/gensrpg-vipfer-polocendre-capture-source-20261122`.
+- Cible Combat officiel `main@c8a2c99ea96f06552f93c2470ea86846ae74aa2f`, PR Combat #373, 2 transferts auteur officiels. CI main `44970997400` à certifier GREEN avant promotion. Exploration main et propriétaire média inchangés dans ce contrat source.
+- Aucun transfert de créature copié localement ; seule la référence SHA/CI du Combat change. Base déjà munie du correctif menu audio/fond #586, sans changement de Shell, sauvegardes, Monster InvoC runtime ou autres modules.
+- Tests source et navigateur PWA puis publication par unique publisher `main`, pin du visuel global-assets certifié `b807389811c5a7e5236b9fdc96b7f155168d7fd7`. Aucun merge si une CI pertinente est rouge.
+
 ## 2026-11-21 — Capture : diagnostic canonique de l'entrée multijoueur sans monde (PR #582)
 - Signalement auteur (Jouer) : message brut anglais « Invalid canonical Capture online play context », liste « Monde local actuel (compatibilité) » et aucun WorldDocument archivé. Le parcours vient de `adventure-app-v1.mjs` → `preflightCaptureOnlineWorldV1` qui exige salle/auth, transport et vrai `WorldDocument` avant l'écriture de la session ou d'une position serveur.
 - START source actuelle `work/capture-v2-audit567-source-20261121@fa907181f557ebbfa7a7da1017daf96d71f745e1`, checkpoint `checkpoint/gensrpg-start-capture-online-play-context-20261121`, branche `work/gensrpg-capture-online-play-context-20261121`. Ne pas modifier directement le staging ni le `main` publisher.

@@ -36,7 +36,7 @@ test('all three native transitions and launch/zone/combat share same artwork',()
  const shell=src('assets/gensrpg/capture-v2/shell-entry-v1.js');
  const adventure=src('assets/gensrpg/capture-v2/adventure-app-v1.mjs');
  assert.match(shell,/visualOwner\.captureOfficialLoadingArtUrlsV1\(\)/);
- assert.match(shell,/const artwork=\[\.\.\.urls,\.\.\.visualOwner/);
+ assert.match(shell,/const artwork=\[\.\.\.visualOwner\.captureOfficialLoadingArtUrlsV1\(\),\.\.\.urls\]/);
  assert.match(adventure,/const scenes=\{launch:official,zone:official,combat:official\}/);
  assert.match(adventure,/response\.blob\(\)/);
  assert.match(adventure,/Object\.freeze\(\[\.\.\.official,\.\.\.sequence\]\.slice\(0,12\)\)/);

@@ -75,7 +75,7 @@
         return;
       }
       state.urls=urls;
-      const artwork=[...urls,...visualOwner.captureOfficialLoadingArtUrlsV1()];
+      const artwork=[...visualOwner.captureOfficialLoadingArtUrlsV1(),...urls];
       if(!artwork.length)artwork.push(officialLoadingArt);
       if(typeof fadeOwner.mountCaptureLoadingArtCrossfadeV1==='function')
         state.crossfade=fadeOwner.mountCaptureLoadingArtCrossfadeV1({

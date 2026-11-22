@@ -38,6 +38,7 @@ test('all three native transitions and launch/zone/combat share same artwork',()
  assert.match(shell,/visualOwner\.captureOfficialLoadingArtUrlsV1\(\)/);
  assert.match(shell,/const artwork=\[\.\.\.urls,\.\.\.visualOwner/);
  assert.match(adventure,/const scenes=\{launch:official,zone:official,combat:official\}/);
- assert.match(adventure,/Object\.freeze\(\[\.\.\.sequence,\.\.\.official\]\)/);
+ assert.match(adventure,/response\.blob\(\)/);
+ assert.match(adventure,/Object\.freeze\(\[\.\.\.official,\.\.\.sequence\]\.slice\(0,12\)\)/);
  assert.doesNotMatch(adventure,/new Audio\(/);
 });

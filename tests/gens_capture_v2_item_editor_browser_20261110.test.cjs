@@ -82,6 +82,8 @@ test('real landscape UI: library, drops, fragments and NPC shop share one saved 
   assert.ok(await frame.locator('[data-capture-fragment-cards] .adventure-item-library-card').count()>0);
   assert.equal(await frame.locator('#adventure-fragments-panel').count(),1,
    'fragment settings are MOVED, not copied');
+  assert.equal(await frame.locator('#adventure-monster-fragments-panel').count(),1);
+  assert.equal(await frame.locator('#adventure-fragment-species').isVisible(),true);
   
   await editor('drops');
   assert.equal(await frame.locator('#adventure-drops-view').isVisible(),true);
@@ -90,6 +92,8 @@ test('real landscape UI: library, drops, fragments and NPC shop share one saved 
   assert.ok(initialDrops>0,'newly published species already have official default drops');
   const species=await frame.locator('#adventure-drop-species option').first().getAttribute('value');
   await frame.locator('#adventure-drop-species').selectOption(species);
+  assert.equal(await frame.locator('#adventure-drop-filter').isVisible(),false,
+   'drop editor must show ONE monster picker, not two');
   await frame.locator('#adventure-drop-item').selectOption({label:'Relique témoin corrigée'});
   await frame.locator('#adventure-drop-chance').fill('35');
   await frame.locator('#adventure-drop-min').fill('1');
@@ -110,11 +114,17 @@ test('real landscape UI: library, drops, fragments and NPC shop share one saved 
    .filter({hasText:'Relique témoin corrigée'}).count(),1);
   
 
-  await editor('merchant');
+  // Merchant does not have a menu anymore. The historical deep link stays
+  // compatible for existing NPC references; the NEW workflow is in the NPC.
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view="merchant"]').count(),0);
+  assert.equal(await page.evaluate(()=>window.GensCaptureV2.open('merchant')),true);
+  await frame.locator('#adventure-drop-species:not([disabled])').waitFor({state:'attached',timeout:45000});
   assert.equal(await frame.locator('#adventure-economy-panel').isVisible(),true);
   assert.equal(await frame.locator('#adventure-drops-view').isVisible(),false);
-  await frame.locator('#adventure-money-singular').fill('jeton');
-  await frame.locator('#adventure-money-plural').fill('jetons');
+  assert.equal(await frame.locator('#adventure-loot-global-rewards').isVisible(),false,
+   'global victory coins and denomination must NOT be merchant options');
   await frame.locator('#adventure-merchant-name').fill('Marchand témoin');
   // The modern merchant catalog is deliberately collapsed on landscape.
   await frame.locator('#adventure-economy-panel > details > summary').tap();

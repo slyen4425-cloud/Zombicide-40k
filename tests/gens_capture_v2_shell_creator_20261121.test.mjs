@@ -197,20 +197,37 @@ test('Creator wallpaper and ambience stay in Shell menus and Adventure preparati
  assert.doesNotMatch(shell,/new Audio\(/);
 });
 
-// The official vitrine wallpaper has one image owner (Shell/Creator or a
-// future published default). CSS projects it whole before filling the gutters.
-test('Creator wallpaper and Shell loading show complete art in both phone orientations',()=>{
+// The Creator owns exactly one image URL. An opaque gradient canvas fills
+// portrait margins; the historic GenSRPG hub must never bleed through.
+test('Creator wallpaper uses ONE complete image and opaque backgrounds in both orientations',()=>{
  const shell=read('shell-style-v1.css');
  const game=read('adventure-style-v1.css');
- const home=shell.slice(shell.indexOf('#gensCaptureV2Root[data-view="home"][data-creator-wallpaper="true"]'));
+ const home=shell.match(/#gensCaptureV2Root\[data-view="home"\]\[data-creator-wallpaper="true"\]\{([\s\S]*?)\n\}/)?.[1];
+ assert.ok(home,'real Capture home wallpaper style exists');
+ assert.match(home,/background-color:#08121b/);
  assert.match(home,/background-size:cover,contain,cover/);
- assert.match(home,/var\(--capture-home-art\),\s*var\(--capture-home-art\)/);
+ assert.equal((home.match(/var\(--capture-home-art\)/g)||[]).length,1,
+  'the SAME transparent hero image must never render at two scales');
+ assert.match(home,/radial-gradient\(/,'gutter fill is geometry, not another monster image');
  const intro=shell.slice(shell.indexOf('#gensCaptureV2Root \.gensCaptureV2Loading{'));
  assert.match(intro,/background-size:contain,100% 100%,cover/);
  assert.match(game,/#adventure-launch-loading\{[^}]*background-size:contain,cover/s);
- const adventure=game.slice(game.indexOf('body[data-capture-shell-wallpaper="true"]'));
- assert.match(adventure,/background-size:cover,contain,cover/);
- assert.match(adventure,/var\(--capture-shell-wallpaper\),\s*var\(--capture-shell-wallpaper\)/);
- // No extra source of truth or personalized wallpaper copied to the game.
+ const prep=game.match(/body\[data-capture-shell-wallpaper="true"\]:not\(\[data-adventure-playing="true"\]\) main\{([\s\S]*?)\n\}/)?.[1];
+ assert.ok(prep,'real Adventure preparation wallpaper style exists');
+ assert.match(prep,/background-color:#08131c/);
+ assert.match(prep,/background-size:cover,contain,cover/);
+ assert.equal((prep.match(/var\(--capture-shell-wallpaper\)/g)||[]).length,1);
+ assert.match(prep,/radial-gradient\(/);
+ // Preserve the existing single authority; never export the local Creator image to gameplay.
  assert.doesNotMatch(game,/background-image:.*gensrpg\.capture\.shell\.creator\.settings/);
+});
+test('portrait Capture header wraps title above the button and back link',()=>{
+ const shell=read('shell-style-v1.css');
+ const portrait=shell.match(/@media \(orientation:portrait\) and \(max-width:650px\)\{([\s\S]*?)\n\}/)?.[1];
+ assert.ok(portrait,'portrait-only layout defined');
+ assert.match(portrait,/> header\{/);
+ assert.match(portrait,/grid-template-columns:max-content minmax\(0,1fr\)/);
+ assert.match(portrait,/> header strong\{\s*grid-column:1\/-1/);
+ assert.match(portrait,/\.gensCaptureReturnToMain\{/);
+ assert.match(portrait,/text-overflow:ellipsis/);
 });

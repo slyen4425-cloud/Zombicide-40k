@@ -77,6 +77,7 @@ import {normalizeCaptureItemTemplatesV1,materializeCaptureItemTemplatesV1,
 import {installAdventureEconomyEditorV1} from './adventure-economy-editor-v1.mjs';
 import {installAdventureMerchantPlayV1} from './adventure-merchant-play-v1.mjs';
 import {createAdventureLoadingArtLibraryV1,captureLoadingArtSequenceV1} from './adventure-loading-art-v1.mjs';
+import {captureOfficialLoadingArtUrlsV1} from './shell-official-wallpapers-v1.mjs';
 
 const $=id=>document.getElementById(id);
 const status=$('adventure-status');
@@ -2186,7 +2187,8 @@ function revokeLoadingArt(urls){
 async function prepareLoadingArtworkForPlay(){
  const requestedAt=journeyLaunchEpoch;
  revokeLoadingArt(loadingArtObjectUrls);
- const scenes={};
+ const official=captureOfficialLoadingArtUrlsV1();
+ const scenes={launch:official,zone:official,combat:official};
  let library;
  try{library=await loadingArtLibrary();}
  catch(error){console.warn('Bibliothèque locale inaccessible',error);return scenes;}
@@ -2199,11 +2201,12 @@ async function prepareLoadingArtworkForPlay(){
   const urls=entries.map(record=>URL.createObjectURL(record.blob));
   for(const url of urls)loadingArtObjectUrls.add(url);
   const sequence=captureLoadingArtSequenceV1(urls,loadingArtRotation.launch++);
-  for(const scene of ['launch','zone','combat'])scenes[scene]=sequence;
+  for(const scene of ['launch','zone','combat'])
+   scenes[scene]=Object.freeze([...sequence,...official]);
  }catch(error){
   revokeLoadingArt(loadingArtObjectUrls);
   console.warn('Bibliothèque de chargement non lisible, art officiel conservé',error);
-  return {};
+  return scenes;
  }
  if(requestedAt!==journeyLaunchEpoch||journeyLoading.hidden){
   revokeLoadingArt(loadingArtObjectUrls);return {};

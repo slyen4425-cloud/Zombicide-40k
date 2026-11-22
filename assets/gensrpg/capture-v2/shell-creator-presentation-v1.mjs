@@ -7,6 +7,8 @@ import {
 } from './adventure-loading-art-v1.mjs';
 import {loadCaptureShellOfficialAudioCatalogV1}
  from './shell-official-audio-catalog-v1.mjs';
+import {CAPTURE_OFFICIAL_WALLPAPERS_V1,captureOfficialWallpaperByIdV1,
+ captureOfficialWallpaperUrlV1} from './shell-official-wallpapers-v1.mjs';
 
 export const CAPTURE_SHELL_CREATOR_SETTINGS_PREFIX_V1=
  'gensrpg.capture.shell.creator.settings.v1:';
@@ -84,10 +86,11 @@ export async function createCaptureShellMediaLibraryV1({
    return Object.freeze(record);
   },
   async putCatalog(universeId,slot,assetId,name){
-   if(slot==='background'||!CAPTURE_SHELL_MEDIA_SLOTS_V1.includes(slot)||
+   if(!CAPTURE_SHELL_MEDIA_SLOTS_V1.includes(slot)||
       typeof assetId!=='string'||
-      !assetId.startsWith(slot==='ambience'?'gensrpg:music:':'gensrpg:sound:')||
-      !/^gensrpg:(sound|music):[a-z0-9:_-]+$/.test(assetId))
+      (slot==='background'?!captureOfficialWallpaperByIdV1(assetId):
+       (!assetId.startsWith(slot==='ambience'?'gensrpg:music:':'gensrpg:sound:')||
+        !/^gensrpg:(sound|music):[a-z0-9:_-]+$/.test(assetId))))
     throw new TypeError('Référence sonore officielle invalide');
    const record={key:key(universeId,slot),assetId,
     name:String(name??assetId).slice(0,100),source:'official',
@@ -242,7 +245,11 @@ export function createCaptureShellCreatorV1({
     const record=results[i],slot=CAPTURE_SHELL_MEDIA_SLOTS_V1[i];
     if(!record)continue;
     if(record.assetId){
-     if(slot==='background')continue;
+     if(slot==='background'){
+      backgroundUrl=captureOfficialWallpaperUrlV1(record.assetId);
+      if(!backgroundUrl)report('Fond officiel inconnu : sélection conservée.',true);
+      continue;
+     }
      try{
       const choice=(await officialCatalog()).get(record.assetId);
       if(!choice||choice.kind!==(slot==='ambience'?'music':'effect'))
@@ -296,6 +303,28 @@ export function createCaptureShellCreatorV1({
    persist();applyBackground();
   });
   shadeLabel.append(shade);
+  const bgChoiceLabel=make(doc,'label','Fonds officiels Monster InvoC');
+  const bgChoice=make(doc,'select');
+  bgChoice.setAttribute('aria-label','Choisir une illustration officielle de fond');
+  const none=make(doc,'option','Choisir un fond de la bibliothèque…');
+  none.value='';bgChoice.append(none);
+  for(const art of CAPTURE_OFFICIAL_WALLPAPERS_V1){
+   const item=make(doc,'option',art.label);item.value=art.id;bgChoice.append(item);
+  }
+  const selectedBg=await media?.get(universe,'background');
+  bgChoice.value=selectedBg?.assetId??'';
+  bgChoice.addEventListener('change',async()=>{
+   if(!bgChoice.value)return;
+   try{
+    if(!media)throw Error('Médiathèque indisponible');
+    const art=captureOfficialWallpaperByIdV1(bgChoice.value);
+    if(!art)throw Error('Fond officiel inconnu');
+    await media.putCatalog(universe,'background',art.id,art.label);
+    await loadUniverse(universe,name);
+    report('Fond officiel sélectionné : '+art.label);
+   }catch(error){report(error.message,true);}
+  });
+  bgChoiceLabel.append(bgChoice);
   const bgInput=make(doc,'input');bgInput.type='file';
   bgInput.accept='image/png,image/jpeg,image/webp';
   bgInput.setAttribute('aria-label','Importer le fond d’accueil');
@@ -314,7 +343,7 @@ export function createCaptureShellCreatorV1({
     report('Fond standard restauré pour cet univers.');}
    catch(error){report(error.message,true);}
   });
-  bg.append(preview,shadeLabel,bgInput,bgRemove);container.append(bg);
+  bg.append(preview,shadeLabel,bgChoiceLabel,bgInput,bgRemove);container.append(bg);
 
   const sound=make(doc,'details',undefined,'captureCreatorGroup');
   sound.append(make(doc,'summary','🔊 Sons d’interface et musique du menu'));
@@ -468,7 +497,7 @@ export function createCaptureShellCreatorV1({
   const art=make(doc,'details',undefined,'captureCreatorGroup');
   art.append(make(doc,'summary','🌄 Illustrations de chargement (fondu et rotation)'));
   art.append(make(doc,'p',
-   'Une seule galerie pour tous les chargements de Monster InvoC : les images défilent toutes les 10 secondes avec un fondu. Maximum de 12 images par univers ; aucune image de Donjon n’est modifiée.'));
+   'Les trois fonds officiels et jusqu’à 12 images importées défilent toutes les 10 secondes avec un fondu, pour les chargements du jeu et des éditeurs. Aucune image de Donjon n’est modifiée.'));
   const artInput=make(doc,'input');artInput.type='file';artInput.multiple=true;
   artInput.accept='image/png,image/jpeg,image/webp,image/gif';
   artInput.setAttribute('aria-label','Ajouter plusieurs illustrations de chargement');
@@ -480,7 +509,15 @@ export function createCaptureShellCreatorV1({
     indexedDB:root.indexedDB,universeId:universe,uuid:()=>root.crypto.randomUUID(),url:root.URL
    });
    const images=await loading.list();
-   if(!images.length)artList.append(make(doc,'p','Illustration officielle utilisée par défaut.'));
+   for(const art of CAPTURE_OFFICIAL_WALLPAPERS_V1){
+    const row=make(doc,'div',undefined,'captureCreatorArtItem');
+    const thumbnail=make(doc,'img');
+    thumbnail.src=captureOfficialWallpaperUrlV1(art.id);
+    thumbnail.loading='lazy';thumbnail.alt=art.label;
+    row.append(thumbnail,make(doc,'span',art.label+' · Officiel · Rotation automatique'));
+    artList.append(row);
+   }
+   if(!images.length)artList.append(make(doc,'p','Les trois illustrations officielles défilent à chaque chargement.'));
    for(const image of images){
     const row=make(doc,'div',undefined,'captureCreatorArtItem');
     const url=root.URL.createObjectURL(image.blob);previews.add(url);

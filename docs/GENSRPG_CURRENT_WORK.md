@@ -1,3 +1,9 @@
+## 2026-11-22 — Multijoueur #584 : préparation PWA après Labos Capture/Exploration GREEN
+- Source Capture canonical `work/capture-v2-audit567-source-20261121@4070006b068285f734624309208e64e7f2550976` inclut #585 (vrai invité / identité / 2 clients), #615 (lien d'invitation) ; aucun autre runtime, média ou sauvegarde transféré.
+- Exploration `main@77bebb83ff176f49edff7ae49c03ba48c28202ca` inclut #522 (séparation visuelle des héros au même Spawn, offset uniquement sur pixels) et CI exacte `#45043998646` GREEN. Combat `main@34c17c15f4ca8b457a94e49fa2f3fcfb8ca93ca0` reste inchangé avec CI `#45016265619` GREEN.
+- Cette branche met à jour **uniquement le manifeste source canonique** et le test de pins pour composer la prochaine PWA. Pas de duplication des labos, pas de déploiement PWA, pas de modification Supabase ni de contrôle RLS.
+- Une fois la CI Capture et le publisher Exploration GREEN, fusionner d'abord vers la source Capture, puis préparer séparément le pin du publisher PWA sur son propre `main` (tests navigateur, archive conservée, son, PWA). Un test physique simultané Android/PC avec deux comptes distincts reste nécessaire pour valider le comportement en conditions réelles.
+
 ## 2026-11-22 — Source Capture V2 : marchands par catégories et drops par créature (C2)
 - Base immuable PWA publiée `c7861946bbb29d1a70adee5f468177011915c38f`, checkpoint `checkpoint/gensrpg-start-merchant-drop-editor-20261122`, branche `work/gensrpg-merchant-drop-editor-20261122`.
 - Propriétaires inchangés : `AdventureRules.loot.items` (objets), `fragmentRecruitment` (fragments), `economy.merchants` (offres), `AdventureSession.inventory` (soldes), `Explorer` (PNJ).

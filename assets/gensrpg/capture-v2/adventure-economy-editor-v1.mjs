@@ -200,5 +200,14 @@ export function installAdventureEconomyEditorV1({
   notify('Offre configurée. Enregistre les paramètres.');
  }));
  $('adventure-money-plural').addEventListener('input',renderOffers);
- return {read,sync,render,isItemUsed};
+ // Deep-linking to a PNJ's existing shop only selects the canonical merchant.
+ // It does not copy the merchant or change any AdventureRules in memory.
+ function focusMerchant(merchantId){
+  if(!byMerchant(merchantId))return false;
+  $('adventure-merchant-select').value=merchantId;
+  clearOffer();renderOffers();
+  $('adventure-merchant-select').focus();
+  return true;
+ }
+ return {read,sync,render,isItemUsed,focusMerchant};
 }

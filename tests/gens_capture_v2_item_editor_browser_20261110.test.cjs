@@ -155,6 +155,13 @@ test('real landscape UI: library, drops, fragments and NPC shop share one saved 
    const doc=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument;
    return doc?.querySelector('#adventure-merchant-select')?.value===id;
   },linkedId,{timeout:45000});
+  // A select can show the first saved merchant before async Bestiary boot
+  // completes; require the actual linked-merchant UI status before asserting.
+  await page.waitForFunction(()=>{
+   const doc=document.querySelector('#gensCaptureV2Root iframe')?.contentDocument;
+   return /Boutique liée à ton PNJ/.test(
+    doc?.querySelector('#adventure-status')?.textContent??'');
+  },null,{timeout:45000});
   assert.equal(await frame.locator('#adventure-merchant-select').inputValue(),linkedId);
   assert.match(await frame.locator('#adventure-status').innerText(),/Boutique liée à ton PNJ/);
   await frame.locator('#adventure-return-preparation').tap();

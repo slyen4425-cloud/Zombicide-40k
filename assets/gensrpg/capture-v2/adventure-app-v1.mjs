@@ -2212,7 +2212,7 @@ async function prepareLoadingArtworkForPlay(){
  catch(error){console.warn('Bibliothèque locale inaccessible',error);library=null;}
  try{
   // Existing IndexedDB imports stay the only custom image authority.
-  const entries=library?(await library.list()).slice(0,12):[];
+  const entries=(await library.list()).slice(0,12);
   if(requestedAt!==journeyLaunchEpoch||journeyLoading.hidden){
    revokeLoadingArt(loadingArtObjectUrls);return {};
   }

@@ -41,6 +41,7 @@ export function installAdventureEconomyEditorV1({
   editedMerchantId=null;
   $('adventure-merchant-name').value='';
   $('adventure-merchant-buys').checked=true;
+  $('adventure-merchant-resale-percent').value='100';
   $('adventure-merchant-add').textContent='Ajouter ce marchand';
   $('adventure-merchant-cancel').hidden=true;
  }
@@ -98,6 +99,7 @@ export function installAdventureEconomyEditorV1({
     editedMerchantId=merchant.id;
     $('adventure-merchant-name').value=merchant.name;
     $('adventure-merchant-buys').checked=merchant.buysItems;
+    $('adventure-merchant-resale-percent').value=String(merchant.resalePercent??100);
     $('adventure-merchant-add').textContent='Enregistrer le marchand';
     $('adventure-merchant-cancel').hidden=false;
    }));
@@ -171,6 +173,7 @@ export function installAdventureEconomyEditorV1({
   const name=$('adventure-merchant-name').value.trim();
   const id=editedMerchantId??'merchant-'+document.defaultView.crypto.randomUUID();
   const next={id,name,buysItems:$('adventure-merchant-buys').checked,
+   resalePercent:numeric('adventure-merchant-resale-percent',0,500),
    offers:editedMerchantId?(byMerchant(editedMerchantId)?.offers??[]):[]};
   const merchants=editedMerchantId?current().merchants.map(m=>m.id===id?next:m)
    :[...current().merchants,next];

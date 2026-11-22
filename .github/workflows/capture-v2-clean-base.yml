@@ -35,6 +35,9 @@ on:
       - 'tests/gens_capture_v2_peer_position_contract_v1.test.mjs'
       - 'tests/gens_capture_v2_peer_transport_v1.test.mjs'
       - 'tests/gens_capture_v2_peer_live_subscription_v1.test.mjs'
+      - 'tests/gens_capture_v2_multiplayer_realtime_553.test.mjs'
+      - 'tests/gens_capture_v2_multiplayer_reconnect_553.test.mjs'
+      - 'tests/gens_capture_v2_multiplayer_two_distinct_users_584.test.mjs'
       - 'tests/gens_capture_v2_peer_observation_ui_v1.test.mjs'
       - 'tests/gens_capture_v2_peer_frame_relay_v1.test.mjs'
       - 'tests/gens_capture_v2_peer_play_bridge_v1.test.mjs'
@@ -97,6 +100,12 @@ jobs:
 
       - name: Capture C3 — notifications Realtime vers positions serveur garanties par RLS (RED/GREEN)
         run: node --test tests/gens_capture_v2_peer_live_subscription_v1.test.mjs
+
+      - name: Multijoueur #553/#584 — identité, reconnexion et 2 clients authentifiés isolés
+        run: |
+          node --test tests/gens_capture_v2_multiplayer_realtime_553.test.mjs
+          node --test tests/gens_capture_v2_multiplayer_reconnect_553.test.mjs
+          node --test tests/gens_capture_v2_multiplayer_two_distinct_users_584.test.mjs
 
       - name: Capture C3 — positions distantes présentées sans deuxième renderer
         run: node --test tests/gens_capture_v2_peer_observation_ui_v1.test.mjs

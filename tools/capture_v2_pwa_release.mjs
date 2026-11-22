@@ -45,7 +45,17 @@ export function releasePreviewPwaForCommit(sourceWorker,sourceHtml,releaseSha){
   if(lifecycleWorker.split(rawWrite).length!==4)
     throw Error('Unknown service worker fetch cache ownership; refuse blind patch');
   const safeWrite='if((await caches.keys()).includes(CACHE_NAME)){'+rawWrite+'}';
-  const worker=lifecycleWorker.replaceAll(rawWrite,safeWrite);
+  // The installed/waiting worker may be terminated immediately after a
+  // SKIP_WAITING message. Bind its activation promise to the ExtendableMessage
+  // event lifetime, as for install. Otherwise Chromium can retain "waiting"
+  // even though the new release's cache was fully populated.
+  // This is an event-lifetime fix in the SAME canonical ServiceWorker.
+  const oldMessage='self.addEventListener("message",event=>{if(event.data&&event.data.type==="SKIP_WAITING")self.skipWaiting()});';
+  const safeMessage='self.addEventListener("message",event=>{if(event.data&&event.data.type==="SKIP_WAITING")event.waitUntil(self.skipWaiting())});';
+  const existingWorker=lifecycleWorker.replaceAll(rawWrite,safeWrite);
+  if(existingWorker.split(oldMessage).length!==2)
+    throw Error('Preview worker activation message contract changed');
+  const worker=existingWorker.replace(oldMessage,safeMessage);
   // The already-existing update checker compares these two source markers.
   // Stamp both in the published preview HTML, not in the immutable source.
   const html=stampShellForCommit(sourceHtml,releaseSha);

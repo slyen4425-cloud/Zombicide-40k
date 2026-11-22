@@ -112,6 +112,7 @@ export function installAdventureEconomyEditorV1({
   const host=$('adventure-merchants');host.replaceChildren();
   for(const merchant of current().merchants){
    const line=document.createElement('div');line.className='rule-row';
+   line.dataset.merchantId=merchant.id;
    const label=document.createElement('span');
    label.textContent=merchant.name+' · '+(isSimple(merchant)
     ?merchant.itemIds.length+' objet(s) · vend '+pct(merchant.sellPercent)+

@@ -609,8 +609,8 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
  const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
  const adapter=read(trial,'vendor/combat-lab/src/adapters/input/capture/capture-npc-opponent-instance-v1.js').toString('utf8');
  const economy=read(trial,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs').toString('utf8');
- assert.equal(pins.combat.sha,'34c17c15f4ca8b457a94e49fa2f3fcfb8ca93ca0');
- assert.equal(pins.combat.certifiedCiRun,45016265619);
+ assert.equal(pins.combat.sha,'a100e480504be1e78485eda3ae90c89439a90f0a');
+ assert.equal(pins.combat.certifiedCiRun,45071409065);
  assert.equal(provenance.combat.sha,pins.combat.sha);
  assert.equal(delivery.combat.sha,pins.combat.sha);
  assert.equal(previewPin.officialVisuals.sha,'b807389811c5a7e5236b9fdc96b7f155168d7fd7');

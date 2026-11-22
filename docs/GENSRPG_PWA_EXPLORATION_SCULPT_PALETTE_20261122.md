@@ -20,6 +20,12 @@ Date : 22 novembre 2026.
 - Extension bornée du garde de certification natif `tools/stage_capture_v2_pages_preview.mjs` : le nouveau SHA Exploration est autorisé **si et seulement si** le renderer garde le Git blob officiel `6c101756bdf9c58a9ae8cf3fe104e49575145748` et les invariants déjà testés.
 - Objectif de l’intégration : familles personnalisées libres (sol/route/eau), variantes d’herbe, atelier 2,5D repliable sans commandes en double ; aucun changement du runtime de jeu en dehors de la source officielle Exploration.
 
+## Régression PWA révélée par les tests navigateur
+- Sur la PR, le test réel de mise à jour de Capture V2 a échoué deux fois : le cache neuf existait mais le nouveau worker restait `installed/waiting`, avec l’ancien cache encore présent.
+- Même code du service worker source, adaptateur et test que dans la PR #617 (GREEN) : la régression traduit une course d’activation, sans rapport avec le SHA Explore ni avec les fichiers de jeu.
+- Correction dans le **seul adaptateur de publication existant** `tools/capture_v2_pwa_release.mjs` : requête `skipWaiting()` au démarrage de l'installation et de nouveau après le préchargement, dans **le même** `event.waitUntil`. Aucun second worker, timer périodique, nouveau cache, ou modification des données utilisateur.
+- Garde statique renforcé `tests/gens_capture_v2_auto_update_20261107.test.mjs` ; maintien intégral du contrôle Chromium réel qui doit être GREEN avant fusion.
+
 ## Gates avant GREEN
 1. Tests et garde SHA sur la PR du publisher ; `stage_capture_v2_pages_preview.mjs` doit produire le site avec les deux SHA épinglés.
 2. Tests Chromium du vrai chemin Capture V2 → Exploration, sauvegarde WorldDocument et retour ; contrôle du site assemblé sans duplication d’assets, budget Pages strict 900 Mio.

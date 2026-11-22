@@ -529,8 +529,8 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
  const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
  const adapter=read(trial,'vendor/combat-lab/src/adapters/input/capture/capture-npc-opponent-instance-v1.js').toString('utf8');
  const economy=read(trial,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs').toString('utf8');
- assert.equal(pins.combat.sha,'a1c832b2f4c151de55f72cc53c0648aa629b2382');
- assert.equal(pins.combat.certifiedCiRun,45005296213);
+ assert.equal(pins.combat.sha,'d7eeae0fdb13454cf5a9ae18a0676e6784e425e5');
+ assert.equal(pins.combat.certifiedCiRun,45008484200);
  assert.equal(provenance.combat.sha,pins.combat.sha);
  assert.equal(delivery.combat.sha,pins.combat.sha);
  assert.equal(previewPin.officialVisuals.sha,'b807389811c5a7e5236b9fdc96b7f155168d7fd7');
@@ -598,4 +598,25 @@ test('published Capture menus keep the creator image and ambience while preservi
  assert.ok(adventureCss.includes('body[data-capture-shell-wallpaper="true"]:not([data-adventure-playing="true"]) main'));
  assert.ok(!shell.includes('new Audio('),'do not create a rival player');
  assert.ok(!creator.includes('soundPlayers.set(\'game\''),'never create gameplay audio');
+});
+
+test('published PC enemy reserve HUD stays beside enemy names and wallpapers keep whole art in portrait',()=>{
+ const combatCss=read(trial,'vendor/combat-lab/examples/dom-demo/capture-editor-v2.css').toString('utf8');
+ const shell=read(trial,'assets/gensrpg/capture-v2/shell-style-v1.css').toString('utf8');
+ const game=read(trial,'assets/gensrpg/capture-v2/adventure-style-v1.css').toString('utf8');
+ const pc=combatCss.slice(combatCss.indexOf('/* PC-only combat legibility.'),
+   combatCss.indexOf('/* Canonical skill recolor controls:'));
+ assert.ok(pc.length>400,'certified PC geometry rules must be shipped');
+ assert.match(pc,/right:\s*calc\(min\(15\.5rem,\s*26%\)\s*\+\s*1\.4rem\)/,
+   'enemy reserve tab is outside the card using its canonical PC width');
+ assert.match(pc,/\.combat-test-enemy-reserves__body\s*\{\s*left:\s*auto;\s*right:\s*0;/,
+   'opened enemy bench cannot cover the visible enemy name');
+ assert.match(shell,/background-size:cover,contain,cover/,
+   'Capture Shell menu must show the complete image and an edge-filling background');
+ assert.match(shell,/background-size:contain,100% 100%,cover/,
+   'Capture Shell load must retain uncut foreground in portrait and landscape');
+ assert.match(game,/background-size:cover,contain,cover/,
+   'Adventure preparation wallpaper must keep its full source image');
+ assert.match(game,/background-size:contain,100% 100%,cover/,
+   'custom loading images remain complete at all screen ratios');
 });

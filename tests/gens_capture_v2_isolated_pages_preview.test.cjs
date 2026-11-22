@@ -273,7 +273,7 @@ test('PWA carries exact cleaned bridge and stair binaries with stable native IDs
 
 test('native World Builder map exporter and in-game 200% dezoom are shipped once from certified Exploration',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(source.exploration.sha,'de86b04f35f96df3783f1f953c7f138bc44a28f8',
+ assert.equal(source.exploration.sha,'1553c0e8f9bab89f5c1badfa64c5d41fb75cff73',
    'ship the certified 22 Nov Exploration main with cleaned bridges and both stair side profiles');
  const helper='vendor/exploration-lab/src/builder/world-assembler-map-preset-export-v1.js';
  required(trial,helper);
@@ -314,9 +314,10 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
   const certifiedNov21ExplorationSha='abe51d7f0634684d29772e0730719b2eb347fa98';
   const certifiedNov22NpcExplorationSha='c3b69270919923d130c74af1a8577fa40476eff2';
   const certifiedNov22CleanedAssetsSha='de86b04f35f96df3783f1f953c7f138bc44a28f8';
+  const certifiedNov22NpcInlineSha='1553c0e8f9bab89f5c1badfa64c5d41fb75cff73';
  // The stair fix changes navigation and sprite presentation only. Its
  // canonical south terrain renderer remains byte-identical to recoveredWorld.
- const expectedOfficialRendererBlob=[recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha].includes(explorationSha)
+ const expectedOfficialRendererBlob=[recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha].includes(explorationSha)
    ?'6c101756bdf9c58a9ae8cf3fe104e49575145748'
    :explorationSha===fringeRoadExplorationSha
     ?'1a0869afc5b258e8f403f43cd26b3f417a6c8786'
@@ -327,7 +328,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  assert.equal(provenance.exploration.sha,explorationSha,
    'the complete native Exploration checkout must match the source pin');
  assert.ok(['13bbd8230d8dfcef612586974b2dcb54e18e16c4',
-   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha].includes(explorationSha),
+   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha].includes(explorationSha),
    'release must reject unreviewed Exploration main SHAs');
  const bytes=read(trial,official);
  const gitBlob=crypto.createHash('sha1')
@@ -342,7 +343,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  const sculpt=read(trial,'vendor/exploration-lab/src/sculpt-lab-main.js').toString('utf8');
  assert.match(sculpt,/drawOuterSouthRim:false/);
  assert.match(sculpt,/drawDecorativeFringeTerrain\(\)/);
- if([fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha].includes(explorationSha)){
+ if([fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha].includes(explorationSha)){
   assert.match(sculpt,/drawDecorativeFringeObjects\('back'\)/);
   assert.match(sculpt,/drawDecorativeFringeObjects\('front'\)/);
   const north=sculpt.indexOf("drawDecorativeFringeObjects('back');");
@@ -350,7 +351,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
   const south=sculpt.indexOf("drawDecorativeFringeObjects('front');",hero);
   assert.ok(north>=0&&hero>north&&south>hero,
    'a southern tree must layer in front of the player but own no collision');
-  if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha].includes(explorationSha)){
+  if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha].includes(explorationSha)){
    assert.doesNotMatch(text,/ctx.fillRect\(rect.x,rect.y,rect.width,rect.height\)/,
     'no per-tile translucent altitude paint on a raised road or grass');
    assert.match(text,/for\(const \{side,opacity\} of info.contactShadows\)/,
@@ -377,14 +378,26 @@ test('published preview carries exactly one item library, healing potions and PN
  const explorer=read(trial,'vendor/exploration-lab/src/actors/npc-editor-v1.js').toString('utf8');
  assert.match(shell,/label:"Bibliothèque d’objets"/);
  assert.match(shell,/label:"Drops \/ Ressources"/);
- assert.match(shell,/gensrpg\.exploration\.npc\.merchant\.configure\.v1/);
+ assert.doesNotMatch(shell,/\["items","drops","merchant"\]/,
+   'The separate merchant navigation must be absent');
+  assert.match(shell,/\["items","drops"\]/);
  assert.match(contract,/item\.potion\.heal/);
  assert.match(contract,/item\.potion\.revive/);
  assert.match(app,/useAdventureConsumableV1/);
  assert.match(html,/id="adventure-library-view"/);
  assert.match(html,/id="adventure-drops-view"/);
  assert.match(economy,/function focusMerchant\(merchantId\)/);
- assert.match(explorer,/gensrpg\.exploration\.npc\.merchant\.configure\.v1/);
+ const npcHtml=read(trial,'vendor/exploration-lab/npc-editor.html').toString('utf8');
+  assert.match(explorer,/url\.searchParams\.set\('embed','npc'\)/);
+  assert.match(explorer,/gensrpg\.capture\.v2\.npc\.merchant\.saved\.v1/);
+  assert.match(npcHtml,/id="npc-merchant-frame"/);
+  assert.match(npcHtml,/id="npc-merchant-config"/);
+  assert.match(html,/id="adventure-fragment-species"/);
+  assert.match(html,/id="adventure-loot-global-rewards"/);
+  assert.match(html,/id="adventure-drop-focused-portrait"/);
+  assert.match(app,/isEmbeddedNpcMerchant/);
+  assert.match(app,/onMerchantCommitted:merchantId/);
+  assert.match(economy,/onMerchantCommitted\(merchant\.id\)/);
 });
 
 test('the existing single Pages publisher remains the only deployment authority',()=>{

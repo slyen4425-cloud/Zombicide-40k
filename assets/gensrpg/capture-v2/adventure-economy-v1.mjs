@@ -49,7 +49,10 @@ export function normalizeAdventureEconomyV1(input,lootItems=[]){
   (commodity.startsWith('fragment:')&&commodity.length>'fragment:'.length);
  const seen=new Set();
  const merchants=source.merchants.map((raw,i)=>{
-  const m=exact(raw,['id','name','buysItems','offers'],'economy.merchants['+i+']');
+  const {resalePercent,...legacyMerchant}=obj(raw,'economy.merchants['+i+']');
+  const m=exact(legacyMerchant,['id','name','buysItems','offers'],'economy.merchants['+i+']');
+  if(resalePercent!==undefined)
+   integer(resalePercent,'merchant.resalePercent',0,500);
   const merchantId=id(m.id,'merchant.id');
   if(seen.has(merchantId))throw new RangeError('Duplicate merchant ID '+merchantId);
   seen.add(merchantId);
@@ -81,7 +84,8 @@ export function normalizeAdventureEconomyV1(input,lootItems=[]){
     throw new RangeError('Merchant offer must have a currency or resource price');
    return {itemId,currencyPrice,resourceCosts,stock:offer.stock};
   });
-  return {id:merchantId,name:title(m.name,'merchant.name'),buysItems:m.buysItems,offers};
+  return {id:merchantId,name:title(m.name,'merchant.name'),buysItems:m.buysItems,
+   ...(resalePercent===undefined?{}:{resalePercent}),offers};
  });
  return freeze({currency:{singular,plural},merchants});
 }
@@ -149,8 +153,10 @@ export function tradeAdventureMerchantInventoryV1({
   if(!merchant.buysItems)throw new RangeError('Merchant does not buy items');
   if(!definition)throw new RangeError('Fragment resale has no authored saleValue');
   if((items[target]??0)<count)throw new RangeError('Insufficient items to sell');
-  const price=integer(definition.saleValue,'item.saleValue',0,100000000);
-  if(price===0)throw new RangeError('Item has no resale value');
+  const basePrice=integer(definition.saleValue,'item.saleValue',0,100000000);
+  const price=Math.floor(basePrice*(merchant.resalePercent??100)/100);
+  if(!Number.isSafeInteger(price)||price<=0)
+   throw new RangeError('Merchant resale price unavailable');
   paidCurrency=multiply(price,count,'resale currency');
   currency=add(currency,paidCurrency,'wallet currency');
   const left=items[target]-count;

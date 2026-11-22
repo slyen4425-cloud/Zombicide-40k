@@ -83,6 +83,10 @@ test('preview worker requests skipWaiting before precache and holds activation i
  assert.ok(install.indexOf('await self.skipWaiting()')<
   install.indexOf('for(const file of CORE_FILES)'),
   'activation request must not be blocked by the 140-resource precache');
+ assert.match(install,/for\(const file of CORE_FILES\)await cacheFresh\(cache,file\);await self\.skipWaiting\(\)/,
+  'same install event must repeat the activation handshake after cache settles');
+ assert.equal((install.match(/await self\.skipWaiting\(\)/g)||[]).length,2,
+  'early and late activation requests share exactly one ServiceWorker registration');
  assert.match(worker,/name\.startsWith\("gensrpg-preview-capture-v2-"\)/);
  assert.doesNotMatch(worker,/name\.startsWith\("gensrpg-cache-"\)&&name!==CACHE_NAME/);
 });

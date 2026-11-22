@@ -338,7 +338,8 @@
     <h3>Configurer un marchand</h3>
     <div class="fields">
      <label>Nom du marchand <input id="adventure-merchant-name" type="text" maxlength="80" placeholder="Ex. Marchand ambulant"></label>
-     <label><input id="adventure-merchant-buys" type="checkbox" checked> Peut racheter les objets au prix défini dans leur fiche</label>
+     <label><input id="adventure-merchant-buys" type="checkbox" checked> Peut racheter les objets</label>
+     <label>Pourcentage de rachat des objets (%) <input id="adventure-merchant-resale-percent" type="number" min="0" max="500" value="100" step="1"></label>
     </div>
     <div class="actions">
      <button type="button" id="adventure-merchant-add">Ajouter ce marchand</button>
@@ -364,7 +365,7 @@
      <button type="button" id="adventure-merchant-offer-cancel" hidden>Annuler la modification</button>
     </div>
     <div id="adventure-merchant-offers" class="rules-list" aria-live="polite"></div>
-    <p class="hint">Les objets, prix, stocks, monnaies et règles restent modifiables par le créateur. Les achats et ventes seront enregistrés dans la sauvegarde Capture ; l'interaction PNJ sera raccordée séparément dans Exploration.</p>
+    <p class="hint">Cette boutique est configurée ici et référencée par son PNJ marchand. Les taux de rachat, offres et stocks appartiennent exclusivement à Capture. Les fiches d'objets restent dans la Bibliothèque.</p>
    </details>
    </div><!-- /adventure-item-authoring : même formulaire, visible seulement dans l'éditeur -->
    <details id="adventure-fragments-panel" class="adventure-options">

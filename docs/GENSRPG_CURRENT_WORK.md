@@ -1,3 +1,10 @@
+## 2026-11-22 — PWA Capture : Vipfer, Polocendre et bibliothèque visuelle unique
+- Départ Publisher `main@e188fe3f67369247ad25a01256eb952b6945c1fb`, checkpoint `checkpoint/gensrpg-start-vipfer-polocendre-pwa-20261122`, branche `work/gensrpg-vipfer-polocendre-publisher-20261122`. Classe C2, source et publisher séparés ; rollback conservé.
+- Le Labo Combat `main@c8a2c99ea96f06552f93c2470ea86846ae74aa2f` (PR #373), CI `44970997400` GREEN + Pages `44970997491` GREEN, fournit 25 transferts Showcase dont les nouveaux Vipfer et Polocendre. La source Capture officielle a fusionné la PR #591 : `6aed0f6e4bda09a59920a11ab0dd82f0c9a216d4`, sans changer Exploration.
+- L'unique `global-assets@b807389811c5a7e5236b9fdc96b7f155168d7fd7` (CI `44925994443`) contient aussi l'icône cheval de feu. Publisher ne modifie que les SHAs du manifeste et les sentinelles de provenance, sans recopie d'assets ni modification du root/SW ou des sauvegardes.
+- Contrôle physique de release : dans `_site/preview/capture-v2-pr225/`, la source Combat réelle doit contenir les deux espèces dans son unique encounter bundle, leurs icônes canoniques et les quatre animations 6/7/5/5 de Polocendre. Préserver tous les tests audio, image menu et transparence #586/#587.
+- Source #591 : native release/clean ownership/Firefox/Tactical GOLD, architecture historique en cours à la fusion ; suivi et qualification §27 documentés sur la PR. Publication PWA PR #590 conditionnée par les tests physiques Pages, navigateur, provenance SHA et service worker isolé ; contrôle final via HTTPS, et validation sur Android installé distincte.
+
 ## 2026-11-19 — Raiiven : publication du catalogue 4 animations dans la PWA Capture V2
 - START Publisher `main@14aa03ee2992cc013ed92dbd8ce8126fe75276ec`, checkpoint `checkpoint/gensrpg-start-raiiven-animations-pwa-20261119`, branche `work/gensrpg-raiiven-animations-pwa-20261119`.
 - Source V2 immutable actuelle : `c8b687d3a42e9cbc7a467925d43f5a82232e151d`. Nouveau candidat source isolé : `work/gensrpg-raiiven-capture-v2-source-20261119` dérivé de ce SHA, mise à jour uniquement du `combat.sha` et `certifiedCiRun` dans la source V2 après certif Combat main.

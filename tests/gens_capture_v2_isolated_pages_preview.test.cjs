@@ -150,6 +150,24 @@ test('exact official Lab main files and derived Showcase have one owner and veri
   const payload=JSON.parse(bytes.toString('utf8'));
   assert.equal(payload.authorSha,combatSha);
   assert.equal(payload.engineSha,combatSha);
+  const authors=new Map(payload.creatureTransfers.map(record=>[record.draft?.id,record]));
+  assert.equal(authors.size,payload.creatureTransfers.length,
+    'official encounter bundle must not duplicate Showcase identities');
+  for(const [id,element,icon] of [
+    ['Vipfer','steel','pack:capture:creature-vipfer-icon-01'],
+    ['polocendre','fire','pack:capture:creature-cheval-de-feu-icon-v1']
+  ]){
+    const creature=authors.get(id);
+    assert.ok(creature,'new author species missing in the actual shipped encounter bundle: '+id);
+    assert.deepEqual(creature.draft.elements,[element]);
+    assert.equal(creature.draft.capture.rarity,'mythic');
+    assert.equal(creature.draft.presentation.visual.icon?.assetId,icon);
+    assert.equal(creature.loadout.slots.length,5);
+  }
+  const horse=authors.get('polocendre').draft.presentation.visual;
+  assert.deepEqual(['movement','movementBack','rangedAttack','rangedAttackBack']
+    .map(key=>horse[key]?.frameCount),[6,7,5,5],
+    'PWA must ship the approved horse animation frame counts');
   const recorded=new Set();
   for(const record of delivery.transport){
     assert.match(record.path,/^vendor\/(combat-lab|exploration-lab)\//);
@@ -497,12 +515,12 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
  const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
  const adapter=read(trial,'vendor/combat-lab/src/adapters/input/capture/capture-npc-opponent-instance-v1.js').toString('utf8');
  const economy=read(trial,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs').toString('utf8');
- assert.equal(pins.combat.sha,'414c0324a2837dee9697e01b4fc4ec9844a61b2a');
- assert.equal(pins.combat.certifiedCiRun,44899730762);
+ assert.equal(pins.combat.sha,'c8a2c99ea96f06552f93c2470ea86846ae74aa2f');
+ assert.equal(pins.combat.certifiedCiRun,44970997400);
  assert.equal(provenance.combat.sha,pins.combat.sha);
  assert.equal(delivery.combat.sha,pins.combat.sha);
- assert.equal(previewPin.officialVisuals.sha,'204564e5f3e0fa5081d23927ef4dfc8b74f9cc90');
- assert.equal(previewPin.officialVisuals.certifiedCiRun,44899212749);
+ assert.equal(previewPin.officialVisuals.sha,'b807389811c5a7e5236b9fdc96b7f155168d7fd7');
+ assert.equal(previewPin.officialVisuals.certifiedCiRun,44925994443);
  assert.ok(adapter.includes('export '));
  assert.match(economy,/adventureMerchantPriceV1/);
 });

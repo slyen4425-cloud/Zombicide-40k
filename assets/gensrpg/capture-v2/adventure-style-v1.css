@@ -794,3 +794,9 @@ body[data-adventure-item-embed="npc"] #adventure-merchant-library{max-height:220
 body[data-adventure-item-embed="npc"] #adventure-merchant-name{max-width:100%}
 body[data-adventure-item-embed="npc"] #adventure-item-authoring{padding:0}
 body[data-adventure-item-embed="npc"] #adventure-loot-panel>.fields{display:none!important}
+
+/* Single selected species + official portrait, no second registry or drop source. */
+.adventure-drop-focused{display:flex;align-items:center;gap:12px;padding:9px;
+ border:1px solid #3b686b;border-radius:9px;background:#102b33;margin:9px 0}
+.adventure-drop-focused img{width:54px;height:54px;object-fit:contain;flex:none}
+#adventure-drop-focused-description{font-size:12px;line-height:1.5;color:#d3efe3}

@@ -27,7 +27,12 @@ export function releasePreviewPwaForCommit(sourceWorker,sourceHtml,releaseSha){
   // present. Bind skipWaiting to waitUntil so the installation lifecycle owns
   // its promise, while letting cache population finish before install settles.
   const oldInstall='self.addEventListener("install",event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE_NAME).then(async cache=>{for(const file of CORE_FILES)await cacheFresh(cache,file)}))});';
-  const activatedInstall='self.addEventListener("install",event=>{event.waitUntil((async()=>{await self.skipWaiting();const cache=await caches.open(CACHE_NAME);for(const file of CORE_FILES)await cacheFresh(cache,file)})())});';
+  // Request activation immediately AND once after precache resolves. Chromium
+  // can retain an installed waiting worker when the first request happened
+  // before its installation settled; the late call is an idempotent safety
+  // handshake owned by the SAME install event and SAME service worker.
+  // No extra registration, polling, cache namespace, or user data mutation.
+  const activatedInstall='self.addEventListener("install",event=>{event.waitUntil((async()=>{await self.skipWaiting();const cache=await caches.open(CACHE_NAME);for(const file of CORE_FILES)await cacheFresh(cache,file);await self.skipWaiting()})())});';
   if(scoped.split(oldInstall).length!==2)
     throw Error('Unknown preview install lifecycle; fail closed');
   const lifecycleWorker=scoped.replace(oldInstall,activatedInstall);

@@ -501,8 +501,8 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
  assert.equal(pins.combat.certifiedCiRun,44899730762);
  assert.equal(provenance.combat.sha,pins.combat.sha);
  assert.equal(delivery.combat.sha,pins.combat.sha);
- assert.equal(previewPin.officialVisuals.sha,'204564e5f3e0fa5081d23927ef4dfc8b74f9cc90');
- assert.equal(previewPin.officialVisuals.certifiedCiRun,44899212749);
+ assert.equal(previewPin.officialVisuals.sha,'b807389811c5a7e5236b9fdc96b7f155168d7fd7');
+ assert.equal(previewPin.officialVisuals.certifiedCiRun,44925994443);
  assert.ok(adapter.includes('export '));
  assert.match(economy,/adventureMerchantPriceV1/);
 });

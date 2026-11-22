@@ -116,6 +116,8 @@ test('real landscape UI: library, drops, fragments and NPC shop share one saved 
   await frame.locator('#adventure-money-singular').fill('jeton');
   await frame.locator('#adventure-money-plural').fill('jetons');
   await frame.locator('#adventure-merchant-name').fill('Marchand témoin');
+  // The modern merchant catalog is deliberately collapsed on landscape.
+  await frame.locator('#adventure-economy-panel > details > summary').tap();
   await frame.locator('#adventure-merchant-search').fill('Relique témoin corrigée');
   await frame.locator('#adventure-merchant-library input[aria-label="Proposer Relique témoin corrigée"]').check();
   assert.equal(await frame.locator('#adventure-merchant-selected-count').innerText(),

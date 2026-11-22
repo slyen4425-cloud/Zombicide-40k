@@ -10,9 +10,9 @@
   "exploration": {
     "repository": "slyen4425-cloud/laboratoire_dynamique_exploration-",
     "ref": "main",
-    "sha": "c3b69270919923d130c74af1a8577fa40476eff2",
+    "sha": "1553c0e8f9bab89f5c1badfa64c5d41fb75cff73",
     "path": "vendor/exploration-lab/",
-    "certifiedCiRun": 45009116871
+    "certifiedCiRun": 45015697925
   },
   "legacyCaptureRuntime": false,
   "featuresDeferred": [

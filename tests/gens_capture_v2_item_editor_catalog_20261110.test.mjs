@@ -121,7 +121,9 @@ test('menu has one dedicated item editor view using the SAME Adventure owner',()
  assert.ok(shell.includes('id:"economy",title:"Bibliothèque et drops"'));
  assert.ok(shell.includes('merchant:{label:"PNJ marchand · Boutique"'),
   'The merchant remains a view of the single Capture authoring engine');
- assert.match(app,/const itemEditorRoute=new URLSearchParams/);
+ assert.match(app,/const itemEditorParams=new URLSearchParams/);
+ assert.match(app,/const itemEditorRoute=itemEditorParams\.get\('editor'\)/);
+ assert.match(shell,/items","drops"\]\)\}/);
  assert.match(app,/document\.body\.dataset\.adventureItemEditor='true'/);
  assert.match(html,/id="adventure-item-search"/);
  assert.match(html,/id="adventure-item-import" disabled/);

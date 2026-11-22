@@ -760,3 +760,55 @@ body[data-capture-shell-wallpaper="true"]:not([data-adventure-playing="true"]) m
  background-repeat:no-repeat,no-repeat,no-repeat;
  background-attachment:fixed,fixed,fixed;
 }
+
+
+/* 2026-11-22: merchant editing lives INSIDE the existing NPC section.
+   One Capture AdventureRules editor mounted inside native Exploration;
+   do not expose adventure-wide XP, victory coins, or a separate shop menu. */
+body[data-adventure-item-editor="true"] #adventure-loot-global-rewards{display:none!important}
+/* The configuration belongs to Bibliothèque → Fragments only. The game
+   preparation reads the SAME hidden fields but never renders a second form. */
+body:not([data-adventure-item-editor="true"]) #adventure-fragments-panel{display:none!important}
+body[data-adventure-item-editor="true"] #adventure-fragments-panel{display:none}
+body[data-adventure-item-editor="true"] #adventure-fragment-library-list #adventure-fragments-panel{display:block}
+body[data-adventure-item-editor="true"] #adventure-drop-filter,
+body[data-adventure-item-editor="true"] label[for="adventure-drop-filter"]{display:none!important}
+#adventure-fragment-library-list .adventure-item-library-card[aria-pressed="true"]{
+ border-color:#a7eccd;background:#194b47}
+body[data-adventure-item-embed="npc"]{margin:0;background:transparent}
+body[data-adventure-item-embed="npc"] main{min-height:0;padding:0;background:transparent}
+body[data-adventure-item-embed="npc"] .adventure-head,
+body[data-adventure-item-embed="npc"] #adventure-item-editor-navigation,
+body[data-adventure-item-embed="npc"] #adventure-loot-heading,
+body[data-adventure-item-embed="npc"] #adventure-economy-panel>summary,
+body[data-adventure-item-embed="npc"] #adventure-merchants,
+body[data-adventure-item-embed="npc"] #adventure-loot-panel>.actions{
+ display:none!important}
+body[data-adventure-item-embed="npc"] #adventure-advanced-panel,
+body[data-adventure-item-embed="npc"] #adventure-loot-panel,
+body[data-adventure-item-embed="npc"] #adventure-economy-panel{
+ border:0!important;background:transparent!important;margin:0!important;
+ padding:0!important;box-shadow:none!important}
+body[data-adventure-item-embed="npc"] .adventure-columns{display:block!important;max-width:none}
+body[data-adventure-item-embed="npc"] #adventure-merchant-library{max-height:220px;overflow:auto}
+body[data-adventure-item-embed="npc"] #adventure-merchant-name{max-width:100%}
+body[data-adventure-item-embed="npc"] #adventure-item-authoring{padding:0}
+body[data-adventure-item-embed="npc"] #adventure-loot-panel>.fields{display:none!important}
+
+/* Single selected species + official portrait, no second registry or drop source. */
+.adventure-drop-focused{display:flex;align-items:center;gap:12px;padding:9px;
+ border:1px solid #3b686b;border-radius:9px;background:#102b33;margin:9px 0}
+.adventure-drop-focused img{width:54px;height:54px;object-fit:contain;flex:none}
+#adventure-drop-focused-description{font-size:12px;line-height:1.5;color:#d3efe3}
+
+/* Inline PNJ form must display Capture validation errors; never hide the status
+   alongside the hero-sized Adventure title. */
+body[data-adventure-item-embed="npc"] .adventure-head{
+ display:flex!important;margin:0 0 7px!important;padding:0!important;
+ background:transparent!important;justify-content:flex-start!important}
+body[data-adventure-item-embed="npc"] .adventure-head>div,
+body[data-adventure-item-embed="npc"] .adventure-head h1,
+body[data-adventure-item-embed="npc"] .adventure-head .eyebrow{display:none!important}
+body[data-adventure-item-embed="npc"] #adventure-status{
+ display:block!important;width:100%;max-width:none!important;min-height:18px;
+ font-size:12px!important;padding:3px 0!important}

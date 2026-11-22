@@ -224,17 +224,24 @@
   </details>
   <details id="adventure-loot-panel" class="adventure-options">
    <summary id="adventure-loot-heading">Récompenses et objets</summary>
-   <div class="fields">
+   <section id="adventure-loot-global-rewards" aria-label="Récompenses générales de l'aventure">
+    <h3>Récompenses générales de l’aventure</h3>
+    <div class="fields">
     <label>Monnaie par victoire <input type="number" id="adventure-currency" min="0" max="100000000" step="1"></label>
     <label>Multiplicateur d'or gagné (victoires et dresseurs) ×
      <input type="number" id="adventure-gold-multiplier" min="0" max="100" step="0.1" value="1">
     </label>
     <p class="hint">×1 par défaut ; ×2 double les gains. Les prix des boutiques et les récompenses en objets restent inchangés. Le multiplicateur d’XP est dans « Progression » ci-dessus.</p>
    </div>
+    <div class="fields" id="adventure-currency-names">
+     <label>Nom de la monnaie (singulier) <input id="adventure-money-singular" type="text" maxlength="40" value="pièce"></label>
+     <label>Nom de la monnaie (pluriel) <input id="adventure-money-plural" type="text" maxlength="40" value="pièces"></label>
+    </div>
+   </section>
    <section id="adventure-loot-preparation-summary" aria-label="Résumé des objets et drops de cette aventure">
-    <p class="hint">Les objets, les drops par monstre et les marchands se configurent dans un seul éditeur, accessible depuis Monster Capture → Éditeurs. Les modifications sont enregistrées dans les règles de cette même aventure.</p>
+    <p class="hint">Les objets et les drops se configurent dans leur bibliothèque. La boutique de chaque marchand se configure directement dans son PNJ, depuis l’éditeur PNJ. Les modifications sont enregistrées dans les règles de cette même aventure.</p>
     <output id="adventure-loot-preparation-count" aria-live="polite">Catalogue de cette aventure en cours de chargement…</output>
-    <div class="actions"><button id="adventure-open-item-editor" type="button">Configurer objets, drops et marchands</button></div>
+    <div class="actions"><button id="adventure-open-item-editor" type="button">Ouvrir Bibliothèque d’objets</button></div>
    </section>
    <div id="adventure-item-authoring" aria-label="Éditeur unique objets, drops par monstre et marchands">
    <div class="actions" id="adventure-item-editor-navigation"><button id="adventure-return-preparation" type="button">← Retour à la préparation de l'aventure</button></div>
@@ -273,7 +280,6 @@
     <button type="button" id="adventure-item-add">Ajouter cet objet</button>
     <button type="button" id="adventure-item-edit-cancel" hidden>Annuler la modification</button>
     <button type="button" id="adventure-item-import" disabled>Importer les objets officiels des monstres</button>
-    <button type="button" id="adventure-item-defaults" disabled>Compléter les drops des monstres · 50 % / 100 pièces</button>
    </div>
    <p class="hint" id="adventure-item-icon-status">Icônes officielles : en attente du catalogue.</p>
    <label for="adventure-item-search">Rechercher un objet</label>
@@ -283,15 +289,19 @@
    <div id="adventure-fragment-library-list" hidden aria-live="polite"></div>
    </div><!-- /adventure-library-view -->
    <div id="adventure-drops-view" aria-label="Drops et ressources">
-   <h3>Drops des monstres publiés</h3>
-   <p class="hint">La créature choisie détermine quels objets elle peut laisser. Chaque drop est réglable (probabilité et quantité). Le Bestiaire Combat reste seul propriétaire des espèces.</p>
+   <h3>Récompenses par créature publiée</h3>
+   <p class="hint">Choisis une seule créature, puis l’objet de sa bibliothèque, sa chance d’obtention et sa quantité. Les fragments se configurent exclusivement dans Bibliothèque → Fragments.</p>
    <label for="adventure-drop-filter">Afficher les règles de drop de</label>
    <select id="adventure-drop-filter" aria-label="Filtrer les drops par créature publiée">
     <option value="">Toutes les créatures</option>
    </select>
    <output id="adventure-drop-summary" aria-live="polite">Chargement des drops officiels…</output>
+   <div id="adventure-drop-focused" class="adventure-drop-focused" aria-live="polite">
+    <img id="adventure-drop-focused-portrait" alt="" hidden>
+    <output id="adventure-drop-focused-description">Choisis une créature pour voir ses ressources.</output>
+   </div>
    <div class="fields">
-    <label>Espèce publiée <select id="adventure-drop-species" disabled></select></label>
+    <label>Créature publiée <select id="adventure-drop-species" disabled></select></label>
     <label>Objet <select id="adventure-drop-item"></select></label>
     <label>Chance (%) <input id="adventure-drop-chance" type="number" min="0" max="100" value="50"></label>
     <label>Quantité minimum <input id="adventure-drop-min" type="number" min="1" max="9999" value="1"></label>
@@ -302,29 +312,15 @@
     <button type="button" id="adventure-drop-edit-cancel" hidden>Annuler la modification</button>
    </div>
    <div id="adventure-drops" class="rules-list"></div>
-   <details id="adventure-monster-fragments-panel" class="adventure-options">
-    <summary>Fragments : réglage particulier pour ce monstre</summary>
-    <p class="hint">Par défaut, toutes les espèces utilisent les réglages généraux « Fragments de créatures » de l'aventure. Tu peux ici définir une chance et une quantité différentes pour le monstre sélectionné, sans toucher aux autres.</p>
-    <output id="adventure-monster-fragments-status" aria-live="polite">Sélectionne un monstre publié.</output>
-    <div class="fields">
-     <label>Chance de fragment (%) <input id="adventure-monster-fragments-chance" type="number" min="0" max="100" step="0.1" value="100"></label>
-     <label>Quantité minimum <input id="adventure-monster-fragments-min" type="number" min="1" max="9999" step="1" value="1"></label>
-     <label>Quantité maximum <input id="adventure-monster-fragments-max" type="number" min="1" max="9999" step="1" value="1"></label>
-    </div>
-    <div class="actions">
-     <button id="adventure-monster-fragments-save" type="button">Personnaliser les fragments de ce monstre</button>
-     <button id="adventure-monster-fragments-default" type="button">Revenir aux valeurs générales</button>
-    </div>
-   </details>
+   <div class="actions">
+    <button type="button" id="adventure-item-defaults" disabled>Compléter les ressources manquantes des créatures (50 %, 1 objet)</button>
+   </div>
+
    </div><!-- /adventure-drops-view -->
    <details id="adventure-economy-panel" class="adventure-options">
-    <summary>Monnaie, ressources et marchands</summary>
-    <p class="hint">Une monnaie principale, dont le nom est personnalisable. Les autres ressources sont les objets du catalogue : on peut les réclamer en paiement, sans créer un second inventaire. Aucun marchand n'apparaît en jeu avant son raccord explicite à un PNJ ou un événement Exploration.</p>
-    <div class="fields">
-     <label>Nom de la monnaie (singulier) <input id="adventure-money-singular" type="text" maxlength="40" value="pièce"></label>
-     <label>Nom de la monnaie (pluriel) <input id="adventure-money-plural" type="text" maxlength="40" value="pièces"></label>
-    </div>
-    <h3>Configurer un marchand</h3>
+    <summary>Objets proposés et tarifs du PNJ marchand</summary>
+    <p class="hint">Cette boutique utilise uniquement les objets de la Bibliothèque. Elle appartient au PNJ sélectionné. Le nom de la monnaie et les gains de victoire se règlent dans la préparation de l’aventure.</p>
+    <h3>Configurer la boutique de ce PNJ</h3>
     <p class="hint">Le marchand utilise les objets de la bibliothèque. Aucun prix ni stock à renseigner objet par objet : seuls les deux pourcentages modifient leur valeur de base.</p>
     <div class="fields">
      <label>Nom du marchand <input id="adventure-merchant-name" type="text" maxlength="80" placeholder="Ex. Marchand ambulant"></label>
@@ -360,7 +356,7 @@
    </div><!-- /adventure-item-authoring : même formulaire, visible seulement dans l'éditeur -->
    <details id="adventure-fragments-panel" class="adventure-options">
     <summary>Fragments de créatures</summary>
-    <p class="hint">Les fragments d'une espèce publiée s'ajoutent à l'inventaire après une victoire. Invoque une créature de niveau 1 par défaut ou transforme les fragments en XP sur une créature déjà possédée. Aucun effet sur les anciennes parties sans cette règle.</p>
+    <p class="hint">Ici se trouvent tous les paramètres des fragments : chance par créature, quantité, invocation et XP. Un seul réglage réel pour chaque règle, sans copie dans les Drops.</p>
     <div class="fields">
      <label><input id="adventure-fragments-enabled" type="checkbox"> Activer les fragments pour ce jeu</label>
      <label>Fragments pour invoquer <input id="adventure-fragments-required" type="number" min="1" max="9999" step="1" value="10"></label>
@@ -373,6 +369,23 @@
      <label>Quantité minimum <input id="adventure-fragments-drop-min" type="number" min="1" max="9999" step="1" value="1"></label>
      <label>Quantité maximum <input id="adventure-fragments-drop-max" type="number" min="1" max="9999" step="1" value="1"></label>
     </div>
+    <label for="adventure-fragment-species">Personnaliser les fragments d’une créature publiée
+     <select id="adventure-fragment-species" aria-label="Créature dont on règle les fragments"></select>
+    </label>
+   <details id="adventure-monster-fragments-panel" class="adventure-options">
+    <summary>Fragments : réglage particulier pour ce monstre</summary>
+    <p class="hint">Par défaut, toutes les espèces utilisent les réglages généraux « Fragments de créatures » de l'aventure. Tu peux ici définir une chance et une quantité différentes pour le monstre sélectionné, sans toucher aux autres.</p>
+    <output id="adventure-monster-fragments-status" aria-live="polite">Sélectionne un monstre publié.</output>
+    <div class="fields">
+     <label>Chance de fragment (%) <input id="adventure-monster-fragments-chance" type="number" min="0" max="100" step="0.1" value="100"></label>
+     <label>Quantité minimum <input id="adventure-monster-fragments-min" type="number" min="1" max="9999" step="1" value="1"></label>
+     <label>Quantité maximum <input id="adventure-monster-fragments-max" type="number" min="1" max="9999" step="1" value="1"></label>
+    </div>
+    <div class="actions">
+     <button id="adventure-monster-fragments-save" type="button">Personnaliser les fragments de ce monstre</button>
+     <button id="adventure-monster-fragments-default" type="button">Revenir aux valeurs générales</button>
+    </div>
+   </details>
     <h3>Collection hors combat</h3>
     <div class="fields">
      <label>Places de stockage <input id="adventure-fragments-storage-capacity" type="number" min="0" max="100000" step="1" value="100"></label>

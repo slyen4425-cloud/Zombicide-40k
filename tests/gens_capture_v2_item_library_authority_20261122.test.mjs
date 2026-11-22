@@ -134,6 +134,11 @@ test('NPC shop deep link preserves the selected saved PNJ without duplicating me
  assert.match(app,/const npcReturnId=returnToNpc/);
  assert.match(app,/economyEditor\?\.focusMerchant\(linkedMerchantId\)/);
  assert.match(editor,/function focusMerchant\(merchantId\)/);
+ assert.match(editor,/onMerchantCommitted\(merchant\.id\)/);
+ assert.match(app,/isEmbeddedNpcMerchant/);
+ assert.match(app,/gensrpg\.capture\.v2\.npc\.merchant\.saved\.v1/);
+ assert.match(app,/saveCurrentAdventureRules\(\)/);
+ assert.doesNotMatch(shell,/items","drops","merchant"\]/);
  assert.doesNotMatch(shell,/merchantOffers|merchantStocks|saleValue:/);
 });
 
@@ -147,4 +152,18 @@ test('a saved potion cannot be treated as failed when only Explorer refresh fail
  assert.match(action,/catch\(error\)\{refreshWarning=/);
  assert.match(action,/Sauvegardé, mais synchronisation Exploration à vérifier/);
  assert.match(action,/receipt\.beforeHp/);
+});
+
+test('fragments own their per-species settings while global currency is outside merchant editor',()=>{
+ const root=new URL('../assets/gensrpg/capture-v2/',import.meta.url);
+ const html=readFileSync(new URL('adventure.html',root),'utf8');
+ const app=readFileSync(new URL('adventure-app-v1.mjs',root),'utf8');
+ const drops=html.split('id="adventure-drops-view"')[1]?.split('id="adventure-economy-panel"')[0]??'';
+ const fragments=html.split('id="adventure-fragments-panel"')[1]?.split('id="adventure-save-rules"')[0]??'';
+ assert.doesNotMatch(drops,/id="adventure-monster-fragments-panel"/);
+ assert.match(fragments,/id="adventure-monster-fragments-panel"/);
+ assert.equal(html.split('id="adventure-fragment-species"').length-1,1);
+ assert.equal(html.split('id="adventure-money-singular"').length-1,1);
+ assert.match(html,/id="adventure-loot-global-rewards"/);
+ assert.match(app,/const id=\$\('adventure-fragment-species'\)\.value/);
 });

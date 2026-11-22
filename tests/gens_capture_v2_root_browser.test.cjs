@@ -80,8 +80,10 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await page.locator('#gensCaptureV2Root [data-capture-universe-select="monster-invoc"]').tap();
   assert.equal(await page.locator('#gensCaptureV2Root').getAttribute('data-menu'),'main');
   const buttons=page.locator('#gensCaptureV2Root [data-capture-v2-view]');
-  assert.equal(await buttons.count(),13,
-   'eight native Lab destinations, library/drops/shop editors, one game and the Creator view');
+  assert.equal(await buttons.count(),12,
+   'eight native Lab destinations, library and drops editors, one game and Creator; merchant belongs in NPC');
+  assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view="merchant"]').count(),0,
+   'merchant has NO standalone menu; configure inside the native NPC editor');
   assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="economy"] [data-capture-v2-view="items"]').count(),1,
    'one official item editor is grouped under Objets et économie');
   assert.equal(await page.locator('#gensCaptureV2Root > nav.gensCaptureV2MainMenu > button').count(),4,

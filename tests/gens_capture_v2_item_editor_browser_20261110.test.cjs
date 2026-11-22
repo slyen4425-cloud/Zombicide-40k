@@ -5,6 +5,7 @@ const http=require('node:http');
 const fs=require('node:fs/promises');
 const path=require('node:path');
 const {chromium}=require('playwright');
+const {PNG}=require('pngjs');
 
 const site=path.resolve(process.env.CAPTURE_V2_SITE||'_site');
 const types={'.html':'text/html;charset=utf-8','.js':'text/javascript;charset=utf-8',
@@ -82,6 +83,8 @@ test('real landscape UI: library, drops, fragments and NPC shop share one saved 
   assert.ok(await frame.locator('[data-capture-fragment-cards] .adventure-item-library-card').count()>0);
   assert.equal(await frame.locator('#adventure-fragments-panel').count(),1,
    'fragment settings are MOVED, not copied');
+  assert.equal(await frame.locator('#adventure-monster-fragments-panel').count(),1);
+  assert.equal(await frame.locator('#adventure-fragment-species').isVisible(),true);
   
   await editor('drops');
   assert.equal(await frame.locator('#adventure-drops-view').isVisible(),true);
@@ -90,6 +93,8 @@ test('real landscape UI: library, drops, fragments and NPC shop share one saved 
   assert.ok(initialDrops>0,'newly published species already have official default drops');
   const species=await frame.locator('#adventure-drop-species option').first().getAttribute('value');
   await frame.locator('#adventure-drop-species').selectOption(species);
+  assert.equal(await frame.locator('#adventure-drop-filter').isVisible(),false,
+   'drop editor must show ONE monster picker, not two');
   await frame.locator('#adventure-drop-item').selectOption({label:'Relique témoin corrigée'});
   await frame.locator('#adventure-drop-chance').fill('35');
   await frame.locator('#adventure-drop-min').fill('1');
@@ -110,11 +115,17 @@ test('real landscape UI: library, drops, fragments and NPC shop share one saved 
    .filter({hasText:'Relique témoin corrigée'}).count(),1);
   
 
-  await editor('merchant');
+  // Merchant does not have a menu anymore. The historical deep link stays
+  // compatible for existing NPC references; the NEW workflow is in the NPC.
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view="merchant"]').count(),0);
+  assert.equal(await page.evaluate(()=>window.GensCaptureV2.open('merchant')),true);
+  await frame.locator('#adventure-drop-species:not([disabled])').waitFor({state:'attached',timeout:45000});
   assert.equal(await frame.locator('#adventure-economy-panel').isVisible(),true);
   assert.equal(await frame.locator('#adventure-drops-view').isVisible(),false);
-  await frame.locator('#adventure-money-singular').fill('jeton');
-  await frame.locator('#adventure-money-plural').fill('jetons');
+  assert.equal(await frame.locator('#adventure-loot-global-rewards').isVisible(),false,
+   'global victory coins and denomination must NOT be merchant options');
   await frame.locator('#adventure-merchant-name').fill('Marchand témoin');
   // The modern merchant catalog is deliberately collapsed on landscape.
   await frame.locator('#adventure-economy-panel > details > summary').tap();
@@ -266,6 +277,67 @@ test('real smartphone merchant: proximity iframe opens only canonical shop and b
   await page.waitForFunction(()=>window.__merchantSession.inventory.currency===20);
   assert.equal(await page.evaluate(()=>window.__merchantSession.inventory.items.relique??0),0);
   await page.locator('#adventure-merchant-close').click();
+ }finally{
+  await browser?.close();server.closeAllConnections();
+  await new Promise(ok=>server.close(ok));
+ }
+});
+
+test('merchant edits inside the saved NPC; official Capture commits the inventory and only merchantId is linked', 
+ {timeout:195000},async()=>{
+ await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
+ let browser;
+ try{
+  browser=await chromium.launch({headless:true});
+  const context=await browser.newContext({viewport:{width:932,height:430},
+   hasTouch:true,serviceWorkers:'block',locale:'fr-FR'});
+  await context.addInitScript(()=>{window.supabase={createClient:()=>({})}});
+  const page=await context.newPage(),errors=[];
+  page.on('pageerror',e=>errors.push(String(e)));
+  await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
+  await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',
+   {waitUntil:'domcontentloaded',timeout:60000});
+  await page.locator('button.gensRootModeCard.capture').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-universe-select="monster-invoc"]').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  assert.equal(await page.locator('[data-capture-v2-view="merchant"]').count(),0,
+   'standalone merchant navigation must be gone');
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="npc"]').tap();
+  const npc=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
+  // IndexedDB NPC catalog must finish its initial async refresh BEFORE form
+  // interaction; otherwise that refresh intentionally clears unsaved fields.
+  await npc.locator('#npc-count:has-text("PNJ enregistrés")')
+   .waitFor({state:'visible',timeout:45000});
+  await npc.locator('#npc-name').fill('Marchand intégré témoin');
+  await npc.locator('#npc-role').selectOption('merchant');
+  // A genuine user-uploaded 64×64 PNG, not an invented Bestiary entry.
+  const png=new PNG({width:64,height:64});
+  for(let i=0;i<png.data.length;i+=4){
+   png.data[i]=64;png.data[i+1]=170;png.data[i+2]=140;png.data[i+3]=255;
+  }
+  const art=PNG.sync.write(png);
+  await npc.locator('#npc-image').setInputFiles({name:'marchand-test.png',mimeType:'image/png',buffer:art});
+  await npc.locator('#npc-save').tap();
+  await npc.locator('#npc-status:has-text("PNJ enregistré")').waitFor({timeout:15000});
+  const npcId=await npc.locator('#npc-saved').inputValue();
+  assert.match(npcId,/^npc\.user\./,'saving must keep the official minted NPC ID');
+  await npc.locator('#npc-merchant-config > summary').tap();
+  await npc.locator('#npc-merchant-configure').tap();
+  const merchant=npc.frameLocator('#npc-merchant-frame');
+  await merchant.locator('#adventure-merchant-name').waitFor({state:'visible',timeout:60000});
+  assert.equal(await merchant.locator('body').getAttribute('data-adventure-item-embed'),'npc');
+  assert.equal(await merchant.locator('#adventure-loot-global-rewards').isVisible(),false);
+  await merchant.locator('#adventure-merchant-library input[type="checkbox"]').first().check();
+  await merchant.locator('#adventure-merchant-add').click({noWaitAfter:true});
+  await npc.locator('#npc-status:has-text("Boutique enregistrée et liée")').waitFor({timeout:60000});
+  const merchantId=await npc.locator('#npc-merchant-choice').inputValue();
+  assert.match(merchantId,/^merchant-/,'the saved PNJ must receive the Capture merchantId');
+  await npc.locator('#npc-merchant-configure').tap();
+  await merchant.locator('#adventure-merchant-name').waitFor({state:'visible',timeout:60000});
+  await merchant.locator('#adventure-merchant-library input:checked').first().waitFor({timeout:40000});
+  assert.equal(await npc.locator('#npc-merchant-choice').inputValue(),merchantId,
+   'link survives reload, without creating a second shop');
+  assert.deepEqual(errors.filter(e=>/SyntaxError|Uncaught|Duplicate Capture/.test(e)),[]);
  }finally{
   await browser?.close();server.closeAllConnections();
   await new Promise(ok=>server.close(ok));

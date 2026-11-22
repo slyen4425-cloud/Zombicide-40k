@@ -101,14 +101,20 @@ const fragmentFields={
  allowDuplicates:'adventure-fragments-duplicates'
 };
 let rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
-const itemEditorRoute=new URLSearchParams(window.location.search).get('editor');
+const itemEditorParams=new URLSearchParams(window.location.search);
+const itemEditorRoute=itemEditorParams.get('editor');
 const isItemEditor=['items','library','drops','merchant'].includes(itemEditorRoute);
 const itemEditorView=itemEditorRoute==='drops'||itemEditorRoute==='merchant'
  ?itemEditorRoute:'library';
-const returnToNpc=itemEditorView==='merchant'&&
- new URLSearchParams(window.location.search).get('returnTo')==='npc';
-const npcReturnId=returnToNpc?new URLSearchParams(window.location.search).get('npcId'):null;
-const linkedMerchantId=returnToNpc?new URLSearchParams(window.location.search).get('merchantId'):null;
+const returnToNpc=itemEditorView==='merchant'&&itemEditorParams.get('returnTo')==='npc';
+// The PNJ owns only merchantId; Capture remains the one authoritative editor.
+// Embedded UI is an actual same-origin Capture document, NOT duplicated form.
+const isEmbeddedNpcMerchant=itemEditorView==='merchant'&&itemEditorParams.get('embed')==='npc';
+const npcReturnId=returnToNpc?itemEditorParams.get('npcId'):null;
+const embeddedNpcId=isEmbeddedNpcMerchant?itemEditorParams.get('npcId'):null;
+const embeddedMerchantNonce=isEmbeddedNpcMerchant?itemEditorParams.get('npcBridgeNonce'):null;
+const linkedMerchantId=(returnToNpc||isEmbeddedNpcMerchant)
+ ?itemEditorParams.get('merchantId'):null;
 let libraryCategory='usable';
 let activeItemEditId=null;
 let activeDropEditIndex=null;
@@ -121,11 +127,12 @@ const officialItemIconUrl=iconKey=>{
 };
 if(isItemEditor){
  document.body.dataset.adventureItemEditor='true';
+ if(isEmbeddedNpcMerchant)document.body.dataset.adventureItemEmbed='npc';
  document.querySelector('.adventure-head h1').textContent='Éditeur d’objets';
  document.querySelector('.adventure-head p').textContent=
   itemEditorView==='library'?'Une bibliothèque unique : objets utilisables, ressources et fragments.':
   itemEditorView==='drops'?'Règles de drops et de récompenses par créature publiée.':
-  'Boutiques des PNJ : offres, prix, stocks et monnaie de cet univers.';
+  'Choisis les objets proposés par ce PNJ et ses pourcentages de vente et de rachat.';
  if(returnToNpc)
   document.getElementById('adventure-return-preparation').textContent=
    '← Retour à l’éditeur PNJ marchand';
@@ -147,13 +154,15 @@ function setCanonicalItemCategory(category){
   // Move the ORIGINAL authoring policy form; never clone its inputs/listeners.
   const settings=$('adventure-fragments-panel');
   if(settings.parentElement!==fragments)fragments.append(settings);
+  settings.open=true; // Fragment parameters are the actual active library tab, not a hidden accordion.
   const gallery=fragments.querySelector('[data-capture-fragment-cards]')??
    document.createElement('div');
   gallery.dataset.captureFragmentCards='true';
   gallery.className='adventure-item-library-gallery';
   gallery.replaceChildren();
   for(const card of published){
-   const line=document.createElement('div');line.className='adventure-item-library-card';
+   const line=document.createElement('button');line.type='button';
+   line.className='adventure-item-library-card';
    const portrait=publishedCapturePortraitUrlV1({
     card:{portrait:card.icon??card.portrait??null},moduleUrl:import.meta.url
    });
@@ -162,9 +171,20 @@ function setCanonicalItemCategory(category){
     picture.alt='Icône de '+card.name;picture.loading='lazy';line.append(picture);
    }
    const name=document.createElement('span');name.textContent='Éclat de '+card.name;
-   const identifier=document.createElement('small');
-   identifier.textContent='fragment:'+card.id;
-   line.append(name,identifier);gallery.append(line);
+   const override=rules.fragmentRecruitment?.perSpecies?.[card.id];
+   const global=rules.fragmentRecruitment??DEFAULT_ADVENTURE_FRAGMENTS_V1;
+   const details=document.createElement('small');
+   details.textContent=(override?.dropChancePercent??global.dropChancePercent)+
+    ' % · '+(override?.dropMin??global.dropMin)+' à '+(override?.dropMax??global.dropMax)+' fragment(s)';
+   line.setAttribute('aria-pressed',String($('adventure-fragment-species').value===card.id));
+   line.addEventListener('click',()=>{
+    $('adventure-fragment-species').value=card.id;
+    renderMonsterFragmentEditor();
+    for(const button of gallery.querySelectorAll('button'))
+     button.setAttribute('aria-pressed',String(button===line));
+    $('adventure-monster-fragments-panel').open=true;
+   });
+   line.append(name,details);gallery.append(line);
   }
   fragments.prepend(gallery);
  }
@@ -181,7 +201,15 @@ function setupCanonicalItemEditor(){
  $('adventure-library-view').hidden=itemEditorView!=='library';
  $('adventure-drops-view').hidden=itemEditorView!=='drops';
  $('adventure-economy-panel').hidden=itemEditorView!=='merchant';
- if(itemEditorView==='merchant')$('adventure-economy-panel').open=true;
+ if(itemEditorView==='merchant'){
+  $('adventure-economy-panel').open=true;
+  if(isEmbeddedNpcMerchant){
+   document.getElementById('adventure-save-rules').textContent='Enregistrer les paramètres de la boutique';
+   // A linked PNJ merchant must expose the catalog selector without requiring
+   // the player to discover a collapsed nested panel.
+   $('adventure-merchant-library').closest('details').open=true;
+  }
+ }
  if(itemEditorView==='library'){
   for(const button of document.querySelectorAll('[data-capture-item-category]'))
    button.addEventListener('click',()=>setCanonicalItemCategory(button.dataset.captureItemCategory));
@@ -189,7 +217,7 @@ function setupCanonicalItemEditor(){
  }
  $('adventure-loot-heading').textContent=
   itemEditorView==='library'?'Bibliothèque d’objets':
-  itemEditorView==='drops'?'Drops / Ressources':'Boutiques des PNJ marchands';
+  itemEditorView==='drops'?'Drops par créature':'Objets et tarifs du PNJ';
 }
 function syncItemUseEffectFields(){
  const usable=$('adventure-item-kind').value==='usable';
@@ -596,19 +624,26 @@ function getStarterSpeciesIds(){
 }
 function fillPublicSpecies(){
  const starters=$('adventure-starter'),enemies=$('adventure-enemy'),drops=$('adventure-drop-species');
- const filter=$('adventure-drop-filter'),previousFilter=filter.value;
+ const fragmentSpecies=$('adventure-fragment-species'),previousFragments=fragmentSpecies.value;
+ const previousDrop=drops.value,filter=$('adventure-drop-filter'),previousFilter=filter.value;
  const previousStarter=starters.value;
  filter.replaceChildren(option('','Toutes les créatures'));
  starters.replaceChildren(option('','Choisir une créature publiée…'));
- enemies.replaceChildren();drops.replaceChildren();
+ enemies.replaceChildren();drops.replaceChildren();fragmentSpecies.replaceChildren();
  for(const card of published){
   const playable=eligibleForNewGame(card);
   starters.append(option(card.id,card.name+(playable?'':' · capacité non prête'),!playable));
   enemies.append(option(card.id,card.name));
   drops.append(option(card.id,card.name));
+  fragmentSpecies.append(option(card.id,card.name));
   filter.append(option(card.id,card.name));
  }
  if(published.some(card=>card.id===previousFilter))filter.value=previousFilter;
+ if(published.some(card=>card.id===previousDrop))drops.value=previousDrop;
+ if(published.some(card=>card.id===previousFragments))
+  fragmentSpecies.value=previousFragments;
+ if(itemEditorView==='drops'&&drops.value)filter.value=drops.value;
+ $('adventure-item-defaults').disabled=!published.length;
  const allowed=published.filter(eligibleForNewGame).length;
  text($('adventure-bestiary-count'),published.length+' créature(s) dans le Bestiaire · '+
   allowed+' avec au moins une capacité utilisable');
@@ -667,6 +702,7 @@ function editDropRule(index){
  if(!drop)throw new Error('Règle de drop indisponible');
  activeDropEditIndex=index;
  $('adventure-drop-species').value=drop.speciesId;
+ $('adventure-drop-filter').value=drop.speciesId;
  $('adventure-drop-item').value=drop.itemId;
  $('adventure-drop-chance').value=String(drop.chancePercent);
  $('adventure-drop-min').value=String(drop.minQuantity);
@@ -678,7 +714,7 @@ function editDropRule(index){
 // Monster-oriented editing projects only the official Combat Bestiary and
 // AdventureRules. No separate loot registry or monster progression engine.
 function renderMonsterFragmentEditor(){
- const id=$('adventure-drop-species').value;
+ const id=$('adventure-fragment-species').value;
  const policy=rules.fragmentRecruitment??DEFAULT_ADVENTURE_FRAGMENTS_V1;
  const override=rules.fragmentRecruitment?.perSpecies?.[id];
  const exists=published.some(card=>card.id===id);
@@ -690,7 +726,7 @@ function renderMonsterFragmentEditor(){
  $('adventure-monster-fragments-max').value=String(override?.dropMax??policy.dropMax);
  const name=published.find(card=>card.id===id)?.name;
  text($('adventure-monster-fragments-status'),!name
-  ?'Choisis un monstre publié dans la liste des drops.'
+  ?'Choisis une créature publiée dans la bibliothèque de fragments.'
   :name+(override?' : chance et quantités particulières enregistrées dans la règle.':
     ' : valeurs générales appliquées.')+
     (rules.fragmentRecruitment?.enabled?'':' Les fragments sont désactivés dans cette aventure.'));
@@ -783,6 +819,17 @@ function renderItemRules(){
  if(rules.loot.items.some(x=>x.id===selected))selector.value=selected;
  $('adventure-drop-add').disabled=!published.length||!rules.loot.items.length;
  const filterId=$('adventure-drop-filter').value;
+ const selectedCard=published.find(card=>card.id===filterId);
+ const image=$('adventure-drop-focused-portrait');
+ const imageSrc=selectedCard?publishedCapturePortraitUrlV1({
+  card:{portrait:selectedCard.icon??selectedCard.portrait??null},
+  moduleUrl:import.meta.url
+ }):null;
+ image.hidden=!imageSrc;
+ if(imageSrc)image.src=imageSrc;
+ text($('adventure-drop-focused-description'),selectedCard
+  ?selectedCard.name+' : choisis une ressource existante, règle sa chance et sa quantité. Une ligne ci-dessous = un seul tirage après victoire.'
+  :'Aucune créature sélectionnée dans le Bestiaire officiel.');
  const visibleDrops=rules.loot.drops.map((drop,index)=>({drop,index}))
   .filter(entry=>!filterId||entry.drop.speciesId===filterId);
  const covered=new Set(rules.loot.drops.map(drop=>drop.speciesId)).size;
@@ -1812,6 +1859,26 @@ installAdventureMerchantPlayV1({
 economyEditor=installAdventureEconomyEditorV1({
  document,getRules:()=>rules,getPublishedSpecies:()=>published,
  getItemIconUrl:officialItemIconUrl,
+ onMerchantCommitted:merchantId=>{
+  // Save on the single Capture AdventureRules authority *before* linking
+  // the PNJ by reference. No merchant catalog is persisted in Exploration.
+  if(!isEmbeddedNpcMerchant){
+   stateMessage('Marchand configuré. Enregistre les paramètres de l’aventure.');
+   return;
+  }
+  if(!/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(merchantId)||
+     !/^[0-9a-f-]{36}$/i.test(embeddedMerchantNonce??'')||
+     !/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(embeddedNpcId??''))
+   throw Error('Liaison PNJ non autorisée : références invalides.');
+  saveCurrentAdventureRules();
+  window.parent.postMessage({
+   schema:'gensrpg.capture.v2.npc.merchant.saved.v1',
+   npcId:embeddedNpcId,merchantId,
+   nonce:embeddedMerchantNonce
+  },window.location.origin);
+  economyEditor.focusMerchant(merchantId);
+  stateMessage('Boutique enregistrée et associée au PNJ dans son éditeur.');
+ },
  commitEconomy:economy=>{
   const currency={singular:$('adventure-money-singular').value.trim(),
    plural:$('adventure-money-plural').value.trim()};
@@ -2493,9 +2560,13 @@ $('adventure-drop-filter').addEventListener('change',()=>{
   $('adventure-drop-species').value=speciesId;
  renderItemRules();
 });
-$('adventure-drop-species').addEventListener('change',renderMonsterFragmentEditor);
+$('adventure-drop-species').addEventListener('change',()=>{
+ $('adventure-drop-filter').value=$('adventure-drop-species').value;
+ renderItemRules();
+});
+$('adventure-fragment-species').addEventListener('change',renderMonsterFragmentEditor);
 $('adventure-monster-fragments-save').addEventListener('click',guarded(()=>{
- const speciesId=$('adventure-drop-species').value;
+ const speciesId=$('adventure-fragment-species').value;
  if(!published.some(card=>card.id===speciesId))
   throw Error('Espèce absente du Bestiaire officiel');
  const current=fromFields(),global=current.fragmentRecruitment??{
@@ -2514,7 +2585,7 @@ $('adventure-monster-fragments-save').addEventListener('click',guarded(()=>{
   ' personnalisés dans le brouillon. Enregistre les paramètres.');
 }));
 $('adventure-monster-fragments-default').addEventListener('click',guarded(()=>{
- const speciesId=$('adventure-drop-species').value;
+ const speciesId=$('adventure-fragment-species').value;
  const current=fromFields();
  const global=current.fragmentRecruitment;
  if(!global?.perSpecies?.[speciesId])return;
@@ -2588,6 +2659,10 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   chancePercent:numberFrom('adventure-drop-chance'),
   minQuantity:numberFrom('adventure-drop-min'),
   maxQuantity:numberFrom('adventure-drop-max')};
+ const duplicate=rules.loot.drops.some((entry,index)=>
+  index!==activeDropEditIndex&&entry.speciesId===speciesId&&entry.itemId===drop.itemId);
+ if(duplicate)throw new Error(
+  'Cette créature possède déjà une règle pour cet objet : clique Modifier sur la ligne existante.');
  const drops=activeDropEditIndex===null?[...rules.loot.drops,drop]:
    rules.loot.drops.map((value,index)=>index===activeDropEditIndex?drop:value);
  rules=normalizeAdventureRulesV1({...fromFields(),loot:{...rules.loot,drops}});
@@ -2666,6 +2741,11 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   ]);
   adventurePerf('boot ready (world library + hero gallery)');
   stateMessage('Prêt pour l’aventure : choisis Nouvelle partie ou Charger partie.');
+  if(isEmbeddedNpcMerchant&&!linkedMerchantId){
+   const npcName=(itemEditorParams.get('npcName')??'').trim().slice(0,80);
+   if(npcName)$('adventure-merchant-name').value=npcName;
+   stateMessage('Sélectionne les objets et leurs tarifs, puis enregistre : la boutique sera liée automatiquement au PNJ.');
+  }
   if(itemEditorView==='merchant'&&linkedMerchantId){
    if(economyEditor?.focusMerchant(linkedMerchantId))
     stateMessage('Boutique liée à ton PNJ sélectionnée : modifie ses offres ou son rachat.');

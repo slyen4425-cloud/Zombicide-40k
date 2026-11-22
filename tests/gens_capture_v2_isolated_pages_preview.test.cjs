@@ -238,10 +238,43 @@ test('Capture editor combat previews reuse the ONE signed Lab transport with mus
   'do not add a second private sound bank to the lightweight editor package');
 });
 
+test('PWA carries exact cleaned bridge and stair binaries with stable native IDs',()=>{
+ const base='vendor/exploration-lab/assets/exploration/objects/';
+ const bridges=json(trial,base+'bridges/manifest.v1.json');
+ const stairs=json(trial,base+'stairs/manifest.v1.json');
+ const cleaned=bridges.files.filter(x=>['wood_rustic','castle'].includes(x.family)&&x.assetId.includes('_2p5d.'));
+ assert.equal(cleaned.length,8);
+ for(const entry of cleaned){
+  assert.equal(entry.runtimeProfile,'mobile-webp-512x512-lossless-v75',entry.assetId);
+  const b=read(trial,'vendor/exploration-lab/'+entry.path);
+  assert.equal(b.length,entry.bytes,entry.assetId);
+  assert.equal(sha256(b),entry.sha256,entry.assetId);
+  assert.equal(b.toString('ascii',0,4),'RIFF');
+  assert.equal(b.toString('ascii',8,12),'WEBP');
+ }
+ for(const variant of ['front','oblique','side','side_alt']){
+  const assetId='object.stairs.earth_log_path_2p5d.'+variant+'.01';
+  const found=stairs.files.filter(x=>x.assetId===assetId);
+  assert.equal(found.length,1,'exactly one '+assetId);
+  const b=read(trial,'vendor/exploration-lab/'+found[0].path);
+  assert.equal(b.length,found[0].bytes);
+  assert.equal(sha256(b),found[0].sha256);
+  assert.equal(b.toString('ascii',0,4),'RIFF');
+  assert.equal(b.toString('ascii',8,12),'WEBP');
+ }
+ const adapter=read(trial,'vendor/exploration-lab/src/assets/world-object-asset-adapter.js').toString('utf8');
+ const catalog=read(trial,'vendor/exploration-lab/src/objects/object-definition-catalog.js').toString('utf8');
+ assert.ok(adapter.includes("'object.stairs.earth_log_path_2p5d.side_alt.01'"));
+ assert.ok(catalog.includes("id: 'side_alt', label: 'Côté · Profil A'"));
+ assert.equal(fs.existsSync(path.join(trial,'assets/exploration/objects/bridges')),false,
+  'no competing bridge visual directory outside native Exploration owner');
+ assert.equal(fs.existsSync(path.join(trial,'ponts_nettoyes_labo_exploration_2026-11-22.zip')),false);
+});
+
 test('native World Builder map exporter and in-game 200% dezoom are shipped once from certified Exploration',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(source.exploration.sha,'c3b69270919923d130c74af1a8577fa40476eff2',
-   'ship the certified 22 Nov Exploration main, preserving native map export, camera and NPC shop');
+ assert.equal(source.exploration.sha,'de86b04f35f96df3783f1f953c7f138bc44a28f8',
+   'ship the certified 22 Nov Exploration main with cleaned bridges and both stair side profiles');
  const helper='vendor/exploration-lab/src/builder/world-assembler-map-preset-export-v1.js';
  required(trial,helper);
  const page=read(trial,'vendor/exploration-lab/world-assembler.html').toString('utf8');
@@ -280,9 +313,10 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  const stairsExplorationSha='2cb75a601cadcd26d33ffdd093a07badaaa9e86f';
   const certifiedNov21ExplorationSha='abe51d7f0634684d29772e0730719b2eb347fa98';
   const certifiedNov22NpcExplorationSha='c3b69270919923d130c74af1a8577fa40476eff2';
+  const certifiedNov22CleanedAssetsSha='de86b04f35f96df3783f1f953c7f138bc44a28f8';
  // The stair fix changes navigation and sprite presentation only. Its
  // canonical south terrain renderer remains byte-identical to recoveredWorld.
- const expectedOfficialRendererBlob=[recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha].includes(explorationSha)
+ const expectedOfficialRendererBlob=[recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha].includes(explorationSha)
    ?'6c101756bdf9c58a9ae8cf3fe104e49575145748'
    :explorationSha===fringeRoadExplorationSha
     ?'1a0869afc5b258e8f403f43cd26b3f417a6c8786'
@@ -293,7 +327,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  assert.equal(provenance.exploration.sha,explorationSha,
    'the complete native Exploration checkout must match the source pin');
  assert.ok(['13bbd8230d8dfcef612586974b2dcb54e18e16c4',
-   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha].includes(explorationSha),
+   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha].includes(explorationSha),
    'release must reject unreviewed Exploration main SHAs');
  const bytes=read(trial,official);
  const gitBlob=crypto.createHash('sha1')
@@ -308,7 +342,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  const sculpt=read(trial,'vendor/exploration-lab/src/sculpt-lab-main.js').toString('utf8');
  assert.match(sculpt,/drawOuterSouthRim:false/);
  assert.match(sculpt,/drawDecorativeFringeTerrain\(\)/);
- if([fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha].includes(explorationSha)){
+ if([fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha].includes(explorationSha)){
   assert.match(sculpt,/drawDecorativeFringeObjects\('back'\)/);
   assert.match(sculpt,/drawDecorativeFringeObjects\('front'\)/);
   const north=sculpt.indexOf("drawDecorativeFringeObjects('back');");
@@ -316,7 +350,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
   const south=sculpt.indexOf("drawDecorativeFringeObjects('front');",hero);
   assert.ok(north>=0&&hero>north&&south>hero,
    'a southern tree must layer in front of the player but own no collision');
-  if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha].includes(explorationSha)){
+  if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha].includes(explorationSha)){
    assert.doesNotMatch(text,/ctx.fillRect\(rect.x,rect.y,rect.width,rect.height\)/,
     'no per-tile translucent altitude paint on a raised road or grass');
    assert.match(text,/for\(const \{side,opacity\} of info.contactShadows\)/,

@@ -203,9 +203,21 @@ for(const art of CAPTURE_OFFICIAL_WALLPAPERS_V1){
   throw Error('Unsafe unpinned official art entry');
  const relative=art.path.slice('vendor/combat-lab/'.length);
  const input=path.join(visuals,relative),output=path.join(trial,art.path);
- if(!fs.existsSync(input)||!fs.statSync(input).isFile())
-  throw Error('Official author file absent: '+relative);
- const original=fs.readFileSync(input);
+ // Sparse checkouts may omit the physical PNG even when it is present in
+ // the exact checked-out commit. Read only that Git object from the approved
+ // visual source, never another branch, URL or fallback library.
+ let original;
+ if(fs.existsSync(input)&&fs.statSync(input).isFile()){
+  original=fs.readFileSync(input);
+ }else{
+  try{
+   original=execFileSync('git',['-C',visuals,'show','HEAD:'+relative],
+    {maxBuffer:12*1024*1024,stdio:['ignore','pipe','pipe']});
+  }catch(error){
+   throw Error('Official pinned author blob not accessible: '+relative+
+    ' ('+String(error?.stderr??error)+')');
+  }
+ }
  const sha=crypto.createHash('sha1')
   .update('blob '+original.length+String.fromCharCode(0)).update(original).digest('hex');
  if(original.length!==art.bytes||sha!==art.blobSha||

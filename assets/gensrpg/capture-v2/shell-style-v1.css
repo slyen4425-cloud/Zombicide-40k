@@ -19,6 +19,23 @@
  padding:clamp(12px,2vw,22px) clamp(12px,3vw,30px)}
 #gensCaptureV2Root[data-view="home"] > header strong{
  font-size:clamp(22px,4.5vw,34px);letter-spacing:.04em}
+/* Portrait menu: the title, Quitter and GenSRPG return link never overlap. */
+@media (orientation:portrait) and (max-width:650px){
+ #gensCaptureV2Root[data-view="home"] > header{
+  display:grid;grid-template-columns:max-content minmax(0,1fr);
+  gap:7px 10px;align-items:center;
+ }
+ #gensCaptureV2Root[data-view="home"] > header strong{
+  grid-column:1/-1;min-width:0;font-size:clamp(20px,5vw,26px);
+  letter-spacing:.01em;white-space:normal;
+ }
+ #gensCaptureV2Root[data-view="home"] > header > button{justify-self:start}
+ #gensCaptureV2Root[data-view="home"] > header .gensCaptureReturnToMain{
+  display:block;min-width:0;max-width:100%;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  text-align:right;color:#afe7e1;font-size:12px;
+ }
+}
 #gensCaptureV2Root[data-view="home"] > nav,
 #gensCaptureV2Root[data-view="home"] > .gensCaptureV2Editors{
  width:min(100% - 32px,520px);margin:auto;min-height:0;overflow-y:auto;
@@ -167,13 +184,15 @@
 
 /* World creator: a fourth *menu* entry, never an overlay over live gameplay. */
 #gensCaptureV2Root[data-view="home"][data-creator-wallpaper="true"]{
+ /* Opaque canvas hides the historical GenSRPG hub even under transparent PNG pixels. */
+ background-color:#08121b;
  background-image:linear-gradient(
   rgba(6,18,25,var(--capture-home-shade,.55)),
   rgba(6,18,25,var(--capture-home-shade,.55))),
   var(--capture-home-art),
-  var(--capture-home-art);
- /* The full image remains visible in BOTH phone orientations. A second
-    projection fills portrait/landscape margins; never distort the art. */
+  radial-gradient(ellipse at 50% 10%,#204a4b 0%,#102c36 42%,#08121b 84%);
+ /* Single uncropped image at every orientation. Gradient fills portrait gutters
+    without painting a second, larger creature. */
  background-size:cover,contain,cover;
  background-position:center,center,center;
  background-repeat:no-repeat,no-repeat,no-repeat;

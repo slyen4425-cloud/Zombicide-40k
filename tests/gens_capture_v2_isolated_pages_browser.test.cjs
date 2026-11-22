@@ -897,3 +897,49 @@ test('actual mobile Creator selects official UI sound, preserves its assetId and
   server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
  }
 });
+
+test('real Android portrait Capture home shows one wallpaper and separated GenSRPG return controls',
+ {timeout:90000},async()=>{
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ let browser,context;
+ try{
+  browser=await chromium.launch({headless:true});
+  context=await browser.newContext({viewport:{width:390,height:844},
+   isMobile:true,hasTouch:true,locale:'fr-FR',serviceWorkers:'block'});
+  await context.addInitScript(()=>{window.supabase={createClient:()=>({})};});
+  const page=await context.newPage();
+  await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
+  const url='http://127.0.0.1:'+server.address().port+scope+
+   'index.html?entry=gensrpg-main&launch=capture';
+  await page.goto(url,{waitUntil:'domcontentloaded'});
+  const home=page.locator('#gensCaptureV2Root');
+  await home.waitFor({state:'visible',timeout:30000});
+  const header=home.locator(':scope > header');
+  const title=header.locator('strong');
+  const quit=header.locator('button').first();
+  const back=header.locator('a.gensCaptureReturnToMain');
+  await back.waitFor({state:'visible',timeout:30000});
+  // A minimal transparent creator image exercises the actual published CSS
+  // without touching IndexedDB or relying on a private author's import.
+  const painted=await home.evaluate(el=>{
+   el.dataset.creatorWallpaper='true';
+   el.style.setProperty('--capture-home-art',
+    'url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22100%22%20height=%22100%22%3E%3Ccircle%20cx=%2250%22%20cy=%2250%22%20r=%2220%22%20fill=%22purple%22/%3E%3C/svg%3E")');
+   const css=getComputedStyle(el);
+   return {color:css.backgroundColor,images:(css.backgroundImage.match(/url\(/g)||[]).length,
+    size:css.backgroundSize,orientation:matchMedia('(orientation:portrait)').matches};
+  });
+  assert.deepEqual(painted,{color:'rgb(8, 18, 27)',images:1,
+   size:'cover, contain, cover',orientation:true},
+   'transparent art must be drawn ONCE over opaque Capture home in portrait');
+  const [t,q,b]=await Promise.all([title.boundingBox(),quit.boundingBox(),back.boundingBox()]);
+  assert.ok(t&&q&&b,'all native navigation controls must be visible');
+  assert.ok(t.y+t.height<=q.y+1&&t.y+t.height<=b.y+1,
+   'title must be on its own row above both actions');
+  assert.ok(q.x+q.width<=b.x+1,
+   'Quitter le mode must not overlap Retour a GenSRPG');
+ }finally{
+  await context?.close();await browser?.close();
+  server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
+ }
+});

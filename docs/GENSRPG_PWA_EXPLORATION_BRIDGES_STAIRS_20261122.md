@@ -3,7 +3,7 @@
 ## Périmètre et autorité
 - Source PWA main avant chantier : `53b6c0ff2810e9dc1c86c7418448ebd102899090`.
 - Source Capture V2 immuable précédente : `4edf9d12195078247af7a7e12e94e196f8bbaa57`.
-- Source Capture V2 candidate sur branche dédiée : `915c14986156fac14dcf84b132585871ca21b876`.
+- Source Capture V2 candidate sur branche dédiée : `7b0231691f2510978c3616402a779e51349a2a41`.
 - Laboratoire Exploration propriétaire, `main@de86b04f35f96df3783f1f953c7f138bc44a28f8`, CI 45012201761, Pages 45012201767 (GREEN).
 - Référence Combat volontairement inchangée : `d7eeae0fdb13454cf5a9ae18a0676e6784e425e5`.
 - Autorités : Exploration fournit les visuels et IDs ; Capture V2 consomme un pin immuable ; un seul publisher PWA ; aucun dépôt Labo modifié.

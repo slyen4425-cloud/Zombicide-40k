@@ -33,7 +33,7 @@
     Object.freeze({id:"npc",title:"PNJ",items:Object.freeze(["npc"])}),
     Object.freeze({id:"combat",title:"Créatures et combat",items:Object.freeze(
       ["creature","skills","combat","bestiary","music"])}),
-    Object.freeze({id:"economy",title:"Bibliothèque et drops",items:Object.freeze(["items","drops","merchant"])})
+    Object.freeze({id:"economy",title:"Bibliothèque et drops",items:Object.freeze(["items","drops"])})
   ]);
   const shell=root.GensShellModuleLaunchV1;
   const returnShell=root.GensShellScreenReturnV1;

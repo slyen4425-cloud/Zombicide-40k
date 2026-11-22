@@ -105,6 +105,8 @@ const itemEditorRoute=new URLSearchParams(window.location.search).get('editor');
 const isItemEditor=['items','library','drops','merchant'].includes(itemEditorRoute);
 const itemEditorView=itemEditorRoute==='drops'||itemEditorRoute==='merchant'
  ?itemEditorRoute:'library';
+const returnToNpc=itemEditorView==='merchant'&&
+ new URLSearchParams(window.location.search).get('returnTo')==='npc';
 let libraryCategory='usable';
 let activeItemEditId=null;
 let activeDropEditIndex=null;
@@ -122,6 +124,9 @@ if(isItemEditor){
   itemEditorView==='library'?'Une bibliothèque unique : objets utilisables, ressources et fragments.':
   itemEditorView==='drops'?'Règles de drops et de récompenses par créature publiée.':
   'Boutiques des PNJ : offres, prix, stocks et monnaie de cet univers.';
+ if(returnToNpc)
+  document.getElementById('adventure-return-preparation').textContent=
+   '← Retour à l’éditeur PNJ marchand';
  document.getElementById('adventure-advanced-panel').open=true;
  const panel=document.getElementById('adventure-loot-panel');panel.open=true;
 }
@@ -2477,6 +2482,8 @@ function navigateToAdventureOwner(destination){
  if(['adventure','items','drops','merchant'].includes(shell?.status?.().view)){
   if(shell.open?.(destination)===true)return;
  }
+ if(destination==='npc')throw new Error(
+  'La navigation vers le PNJ exige le Shell officiel Monster InvoC');
  const relative=destination==='items'?'./adventure.html?editor=library':'./adventure.html';
  const target=new URL(relative,import.meta.url);
  if(target.origin!==window.location.origin)
@@ -2491,7 +2498,7 @@ $('adventure-open-item-editor').addEventListener('click',guarded(()=>{
 $('adventure-return-preparation').addEventListener('click',guarded(()=>{
  if(!store)throw Error('Sauvegarde du jeu indisponible');
  saveCurrentAdventureRules();
- navigateToAdventureOwner('adventure');
+ navigateToAdventureOwner(returnToNpc?'npc':'adventure');
 }));
 $('adventure-drop-filter').addEventListener('change',()=>{
  const speciesId=$('adventure-drop-filter').value;

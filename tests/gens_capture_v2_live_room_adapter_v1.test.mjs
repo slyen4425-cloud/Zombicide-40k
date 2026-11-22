@@ -13,6 +13,7 @@ import {
 } from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
 
 const hostId='93b5ba2f-07b4-4b01-9b94-5fbd0215e02a';
+const guestId='b55f72d4-1861-42f7-9804-d5ee774fc539';
 const roomId='d142e95f-a220-4ae9-9487-5d5ae1c0fd18';
 const code='ABCDEFGHJK';
 const source=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
@@ -27,12 +28,12 @@ function save(){
   hostIsGameMaster:true,joinEnabled:true,guestPermissions:DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1
  }});
 }
-const client=()=>{
+const client=({userId=hostId,includeGuest=false}={})=>{
  const calls=[],channels=[];
  const api={
   calls,channels,
   auth:{
-   getSession:async()=>({data:{session:{user:{id:hostId}}},error:null}),
+   getSession:async()=>({data:{session:{user:{id:userId}}},error:null}),
    signInAnonymously:async()=>{throw Error('unexpected sign-in');}
   },
   rpc:async (name,args)=>{
@@ -51,7 +52,8 @@ const client=()=>{
          code,owner_id:hostId,adventure_session_id:'capture-session-1',
          max_players:3,open:true,revision:1,join_enabled:true
         },error:null}),
-        order:async()=>({data:[{user_id:hostId,display_name:'Hôte',role:'host'}],error:null})
+        order:async()=>({data:[{user_id:hostId,display_name:'Hôte',role:'host'},
+          ...(includeGuest?[{user_id:guestId,display_name:'Invité',role:'guest'}]:[])],error:null})
        };
       }
      };
@@ -109,26 +111,31 @@ test('Capture host only calls its guarded RPC with policy, not full save or Surv
  assert.equal(c.calls.length,0,'no remote RPC for disabled room');
 });
 test('join/observe/leave are separate, private and scoped; no cross-game side effects',async()=>{
- const sb=client(),transport=createCaptureRoomTransportV1({client:sb});
+ // Two distinct authenticated users are required. join_room is idempotent
+ // for an existing host, and an accepted RPC alone must not fake a guest.
+ const sb=client({userId:guestId,includeGuest:true}),transport=createCaptureRoomTransportV1({client:sb});
  await assert.rejects(transport.join({code:'ABC',name:'Joueur'}),/10 caractères/i);
  assert.equal(sb.calls.length,0);
  const join=await transport.join({code:' abcdefghjk ',name:'Joueur'});
  assert.equal(join.roomId,roomId);
+ assert.equal(join.role,'guest');
+ assert.equal(join.userId,guestId);
  assert.equal(sb.calls[0].name,'gensrpg_capture_join_room');
  assert.equal(sb.calls[0].args.p_code,code);
  let state=null;
- await transport.observe({roomId,userId:hostId,onChange:s=>{state=s;}});
+ await transport.observe({roomId,userId:guestId,onChange:s=>{state=s;}});
  assert.equal(sb.channels.length,1);
  const ch=sb.channels[0];
  assert.equal(ch.topic,'gensrpg-capture-room:'+roomId);
  assert.equal(ch.options.config.private,true);
- assert.equal(ch.options.config.presence.key,hostId);
+ assert.equal(ch.options.config.presence.key,guestId);
  assert.ok(ch.events.some(e=>e.type==='presence'));
  assert.equal(ch.events.some(e=>e.type==='postgres_changes'),false);
  ch.subscription('SUBSCRIBED');
  // async callbacks are intentionally verified through inspectRoom directly.
  const view=await transport.inspectRoom(roomId);
  assert.equal(view.members[0].name,'Hôte');
+ assert.equal(view.members[1].name,'Invité');
  assert.equal(Object.hasOwn(view,'inventory'),false);
  await transport.leave({roomId});
  assert.ok(sb.calls.some(x=>x.name==='gensrpg_capture_leave_room'));

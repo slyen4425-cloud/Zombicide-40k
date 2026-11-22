@@ -66,8 +66,10 @@ export function installAdventureMerchantPlayV1({
    for(const [id,count] of Object.entries(state.inventory.items)){
     const article=state.rules.loot.items.find(item=>item.id===id);
     if(!article||article.saleValue<=0)continue;
+    const price=Math.floor(article.saleValue*(merchant.resalePercent??100)/100);
+    if(price<=0)continue;
     const {row,quantity,button}=line(article.name,
-      article.saleValue+' '+money+' / unité · possédés : '+count,'sell');
+      price+' '+money+' / unité · possédés : '+count,'sell');
     button.disabled=busy||count<=0;
     button.addEventListener('click',()=>void transact('sell',id,quantity.value));
     rows.append(row);

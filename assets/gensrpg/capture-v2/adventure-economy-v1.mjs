@@ -64,7 +64,7 @@ export function normalizeAdventureEconomyV1(input,lootItems=[]){
    const items=new Set();
    for(const item of m.itemIds){
     const itemId=id(item,'merchant.itemId');
-    if(!isCommodity(itemId))throw new RangeError('Merchant item missing from official catalog: '+itemId);
+    if(!isCommodity(itemId))throw new RangeError('Merchant item missing from loot.items or official fragments: '+itemId);
     if(items.has(itemId))throw new RangeError('Duplicate merchant item '+itemId);
     items.add(itemId);
    }

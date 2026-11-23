@@ -496,6 +496,9 @@ jobs:
           path: preview-combat-assets
           sparse-checkout: |
             data/assets/catalog
+            assets/library/capture/file_00000000ee088210a7c5cb3bea4d5068.png
+            assets/library/capture/file_0000000090d481f48cc94001c7925590.png
+            assets/library/capture/raiiven_sous_la_lune_violette.png
 
       - name: Stage isolated native preview under the existing Pages owner
         run: |

@@ -3,7 +3,7 @@
 ## Autorité et isolation
 
 - Publisher unique : `slyen4425-cloud/Zombicide-40k` `main`, publication dans `/preview/capture-v2-pr225/`.
-- Sources Capture épinglées (sans fusion de branches divergentes) : `1498fb6e525c5adc430a223301c6deedc36d261e`.
+- Sources Capture épinglées (sans fusion de branches divergentes) : `d067bde7ce90c796f6fea84203591c22e61a3abd`.
 - Visuels immuables et exacts : `global-assets@1d138d8c5abc5b8c300774d5afce6d67ec6e9c35`.
 - Pas de duplication de bibliothèques ni de moteur, pas de suppression du fond ancien, aucune altération du gameplay, des règles, du réseau ou des sauvegardes.
 

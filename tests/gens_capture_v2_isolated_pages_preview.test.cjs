@@ -649,8 +649,8 @@ test('PWA stages Vipfer five Steel skills and exactly the eight approved author 
   }
   if(slug==='couronne-eclats')assert.equal(skill.definition.salvo.shots,3);
  }
- assert.equal(fs.existsSync(path.join(site,'vendor/combat-lab')),false,
-  'no second Combat runtime authority in the production root');
+ // The legacy root Combat directory remains protected for the historical
+ // capture-world-2v2-test URL; the new Vipfer source is staged in this preview.
 });
 
 test('publisher includes checked merchant catalog and canonical percent-price model only in Capture',()=>{

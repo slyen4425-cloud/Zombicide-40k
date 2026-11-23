@@ -61,7 +61,7 @@ import {writeAdventureHeroSelectionGrantV1} from './adventure-hero-selection-gra
 import {
  DEFAULT_ADVENTURE_RULES_V1,SHOWCASE_ADVENTURE_RULES_V1,
  summonAdventureCreatureWithFragmentsV1,grantAdventureCreatureFragmentXpV1,
- useAdventureConsumableV1,
+ useAdventureConsumableV1,materializeAdventureMissingConsumablesV1,
  DEFAULT_ADVENTURE_GUEST_PERMISSIONS_V1,normalizeAdventureRulesV1,calculateAdventureXpV1,
  createAdventureSessionV1,createAdventureStoreV1,updateAdventureCameraPolicyV1,publishedAdventureSpeciesV1,
  coreAdventureProgressionConfigV1,
@@ -2766,6 +2766,21 @@ $('adventure-item-import').addEventListener('click',guarded(()=>{
  resetItemEditor();renderItemRules();updatePreview();
  stateMessage(staged.addedItems+' objets illustrés et '+staged.addedDrops+
   ' drops officiels ajoutés (100 pièces / 50 %). Enregistre les paramètres.');
+}));
+// Existing universes never receive showcase consumables implicitly.
+// The author chooses this import; their other items and drops are untouched.
+$('adventure-item-import-potions').addEventListener('click',guarded(()=>{
+ const authored=fromFields();
+ const staged=materializeAdventureMissingConsumablesV1(authored);
+ if(!staged.addedItems){
+  stateMessage('Les deux potions officielles sont déjà présentes. Rien à modifier.');
+  return;
+ }
+ rules=normalizeAdventureRulesV1({...authored,loot:staged.loot});
+ resetItemEditor();renderItemRules();updatePreview();
+ stateMessage(staged.addedItems+' potion(s) ajoutée(s) au brouillon. '+
+  staged.existingItems+' modèle(s) déjà présent(s) conservé(s). '+
+  'Aucun drop ni stock changé. Enregistre les paramètres pour les conserver.');
 }));
 $('adventure-item-defaults').addEventListener('click',guarded(()=>{
  // Authoring command: add ONLY missing creature drops. Custom odds and

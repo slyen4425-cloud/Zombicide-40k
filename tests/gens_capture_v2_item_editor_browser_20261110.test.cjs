@@ -132,7 +132,7 @@ test('real landscape UI: library, drops, fragments and NPC shop share one saved 
   await frame.locator('#adventure-merchant-search').fill('Relique témoin corrigée');
   await frame.locator('#adventure-merchant-library input[aria-label="Proposer Relique témoin corrigée"]').check();
   assert.match(await frame.locator('#adventure-merchant-selected-count').innerText(),
-    /^1 objet\(s\) proposés parmi \d+$/,
+    /^1 sélectionné\(s\) \/ 1 affiché\(s\) dans cette catégorie$/,
     'the selected canonical resource is checked regardless of unrelated published species');
   await frame.locator('#adventure-merchant-add').tap();
   assert.equal(await frame.locator('#adventure-merchants .rule-row').count(),1);

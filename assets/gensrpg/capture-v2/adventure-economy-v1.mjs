@@ -58,8 +58,10 @@ export function normalizeAdventureEconomyV1(input,lootItems=[]){
   if(Object.hasOwn(raw,'itemIds')){
    const baseFields=['id','name','itemIds','sellPercent','buyPercent'];
    const hasFragmentPrices=Object.hasOwn(raw,'fragmentPrices');
-   const m=exact(raw,hasFragmentPrices?[...baseFields,'fragmentPrices']:baseFields,
-    'economy.merchants['+i+']');
+   const hasItemStocks=Object.hasOwn(raw,'itemStocks');
+   const m=exact(raw,[...baseFields,
+    ...(hasFragmentPrices?['fragmentPrices']:[]),
+    ...(hasItemStocks?['itemStocks']:[])], 'economy.merchants['+i+']');
    if(!Array.isArray(m.itemIds))throw new TypeError('merchant.itemIds must be an array');
    const items=new Set();
    for(const item of m.itemIds){
@@ -83,10 +85,19 @@ export function normalizeAdventureEconomyV1(input,lootItems=[]){
    for(const itemId of items)if(itemId.startsWith('fragment:')&&
      !Object.hasOwn(fragmentPrices,itemId))
     throw new RangeError('Missing merchant fragment price '+itemId);
+   const itemStocks={};
+   if(hasItemStocks){
+    obj(m.itemStocks,'merchant.itemStocks');
+    for(const [stockId,count] of Object.entries(m.itemStocks)){
+     id(stockId,'merchant.itemStocks ID');
+     if(!items.has(stockId))throw new RangeError('Stock for unselected merchant item '+stockId);
+     itemStocks[stockId]=integer(count,'merchant item stock',0,100000000);
+    }
+   }
    return {id:merchantId,name:title(m.name,'merchant.name'),
     itemIds:[...items],sellPercent:integer(m.sellPercent,'merchant.sellPercent',-100,200),
     buyPercent:integer(m.buyPercent,'merchant.buyPercent',-100,200),
-    ...(hasFragmentPrices?{fragmentPrices}:{})};
+    ...(hasFragmentPrices?{fragmentPrices}:{}),...(hasItemStocks?{itemStocks}:{})};
   }
   const m=exact(raw,['id','name','buysItems','offers'],'economy.merchants['+i+']');
   if(typeof m.buysItems!=='boolean')throw new TypeError('merchant.buysItems must be boolean');
@@ -171,7 +182,8 @@ export function tradeAdventureMerchantInventoryV1({
    ?(merchant.itemIds.includes(target)
      ?{itemId:target,currencyPrice:adventureMerchantPriceV1(
         definition?.saleValue??merchant.fragmentPrices?.[target],
-        merchant.sellPercent),resourceCosts:[],stock:null}
+        merchant.sellPercent),resourceCosts:[],
+        stock:merchant.itemStocks?.[target]??null}
      :null)
    :merchant.offers.find(x=>x.itemId===target);
   if(!offer)throw new RangeError('Merchant does not offer this item');

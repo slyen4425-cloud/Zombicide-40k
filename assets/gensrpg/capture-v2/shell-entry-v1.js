@@ -414,10 +414,22 @@
       :'Choisis un univers. Monster InvoC conserve toutes tes parties historiques.';
     return true;
   }
+  // At first app launch and when leaving an universe, show the official
+  // showcase wallpaper with the SAME Creator owner, not an extra CSS authority.
+  function showShowcaseWallpaper(){
+    const expected=host;
+    void createShellCreator().then(async owner=>{
+      if(!owner||!host||host!==expected||selectedUniverse)return;
+      await owner.selectUniverse('monster-invoc','Monster InvoC');
+      if(host===expected&&!selectedUniverse&&host.dataset.view==='home')
+        owner.enterHome();
+    }).catch(error=>console.warn('Fond de vitrine temporairement indisponible',error));
+  }
   function showUniverses(){
     if(!host)return false;
     selectedUniverse=null;
     home();
+    showShowcaseWallpaper();
     universeUi?.showList();
     return true;
   }
@@ -594,6 +606,7 @@
     root.gensHideHomeLevels?.();
     home();
     loadUniverseHub();
+    showShowcaseWallpaper();
     return true;
   }
   function stop(){

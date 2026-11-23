@@ -87,10 +87,22 @@ test('preview worker requests skipWaiting before precache and holds activation i
   'exactly two non-blocking activation requests, one canonical worker');
  assert.doesNotMatch(install,/await self\.skipWaiting\(\)/,
   'install.waitUntil MUST NOT await activation: the two lifecycles can deadlock');
- assert.match(worker,/self\.addEventListener\("message",event=>\{if\(event\.data&&event\.data\.type==="SKIP_WAITING"\)event\.waitUntil\(self\.skipWaiting\(\)\)\}\)/,
-  'waiting-worker activation must survive termination of the message event');
- assert.doesNotMatch(worker,/type==="SKIP_WAITING"\)self\.skipWaiting\(\)/,
-  'an unbound skipWaiting promise may be lost while a worker is still waiting');
+ assert.match(worker,/self\.addEventListener\("message",event=>\{if\(event\.data&&event\.data\.type==="SKIP_WAITING"\)self\.skipWaiting\(\)\}\)/,
+  'waiting worker receives an immediate signal from its single native handler');
+ assert.doesNotMatch(worker,/event\.waitUntil\(self\.skipWaiting\(\)\)/,
+  'message lifetime must never await activation: it can deadlock the replacement');
  assert.match(worker,/name\.startsWith\("gensrpg-preview-capture-v2-"\)/);
  assert.doesNotMatch(worker,/name\.startsWith\("gensrpg-cache-"\)&&name!==CACHE_NAME/);
+});
+
+test('SKIP_WAITING message never binds its event lifetime to activation',()=>{
+ const worker=releasePreviewPwaForCommit(originalWorker,sample,b).worker;
+ let dispatch,signals=0;
+ vm.runInNewContext(worker,{self:{
+  addEventListener(type,handler){if(type==='message')dispatch=handler},
+  skipWaiting(){signals++;return new Promise(()=>{})}
+ }});
+ assert.equal(typeof dispatch,'function');
+ dispatch({data:{type:'SKIP_WAITING'},waitUntil(){throw Error('blocking event lifetime')}});
+ assert.equal(signals,1,'exactly one native activation signal');
 });

@@ -356,8 +356,11 @@ export function createCaptureShellCreatorV1({
   });
   const bgRemove=make(doc,'button','Réinitialiser le fond');bgRemove.type='button';
   bgRemove.addEventListener('click',async()=>{
-   try{await media.clearVisualChoice(universe);
-    await media.remove(universe,'background');await loadUniverse(universe,name);
+   try{
+    // Resetting a preset only removes the choice, not the author-uploaded Blob.
+    if(selectedOfficialArt)await media.clearVisualChoice(universe);
+    else await media.remove(universe,'background');
+    await loadUniverse(universe,name);
     report('Fond standard restauré pour cet univers.');}
    catch(error){report(error.message,true);}
   });

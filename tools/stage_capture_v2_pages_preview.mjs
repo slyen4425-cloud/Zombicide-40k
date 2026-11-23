@@ -180,6 +180,44 @@ const bridge=stageOfficialCaptureEncounterBridge({
   combatSha:sourcePin.combat.sha,explorationSha:sourcePin.exploration.sha,
   visualsSha:approvedVisuals
 });
+// Immutable official Monster InvoC background set. Preserve the original art
+// already staged above; only add these three user-approved PNGs from ONE visual
+// owner. Never copy the source archive, a whole Lab library or a second engine.
+const officialWallpaperSource='assets/library/capture/';
+const officialWallpaperDest='vendor/combat-lab/assets/library/capture/';
+const extraOfficialWallpapers=[
+ {file:'file_00000000ee088210a7c5cb3bea4d5068.png',size:2272467,blob:'8b4cf837d74643abf6e7d6246db716691f941222'},
+ {file:'file_0000000090d481f48cc94001c7925590.png',size:2936672,blob:'f3a8f75eed0d8d0f1f670d343107f53ec9bfc83b'},
+ {file:'raiiven_sous_la_lune_violette.png',size:2530477,blob:'1bce6ae819d19e64370f65e1f6dc811eb063d2f3'}
+];
+const historicalWallpaper=officialWallpaperDest+'file_0000000089ec81f4a7bdfd03220f487c.png';
+if(!fs.existsSync(path.join(trial,historicalWallpaper)))
+ throw Error('Historical Monster InvoC loading artwork missing: never replace it');
+const officialWallpaperDelivery=[];
+for(const art of extraOfficialWallpapers){
+ const src=path.join(visuals,officialWallpaperSource+art.file);
+ if(!fs.existsSync(src))throw Error('Official visual missing from approved SHA: '+art.file);
+ const raw=fs.readFileSync(src);
+ const blob=crypto.createHash('sha1').update('blob '+raw.length+'\\0').update(raw).digest('hex');
+ if(raw.length!==art.size||blob!==art.blob||
+   !raw.subarray(0,8).equals(Buffer.from('89504e470d0a1a0a','hex')))
+  throw Error('Unexpected or altered approved wallpaper: '+art.file);
+ const rel=officialWallpaperDest+art.file,out=path.join(trial,rel);
+ if(fs.existsSync(out))throw Error('Duplicate/overwritten official art transport: '+rel);
+ fs.mkdirSync(path.dirname(out),{recursive:true});
+ fs.copyFileSync(src,out);
+ if(!fs.readFileSync(out).equals(raw))throw Error('Wallpaper transport drift: '+art.file);
+ officialWallpaperDelivery.push({file:rel,gitBlob:blob,size:raw.length,sha256:digest(raw)});
+}
+const wallpaperReport={
+ schema:'gensrpg-capture-official-wallpapers-v1',
+ visualOwner:{repository:mediaAuthority.repository,ref:mediaAuthority.ref,sha:approvedVisuals},
+ historicalArt:{file:historicalWallpaper,preserved:true},
+ additions:officialWallpaperDelivery
+};
+const wallpaperReportFile=path.join(trial,'assets/gensrpg/capture-v2/official-art-provenance.v1.json');
+fs.writeFileSync(wallpaperReportFile,JSON.stringify(wallpaperReport,null,2)+'\\n');
+
 // Audio regression guard: the Capture shell used the lightweight Combat editor
 // transport, which ships ONLY the victory track. The real Exploration bridge
 // already stages the exact same Combat SHA and its COMPLETE signed audio graph.

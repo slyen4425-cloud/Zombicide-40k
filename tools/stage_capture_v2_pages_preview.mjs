@@ -198,7 +198,7 @@ for(const art of extraOfficialWallpapers){
  const src=path.join(visuals,officialWallpaperSource+art.file);
  if(!fs.existsSync(src))throw Error('Official visual missing from approved SHA: '+art.file);
  const raw=fs.readFileSync(src);
- const blob=crypto.createHash('sha1').update('blob '+raw.length+'\\0').update(raw).digest('hex');
+ const blob=crypto.createHash('sha1').update('blob '+raw.length+String.fromCharCode(0)).update(raw).digest('hex');
  if(raw.length!==art.size||blob!==art.blob||
    !raw.subarray(0,8).equals(Buffer.from('89504e470d0a1a0a','hex')))
   throw Error('Unexpected or altered approved wallpaper: '+art.file);
@@ -216,7 +216,7 @@ const wallpaperReport={
  additions:officialWallpaperDelivery
 };
 const wallpaperReportFile=path.join(trial,'assets/gensrpg/capture-v2/official-art-provenance.v1.json');
-fs.writeFileSync(wallpaperReportFile,JSON.stringify(wallpaperReport,null,2)+'\\n');
+fs.writeFileSync(wallpaperReportFile,JSON.stringify(wallpaperReport,null,2)+String.fromCharCode(10));
 
 // Audio regression guard: the Capture shell used the lightweight Combat editor
 // transport, which ships ONLY the victory track. The real Exploration bridge

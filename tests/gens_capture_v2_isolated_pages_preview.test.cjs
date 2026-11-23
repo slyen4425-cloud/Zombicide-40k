@@ -610,8 +610,8 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
  const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
  const adapter=read(trial,'vendor/combat-lab/src/adapters/input/capture/capture-npc-opponent-instance-v1.js').toString('utf8');
  const economy=read(trial,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs').toString('utf8');
- assert.equal(pins.combat.sha,'2b3438a3f7d0ab13c2b074710ffc7d9925dec071');
- assert.equal(pins.combat.certifiedCiRun,45190363744);
+ assert.equal(pins.combat.sha,'0543103891b5777fff108cb12a1ae55a519544d9');
+ assert.equal(pins.combat.certifiedCiRun,45223872730);
  assert.equal(provenance.combat.sha,pins.combat.sha);
  assert.equal(delivery.combat.sha,pins.combat.sha);
  assert.equal(previewPin.officialVisuals.sha,'1d138d8c5abc5b8c300774d5afce6d67ec6e9c35');
@@ -623,8 +623,8 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
 test('PWA stages Vipfer five Steel skills and exactly the eight approved author media references',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
  const bundle=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
- assert.equal(source.combat.sha,'2b3438a3f7d0ab13c2b074710ffc7d9925dec071');
- assert.equal(source.combat.certifiedCiRun,45190363744);
+ assert.equal(source.combat.sha,'0543103891b5777fff108cb12a1ae55a519544d9');
+ assert.equal(source.combat.certifiedCiRun,45223872730);
  assert.equal(bundle.combat.sha,source.combat.sha,'the real staged combat must match the certified pin');
  assert.equal(previewPin.officialVisuals.sha,'1d138d8c5abc5b8c300774d5afce6d67ec6e9c35');
  const slugs=['morsure-ressort','etreinte-acier','mue-tranchante','couronne-eclats','broyeur-serpentin'];
@@ -823,7 +823,7 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
 
 test('the PWA physically ships the generic author description and zone/trail editor, not species-specific code',()=>{
  const pinned=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(pinned.combat.sha,'2b3438a3f7d0ab13c2b074710ffc7d9925dec071');
+ assert.equal(pinned.combat.sha,'0543103891b5777fff108cb12a1ae55a519544d9');
  assert.equal(pinned.exploration.sha,'1b69d62a88e77c545ab9a476a6a2b7f81ad4dd90');
  const explanation=read(trial,'vendor/combat-lab/src/ui/capture-skill-explanation-v1.js').toString('utf8');
  const editor=read(trial,'vendor/combat-lab/src/ui/capture-editor-human-v2.js').toString('utf8');
@@ -840,4 +840,29 @@ test('the PWA physically ships the generic author description and zone/trail edi
  const volley=json(trial,'vendor/combat-lab/data/capture/showcase/vipfer-couronne-eclats.capture-skill-transfer-v1.json');
  assert.deepEqual(volley.draft.definition.salvo,{shots:3,shotDurationMs:550,gapMs:150});
  assert.equal(volley.draft.definition.effects.find(effect=>effect.kind==='damage').amount,12);
+});
+
+test('PWA stages the one approved Vipfer buff sprite bound to native 8-second status, and a movable enemy skill viewer',()=>{
+ const mue=json(trial,'vendor/combat-lab/data/capture/showcase/vipfer-mue-tranchante.capture-skill-transfer-v1.json').draft;
+ const defense=mue.definition.effects.find(e=>e.kind==='apply_status'&&e.status.kind==='stat_modifier');
+ const riposte=mue.definition.effects.find(e=>e.kind==='apply_status'&&e.status.kind==='damage_reflection');
+ assert.equal(defense.status.durationMs,8000);
+ assert.equal(defense.status.deltaPoints,200);
+ assert.equal(riposte.status.contactDamage,25);
+ assert.equal(riposte.status.consumeOnContact,true);
+ const visual=mue.presentation.statusVisuals[defense.status.id];
+ assert.equal(visual.mode,'sprite');
+ assert.equal(visual.sprite.playbackMode,'hold-last');
+ assert.equal(visual.sprite.assetId,mue.presentation.visual.cast.assetId,
+   'keep exactly one approved author sprite; no duplicate asset or new FX');
+ const hudHtml=read(trial,'vendor/combat-lab/examples/dom-demo/capture-editor-v2.html').toString('utf8');
+ const hudUi=read(trial,'vendor/combat-lab/src/ui/combat-2v2-test-ui.js').toString('utf8');
+ const hudCss=read(trial,'vendor/combat-lab/examples/dom-demo/capture-editor-v2.css').toString('utf8');
+ assert.match(hudHtml,/data-combat-hud-widget="opponent-skill-loadout"/);
+ assert.match(hudHtml,/<details class="combat-test-enemy-skills"/);
+ assert.match(hudUi,/projectOpponentSkillLoadoutV1/);
+ assert.match(hudUi,/rosterController\?\.skillIdsFor\(actorId\)/);
+ assert.match(hudUi,/skillCooldownRemainingMs\(state,actorId,id\)/);
+ assert.match(hudCss,/\.combat-test-enemy-skills__body\s*\{/);
+ assert.ok(!hudHtml.includes('data-combat-enemy-skill-activate'));
 });

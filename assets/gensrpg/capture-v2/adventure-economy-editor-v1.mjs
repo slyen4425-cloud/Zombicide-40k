@@ -136,7 +136,7 @@ export function installAdventureEconomyEditorV1({
   renderLibraryCount();
  }
  function renderLibraryCount(){
-  const all=catalog(),visible=shownItems(all);
+  const all=catalog(),visible=shownItems(all).slice(0,120);
   const inView=visible.filter(item=>selected.has(item.id)).length;
   const total=all.filter(item=>selected.has(item.id)).length;
   $('adventure-merchant-selected-count').textContent=

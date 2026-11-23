@@ -277,6 +277,7 @@
       url.searchParams.set('start',startView);
     // All preparation menus share the Shell atmosphere. Live Adventure play
     // disables it via its existing data-adventure-playing state (below).
+    creatorOwner?.rotateDefaultWallpaper?.();
     creatorOwner?.enterHome();
     unbindNativeEditorAudio();
     dismissNativeLoading();
@@ -395,11 +396,15 @@
     if(gameFullscreenActive())void exitGameFullscreen();
     if(frame){frame.src="about:blank";frame.remove();frame=null;}
     stage.replaceChildren();
+    const previousMenu=host.dataset.menu;
     current=null;host.dataset.view="home";
     host.dataset.menu=selectedUniverse?'main':'universes';
     creatorPanel.dataset.active='false';creatorOwner?.hide();
-    if(selectedUniverse)creatorOwner?.enterHome();
-    else creatorOwner?.leaveHome();
+    if(selectedUniverse){
+      if(previousMenu==='creator'||previousMenu==='editors')
+        creatorOwner?.rotateDefaultWallpaper?.();
+      creatorOwner?.enterHome();
+    }else creatorOwner?.leaveHome();
     delete host.dataset.nativeFamily;
     delete host.dataset.adventureCombatActive;
     delete host.dataset.adventureLoadingActive;
@@ -474,6 +479,7 @@
   }
   function showCreator(){
     if(!selectedUniverse||!home())return false;
+    creatorOwner?.rotateDefaultWallpaper?.();
     host.dataset.menu='creator';
     creatorPanel.dataset.active='true';
     notice.textContent='Habillage de '+selectedUniverse.name+
@@ -493,6 +499,7 @@
   }
   function editors(){
     if(!selectedUniverse||!home())return false;
+    creatorOwner?.rotateDefaultWallpaper?.();
     host.dataset.menu="editors";
     notice.textContent="Choisis un outil de création.";
     return true;

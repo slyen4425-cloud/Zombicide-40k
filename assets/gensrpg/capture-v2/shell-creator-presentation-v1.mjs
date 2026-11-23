@@ -21,6 +21,7 @@ const MIME_IMAGE=new Set(['image/png','image/jpeg','image/webp']);
 const MIME_SOUND=new Set(['audio/mpeg','audio/mp3','audio/wav',
  'audio/x-wav','audio/ogg','audio/mp4','audio/aac']);
 const IMAGE_MAX=8*1024*1024,SOUND_MAX=12*1024*1024;
+const AUTO_WALLPAPER_CHOICE_V1='gensrpg:wallpaper:auto';
 const DEFAULT=Object.freeze({
  menuVolume:35,interfaceVolume:55,ambienceEnabled:false,backgroundShade:55
 });
@@ -110,7 +111,8 @@ export async function createCaptureShellMediaLibraryV1({
     .objectStore(STORE).get(visualKey)))??null;
   },
   async putVisualChoice(universeId,assetId){
-   if(!captureOfficialArtByIdV1(assetId))throw new RangeError('Fond officiel inconnu');
+   if(assetId!==AUTO_WALLPAPER_CHOICE_V1&&!captureOfficialArtByIdV1(assetId))
+    throw new RangeError('Fond officiel inconnu');
    const visualKey=captureArtUniverseIdV1(universeId)+'/official-background-choice';
    await requestDone(db.transaction(STORE,'readwrite')
     .objectStore(STORE).put({key:visualKey,assetId}));
@@ -156,6 +158,7 @@ export function createCaptureShellCreatorV1({
  const previews=new Set();
  const effectSlots=['click','confirm','back','error'];
  let statusLine=null,backgroundUrl=null,selectedOfficialArt=null;
+ let automaticWallpaper=false,automaticWallpaperIndex=0;
  const report=(value,error=false)=>{
   if(statusLine){statusLine.textContent=value;statusLine.dataset.error=String(error);}
   if(error&&notice){notice.textContent=value;notice.dataset.error='true';}
@@ -179,6 +182,16 @@ export function createCaptureShellCreatorV1({
   soundPlayers.clear();
   for(const url of mediaUrls.values())root.URL.revokeObjectURL(url);
   mediaUrls.clear();backgroundUrl=null;selectedOfficialArt=null;
+  automaticWallpaper=false;
+ }
+ // The showcase rotates only without an explicit personal/preset selection.
+ // Each universe keeps its own index for the current browser session.
+ function rotateDefaultWallpaper(){
+  if(!automaticWallpaper||disposed)return false;
+  automaticWallpaperIndex=(automaticWallpaperIndex+1)%CAPTURE_OFFICIAL_BACKGROUND_ART_V1.length;
+  backgroundUrl=captureOfficialArtUrlV1(CAPTURE_OFFICIAL_BACKGROUND_ART_V1[automaticWallpaperIndex]);
+  applyBackground();
+  return true;
  }
  function applyBackground(){
   if(disposed)return;
@@ -246,7 +259,9 @@ export function createCaptureShellCreatorV1({
   return true;
  }
  async function loadUniverse(nextUniverse,nextName='Monster InvoC'){
-  universe=captureArtUniverseIdV1(nextUniverse);
+  const requestedUniverse=captureArtUniverseIdV1(nextUniverse);
+  if(universe!==requestedUniverse)automaticWallpaperIndex=0;
+  universe=requestedUniverse;
   name=String(nextName??universe);
   const current=++epoch;
   // Close the prior universe gallery without deleting any stored illustrations.
@@ -287,6 +302,10 @@ export function createCaptureShellCreatorV1({
    if(selected){
     selectedOfficialArt=selected.assetId;
     backgroundUrl=captureOfficialArtUrlV1(selected);
+   }else if(visualChoice?.assetId===AUTO_WALLPAPER_CHOICE_V1||!results[0]?.blob){
+    // New worlds show official art by default; old author uploads survive untouched.
+    automaticWallpaper=true;
+    backgroundUrl=captureOfficialArtUrlV1(CAPTURE_OFFICIAL_BACKGROUND_ART_V1[automaticWallpaperIndex]);
    }
    applyBackground();
    if(active&&settings.ambienceEnabled)enterHome();
@@ -324,7 +343,18 @@ export function createCaptureShellCreatorV1({
   });
   shadeLabel.append(shade);
   const officialChoices=make(doc,'div',undefined,'captureCreatorOfficialBackgrounds');
-  officialChoices.append(make(doc,'p','Fonds officiels · choix sans suppression du fond importé.'));
+  officialChoices.append(make(doc,'p','Vitrine : les fonds changent à certaines ouvertures de menus. Les choix personnels restent fixes.'));
+  const automatic=make(doc,'button','↻ Rotation automatique (vitrine)','captureCreatorOfficialArtChoice');
+  automatic.type='button';automatic.setAttribute('aria-pressed',String(automaticWallpaper));
+  automatic.addEventListener('click',async()=>{
+   try{
+    if(!media)throw Error('Médiathèque indisponible');
+    await media.putVisualChoice(universe,AUTO_WALLPAPER_CHOICE_V1);
+    await loadUniverse(universe,name);
+    report('Rotation automatique des fonds activée pour cet univers.');
+   }catch(error){report(error.message,true);}
+  });
+  officialChoices.append(automatic);
   for(const art of CAPTURE_OFFICIAL_BACKGROUND_ART_V1){
    const button=make(doc,'button',undefined,'captureCreatorOfficialArtChoice');
    button.type='button';button.setAttribute('aria-pressed',String(selectedOfficialArt===art.assetId));
@@ -358,7 +388,7 @@ export function createCaptureShellCreatorV1({
   bgRemove.addEventListener('click',async()=>{
    try{
     // Resetting a preset only removes the choice, not the author-uploaded Blob.
-    if(selectedOfficialArt)await media.clearVisualChoice(universe);
+    if(selectedOfficialArt||automaticWallpaper)await media.clearVisualChoice(universe);
     else await media.remove(universe,'background');
     await loadUniverse(universe,name);
     report('Fond standard restauré pour cet univers.');}
@@ -573,7 +603,7 @@ export function createCaptureShellCreatorV1({
    container.dataset.active='true';await render();enterHome();
   },
   hide(){container.dataset.active='false';},
-  enterHome,leaveHome,play,stopAmbient,startAmbient,
+  enterHome,leaveHome,play,stopAmbient,startAmbient,rotateDefaultWallpaper,
   wallpaper:()=>backgroundUrl?Object.freeze({
    url:backgroundUrl,shade:settings.backgroundShade/100}):null,
   async reload(){await loadUniverse(universe,name);},

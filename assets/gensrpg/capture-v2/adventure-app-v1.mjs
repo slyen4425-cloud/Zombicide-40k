@@ -2188,20 +2188,39 @@ async function prepareLoadingArtworkForPlay(){
  const requestedAt=journeyLaunchEpoch;
  revokeLoadingArt(loadingArtObjectUrls);
  const scenes={};
- let library;
+ let library=null;
  try{library=await loadingArtLibrary();}
- catch(error){console.warn('Bibliothèque locale inaccessible',error);return scenes;}
+ catch(error){console.warn('Bibliothèque locale inaccessible : illustrations officielles conservées',error);}
  try{
   // Simple mode: the EXISTING Capture image library remains the only store.
   // All uploaded images form one ordered gallery across all loading contexts.
-  const entries=(await library.list()).slice(0,12);
+  const entries=library?(await library.list()).slice(0,12):[];
   // A cancelled launch must never revive its screen or leave Blob URLs live.
   if(requestedAt!==journeyLaunchEpoch||journeyLoading.hidden)return {};
   const urls=entries.map(record=>URL.createObjectURL(record.blob));
   for(const url of urls)loadingArtObjectUrls.add(url);
   const sequence=captureLoadingArtSequenceV1(urls,loadingArtRotation.launch++);
-  // The historical art remains first, followed by new and uploaded artwork.
-  const officialAndCreator=[...captureOfficialLoadingArtUrlsV1(),...sequence];
+  // Exploration's existing native Combat contract explicitly accepts same-origin
+  // blob: URLs, not the HTTPS library URLs used by the Shell on startup.
+  // Project the four certified image files into ephemeral Blobs for the playing
+  // session; NO additional asset library, rule owner or file copy is created.
+  const officialBlobs=await Promise.all(captureOfficialLoadingArtUrlsV1().map(async source=>{
+   try{
+    const response=await fetch(source,{cache:'force-cache'});
+    if(!response.ok)throw Error('HTTP '+response.status);
+    const file=await response.blob();
+    if(!file.type.startsWith('image/'))throw Error('Réponse non illustrée');
+    const localUrl=URL.createObjectURL(file);
+    loadingArtObjectUrls.add(localUrl);
+    return localUrl;
+   }catch(error){
+    console.warn('Illustration officielle temporairement indisponible',error);
+    return null;
+   }
+  }));
+  // Twelve URLs maximum: Exploration rejects the ENTIRE list if it exceeds 12.
+  // Keep the original first, then the three new visuals and the author's gallery.
+  const officialAndCreator=[...officialBlobs.filter(Boolean),...sequence].slice(0,12);
   for(const scene of ['launch','zone','combat'])scenes[scene]=officialAndCreator;
  }catch(error){
   revokeLoadingArt(loadingArtObjectUrls);

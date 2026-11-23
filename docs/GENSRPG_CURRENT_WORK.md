@@ -1,3 +1,12 @@
+## 2026-11-23 — PWA Monster InvoC : descriptions automatiques, salves et zones éditables
+- Demande créateur : les capacités créées librement par les joueurs doivent expliquer leurs effets automatiquement ; Couronne d'éclats et Polocendre ne sont que des exemples, pas des branches de code.
+- START Publisher `main@483fd4a4fb862f508989359682e81c4f89018741`, checkpoint `checkpoint/gensrpg-pwa-before-generic-skills-20261123`, branche `work/pwa-generic-skills-descriptions-publish-20261123`.
+- Candidat source Capture V2 immuable `work/capture-v2-generic-skills-dynamic-descriptions-20261123@5cbb1dd41566066738f01e3b7f0f03a27d64875c` dérivé strictement de la version publiée `fd96d00dd7aa8d2a6f5fc3951e49e75a897f1b9c`. Deux champs seulement changent : `combat.sha` et son run CI, plus la sentinelle de provenance historique correspondante. Exploration, Creator, shell et fonds conservés.
+- Combat officiel `main@2b3438a3f7d0ab13c2b074710ffc7d9925dec071` : PR Combat #384 fusionnée, CI main 14/14 SUCCESS (run `45190363744`), Pages Build/Deploy SUCCESS ; checkpoint GREEN sur dépôt propriétaire.
+- Les vrais SkillDefinition restent uniques : salve 2..6 avec impacts autonomes, zones persistent_zone distinctes + index de trajet éditable (contrat 1..5), descriptions issues des effets configurés. Aucun changement des dégâts/durées originaux : Vipfer 3 × 12 + 15 %/6s ; Polocendre trois zones 5 dégâts/entrée, 10s.
+- Catalogue médias canonique **inchangé** : `global-assets@1d138d8c5abc5b8c300774d5afce6d67ec6e9c35`. La PWA ne reçoit qu'un nouveau pin immuable de Capture et un test de transport physique, sans répliquer moteur ou bibliothèque. Préserver le root, service worker, Survie, Dungeon, PvP, Exploration et sauvegardes.
+- Gates bloquants : tests de provenance source, CI du commit Publisher exact, build physique _site, budget 900 Mio, navigateur PC/mobile, Pages HTTPS et comparaison du SHA public, puis contrôle Android installé distinct. Aucun GREEN PWA avant preuves.
+
 ## 2026-11-23 — Vipfer : raccorder les 5 compétences et médias validés à la PWA Capture V2 (C2)
 - Autorité unique : le publisher PWA `main` publie seulement la source Capture candidate immuable dans `/preview/capture-v2-pr225/`, sans recopier de moteur vers le Shell racine.
 - Checkpoint de départ Publisher : `checkpoint/gensrpg-start-vipfer-final-pwa-20261123` @ `5e58ae24b80838d7a5f9a93f2e144f2379e7a1d7`. Branche publisher `work/pwa-vipfer-five-skills-media-publish-20261123` issue de la préparation vitrine PR #626 pour **conserver ses correctifs sans les contourner**.

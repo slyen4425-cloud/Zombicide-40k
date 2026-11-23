@@ -3,8 +3,8 @@
 ## Périmètre unique
 - Demande : fusionner la PR #524 Exploration, publier l'éditeur 2,5D et raccorder la source à la PWA.
 - Exploration main certifié : `98e3f67700494d76ab12628ee52d498e7cc24606` (CI `45186744323`, release Pages `45186743956` GREEN).
-- Capture V2 candidate dérivée du pin PWA préexistant `fd96d00dd7aa8d2a6f5fc3951e49e75a897f1b9c`, modification autorisée du seul pin Exploration `source-pins-v1.json` et test additionnel; nouveau SHA candidate `4f5ad09c00237d45c1e1b3ea4cb06c5a6be6390f` (test de provenance Capture actualisé).
-- Combat officiel `23623733ab077fd09603848b16ab17806a26ed11` et visuels épinglés inchangés. Moteur PWA, shell, caches et sauvegardes inchangés.
+- Capture V2 candidate finale `63a82024504c6deec63f40f090d03760492609d8` dérivée du candidat compétences génériques de la PR PWA #630 (`5cbb1dd41566066738f01e3b7f0f03a27d64875c`) avec seulement le pin Exploration mis à jour et tests de provenance. Les descriptions automatiques, salves et zones sur trajet restent intégralement conservées.
+- Combat officiel `2b3438a3f7d0ab13c2b074710ffc7d9925dec071` (CI `45190363744`, compétences génériques PR #630) et catalogue visuel épinglé inchangé. Moteur PWA, shell, caches et sauvegardes inchangés.
 - Unique publisher existant : `.github/workflows/main.yml`; les assets Exploration appartiennent à `vendor/exploration-lab`, sans seconde autorité de Portal ou de textures.
 
 ## Fonctionnement et compatibilité
@@ -12,6 +12,9 @@
 - Apparences de Portal : cercle historique, invisible en jeu (éditable), ombre noire, texture de la bibliothèque matérielle officielle ; aucune URL personnalisée ou fichier binaire embarqué dans WorldDocument.
 - Un ancien Portal invalide refuse la traversée : réparation explicite dans le World Builder, sans correction silencieuse de la carte.
 - Le renderer de terrain sud `src/render/sculpt-height-renderer.js` est conservé à l'octet avec Git blob `6c101756bdf9c58a9ae8cf3fe104e49575145748` ; seule la certification de SHA officiel est enrichie dans le publisher.
+
+## Réconciliation concurrente
+- Reprise de PR PWA #628 sur `main@1630f219bd8b2232212a9cfc597abbe577ba7d87` après fusion de #630, sans revenir au candidat Combat antérieur. Les contrôles de description/éditeur génériques de #630 sont maintenus et les contrôles auto-Portal sont ajoutés, sans deuxième source de vérité.
 
 ## Gates
 1. PR PWA CI : exactitude source Capture/Exploration/Combat, test de présence des nouveaux contrôles, rendu terrain et provenance immuable, budget du site <900 Mio, Chromium paysage mobile + PC.

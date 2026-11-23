@@ -318,8 +318,7 @@ const certifiedNov22MultiplayerOverlapSha='77bebb83ff176f49edff7ae49c03ba48c2820
 const certifiedNov22SculptPaletteSha='a8d9f8bd61bee7a14ab4e71e6cedc85250457f5c';
 // #523: five new canonical terrain WebP surfaces; same reviewed south renderer blob.
 const certifiedNov22FiveTerrainTexturesSha='1b69d62a88e77c545ab9a476a6a2b7f81ad4dd90';
-// #524: canonical auto Portals & textures; native raised-ground renderer stays byte-identical.
-// Exploration main CI 45186744323; main Pages 45186743956.
+// #524: Exploration main auto portals/marker visuals; official height renderer byte-identical.
 const certifiedNov23AutoPortalsSha='98e3f67700494d76ab12628ee52d498e7cc24606';
 const recoveredWorldSouthBlob='6c101756bdf9c58a9ae8cf3fe104e49575145748';
 const oldSouthBacking="  ctx.fillStyle=baseColor;ctx.fillRect(0,0,totalWidth,totalHeight);";

@@ -796,7 +796,7 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
   const base=html.match(/<select id="material">([\s\S]*?)<\/select>/)?.[1]??'';
   const rows=[["grass.forest.tall","texture.grass.forest.tall.01","terrain_haute_herbe_01.webp","forest","9a127bde4f600d1fbb77fc8cb1a03f7bc05d569576805e98ad461bb59627a49b"],["grass.forest.flowers","texture.grass.forest.flowers.01","terrain_herbe_fleurie_01.webp","forest","6cef9ed6c7e12b67f1e9d2cb1ab2ba7d3f13908ef6e111a32797462ae92bfff0"],["ground.snow.rocky","texture.ground.snow.rocky.01","terrain_neige_rocheuse_01.webp","snow","2e336b9446c335b0cf5f1913b45dbae5a137cb691ab77bd2ff7dbc57337cda35"],["ground.dirt.textured","texture.ground.dirt.textured.01","terrain_sol_terre_01.webp","plain","e3d1958b076497b6b56b29a582792ad583a42d94cff7d2206efae5af691f1440"],["ground.volcanic.rocky","texture.ground.volcanic.rocky.01","terrain_sol_volcanique_01.webp","volcano","d14a157801e96c4a0e7121cb044799c1bfe17ea15125aa9e63029f417faf2cbc"]];
   const provenance=json(trial,'release-provenance.v1.json');
-  assert.equal(provenance.exploration.sha,'1b69d62a88e77c545ab9a476a6a2b7f81ad4dd90');
+  assert.equal(provenance.exploration.sha,'98e3f67700494d76ab12628ee52d498e7cc24606');
   for(const [materialId,assetId,filename,family,hash] of rows){
     const rel=owner+'assets/exploration/materials/forest/surfaces/'+filename;
     required(trial,rel);
@@ -834,7 +834,7 @@ test('published 2.5D portals auto-cross their canonical trigger and preserve edi
   assert.match(doc,/export function findPortalEnteredDuringMove\(/);
   assert.match(doc,/visual\.marker === 'shadow'/);
   assert.match(doc,/textureMaterialId/);
-  assert.match(markers,/showHidden:false/);
+  assert.match(markers,/showHidden=false/);
   assert.match(renderer,/drawPortalArt/);
   for(const id of ['object-waypoint-marker-mode','object-waypoint-marker-texture',
     'object-waypoint-marker-save'])assert.ok(html.includes('id="'+id+'"'));

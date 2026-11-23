@@ -65,6 +65,23 @@ export const SHOWCASE_ADVENTURE_RULES_V1=freeze({
  // Only new Showcase worlds opt in; old saves retain their historical rules.
  fragmentRecruitment:DEFAULT_ADVENTURE_FRAGMENTS_V1
 });
+// Explicit author action for EXISTING universes. The two official potion
+// definitions have ONE authority in SHOWCASE_ADVENTURE_RULES_V1; this helper
+// only copies missing IDs into the selected universe's existing loot catalog.
+// Custom records with the same ID always win, even if they have another type.
+export function materializeAdventureMissingConsumablesV1(rules){
+ if(!rules?.loot||!Array.isArray(rules.loot.items)||!Array.isArray(rules.loot.drops))
+  throw new TypeError('AdventureRules loot required for potion import');
+ const ids=new Set(rules.loot.items.map(item=>item.id));
+ const missing=SHOWCASE_ADVENTURE_RULES_V1.loot.items
+  .filter(item=>item.kind==='usable'&&!ids.has(item.id))
+  .map(item=>({...item,useEffect:{...item.useEffect}}));
+ return Object.freeze({
+  loot:{...rules.loot,items:[...rules.loot.items,...missing]},
+  addedItems:missing.length,
+  existingItems:SHOWCASE_ADVENTURE_RULES_V1.loot.items.length-missing.length
+ });
+}
 function object(value,label){
  if(!value||typeof value!=='object'||Array.isArray(value))
   throw new TypeError(label+' must be an object');

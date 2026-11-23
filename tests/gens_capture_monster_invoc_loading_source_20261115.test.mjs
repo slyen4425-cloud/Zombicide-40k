@@ -33,7 +33,7 @@ test('launch cover and native Explorer transition share the exact same art path'
 test('official transport pins exactly one certified victory MP3 and latest Exploration owner',()=>{
  const pins=JSON.parse(read('source-pins-v1.json'));
  assert.equal(pins.combat.sha,'0543103891b5777fff108cb12a1ae55a519544d9');
- assert.equal(pins.exploration.sha,'b0f52e23bea6e9eaf359fc7faf206c13386bdb4a');
+ assert.equal(pins.exploration.sha,'35dbe475e53abcc7ba8f4c5ee3be972390232584');
  assert.equal(pins.combat.ref,'main');assert.equal(pins.exploration.ref,'main');
  assert.equal(pins.combat.certifiedCiRun,45223872730);
  assert.equal(pins.exploration.certifiedCiRun,45260398784);

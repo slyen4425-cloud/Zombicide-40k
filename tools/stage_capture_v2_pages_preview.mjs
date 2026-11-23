@@ -175,11 +175,6 @@ if(mediaAuthority?.repository!==sourcePin.combat.repository||
    !Number.isInteger(mediaAuthority.certifiedCiRun)||mediaAuthority.certifiedCiRun<=0||
    !/^[a-f0-9]{40}$/.test(approvedVisuals)||head(visuals)!==approvedVisuals)
   throw Error('Encounter media must use the single certified immutable official visual library SHA');
-const bridge=stageOfficialCaptureEncounterBridge({
-  previewRoot:trial,combatRoot:combat,explorationRoot:exploration,visualsRoot:visuals,
-  combatSha:sourcePin.combat.sha,explorationSha:sourcePin.exploration.sha,
-  visualsSha:approvedVisuals
-});
 // Immutable official Monster InvoC background set. Preserve the original art
 // already staged above; only add these three user-approved PNGs from ONE visual
 // owner. Never copy the source archive, a whole Lab library or a second engine.
@@ -218,6 +213,11 @@ const wallpaperReport={
 const wallpaperReportFile=path.join(trial,'assets/gensrpg/capture-v2/official-art-provenance.v1.json');
 fs.writeFileSync(wallpaperReportFile,JSON.stringify(wallpaperReport,null,2)+String.fromCharCode(10));
 
+const bridge=stageOfficialCaptureEncounterBridge({
+  previewRoot:trial,combatRoot:combat,explorationRoot:exploration,visualsRoot:visuals,
+  combatSha:sourcePin.combat.sha,explorationSha:sourcePin.exploration.sha,
+  visualsSha:approvedVisuals
+});
 // Audio regression guard: the Capture shell used the lightweight Combat editor
 // transport, which ships ONLY the victory track. The real Exploration bridge
 // already stages the exact same Combat SHA and its COMPLETE signed audio graph.

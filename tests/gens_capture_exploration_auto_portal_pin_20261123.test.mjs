@@ -14,6 +14,6 @@ test('Capture V2 links only certified Exploration main for auto portals and cano
   certifiedCiRun:45186744323
  });
  assert.equal(pin.legacyCaptureRuntime,false);
- assert.equal(pin.combat.sha,'2b3438a3f7d0ab13c2b074710ffc7d9925dec071',
+ assert.equal(pin.combat.sha,'0543103891b5777fff108cb12a1ae55a519544d9',
   'Vipfer and other approved Combat changes must be retained');
 });

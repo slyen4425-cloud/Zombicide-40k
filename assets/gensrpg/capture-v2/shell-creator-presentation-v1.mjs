@@ -603,9 +603,10 @@ export function createCaptureShellCreatorV1({
    container.dataset.active='true';await render();enterHome();
   },
   hide(){container.dataset.active='false';},
-  enterHome,leaveHome,play,stopAmbient,startAmbient,rotateDefaultWallpaper,
+  enterHome,leaveHome,play,stopAmbient,startAmbient,
   wallpaper:()=>backgroundUrl?Object.freeze({
    url:backgroundUrl,shade:settings.backgroundShade/100}):null,
+  rotateDefaultWallpaper,
   async reload(){await loadUniverse(universe,name);},
   stop(){
    disposed=true;++epoch;active=false;

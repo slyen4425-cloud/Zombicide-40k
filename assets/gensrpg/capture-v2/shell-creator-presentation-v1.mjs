@@ -7,6 +7,9 @@ import {
 } from './adventure-loading-art-v1.mjs';
 import {loadCaptureShellOfficialAudioCatalogV1}
  from './shell-official-audio-catalog-v1.mjs';
+import {CAPTURE_OFFICIAL_BACKGROUND_ART_V1,captureOfficialArtByIdV1,
+ captureOfficialArtUrlV1,captureOfficialLoadingArtUrlsV1}
+ from './shell-official-art-v1.mjs';
 
 export const CAPTURE_SHELL_CREATOR_SETTINGS_PREFIX_V1=
  'gensrpg.capture.shell.creator.settings.v1:';
@@ -100,6 +103,23 @@ export async function createCaptureShellMediaLibraryV1({
    await requestDone(db.transaction(STORE,'readwrite')
     .objectStore(STORE).delete(key(universeId,slot)));
   },
+  // Keep the user's imported wallpaper Blob intact when choosing official art.
+  async getVisualChoice(universeId){
+   const visualKey=captureArtUniverseIdV1(universeId)+'/official-background-choice';
+   return (await requestDone(db.transaction(STORE,'readonly')
+    .objectStore(STORE).get(visualKey)))??null;
+  },
+  async putVisualChoice(universeId,assetId){
+   if(!captureOfficialArtByIdV1(assetId))throw new RangeError('Fond officiel inconnu');
+   const visualKey=captureArtUniverseIdV1(universeId)+'/official-background-choice';
+   await requestDone(db.transaction(STORE,'readwrite')
+    .objectStore(STORE).put({key:visualKey,assetId}));
+  },
+  async clearVisualChoice(universeId){
+   const visualKey=captureArtUniverseIdV1(universeId)+'/official-background-choice';
+   await requestDone(db.transaction(STORE,'readwrite')
+    .objectStore(STORE).delete(visualKey));
+  },
   close(){db.close();}
  });
 }
@@ -135,7 +155,7 @@ export function createCaptureShellCreatorV1({
  };
  const previews=new Set();
  const effectSlots=['click','confirm','back','error'];
- let statusLine=null,backgroundUrl=null;
+ let statusLine=null,backgroundUrl=null,selectedOfficialArt=null;
  const report=(value,error=false)=>{
   if(statusLine){statusLine.textContent=value;statusLine.dataset.error=String(error);}
   if(error&&notice){notice.textContent=value;notice.dataset.error='true';}
@@ -158,7 +178,7 @@ export function createCaptureShellCreatorV1({
   for(const value of soundPlayers.values()){value.pause?.();value.src='';}
   soundPlayers.clear();
   for(const url of mediaUrls.values())root.URL.revokeObjectURL(url);
-  mediaUrls.clear();backgroundUrl=null;
+  mediaUrls.clear();backgroundUrl=null;selectedOfficialArt=null;
  }
  function applyBackground(){
   if(disposed)return;
@@ -235,8 +255,10 @@ export function createCaptureShellCreatorV1({
   try{
    if(!media)media=await createCaptureShellMediaLibraryV1({indexedDB:root.indexedDB});
    if(current!==epoch||disposed)return;
-   const results=await Promise.all(CAPTURE_SHELL_MEDIA_SLOTS_V1.map(slot=>
-    media.get(universe,slot)));
+   const [results,visualChoice]=await Promise.all([
+    Promise.all(CAPTURE_SHELL_MEDIA_SLOTS_V1.map(slot=>media.get(universe,slot))),
+    media.getVisualChoice(universe)
+   ]);
    if(current!==epoch||disposed)return;
    for(let i=0;i<results.length;i++){
     const record=results[i],slot=CAPTURE_SHELL_MEDIA_SLOTS_V1[i];
@@ -260,6 +282,11 @@ export function createCaptureShellCreatorV1({
      const player=audioFor(url,slot==='ambience');
      if(player)soundPlayers.set(slot,player);
     }
+   }
+   const selected=captureOfficialArtByIdV1(visualChoice?.assetId);
+   if(selected){
+    selectedOfficialArt=selected.assetId;
+    backgroundUrl=captureOfficialArtUrlV1(selected);
    }
    applyBackground();
    if(active&&settings.ambienceEnabled)enterHome();
@@ -296,6 +323,24 @@ export function createCaptureShellCreatorV1({
    persist();applyBackground();
   });
   shadeLabel.append(shade);
+  const officialChoices=make(doc,'div',undefined,'captureCreatorOfficialBackgrounds');
+  officialChoices.append(make(doc,'p','Fonds officiels · choix sans suppression du fond importé.'));
+  for(const art of CAPTURE_OFFICIAL_BACKGROUND_ART_V1){
+   const button=make(doc,'button',undefined,'captureCreatorOfficialArtChoice');
+   button.type='button';button.setAttribute('aria-pressed',String(selectedOfficialArt===art.assetId));
+   const picture=make(doc,'img');picture.src=captureOfficialArtUrlV1(art);
+   picture.alt=art.label;picture.loading='lazy';
+   button.append(picture,make(doc,'span',art.label));
+   button.addEventListener('click',async()=>{
+    try{
+     if(!media)throw Error('Médiathèque indisponible');
+     await media.putVisualChoice(universe,art.assetId);
+     await loadUniverse(universe,name);
+     report('Fond officiel sélectionné : '+art.label+'.');
+    }catch(error){report(error.message,true);}
+   });
+   officialChoices.append(button);
+  }
   const bgInput=make(doc,'input');bgInput.type='file';
   bgInput.accept='image/png,image/jpeg,image/webp';
   bgInput.setAttribute('aria-label','Importer le fond d’accueil');
@@ -304,17 +349,19 @@ export function createCaptureShellCreatorV1({
    try{
     if(!media)throw Error('Médiathèque indisponible');
     await media.put(universe,'background',bgInput.files[0]);
+    await media.clearVisualChoice(universe);
     await loadUniverse(universe,name);
     report('Fond de cet univers enregistré.');
    }catch(error){report(error.message,true);}
   });
   const bgRemove=make(doc,'button','Réinitialiser le fond');bgRemove.type='button';
   bgRemove.addEventListener('click',async()=>{
-   try{await media.remove(universe,'background');await loadUniverse(universe,name);
+   try{await media.clearVisualChoice(universe);
+    await media.remove(universe,'background');await loadUniverse(universe,name);
     report('Fond standard restauré pour cet univers.');}
    catch(error){report(error.message,true);}
   });
-  bg.append(preview,shadeLabel,bgInput,bgRemove);container.append(bg);
+  bg.append(preview,shadeLabel,officialChoices,bgInput,bgRemove);container.append(bg);
 
   const sound=make(doc,'details',undefined,'captureCreatorGroup');
   sound.append(make(doc,'summary','🔊 Sons d’interface et musique du menu'));
@@ -480,7 +527,18 @@ export function createCaptureShellCreatorV1({
     indexedDB:root.indexedDB,universeId:universe,uuid:()=>root.crypto.randomUUID(),url:root.URL
    });
    const images=await loading.list();
-   if(!images.length)artList.append(make(doc,'p','Illustration officielle utilisée par défaut.'));
+   // The historical image is always first; the three new official additions
+   // are read-only, and creator-uploaded art remains available afterward.
+   const officialLabels=['Illustration originale · conservée',
+    ...CAPTURE_OFFICIAL_BACKGROUND_ART_V1.map(art=>art.label)];
+   const officialUrls=captureOfficialLoadingArtUrlsV1();
+   for(let index=0;index<officialUrls.length;index++){
+    const row=make(doc,'div',undefined,'captureCreatorArtItem');
+    const picture=make(doc,'img');picture.src=officialUrls[index];
+    picture.alt=officialLabels[index];picture.loading='lazy';
+    row.append(picture,make(doc,'span',officialLabels[index]+' · officielle'));
+    artList.append(row);
+   }
    for(const image of images){
     const row=make(doc,'div',undefined,'captureCreatorArtItem');
     const url=root.URL.createObjectURL(image.blob);previews.add(url);

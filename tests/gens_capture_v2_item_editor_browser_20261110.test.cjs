@@ -131,8 +131,10 @@ test('real landscape UI: library, drops, fragments and NPC shop share one saved 
   await frame.locator('#adventure-economy-panel > details > summary').tap();
   await frame.locator('#adventure-merchant-search').fill('Relique témoin corrigée');
   await frame.locator('#adventure-merchant-library input[aria-label="Proposer Relique témoin corrigée"]').check();
+  const stockField='#adventure-merchant-library input[aria-label="Stock du Relique témoin corrigée (vide : illimité)"]';
+  await frame.locator(stockField).fill('3');
   assert.match(await frame.locator('#adventure-merchant-selected-count').innerText(),
-    /^1 objet\(s\) proposés parmi \d+$/,
+    /^1 sélectionné\(s\) \/ 1 affiché\(s\) dans cette catégorie$/,
     'the selected canonical resource is checked regardless of unrelated published species');
   await frame.locator('#adventure-merchant-add').tap();
   assert.equal(await frame.locator('#adventure-merchants .rule-row').count(),1);
@@ -145,6 +147,8 @@ test('real landscape UI: library, drops, fragments and NPC shop share one saved 
   assert.equal(await frame.locator('#adventure-merchant-sell-percent').inputValue(),'10');
   assert.equal(await frame.locator('#adventure-merchant-buy-percent').inputValue(),'-50');
   assert.equal(await frame.locator('#adventure-merchant-library input:checked').count(),1);
+  assert.equal(await frame.locator(stockField).inputValue(),'3',
+   'capped stock survives a real saved-universe reload and merchant re-edit');
 
   // Real Shell routing (same iframe, same stored AdventureRules): opening the
   // selected PNJ's linked merchant preselects this shop and returning restores

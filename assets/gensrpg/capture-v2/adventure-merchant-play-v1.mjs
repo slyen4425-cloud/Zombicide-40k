@@ -50,7 +50,8 @@ export function installAdventureMerchantPlayV1({
    const item=state.rules.loot.items.find(x=>x.id===itemId);
    const basePrice=item?.saleValue??merchant.fragmentPrices?.[itemId];
    return basePrice===undefined?null:{itemId,currencyPrice:adventureMerchantPriceV1(
-    basePrice,merchant.sellPercent),resourceCosts:[],stock:null};
+    basePrice,merchant.sellPercent),resourceCosts:[],
+    stock:merchant.itemStocks?.[itemId]??null};
   }).filter(Boolean):merchant.offers;
   for(const offer of offers){
    const resources=offer.resourceCosts.map(cost=>

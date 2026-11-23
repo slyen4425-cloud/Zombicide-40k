@@ -85,3 +85,43 @@ test('merchant editor and merchant play use the shared price owner and preserve 
  assert.match(contract,/Historical merchants/);
  assert.doesNotMatch(editor,/localStorage|sessionStorage|window\.location\.assign/);
 });
+
+test('simple merchants: per-item stock is bounded and transaction-ledger owned, unlimited remains legacy default',()=>{
+ const edited=normalizeAdventureRulesV1({...rules,economy:{...rules.economy,
+  merchants:[{...merchant,itemStocks:{relique:2,potion:0}}]}});
+ assert.deepEqual(edited.economy.merchants[0].itemStocks,{relique:2,potion:0});
+ const initial={...session(),rules:edited,inventory:{currency:1000,items:{}}};
+ const first=trade(initial,'buy','relique',1,'stock-buy-1');
+ assert.equal(first.session.merchantStocks['marchand-foret'].relique,1);
+ assert.equal(first.session.inventory.currency,890);
+ assert.equal(initial.merchantStocks,undefined,'no mutation of old save');
+ assert.throws(()=>trade(first.session,'buy','relique',2,'stock-buy-2'),/stock/i);
+ assert.throws(()=>trade(initial,'buy','potion',1,'stock-potion-zero'),/stock/i);
+ const second=trade(first.session,'buy','relique',1,'stock-buy-3');
+ assert.equal(second.session.merchantStocks['marchand-foret'].relique,0);
+ assert.equal(trade(second.session,'buy','relique',1,'stock-buy-3').applied,false);
+ assert.throws(()=>trade(second.session,'buy','relique',1,'stock-buy-4'),/stock/i);
+ assert.throws(()=>normalizeAdventureEconomyV1({...edited.economy,
+  merchants:[{...merchant,itemStocks:{invisible:1}}]},baseItems),/unselected/i);
+ assert.throws(()=>normalizeAdventureEconomyV1({...edited.economy,
+  merchants:[{...merchant,itemStocks:{relique:-1}}]},baseItems),/stock/i);
+ assert.throws(()=>normalizeAdventureEconomyV1({...edited.economy,
+  merchants:[{...merchant,itemStocks:{relique:1.5}}]},baseItems),/stock/i);
+ const loose={...session(),inventory:{currency:300,items:{}}};
+ assert.equal(Object.hasOwn(trade(loose,'buy','relique',1,'unlimited-1').session,'merchantStocks'),false,
+  'historical simple merchants still have unlimited stock');
+});
+
+test('merchant stock editor reuses the canonical selection and session stock owner',()=>{
+ const read=path=>readFileSync(new URL('../assets/gensrpg/capture-v2/'+path,import.meta.url),'utf8');
+ const editor=read('adventure-economy-editor-v1.mjs');
+ const game=read('adventure-merchant-play-v1.mjs');
+ const economy=read('adventure-economy-v1.mjs');
+ assert.match(editor,/shownItems\(all\)/);
+ assert.match(editor,/affiché\(s\) dans cette catégorie/);
+ assert.match(editor,/itemStocksDraft/);
+ assert.match(editor,/Stock du /);
+ assert.match(game,/merchant\.itemStocks\?\.\[itemId\]/);
+ assert.match(economy,/stock:merchant\.itemStocks\?\.\[target\]/);
+ assert.doesNotMatch(editor,/localStorage|sessionStorage|new Map\(|window\.location\.assign/);
+});

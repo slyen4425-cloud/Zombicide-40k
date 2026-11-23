@@ -610,14 +610,47 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
  const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
  const adapter=read(trial,'vendor/combat-lab/src/adapters/input/capture/capture-npc-opponent-instance-v1.js').toString('utf8');
  const economy=read(trial,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs').toString('utf8');
- assert.equal(pins.combat.sha,'34c17c15f4ca8b457a94e49fa2f3fcfb8ca93ca0');
- assert.equal(pins.combat.certifiedCiRun,45016265619);
+ assert.equal(pins.combat.sha,'23623733ab077fd09603848b16ab17806a26ed11');
+ assert.equal(pins.combat.certifiedCiRun,45139989917);
  assert.equal(provenance.combat.sha,pins.combat.sha);
  assert.equal(delivery.combat.sha,pins.combat.sha);
  assert.equal(previewPin.officialVisuals.sha,'1d138d8c5abc5b8c300774d5afce6d67ec6e9c35');
  assert.equal(previewPin.officialVisuals.certifiedCiRun,45114203267);
  assert.ok(adapter.includes('export '));
  assert.match(economy,/adventureMerchantPriceV1/);
+});
+
+test('PWA stages Vipfer five Steel skills and exactly the eight approved author media references',()=>{
+ const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
+ const bundle=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
+ assert.equal(source.combat.sha,'23623733ab077fd09603848b16ab17806a26ed11');
+ assert.equal(source.combat.certifiedCiRun,45139989917);
+ assert.equal(bundle.combat.sha,source.combat.sha,'the real staged combat must match the certified pin');
+ assert.equal(previewPin.officialVisuals.sha,'1d138d8c5abc5b8c300774d5afce6d67ec6e9c35');
+ const slugs=['morsure-ressort','etreinte-acier','mue-tranchante','couronne-eclats','broyeur-serpentin'];
+ const ids=slugs.map(slug=>'vipfer-'+slug);
+ const creature=json(trial,'vendor/combat-lab/data/capture/showcase/Vipfer.capture-creature-transfer-v1.json');
+ assert.deepEqual(creature.draft.skillIds,ids);
+ assert.deepEqual(creature.loadout.slots.map(slot=>slot.skillId),ids);
+ const approved={'morsure-ressort':'impact','mue-tranchante':'cast','couronne-eclats':'travel'};
+ for(const slug of slugs){
+  const id='vipfer-'+slug;
+  const skill=json(trial,'vendor/combat-lab/data/capture/showcase/'+id+'.capture-skill-transfer-v1.json').draft;
+  assert.equal(skill.id,id);
+  assert.equal(skill.definition.id,id);
+  assert.equal(skill.definition.element,'steel');
+  assert.equal(skill.presentation.visual.icon.assetId,'pack:capture:icon-skill-vipfer-'+slug+'-v1');
+  const slot=approved[slug];
+  if(slot){
+   assert.equal(skill.presentation.visual[slot].assetId,'pack:capture:sprite-skill-vipfer-'+slug+'-v1');
+  }else{
+   assert.deepEqual(Object.keys(skill.presentation.visual),['icon'],
+    'Étreinte et Broyeur must not import rejected silhouette animations');
+  }
+  if(slug==='couronne-eclats')assert.equal(skill.definition.salvo.shots,3);
+ }
+ assert.equal(fs.existsSync(path.join(site,'vendor/combat-lab')),false,
+  'no second Combat runtime authority in the production root');
 });
 
 test('publisher includes checked merchant catalog and canonical percent-price model only in Capture',()=>{

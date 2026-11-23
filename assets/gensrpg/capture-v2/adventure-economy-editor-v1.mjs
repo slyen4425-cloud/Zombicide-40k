@@ -14,7 +14,7 @@ export function installAdventureEconomyEditorV1({
  const current=()=>getRules().economy??DEFAULT_ADVENTURE_ECONOMY_V1;
  const items=()=>getRules().loot.items;
  const byMerchant=id=>current().merchants.find(m=>m.id===id);
- let editedId=null,selected=new Set(),fragmentPricesDraft={};
+ let editedId=null,selected=new Set(),fragmentPricesDraft={},itemStocksDraft={};
  const isSimple=m=>Array.isArray(m.itemIds);
  const pct=n=>(n>0?'+':'')+n+' %';
  function read(){
@@ -26,7 +26,7 @@ export function installAdventureEconomyEditorV1({
   return {...current(),currency:{singular,plural}};
  }
  function clearMerchant(){
-  editedId=null;selected=new Set();fragmentPricesDraft={};
+  editedId=null;selected=new Set();fragmentPricesDraft={};itemStocksDraft={};
   $('adventure-merchant-name').value='';
   $('adventure-merchant-sell-percent').value='10';
   $('adventure-merchant-buy-percent').value='-50';
@@ -58,11 +58,13 @@ export function installAdventureEconomyEditorV1({
   }))
  ];
  const category=()=>$('adventure-merchant-category').value;
+ const shownItems=all=>{
+  const needle=$('adventure-merchant-search').value.trim().toLocaleLowerCase('fr');
+  return all.filter(x=>x.kind===category()&&x.name.toLocaleLowerCase('fr').includes(needle));
+ };
  function renderLibrary(){
   const host=$('adventure-merchant-library');
-  const needle=$('adventure-merchant-search').value.trim().toLocaleLowerCase('fr');
-  const all=catalog(),visible=all.filter(x=>x.kind===category()&&
-   x.name.toLocaleLowerCase('fr').includes(needle));
+  const all=catalog(),visible=shownItems(all);
   host.replaceChildren();
   for(const item of visible.slice(0,120)){
    const label=document.createElement('label');
@@ -76,9 +78,9 @@ export function installAdventureEconomyEditorV1({
      if(item.kind==='fragment'&&!Object.hasOwn(fragmentPricesDraft,item.id))
       fragmentPricesDraft[item.id]=100;
     }else selected.delete(item.id);
-    // Preserve checked nodes for keyboard/touch callers; only fragment price
-    // fields require rebuilding the card when their visibility changes.
-    if(item.kind==='fragment')renderLibrary();else renderLibraryCount();
+    // Reveal stock for every selected item, never a separate stock catalog.
+    if(!checkbox.checked)delete itemStocksDraft[item.id];
+    renderLibrary();
    });
    label.append(checkbox);
    const imageUrl=item.kind==='fragment'?null:getItemIconUrl?.(item.iconKey);
@@ -90,6 +92,26 @@ export function installAdventureEconomyEditorV1({
    info.textContent=item.name+(item.kind==='fragment'
     ?' · fragment officiel': ' · '+item.saleValue+' '+($('adventure-money-plural').value||'pièces'));
    label.append(info);
+   if(selected.has(item.id)){
+    const stock=document.createElement('input');
+    stock.type='number';stock.min='0';stock.max='100000000';stock.step='1';
+    stock.placeholder='Stock ∞';
+    stock.value=Object.hasOwn(itemStocksDraft,item.id)?String(itemStocksDraft[item.id]):'';
+    stock.setAttribute('aria-label','Stock du '+item.name+' (vide : illimité)');
+    stock.title='Stock initial : vide = illimité ; 0 = indisponible';
+    stock.addEventListener('change',()=>{
+     const raw=stock.value.trim();
+     if(raw===''){delete itemStocksDraft[item.id];return;}
+     const count=Number(raw);
+     if(!Number.isSafeInteger(count)||count<0||count>100000000){
+      notify('Stock : entier de 0 à 100 000 000, ou vide pour illimité.',true);
+      stock.value=Object.hasOwn(itemStocksDraft,item.id)?String(itemStocksDraft[item.id]):'';
+      return;
+     }
+     itemStocksDraft[item.id]=count;
+    });
+    label.append(stock);
+   }
    if(item.kind==='fragment'&&selected.has(item.id)){
     const price=document.createElement('input');
     price.type='number';price.min='1';price.max='100000000';price.step='1';
@@ -114,10 +136,12 @@ export function installAdventureEconomyEditorV1({
   renderLibraryCount();
  }
  function renderLibraryCount(){
-  const available=new Set(catalog().map(x=>x.id));
+  const all=catalog(),visible=shownItems(all);
+  const inView=visible.filter(item=>selected.has(item.id)).length;
+  const total=all.filter(item=>selected.has(item.id)).length;
   $('adventure-merchant-selected-count').textContent=
-   [...selected].filter(id=>available.has(id)).length+
-   ' objet(s) proposés parmi '+available.size;
+   inView+' sélectionné(s) / '+visible.length+' affiché(s) dans cette catégorie'+
+   (total!==inView?' · '+total+' sélectionné(s) au total':'');
  }
  function editMerchant(merchant){
   if(!isSimple(merchant)&&!document.defaultView.confirm(
@@ -125,6 +149,9 @@ export function installAdventureEconomyEditorV1({
    'remplacera ces paramètres par les deux pourcentages et une liste d’objets. '+
    'Les anciennes parties ne seront pas modifiées. Continuer ?'))return;
   editedId=merchant.id;
+  itemStocksDraft=isSimple(merchant)?{...(merchant.itemStocks??{})}:
+   Object.fromEntries(merchant.offers.filter(offer=>offer.stock!==null)
+    .map(offer=>[offer.itemId,offer.stock]));
   fragmentPricesDraft=isSimple(merchant)?{...(merchant.fragmentPrices??{})}:
    Object.fromEntries(merchant.offers.filter(offer=>offer.itemId.startsWith('fragment:'))
     .map(offer=>[offer.itemId,offer.currencyPrice]));
@@ -145,7 +172,9 @@ export function installAdventureEconomyEditorV1({
    const label=document.createElement('span');
    label.textContent=merchant.name+' · '+(isSimple(merchant)
     ?merchant.itemIds.length+' objet(s) · vend '+pct(merchant.sellPercent)+
-     ' · rachète '+pct(merchant.buyPercent)
+     ' · rachète '+pct(merchant.buyPercent)+
+     ' · stock '+(Object.keys(merchant.itemStocks??{}).length
+      ?Object.keys(merchant.itemStocks).length+' article(s) limités':'illimité')
     :merchant.offers.length+' offre(s) anciennes (stock/prix conservés)');
    const edit=document.createElement('button');edit.type='button';
    edit.textContent=isSimple(merchant)?'Modifier':'Convertir';
@@ -179,7 +208,10 @@ export function installAdventureEconomyEditorV1({
    sellPercent:Number($('adventure-merchant-sell-percent').value),
    buyPercent:Number($('adventure-merchant-buy-percent').value),
    ...(fragments.length?{fragmentPrices:Object.fromEntries(fragments.map(id=>[
-    id,fragmentPricesDraft[id]??100]))}:{})};
+    id,fragmentPricesDraft[id]??100]))}:{}),
+   ...(itemIds.some(id=>Object.hasOwn(itemStocksDraft,id))
+    ?{itemStocks:Object.fromEntries(itemIds.filter(id=>Object.hasOwn(itemStocksDraft,id))
+      .map(id=>[id,itemStocksDraft[id]]))}:{})};
   const merchants=editedId
    ?current().merchants.map(m=>m.id===editedId?merchant:m)
    :[...current().merchants,merchant];

@@ -3,7 +3,7 @@
 ## Périmètre unique
 - Demande : fusionner la PR #524 Exploration, publier l'éditeur 2,5D et raccorder la source à la PWA.
 - Exploration main certifié : `98e3f67700494d76ab12628ee52d498e7cc24606` (CI `45186744323`, release Pages `45186743956` GREEN).
-- Capture V2 candidate dérivée du pin PWA préexistant `fd96d00dd7aa8d2a6f5fc3951e49e75a897f1b9c`, modification autorisée du seul pin Exploration `source-pins-v1.json` et test additionnel; nouveau SHA candidate `ee160bc5de52d9e74bf5ba2662359b73ae635ae5`.
+- Capture V2 candidate dérivée du pin PWA préexistant `fd96d00dd7aa8d2a6f5fc3951e49e75a897f1b9c`, modification autorisée du seul pin Exploration `source-pins-v1.json` et test additionnel; nouveau SHA candidate `4f5ad09c00237d45c1e1b3ea4cb06c5a6be6390f` (test de provenance Capture actualisé).
 - Combat officiel `23623733ab077fd09603848b16ab17806a26ed11` et visuels épinglés inchangés. Moteur PWA, shell, caches et sauvegardes inchangés.
 - Unique publisher existant : `.github/workflows/main.yml`; les assets Exploration appartiennent à `vendor/exploration-lab`, sans seconde autorité de Portal ou de textures.
 

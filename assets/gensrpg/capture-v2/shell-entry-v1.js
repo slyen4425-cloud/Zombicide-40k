@@ -58,9 +58,10 @@
     try{
       // The existing Capture art owner is the ONLY source of player
       // artwork. Read all three legacy categories as ONE simple gallery.
-      const [libraryOwner,fadeOwner]=await Promise.all([
+      const [libraryOwner,fadeOwner,artOwner]=await Promise.all([
         import(new URL('assets/gensrpg/capture-v2/adventure-loading-art-v1.mjs',base).href),
-        import(new URL('vendor/exploration-lab/src/play/exploration-loading-art-v1.js',base).href)
+        import(new URL('vendor/exploration-lab/src/play/exploration-loading-art-v1.js',base).href),
+        import(new URL('assets/gensrpg/capture-v2/shell-official-art-v1.mjs',base).href)
       ]);
       const library=await libraryOwner.createAdventureLoadingArtLibraryV1({
         universeId:selectedUniverse?.id??'monster-invoc'
@@ -74,7 +75,8 @@
         return;
       }
       state.urls=urls;
-      const artwork=urls.length?urls:[officialLoadingArt];
+      // Keep the original official image FIRST; append new and creator art.
+      const artwork=[officialLoadingArt,...artOwner.captureOfficialLoadingArtUrlsV1().slice(1),...urls];
       if(typeof fadeOwner.mountCaptureLoadingArtCrossfadeV1==='function')
         state.crossfade=fadeOwner.mountCaptureLoadingArtCrossfadeV1({
           host:state.overlay,images:artwork,documentRef:root.document,windowRef:root

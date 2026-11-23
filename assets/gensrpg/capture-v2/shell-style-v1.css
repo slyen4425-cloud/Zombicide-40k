@@ -264,3 +264,10 @@
 #gensCaptureV2Root[data-view="home"][data-menu="main"] > .gensCaptureV2MainMenu button:hover{
  background:linear-gradient(110deg,rgba(39,101,118,.91),rgba(27,74,89,.93));
 }
+
+/* Creator visual options use the existing art owner; no extra gallery engine. */
+#gensCaptureV2Root .captureCreatorOfficialBackgrounds{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;margin:10px 0}
+#gensCaptureV2Root .captureCreatorOfficialBackgrounds>p{grid-column:1/-1;margin:0 0 3px}
+#gensCaptureV2Root .captureCreatorOfficialArtChoice{display:flex;flex-direction:column;gap:6px;padding:6px;min-width:0;align-items:stretch;text-align:center}
+#gensCaptureV2Root .captureCreatorOfficialArtChoice img{width:100%;height:84px;object-fit:contain;background:#08121b;border-radius:6px}
+#gensCaptureV2Root .captureCreatorOfficialArtChoice[aria-pressed="true"]{border-color:#87e5c3;box-shadow:0 0 0 2px #87e5c355}

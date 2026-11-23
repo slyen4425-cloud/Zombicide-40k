@@ -1,12 +1,12 @@
 {
   "schema": "gensrpg-capture-v2-pages-source-pin-v1",
   "repository": "slyen4425-cloud/Zombicide-40k",
-  "sha": "a2a1666ddca286e76edf155f91fe097cec992f79",
+  "sha": "12fe558eebe135802cab4545709272d463ef3f4d",
   "publicPath": "/preview/capture-v2-pr225/",
   "officialVisuals": {
     "repository": "slyen4425-cloud/GenSrpg_labo_combat_dynamique",
     "ref": "global-assets",
-    "sha": "b807389811c5a7e5236b9fdc96b7f155168d7fd7",
-    "certifiedCiRun": 44925994443
+    "sha": "1d138d8c5abc5b8c300774d5afce6d67ec6e9c35",
+    "certifiedCiRun": 45114203267
   }
 }

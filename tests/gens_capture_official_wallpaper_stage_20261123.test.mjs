@@ -51,5 +51,10 @@ test('staged creator and launch screens use one official catalogue without repla
  assert.ok(creator.includes('putVisualChoice'));
  assert.ok(creator.includes('getVisualChoice'));
  assert.ok(shell.includes('officialLoadingArt,...artOwner.captureOfficialLoadingArtUrlsV1().slice(1)'));
- assert.ok(game.includes('...captureOfficialLoadingArtUrlsV1(),...sequence'));
+ assert.ok(game.includes('captureOfficialLoadingArtUrlsV1().map(async source=>'));
+ assert.ok(game.includes('URL.createObjectURL(file)'));
+ assert.ok(game.includes('[...officialBlobs.filter(Boolean),...sequence].slice(0,12)'));
+ assert.ok(creator.includes('automaticWallpaper=true'));
+ assert.ok(shell.includes('showShowcaseWallpaper()'));
+ // The original and all three new artworks are still byte-identical in the site.
 });

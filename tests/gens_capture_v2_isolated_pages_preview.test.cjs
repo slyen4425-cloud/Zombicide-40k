@@ -478,7 +478,7 @@ test('Creator and default 50% items exist in ONE official Capture source',()=>{
   'in-game preparation must not expose a second art editor');
  assert.ok(!app.includes('refreshLoadingArtEditor'),
   'the adventure owns playback, never configuration');
- assert.ok(app.includes('const entries=(await library.list()).slice(0,12)'),
+ assert.ok(app.includes('const entries=library?(await library.list()).slice(0,12):[]'),
   'all existing illustrations remain readable across the three loading contexts');
 });
 

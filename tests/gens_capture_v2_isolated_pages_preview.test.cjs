@@ -610,8 +610,8 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
  const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
  const adapter=read(trial,'vendor/combat-lab/src/adapters/input/capture/capture-npc-opponent-instance-v1.js').toString('utf8');
  const economy=read(trial,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs').toString('utf8');
- assert.equal(pins.combat.sha,'23623733ab077fd09603848b16ab17806a26ed11');
- assert.equal(pins.combat.certifiedCiRun,45139989917);
+ assert.equal(pins.combat.sha,'2b3438a3f7d0ab13c2b074710ffc7d9925dec071');
+ assert.equal(pins.combat.certifiedCiRun,45190363744);
  assert.equal(provenance.combat.sha,pins.combat.sha);
  assert.equal(delivery.combat.sha,pins.combat.sha);
  assert.equal(previewPin.officialVisuals.sha,'1d138d8c5abc5b8c300774d5afce6d67ec6e9c35');
@@ -623,8 +623,8 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
 test('PWA stages Vipfer five Steel skills and exactly the eight approved author media references',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
  const bundle=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
- assert.equal(source.combat.sha,'23623733ab077fd09603848b16ab17806a26ed11');
- assert.equal(source.combat.certifiedCiRun,45139989917);
+ assert.equal(source.combat.sha,'2b3438a3f7d0ab13c2b074710ffc7d9925dec071');
+ assert.equal(source.combat.certifiedCiRun,45190363744);
  assert.equal(bundle.combat.sha,source.combat.sha,'the real staged combat must match the certified pin');
  assert.equal(previewPin.officialVisuals.sha,'1d138d8c5abc5b8c300774d5afce6d67ec6e9c35');
  const slugs=['morsure-ressort','etreinte-acier','mue-tranchante','couronne-eclats','broyeur-serpentin'];
@@ -819,4 +819,25 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
   assert.ok(base.includes('value="ground.volcanic_ash_lava"'),'historical volcanic base remains');
   assert.equal(fs.existsSync(path.join(trial,owner+'GENSRPG_Exploration_5_textures_2026-11-22.zip')),false);
   assert.equal(fs.existsSync(path.join(site,'GENSRPG_Exploration_5_textures_2026-11-22.zip')),false);
+});
+
+test('the PWA physically ships the generic author description and zone/trail editor, not species-specific code',()=>{
+ const pinned=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
+ assert.equal(pinned.combat.sha,'2b3438a3f7d0ab13c2b074710ffc7d9925dec071');
+ assert.equal(pinned.exploration.sha,'1b69d62a88e77c545ab9a476a6a2b7f81ad4dd90');
+ const explanation=read(trial,'vendor/combat-lab/src/ui/capture-skill-explanation-v1.js').toString('utf8');
+ const editor=read(trial,'vendor/combat-lab/src/ui/capture-editor-human-v2.js').toString('utf8');
+ assert.match(explanation,/if\(d\.salvo\)/,'auto description must show configured salvo count');
+ assert.match(explanation,/s\.contactDamage>0/,'fixed melee retaliation must not print 0%');
+ for(const selector of ['data-skill-zone-trail-enabled','data-skill-zone-trail-index',
+    'data-skill-zone-trail-count'])assert.ok(editor.includes(selector),
+    'generic trajectory-zone author setting missing: '+selector);
+ const fire=json(trial,'vendor/combat-lab/data/capture/showcase/polocendre-trainee-feu.capture-skill-transfer-v1.json');
+ const zones=fire.draft.definition.effects.filter(effect=>effect.kind==='persistent_zone');
+ assert.equal(zones.length,3);
+ assert.deepEqual(zones.map(zone=>[zone.trailIndex,zone.trailCount,zone.tickEffect.amount]),
+   [[1,3,5],[2,3,5],[3,3,5]]);
+ const volley=json(trial,'vendor/combat-lab/data/capture/showcase/vipfer-couronne-eclats.capture-skill-transfer-v1.json');
+ assert.deepEqual(volley.draft.definition.salvo,{shots:3,shotDurationMs:550,gapMs:150});
+ assert.equal(volley.draft.definition.effects.find(effect=>effect.kind==='damage').amount,12);
 });

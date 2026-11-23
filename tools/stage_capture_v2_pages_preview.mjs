@@ -320,6 +320,11 @@ const certifiedNov22SculptPaletteSha='a8d9f8bd61bee7a14ab4e71e6cedc85250457f5c';
 const certifiedNov22FiveTerrainTexturesSha='1b69d62a88e77c545ab9a476a6a2b7f81ad4dd90';
 // #524: Exploration main auto portals/marker visuals; official height renderer byte-identical.
 const certifiedNov23AutoPortalsSha='98e3f67700494d76ab12628ee52d498e7cc24606';
+// #538/#539 merged main: CI 45260398784 and Pages 45260398731 GREEN.
+// Source owner adds a native invisible navigation-only corridor. All older
+// renderer blobs remain authorized only at their exact historic main refs.
+const certifiedNov23NavigationAllowSha='b0f52e23bea6e9eaf359fc7faf206c13386bdb4a';
+const navigationAllowSouthBlob='98c70979a719b2bad48a35df972bb880b6a62f5e';
 const recoveredWorldSouthBlob='6c101756bdf9c58a9ae8cf3fe104e49575145748';
 const oldSouthBacking="  ctx.fillStyle=baseColor;ctx.fillRect(0,0,totalWidth,totalHeight);";
 const officialSouthBacking="  // The outer cliff is deliberately disabled in the canonical 2.5D editor\n  // and its Tester, including the decorative south fringe. Raised last-row\n  // tops end BEFORE the bottom of this backing rectangle; a solid baseColor\n  // leaked through as the broad grey/green slanted strip on Android. Carry\n  // the EXACT same Material Registry texture underneath the raised tops.\n  // Keep the original backing for callers that explicitly draw a cliff rim.\n  // This is visual-only: no new cells, heights, collisions or saved paint.\n  ctx.fillStyle=!drawOuterSouthRim&&pattern?pattern:baseColor;\n  ctx.fillRect(0,0,totalWidth,totalHeight);";
@@ -377,6 +382,17 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
     !pinnedSouthRenderer.includes(officialSouthBacking))
    throw Error('Certified native elevated-ground renderer differs from Exploration main');
  releasedSouthBlob=recoveredWorldSouthBlob;
+ southRendererOriginSha=sourcePin.exploration.sha;
+}else if(sourcePin.exploration.sha===certifiedNov23NavigationAllowSha){
+ // The canonical owner intentionally hides navigationOnly ramps in play.
+ // Certify its EXACT Git blob; preserve all physical passages in Collision
+ // World, and NEVER modify/copy the original native renderer in the PWA.
+ if(gitBlobSha(pinnedSouthRenderer)!==navigationAllowSouthBlob||
+    !pinnedSouthRenderer.includes('if(ramp.navigationOnly)continue;')||
+    !pinnedSouthRenderer.includes(officialSouthBacking)||
+    !pinnedSouthRenderer.includes('for(const {side,opacity} of info.contactShadows)'))
+  throw Error('Exploration navigation-only renderer differs from reviewed official main');
+ releasedSouthBlob=navigationAllowSouthBlob;
  southRendererOriginSha=sourcePin.exploration.sha;
 }else throw Error('Unreviewed Exploration renderer version; certification required');
 const provenance={

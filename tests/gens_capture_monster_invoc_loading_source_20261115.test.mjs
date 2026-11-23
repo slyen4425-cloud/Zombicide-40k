@@ -36,7 +36,7 @@ test('official transport pins exactly one certified victory MP3 and latest Explo
  assert.equal(pins.exploration.sha,'35dbe475e53abcc7ba8f4c5ee3be972390232584');
  assert.equal(pins.combat.ref,'main');assert.equal(pins.exploration.ref,'main');
  assert.equal(pins.combat.certifiedCiRun,45223872730);
- assert.equal(pins.exploration.certifiedCiRun,45260398784);
+ assert.equal(pins.exploration.certifiedCiRun,45266578823);
  assert.equal(pins.legacyCaptureRuntime,false);
  const stage=readFileSync(new URL('../tools/stage_capture_v2_labs.mjs',import.meta.url),'utf8');
  assert.match(stage,/assets\/runtime\/audio\/music-v1\/victory-01-0b52ce2b\.mp3/);

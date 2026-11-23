@@ -1,3 +1,12 @@
+## 2026-11-23 — Repin de convergence Combat + Navigation, sans perte des passages automatiques
+- Base Publisher `main@d641d41be4c88cfffe582745e68fef2ca45e14cc` (portails automatiques #628 + capacités génériques #630). Branche `work/pwa-reconcile-combat-and-navigation-20261123`.
+- Source Capture candidate `fd3c0a84e8b2a9df75c02ab59daa1b9190603e8a` depuis la source publiée `63a82024504c6deec63f40f090d03760492609d8` : seuls pins Combat/Exploration et sentinelles de sources, aucun fork des labos ni autre module touché.
+- Combat `main@0543103891b5777fff108cb12a1ae55a519544d9` (CI `45223872730` success), buff Mue +200 DEF/8s affichage hold-last et volet repliable Capacités adverses.
+- Exploration `main@b0f52e23bea6e9eaf359fc7faf206c13386bdb4a` (Navigation Interdire/Autoriser/Normal dans World Builder, corridor physique invisible en jeu, Normal, Undo/Redo, pinceau texture carré, passage auto conservé). **CI post-fusion `45260398784` et Pages `45260398731` doivent être intégralement GREEN avant fusion publisher.**
+- Le nouveau `sculpt-height-renderer.js` a un blob officiel `98c70979a719b2bad48a35df972bb880b6a62f5e`, vérifié par rapport à la source Exploration, pas de fichier patché manuellement dans la PWA. Le stage Publisher ne fait qu'autoriser ce couple **SHA main exact + blob Git exact** sans changer ses anciens gardes; quatre fichiers Publisher (pin, stage certification, sentinelles et journal).
+- Un seul publisher `tools/capture_v2_pages_preview_pin.json`, mêmes médias `global-assets@1d138d8c5abc5b8c300774d5afce6d67ec6e9c35`, pas de SW ou root Shell touché. PWA PR #631 est obsolète et en conflit, ne pas fusionner sa version stale.
+- Gates : CI exacte de chaque upstream, PR publisher complète, build réel Chromium Android/PC, contrôle poids, fusion main puis Pages HTTPS. Les tickets eau/passerelle #530 et réglage des escaliers latéraux #525 restent ouverts. Pas de proclamation de PWA Android installée sans essai appareil.
+
 ## 2026-11-23 — PWA Monster InvoC : descriptions automatiques, salves et zones éditables
 - Demande créateur : les capacités créées librement par les joueurs doivent expliquer leurs effets automatiquement ; Couronne d'éclats et Polocendre ne sont que des exemples, pas des branches de code.
 - START Publisher `main@483fd4a4fb862f508989359682e81c4f89018741`, checkpoint `checkpoint/gensrpg-pwa-before-generic-skills-20261123`, branche `work/pwa-generic-skills-descriptions-publish-20261123`.

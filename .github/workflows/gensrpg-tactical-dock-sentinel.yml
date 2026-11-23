@@ -35,6 +35,7 @@ jobs:
   dock-chromium:
     needs: dock-contract
     runs-on: ubuntu-24.04
+    timeout-minutes: 25
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
@@ -42,16 +43,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Installer Chromium Playwright
-        run: |
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps chromium
+      - name: Vérifier le Playwright 1.55.0 déjà versionné
+        run: node -e "if(require('playwright/package.json').version!=='1.55.0')process.exit(1)"
+      - name: Installer Chromium headless et ses dépendances, sans npm install
+        timeout-minutes: 18
+        run: node node_modules/playwright/cli.js install --with-deps --only-shell chromium
       - name: Vérifier le dock sur le vrai rendu Tactical Chromium
         run: GENS_BROWSER=chromium node tests/gens_tactical_dock_browser_v11411.test.cjs
 
   dock-firefox:
     needs: dock-contract
     runs-on: ubuntu-24.04
+    timeout-minutes: 25
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
@@ -59,9 +62,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Installer Firefox Playwright
-        run: |
-          npm install --no-save playwright@1.55.0
-          npx playwright install --with-deps firefox
+      - name: Vérifier le Playwright 1.55.0 déjà versionné
+        run: node -e "if(require('playwright/package.json').version!=='1.55.0')process.exit(1)"
+      - name: Installer Firefox et ses dépendances, sans npm install
+        timeout-minutes: 18
+        run: node node_modules/playwright/cli.js install --with-deps firefox
       - name: Vérifier le dock sur le vrai rendu Tactical Firefox
         run: GENS_BROWSER=firefox node tests/gens_tactical_dock_browser_v11411.test.cjs

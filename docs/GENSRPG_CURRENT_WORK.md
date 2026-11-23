@@ -1,3 +1,14 @@
+## 2026-11-23 — Vipfer : raccorder les 5 compétences et médias validés à la PWA Capture V2 (C2)
+- Autorité unique : le publisher PWA `main` publie seulement la source Capture candidate immuable dans `/preview/capture-v2-pr225/`, sans recopier de moteur vers le Shell racine.
+- Checkpoint de départ Publisher : `checkpoint/gensrpg-start-vipfer-final-pwa-20261123` @ `5e58ae24b80838d7a5f9a93f2e144f2379e7a1d7`. Branche publisher `work/pwa-vipfer-five-skills-media-publish-20261123` issue de la préparation vitrine PR #626 pour **conserver ses correctifs sans les contourner**.
+- Source Capture officielle : `work/capture-v2-vipfer-certified-post-vitrine-20261123@fd96d00dd7aa8d2a6f5fc3951e49e75a897f1b9c` dérivée strictement de `d067bde7ce90c796f6fea84203591c22e61a3abd` (PR #626). Seuls `combat.sha` et `combat.certifiedCiRun` changent. Exploration `1b69d62a88e77c545ab9a476a6a2b7f81ad4dd90`, images et comportement de chargement restent identiques.
+- Combat : `main@23623733ab077fd09603848b16ab17806a26ed11`, 14 contrôles CI au succès (run `45139989917`) et Pages `45139990082` au succès. Ce SHA inclut la PR #380 fusionnée, 5 capacités Acier natives et les 5 icônes + 3 sprites approuvés raccordés par `7f9e81c67f35` puis stabilisés par `e8b12a9f4825`.
+- Catalogue visuel canonique inchangé : `global-assets@1d138d8c5abc5b8c300774d5afce6d67ec6e9c35`, CI `45114203267`. Étreinte et Broyeur : icônes seulement ; aucun sprite rejeté, silhouette humaine ni FX inventé.
+- Périmètre autorisé : unique pin `tools/capture_v2_pages_preview_pin.json`, sentinelle de transport physique `tests/gens_capture_v2_isolated_pages_preview.test.cjs`, ce journal. Ne modifier ni hub root/service worker, Donjon, Survie, Exploration, PNJ, multijoueur, textures, sons ni bibliothèques.
+- Sentinelle de provenance source `gens_capture_monster_invoc_loading_source_20261115.test.mjs` alignée sur le SHA Combat certifié (remplacement d'une assertion périmée, aucun changement de runtime).
+- Gates : CI publisher PR et main sur les SHA exacts, budget et duplication, tests navigateur, HTTP/HTTPS et preuve de provenance du pin nouveau. **NON GREEN** jusqu'aux résultats réels. La PR #621 ancienne est obsolète : ne pas la fusionner (risque de retour à un ancien fond et sans médias).
+- L'état public ne doit jamais être annoncé avant réussite du publisher réel ; valider sur Android installé séparément.
+
 ## 2026-11-22 — PWA Capture V2 : marchands et drops automatiquement reliés par créature (C2)
 - Base Publisher `main@712a7698cb061bc76038690cbb16eebb918cb7cc`, checkpoint `checkpoint/gensrpg-start-merchant-drops-pwa-20261122`, branche `work/gensrpg-merchant-drops-pwa-20261122`.
 - PR source Capture V2 #612, fusion certifiée `d3be0856b4abcc24b109fc90a4ece88d81f6987d` ; 7 workflows de PR SUCCESS au SHA tête `6d563afe877e7138cc56da46333fe4561c1b7e79`.

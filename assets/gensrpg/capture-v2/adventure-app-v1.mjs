@@ -77,6 +77,7 @@ import {normalizeCaptureItemTemplatesV1,materializeCaptureItemTemplatesV1,
 import {installAdventureEconomyEditorV1} from './adventure-economy-editor-v1.mjs';
 import {installAdventureMerchantPlayV1} from './adventure-merchant-play-v1.mjs';
 import {createAdventureLoadingArtLibraryV1,captureLoadingArtSequenceV1} from './adventure-loading-art-v1.mjs';
+import {captureOfficialLoadingArtUrlsV1} from './shell-official-art-v1.mjs';
 
 const $=id=>document.getElementById(id);
 const status=$('adventure-status');
@@ -2199,7 +2200,9 @@ async function prepareLoadingArtworkForPlay(){
   const urls=entries.map(record=>URL.createObjectURL(record.blob));
   for(const url of urls)loadingArtObjectUrls.add(url);
   const sequence=captureLoadingArtSequenceV1(urls,loadingArtRotation.launch++);
-  for(const scene of ['launch','zone','combat'])scenes[scene]=sequence;
+  // The historical art remains first, followed by new and uploaded artwork.
+  const officialAndCreator=[...captureOfficialLoadingArtUrlsV1(),...sequence];
+  for(const scene of ['launch','zone','combat'])scenes[scene]=officialAndCreator;
  }catch(error){
   revokeLoadingArt(loadingArtObjectUrls);
   console.warn('Bibliothèque de chargement non lisible, art officiel conservé',error);

@@ -84,7 +84,8 @@ test('Creator alone configures all loading art while preserving legacy scene-tag
  assert.match(shell,/const images=await loading\.list\(\)/);
  assert.match(shell,/await loading\.add\('launch',artInput\.files\)/);
  assert.match(shell,/loading\?\.close\(\);loading=null/);
- assert.match(game,/const entries=\(await library\.list\(\)\)\.slice\(0,12\)/);
+ // The official gallery must remain available even if IndexedDB fails.
+ assert.match(game,/const entries=library\?\(await library\.list\(\)\)\.slice\(0,12\):\[\]/);
  assert.doesNotMatch(html,/id="adventure-loading-art-files"/);
  assert.doesNotMatch(game,/refreshLoadingArtEditor/);
 });

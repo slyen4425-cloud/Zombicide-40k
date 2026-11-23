@@ -41,7 +41,10 @@ test('Creator keeps author files while persisting only an official selection poi
 test('the existing Shell and all gameplay loading contexts use the same four official images',()=>{
  const shell=read('shell-entry-v1.js'),game=read('adventure-app-v1.mjs');
  assert.match(shell,/\[officialLoadingArt,\.\.\.artOwner\.captureOfficialLoadingArtUrlsV1\(\)\.slice\(1\),\.\.\.urls\]/);
- assert.match(game,/\[\.\.\.captureOfficialLoadingArtUrlsV1\(\),\.\.\.sequence\]/);
+ // Native Exploration accepts blob: URLs for Combat; HTTPS official files must
+ // be projected into temporary same-origin blobs, never discarded.
+ assert.match(game,/captureOfficialLoadingArtUrlsV1\(\)\.map\(async source=>/);
+ assert.match(game,/\[\.\.\.officialBlobs\.filter\(Boolean\),\.\.\.sequence\]\.slice\(0,12\)/);
  assert.match(game,/for\(const scene of \['launch','zone','combat'\]\)/);
  assert.doesNotMatch(shell,/new Audio\(/);
 });

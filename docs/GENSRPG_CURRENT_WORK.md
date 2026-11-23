@@ -1,3 +1,11 @@
+## 2026-11-23 — Monster InvoC : buff Mue tranchante visible et compétences adverses consultables
+- START publisher `main@1630f219bd8b2232212a9cfc597abbe577ba7d87`, checkpoint `checkpoint/pwa-before-vipfer-buff-enemy-skills-20261123`, branche `work/pwa-vipfer-buff-enemy-skills-20261123`.
+- Source Capture candidate `work/capture-v2-vipfer-buff-enemy-skills-20261123@9c46094ab7daea3a3b809a62df2460611a670a10`, issue strictement du candidat publié `5cbb1dd41566066738f01e3b7f0f03a27d64875c`. Un seul pin de Combat modifié vers `main@0543103891b5777fff108cb12a1ae55a519544d9`, run de vérification `45223872730` (vérifier son succès total avant fusion). Exploration et global-assets inchangés.
+- Combat : PR #387 statut visuel Vipfer `hold-last`, +200 DEF 8 s, riposte unique 25 inchangés ; PR #388 panneau repliable « Capacités adverses » en lecture seule, compétences/récharges depuis RosterSession/CombatState canoniques. Le nouvel affichage `data-combat-hud-widget="opponent-skill-loadout"` constitue un point d'attache pour un futur éditeur de disposition, **pas une deuxième autorité**.
+- Les deux PR ont été fusionnées sur Combat main avec tests de vrais navigateurs ; pas d'effets visuels nouveaux, d'asset dupliqué, de nouvelle horloge ni de règles de gameplay. Aucun HUD interactif adverse, aucune modification des cinq commandes du joueur.
+- Seuls le pin publisher, le test de transport physique `tests/gens_capture_v2_isolated_pages_preview.test.cjs`, et ce journal changent. Conservés : Shell, service-worker, Adventure, Exploration, Donjon, Survie, PVP, données utilisateur et audio.
+- Gates impératifs : Combat main CI 14/14 du SHA source, CI de PR publisher, tests vrai navigateur et budget, CI après merge, build/deploy Pages, preuve publique HTTPS. Ne pas annoncer Android installé sans test sur appareil.
+
 ## 2026-11-23 — PWA Monster InvoC : descriptions automatiques, salves et zones éditables
 - Demande créateur : les capacités créées librement par les joueurs doivent expliquer leurs effets automatiquement ; Couronne d'éclats et Polocendre ne sont que des exemples, pas des branches de code.
 - START Publisher `main@483fd4a4fb862f508989359682e81c4f89018741`, checkpoint `checkpoint/gensrpg-pwa-before-generic-skills-20261123`, branche `work/pwa-generic-skills-descriptions-publish-20261123`.

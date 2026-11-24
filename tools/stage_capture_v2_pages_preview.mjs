@@ -329,6 +329,9 @@ const certifiedNov23NavigationAllowSha='b0f52e23bea6e9eaf359fc7faf206c13386bdb4a
 const certifiedNov23StairsAuthoringSha='35dbe475e53abcc7ba8f4c5ee3be972390232584';
 // Exploration #541, CI 45422631920 and HTTPS release 45422631766.
 const certifiedMerchantDialogSha='d55dd4d4f565baefc66bc5ccbde2f10e501f67fe';
+// Exploration #545, CI 45466487382 and HTTPS release 45466487438.
+const certifiedUniversePlaySha='46e2e1e11cfd841232998d452dbf4f235f2b482c';
+const waterPassageSouthBlob='19b0c9822048381793cd705f7cfcb2d4cdc207fa';
 const navigationAllowSouthBlob='98c70979a719b2bad48a35df972bb880b6a62f5e';
 const recoveredWorldSouthBlob='6c101756bdf9c58a9ae8cf3fe104e49575145748';
 const oldSouthBacking="  ctx.fillStyle=baseColor;ctx.fillRect(0,0,totalWidth,totalHeight);";
@@ -388,16 +391,19 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
    throw Error('Certified native elevated-ground renderer differs from Exploration main');
  releasedSouthBlob=recoveredWorldSouthBlob;
  southRendererOriginSha=sourcePin.exploration.sha;
-}else if([certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha].includes(sourcePin.exploration.sha)){
+}else if([certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha].includes(sourcePin.exploration.sha)){
  // The canonical owner intentionally hides navigationOnly ramps in play.
  // Certify its EXACT Git blob; preserve all physical passages in Collision
  // World, and NEVER modify/copy the original native renderer in the PWA.
- if(gitBlobSha(pinnedSouthRenderer)!==navigationAllowSouthBlob||
+ const waterPassage=sourcePin.exploration.sha===certifiedUniversePlaySha;
+ const expectedSouthBlob=waterPassage?waterPassageSouthBlob:navigationAllowSouthBlob;
+ if(gitBlobSha(pinnedSouthRenderer)!==expectedSouthBlob||
+    (waterPassage&&!pinnedSouthRenderer.includes('if(bridge.visibleInPlay)drawSculptWaterSupport(ctx,bridge,rise);'))||
     !pinnedSouthRenderer.includes('if(ramp.navigationOnly)continue;')||
     !pinnedSouthRenderer.includes(officialSouthBacking)||
     !pinnedSouthRenderer.includes('for(const {side,opacity} of info.contactShadows)'))
   throw Error('Exploration navigation-only renderer differs from reviewed official main');
- releasedSouthBlob=navigationAllowSouthBlob;
+ releasedSouthBlob=expectedSouthBlob;
  southRendererOriginSha=sourcePin.exploration.sha;
 }else throw Error('Unreviewed Exploration renderer version; certification required');
 const provenance={

@@ -1,3 +1,6 @@
+## 2026-11-24 — #530 · Passerelle tracée entre deux berges
+Capture part de 5493119441169bfb3f29badd68cb2b328a3019b4. Exploration #542 et #543 sont publiées sur main à 1ef71e18d2244e96a752f0266f1ed6b429a76c3a (CI 45435313260, preuve HTTPS 45435313230). Raccord du moteur certifié. Les cartes, la collision et le pinceau restent la propriété d’Exploration.
+
 ## 2026-11-24 — #629 · Raccorder les deux corrections du marchand
 Départ Capture `929fb31ab044f5bb52356124cf28b8d015f7d1e6`, checkpoint `checkpoint/gensrpg-start-capture-merchant-exploration-pin-20261124`. Cette source contient déjà les stocks, l’import des potions et le dialogue de Capture. Le seul changement de configuration raccorde Exploration #541, CI `45422631920`, publication HTTPS `45422631766`. Les règles, le sac, les autres moteurs et les médias gardent leurs propriétaires. Vérifier le manifeste source, la CI et le raccord physique dans la PR de publication.
 

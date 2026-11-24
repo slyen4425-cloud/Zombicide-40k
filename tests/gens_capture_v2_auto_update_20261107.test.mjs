@@ -106,3 +106,10 @@ test('SKIP_WAITING message never binds its event lifetime to activation',()=>{
  dispatch({data:{type:'SKIP_WAITING'},waitUntil(){throw Error('blocking event lifetime')}});
  assert.equal(signals,1,'exactly one native activation signal');
 });
+
+test('the preview navigation can complete independently of installing its successor',()=>{
+ const {worker}=releasePreviewPwaForCommit(originalWorker,sample,b);
+ assert.ok(originalWorker.includes('event.waitUntil(self.registration.update()'));
+ assert.doesNotMatch(worker,/event\.waitUntil\(self\.registration\.update\(/);
+ assert.match(worker,/url\.searchParams\.set\("_gens_pwa_refresh"/);
+});

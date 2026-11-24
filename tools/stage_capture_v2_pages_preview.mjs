@@ -327,6 +327,8 @@ const certifiedNov23NavigationAllowSha='b0f52e23bea6e9eaf359fc7faf206c13386bdb4a
 // #540: selected stair foot/summit is per-WorldObject; renderer unchanged (Git blob proven).
 // Post-merge owner CI 45266578823 and Pages GREEN. No new raster authority.
 const certifiedNov23StairsAuthoringSha='35dbe475e53abcc7ba8f4c5ee3be972390232584';
+// Exploration #541, CI 45422631920 and HTTPS release 45422631766.
+const certifiedMerchantDialogSha='d55dd4d4f565baefc66bc5ccbde2f10e501f67fe';
 const navigationAllowSouthBlob='98c70979a719b2bad48a35df972bb880b6a62f5e';
 const recoveredWorldSouthBlob='6c101756bdf9c58a9ae8cf3fe104e49575145748';
 const oldSouthBacking="  ctx.fillStyle=baseColor;ctx.fillRect(0,0,totalWidth,totalHeight);";
@@ -386,7 +388,7 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
    throw Error('Certified native elevated-ground renderer differs from Exploration main');
  releasedSouthBlob=recoveredWorldSouthBlob;
  southRendererOriginSha=sourcePin.exploration.sha;
-}else if([certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha].includes(sourcePin.exploration.sha)){
+}else if([certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha].includes(sourcePin.exploration.sha)){
  // The canonical owner intentionally hides navigationOnly ramps in play.
  // Certify its EXACT Git blob; preserve all physical passages in Collision
  // World, and NEVER modify/copy the original native renderer in the PWA.

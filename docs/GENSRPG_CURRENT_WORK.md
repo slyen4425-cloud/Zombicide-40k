@@ -1,3 +1,6 @@
+## 2026-11-24 — #629 · Publication du dialogue marchand
+Départ `95e7e05629fef5ca9f4f4319b08cc144c330eb21`, checkpoint `checkpoint/gensrpg-start-merchant-dialog-publisher-20261124`. La PR source #640, intégrée à `5493119441169bfb3f29badd68cb2b328a3019b4`, réunit Capture #639 et Exploration #541. Les quatre contrôles du candidat ont réussi, dont `45424588856`. Vérifier les deux messages dans le site assemblé, le budget et la provenance HTTPS du publisher après fusion. Les stocks, potions et portails gardent leurs chemins actuels.
+
 ## 2026-11-23 — Repin de convergence Combat + Navigation, sans perte des passages automatiques
 - Base Publisher `main@d641d41be4c88cfffe582745e68fef2ca45e14cc` (portails automatiques #628 + capacités génériques #630). Branche `work/pwa-reconcile-combat-and-navigation-20261123`.
 - Source Capture candidate `fd3c0a84e8b2a9df75c02ab59daa1b9190603e8a` depuis la source publiée `63a82024504c6deec63f40f090d03760492609d8` : seuls pins Combat/Exploration et sentinelles de sources, aucun fork des labos ni autre module touché.

@@ -1,6 +1,6 @@
 ## 2026-11-24 — #527 · Transport Capture du raccord sauvage natif
 - START source Capture `8005c99ebd3bf33f58cd833617242b2bda3dbf46`, checkpoint `checkpoint/gensrpg-start-capture-wild-encounter-2026-11-24`, branche `work/capture-wild-encounter-527-20261124`. Publisher GREEN `4f0ff386007ebbb18999fe25e88cd7d1f7e6f26e` (CI et HTTPS 45473989957 / 45474749499).
-- Candidat Exploration #547 fusionné `bdac9bade51cb908fe0e7a5fc8d06ac3f2a8d874`, CI 45484426362 et Pages 45484426128 en cours : aucun repin avant certification. Combat `826c6cddf81e14f485f5afae2e1a9160e3f8b415` et médias inchangés. Périmètre : source pin et sentinelles de provenance, test du contrat récompenses sauvage ; aucun moteur, asset, sauvegarde ni SW dupliqué. Publisher distinct après validation de la source.
+- Candidat Exploration #547 fusionné `bdac9bade51cb908fe0e7a5fc8d06ac3f2a8d874`, CI 45484426362 et Pages 45484426128 SUCCESS, provenance HTTPS vérifiée ; checkpoint Exploration GREEN `checkpoint/exploration-wild-encounter-527-green-2026-11-24`. Combat `826c6cddf81e14f485f5afae2e1a9160e3f8b415` et médias inchangés. Périmètre : source pin et sentinelles de provenance, test du contrat récompenses sauvage ; aucun moteur, asset, sauvegarde ni SW dupliqué. Publisher distinct après validation de la source.
 - Gates : vérifier CI et HTTPS Exploration, tests Capture (Aventure, anciennes sauvegardes et récompenses), Chromium, source immuable, puis publication PWA exacte. #529 reste indépendant.
 
 ## 2026-11-24 — Bestiaire et rencontres de l’univers en mode Jouer

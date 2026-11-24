@@ -247,10 +247,20 @@ test('placed wild result awards canonical species loot once and never records a 
   drops:[{speciesId:'real-wild',itemId:'wild-item',chancePercent:100,minQuantity:1,maxQuantity:1}]
  }}});
  const raw=envelope();raw.snapshot.source='npc-wild';raw.snapshot.context.wildActorId='wild-actor';
- raw.snapshot.opponents=[{creatureId:'real-wild',level:2,npcInstance:{schema:'capture-npc-opponent-instance-v1',displayName:'Sauvage personnalisé',statAllocations:{health:7}}}];
+ raw.snapshot.opponents=[{creatureId:'real-wild',level:3,npcInstance:{schema:'capture-npc-opponent-instance-v1',displayName:'Sauvage personnalisé',statAllocations:{health:7}}}];
  const receipt=commit(fx.store,raw);
- assert.equal(receipt.persisted,true);assert.equal(receipt.award.xp,1300);
+ assert.equal(receipt.persisted,true);assert.equal(receipt.award.xp,1690);
  assert.equal(receipt.award.currency,7);assert.equal(fx.store.load().inventory.items['wild-item'],1);
  assert.equal(fx.store.load().trainerVictories,undefined);
  const writes=fx.writes;assert.equal(commit(fx.store,raw).applied,false);assert.equal(fx.writes,writes);
+});
+
+test('placed wild with invalid instance level never changes the Adventure save',()=>{
+ for(const level of [undefined,0,1.5,-1,10000]){
+  const fx=fixture(),raw=envelope();raw.snapshot.source='npc-wild';raw.snapshot.context.wildActorId='wild-actor';
+  raw.snapshot.opponents=[{creatureId:'real-wild',level}];
+  const before=JSON.stringify(fx.store.load()),writes=fx.writes;
+  assert.throws(()=>commit(fx.store,raw),/placed wild opponent level/);
+  assert.equal(JSON.stringify(fx.store.load()),before);assert.equal(fx.writes,writes);
+ }
 });

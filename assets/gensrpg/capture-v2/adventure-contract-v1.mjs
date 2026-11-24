@@ -792,9 +792,14 @@ export function applyAdventureCombatResultV1({
  if(!enemy)throw new RangeError('Opponent is not a creature in the published bestiaire: '+enemyId);
  if(!progressionCore||typeof progressionCore.levelFromXp!=='function')
   throw new TypeError('Existing Core Progression levelFromXp must be injected');
+ // A placed wild opponent has a validated instance level in the official
+ // EncounterSnapshot. The species card still owns loot and fragment identity.
+ // Preserve the legacy level policy for other encounter sources.
+ const enemyLevel=snapshot.source==='npc-wild'
+  ?integer(snapshot.opponents[0].level,'placed wild opponent level',1,9999):enemy.level;
  const before=state.party.active.level;
  const amount=result.outcome==='victory'
-  ?calculateAdventureXpV1({rules:state.rules,allyLevel:before,enemyLevel:enemy.level}).xp:0;
+  ?calculateAdventureXpV1({rules:state.rules,allyLevel:before,enemyLevel}).xp:0;
  // GenSRPG owns XP; Combat provides official outcome and member HP only.
  // Deterministic splitting preserves every XP point, including remainders.
  const originalMembers=[state.party.active,...(state.party.reserve??[])];

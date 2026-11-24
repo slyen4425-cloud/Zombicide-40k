@@ -912,3 +912,20 @@ test('the same Exploration collision authority ships the three navigation modes 
  assert.match(main,/findPortalEnteredDuringMove\(sculptWorldDraft,sculptWorldAreaId/);
  assert.match(html,/id="object-waypoints-panel"/);
 });
+
+test('published Capture carries the opt-in potion import and actual merchant stock from #635/#636',()=>{
+ const base='assets/gensrpg/capture-v2/';
+ const html=read(trial,base+'adventure.html').toString('utf8');
+ const app=read(trial,base+'adventure-app-v1.mjs').toString('utf8');
+ const editor=read(trial,base+'adventure-economy-editor-v1.mjs').toString('utf8');
+ const economy=read(trial,base+'adventure-economy-v1.mjs').toString('utf8');
+ const shop=read(trial,base+'adventure-merchant-play-v1.mjs').toString('utf8');
+ assert.equal((html.match(/id="adventure-item-import-potions"/g)||[]).length,1);
+ assert.match(app,/\$\('adventure-item-import-potions'\)\.addEventListener\('click'/);
+ assert.match(editor,/itemStocksDraft/);
+ assert.match(economy,/merchant\.itemStocks/);
+ assert.match(shop,/state\.merchantStocks/);
+ const pins=json(trial,base+'source-pins-v1.json');
+ assert.equal(pins.combat.sha,'0543103891b5777fff108cb12a1ae55a519544d9');
+ assert.equal(pins.exploration.sha,'35dbe475e53abcc7ba8f4c5ee3be972390232584');
+});

@@ -331,6 +331,8 @@ const certifiedNov23StairsAuthoringSha='35dbe475e53abcc7ba8f4c5ee3be972390232584
 const certifiedMerchantDialogSha='d55dd4d4f565baefc66bc5ccbde2f10e501f67fe';
 // Exploration #545, CI 45466487382 and HTTPS release 45466487438.
 const certifiedUniversePlaySha='46e2e1e11cfd841232998d452dbf4f235f2b482c';
+// Exploration #547: CI 45484426362, Pages 45484426128 exact HTTPS.
+const certifiedWildEncounterSha='bdac9bade51cb908fe0e7a5fc8d06ac3f2a8d874';
 const waterPassageSouthBlob='19b0c9822048381793cd705f7cfcb2d4cdc207fa';
 const navigationAllowSouthBlob='98c70979a719b2bad48a35df972bb880b6a62f5e';
 const recoveredWorldSouthBlob='6c101756bdf9c58a9ae8cf3fe104e49575145748';
@@ -391,11 +393,11 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
    throw Error('Certified native elevated-ground renderer differs from Exploration main');
  releasedSouthBlob=recoveredWorldSouthBlob;
  southRendererOriginSha=sourcePin.exploration.sha;
-}else if([certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha].includes(sourcePin.exploration.sha)){
+}else if([certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha].includes(sourcePin.exploration.sha)){
  // The canonical owner intentionally hides navigationOnly ramps in play.
  // Certify its EXACT Git blob; preserve all physical passages in Collision
  // World, and NEVER modify/copy the original native renderer in the PWA.
- const waterPassage=sourcePin.exploration.sha===certifiedUniversePlaySha;
+ const waterPassage=[certifiedUniversePlaySha,certifiedWildEncounterSha].includes(sourcePin.exploration.sha);
  const expectedSouthBlob=waterPassage?waterPassageSouthBlob:navigationAllowSouthBlob;
  if(gitBlobSha(pinnedSouthRenderer)!==expectedSouthBlob||
     (waterPassage&&!pinnedSouthRenderer.includes('if(bridge.visibleInPlay)drawSculptWaterSupport(ctx,bridge,rise);'))||

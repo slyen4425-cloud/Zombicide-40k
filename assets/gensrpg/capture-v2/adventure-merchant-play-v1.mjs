@@ -87,7 +87,7 @@ export function installAdventureMerchantPlayV1({
   }
  }
  async function transact(kind,itemId,rawQuantity){
-  if(busy||!dialog.open)return;
+  if(busy||!dialog.open||!openedMerchant)return;
   const quantity=Number(rawQuantity);
   if(!Number.isSafeInteger(quantity)||quantity<1||quantity>9999){
    say('Choisis une quantité entière entre 1 et 9999.',true);return;
@@ -130,10 +130,20 @@ export function installAdventureMerchantPlayV1({
      hasPendingCombat(state.sessionId)||dialog.open)return;
   const merchant=state.rules.economy?.merchants.find(
    item=>item.id===event.data.merchantId);
-  if(!merchant)return; // invalid or removed link never creates a shop.
-  openedMerchant=merchant.id;openedSession=state.sessionId;
-  say('Choisis un objet et sa quantité.');
-  dialog.showModal();render();
+  // An authenticated, active Explorer may reference a removed shop. Keep
+  // the existing dialog/ack/close lifecycle, but never create a fake shop
+  // or make a transaction possible when the canonical reference is missing.
+  openedMerchant=merchant?.id??null;openedSession=state.sessionId;
+  if(merchant){
+   say('Choisis un objet et sa quantité.');
+   dialog.showModal();render();
+  }else{
+   title.textContent='Marchand indisponible';
+   balance.textContent='';
+   rows.replaceChildren();
+   say('Boutique introuvable dans les règles de cette partie. Dans l’éditeur PNJ, associe une boutique existante, enregistre la liaison et les paramètres de la partie.',true);
+   dialog.showModal();
+  }
   frame.contentWindow?.postMessage({
    schema:'gensrpg.capture.v2.npc.merchant.open-ack.v1',
    sessionId:openedSession

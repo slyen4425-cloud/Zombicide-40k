@@ -262,6 +262,20 @@ test('real smartphone merchant: proximity iframe opens only canonical shop and b
   await page.waitForFunction(()=>
    document.getElementById('native-explorer').contentWindow.shopWasClosed===true);
   assert.equal(await page.locator('#adventure-merchant-dialog').evaluate(e=>e.open),false);
+  // A real message from the scoped iframe with a removed merchant reference
+  // must show an actionable error in the existing dialog, not invent a shop.
+  const beforeMissing=await page.evaluate(()=>JSON.stringify(window.__merchantSession));
+  await page.evaluate(()=>document.getElementById('native-explorer')
+   .contentWindow.openNativeShop('merchant-removed'));
+  await page.locator('#adventure-merchant-dialog[open]').waitFor({timeout:5000});
+  assert.match(await page.locator('#adventure-merchant-message').innerText(),
+   /boutique.*introuvable.*partie/i);
+  assert.equal(await page.locator('#adventure-merchant-trades button').count(),0);
+  assert.equal(await page.evaluate(()=>JSON.stringify(window.__merchantSession)),beforeMissing);
+  await page.evaluate(()=>{document.getElementById('native-explorer').contentWindow.shopWasClosed=false;});
+  await page.locator('#adventure-merchant-close').click();
+  await page.waitForFunction(()=>
+   document.getElementById('native-explorer').contentWindow.shopWasClosed===true);
   // Same real Exploration NPC message, this time for the new percentage model.
   await page.evaluate(()=>document.getElementById('native-explorer')
    .contentWindow.openNativeShop('merchant-simple'));

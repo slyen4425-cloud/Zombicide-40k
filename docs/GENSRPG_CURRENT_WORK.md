@@ -1,3 +1,6 @@
+## 2026-11-24 — Publication des patrouilles, passerelles et caractéristiques du Bestiaire
+Départ de publication `860a024caac12ecdf22457a1bcbb231917448bf4`, checkpoint `checkpoint/gensrpg-start-universe-patrol-publisher-20261124`. La source Capture intégrée par #644 est `8005c99ebd3bf33f58cd833617242b2bda3dbf46`. Combat vient de `826c6cddf81e14f485f5afae2e1a9160e3f8b415` (CI 45442392649) et Exploration de `46e2e1e11cfd841232998d452dbf4f235f2b482c` (CI 45466487382). Le contrôle du rendu exige le fichier exact du moteur qui dessine les passerelles. Le contrôle de l’assemblage vérifie la patrouille, le passage sur l’eau et la transmission de l’univers au combat natif.
+
 ## 2026-11-24 — #629 · Publication du dialogue marchand
 Départ `95e7e05629fef5ca9f4f4319b08cc144c330eb21`, checkpoint `checkpoint/gensrpg-start-merchant-dialog-publisher-20261124`. La PR source #640, intégrée à `5493119441169bfb3f29badd68cb2b328a3019b4`, réunit Capture #639 et Exploration #541. Les quatre contrôles du candidat ont réussi, dont `45424588856`. Vérifier les deux messages dans le site assemblé, le budget et la provenance HTTPS du publisher après fusion. Les stocks, potions et portails gardent leurs chemins actuels.
 

@@ -49,7 +49,13 @@ export function releasePreviewPwaForCommit(sourceWorker,sourceHtml,releaseSha){
   const existingWorker=lifecycleWorker.replaceAll(rawWrite,safeWrite);
   if(existingWorker.split(oldMessage).length!==2)
     throw Error('Preview worker activation message contract changed');
-  const worker=existingWorker;
+  // The shell checks for an update at launch. Keeping a navigation event in
+  // the retiring worker alive until its own registration.update() settles
+  // can leave an installed replacement waiting behind that navigation.
+  const navigationUpdate='event.waitUntil(self.registration.update().catch(()=>{}));';
+  if(existingWorker.split(navigationUpdate).length!==2)
+    throw Error('Unknown preview navigation update owner');
+  const worker=existingWorker.replace(navigationUpdate,'');
   // The already-existing update checker compares these two source markers.
   // Stamp both in the published preview HTML, not in the immutable source.
   const html=stampShellForCommit(sourceHtml,releaseSha);

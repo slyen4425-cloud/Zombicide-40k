@@ -10,10 +10,10 @@ test('Capture V2 links only certified Exploration main for auto portals and cano
   sha:pin.exploration.sha,certifiedCiRun:pin.exploration.certifiedCiRun
  },{
   repository:'slyen4425-cloud/laboratoire_dynamique_exploration-',
-  ref:'main',sha:'1ef71e18d2244e96a752f0266f1ed6b429a76c3a',
-  certifiedCiRun:45435313260
+  ref:'main',sha:'46e2e1e11cfd841232998d452dbf4f235f2b482c',
+  certifiedCiRun:45466487382
  });
  assert.equal(pin.legacyCaptureRuntime,false);
- assert.equal(pin.combat.sha,'0543103891b5777fff108cb12a1ae55a519544d9',
+ assert.equal(pin.combat.sha,'826c6cddf81e14f485f5afae2e1a9160e3f8b415',
   'Vipfer and other approved Combat changes must be retained');
 });

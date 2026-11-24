@@ -1,3 +1,8 @@
+## 2026-11-24 — Bestiaire et rencontres de l’univers en mode Jouer
+Départ Capture `d0b717986273e21f412c3e94edd322e8dff50291`, checkpoint `checkpoint/capture-start-universe-play-385-20261124`. La fiche Collection, le choix du compagnon, la navigation et le combat lisent le même univers. Exploration reprend la position d’une ancienne sauvegarde après vérification de la session, du monde et de son empreinte.
+
+Combat #389 fournit les caractéristiques et les transferts de l’univers sur `826c6cddf81e14f485f5afae2e1a9160e3f8b415` (CI 45442392649, Pages 45442392578). Exploration #544 et #545 fournissent le tracé des patrouilles et les rencontres sur `46e2e1e11cfd841232998d452dbf4f235f2b482c` (CI 45466487382, Pages 45466487438). Les tests Chromium couvrent le Sélachombre à 195 PV en partie et l’univers à une espèce depuis Tester. La passerelle entre deux berges vient de la source déjà intégrée par #643.
+
 ## 2026-11-24 — #530 · Passerelle tracée entre deux berges
 Capture part de 5493119441169bfb3f29badd68cb2b328a3019b4. Exploration #542 et #543 sont publiées sur main à 1ef71e18d2244e96a752f0266f1ed6b429a76c3a (CI 45435313260, preuve HTTPS 45435313230). Raccord du moteur certifié. Les cartes, la collision et le pinceau restent la propriété d’Exploration.
 

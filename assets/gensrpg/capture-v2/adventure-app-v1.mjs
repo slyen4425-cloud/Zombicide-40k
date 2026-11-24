@@ -18,7 +18,7 @@ import {readWorldAssemblerDraft} from '../../../vendor/exploration-lab/src/build
 import {serializeWorldBuilderDraft,importWorldBuilderDocument}
  from '../../../vendor/exploration-lab/src/builder/world-builder-draft.js';
 import {
- createNewExplorationPlay,readExplorationPlay,playWorldFingerprint
+ adoptLegacyUniversePlayCheckpointV1,createNewExplorationPlay,readExplorationPlay,playWorldFingerprint
 } from '../../../vendor/exploration-lab/src/play/exploration-play-session.js';
 import {readCombatHandoff} from '../../../vendor/exploration-lab/src/encounters/combat-handoff-store.js';
 import {connectAdventureCombatHostV1} from './adventure-combat-host-v1.mjs';
@@ -417,23 +417,20 @@ async function fetchPublishedBestiary(){
  if(selectedUniverseId!==null){
   // Native Combat database, not the global Monster InvoC showcase. Shared
   // global assets are references only; creature/skill/rules lists are private.
-  const [{createCaptureUniverseDatabaseStoreV1},assets,delivery]=await Promise.all([
-   import('../../../vendor/combat-lab/src/contracts/capture-universe-database-store-v1.js'),
+  const [{readCaptureUniverseEncounterSourceV1},assets,delivery]=await Promise.all([
+   import('../../../vendor/combat-lab/src/adapters/input/capture/capture-universe-encounter-source-v1.js'),
    fetchOfficialAdventureJsonV1('../../../vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json',import.meta.url,crypto.randomUUID(),fetch),
    fetchOfficialAdventureJsonV1('./delivery-manifest.json',import.meta.url,crypto.randomUUID(),fetch)
   ]);
-  const snapshot=createCaptureUniverseDatabaseStoreV1({storage:window.localStorage})
-   .load(selectedUniverseId);
-  if(!snapshot)throw new Error('Catalogue de cet univers absent du Labo Combat officiel');
-  const database=snapshot.database;
-  const creatureTransfers=database.creatures;
+  const {creatureTransfers,skillTransfers,statRegistry}=readCaptureUniverseEncounterSourceV1({
+   storage:window.localStorage,universeId:selectedUniverseId
+  });
   return Object.freeze({
    cards:publishedAdventureSpeciesV1(captureBestiaryCardsV1({
-    creatureTransfers,skillTransfers:database.skills.map(draft=>({draft})),
-    assetCatalog:assets,statRegistry:database.statRegistry,nativeSkills:[]
+    creatureTransfers,skillTransfers,assetCatalog:assets,statRegistry,nativeSkills:[]
    })),
    combatSha:delivery.combat.sha,
-   statRegistry:database.statRegistry,creatureTransfers
+   statRegistry,creatureTransfers
   });
  }
  // The preview is an installed PWA: its previous worker may still serve JSON
@@ -1705,7 +1702,7 @@ function renderPlayingSheet(){
  const portraitUrl=publishedCapturePortraitUrlV1({card,moduleUrl:import.meta.url});
  renderAdventureSheetViewV1({
   host:$('adventure-sheet-content'),snapshot,tab:currentSheetTab,
-  portraitUrl,heroVisual:currentHeroVisual,collection,
+  portraitUrl,heroVisual:currentHeroVisual,collection,universeId:selectedUniverseId,
   resolveSpeciesPortrait:card=>publishedCapturePortraitUrlV1({card,moduleUrl:import.meta.url}),
   onOpenOwnedCreature:instanceId=>{
    currentSheetCreatureId=instanceId;currentSheetTab='stats';renderPlayingSheet();
@@ -2378,8 +2375,10 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  if(selectedWorldId&&beforeWorldSession?.world?.mapRef===null){
   store.save(withSelectedAdventureWorldV1(beforeWorldSession,selectedWorldId));
  }
+ if(selectedUniverseId!==null&&beforeWorldSession)
+  adoptLegacyUniversePlayCheckpointV1(universeWorldStorage,window.localStorage,world,beforeWorldSession.sessionId);
  const result=startAdventureExplorationV1({
-  store,storage:window.localStorage,world,
+  store,storage:universeWorldStorage,world,
   navigation:{createNewExplorationPlay,readExplorationPlay},
   now:new Date().toISOString()
  });
@@ -2422,6 +2421,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  };
  refreshParty(result.session);
  const url=new URL('../../../vendor/exploration-lab/sculpt-lab.html',import.meta.url);
+ if(selectedUniverseId!==null)url.searchParams.set('universe',selectedUniverseId);
  const sessionId=result.session.sessionId;
  url.searchParams.set('play','1');
  // Explorer reuses its native loading masks; only one artwork URI on this

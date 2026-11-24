@@ -237,3 +237,20 @@ test('reject a different owned instance even when its species matches',()=>{
  assert.equal(fx.store.load().party.active.xp,0);
  assert.deepEqual(fx.store.load().processedEncounterKeys,[]);
 });
+
+// Placed wild actors are ordinary wild encounters for the ONE Adventure
+// result transaction, not trainer victories or a second reward ledger.
+test('placed wild result awards canonical species loot once and never records a trainer victory',()=>{
+ const fx=fixture(),before=fx.store.load();
+ fx.store.save({...before,rules:{...before.rules,loot:{...before.rules.loot,
+  currencyPerVictory:7,items:[{id:'wild-item',name:'Objet sauvage',saleValue:5}],
+  drops:[{speciesId:'real-wild',itemId:'wild-item',chancePercent:100,minQuantity:1,maxQuantity:1}]
+ }}});
+ const raw=envelope();raw.snapshot.source='npc-wild';raw.snapshot.context.wildActorId='wild-actor';
+ raw.snapshot.opponents=[{creatureId:'real-wild',level:2,npcInstance:{schema:'capture-npc-opponent-instance-v1',displayName:'Sauvage personnalisé',statAllocations:{health:7}}}];
+ const receipt=commit(fx.store,raw);
+ assert.equal(receipt.persisted,true);assert.equal(receipt.award.xp,1300);
+ assert.equal(receipt.award.currency,7);assert.equal(fx.store.load().inventory.items['wild-item'],1);
+ assert.equal(fx.store.load().trainerVictories,undefined);
+ const writes=fx.writes;assert.equal(commit(fx.store,raw).applied,false);assert.equal(fx.writes,writes);
+});

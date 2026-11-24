@@ -10,8 +10,8 @@ test('Capture V2 links only certified Exploration main for auto portals and cano
   sha:pin.exploration.sha,certifiedCiRun:pin.exploration.certifiedCiRun
  },{
   repository:'slyen4425-cloud/laboratoire_dynamique_exploration-',
-  ref:'main',sha:'46e2e1e11cfd841232998d452dbf4f235f2b482c',
-  certifiedCiRun:45466487382
+  ref:'main',sha:'bdac9bade51cb908fe0e7a5fc8d06ac3f2a8d874',
+  certifiedCiRun:45484426362
  });
  assert.equal(pin.legacyCaptureRuntime,false);
  assert.equal(pin.combat.sha,'826c6cddf81e14f485f5afae2e1a9160e3f8b415',

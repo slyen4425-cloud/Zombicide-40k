@@ -94,7 +94,7 @@ function statGrid(stats,{availablePoints=null,onAllocate=null}={}){
  return area;
 }
 export function renderAdventureSheetViewV1({
- host,snapshot,tab,portraitUrl=null,heroVisual=null,collection=null,
+ host,snapshot,tab,portraitUrl=null,heroVisual=null,collection=null,universeId=null,
  resolveSpeciesPortrait=null,onOpenOwnedCreature=null,onAllocate=null,
  onSelectCreature=null,onMoveCreature=null,onMakeActive=null,
  onSummonFragment=null,onUseFragmentXp=null,onUseItem=null,
@@ -305,6 +305,7 @@ export function renderAdventureSheetViewV1({
     // descriptions, stats and media. No second bestiary renderer or stat math.
     const page=new URL('../../../vendor/combat-lab/examples/dom-demo/bestiary.html',import.meta.url);
     page.searchParams.set('embedded','1');
+    if(universeId!==null)page.searchParams.set('universe',universeId);
     page.hash=encodeURIComponent(entry.speciesId);
     const official=node('iframe','sheet-bestiary-embed');
     official.title='Fiche officielle du Bestiaire : '+entry.name;

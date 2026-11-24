@@ -29,12 +29,14 @@ test('Capture opens an actual universe picker before any native game/editor, the
  vm.runInNewContext(source('assets/gensrpg/capture-v2/shell-entry-v1.js'),
   {window:root,globalThis:root,URL,Error,RangeError,Object,Promise});
  assert.equal(root.GensCaptureV2.start(),true);
- const host=doc.body.children[0],nav=host.children[1],stage=host.children[5];
+ const host=doc.body.children[0];
+ const nav=host.children.find(el=>el.className==='gensCaptureV2MainMenu');
+ const stage=host.children.find(el=>el.className==='gensCaptureV2Stage');
  assert.equal(host.dataset.menu,'universes');
  assert.equal(stage.children.length,0);
  for(let n=0;n<8;n++)await Promise.resolve();
  assert.equal(typeof select,'function','the real universe owner must mount asynchronously');
- assert.deepEqual(nav.children.map(b=>b.textContent),['Jouer','Éditeurs','Changer d’univers']);
+ assert.deepEqual(nav.children.map(b=>b.textContent),['Jouer','Éditeurs','Créateur','Changer d’univers']);
  assert.equal(root.GensCaptureV2.open('builder'),false,'no editor without selected universe');
  select({legacy:true,id:'monster-invoc',name:'Monster InvoC'});
  assert.equal(host.dataset.menu,'main');
@@ -42,7 +44,7 @@ test('Capture opens an actual universe picker before any native game/editor, the
  assert.match(stage.children[0].src,/\/assets\/gensrpg\/capture-v2\/adventure\.html$/);
  root.GensCaptureV2.home();
  nav.children[1].click();assert.equal(host.dataset.menu,'editors');
- const panel=host.children[2];
+ const panel=host.children.find(el=>el.className==='gensCaptureV2Editors');
  const world=panel.children.find(x=>x.tag==='section').children.find(x=>x.tag==='ul').children[0].children[0];
  world.click();
  assert.match(stage.children[0].src,/vendor\/exploration-lab\/world-assembler\.html$/);

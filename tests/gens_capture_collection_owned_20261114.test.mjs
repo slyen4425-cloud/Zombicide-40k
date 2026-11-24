@@ -111,12 +111,19 @@ test('owned Collection opens full official Bestiary page with skills, explanatio
   const bestiaryPage=new URL(detail.src);
   assert.ok(bestiaryPage.pathname.endsWith('/vendor/combat-lab/examples/dom-demo/bestiary.html'));
   assert.equal(bestiaryPage.searchParams.get('embedded'),'1');
+  assert.equal(bestiaryPage.searchParams.get('universe'),null);
   assert.equal(decodeURIComponent(bestiaryPage.hash.slice(1)),'r');
   assert.doesNotMatch(textContent(page),/Compétence secrète/);
   const back=walk(page,e=>e.className==='sheet-collection-back')[0];
   back.events.click();
   assert.equal(grid.hidden,false);
   assert.equal(page.hidden,true);
+  const universeId='unv_15d355c1-f2b6-4dd5-8521-a1b59bd2d3eb';
+  renderAdventureSheetViewV1({host,snapshot:{},tab:'collection',collection:chosen,universeId});
+  walk(host,e=>e.dataset.collectionOwned==='true')[0].events.click();
+  const projectPage=new URL(walk(host,e=>e.dataset.collectionBestiarySpecies==='r')[0].src);
+  assert.equal(projectPage.searchParams.get('universe'),universeId);
+  assert.equal(projectPage.hash,'#r');
  }finally{
   if(previousDocument===undefined)delete globalThis.document;
   else globalThis.document=previousDocument;

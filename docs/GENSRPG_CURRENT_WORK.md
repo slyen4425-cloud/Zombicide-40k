@@ -1,3 +1,6 @@
+## 2026-11-24 — #629 · Raccorder les deux corrections du marchand
+Départ Capture `929fb31ab044f5bb52356124cf28b8d015f7d1e6`, checkpoint `checkpoint/gensrpg-start-capture-merchant-exploration-pin-20261124`. Cette source contient déjà les stocks, l’import des potions et le dialogue de Capture. Le seul changement de configuration raccorde Exploration #541, CI `45422631920`, publication HTTPS `45422631766`. Les règles, le sac, les autres moteurs et les médias gardent leurs propriétaires. Vérifier le manifeste source, la CI et le raccord physique dans la PR de publication.
+
 ## 2026-11-22 — Multijoueur #584 : préparation PWA après Labos Capture/Exploration GREEN
 - Source Capture canonical `work/capture-v2-audit567-source-20261121@4070006b068285f734624309208e64e7f2550976` inclut #585 (vrai invité / identité / 2 clients), #615 (lien d'invitation) ; aucun autre runtime, média ou sauvegarde transféré.
 - Exploration `main@77bebb83ff176f49edff7ae49c03ba48c28202ca` inclut #522 (séparation visuelle des héros au même Spawn, offset uniquement sur pixels) et CI exacte `#45043998646` GREEN. Combat `main@34c17c15f4ca8b457a94e49fa2f3fcfb8ca93ca0` reste inchangé avec CI `#45016265619` GREEN.

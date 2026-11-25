@@ -421,8 +421,64 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
    'link survives reload, without creating a second shop');
   assert.equal(await merchant.getByRole('spinbutton',{name:'Stock du Potion de soins (vide : illimité)',exact:true}).inputValue(),'3');
   assert.equal(await merchant.getByRole('spinbutton',{name:'Stock du Potion de réanimation (vide : illimité)',exact:true}).inputValue(),'3');
-  // Place the exact authored definition (not copied NPC data) in a real
-  // WorldDocument; launch the native Adventure using its normal UI.
+  // Seed only a blank map; placement/removal/replacement and saving must
+  // pass through the actual World Builder, not injected actor records.
+  await npc.locator('body').evaluate(async()=>{
+   const {createBlankWorldBuilderDraft}=await import('./src/builder/world-builder-draft.js');
+   const {saveWorldAssemblerDraft}=await import('./src/builder/world-assembler-handoff.js');
+   saveWorldAssemblerDraft(localStorage,createBlankWorldBuilderDraft({
+    id:'merchant-ci-world',width:36*28,height:24*21
+   }));
+  });
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="world"]').tap();
+  const builder=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
+  await builder.locator('#world-workspace-map').tap();
+  await builder.locator('#sculpt-canvas').waitFor({state:'visible',timeout:45000});
+  const nativeFrame=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
+  await page.waitForFunction(id=>document.querySelector('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]')
+   ?.contentWindow?.__sculptActorsProbe?.()?.definitions?.includes(id),npcId,{timeout:45000});
+  await builder.locator('#mode-objects').tap();
+  await builder.locator('#actor-open').tap();
+  const chooseNpc=async()=>{
+   await builder.locator('#actor-npc-library-open').tap();
+   await builder.locator('#actor-npc-gallery button').filter({hasText:'Marchand intégré témoin'}).tap();
+  };
+  const canvas=builder.locator('#sculpt-canvas');
+  const place=async()=>{
+   await canvas.scrollIntoViewIfNeeded();
+   const position=await canvas.evaluate(el=>{
+    const p=window.__sculptLabProbe(),rect=el.getBoundingClientRect();
+    for(const [cx,cy] of [[18,12],[17,12],[18,11],[17,11]]){
+     const x=rect.left+p.cameraPan.x+(cx+.5)*28*p.zoom;
+     const y=rect.top+p.cameraPan.y+(cy+.5)*21*p.zoom;
+     if(document.elementFromPoint(x,y)===el)return {x:x-rect.left,y:y-rect.top};
+    }
+    throw Error('No reachable World Builder cell near the start');
+   });
+   await canvas.tap({position});
+  };
+  const count=()=>nativeFrame.evaluate(el=>el.contentWindow.__sculptActorsProbe().count);
+  await chooseNpc();
+  await place();
+  assert.equal(await count(),1);
+  await builder.locator('#actor-action').selectOption('remove');
+  await place();
+  assert.equal(await count(),0);
+  await chooseNpc();
+  await place();
+  assert.equal(await count(),1);
+  await builder.locator('#world-workspace-world').tap();
+  await builder.locator('#world-workspace-map').waitFor({state:'visible',timeout:45000});
+  const placed=await builder.locator('body').evaluate(async()=>{
+   const {readWorldAssemblerDraft}=await import('./src/builder/world-assembler-handoff.js');
+   const world=readWorldAssemblerDraft(localStorage);
+   return world.areas.find(a=>a.id===world.initialAreaId).actors;
+  });
+  assert.equal(placed.length,1);
+  assert.equal(placed[0].actorDefinitionId,npcId);
+  assert.equal(placed[0].npc,undefined,'placed actor must not duplicate the canonical NPC definition');
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
   const adventure=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
@@ -435,24 +491,11 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   await adventure.locator('#adventure-player-alias').fill('Marchand témoin');
   await adventure.locator('#adventure-create').tap();
   const fixture=await adventure.locator('#adventure-play').evaluate(async(_,ids)=>{
-   const [{createBlankWorldBuilderDraft},{saveWorldAssemblerDraft},{normalizeWorldActorPlacement},
-    {createUserNpcStoreV1},{createAdventureStoreV1},{createAdventurePortfolioStoreV1},
+   const [{createAdventureStoreV1},{createAdventurePortfolioStoreV1},
     {adventureMerchantPriceV1}]=await Promise.all([
-     import('../../../vendor/exploration-lab/src/builder/world-builder-draft.js'),
-     import('../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js'),
-     import('../../../vendor/exploration-lab/src/actors/world-actor-placement-model.js'),
-     import('../../../vendor/exploration-lab/src/storage/user-npc-store-v1.js'),
      import('./adventure-contract-v1.mjs'),import('./adventure-portfolio-store-v1.mjs'),
      import('./adventure-economy-v1.mjs')
    ]);
-   const npc=await createUserNpcStoreV1().get(ids.npcId);
-   if(!npc)throw Error('PNJ enregistré introuvable');
-   const world=createBlankWorldBuilderDraft({id:'merchant-ci-world',width:36*28,height:24*21});
-   const area=world.areas.find(a=>a.id===world.initialAreaId);
-   const spawn=area.spawns.find(s=>s.id===world.initialSpawnId);
-   area.actors.push(normalizeWorldActorPlacement({id:'merchant-placement-'+crypto.randomUUID(),
-    actorDefinitionId:ids.npcId,x:spawn.x+20,y:spawn.y,facingX:1}));
-   saveWorldAssemblerDraft(localStorage,world);
    const options={storage:localStorage,coreStorage:window.GensStorageV1};
    const portfolio=createAdventurePortfolioStoreV1({...options,legacyStore:createAdventureStoreV1(options)});
    const session=portfolio.load();

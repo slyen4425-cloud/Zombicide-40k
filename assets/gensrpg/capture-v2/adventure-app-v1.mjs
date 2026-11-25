@@ -25,7 +25,7 @@ import {connectAdventureCombatHostV1} from './adventure-combat-host-v1.mjs';
 import {readScopedAdventureCombatVisibilityV1,readScopedAdventureZoneLoadingV1} from './adventure-combat-visibility-v1.mjs';
 import {projectAdventureCombatAwardV1} from './adventure-result-presentation-v1.mjs';
 import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
-import {createAdventureRulesDraftStoreV1} from './adventure-rules-draft-v1.mjs';
+import {createAdventureRulesDraftStoreV1,projectAdventureMerchantDraftV1} from './adventure-rules-draft-v1.mjs';
 import {adventurePlaySheetSnapshotV1} from './adventure-play-sheet-v1.mjs';
 import {adventureOwnedCollectionV1} from './adventure-collection-v1.mjs';
 import {publishedCapturePortraitUrlV1} from './adventure-sheet-visual-v1.mjs';
@@ -1988,18 +1988,28 @@ economyEditor=installAdventureEconomyEditorV1({
      !/^[0-9a-f-]{36}$/i.test(embeddedMerchantNonce??'')||
      !/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(embeddedNpcId??''))
    throw Error('Liaison PNJ non autorisée : références invalides.');
+  const selected=store.load();
+  const nextDraft=selected?projectAdventureMerchantDraftV1({
+   draftRules:draftStore.load()??SHOWCASE_ADVENTURE_RULES_V1,
+   sourceRules:rules,merchantId
+  }):null;
   saveCurrentAdventureRules();
+  // Saving the selected adventure alone loses this world author's shop when
+  // Nouvelle partie reads its independent rules draft.
+  if(nextDraft)draftStore.save(nextDraft);
   const persisted=(store.load()?.rules??draftStore.load())?.economy?.merchants.find(m=>m.id===merchantId);
   const expected=rules.economy?.merchants.find(m=>m.id===merchantId);
-  if(!persisted||JSON.stringify(persisted)!==JSON.stringify(expected))
-   throw Error('Articles ou stocks non enregistrés : réessaie.');
+  const future=draftStore.load()?.economy?.merchants.find(m=>m.id===merchantId);
+  if(!persisted||JSON.stringify(persisted)!==JSON.stringify(expected)||
+     !future||JSON.stringify(future)!==JSON.stringify(expected))
+   throw Error('Articles ou stocks non enregistrés dans les réglages attendus : réessaie.');
   window.parent.postMessage({
    schema:'gensrpg.capture.v2.npc.merchant.saved.v1',
    npcId:embeddedNpcId,merchantId,
    nonce:embeddedMerchantNonce
   },window.location.origin);
   economyEditor.focusMerchant(merchantId);
-  stateMessage('Articles, stocks et tarifs enregistrés '+(store.load()?'dans la partie sélectionnée.':'pour la prochaine nouvelle partie.'));
+  stateMessage('Articles, stocks et tarifs enregistrés '+(selected?'dans la partie sélectionnée et pour les nouvelles parties.':'pour la prochaine nouvelle partie.'));
  },
  commitEconomy:economy=>{
   const currency={singular:$('adventure-money-singular').value.trim(),

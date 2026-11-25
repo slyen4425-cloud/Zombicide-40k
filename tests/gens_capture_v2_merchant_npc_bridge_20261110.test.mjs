@@ -84,7 +84,9 @@ test('in-game shop listens only to its active Explorer iframe and uses canonical
  assert.match(shop,/gensrpg.capture.v2.adventure-combat:/);
  assert.match(shop,/tradeAdventureMerchantV1/);
  assert.match(shop,/save\(result.session\)/);
- assert.match(shop,/hasPendingCombat\(openedSession\)/);
+ assert.match(shop,/hasPendingCombat\(transactionSession\)/);
+ assert.match(shop,/openEpoch===epoch/);
+ assert.match(shop,/merchantId:transactionMerchant/);
  assert.match(app,/installAdventureMerchantPlayV1/);
  assert.doesNotMatch(shop,/localStorage|sessionStorage/);
 });

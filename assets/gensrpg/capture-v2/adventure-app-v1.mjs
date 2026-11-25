@@ -25,7 +25,7 @@ import {connectAdventureCombatHostV1} from './adventure-combat-host-v1.mjs';
 import {readScopedAdventureCombatVisibilityV1,readScopedAdventureZoneLoadingV1} from './adventure-combat-visibility-v1.mjs';
 import {projectAdventureCombatAwardV1} from './adventure-result-presentation-v1.mjs';
 import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
-import {createAdventureRulesDraftStoreV1,projectAdventureMerchantDraftV1} from './adventure-rules-draft-v1.mjs';
+import {createAdventureRulesDraftStoreV1,projectAdventureMerchantDraftV1,reconcileAuthoredMerchantForSessionV1} from './adventure-rules-draft-v1.mjs';
 import {adventurePlaySheetSnapshotV1} from './adventure-play-sheet-v1.mjs';
 import {adventureOwnedCollectionV1} from './adventure-collection-v1.mjs';
 import {publishedCapturePortraitUrlV1} from './adventure-sheet-visual-v1.mjs';
@@ -1979,6 +1979,26 @@ const merchantPlay=installAdventureMerchantPlayV1({
  sessionId:()=>isMerchantPreview?merchantPreviewSession?.sessionId:activePlayingSheet?.sessionId,
  bestiaryCards:()=>published,
  hasPendingCombat:id=>!isMerchantPreview&&Boolean(readCombatHandoff(window.localStorage,{sessionId:id})),
+ repairMissingMerchant:async ({sessionId,merchantId})=>{
+  // Existing games retain a rules snapshot. A shop added later in the
+  // SAME universe's authoring draft must be adopted on the actual click,
+  // without losing any previous stock, wallet, combat or other rules.
+  if(activeCaptureRoom||isMerchantPreview||!window.navigator.locks?.request)return null;
+  let restored=null;
+  await window.navigator.locks.request('gensrpg.capture.v2.adventure-combat:'+sessionId,async()=>{
+   const current=store?.load();
+   if(!current||current.sessionId!==sessionId||current.status!=='playing'||
+      readCombatHandoff(window.localStorage,{sessionId}))return;
+   const authored=draftStore?.load();
+   if(!authored)return;
+   const next=reconcileAuthoredMerchantForSessionV1({
+    session:current,draftRules:authored,merchantId
+   });
+   if(next!==current)store.save({...next,updatedAt:new Date().toISOString()});
+   restored=store.load();
+  });
+  return restored;
+ },
  afterSave:()=>{if(!isMerchantPreview){showSave();renderPlayingSheet();}},
  onPreviewClose:()=>{
   merchantPreviewSession=null;

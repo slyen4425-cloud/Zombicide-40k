@@ -421,6 +421,32 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
    'link survives reload, without creating a second shop');
   assert.equal(await merchant.getByRole('spinbutton',{name:'Stock du Potion de soins (vide : illimité)',exact:true}).inputValue(),'3');
   assert.equal(await merchant.getByRole('spinbutton',{name:'Stock du Potion de réanimation (vide : illimité)',exact:true}).inputValue(),'3');
+  // Verify the exact Capture-owned modal used by the editor test bridge.
+  // Read existing authored rules, buy with test funds, close, and prove that
+  // neither the old save nor the future-game draft was mutated.
+  const snapshot=()=>page.evaluate(()=>Object.fromEntries(Object.keys(localStorage)
+   .filter(k=>k.includes('gensrpg.capture.v2.adventure')).sort()
+   .map(k=>[k,localStorage.getItem(k)])));
+  const beforeTest=await snapshot();
+  await page.evaluate(id=>{
+   const testFrame=document.createElement('iframe');
+   testFrame.id='merchant-test-fixture';
+   testFrame.style='position:fixed;inset:0;width:100vw;height:100dvh;z-index:99999;background:white';
+   const url=new URL('assets/gensrpg/capture-v2/adventure.html',document.baseURI);
+   url.searchParams.set('merchantTest',id);
+   url.searchParams.set('merchantTestNonce',crypto.randomUUID());
+   testFrame.src=url.href;document.body.append(testFrame);
+  },merchantId);
+  const preview=page.frameLocator('#merchant-test-fixture');
+  await preview.locator('#adventure-merchant-dialog[open]').waitFor({timeout:60000});
+  assert.match(await preview.locator('#adventure-merchant-balance').innerText(),/TEST.*fictif/);
+  assert.match(await preview.locator('#adventure-merchant-trades').innerText(),/Potion de soins.*stock 3/);
+  await preview.getByRole('button',{name:'Acheter',exact:true}).first().tap();
+  await preview.locator('#adventure-merchant-trades').filter({hasText:/Potion de soins.*stock 2/}).waitFor();
+  assert.deepEqual(await snapshot(),beforeTest,'simulation must not write any Adventure persistence');
+  await preview.locator('#adventure-merchant-close').tap();
+  await page.locator('#merchant-test-fixture').evaluate(frame=>frame.remove());
+  assert.deepEqual(await snapshot(),beforeTest);
   // Seed only a blank map; placement/removal/replacement and saving must
   // pass through the actual World Builder, not injected actor records.
   await npc.locator('body').evaluate(async()=>{

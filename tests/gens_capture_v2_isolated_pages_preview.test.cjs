@@ -341,8 +341,8 @@ const certifiedDirectMerchantSha='afdd45a4ab4065c0921b160a38a948ca3663e62f'; // 
 const certifiedFinalMerchantSha='55aac7cef63134e6f92355bf530c8967d08d0d10'; // #553: CI 45586658460, Pages 45586658600, identical renderer blob.
 const certifiedLightingSha='18acbbf28e82973e3d0cf3935fe3a56cf47c159b'; // certified #555 renderer 82e230a2095bceecfdc7e566d3bddaf63f3c2dbc
 const certifiedDoorPromptSha='1333b74a5306bb07473f3c1f58be18804b9a5a75'; // #557 certified CSS-only transition visual, native south renderer Git blob unchanged.
-const certifiedDecorAssetsSha='da445a85caa11d3d0503a3fc1227cad4e6b11471';
- const certifiedWildVictorySha='afb8d878f4c0b60c61aef4bf59306d518481efe6'; // #559 CI/Pages required; renderer is byte identical to #558 // #558 CI 45680415618 and Pages 45680415517 GREEN; same renderer blob.
+const certifiedDecorAssetsSha='da445a85caa11d3d0503a3fc1227cad4e6b11471'; // #558 CI 45680415618 + Pages 45680415517 GREEN.
+ const certifiedWildVictorySha='afb8d878f4c0b60c61aef4bf59306d518481efe6'; // #559 main CI 45703174726 + Pages 45703174709 GREEN; same renderer blob.
 const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #554: CI 45624477145, Pages 45624477116 and 45640176867 SUCCESS, identical renderer blob.
  // The stair fix changes navigation and sprite presentation only. Its
  // canonical south terrain renderer remains byte-identical to recoveredWorld.

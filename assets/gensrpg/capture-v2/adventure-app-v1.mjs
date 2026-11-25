@@ -1983,7 +1983,7 @@ economyEditor=installAdventureEconomyEditorV1({
    stateMessage('Marchand configuré. Enregistre les paramètres de l’aventure.');
    return;
   }
-  if(merchantId!==embeddedMerchantScope.id||! /^[a-z0-9][a-z0-9_:.-]{0,119}$/i.test(merchantId)||
+  if(merchantId!==embeddedMerchantScope.id||!/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(merchantId)||
      !/^[0-9a-f-]{36}$/i.test(embeddedMerchantNonce??'')||
      !/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(embeddedNpcId??''))
    throw Error('Liaison PNJ non autorisée : références invalides.');

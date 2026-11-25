@@ -141,7 +141,8 @@ test('direct PNJ editor: first save and repeat save upsert the exact same mercha
  let state=rules,commits=[],errors=[];
  $('adventure-money-singular').value='pièce';$('adventure-money-plural').value='pièces';
  $('adventure-merchant-category').value='resource';
- const scope={id:'merchant-npc-stable',name:'PNJ neuf'};
+ const scope={id:'merchant-'+ 'n'.repeat(121),name:'PNJ neuf'};
+ assert.equal(scope.id.length,130);
  const editor=installAdventureEconomyEditorV1({document,merchantScope:scope,getRules:()=>state,
   commitEconomy:economy=>{state=normalizeAdventureRulesV1({...state,economy});},
   notify:m=>errors.push(m),onMerchantCommitted:id=>commits.push(id)});

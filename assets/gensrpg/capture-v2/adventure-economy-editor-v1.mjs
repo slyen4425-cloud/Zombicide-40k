@@ -16,7 +16,7 @@ export function installAdventureEconomyEditorV1({
  const items=()=>getRules().loot.items;
  const byMerchant=id=>current().merchants.find(m=>m.id===id);
  const scopedId=merchantScope?.id??null;
- if(scopedId&&!/^[a-z0-9][a-z0-9_:.-]{0,119}$/i.test(scopedId))
+ if(scopedId&&!/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(scopedId))
   throw Error('Référence PNJ invalide.');
  let editedId=null,selected=new Set(),fragmentPricesDraft={},itemStocksDraft={};
  const isSimple=m=>Array.isArray(m.itemIds);

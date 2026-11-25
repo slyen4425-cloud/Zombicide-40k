@@ -1,3 +1,6 @@
+## 2026-11-25 — Revue marchand : compatibilité des IDs
+- Observation Codex #654 : conserver la limite canonique de 130 caractères dans le formulaire et le callback. Test upsert utilise un ID de longueur 130. Aucun ID historique réécrit; normalisation Exploration à aligner dans #552.
+
 ## 2026-11-25 — C2 marchand : une configuration par PNJ, sans sélection de boutique
 - START Capture 31dea51c35d841a77ecfda269bb1c86efd637deb, checkpoint `checkpoint/gensrpg-start-npc-merchant-single-form-20261125`, branche `work/capture-npc-merchant-single-form-20261125`. #653 certifiée, publisher #649 en livraison indépendante. Pas de modification de main, moteur de transaction, inventaire, stocks sauvegardés, prix, catalogue objets, ni assets.
 - Le diagnostic montre deux parcours UI et non deux moteurs : édition de la boutique dans la fiche réutilisable et sélection d'une boutique dans la fiche carte. Capture conserve AdventureRules.economy (définition) et AdventureSession (stock/transaction). Formulaire embarqué borné à un seul ID de PNJ, upsert de cette seule boutique, réouverture du même ID même si référence historique manquante, aucune liste de boutiques concurrente. Conversion ancienne explicite, autres marchands conservés.

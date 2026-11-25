@@ -106,6 +106,11 @@ const fragmentFields={
 let rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
 const itemEditorParams=new URLSearchParams(window.location.search);
 const itemEditorRoute=itemEditorParams.get('editor');
+const merchantPreviewId=itemEditorParams.get('merchantTest');
+const merchantPreviewNonce=itemEditorParams.get('merchantTestNonce');
+const isMerchantPreview=merchantPreviewId!==null;
+let merchantPreviewSession=null;
+if(isMerchantPreview)document.querySelector('[data-adventure-app]').hidden=true;
 const isItemEditor=['items','library','drops','merchant'].includes(itemEditorRoute);
 const itemEditorView=itemEditorRoute==='drops'||itemEditorRoute==='merchant'
  ?itemEditorRoute:'library';
@@ -1966,13 +1971,21 @@ for(const button of document.querySelectorAll('[data-adventure-sheet-tab]')){
 
 // Native Explorer supplies only proximity and the chosen merchant reference.
  // Every purchase/sale is committed under the original Adventure Core lock.
-installAdventureMerchantPlayV1({
+const merchantPlay=installAdventureMerchantPlayV1({
  window,document,frame:$('adventure-play-frame'),
- load:()=>store?.load(),save:session=>store.save(session),
- sessionId:()=>activePlayingSheet?.sessionId,
+ preview:isMerchantPreview,
+ load:()=>isMerchantPreview?merchantPreviewSession:store?.load(),
+ save:session=>{if(isMerchantPreview)merchantPreviewSession=session;else store.save(session);},
+ sessionId:()=>isMerchantPreview?merchantPreviewSession?.sessionId:activePlayingSheet?.sessionId,
  bestiaryCards:()=>published,
- hasPendingCombat:id=>Boolean(readCombatHandoff(window.localStorage,{sessionId:id})),
- afterSave:()=>{showSave();renderPlayingSheet();}
+ hasPendingCombat:id=>!isMerchantPreview&&Boolean(readCombatHandoff(window.localStorage,{sessionId:id})),
+ afterSave:()=>{if(!isMerchantPreview){showSave();renderPlayingSheet();}},
+ onPreviewClose:()=>{
+  merchantPreviewSession=null;
+  if(window.parent!==window)window.parent.postMessage({
+   schema:'gensrpg.capture.v2.npc.merchant.test.closed.v1',nonce:merchantPreviewNonce
+  },window.location.origin);
+ }
 });
 economyEditor=installAdventureEconomyEditorV1({
  document,getRules:()=>rules,getPublishedSpecies:()=>published,
@@ -2886,6 +2899,28 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   const official=await fetchPublishedBestiary();
   adventurePerf('boot after official bestiary');
   published=official.cards;officialCombatSha=official.combatSha;
+  if(isMerchantPreview){
+   if(window.parent===window||!/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(merchantPreviewId)||
+      !/^[a-f0-9-]{36}$/i.test(merchantPreviewNonce??''))
+    throw Error('Contexte de test marchand invalide.');
+   // Read only the same authoring scope used by the NPC form. Do not run
+   // the normal boot that materializes defaults or selects/saves a party.
+   const previewRules=normalizeAdventureRulesV1(store.load()?.rules??draftStore.load()??SHOWCASE_ADVENTURE_RULES_V1);
+   const starter=publishedAdventureSpeciesV1(published).find(card=>
+    card.skills?.some(skill=>skill.state==='ready')&&
+    ((card.rarity??'rare')==='rare'||previewRules.starterSelection?.allowAllRarities));
+   if(!starter)throw Error('Aucune créature publiée jouable pour la simulation.');
+   const id=()=>crypto.randomUUID();
+   const temporary=createAdventureSessionV1({
+    bestiaryCards:published,starterId:starter.id,rules:previewRules,
+    progressionCore:window.GensProgressionV1,ids:{sessionId:id(),instanceId:id()},
+    now:new Date().toISOString()
+   });
+   // Explicitly fictional test money; only the in-memory snapshot is mutated.
+   merchantPreviewSession={...temporary,status:'playing',inventory:{currency:1000,items:{}}};
+   merchantPlay.openPreview(merchantPreviewId);
+   return;
+  }
   await loadOfficialItemTemplates();
   adventurePerf('boot after item catalog');
   officialStatRegistry=official.statRegistry;
@@ -2941,6 +2976,7 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
    else stateMessage('Ouvre directement les réglages de ce PNJ pour configurer ses articles.',true);
   }
  }catch(error){
+  if(isMerchantPreview){merchantPlay.openPreview(merchantPreviewId,error.message);return;}
   stateMessage('Aventure indisponible : '+error.message,true);
   $('adventure-create').disabled=true;
   console.error('Adventure boot: official publication/session owner failed',error);

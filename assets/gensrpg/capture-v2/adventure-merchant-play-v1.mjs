@@ -6,7 +6,7 @@ import {adventureMerchantPriceV1} from './adventure-economy-v1.mjs';
 
 export function installAdventureMerchantPlayV1({
  window,document,frame,load,save,sessionId,bestiaryCards,
- hasPendingCombat,afterSave
+ hasPendingCombat,afterSave,preview=false,onPreviewClose
 }={}){
  const dialog=document.getElementById('adventure-merchant-dialog');
  const title=document.getElementById('adventure-merchant-title');
@@ -41,7 +41,7 @@ export function installAdventureMerchantPlayV1({
   if(!merchant){say('Cette boutique a été retirée par le créateur.',true);rows.replaceChildren();return;}
   const money=state.rules.economy?.currency.plural??'pièces';
   title.textContent=merchant.name;
-  balance.textContent='Solde : '+state.inventory.currency+' '+money;
+  balance.textContent='Solde : '+state.inventory.currency+' '+money+(preview?' · TEST — argent fictif, aucun achat sauvegardé':'');
   rows.replaceChildren();
   const heading=document.createElement('h3');heading.textContent='Acheter';
   rows.append(heading);
@@ -126,6 +126,7 @@ export function installAdventureMerchantPlayV1({
   finally{busy=false;render();}
  }
  const onMessage=event=>{
+  if(preview)return;
   if(event.origin!==window.location.origin||event.source!==frame.contentWindow||
      event.data?.schema!=='gensrpg.exploration.npc.merchant.open.v1')return;
   const activeSession=sessionId();
@@ -151,8 +152,14 @@ export function installAdventureMerchantPlayV1({
   // Explain a pending combat instead of silently ignoring an authenticated request.
   let combatBlocked=false;
   try{combatBlocked=hasPendingCombat(state.sessionId);}catch{combatBlocked=true;}
-  const merchant=state.rules.economy?.merchants.find(
-   item=>item.id===event.data.merchantId);
+  openShop(state,event.data.merchantId,combatBlocked);
+  frame.contentWindow?.postMessage({
+   schema:'gensrpg.capture.v2.npc.merchant.open-ack.v1',
+   sessionId:openedSession
+  },window.location.origin);
+ };
+ function openShop(state,merchantId,combatBlocked=false){
+  const merchant=state.rules.economy?.merchants.find(item=>item.id===merchantId);
   // An authenticated, active Explorer may reference a removed shop. Keep
   // the existing dialog/ack/close lifecycle, but never create a fake shop
   // or make a transaction possible when the canonical reference is missing.
@@ -172,20 +179,30 @@ export function installAdventureMerchantPlayV1({
    say('Boutique introuvable dans les règles de cette partie. Ouvre la fiche de ce PNJ, configure ses articles et enregistre. Aucune association de boutique séparée n’est nécessaire.',true);
    dialog.showModal();
   }
-  frame.contentWindow?.postMessage({
-   schema:'gensrpg.capture.v2.npc.merchant.open-ack.v1',
-   sessionId:openedSession
-  },window.location.origin);
- };
+ }
+ // A dedicated editor iframe reuses this exact view and transaction path,
+ // with a Capture-owned in-memory session, never the persistent portfolio.
+ function openPreview(merchantId,error=null){
+  if(!preview||dialog.open)return false;
+  const state=load();
+  if(error||!state){
+   openEpoch++;openedMerchant=null;openedSession=null;
+   title.textContent='Test marchand indisponible';balance.textContent='';
+   rows.replaceChildren();say(error??'Configuration indisponible.',true);
+   dialog.showModal();return true;
+  }
+  openShop(state,merchantId);return true;
+ }
  window.addEventListener('message',onMessage);
  close.addEventListener('click',()=>dialog.close());
  dialog.addEventListener('close',()=>{
   const old=openedSession;
   openEpoch++;openedSession=null;openedMerchant=null;
+  if(preview){onPreviewClose?.();return;}
   if(old)frame.contentWindow?.postMessage({
    schema:'gensrpg.capture.v2.npc.merchant.closed.v1',sessionId:old
   },window.location.origin);
  });
- return Object.freeze({dispose:()=>{window.removeEventListener('message',onMessage);
+ return Object.freeze({openPreview,dispose:()=>{window.removeEventListener('message',onMessage);
   if(dialog.open)dialog.close();}});
 }

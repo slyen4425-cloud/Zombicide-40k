@@ -781,7 +781,6 @@ body[data-adventure-item-embed="npc"] .adventure-head,
 body[data-adventure-item-embed="npc"] #adventure-item-editor-navigation,
 body[data-adventure-item-embed="npc"] #adventure-loot-heading,
 body[data-adventure-item-embed="npc"] #adventure-economy-panel>summary,
-body[data-adventure-item-embed="npc"] #adventure-merchants,
 body[data-adventure-item-embed="npc"] #adventure-loot-panel>.actions{
  display:none!important}
 body[data-adventure-item-embed="npc"] #adventure-advanced-panel,

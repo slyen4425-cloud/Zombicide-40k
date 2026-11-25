@@ -146,7 +146,7 @@ export function installAdventureMerchantPlayV1({
    title.textContent='Marchand indisponible';
    balance.textContent='';
    rows.replaceChildren();
-   say('Boutique introuvable dans les règles de cette partie. Dans l’éditeur PNJ, associe une boutique existante, enregistre la liaison et les paramètres de la partie.',true);
+   say('Boutique introuvable dans les règles de cette partie. Ouvre la fiche de ce PNJ, configure ses articles et enregistre. Aucune association de boutique séparée n’est nécessaire.',true);
    dialog.showModal();
   }
   frame.contentWindow?.postMessage({

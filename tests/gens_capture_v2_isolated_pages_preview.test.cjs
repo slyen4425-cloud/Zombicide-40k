@@ -980,10 +980,17 @@ test('certified HUD editor, native encounter handoff and four author-validated V
  const combat='vendor/combat-lab/';
  const explorer='vendor/exploration-lab/';
  const editor=read(trial,combat+'examples/dom-demo/capture-editor-v2.html').toString('utf8');
- assert.match(editor,/data-hud-layout-profile/);
- assert.match(editor,/data-hud-layout-preview/);
+ // Combat #401 replaced the old form with the native visual authoring surface.
+ for(const selector of ['data-hud-layout-preview','data-hud-author-toolbar','data-hud-author-profile','data-hud-author-drag','data-hud-author-add-slot','data-hud-author-add-column','data-hud-author-portraits-local','data-hud-author-portraits-opponent','data-hud-author-apply','data-hud-author-test'])assert.ok(editor.includes(selector),selector);
+ assert.doesNotMatch(editor,/data-hud-layout-profile/,'obsolete competing authoring form must not return');
  required(trial,combat+'src/contracts/capture-hud-layout-v1.js');
- required(trial,combat+'src/ui/capture-hud-layout-editor-v1.js');
+ const author=read(trial,combat+'src/ui/capture-hud-visual-author-v1.js').toString('utf8');
+ const preview=read(trial,combat+'src/ui/capture-hud-layout-preview-v1.js').toString('utf8');
+ assert.match(author,/mountCaptureHudVisualAuthorV1/);
+ assert.match(author,/data-hud-author-apply/);
+ assert.match(author,/data-hud-author-test/);
+ assert.match(preview,/mountCaptureHudLayoutPreviewV1/);
+ assert.equal(fs.existsSync(path.join(trial,combat+'src/ui/capture-hud-layout-editor-v1.js')),false,'retired parallel editor must not ship');
  const handoff=read(trial,explorer+'combat-preview/examples/dom-demo/exploration-encounter.js').toString('utf8');
  assert.match(handoff,/hudLayout/);
  const media=explorer+'capture-assets/assets/library/capture/creatures/veuve_jaune/animations/';

@@ -330,7 +330,7 @@ test('real smartphone merchant: proximity iframe opens only canonical shop and b
 });
 
 test('merchant edits inside the saved NPC; official Capture commits the inventory and only merchantId is linked', 
- {timeout:195000},async()=>{
+ {timeout:300000},async()=>{
  await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
  let browser;
  try{
@@ -495,6 +495,33 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   await chooseNpc();
   await place();
   assert.equal(await count(),1);
+  // Real Tester button in the actual World Builder. Both the host and
+  // Capture shop are native iframes; no synthetic merchant-open message.
+  await builder.locator('#navigation-toggle').tap();
+  await builder.locator('#npc-talk').waitFor({state:'visible',timeout:45000});
+  const testBefore=await snapshot();
+  const testShop=builder.frameLocator('#npc-merchant-test-frame');
+  const openTesterShop=async()=>{
+   await builder.locator('#npc-talk').tap();
+   await builder.locator('#npc-dialogue-next').filter({hasText:'Commercer'}).tap();
+   await builder.locator('#npc-merchant-test-dialog[open]').waitFor();
+   await testShop.locator('#adventure-merchant-dialog[open]').waitFor({timeout:60000});
+   assert.match(await testShop.locator('#adventure-merchant-balance').innerText(),/TEST.*fictif/);
+   assert.match(await testShop.locator('#adventure-merchant-trades').innerText(),/Potion de soins.*stock 3/);
+   assert.match(await testShop.locator('#adventure-merchant-trades').innerText(),/Potion de réanimation.*stock 3/);
+  };
+  await openTesterShop();
+  await testShop.getByRole('button',{name:'Acheter',exact:true}).first().tap();
+  await testShop.locator('#adventure-merchant-trades').filter({hasText:/Potion de soins.*stock 2/}).waitFor();
+  assert.deepEqual(await snapshot(),testBefore);
+  await testShop.locator('#adventure-merchant-close').tap();
+  await builder.locator('#npc-merchant-test-dialog').waitFor({state:'hidden'});
+  await builder.locator('#npc-talk').waitFor({state:'visible'});
+  await openTesterShop();
+  await builder.locator('#npc-merchant-test-close').tap();
+  await builder.locator('#npc-merchant-test-dialog').waitFor({state:'hidden'});
+  assert.deepEqual(await snapshot(),testBefore,'Tester must never write Adventure persistence');
+  await builder.locator('#navigation-toggle').tap();
   await builder.locator('#world-workspace-world').tap();
   await builder.locator('#world-workspace-map').waitFor({state:'visible',timeout:45000});
   const placed=await builder.locator('body').evaluate(async()=>{

@@ -467,6 +467,9 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   assert.equal(saved.inventory.items[fixture.itemId]??0,0);
   assert.equal(saved.merchantStocks[fixture.merchantId][fixture.itemId],1);
   await adventure.locator('#adventure-merchant-close').tap();
+  // Wait for the scoped closed acknowledgement before changing view.
+  await play.locator('#npc-talk').waitFor({state:'visible',timeout:15000});
+  const beforeResume=await play.locator('body').evaluate(()=>window.__sculptPlayProbe());
   await play.locator('#play-menu-button').tap();
   await adventure.locator('#adventure-menu-return-title').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
@@ -474,7 +477,19 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   await adventure.locator('#adventure-save-gallery [data-save-id="'+fixture.sessionId+'"]').tap();
   await adventure.locator('#adventure-save-load').tap();
   await adventure.locator('#adventure-play:not([disabled])').tap();
-  await play.locator('#npc-talk').waitFor({state:'visible',timeout:45000});
+  try{
+   await play.locator('#play-menu-button').waitFor({state:'visible',timeout:45000});
+   await adventure.locator('#adventure-launch-loading').waitFor({state:'hidden',timeout:45000});
+   await play.locator('#npc-talk').waitFor({state:'visible',timeout:45000});
+  }catch(error){
+   const afterResume=await play.locator('body').evaluate(()=>({
+    play:window.__sculptPlayProbe?.(),navigation:window.__sculptLabProbe?.()?.navigationTesting,
+    talk:document.getElementById('npc-talk')?.outerHTML,
+    dialogue:document.getElementById('npc-dialogue-overlay')?.hidden,
+    status:document.getElementById('play-save-status')?.textContent
+   })).catch(()=>null);
+   throw Error('Merchant unavailable after actual resume: '+JSON.stringify({beforeResume,afterResume}),{cause:error});
+  }
   await play.locator('#npc-talk').tap();
   await play.locator('#npc-dialogue-next').filter({hasText:'Commercer'}).waitFor({state:'visible',timeout:15000});
   assert.equal(await play.locator('#npc-dialogue-trade').isVisible(),false,'one final commerce action');

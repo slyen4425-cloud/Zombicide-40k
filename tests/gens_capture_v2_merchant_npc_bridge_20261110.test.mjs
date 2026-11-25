@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {availableAdventureMerchantsForNpcV1,availableAdventureItemsForNpcRewardV1}
  from '../assets/gensrpg/capture-v2/adventure-merchant-catalog-bridge-v1.mjs';
-import {DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,
+import {DEFAULT_ADVENTURE_RULES_V1,SHOWCASE_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,
  createAdventureSessionV1,createAdventureStoreV1}
  from '../assets/gensrpg/capture-v2/adventure-contract-v1.mjs';
-import {createAdventureRulesDraftStoreV1}
+import {createAdventureRulesDraftStoreV1,projectAdventureMerchantDraftV1}
  from '../assets/gensrpg/capture-v2/adventure-rules-draft-v1.mjs';
 import {createCaptureUniverseAdventureStorageV1}
  from '../assets/gensrpg/capture-v2/universe-adventure-storage-v1.mjs';
@@ -109,4 +109,36 @@ test('read-only merchant and item catalogs stay isolated per independent Capture
  const shell=source('shell-entry-v1.js');
  assert.ok(shell.includes("returnTo:\"npc\""));
  assert.ok(shell.includes("universeId:selectedUniverse?.id"));
+});
+
+test('PNJ shop configured with an existing save is available to a new game; two potions retain stock 3/3',()=>{
+ const s=storage(),owner=createAdventureRulesDraftStoreV1({storage:s,coreStorage});
+ owner.save(catalog);
+ const items=['item.potion.heal','item.potion.revive'];
+ const merchant={id:'merchant-two-potions',name:'Marchand de potions',
+  itemIds:items,sellPercent:10,buyPercent:-50,
+  itemStocks:Object.fromEntries(items.map(id=>[id,3]))};
+ const sourceRules=normalizeAdventureRulesV1({...SHOWCASE_ADVENTURE_RULES_V1,
+  economy:{currency:{singular:'pièce',plural:'pièces'},merchants:[merchant]}});
+ const originalDraft=owner.load();
+ owner.save(projectAdventureMerchantDraftV1({
+  draftRules:originalDraft,sourceRules,merchantId:merchant.id
+ }));
+ const future=owner.load();
+ assert.deepEqual(future.economy.currency,originalDraft.economy.currency);
+ assert.deepEqual(future.economy.merchants.slice(0,2),originalDraft.economy.merchants);
+ assert.deepEqual(future.loot.drops,originalDraft.loot.drops);
+ assert.deepEqual(future.economy.merchants.at(-1),merchant);
+ for(const id of items)assert.equal(future.loot.items.filter(item=>item.id===id).length,1);
+ const session=createAdventureSessionV1({bestiaryCards:published,starterId:'crea_nat_1',
+  rules:future,ids:{sessionId:'future-shop-session',instanceId:'future-shop-creature'},
+  now:'2026-11-25T12:20:00.000Z'});
+ assert.deepEqual(session.rules.economy.merchants.at(-1).itemStocks,merchant.itemStocks);
+ const changed={...merchant,itemStocks:{...merchant.itemStocks,[items[0]]:7}};
+ const next=projectAdventureMerchantDraftV1({draftRules:future,
+  sourceRules:normalizeAdventureRulesV1({...sourceRules,
+    economy:{...sourceRules.economy,merchants:[changed]}}),merchantId:merchant.id});
+ assert.equal(next.economy.merchants.filter(m=>m.id===merchant.id).length,1);
+ assert.equal(next.economy.merchants.at(-1).itemStocks[items[0]],7);
+ assert.equal(session.rules.economy.merchants.at(-1).itemStocks[items[0]],3);
 });

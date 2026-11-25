@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {reconcileAuthoredMerchantForSessionV1}
+ from '../assets/gensrpg/capture-v2/adventure-rules-draft-v1.mjs';
 import {normalizeAdventureEconomyV1,adventureMerchantPriceV1}
  from '../assets/gensrpg/capture-v2/adventure-economy-v1.mjs';
 import {DEFAULT_ADVENTURE_RULES_V1,normalizeAdventureRulesV1,
@@ -171,4 +173,36 @@ test('direct PNJ editor: first save and repeat save upsert the exact same mercha
   now:'2026-11-21T13:01:00.000Z',bestiaryCards:published});
  assert.equal(bought.receipt.currencyAmount,135);
  assert.equal(bought.session.inventory.items.relique,1);
+});
+
+test('already-running game adopts ONLY an authored matching NPC merchant on the actual visit',()=>{
+ const authored=normalizeAdventureRulesV1({...rules,
+  economy:{...rules.economy,merchants:[{...merchant,itemStocks:{potion:3}}]}});
+ const old=normalizeAdventureRulesV1({...rules,economy:{...rules.economy,merchants:[]}});
+ const before={...session(),status:'playing',rules:old,
+  inventory:{currency:300,items:{relique:1}}};
+ const restored=reconcileAuthoredMerchantForSessionV1({
+  session:before,draftRules:authored,merchantId:merchant.id
+ });
+ assert.equal(restored.rules.economy.merchants.length,1);
+ assert.deepEqual(restored.rules.economy.merchants[0].itemStocks,{potion:3});
+ assert.deepEqual(restored.inventory,before.inventory,'no lost wallet or items');
+ assert.equal(restored.sessionId,before.sessionId);
+ assert.deepEqual(restored.processedEncounterKeys,before.processedEncounterKeys);
+ assert.deepEqual(before.rules.economy.merchants,[],'saved original is untouched');
+ assert.strictEqual(reconcileAuthoredMerchantForSessionV1({
+  session:restored,draftRules:authored,merchantId:merchant.id
+ }),restored,'no repeated import or reset of remaining stock');
+ assert.strictEqual(reconcileAuthoredMerchantForSessionV1({
+  session:before,draftRules:authored,merchantId:'other-merchant'
+ }),before,'missing author reference does not invent a merchant');
+ const purchase=trade(restored,'buy','potion',1,'npc-repaired-buy');
+ assert.equal(purchase.session.merchantStocks[merchant.id].potion,2);
+ assert.equal(purchase.session.inventory.items.potion,1);
+ assert.equal(purchase.session.inventory.currency,272);
+ const source=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ const presenter=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-merchant-play-v1.mjs',import.meta.url),'utf8');
+ assert.match(source,/repairMissingMerchant:async/);
+ assert.match(source,/window\.navigator\.locks\.request/);
+ assert.match(presenter,/await repairMissingMerchant/);
 });

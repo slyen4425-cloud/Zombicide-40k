@@ -48,3 +48,22 @@ export function projectAdventureMerchantDraftV1({draftRules,sourceRules,merchant
   loot:{...draft.loot,items:[...draft.loot.items,...missing]},
   economy:{...economy,merchants}});
 }
+
+
+// Repair ONLY an explicitly-authored NPC shop missing from a running save.
+// The player has just requested this merchant via the authenticated Explorer.
+// No global rule migration, no stock reset, no synthetic merchant or wallet.
+export function reconcileAuthoredMerchantForSessionV1({session,draftRules,merchantId}={}){
+ if(session?.status!=='playing'||!session.rules)
+  throw new TypeError('A playing AdventureSession is required');
+ if(typeof merchantId!=='string'||!merchantId)
+  throw new TypeError('A real NPC merchant reference is required');
+ if(session.rules.economy?.merchants?.some(m=>m.id===merchantId))return session;
+ if(!draftRules)return session;
+ const authored=normalizeAdventureRulesV1(draftRules);
+ if(!authored.economy?.merchants.some(m=>m.id===merchantId))return session;
+ const rules=projectAdventureMerchantDraftV1({
+  draftRules:session.rules,sourceRules:authored,merchantId
+ });
+ return {...session,rules};
+}

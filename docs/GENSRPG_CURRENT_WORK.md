@@ -1,3 +1,9 @@
+## 2026-11-25 — Raccord prioritaire PWA des lots certifiés (C2)
+- START Capture `470e64547130ecfc73b922aeb0b57bacfffc2780`, source actuelle #652 (arbre 21b0bf19eeb3073a114be339f544fe155b79672a identique à eea783af, 4 workflows verts 45547360052/45547359938/45547359970/45547359957). Checkpoint `checkpoint/gensrpg-start-capture-hud-convergence-20261125`, branche `work/capture-hud-convergence-20261125`. Publisher GREEN c32645450ccf887084afa43f23413ba59109a9a5, PR publisher existante #649.
+- Combat main c02be408963fed0ce8e70e028ae463f3719e1010: #390/#391 HUD, #392 import Veuve jaune, CI 45555910228, Pages 45555909754. Exploration main 46654efe2b7d084d8ae891362e5d4e2999c3ab8c: #550 raccord HUD, Pages 45554656527 et CI exacte du checkpoint 45554803426 SUCCESS; relance ciblée du run main 45554656523 (incident catalogue PNJ intermittent) à confirmer avant promotion. Ne pas inclure #549 en attente ni #551 non fusionnée.
+- Périmètre : pins immuables + sentinelles source uniquement, conserver #648 comportement/XP et #652 marchand. Aucun moteur, stockage, shell, asset, autre module modifié. Test livraison native et navigateur sur vrais owners. Publication #649 après preuve source, CI et Pages; assets global-assets 7b882cf5a979182dfb68e9b4e87365f3a2bad17b (CI 45556221469) à épingler au publisher, non copiés ici.
+- NON GREEN jusqu'à certification de la source et publication réelle. Aucun ancien lot réouvert ni branche supprimée.
+
 # Lot #629 / #594 — marchand réel en Aventure (25/11)
 
 START: `b1b0532c7838520c3bce72f943dfa35eea4452b4` (source certifiée), checkpoint `checkpoint/gensrpg-start-capture-merchant-real-map-20261125`.

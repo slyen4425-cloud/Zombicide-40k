@@ -958,6 +958,30 @@ test('both owners explain missing merchant links in the assembled PWA',()=>{
  assert.match(capture,/Boutique introuvable dans les règles de cette partie/);
 });
 
+test('PWA ships the single merchant repair and wild-defeat lifetime, not another gameplay owner',()=>{
+ const base='assets/gensrpg/capture-v2/';
+ const app=read(trial,base+'adventure-app-v1.mjs').toString('utf8');
+ const bridge=read(trial,base+'adventure-playing-party-grant-v1.mjs').toString('utf8');
+ const contract=read(trial,base+'adventure-contract-v1.mjs').toString('utf8');
+ const merchant=read(trial,base+'adventure-merchant-play-v1.mjs').toString('utf8');
+ const source=read(trial,base+'adventure-rules-draft-v1.mjs').toString('utf8');
+ const world=read(trial,'vendor/exploration-lab/src/sculpt-lab-main.js').toString('utf8');
+ const reader=read(trial,'vendor/exploration-lab/src/encounters/adventure-playing-party-v1.js').toString('utf8');
+ const projected=read(trial,'vendor/exploration-lab/src/actors/npc-wild-defeat-projection-v1.js').toString('utf8');
+ assert.match(contract,/wildVictories:\[\.\.\.\(state\.wildVictories\?\?\[\]\),wild\]/,
+  'only the official Combat receipt may persist an actor victory');
+ assert.match(bridge,/wildVictories:normalizeAdventureWildVictoriesV1\(session\.wildVictories\)/);
+ assert.match(reader,/wildVictories=Object\.freeze\(/);
+ assert.match(world,/projectDefeatedPlacedWildV1\(authored,/,
+  'the renderer and collisions must share one filtered actor projection');
+ assert.match(projected,/actor\?\.npc\?\.kind!=='wild'/,
+  'trainer and merchant NPCs must never disappear because of wild wins');
+ assert.match(source,/reconcileAuthoredMerchantForSessionV1/);
+ assert.match(app,/repairMissingMerchant:async/);
+ assert.match(merchant,/await repairMissingMerchant/);
+ assert.doesNotMatch(projected,/localStorage|sessionStorage|deleteActor|removeWorldActor/);
+});
+
 test('the shipped game connects the same universe to the Bestiary, navigation and native fight',()=>{
  const base='assets/gensrpg/capture-v2/',explorer='vendor/exploration-lab/';
  const launch=read(trial,base+'adventure-app-v1.mjs').toString('utf8');

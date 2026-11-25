@@ -280,7 +280,7 @@ test('PWA carries exact cleaned bridge and stair binaries with stable native IDs
 
 test('native World Builder map exporter and in-game 200% dezoom are shipped once from certified Exploration',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(source.exploration.sha,'bdac9bade51cb908fe0e7a5fc8d06ac3f2a8d874',
+ assert.equal(source.exploration.sha,'46654efe2b7d084d8ae891362e5d4e2999c3ab8c',
    'ship certified Exploration main with the sculpt palette, cleaned bridges and stair profiles');
  const helper='vendor/exploration-lab/src/builder/world-assembler-map-preset-export-v1.js';
  required(trial,helper);
@@ -335,13 +335,15 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
   const certifiedMerchantDialogSha='d55dd4d4f565baefc66bc5ccbde2f10e501f67fe';
   const certifiedUniversePlaySha='46e2e1e11cfd841232998d452dbf4f235f2b482c';
   const certifiedWildEncounterSha='bdac9bade51cb908fe0e7a5fc8d06ac3f2a8d874';
+  const certifiedWildBehaviorSha='52c0736f16b4bf75209a3839255135786719188c';
+const certifiedHudSha='46654efe2b7d084d8ae891362e5d4e2999c3ab8c'; // #550: CI 45554656523, Pages 45554656527, identical renderer blob.
  // The stair fix changes navigation and sprite presentation only. Its
  // canonical south terrain renderer remains byte-identical to recoveredWorld.
- const expectedOfficialRendererBlob=[certifiedUniversePlaySha,certifiedWildEncounterSha].includes(explorationSha)
+ const expectedOfficialRendererBlob=[certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha].includes(explorationSha)
    ?'19b0c9822048381793cd705f7cfcb2d4cdc207fa'
    :[certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha].includes(explorationSha)
    ?'98c70979a719b2bad48a35df972bb880b6a62f5e'
-   :[recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha].includes(explorationSha)
+   :[recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha].includes(explorationSha)
    ?'6c101756bdf9c58a9ae8cf3fe104e49575145748'
    :explorationSha===fringeRoadExplorationSha
     ?'1a0869afc5b258e8f403f43cd26b3f417a6c8786'
@@ -352,7 +354,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  assert.equal(provenance.exploration.sha,explorationSha,
    'the complete native Exploration checkout must match the source pin');
  assert.ok(['13bbd8230d8dfcef612586974b2dcb54e18e16c4',
-   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha].includes(explorationSha),
+   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha].includes(explorationSha),
    'release must reject unreviewed Exploration main SHAs');
  const bytes=read(trial,official);
  const gitBlob=crypto.createHash('sha1')
@@ -367,7 +369,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
  const sculpt=read(trial,'vendor/exploration-lab/src/sculpt-lab-main.js').toString('utf8');
  assert.match(sculpt,/drawOuterSouthRim:false/);
  assert.match(sculpt,/drawDecorativeFringeTerrain\(\)/);
- if([fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha].includes(explorationSha)){
+ if([fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha].includes(explorationSha)){
   assert.match(sculpt,/drawDecorativeFringeObjects\('back'\)/);
   assert.match(sculpt,/drawDecorativeFringeObjects\('front'\)/);
   const north=sculpt.indexOf("drawDecorativeFringeObjects('back');");
@@ -375,7 +377,7 @@ test('south 2.5D renderer is BYTE-IDENTICAL to the certified Exploration main (n
   const south=sculpt.indexOf("drawDecorativeFringeObjects('front');",hero);
   assert.ok(north>=0&&hero>north&&south>hero,
    'a southern tree must layer in front of the player but own no collision');
-  if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha].includes(explorationSha)){
+  if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha].includes(explorationSha)){
    assert.doesNotMatch(text,/ctx.fillRect\(rect.x,rect.y,rect.width,rect.height\)/,
     'no per-tile translucent altitude paint on a raised road or grass');
    assert.match(text,/for\(const \{side,opacity\} of info.contactShadows\)/,
@@ -620,12 +622,12 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
  const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
  const adapter=read(trial,'vendor/combat-lab/src/adapters/input/capture/capture-npc-opponent-instance-v1.js').toString('utf8');
  const economy=read(trial,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs').toString('utf8');
- assert.equal(pins.combat.sha,'826c6cddf81e14f485f5afae2e1a9160e3f8b415');
- assert.equal(pins.combat.certifiedCiRun,45442392649);
+ assert.equal(pins.combat.sha,'c02be408963fed0ce8e70e028ae463f3719e1010');
+ assert.equal(pins.combat.certifiedCiRun,45555910228);
  assert.equal(provenance.combat.sha,pins.combat.sha);
  assert.equal(delivery.combat.sha,pins.combat.sha);
- assert.equal(previewPin.officialVisuals.sha,'1d138d8c5abc5b8c300774d5afce6d67ec6e9c35');
- assert.equal(previewPin.officialVisuals.certifiedCiRun,45114203267);
+ assert.equal(previewPin.officialVisuals.sha,'7b882cf5a979182dfb68e9b4e87365f3a2bad17b');
+ assert.equal(previewPin.officialVisuals.certifiedCiRun,45556221469);
  assert.ok(adapter.includes('export '));
  assert.match(economy,/adventureMerchantPriceV1/);
 });
@@ -633,10 +635,10 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
 test('PWA stages Vipfer five Steel skills and exactly the eight approved author media references',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
  const bundle=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
- assert.equal(source.combat.sha,'826c6cddf81e14f485f5afae2e1a9160e3f8b415');
- assert.equal(source.combat.certifiedCiRun,45442392649);
+ assert.equal(source.combat.sha,'c02be408963fed0ce8e70e028ae463f3719e1010');
+ assert.equal(source.combat.certifiedCiRun,45555910228);
  assert.equal(bundle.combat.sha,source.combat.sha,'the real staged combat must match the certified pin');
- assert.equal(previewPin.officialVisuals.sha,'1d138d8c5abc5b8c300774d5afce6d67ec6e9c35');
+ assert.equal(previewPin.officialVisuals.sha,'7b882cf5a979182dfb68e9b4e87365f3a2bad17b');
  const slugs=['morsure-ressort','etreinte-acier','mue-tranchante','couronne-eclats','broyeur-serpentin'];
  const ids=slugs.map(slug=>'vipfer-'+slug);
  const creature=json(trial,'vendor/combat-lab/data/capture/showcase/Vipfer.capture-creature-transfer-v1.json');
@@ -805,7 +807,7 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
   const base=html.match(/<select id="material">([\s\S]*?)<\/select>/)?.[1]??'';
   const rows=[["grass.forest.tall","texture.grass.forest.tall.01","terrain_haute_herbe_01.webp","forest","9a127bde4f600d1fbb77fc8cb1a03f7bc05d569576805e98ad461bb59627a49b"],["grass.forest.flowers","texture.grass.forest.flowers.01","terrain_herbe_fleurie_01.webp","forest","6cef9ed6c7e12b67f1e9d2cb1ab2ba7d3f13908ef6e111a32797462ae92bfff0"],["ground.snow.rocky","texture.ground.snow.rocky.01","terrain_neige_rocheuse_01.webp","snow","2e336b9446c335b0cf5f1913b45dbae5a137cb691ab77bd2ff7dbc57337cda35"],["ground.dirt.textured","texture.ground.dirt.textured.01","terrain_sol_terre_01.webp","plain","e3d1958b076497b6b56b29a582792ad583a42d94cff7d2206efae5af691f1440"],["ground.volcanic.rocky","texture.ground.volcanic.rocky.01","terrain_sol_volcanique_01.webp","volcano","d14a157801e96c4a0e7121cb044799c1bfe17ea15125aa9e63029f417faf2cbc"]];
   const provenance=json(trial,'release-provenance.v1.json');
-  assert.equal(provenance.exploration.sha,'bdac9bade51cb908fe0e7a5fc8d06ac3f2a8d874');
+  assert.equal(provenance.exploration.sha,'46654efe2b7d084d8ae891362e5d4e2999c3ab8c');
   for(const [materialId,assetId,filename,family,hash] of rows){
     const rel=owner+'assets/exploration/materials/forest/surfaces/'+filename;
     required(trial,rel);
@@ -833,8 +835,8 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
 
 test('the PWA physically ships the generic author description and zone/trail editor, not species-specific code',()=>{
  const pinned=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(pinned.combat.sha,'826c6cddf81e14f485f5afae2e1a9160e3f8b415');
- assert.equal(pinned.exploration.sha,'bdac9bade51cb908fe0e7a5fc8d06ac3f2a8d874');
+ assert.equal(pinned.combat.sha,'c02be408963fed0ce8e70e028ae463f3719e1010');
+ assert.equal(pinned.exploration.sha,'46654efe2b7d084d8ae891362e5d4e2999c3ab8c');
  const explanation=read(trial,'vendor/combat-lab/src/ui/capture-skill-explanation-v1.js').toString('utf8');
  const editor=read(trial,'vendor/combat-lab/src/ui/capture-editor-human-v2.js').toString('utf8');
  assert.match(explanation,/if\(d\.salvo\)/,'auto description must show configured salvo count');
@@ -931,8 +933,8 @@ test('published Capture carries the opt-in potion import and actual merchant sto
  assert.match(economy,/merchant\.itemStocks/);
  assert.match(shop,/state\.merchantStocks/);
  const pins=json(trial,base+'source-pins-v1.json');
- assert.equal(pins.combat.sha,'826c6cddf81e14f485f5afae2e1a9160e3f8b415');
- assert.equal(pins.exploration.sha,'bdac9bade51cb908fe0e7a5fc8d06ac3f2a8d874');
+ assert.equal(pins.combat.sha,'c02be408963fed0ce8e70e028ae463f3719e1010');
+ assert.equal(pins.exploration.sha,'46654efe2b7d084d8ae891362e5d4e2999c3ab8c');
 });
 
 test('both owners explain missing merchant links in the assembled PWA',()=>{
@@ -959,4 +961,28 @@ test('the shipped game connects the same universe to the Bestiary, navigation an
  const editor=read(trial,explorer+'sculpt-lab.html').toString('utf8');
  assert.match(editor,/id="actor-route-draw"/);
  assert.match(editor,/value="footbridge"/);
+});
+
+
+test('certified HUD editor, native encounter handoff and four author-validated Veuve jaune atlases ship through existing owners',()=>{
+ const combat='vendor/combat-lab/';
+ const explorer='vendor/exploration-lab/';
+ const editor=read(trial,combat+'examples/dom-demo/capture-editor-v2.html').toString('utf8');
+ assert.match(editor,/data-hud-layout-profile/);
+ assert.match(editor,/data-hud-layout-preview/);
+ required(trial,combat+'src/contracts/capture-hud-layout-v1.js');
+ required(trial,combat+'src/ui/capture-hud-layout-editor-v1.js');
+ const handoff=read(trial,explorer+'combat-preview/examples/dom-demo/exploration-encounter.js').toString('utf8');
+ assert.match(handoff,/hudLayout/);
+ const media=explorer+'capture-assets/assets/library/capture/creatures/veuve_jaune/animations/';
+ const expected={
+  'attack-opponent-6f-20261125.webp':'70f57aa1927fc7adabf5590b0158a40a09aff367',
+  'attack-player-9f-20261125.webp':'f2a4fd616d335b1ff1137ddcec256eddf76db563',
+  'movement-opponent-5f-20261125.webp':'b07de3a498687dc16c79b1c9946bf36b9f275853',
+  'movement-player-6f-20261125.webp':'ebd9f0a275d2a0b656dc307842ded15cbe308f00'};
+ for(const [file,blob] of Object.entries(expected)){
+  const bytes=read(trial,media+file);
+  assert.equal(bytes.toString('ascii',8,12),'WEBP');
+  assert.equal(crypto.createHash('sha1').update('blob '+bytes.length+String.fromCharCode(0)).update(bytes).digest('hex'),blob);
+ }
 });

@@ -1,3 +1,7 @@
+## 2026-11-25 — Livraison du marchand direct et des portes (C2, NON GREEN)
+- START Capture a87323ca08125eb4915f1d1178af6ccb4d699b78, checkpoint `checkpoint/gensrpg-start-capture-merchant-doors-release-20261125`, branche `work/capture-merchant-doors-release-20261125`. #654 certifiée, arbre f2be9e40f70a8562157088c87145b5cd3825f0c3 identique au candidat 7f87e3bf. #552 Exploration main afdd45a4ab4065c0921b160a38a948ca3663e62f, CI 45569743090, Pages et HTTPS 45569743151 SUCCESS. Publisher précédent 7a8260a55d62d089e6e981db34d1d4ac27f40a0e, Pages 45569724541 + public smoke 45570264229 verts; architecture main 45569724374 encore active.
+- Raccord immuable du marchand et test réel de la fiche PNJ sans sélecteur concurrent, référence stable, réouverture et achat/vente/reprise. #551 portes : correction 65206cd2 sur sa branche, fusion uniquement après revue/CI; le pin sera actualisé sur son SHA main certifié avant promotion commune. Pas de changement du moteur Capture, du Combat, des médias, ni de duplication. Publisher unique, tests et publication HTTPS exacts requis.
+
 ## 2026-11-25 — Revue marchand : compatibilité des IDs
 - Observation Codex #654 : conserver la limite canonique de 130 caractères dans le formulaire et le callback. Test upsert utilise un ID de longueur 130. Aucun ID historique réécrit; normalisation Exploration à aligner dans #552.
 

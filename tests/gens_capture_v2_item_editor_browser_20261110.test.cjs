@@ -367,6 +367,7 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   await npc.locator('#npc-status:has-text("PNJ enregistré")').waitFor({timeout:15000});
   const npcId=await npc.locator('#npc-saved').inputValue();
   assert.match(npcId,/^npc\.user\./,'saving must keep the official minted NPC ID');
+  assert.equal(await npc.locator('#npc-merchant-choice').count(),0,'no competing shop picker in the native NPC editor');
   await npc.locator('#npc-merchant-config > summary').tap();
   await npc.locator('#npc-merchant-configure').tap();
   const merchant=npc.frameLocator('#npc-merchant-frame');
@@ -383,7 +384,7 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
    return (await createUserNpcStoreV1().get(id))?.npc?.merchantId;
   },npcId);
   const merchantId=await storedMerchantId();
-  assert.match(merchantId,/^merchant-/,'the saved PNJ must receive the Capture merchantId');
+  assert.equal(merchantId,'merchant-'+npcId,'new PNJ gets a stable automatic shop reference');
   await npc.locator('#npc-merchant-configure').tap();
   await merchant.locator('#adventure-merchant-name').waitFor({state:'visible',timeout:60000});
   await merchant.locator('#adventure-merchant-library input:checked').first().waitFor({timeout:40000});

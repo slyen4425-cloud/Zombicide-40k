@@ -14,7 +14,7 @@ export function installAdventureMerchantPlayV1({
  const rows=document.getElementById('adventure-merchant-trades');
  const notice=document.getElementById('adventure-merchant-message');
  const close=document.getElementById('adventure-merchant-close');
- let openedMerchant=null,openedSession=null,busy=false;
+ let openedMerchant=null,openedSession=null,busy=false,openEpoch=0;
  const say=(message,error=false)=>{notice.textContent=message;notice.dataset.error=String(error);};
  const label=(session,id)=>{
   if(id.startsWith('fragment:'))return 'Éclat de '+(
@@ -92,19 +92,22 @@ export function installAdventureMerchantPlayV1({
   if(!Number.isSafeInteger(quantity)||quantity<1||quantity>9999){
    say('Choisis une quantité entière entre 1 et 9999.',true);return;
   }
-  busy=true;
+  const transactionSession=openedSession,transactionMerchant=openedMerchant,epoch=openEpoch;
+  const sameOpening=()=>dialog.open&&openEpoch===epoch&&
+   openedSession===transactionSession&&openedMerchant===transactionMerchant;
+  busy=true;render();
   try{
    if(typeof window.navigator.locks?.request!=='function')
     throw new Error('Verrou de sauvegarde indisponible : transaction annulée.');
    let receipt=null;
    await window.navigator.locks.request(
-    'gensrpg.capture.v2.adventure-combat:'+openedSession,()=>{
+    'gensrpg.capture.v2.adventure-combat:'+transactionSession,()=>{
      const state=load();
-     if(!state||state.sessionId!==openedSession||state.status!=='playing'||
-       sessionId()!==openedSession||hasPendingCombat(openedSession))
+     if(!sameOpening()||!state||state.sessionId!==transactionSession||state.status!=='playing'||
+       sessionId()!==transactionSession||hasPendingCombat(transactionSession))
       throw new Error('La partie ou le combat a changé : transaction annulée.');
      const result=tradeAdventureMerchantV1({
-      session:state,merchantId:openedMerchant,itemId,kind,quantity,
+      session:state,merchantId:transactionMerchant,itemId,kind,quantity,
       actionId:window.crypto.randomUUID(),now:new Date().toISOString(),
       bestiaryCards:bestiaryCards()
      });
@@ -113,11 +116,13 @@ export function installAdventureMerchantPlayV1({
      save(result.session);
      receipt=result.receipt;
    });
-   afterSave?.();
-   const money=load().rules.economy?.currency.plural??'pièces';
-   say((kind==='buy'?'Achat':'Vente')+' enregistré(e) : '+quantity+' × '+
-    label(load(),itemId)+' · '+receipt.currencyAmount+' '+money+'.');
-  }catch(error){say('Transaction refusée : '+error.message,true);}
+   try{afterSave?.();}catch(error){console.error('Actualisation après transaction enregistrée',error);}
+   if(sameOpening()){
+    const state=load(),money=state.rules.economy?.currency.plural??'pièces';
+    say((kind==='buy'?'Achat':'Vente')+' enregistré(e) : '+quantity+' × '+
+     label(state,itemId)+' · '+receipt.currencyAmount+' '+money+'.');
+   }
+  }catch(error){if(sameOpening())say('Transaction refusée : '+error.message,true);}
   finally{busy=false;render();}
  }
  const onMessage=event=>{
@@ -133,7 +138,7 @@ export function installAdventureMerchantPlayV1({
   // An authenticated, active Explorer may reference a removed shop. Keep
   // the existing dialog/ack/close lifecycle, but never create a fake shop
   // or make a transaction possible when the canonical reference is missing.
-  openedMerchant=merchant?.id??null;openedSession=state.sessionId;
+  openEpoch++;openedMerchant=merchant?.id??null;openedSession=state.sessionId;
   if(merchant){
    say('Choisis un objet et sa quantité.');
    dialog.showModal();render();
@@ -153,7 +158,7 @@ export function installAdventureMerchantPlayV1({
  close.addEventListener('click',()=>dialog.close());
  dialog.addEventListener('close',()=>{
   const old=openedSession;
-  openedSession=null;openedMerchant=null;
+  openEpoch++;openedSession=null;openedMerchant=null;
   if(old)frame.contentWindow?.postMessage({
    schema:'gensrpg.capture.v2.npc.merchant.closed.v1',sessionId:old
   },window.location.origin);

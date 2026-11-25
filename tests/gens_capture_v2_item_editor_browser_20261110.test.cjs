@@ -375,9 +375,16 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   assert.equal(await merchant.locator('body').getAttribute('data-adventure-item-embed'),'npc');
   assert.equal(await merchant.locator('#adventure-loot-global-rewards').isVisible(),false);
   await merchant.locator('#adventure-merchant-library input[type="checkbox"]').first().check();
-  await merchant.locator('#adventure-merchant-library input[aria-label^="Stock du "]').first().fill('2');
+  const stockInput=merchant.locator('#adventure-merchant-library input[aria-label^="Stock du "]').first();
+  const stockBox=await stockInput.boundingBox();
+  assert.ok(stockBox&&stockBox.width>=90&&stockBox.height>=40,'stock control readable on mobile');
+  assert.equal(await stockInput.getAttribute('placeholder'),'Illimité');
+  assert.equal(await merchant.locator('#adventure-status').isVisible(),true,'inline validation remains visible before save');
+  await stockInput.fill('2');
   await merchant.locator('#adventure-merchant-add').click({noWaitAfter:true});
   await npc.locator('#npc-status').filter({hasText:/Boutique enregistrée et liée|Articles et tarifs enregistrés/}).waitFor({timeout:60000});
+  // The native NPC owner closes the child iframe on successful refresh.
+  // The parent status above is the visible acknowledgement after linking.
   // Read the actual saved NPC authority, not an obsolete shop selector.
   const storedMerchantId=()=>npc.locator('body').evaluate(async(_,id)=>{
    const {createUserNpcStoreV1}=await import('./src/storage/user-npc-store-v1.js');
@@ -390,6 +397,7 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   await merchant.locator('#adventure-merchant-library input:checked').first().waitFor({timeout:40000});
   assert.equal(await storedMerchantId(),merchantId,
    'link survives reload, without creating a second shop');
+  assert.equal(await merchant.locator('#adventure-merchant-library input[aria-label^="Stock du "]').first().inputValue(),'2','stock restored in visible field');
   // Place the exact authored definition (not copied NPC data) in a real
   // WorldDocument; launch the native Adventure using its normal UI.
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();

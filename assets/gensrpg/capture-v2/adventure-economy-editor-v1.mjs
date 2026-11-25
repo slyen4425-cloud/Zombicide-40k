@@ -34,7 +34,7 @@ export function installAdventureEconomyEditorV1({
   $('adventure-merchant-name').value=merchantScope?.name??'';
   $('adventure-merchant-sell-percent').value='10';
   $('adventure-merchant-buy-percent').value='-50';
-  $('adventure-merchant-add').textContent=scopedId?'Enregistrer les objets et tarifs':'Ajouter ce marchand';
+  $('adventure-merchant-add').textContent=scopedId?'Enregistrer les articles, stocks et tarifs':'Ajouter ce marchand';
   $('adventure-merchant-add').disabled=Boolean(scopedId&&byMerchant(scopedId)&&!isSimple(byMerchant(scopedId)));
   $('adventure-merchant-cancel').hidden=true;
   renderPercents();renderLibrary();
@@ -72,8 +72,11 @@ export function installAdventureEconomyEditorV1({
   const all=catalog(),visible=shownItems(all);
   host.replaceChildren();
   for(const item of visible.slice(0,120)){
+   const card=document.createElement('div');
+   card.className='adventure-merchant-item-card';
    const label=document.createElement('label');
-   label.className='adventure-merchant-item-card';
+   label.className='adventure-merchant-selection';
+   card.append(label);
    const checkbox=document.createElement('input');
    checkbox.type='checkbox';checkbox.checked=selected.has(item.id);
    checkbox.setAttribute('aria-label','Proposer '+item.name);
@@ -100,22 +103,32 @@ export function installAdventureEconomyEditorV1({
    if(selected.has(item.id)){
     const stock=document.createElement('input');
     stock.type='number';stock.min='0';stock.max='100000000';stock.step='1';
-    stock.placeholder='Stock ∞';
+    stock.placeholder='Illimité';
+    stock.inputMode='numeric';
     stock.value=Object.hasOwn(itemStocksDraft,item.id)?String(itemStocksDraft[item.id]):'';
     stock.setAttribute('aria-label','Stock du '+item.name+' (vide : illimité)');
     stock.title='Stock initial : vide = illimité ; 0 = indisponible';
+    stock.addEventListener('input',()=>{
+     const raw=stock.value.trim(),count=Number(raw);
+     if(stock.validity?.badInput)return;
+     if(raw==='')delete itemStocksDraft[item.id];
+     else if(Number.isSafeInteger(count)&&count>=0&&count<=100000000)itemStocksDraft[item.id]=count;
+    });
     stock.addEventListener('change',()=>{
      const raw=stock.value.trim();
-     if(raw===''){delete itemStocksDraft[item.id];return;}
+     if(raw===''&&!stock.validity?.badInput){delete itemStocksDraft[item.id];return;}
      const count=Number(raw);
-     if(!Number.isSafeInteger(count)||count<0||count>100000000){
+     if(stock.validity?.badInput||!Number.isSafeInteger(count)||count<0||count>100000000){
       notify('Stock : entier de 0 à 100 000 000, ou vide pour illimité.',true);
       stock.value=Object.hasOwn(itemStocksDraft,item.id)?String(itemStocksDraft[item.id]):'';
       return;
      }
      itemStocksDraft[item.id]=count;
     });
-    label.append(stock);
+    const stockLabel=document.createElement('label');
+    stockLabel.className='adventure-merchant-detail';
+    stockLabel.textContent='Stock initial (0 = épuisé)';
+    stockLabel.append(stock);card.append(stockLabel);
    }
    if(item.kind==='fragment'&&selected.has(item.id)){
     const price=document.createElement('input');
@@ -126,9 +139,12 @@ export function installAdventureEconomyEditorV1({
     price.addEventListener('change',()=>{
      fragmentPricesDraft[item.id]=Number(price.value);
     });
-    label.append(price);
+    const priceLabel=document.createElement('label');
+    priceLabel.className='adventure-merchant-detail';
+    priceLabel.textContent='Prix de base du fragment';
+    priceLabel.append(price);card.append(priceLabel);
    }
-   host.append(label);
+   host.append(card);
   }
   if(!visible.length)host.textContent=all.some(x=>x.kind===category())
    ?'Aucun article ne correspond à la recherche.'
@@ -167,7 +183,7 @@ export function installAdventureEconomyEditorV1({
   $('adventure-merchant-name').value=merchant.name;
   $('adventure-merchant-sell-percent').value=String(isSimple(merchant)?merchant.sellPercent:10);
   $('adventure-merchant-buy-percent').value=String(isSimple(merchant)?merchant.buyPercent:-50);
-  $('adventure-merchant-add').textContent='Enregistrer le marchand';
+  $('adventure-merchant-add').textContent=scopedId?'Enregistrer les articles, stocks et tarifs':'Enregistrer le marchand';
   $('adventure-merchant-cancel').hidden=false;
   renderPercents();renderLibrary();
  }

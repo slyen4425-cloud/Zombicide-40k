@@ -132,14 +132,22 @@ export function installAdventureMerchantPlayV1({
   if(!state||state.status!=='playing'||sessionId()!==state.sessionId||
      event.data.sessionId!==state.sessionId||
      document.body.dataset.adventurePlaying!=='true'||frame.hidden||
-     hasPendingCombat(state.sessionId)||dialog.open)return;
+     dialog.open)return;
+  // Explain a pending combat instead of silently ignoring an authenticated request.
+  let combatBlocked=false;
+  try{combatBlocked=hasPendingCombat(state.sessionId);}catch{combatBlocked=true;}
   const merchant=state.rules.economy?.merchants.find(
    item=>item.id===event.data.merchantId);
   // An authenticated, active Explorer may reference a removed shop. Keep
   // the existing dialog/ack/close lifecycle, but never create a fake shop
   // or make a transaction possible when the canonical reference is missing.
-  openEpoch++;openedMerchant=merchant?.id??null;openedSession=state.sessionId;
-  if(merchant){
+  openEpoch++;openedMerchant=combatBlocked?null:merchant?.id??null;openedSession=state.sessionId;
+  if(combatBlocked){
+   title.textContent='Commerce temporairement indisponible';
+   balance.textContent='';rows.replaceChildren();
+   say('Un résultat de combat reste en attente de sauvegarde. Reprends la partie pour le valider avant de commercer. Aucune transaction effectuée.',true);
+   dialog.showModal();
+  }else if(merchant){
    say('Choisis un objet et sa quantité.');
    dialog.showModal();render();
   }else{

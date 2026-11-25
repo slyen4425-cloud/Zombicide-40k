@@ -518,6 +518,20 @@ export function normalizeAdventureTrainerVictoriesV1(raw) {
   return Object.freeze({areaId,actorId});
  }));
 }
+// World actors defeated in Jouer are recorded in the SAME AdventureSession
+// as trainer victories; WorldArea placements remain untouched for the editor.
+export function normalizeAdventureWildVictoriesV1(raw){
+ if(!Array.isArray(raw))throw new TypeError('Wild victories must be an array');
+ const seen=new Set();
+ return Object.freeze(raw.map(entry=>{
+  const record=exact(entry,['areaId','actorId'],'wild victory');
+  const areaId=label(record.areaId,'wild areaId'),actorId=label(record.actorId,'wild actorId');
+  const key=JSON.stringify([areaId,actorId]);
+  if(seen.has(key))throw new RangeError('Duplicate wild victory');
+  seen.add(key);
+  return Object.freeze({areaId,actorId});
+ }));
+}
 // Instance-scoped NPC victory reward. This is only a transport contract;
 // the official Adventure item catalogue and wallet stay the sole authority.
 export function normalizeAdventureTrainerRewardV1(raw){
@@ -652,6 +666,7 @@ function assertSession(session){
   throw new TypeError('processedEncounterKeys must be an array');
  v.processedEncounterKeys.forEach(x=>identity(x,'processedEncounterKey'));
  if(Object.hasOwn(v,'trainerVictories'))normalizeAdventureTrainerVictoriesV1(v.trainerVictories);
+ if(Object.hasOwn(v,'wildVictories'))normalizeAdventureWildVictoriesV1(v.wildVictories);
  return v;
 }
 // Invert the ONE Core Progression contract, rather than maintaining a
@@ -777,6 +792,10 @@ export function applyAdventureCombatResultV1({
   areaId:label(snapshot.context?.areaId,'trainer areaId'),
   actorId:label(snapshot.context?.trainerActorId,'trainer actorId')
  } : null;
+ const wild=snapshot.source==='npc-wild' ? {
+  areaId:label(snapshot.context?.areaId,'wild areaId'),
+  actorId:label(snapshot.context?.wildActorId,'wild actorId')
+ } : null;
  const trainerReward=trainer&&Object.hasOwn(snapshot.context??{},'trainerReward')
   ?normalizeAdventureTrainerRewardV1(snapshot.context.trainerReward):null;
  if(trainer){
@@ -787,6 +806,8 @@ export function applyAdventureCombatResultV1({
   if(state.trainerVictories?.some(entry=>entry.areaId===trainer.areaId&&entry.actorId===trainer.actorId))
    throw new RangeError('Ce dresseur a déjà été battu dans cette partie');
  }
+ if(wild&&state.wildVictories?.some(entry=>entry.areaId===wild.areaId&&entry.actorId===wild.actorId))
+  throw new RangeError('Cette créature errante a déjà été vaincue dans cette partie');
  const enemyId=identity(snapshot.opponents?.[0]?.creatureId,'opponent.creatureId');
  const enemy=cards.find(c=>c.id===enemyId);
  if(!enemy)throw new RangeError('Opponent is not a creature in the published bestiaire: '+enemyId);
@@ -985,6 +1006,9 @@ export function applyAdventureCombatResultV1({
   processedEncounterKeys:[...state.processedEncounterKeys,key],
   ...(trainer&&result.outcome==='victory'?{
    trainerVictories:[...(state.trainerVictories??[]),trainer]
+  }:{}),
+  ...(wild&&result.outcome==='victory'?{
+   wildVictories:[...(state.wildVictories??[]),wild]
   }:{}),
   lastAward:award
  });

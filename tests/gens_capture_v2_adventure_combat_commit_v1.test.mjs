@@ -252,7 +252,14 @@ test('placed wild result awards canonical species loot once and never records a 
  assert.equal(receipt.persisted,true);assert.equal(receipt.award.xp,1690);
  assert.equal(receipt.award.currency,7);assert.equal(fx.store.load().inventory.items['wild-item'],1);
  assert.equal(fx.store.load().trainerVictories,undefined);
+ assert.deepEqual(fx.store.load().wildVictories,[{areaId:'real-area',actorId:'wild-actor'}]);
  const writes=fx.writes;assert.equal(commit(fx.store,raw).applied,false);assert.equal(fx.writes,writes);
+ const second=envelope({encounterId:'new-encounter',returnToken:'new-return'});
+ second.snapshot.source='npc-wild';second.snapshot.context.wildActorId='wild-actor';
+ second.snapshot.opponents=[{creatureId:'real-wild',level:3}];
+ const saved=JSON.stringify(fx.store.load());
+ assert.throws(()=>commit(fx.store,second),/déjà été vaincue/);
+ assert.equal(JSON.stringify(fx.store.load()),saved,'no second loot or progress after a wild victory');
 });
 
 test('placed wild with invalid instance level never changes the Adventure save',()=>{

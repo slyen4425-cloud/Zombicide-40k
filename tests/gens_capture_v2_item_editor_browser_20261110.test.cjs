@@ -379,10 +379,12 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   const stockBox=await stockInput.boundingBox();
   assert.ok(stockBox&&stockBox.width>=90&&stockBox.height>=40,'stock control readable on mobile');
   assert.equal(await stockInput.getAttribute('placeholder'),'Illimité');
+  assert.equal(await merchant.locator('#adventure-status').isVisible(),true,'inline validation remains visible before save');
   await stockInput.fill('2');
   await merchant.locator('#adventure-merchant-add').click({noWaitAfter:true});
   await npc.locator('#npc-status').filter({hasText:/Boutique enregistrée et liée|Articles et tarifs enregistrés/}).waitFor({timeout:60000});
-  await merchant.locator('#adventure-status').filter({hasText:/Articles, stocks et tarifs enregistrés/}).waitFor({state:'visible',timeout:15000});
+  // The native NPC owner closes the child iframe on successful refresh.
+  // The parent status above is the visible acknowledgement after linking.
   // Read the actual saved NPC authority, not an obsolete shop selector.
   const storedMerchantId=()=>npc.locator('body').evaluate(async(_,id)=>{
    const {createUserNpcStoreV1}=await import('./src/storage/user-npc-store-v1.js');

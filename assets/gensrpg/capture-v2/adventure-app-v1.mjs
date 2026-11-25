@@ -25,7 +25,7 @@ import {connectAdventureCombatHostV1} from './adventure-combat-host-v1.mjs';
 import {readScopedAdventureCombatVisibilityV1,readScopedAdventureZoneLoadingV1} from './adventure-combat-visibility-v1.mjs';
 import {projectAdventureCombatAwardV1} from './adventure-result-presentation-v1.mjs';
 import {startAdventureExplorationV1} from './adventure-play-bridge-v1.mjs';
-import {createAdventureRulesDraftStoreV1} from './adventure-rules-draft-v1.mjs';
+import {createAdventureRulesDraftStoreV1,projectAdventureMerchantDraftV1} from './adventure-rules-draft-v1.mjs';
 import {adventurePlaySheetSnapshotV1} from './adventure-play-sheet-v1.mjs';
 import {adventureOwnedCollectionV1} from './adventure-collection-v1.mjs';
 import {publishedCapturePortraitUrlV1} from './adventure-sheet-visual-v1.mjs';
@@ -106,6 +106,11 @@ const fragmentFields={
 let rules=normalizeAdventureRulesV1(SHOWCASE_ADVENTURE_RULES_V1);
 const itemEditorParams=new URLSearchParams(window.location.search);
 const itemEditorRoute=itemEditorParams.get('editor');
+const merchantPreviewId=itemEditorParams.get('merchantTest');
+const merchantPreviewNonce=itemEditorParams.get('merchantTestNonce');
+const isMerchantPreview=merchantPreviewId!==null;
+let merchantPreviewSession=null;
+if(isMerchantPreview)document.querySelector('[data-adventure-app]').hidden=true;
 const isItemEditor=['items','library','drops','merchant'].includes(itemEditorRoute);
 const itemEditorView=itemEditorRoute==='drops'||itemEditorRoute==='merchant'
  ?itemEditorRoute:'library';
@@ -1966,13 +1971,21 @@ for(const button of document.querySelectorAll('[data-adventure-sheet-tab]')){
 
 // Native Explorer supplies only proximity and the chosen merchant reference.
  // Every purchase/sale is committed under the original Adventure Core lock.
-installAdventureMerchantPlayV1({
+const merchantPlay=installAdventureMerchantPlayV1({
  window,document,frame:$('adventure-play-frame'),
- load:()=>store?.load(),save:session=>store.save(session),
- sessionId:()=>activePlayingSheet?.sessionId,
+ preview:isMerchantPreview,
+ load:()=>isMerchantPreview?merchantPreviewSession:store?.load(),
+ save:session=>{if(isMerchantPreview)merchantPreviewSession=session;else store.save(session);},
+ sessionId:()=>isMerchantPreview?merchantPreviewSession?.sessionId:activePlayingSheet?.sessionId,
  bestiaryCards:()=>published,
- hasPendingCombat:id=>Boolean(readCombatHandoff(window.localStorage,{sessionId:id})),
- afterSave:()=>{showSave();renderPlayingSheet();}
+ hasPendingCombat:id=>!isMerchantPreview&&Boolean(readCombatHandoff(window.localStorage,{sessionId:id})),
+ afterSave:()=>{if(!isMerchantPreview){showSave();renderPlayingSheet();}},
+ onPreviewClose:()=>{
+  merchantPreviewSession=null;
+  if(window.parent!==window)window.parent.postMessage({
+   schema:'gensrpg.capture.v2.npc.merchant.test.closed.v1',nonce:merchantPreviewNonce
+  },window.location.origin);
+ }
 });
 economyEditor=installAdventureEconomyEditorV1({
  document,getRules:()=>rules,getPublishedSpecies:()=>published,
@@ -1988,18 +2001,28 @@ economyEditor=installAdventureEconomyEditorV1({
      !/^[0-9a-f-]{36}$/i.test(embeddedMerchantNonce??'')||
      !/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(embeddedNpcId??''))
    throw Error('Liaison PNJ non autorisée : références invalides.');
+  const selected=store.load();
+  const nextDraft=selected?projectAdventureMerchantDraftV1({
+   draftRules:draftStore.load()??SHOWCASE_ADVENTURE_RULES_V1,
+   sourceRules:rules,merchantId
+  }):null;
   saveCurrentAdventureRules();
+  // Saving the selected adventure alone loses this world author's shop when
+  // Nouvelle partie reads its independent rules draft.
+  if(nextDraft)draftStore.save(nextDraft);
   const persisted=(store.load()?.rules??draftStore.load())?.economy?.merchants.find(m=>m.id===merchantId);
   const expected=rules.economy?.merchants.find(m=>m.id===merchantId);
-  if(!persisted||JSON.stringify(persisted)!==JSON.stringify(expected))
-   throw Error('Articles ou stocks non enregistrés : réessaie.');
+  const future=draftStore.load()?.economy?.merchants.find(m=>m.id===merchantId);
+  if(!persisted||JSON.stringify(persisted)!==JSON.stringify(expected)||
+     !future||JSON.stringify(future)!==JSON.stringify(expected))
+   throw Error('Articles ou stocks non enregistrés dans les réglages attendus : réessaie.');
   window.parent.postMessage({
    schema:'gensrpg.capture.v2.npc.merchant.saved.v1',
    npcId:embeddedNpcId,merchantId,
    nonce:embeddedMerchantNonce
   },window.location.origin);
   economyEditor.focusMerchant(merchantId);
-  stateMessage('Articles, stocks et tarifs enregistrés '+(store.load()?'dans la partie sélectionnée.':'pour la prochaine nouvelle partie.'));
+  stateMessage('Articles, stocks et tarifs enregistrés '+(selected?'dans la partie sélectionnée et pour les nouvelles parties.':'pour la prochaine nouvelle partie.'));
  },
  commitEconomy:economy=>{
   const currency={singular:$('adventure-money-singular').value.trim(),
@@ -2876,6 +2899,28 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   const official=await fetchPublishedBestiary();
   adventurePerf('boot after official bestiary');
   published=official.cards;officialCombatSha=official.combatSha;
+  if(isMerchantPreview){
+   if(window.parent===window||!/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(merchantPreviewId)||
+      !/^[a-f0-9-]{36}$/i.test(merchantPreviewNonce??''))
+    throw Error('Contexte de test marchand invalide.');
+   // Read only the same authoring scope used by the NPC form. Do not run
+   // the normal boot that materializes defaults or selects/saves a party.
+   const previewRules=normalizeAdventureRulesV1(store.load()?.rules??draftStore.load()??SHOWCASE_ADVENTURE_RULES_V1);
+   const starter=publishedAdventureSpeciesV1(published).find(card=>
+    card.skills?.some(skill=>skill.state==='ready')&&
+    ((card.rarity??'rare')==='rare'||previewRules.starterSelection?.allowAllRarities));
+   if(!starter)throw Error('Aucune créature publiée jouable pour la simulation.');
+   const id=()=>crypto.randomUUID();
+   const temporary=createAdventureSessionV1({
+    bestiaryCards:published,starterId:starter.id,rules:previewRules,
+    progressionCore:window.GensProgressionV1,ids:{sessionId:id(),instanceId:id()},
+    now:new Date().toISOString()
+   });
+   // Explicitly fictional test money; only the in-memory snapshot is mutated.
+   merchantPreviewSession={...temporary,status:'playing',inventory:{currency:1000,items:{}}};
+   merchantPlay.openPreview(merchantPreviewId);
+   return;
+  }
   await loadOfficialItemTemplates();
   adventurePerf('boot after item catalog');
   officialStatRegistry=official.statRegistry;
@@ -2931,6 +2976,7 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
    else stateMessage('Ouvre directement les réglages de ce PNJ pour configurer ses articles.',true);
   }
  }catch(error){
+  if(isMerchantPreview){merchantPlay.openPreview(merchantPreviewId,error.message);return;}
   stateMessage('Aventure indisponible : '+error.message,true);
   $('adventure-create').disabled=true;
   console.error('Adventure boot: official publication/session owner failed',error);

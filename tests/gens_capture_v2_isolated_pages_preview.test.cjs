@@ -631,8 +631,8 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
  const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
  const adapter=read(trial,'vendor/combat-lab/src/adapters/input/capture/capture-npc-opponent-instance-v1.js').toString('utf8');
  const economy=read(trial,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs').toString('utf8');
- assert.equal(pins.combat.sha,'c02be408963fed0ce8e70e028ae463f3719e1010');
- assert.equal(pins.combat.certifiedCiRun,45555910228);
+ assert.equal(pins.combat.sha,'914cedbeef37e2cff07da053b1be0fcfa56cc6f9');
+ assert.equal(pins.combat.certifiedCiRun,45619063640);
  assert.equal(provenance.combat.sha,pins.combat.sha);
  assert.equal(delivery.combat.sha,pins.combat.sha);
  assert.equal(previewPin.officialVisuals.sha,'7b882cf5a979182dfb68e9b4e87365f3a2bad17b');
@@ -644,8 +644,8 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
 test('PWA stages Vipfer five Steel skills and exactly the eight approved author media references',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
  const bundle=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
- assert.equal(source.combat.sha,'c02be408963fed0ce8e70e028ae463f3719e1010');
- assert.equal(source.combat.certifiedCiRun,45555910228);
+ assert.equal(source.combat.sha,'914cedbeef37e2cff07da053b1be0fcfa56cc6f9');
+ assert.equal(source.combat.certifiedCiRun,45619063640);
  assert.equal(bundle.combat.sha,source.combat.sha,'the real staged combat must match the certified pin');
  assert.equal(previewPin.officialVisuals.sha,'7b882cf5a979182dfb68e9b4e87365f3a2bad17b');
  const slugs=['morsure-ressort','etreinte-acier','mue-tranchante','couronne-eclats','broyeur-serpentin'];
@@ -844,7 +844,7 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
 
 test('the PWA physically ships the generic author description and zone/trail editor, not species-specific code',()=>{
  const pinned=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(pinned.combat.sha,'c02be408963fed0ce8e70e028ae463f3719e1010');
+ assert.equal(pinned.combat.sha,'914cedbeef37e2cff07da053b1be0fcfa56cc6f9');
  assert.equal(pinned.exploration.sha,'55aac7cef63134e6f92355bf530c8967d08d0d10');
  const explanation=read(trial,'vendor/combat-lab/src/ui/capture-skill-explanation-v1.js').toString('utf8');
  const editor=read(trial,'vendor/combat-lab/src/ui/capture-editor-human-v2.js').toString('utf8');
@@ -942,7 +942,7 @@ test('published Capture carries the opt-in potion import and actual merchant sto
  assert.match(economy,/merchant\.itemStocks/);
  assert.match(shop,/state\.merchantStocks/);
  const pins=json(trial,base+'source-pins-v1.json');
- assert.equal(pins.combat.sha,'c02be408963fed0ce8e70e028ae463f3719e1010');
+ assert.equal(pins.combat.sha,'914cedbeef37e2cff07da053b1be0fcfa56cc6f9');
  assert.equal(pins.exploration.sha,'55aac7cef63134e6f92355bf530c8967d08d0d10');
 });
 

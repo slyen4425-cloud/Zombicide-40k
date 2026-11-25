@@ -118,6 +118,12 @@ const embeddedNpcId=isEmbeddedNpcMerchant?itemEditorParams.get('npcId'):null;
 const embeddedMerchantNonce=isEmbeddedNpcMerchant?itemEditorParams.get('npcBridgeNonce'):null;
 const linkedMerchantId=(returnToNpc||isEmbeddedNpcMerchant)
  ?itemEditorParams.get('merchantId'):null;
+// One form is scoped to the selected PNJ, including when its first shop
+// does not exist yet. Existing legacy references are never rewritten.
+const embeddedMerchantScope=isEmbeddedNpcMerchant?Object.freeze({
+ id:linkedMerchantId??('merchant-'+embeddedNpcId),
+ name:(itemEditorParams.get('npcName')??'').trim().slice(0,80)
+}):null;
 let libraryCategory='usable';
 let activeItemEditId=null;
 let activeDropEditIndex=null,autoFocusedDropIndex=null;
@@ -1969,7 +1975,7 @@ installAdventureMerchantPlayV1({
 });
 economyEditor=installAdventureEconomyEditorV1({
  document,getRules:()=>rules,getPublishedSpecies:()=>published,
- getItemIconUrl:officialItemIconUrl,
+ getItemIconUrl:officialItemIconUrl,merchantScope:embeddedMerchantScope,
  onMerchantCommitted:merchantId=>{
   // Save on the single Capture AdventureRules authority *before* linking
   // the PNJ by reference. No merchant catalog is persisted in Exploration.
@@ -1977,7 +1983,7 @@ economyEditor=installAdventureEconomyEditorV1({
    stateMessage('Marchand configuré. Enregistre les paramètres de l’aventure.');
    return;
   }
-  if(!/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(merchantId)||
+  if(merchantId!==embeddedMerchantScope.id||!/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(merchantId)||
      !/^[0-9a-f-]{36}$/i.test(embeddedMerchantNonce??'')||
      !/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(embeddedNpcId??''))
    throw Error('Liaison PNJ non autorisée : références invalides.');
@@ -1988,7 +1994,7 @@ economyEditor=installAdventureEconomyEditorV1({
    nonce:embeddedMerchantNonce
   },window.location.origin);
   economyEditor.focusMerchant(merchantId);
-  stateMessage('Boutique enregistrée et associée au PNJ dans son éditeur.');
+  stateMessage('Objets, stocks et tarifs de ce PNJ enregistrés.');
  },
  commitEconomy:economy=>{
   const currency={singular:$('adventure-money-singular').value.trim(),
@@ -2910,15 +2916,14 @@ $('adventure-drop-add').addEventListener('click',guarded(()=>{
   ]);
   adventurePerf('boot ready (world library + hero gallery)');
   stateMessage('Prêt pour l’aventure : choisis Nouvelle partie ou Charger partie.');
-  if(isEmbeddedNpcMerchant&&!linkedMerchantId){
-   const npcName=(itemEditorParams.get('npcName')??'').trim().slice(0,80);
-   if(npcName)$('adventure-merchant-name').value=npcName;
-   stateMessage('Sélectionne les objets et leurs tarifs, puis enregistre : la boutique sera liée automatiquement au PNJ.');
-  }
-  if(itemEditorView==='merchant'&&linkedMerchantId){
+  if(isEmbeddedNpcMerchant){
+   const exists=economyEditor?.focusMerchant(embeddedMerchantScope.id);
+   stateMessage(exists?'Modifie les articles et tarifs de ce PNJ.':
+    'Choisis les articles de ce PNJ puis enregistre. Aucune boutique à créer ou à associer séparément.');
+  }else if(itemEditorView==='merchant'&&linkedMerchantId){
    if(economyEditor?.focusMerchant(linkedMerchantId))
     stateMessage('Boutique liée à ton PNJ sélectionnée : modifie ses offres ou son rachat.');
-   else stateMessage('La boutique liée à ce PNJ est introuvable dans cet univers : vérifie son association.',true);
+   else stateMessage('Ouvre directement les réglages de ce PNJ pour configurer ses articles.',true);
   }
  }catch(error){
   stateMessage('Aventure indisponible : '+error.message,true);

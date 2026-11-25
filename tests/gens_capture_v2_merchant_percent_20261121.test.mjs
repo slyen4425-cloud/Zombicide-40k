@@ -125,3 +125,50 @@ test('merchant stock editor reuses the canonical selection and session stock own
  assert.match(economy,/stock:merchant\.itemStocks\?\.\[target\]/);
  assert.doesNotMatch(editor,/localStorage|sessionStorage|new Map\(|window\.location\.assign/);
 });
+
+test('direct PNJ editor: first save and repeat save upsert the exact same merchant, never expose another shop',async()=>{
+ const {installAdventureEconomyEditorV1}=await import('../assets/gensrpg/capture-v2/adventure-economy-editor-v1.mjs');
+ function element(){
+  return {value:'',hidden:false,disabled:false,children:[],handlers:{},dataset:{},
+   append(...nodes){this.children.push(...nodes);},replaceChildren(...nodes){this.children=nodes;},
+   addEventListener(type,fn){this.handlers[type]=fn;},
+   setAttribute(){},scrollIntoView(){},fire(type='click'){this.handlers[type]?.();}};
+ }
+ const nodes={};
+ const document={getElementById:id=>nodes[id]??=element(),createElement:()=>element(),
+  defaultView:{confirm:()=>false,crypto:{randomUUID(){throw Error('A scoped NPC must not mint another shop ID');}}}};
+ const $=document.getElementById;
+ let state=rules,commits=[],errors=[];
+ $('adventure-money-singular').value='pièce';$('adventure-money-plural').value='pièces';
+ $('adventure-merchant-category').value='resource';
+ const scope={id:'merchant-'+ 'n'.repeat(121),name:'PNJ neuf'};
+ assert.equal(scope.id.length,130);
+ const editor=installAdventureEconomyEditorV1({document,merchantScope:scope,getRules:()=>state,
+  commitEconomy:economy=>{state=normalizeAdventureRulesV1({...state,economy});},
+  notify:m=>errors.push(m),onMerchantCommitted:id=>commits.push(id)});
+ editor.sync(state);
+ assert.equal($('adventure-merchants').hidden,true);
+ assert.equal($('adventure-merchants').children.length,0);
+ assert.equal($('adventure-merchant-name').value,'PNJ neuf');
+ $('adventure-merchant-all').fire();
+ $('adventure-merchant-sell-percent').value='20';
+ $('adventure-merchant-add').fire();
+ assert.deepEqual(commits,[scope.id]);
+ assert.equal(state.economy.merchants.length,2);
+ assert.deepEqual(state.economy.merchants[0],merchant);
+ assert.equal(state.economy.merchants[1].id,scope.id);
+ assert.ok(state.economy.merchants[1].itemIds.includes('relique'));
+ $('adventure-merchant-sell-percent').value='35';
+ $('adventure-merchant-add').fire();
+ assert.equal(state.economy.merchants.length,2);
+ assert.equal(state.economy.merchants[1].sellPercent,35);
+ assert.deepEqual(commits,[scope.id,scope.id]);
+ assert.equal(editor.focusMerchant(merchant.id),false);
+ assert.deepEqual(errors,[]);
+ const existing={...session(),rules:state,inventory:{currency:500,items:{}}};
+ const bought=tradeAdventureMerchantV1({session:existing,merchantId:scope.id,
+  itemId:'relique',kind:'buy',quantity:1,actionId:'direct-npc-buy',
+  now:'2026-11-21T13:01:00.000Z',bestiaryCards:published});
+ assert.equal(bought.receipt.currencyAmount,135);
+ assert.equal(bought.session.inventory.items.relique,1);
+});

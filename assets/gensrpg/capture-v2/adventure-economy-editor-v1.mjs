@@ -5,7 +5,8 @@ import {DEFAULT_ADVENTURE_ECONOMY_V1,adventureMerchantPriceV1}
  from './adventure-economy-v1.mjs';
 
 export function installAdventureEconomyEditorV1({
- document,getRules,commitEconomy,notify,getItemIconUrl,getPublishedSpecies,onMerchantCommitted
+ document,getRules,commitEconomy,notify,getItemIconUrl,getPublishedSpecies,onMerchantCommitted,
+ merchantScope=null
 }){
  const $=id=>document.getElementById(id);
  const option=(value,label)=>{const node=document.createElement('option');
@@ -14,6 +15,9 @@ export function installAdventureEconomyEditorV1({
  const current=()=>getRules().economy??DEFAULT_ADVENTURE_ECONOMY_V1;
  const items=()=>getRules().loot.items;
  const byMerchant=id=>current().merchants.find(m=>m.id===id);
+ const scopedId=merchantScope?.id??null;
+ if(scopedId&&!/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(scopedId))
+  throw Error('Référence PNJ invalide.');
  let editedId=null,selected=new Set(),fragmentPricesDraft={},itemStocksDraft={};
  const isSimple=m=>Array.isArray(m.itemIds);
  const pct=n=>(n>0?'+':'')+n+' %';
@@ -27,10 +31,11 @@ export function installAdventureEconomyEditorV1({
  }
  function clearMerchant(){
   editedId=null;selected=new Set();fragmentPricesDraft={};itemStocksDraft={};
-  $('adventure-merchant-name').value='';
+  $('adventure-merchant-name').value=merchantScope?.name??'';
   $('adventure-merchant-sell-percent').value='10';
   $('adventure-merchant-buy-percent').value='-50';
-  $('adventure-merchant-add').textContent='Ajouter ce marchand';
+  $('adventure-merchant-add').textContent=scopedId?'Enregistrer les objets et tarifs':'Ajouter ce marchand';
+  $('adventure-merchant-add').disabled=Boolean(scopedId&&byMerchant(scopedId)&&!isSimple(byMerchant(scopedId)));
   $('adventure-merchant-cancel').hidden=true;
   renderPercents();renderLibrary();
  }
@@ -38,7 +43,7 @@ export function installAdventureEconomyEditorV1({
   const money=config.economy?.currency??DEFAULT_ADVENTURE_ECONOMY_V1.currency;
   $('adventure-money-singular').value=money.singular;
   $('adventure-money-plural').value=money.plural;
-  clearMerchant();render();
+  resetMerchantForm();render();
  }
  function renderPercents(){
   const sell=Number($('adventure-merchant-sell-percent').value);
@@ -148,7 +153,9 @@ export function installAdventureEconomyEditorV1({
    'Cette boutique utilise les anciens prix, stocks ou échanges. La convertir '+ 
    'remplacera ces paramètres par les deux pourcentages et une liste d’objets. '+
    'Les anciennes parties ne seront pas modifiées. Continuer ?'))return;
+  if(scopedId&&merchant.id!==scopedId)throw Error('Ce formulaire appartient à un autre PNJ.');
   editedId=merchant.id;
+  $('adventure-merchant-add').disabled=false;
   itemStocksDraft=isSimple(merchant)?{...(merchant.itemStocks??{})}:
    Object.fromEntries(merchant.offers.filter(offer=>offer.stock!==null)
     .map(offer=>[offer.itemId,offer.stock]));
@@ -164,9 +171,21 @@ export function installAdventureEconomyEditorV1({
   $('adventure-merchant-cancel').hidden=false;
   renderPercents();renderLibrary();
  }
+ function resetMerchantForm(){
+  clearMerchant();
+  const existing=scopedId?byMerchant(scopedId):null;
+  if(existing&&isSimple(existing))editMerchant(existing);
+ }
  function render(){
   const host=$('adventure-merchants');host.replaceChildren();
-  for(const merchant of current().merchants){
+  // In a PNJ context no second list of shops is created or selectable.
+  // Only the legacy conversion command for THIS merchant may be necessary.
+  const scopedMerchant=scopedId?byMerchant(scopedId):null;
+  const visibleMerchants=scopedId
+   ?(scopedMerchant&&!isSimple(scopedMerchant)&&editedId!==scopedId?[scopedMerchant]:[])
+   :current().merchants;
+  host.hidden=Boolean(scopedId&&!visibleMerchants.length);
+  for(const merchant of visibleMerchants){
    const line=document.createElement('div');line.className='rule-row';
    line.dataset.merchantId=merchant.id;
    const label=document.createElement('span');
@@ -186,9 +205,11 @@ export function installAdventureEconomyEditorV1({
     commitEconomy({...current(),merchants:current().merchants.filter(m=>m.id!==merchant.id)});
     clearMerchant();render();notify('Marchand retiré du brouillon. Enregistre les paramètres.');
    }));
-   line.append(label,edit,remove);host.append(line);
+   line.append(label,edit);
+   if(!scopedId)line.append(remove);
+   host.append(line);
   }
-  if(!current().merchants.length)host.textContent='Aucun marchand configuré.';
+  if(!scopedId&&!current().merchants.length)host.textContent='Aucun marchand configuré.';
   renderLibrary();
  }
  function isItemUsed(itemId){
@@ -203,7 +224,7 @@ export function installAdventureEconomyEditorV1({
   const available=new Set(catalog().map(x=>x.id));
   const itemIds=[...selected].filter(id=>available.has(id));
   const fragments=itemIds.filter(id=>id.startsWith('fragment:'));
-  const merchant={id:editedId??'merchant-'+document.defaultView.crypto.randomUUID(),
+  const merchant={id:scopedId??editedId??'merchant-'+document.defaultView.crypto.randomUUID(),
    name,itemIds,
    sellPercent:Number($('adventure-merchant-sell-percent').value),
    buyPercent:Number($('adventure-merchant-buy-percent').value),
@@ -212,14 +233,17 @@ export function installAdventureEconomyEditorV1({
    ...(itemIds.some(id=>Object.hasOwn(itemStocksDraft,id))
     ?{itemStocks:Object.fromEntries(itemIds.filter(id=>Object.hasOwn(itemStocksDraft,id))
       .map(id=>[id,itemStocksDraft[id]]))}:{})};
-  const merchants=editedId
-   ?current().merchants.map(m=>m.id===editedId?merchant:m)
+  const previous=byMerchant(merchant.id);
+  if(scopedId&&previous&&!isSimple(previous)&&editedId!==scopedId)
+   throw Error('Confirme la conversion de cette ancienne boutique avant de la modifier.');
+  const merchants=previous
+   ?current().merchants.map(m=>m.id===merchant.id?merchant:m)
    :[...current().merchants,merchant];
-  commitEconomy({...current(),merchants});clearMerchant();render();
+  commitEconomy({...current(),merchants});resetMerchantForm();render();
   if(onMerchantCommitted)onMerchantCommitted(merchant.id);
   else notify('Marchand configuré. Enregistre les paramètres pour conserver ses règles.');
  }));
- $('adventure-merchant-cancel').addEventListener('click',clearMerchant);
+ $('adventure-merchant-cancel').addEventListener('click',()=>{resetMerchantForm();render();});
  $('adventure-merchant-search').addEventListener('input',renderLibrary);
  $('adventure-merchant-category').addEventListener('change',renderLibrary);
  for(const key of ['sell','buy']){
@@ -238,13 +262,16 @@ export function installAdventureEconomyEditorV1({
    selected.delete(item.id);
   renderLibrary();
  });
- clearMerchant();
- // The linked PNJ selects an existing canonical shop without duplicating data.
+ resetMerchantForm();
+ // An old link is preserved. A missing link opens this same form, using
+ // the PNJ's reserved ID, so its first save is an upsert, not a second shop.
  function focusMerchant(merchantId){
+  if(scopedId&&merchantId!==scopedId)return false;
   const merchant=byMerchant(merchantId);
-  if(!merchant)return false;
+  if(!merchant){if(scopedId){resetMerchantForm();render();}return false;}
   if(isSimple(merchant))editMerchant(merchant);
-  $('adventure-merchants')?.scrollIntoView?.({block:'nearest'});
+  else if(scopedId){resetMerchantForm();render();}
+  if(!scopedId)$('adventure-merchants')?.scrollIntoView?.({block:'nearest'});
   return true;
  }
  return {read,sync,render,isItemUsed,focusMerchant};

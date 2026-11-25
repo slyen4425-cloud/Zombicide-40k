@@ -1,3 +1,12 @@
+# Lot #629 / #594 — marchand réel en Aventure (25/11)
+
+START: `b1b0532c7838520c3bce72f943dfa35eea4452b4` (source certifiée), checkpoint `checkpoint/gensrpg-start-capture-merchant-real-map-20261125`.
+- Verrou transactionnel: l'identité session/boutique/ouverture doit rester celle du clic, même si le dialogue ferme pendant l'attente du verrou.
+- Test navigateur: PNJ créé, boutique liée, placement dans WorldDocument officiel, achat/revente et stock sauvegardé. Aucun second catalogue ni portefeuille. Aucun changement aux pins du lot #649.
+- Validation: tests ciblés, CI native, review, GREEN avant publication; contrôle auteur différé.
+
+---
+
 ## 2026-11-24 — #529 · Raccord Capture du comportement sauvage certifié
 - START Capture `acdd99b57a2f8d06e9371c5c60ffc14f19471524`, checkpoint `checkpoint/gensrpg-start-capture-wild-behavior-2026-11-24`, branche `work/capture-wild-behavior-529-20261124`. Publisher GREEN `c32645450ccf887084afa43f23413ba59109a9a5`, 9/9 workflows et HTTPS 45491907598. Exploration #548 GREEN `52c0736f16b4bf75209a3839255135786719188c`, CI 45491305221 / Pages 45491305075. Combat reste 826c6cdd, #390 en certification séparée.
 - Transport du pin Exploration et sentinelles; corriger dans le calcul XP déjà propriétaire la lecture du niveau réel d’une instance sauvage placée, sans changer les règles des autres rencontres. Tests niveau réel, loot, anti-replay et sauvegardes. Pas de nouveau système de capture, ni copie de moteurs ou médias. Publisher distinct après certification.

@@ -720,14 +720,19 @@ body[data-adventure-item-editor="true"] .adventure-start-tabs{display:none!impor
 
 /* Merchant authoring: category/preview belongs to the existing Capture loot
    catalog, not a second item registry. Compact on landscape Android. */
-.adventure-merchant-library{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
- gap:7px;max-height:225px;overflow:auto;padding:7px 2px;overscroll-behavior:contain}
-.adventure-merchant-item-card{display:flex;align-items:center;gap:7px;min-width:0;
- border:1px solid #426f70;background:#173640;border-radius:9px;padding:6px;
- cursor:pointer;font-size:12px;overflow-wrap:anywhere}
-.adventure-merchant-item-card:has(input:checked){border-color:#9aeac9;background:#24594e}
+.adventure-merchant-library{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));
+ gap:7px;max-height:280px;overflow:auto;padding:7px 2px;overscroll-behavior:contain}
+.adventure-merchant-item-card{display:grid;gap:7px;min-width:0;
+ border:1px solid #426f70;background:#173640;border-radius:9px;padding:9px;
+ font-size:12px;overflow-wrap:anywhere}
+.adventure-merchant-item-card:has(input[type=checkbox]:checked){border-color:#9aeac9;background:#24594e}
+.adventure-merchant-item-card .adventure-merchant-selection{display:flex;justify-content:flex-start;align-items:center;gap:8px;margin:0;cursor:pointer;min-width:0;min-height:32px}
 .adventure-merchant-item-card img{width:36px;height:36px;object-fit:contain;flex-shrink:0}
-.adventure-merchant-item-card input{flex-shrink:0;width:19px;height:19px}
+.adventure-merchant-item-card input[type=checkbox]{flex-shrink:0;width:22px;height:22px}
+.adventure-merchant-item-card .adventure-merchant-detail{display:grid;gap:4px;margin:0;color:#f0ffff;font-size:12px}
+.adventure-merchant-item-card input[type=number]{width:100%;height:44px;min-height:44px;padding:7px 10px;font-size:16px;background:#102d36}
+.adventure-merchant-item-card input[type=number]::placeholder{color:#c1dedc;opacity:1}
+body[data-adventure-item-embed="npc"] #adventure-status{max-width:none;padding:8px;border:1px solid #426f70;border-radius:8px;margin:6px 0;font-weight:650}
 #adventure-merchant-search{flex:1 1 180px;min-width:130px}
 #adventure-merchant-selected-count{display:block;font-weight:700;margin:8px 0}
 .adventure-merchant-percent-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
@@ -739,7 +744,7 @@ body[data-adventure-item-editor="true"] .adventure-start-tabs{display:none!impor
 #adventure-merchant-price-example{display:block;padding:9px;border-radius:8px;
  background:#143e3c;font-weight:650}
 @media(orientation:landscape) and (max-height:550px){
- .adventure-merchant-library{max-height:160px;grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+ .adventure-merchant-library{max-height:220px;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr))}
  .adventure-merchant-percent-grid{gap:6px}
  .adventure-merchant-percent-grid label{padding:7px}
 }

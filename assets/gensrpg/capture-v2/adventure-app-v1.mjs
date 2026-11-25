@@ -219,7 +219,8 @@ function setupCanonicalItemEditor(){
  if(itemEditorView==='merchant'){
   $('adventure-economy-panel').open=true;
   if(isEmbeddedNpcMerchant){
-   document.getElementById('adventure-save-rules').textContent='Enregistrer les paramètres de la boutique';
+   // Move the original status into the visible PNJ form.
+   $('adventure-merchant-add').closest('.actions').after(status);
    // A linked PNJ merchant must expose the catalog selector without requiring
    // the player to discover a collapsed nested panel.
    $('adventure-merchant-library').closest('details').open=true;
@@ -1988,13 +1989,17 @@ economyEditor=installAdventureEconomyEditorV1({
      !/^[a-z0-9][a-z0-9_:.-]{0,129}$/i.test(embeddedNpcId??''))
    throw Error('Liaison PNJ non autorisée : références invalides.');
   saveCurrentAdventureRules();
+  const persisted=(store.load()?.rules??draftStore.load())?.economy?.merchants.find(m=>m.id===merchantId);
+  const expected=rules.economy?.merchants.find(m=>m.id===merchantId);
+  if(!persisted||JSON.stringify(persisted)!==JSON.stringify(expected))
+   throw Error('Articles ou stocks non enregistrés : réessaie.');
   window.parent.postMessage({
    schema:'gensrpg.capture.v2.npc.merchant.saved.v1',
    npcId:embeddedNpcId,merchantId,
    nonce:embeddedMerchantNonce
   },window.location.origin);
   economyEditor.focusMerchant(merchantId);
-  stateMessage('Objets, stocks et tarifs de ce PNJ enregistrés.');
+  stateMessage('Articles, stocks et tarifs enregistrés '+(store.load()?'dans la partie sélectionnée.':'pour la prochaine nouvelle partie.'));
  },
  commitEconomy:economy=>{
   const currency={singular:$('adventure-money-singular').value.trim(),

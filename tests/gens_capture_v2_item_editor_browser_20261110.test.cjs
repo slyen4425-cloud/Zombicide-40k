@@ -295,6 +295,34 @@ test('real smartphone merchant: proximity iframe opens only canonical shop and b
   await page.waitForFunction(()=>window.__merchantSession.inventory.currency===20);
   assert.equal(await page.evaluate(()=>window.__merchantSession.inventory.items.relique??0),0);
   await page.locator('#adventure-merchant-close').click();
+  // A queued purchase must not execute against a later opening, even for
+  // the identical shop. Hold the production shared lock, close/reopen, release.
+  await page.waitForFunction(()=>!document.querySelector('#adventure-merchant-dialog').open);
+  await page.evaluate(()=>document.getElementById('native-explorer').contentWindow.openNativeShop('merchant-simple'));
+  await page.locator('#adventure-merchant-dialog[open]').waitFor();
+  const beforeQueued=await page.evaluate(()=>JSON.stringify(window.__merchantSession));
+  await page.evaluate(()=>{
+   void navigator.locks.request('gensrpg.capture.v2.adventure-combat:merchant-session',()=>
+    new Promise(resolve=>{window.releaseMerchantLock=resolve;}));
+  });
+  await page.waitForFunction(()=>typeof window.releaseMerchantLock==='function');
+  await page.getByRole('button',{name:'Acheter'}).click();
+  await page.waitForFunction(async()=>{
+   const state=await navigator.locks.query();
+   return state.pending.some(lock=>lock.name==='gensrpg.capture.v2.adventure-combat:merchant-session');
+  });
+  await page.locator('#adventure-merchant-close').click();
+  await page.waitForFunction(()=>!document.querySelector('#adventure-merchant-dialog').open);
+  // Wait for the close lifecycle before issuing a new native request.
+  await page.evaluate(()=>new Promise(resolve=>setTimeout(resolve,0)));
+  await page.evaluate(()=>document.getElementById('native-explorer').contentWindow.openNativeShop('merchant-simple'));
+  await page.locator('#adventure-merchant-dialog[open]').waitFor();
+  await page.evaluate(()=>window.releaseMerchantLock());
+  await page.getByRole('button',{name:'Acheter'}).waitFor();
+  await page.waitForFunction(()=>!Array.from(document.querySelectorAll('#adventure-merchant-trades button')).some(b=>b.disabled));
+  assert.equal(await page.evaluate(()=>JSON.stringify(window.__merchantSession)),beforeQueued,
+   'closing the shop cancels the queued trade, even when the same shop reopens');
+  await page.locator('#adventure-merchant-close').click();
  }finally{
   await browser?.close();server.closeAllConnections();
   await new Promise(ok=>server.close(ok));

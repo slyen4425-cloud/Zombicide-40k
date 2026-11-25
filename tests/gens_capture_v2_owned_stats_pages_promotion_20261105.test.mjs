@@ -27,12 +27,12 @@ test('published Monster Capture stays isolated and retains exact certified origi
  // The original 9eef5847 author branch remains an ancestor: GitHub compare
  // The new Raiiven author archive import advances global-assets without deleting\n // the Veuve V2 or other author media; immutable SHA and import run stay pinned.
  // 2026-11-25: compare 1d138d8...7b882cf confirms ahead by 3, no removed files.
- // Original approved Raiiven/Veuve/Polocendre files stay intact; #399 added 46 idle GIFs on top with CI 45648785403 GREEN.
+ // Original approved Raiiven/Veuve/Polocendre files stay intact; #399 added 46 idle GIFs + 2 validated Dracendre GIFs on top with CI 45648785403 GREEN.
  // The official Veuve V2 import workflow publishes this exact immutable asset
  // catalog; Pages MUST still validate all referenced physical files and size.
- assert.equal(file.officialVisuals.sha,'58488e2d16ff253697ad259404a71e2d895348ff',
+ assert.equal(file.officialVisuals.sha,'3169aaf8ead839683b40d9a17ce4ad1b8ff8cfb6',
   'the certified canonical catalog must retain Raiiven and Veuve jaune plus Polocendre Cheval de feu icon and the four Veuve jaune atlases');
- assert.equal(file.officialVisuals.certifiedCiRun,45648785403,
+ assert.equal(file.officialVisuals.certifiedCiRun,45683905164,
   'provenance is the successful author asset import; final Pages and browser checks remain mandatory');
  const workflow=fs.readFileSync(new URL('../.github/workflows/main.yml',import.meta.url),'utf8');
  assert.match(workflow,/steps\.preview_labs\.outputs\.combat/);

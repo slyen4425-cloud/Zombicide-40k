@@ -280,7 +280,7 @@ test('PWA carries exact cleaned bridge and stair binaries with stable native IDs
 
 test('native World Builder map exporter and in-game 200% dezoom are shipped once from certified Exploration',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(source.exploration.sha,'1333b74a5306bb07473f3c1f58be18804b9a5a75',
+ assert.equal(source.exploration.sha,'da445a85caa11d3d0503a3fc1227cad4e6b11471',
    'ship certified Exploration main with the sculpt palette, cleaned bridges and stair profiles');
  const helper='vendor/exploration-lab/src/builder/world-assembler-map-preset-export-v1.js';
  required(trial,helper);
@@ -341,14 +341,15 @@ const certifiedDirectMerchantSha='afdd45a4ab4065c0921b160a38a948ca3663e62f'; // 
 const certifiedFinalMerchantSha='55aac7cef63134e6f92355bf530c8967d08d0d10'; // #553: CI 45586658460, Pages 45586658600, identical renderer blob.
 const certifiedLightingSha='18acbbf28e82973e3d0cf3935fe3a56cf47c159b'; // certified #555 renderer 82e230a2095bceecfdc7e566d3bddaf63f3c2dbc
 const certifiedDoorPromptSha='1333b74a5306bb07473f3c1f58be18804b9a5a75'; // #557 certified CSS-only transition visual, native south renderer Git blob unchanged.
+const certifiedDecorAssetsSha='da445a85caa11d3d0503a3fc1227cad4e6b11471'; // #558 CI 45680415618 and Pages 45680415517 GREEN; same renderer blob.
 const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #554: CI 45624477145, Pages 45624477116 and 45640176867 SUCCESS, identical renderer blob.
  // The stair fix changes navigation and sprite presentation only. Its
  // canonical south terrain renderer remains byte-identical to recoveredWorld.
- const expectedOfficialRendererBlob=[certifiedLightingSha,certifiedDoorPromptSha].includes(explorationSha)?'82e230a2095bceecfdc7e566d3bddaf63f3c2dbc': [certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha].includes(explorationSha)
+ const expectedOfficialRendererBlob=[certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha].includes(explorationSha)?'82e230a2095bceecfdc7e566d3bddaf63f3c2dbc': [certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha].includes(explorationSha)
    ?'19b0c9822048381793cd705f7cfcb2d4cdc207fa'
    :[certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha].includes(explorationSha)
    ?'98c70979a719b2bad48a35df972bb880b6a62f5e'
-   :[recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha].includes(explorationSha)
+   :[recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha].includes(explorationSha)
    ?'6c101756bdf9c58a9ae8cf3fe104e49575145748'
    :explorationSha===fringeRoadExplorationSha
     ?'1a0869afc5b258e8f403f43cd26b3f417a6c8786'
@@ -359,7 +360,7 @@ const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #55
  assert.equal(provenance.exploration.sha,explorationSha,
    'the complete native Exploration checkout must match the source pin');
  assert.ok(['13bbd8230d8dfcef612586974b2dcb54e18e16c4',
-   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha].includes(explorationSha),
+   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha].includes(explorationSha),
    'release must reject unreviewed Exploration main SHAs');
  const bytes=read(trial,official);
  const gitBlob=crypto.createHash('sha1')
@@ -374,7 +375,7 @@ const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #55
  const sculpt=read(trial,'vendor/exploration-lab/src/sculpt-lab-main.js').toString('utf8');
  assert.match(sculpt,/drawOuterSouthRim:false/);
  assert.match(sculpt,/drawDecorativeFringeTerrain\(\)/);
- if([fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha].includes(explorationSha)){
+ if([fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha].includes(explorationSha)){
   assert.match(sculpt,/drawDecorativeFringeObjects\('back'\)/);
   assert.match(sculpt,/drawDecorativeFringeObjects\('front'\)/);
   const north=sculpt.indexOf("drawDecorativeFringeObjects('back');");
@@ -382,7 +383,7 @@ const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #55
   const south=sculpt.indexOf("drawDecorativeFringeObjects('front');",hero);
   assert.ok(north>=0&&hero>north&&south>hero,
    'a southern tree must layer in front of the player but own no collision');
-  if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha].includes(explorationSha)){
+  if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha].includes(explorationSha)){
    assert.doesNotMatch(text,/ctx.fillRect\(rect.x,rect.y,rect.width,rect.height\)/,
     'no per-tile translucent altitude paint on a raised road or grass');
    assert.match(text,/for\(const \{side,opacity\} of info.contactShadows\)/,
@@ -634,12 +635,12 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
  const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
  const adapter=read(trial,'vendor/combat-lab/src/adapters/input/capture/capture-npc-opponent-instance-v1.js').toString('utf8');
  const economy=read(trial,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs').toString('utf8');
- assert.equal(pins.combat.sha,'914cedbeef37e2cff07da053b1be0fcfa56cc6f9');
- assert.equal(pins.combat.certifiedCiRun,45619063640);
+ assert.equal(pins.combat.sha,'dcb464e5bd0f24e1eeeafcc8995822f601e5fd10');
+ assert.equal(pins.combat.certifiedCiRun,45684410124);
  assert.equal(provenance.combat.sha,pins.combat.sha);
  assert.equal(delivery.combat.sha,pins.combat.sha);
- assert.equal(previewPin.officialVisuals.sha,'58488e2d16ff253697ad259404a71e2d895348ff');
- assert.equal(previewPin.officialVisuals.certifiedCiRun,45648785403);
+ assert.equal(previewPin.officialVisuals.sha,'3169aaf8ead839683b40d9a17ce4ad1b8ff8cfb6');
+ assert.equal(previewPin.officialVisuals.certifiedCiRun,45683905164);
  assert.ok(adapter.includes('export '));
  assert.match(economy,/adventureMerchantPriceV1/);
 });
@@ -647,10 +648,10 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
 test('PWA stages Vipfer five Steel skills and exactly the eight approved author media references',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
  const bundle=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
- assert.equal(source.combat.sha,'914cedbeef37e2cff07da053b1be0fcfa56cc6f9');
- assert.equal(source.combat.certifiedCiRun,45619063640);
+ assert.equal(source.combat.sha,'dcb464e5bd0f24e1eeeafcc8995822f601e5fd10');
+ assert.equal(source.combat.certifiedCiRun,45684410124);
  assert.equal(bundle.combat.sha,source.combat.sha,'the real staged combat must match the certified pin');
- assert.equal(previewPin.officialVisuals.sha,'58488e2d16ff253697ad259404a71e2d895348ff');
+ assert.equal(previewPin.officialVisuals.sha,'3169aaf8ead839683b40d9a17ce4ad1b8ff8cfb6');
  const slugs=['morsure-ressort','etreinte-acier','mue-tranchante','couronne-eclats','broyeur-serpentin'];
  const ids=slugs.map(slug=>'vipfer-'+slug);
  const creature=json(trial,'vendor/combat-lab/data/capture/showcase/Vipfer.capture-creature-transfer-v1.json');
@@ -819,7 +820,7 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
   const base=html.match(/<select id="material">([\s\S]*?)<\/select>/)?.[1]??'';
   const rows=[["grass.forest.tall","texture.grass.forest.tall.01","terrain_haute_herbe_01.webp","forest","9a127bde4f600d1fbb77fc8cb1a03f7bc05d569576805e98ad461bb59627a49b"],["grass.forest.flowers","texture.grass.forest.flowers.01","terrain_herbe_fleurie_01.webp","forest","6cef9ed6c7e12b67f1e9d2cb1ab2ba7d3f13908ef6e111a32797462ae92bfff0"],["ground.snow.rocky","texture.ground.snow.rocky.01","terrain_neige_rocheuse_01.webp","snow","2e336b9446c335b0cf5f1913b45dbae5a137cb691ab77bd2ff7dbc57337cda35"],["ground.dirt.textured","texture.ground.dirt.textured.01","terrain_sol_terre_01.webp","plain","e3d1958b076497b6b56b29a582792ad583a42d94cff7d2206efae5af691f1440"],["ground.volcanic.rocky","texture.ground.volcanic.rocky.01","terrain_sol_volcanique_01.webp","volcano","d14a157801e96c4a0e7121cb044799c1bfe17ea15125aa9e63029f417faf2cbc"]];
   const provenance=json(trial,'release-provenance.v1.json');
-  assert.equal(provenance.exploration.sha,'1333b74a5306bb07473f3c1f58be18804b9a5a75');
+  assert.equal(provenance.exploration.sha,'da445a85caa11d3d0503a3fc1227cad4e6b11471');
   for(const [materialId,assetId,filename,family,hash] of rows){
     const rel=owner+'assets/exploration/materials/forest/surfaces/'+filename;
     required(trial,rel);
@@ -847,8 +848,8 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
 
 test('the PWA physically ships the generic author description and zone/trail editor, not species-specific code',()=>{
  const pinned=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(pinned.combat.sha,'914cedbeef37e2cff07da053b1be0fcfa56cc6f9');
- assert.equal(pinned.exploration.sha,'1333b74a5306bb07473f3c1f58be18804b9a5a75');
+ assert.equal(pinned.combat.sha,'dcb464e5bd0f24e1eeeafcc8995822f601e5fd10');
+ assert.equal(pinned.exploration.sha,'da445a85caa11d3d0503a3fc1227cad4e6b11471');
  const explanation=read(trial,'vendor/combat-lab/src/ui/capture-skill-explanation-v1.js').toString('utf8');
  const editor=read(trial,'vendor/combat-lab/src/ui/capture-editor-human-v2.js').toString('utf8');
  assert.match(explanation,/if\(d\.salvo\)/,'auto description must show configured salvo count');
@@ -945,8 +946,8 @@ test('published Capture carries the opt-in potion import and actual merchant sto
  assert.match(economy,/merchant\.itemStocks/);
  assert.match(shop,/state\.merchantStocks/);
  const pins=json(trial,base+'source-pins-v1.json');
- assert.equal(pins.combat.sha,'914cedbeef37e2cff07da053b1be0fcfa56cc6f9');
- assert.equal(pins.exploration.sha,'1333b74a5306bb07473f3c1f58be18804b9a5a75');
+ assert.equal(pins.combat.sha,'dcb464e5bd0f24e1eeeafcc8995822f601e5fd10');
+ assert.equal(pins.exploration.sha,'da445a85caa11d3d0503a3fc1227cad4e6b11471');
 });
 
 test('both owners explain missing merchant links in the assembled PWA',()=>{
@@ -980,10 +981,17 @@ test('certified HUD editor, native encounter handoff and four author-validated V
  const combat='vendor/combat-lab/';
  const explorer='vendor/exploration-lab/';
  const editor=read(trial,combat+'examples/dom-demo/capture-editor-v2.html').toString('utf8');
- assert.match(editor,/data-hud-layout-profile/);
- assert.match(editor,/data-hud-layout-preview/);
+ // Combat #401 replaced the old form with the native visual authoring surface.
+ for(const selector of ['data-hud-layout-preview','data-hud-author-toolbar','data-hud-author-profile','data-hud-author-drag','data-hud-author-add-slot','data-hud-author-add-column','data-hud-author-portraits-local','data-hud-author-portraits-opponent','data-hud-author-apply','data-hud-author-test'])assert.ok(editor.includes(selector),selector);
+ assert.doesNotMatch(editor,/data-hud-layout-profile/,'obsolete competing authoring form must not return');
  required(trial,combat+'src/contracts/capture-hud-layout-v1.js');
- required(trial,combat+'src/ui/capture-hud-layout-editor-v1.js');
+ const author=read(trial,combat+'src/ui/capture-hud-visual-author-v1.js').toString('utf8');
+ const preview=read(trial,combat+'src/ui/capture-hud-layout-preview-v1.js').toString('utf8');
+ assert.match(author,/mountCaptureHudVisualAuthorV1/);
+ assert.match(author,/data-hud-author-apply/);
+ assert.match(author,/data-hud-author-test/);
+ assert.match(preview,/mountCaptureHudLayoutPreviewV1/);
+ assert.equal(fs.existsSync(path.join(trial,combat+'src/ui/capture-hud-layout-editor-v1.js')),false,'retired parallel editor must not ship');
  const handoff=read(trial,explorer+'combat-preview/examples/dom-demo/exploration-encounter.js').toString('utf8');
  assert.match(handoff,/hudLayout/);
  const media=explorer+'capture-assets/assets/library/capture/creatures/veuve_jaune/animations/';
@@ -1011,4 +1019,73 @@ test('PWA ships native manual building doors and Capture-owned merchant Tester',
  assert.match(sculpt,/arrivalPortalId/);
  assert.match(html,/id="npc-merchant-test-frame"/);
  assert.match(merchant,/openPreview/);
+});
+
+test('Dracendre 24 real idle frames are shipped by the one canonical visual library and V11 showcase',()=>{
+ const catalog=json(trial,'vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json');
+ assert.equal(catalog.counts.assets,555);
+ assert.equal(catalog.counts.sprites,305);
+ const dracendre=json(trial,'vendor/combat-lab/data/capture/showcase/crea_dracendre.capture-creature-transfer-v1.json').draft;
+ assert.equal(dracendre.id,'crea_dracendre');
+ assert.equal(dracendre.presentation.version,11);
+ const idle=dracendre.presentation.visual.idle;
+ assert.equal(idle.mode,'gif');
+ for(const [role,side,digest] of [
+  ['opponent','face','f65b7bf068d04a7dda64748a3e12a8ae8c70f65432ccaa0ff46c31b9b8beaf46'],
+  ['player','dos','164f839b07d537e84755eff03e54711694d4701a5aceaf5ff4c89b4cdf767275']
+ ]){
+  const id='pack:capture:creature-braisombre-idle-'+role+'-gif-v1';
+  assert.equal(idle[side==='face'?'frontAssetId':'backAssetId'],id);
+  const asset=catalog.assets.find(x=>x.id===id);
+  assert.ok(asset,'GIF asset must exist in the single catalog');
+  const gif=read(trial,'vendor/exploration-lab/capture-assets/assets/library/'+asset.resource.file);
+  assert.equal(gif.subarray(0,6).toString('ascii'),'GIF89a');
+  assert.equal(gif.readUInt16LE(6),512);assert.equal(gif.readUInt16LE(8),512);
+  assert.equal(sha256(gif),digest,'original author 12-frame idle must not be changed');
+ }
+ for(const [slot,id] of [
+  ['movement','pack:capture:creature-braisombre-movement-face-12-v1'],
+  ['movementBack','pack:capture:creature-braisombre-movement-dos-12-v1'],
+  ['rangedAttack','pack:capture:creature-braisombre-attack-face-12-v1'],
+  ['rangedAttackBack','pack:capture:creature-braisombre-attack-dos-12-v1']
+ ])assert.equal(dracendre.presentation.visual[slot].assetId,id);
+});
+test('Veuve jaune retains all four author-approved view actions in the certified PWA',()=>{
+ const creature=json(trial,'vendor/combat-lab/data/capture/showcase/veuve-jaune.capture-creature-transfer-v1.json').draft;
+ assert.equal(creature.id,'veuve-jaune');
+ for(const [slot,id] of [
+  ['movement','pack:capture:creature-veuve-jaune-movement-opponent-5-20261125'],
+  ['movementBack','pack:capture:creature-veuve-jaune-movement-player-6-20261125'],
+  ['rangedAttack','pack:capture:creature-veuve-jaune-attack-opponent-6-20261125'],
+  ['rangedAttackBack','pack:capture:creature-veuve-jaune-attack-player-9-20261125']
+ ])assert.equal(creature.presentation.visual[slot].assetId,id);
+ assert.deepEqual(creature.presentation.visual.rangedAttackPlacement.back,{x:0,y:-20});
+ assert.equal(creature.combat.maxHp,110);
+});
+
+test('85 certified Genesis decor WebPs ship once with their exact native definitions',()=>{
+ const owner='vendor/exploration-lab/';
+ const manifestPath='assets/exploration/objects/manifest.genesis-decor-20261125.json';
+ const raw=read(trial,owner+manifestPath);
+ assert.equal(crypto.createHash('sha1').update('blob '+raw.length+String.fromCharCode(0)).update(raw).digest('hex'),'7da7dc825f189df7e82cbf50952b1a1ca1862f62');
+ const m=JSON.parse(raw);
+ assert.equal(m.assetCount,85);assert.equal(m.sourceCount,77);assert.equal(m.bytes,4298742);
+ assert.equal(m.assets.length,85);
+ assert.equal(new Set(m.assets.map(x=>x.sha256)).size,85);
+ assert.equal(new Set(m.assets.map(x=>x.assetId)).size,85);
+ assert.equal(m.assets.filter(x=>x.traversable).length,32);
+ const registry=read(trial,owner+'src/objects/object-definition-catalog.js').toString('utf8');
+ const adapter=read(trial,owner+'src/assets/world-object-asset-adapter.js').toString('utf8');
+ for(const rec of m.assets){
+  const bytes=read(trial,owner+rec.file);
+  assert.equal(bytes.length,rec.bytes,rec.file);
+  assert.equal(sha256(bytes),rec.sha256,rec.file);
+  assert.equal(bytes.toString('ascii',8,12),'WEBP');
+  assert.ok(registry.includes(rec.definitionId),rec.definitionId);
+  assert.ok(adapter.includes(rec.assetId)&&adapter.includes(rec.file),rec.assetId);
+  assert.equal(fs.existsSync(path.join(trial,rec.file)),false,'no parallel decor copy');
+  assert.equal(fs.existsSync(path.join(site,rec.file)),false,'no root decor copy');
+  assert.equal(fs.existsSync(path.join(trial,owner+rec.archive)),false,'source archives excluded');
+  assert.equal(fs.existsSync(path.join(site,rec.archive)),false);
+ }
 });

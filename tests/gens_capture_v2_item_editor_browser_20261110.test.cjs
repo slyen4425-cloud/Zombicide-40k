@@ -356,6 +356,7 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
    .waitFor({state:'visible',timeout:45000});
   await npc.locator('#npc-name').fill('Marchand intégré témoin');
   await npc.locator('#npc-role').selectOption('merchant');
+  await npc.locator('#npc-dialogue').fill('Bienvenue dans ma boutique !');
   // A genuine user-uploaded 64×64 PNG, not an invented Bestiary entry.
   const png=new PNG({width:64,height:64});
   for(let i=0;i<png.data.length;i+=4){
@@ -449,6 +450,9 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   await adventure.locator('#adventure-play').tap();
   await play.locator('#npc-talk').waitFor({state:'visible',timeout:45000});
   await play.locator('#npc-talk').tap();
+  await play.locator('#npc-dialogue-next').filter({hasText:'Commercer'}).waitFor({state:'visible',timeout:15000});
+  assert.equal(await play.locator('#npc-dialogue-trade').isVisible(),false,'one final commerce action');
+  await play.locator('#npc-dialogue-next').tap();
   await adventure.locator('#adventure-merchant-dialog[open]').waitFor({timeout:15000});
   await adventure.getByRole('button',{name:'Acheter',exact:true}).tap();
   await page.waitForFunction(f=>JSON.parse(localStorage.getItem(
@@ -472,6 +476,9 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   await adventure.locator('#adventure-play:not([disabled])').tap();
   await play.locator('#npc-talk').waitFor({state:'visible',timeout:45000});
   await play.locator('#npc-talk').tap();
+  await play.locator('#npc-dialogue-next').filter({hasText:'Commercer'}).waitFor({state:'visible',timeout:15000});
+  assert.equal(await play.locator('#npc-dialogue-trade').isVisible(),false,'one final commerce action');
+  await play.locator('#npc-dialogue-next').tap();
   await adventure.locator('#adventure-merchant-dialog[open]').waitFor({timeout:15000});
   await adventure.getByRole('button',{name:'Acheter',exact:true}).tap();
   await page.waitForFunction(f=>JSON.parse(localStorage.getItem(

@@ -203,6 +203,6 @@ test('already-running game adopts ONLY an authored matching NPC merchant on the 
  const source=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
  const presenter=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-merchant-play-v1.mjs',import.meta.url),'utf8');
  assert.match(source,/repairMissingMerchant:async/);
- assert.match(source,/window\\.navigator\\.locks\\.request/);
+ assert.match(source,/window\.navigator\.locks\.request/);
  assert.match(presenter,/await repairMissingMerchant/);
 });

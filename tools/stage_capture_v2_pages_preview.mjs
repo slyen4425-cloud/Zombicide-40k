@@ -337,6 +337,7 @@ const certifiedWildEncounterSha='bdac9bade51cb908fe0e7a5fc8d06ac3f2a8d874';
 const certifiedWildBehaviorSha='52c0736f16b4bf75209a3839255135786719188c';
 const certifiedHudSha='46654efe2b7d084d8ae891362e5d4e2999c3ab8c'; // #550: CI 45554656523, Pages 45554656527, identical renderer blob.
 const certifiedDirectMerchantSha='afdd45a4ab4065c0921b160a38a948ca3663e62f'; // #552: CI 45569743090, Pages 45569743151, identical renderer blob.
+const certifiedFinalMerchantSha='55aac7cef63134e6f92355bf530c8967d08d0d10'; // #553: CI 45586658460, Pages 45586658600, identical renderer blob.
 const waterPassageSouthBlob='19b0c9822048381793cd705f7cfcb2d4cdc207fa';
 const navigationAllowSouthBlob='98c70979a719b2bad48a35df972bb880b6a62f5e';
 const recoveredWorldSouthBlob='6c101756bdf9c58a9ae8cf3fe104e49575145748';
@@ -397,11 +398,11 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
    throw Error('Certified native elevated-ground renderer differs from Exploration main');
  releasedSouthBlob=recoveredWorldSouthBlob;
  southRendererOriginSha=sourcePin.exploration.sha;
-}else if([certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha].includes(sourcePin.exploration.sha)){
+}else if([certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha].includes(sourcePin.exploration.sha)){
  // The canonical owner intentionally hides navigationOnly ramps in play.
  // Certify its EXACT Git blob; preserve all physical passages in Collision
  // World, and NEVER modify/copy the original native renderer in the PWA.
- const waterPassage=[certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha].includes(sourcePin.exploration.sha);
+ const waterPassage=[certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha].includes(sourcePin.exploration.sha);
  const expectedSouthBlob=waterPassage?waterPassageSouthBlob:navigationAllowSouthBlob;
  if(gitBlobSha(pinnedSouthRenderer)!==expectedSouthBlob||
     (waterPassage&&!pinnedSouthRenderer.includes('if(bridge.visibleInPlay)drawSculptWaterSupport(ctx,bridge,rise);'))||

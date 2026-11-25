@@ -376,13 +376,18 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   await merchant.locator('#adventure-merchant-library input[type="checkbox"]').first().check();
   await merchant.locator('#adventure-merchant-library input[aria-label^="Stock du "]').first().fill('2');
   await merchant.locator('#adventure-merchant-add').click({noWaitAfter:true});
-  await npc.locator('#npc-status:has-text("Boutique enregistrée et liée")').waitFor({timeout:60000});
-  const merchantId=await npc.locator('#npc-merchant-choice').inputValue();
+  await npc.locator('#npc-status').filter({hasText:/Boutique enregistrée et liée|Articles et tarifs enregistrés/}).waitFor({timeout:60000});
+  // Read the actual saved NPC authority, not an obsolete shop selector.
+  const storedMerchantId=()=>npc.locator('body').evaluate(async(_,id)=>{
+   const {createUserNpcStoreV1}=await import('./src/storage/user-npc-store-v1.js');
+   return (await createUserNpcStoreV1().get(id))?.npc?.merchantId;
+  },npcId);
+  const merchantId=await storedMerchantId();
   assert.match(merchantId,/^merchant-/,'the saved PNJ must receive the Capture merchantId');
   await npc.locator('#npc-merchant-configure').tap();
   await merchant.locator('#adventure-merchant-name').waitFor({state:'visible',timeout:60000});
   await merchant.locator('#adventure-merchant-library input:checked').first().waitFor({timeout:40000});
-  assert.equal(await npc.locator('#npc-merchant-choice').inputValue(),merchantId,
+  assert.equal(await storedMerchantId(),merchantId,
    'link survives reload, without creating a second shop');
   // Place the exact authored definition (not copied NPC data) in a real
   // WorldDocument; launch the native Adventure using its normal UI.

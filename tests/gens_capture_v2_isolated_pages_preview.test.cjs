@@ -634,12 +634,12 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
  const delivery=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
  const adapter=read(trial,'vendor/combat-lab/src/adapters/input/capture/capture-npc-opponent-instance-v1.js').toString('utf8');
  const economy=read(trial,'assets/gensrpg/capture-v2/adventure-economy-v1.mjs').toString('utf8');
- assert.equal(pins.combat.sha,'914cedbeef37e2cff07da053b1be0fcfa56cc6f9');
- assert.equal(pins.combat.certifiedCiRun,45619063640);
+ assert.equal(pins.combat.sha,'dcb464e5bd0f24e1eeeafcc8995822f601e5fd10');
+ assert.equal(pins.combat.certifiedCiRun,45684410124);
  assert.equal(provenance.combat.sha,pins.combat.sha);
  assert.equal(delivery.combat.sha,pins.combat.sha);
- assert.equal(previewPin.officialVisuals.sha,'58488e2d16ff253697ad259404a71e2d895348ff');
- assert.equal(previewPin.officialVisuals.certifiedCiRun,45648785403);
+ assert.equal(previewPin.officialVisuals.sha,'3169aaf8ead839683b40d9a17ce4ad1b8ff8cfb6');
+ assert.equal(previewPin.officialVisuals.certifiedCiRun,45683905164);
  assert.ok(adapter.includes('export '));
  assert.match(economy,/adventureMerchantPriceV1/);
 });
@@ -647,10 +647,10 @@ test('published merchant + Combat PNJ share the certified owner and the 25-media
 test('PWA stages Vipfer five Steel skills and exactly the eight approved author media references',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
  const bundle=json(trial,'assets/gensrpg/capture-v2/delivery-manifest.json');
- assert.equal(source.combat.sha,'914cedbeef37e2cff07da053b1be0fcfa56cc6f9');
- assert.equal(source.combat.certifiedCiRun,45619063640);
+ assert.equal(source.combat.sha,'dcb464e5bd0f24e1eeeafcc8995822f601e5fd10');
+ assert.equal(source.combat.certifiedCiRun,45684410124);
  assert.equal(bundle.combat.sha,source.combat.sha,'the real staged combat must match the certified pin');
- assert.equal(previewPin.officialVisuals.sha,'58488e2d16ff253697ad259404a71e2d895348ff');
+ assert.equal(previewPin.officialVisuals.sha,'3169aaf8ead839683b40d9a17ce4ad1b8ff8cfb6');
  const slugs=['morsure-ressort','etreinte-acier','mue-tranchante','couronne-eclats','broyeur-serpentin'];
  const ids=slugs.map(slug=>'vipfer-'+slug);
  const creature=json(trial,'vendor/combat-lab/data/capture/showcase/Vipfer.capture-creature-transfer-v1.json');
@@ -847,7 +847,7 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
 
 test('the PWA physically ships the generic author description and zone/trail editor, not species-specific code',()=>{
  const pinned=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(pinned.combat.sha,'914cedbeef37e2cff07da053b1be0fcfa56cc6f9');
+ assert.equal(pinned.combat.sha,'dcb464e5bd0f24e1eeeafcc8995822f601e5fd10');
  assert.equal(pinned.exploration.sha,'1333b74a5306bb07473f3c1f58be18804b9a5a75');
  const explanation=read(trial,'vendor/combat-lab/src/ui/capture-skill-explanation-v1.js').toString('utf8');
  const editor=read(trial,'vendor/combat-lab/src/ui/capture-editor-human-v2.js').toString('utf8');
@@ -945,7 +945,7 @@ test('published Capture carries the opt-in potion import and actual merchant sto
  assert.match(economy,/merchant\.itemStocks/);
  assert.match(shop,/state\.merchantStocks/);
  const pins=json(trial,base+'source-pins-v1.json');
- assert.equal(pins.combat.sha,'914cedbeef37e2cff07da053b1be0fcfa56cc6f9');
+ assert.equal(pins.combat.sha,'dcb464e5bd0f24e1eeeafcc8995822f601e5fd10');
  assert.equal(pins.exploration.sha,'1333b74a5306bb07473f3c1f58be18804b9a5a75');
 });
 
@@ -1011,4 +1011,46 @@ test('PWA ships native manual building doors and Capture-owned merchant Tester',
  assert.match(sculpt,/arrivalPortalId/);
  assert.match(html,/id="npc-merchant-test-frame"/);
  assert.match(merchant,/openPreview/);
+});
+
+test('Dracendre 24 real idle frames are shipped by the one canonical visual library and V11 showcase',()=>{
+ const catalog=json(trial,'vendor/exploration-lab/capture-assets/data/assets/catalog/global-visual-assets.v1.json');
+ assert.equal(catalog.counts.assets,555);
+ assert.equal(catalog.counts.sprites,305);
+ const dracendre=json(trial,'vendor/combat-lab/data/capture/showcase/crea_dracendre.capture-creature-transfer-v1.json').draft;
+ assert.equal(dracendre.id,'crea_dracendre');
+ assert.equal(dracendre.presentation.version,11);
+ const idle=dracendre.presentation.visual.idle;
+ assert.equal(idle.mode,'gif');
+ for(const [role,side,digest] of [
+  ['opponent','face','f65b7bf068d04a7dda64748a3e12a8ae8c70f65432ccaa0ff46c31b9b8beaf46'],
+  ['player','dos','164f839b07d537e84755eff03e54711694d4701a5aceaf5ff4c89b4cdf767275']
+ ]){
+  const id='pack:capture:creature-braisombre-idle-'+role+'-gif-v1';
+  assert.equal(idle[side==='face'?'frontAssetId':'backAssetId'],id);
+  const asset=catalog.assets.find(x=>x.id===id);
+  assert.ok(asset,'GIF asset must exist in the single catalog');
+  const gif=read(trial,'vendor/exploration-lab/capture-assets/assets/library/'+asset.resource.file);
+  assert.equal(gif.subarray(0,6).toString('ascii'),'GIF89a');
+  assert.equal(gif.readUInt16LE(6),512);assert.equal(gif.readUInt16LE(8),512);
+  assert.equal(sha256(gif),digest,'original author 12-frame idle must not be changed');
+ }
+ for(const [slot,id] of [
+  ['movement','pack:capture:creature-braisombre-movement-face-12-v1'],
+  ['movementBack','pack:capture:creature-braisombre-movement-dos-12-v1'],
+  ['rangedAttack','pack:capture:creature-braisombre-attack-face-12-v1'],
+  ['rangedAttackBack','pack:capture:creature-braisombre-attack-dos-12-v1']
+ ])assert.equal(dracendre.presentation.visual[slot].assetId,id);
+});
+test('Veuve jaune retains all four author-approved view actions in the certified PWA',()=>{
+ const creature=json(trial,'vendor/combat-lab/data/capture/showcase/veuve-jaune.capture-creature-transfer-v1.json').draft;
+ assert.equal(creature.id,'veuve-jaune');
+ for(const [slot,id] of [
+  ['movement','pack:capture:creature-veuve-jaune-movement-opponent-5-20261125'],
+  ['movementBack','pack:capture:creature-veuve-jaune-movement-player-6-20261125'],
+  ['rangedAttack','pack:capture:creature-veuve-jaune-attack-opponent-6-20261125'],
+  ['rangedAttackBack','pack:capture:creature-veuve-jaune-attack-player-9-20261125']
+ ])assert.equal(creature.presentation.visual[slot].assetId,id);
+ assert.deepEqual(creature.presentation.visual.rangedAttackPlacement.back,{x:0,y:-20});
+ assert.equal(creature.combat.maxHp,110);
 });

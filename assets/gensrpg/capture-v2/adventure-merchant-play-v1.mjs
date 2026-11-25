@@ -6,7 +6,7 @@ import {adventureMerchantPriceV1} from './adventure-economy-v1.mjs';
 
 export function installAdventureMerchantPlayV1({
  window,document,frame,load,save,sessionId,bestiaryCards,
- hasPendingCombat,afterSave,preview=false,onPreviewClose
+ hasPendingCombat,afterSave,repairMissingMerchant,preview=false,onPreviewClose
 }={}){
  const dialog=document.getElementById('adventure-merchant-dialog');
  const title=document.getElementById('adventure-merchant-title');
@@ -125,7 +125,7 @@ export function installAdventureMerchantPlayV1({
   }catch(error){if(sameOpening())say('Transaction refusée : '+error.message,true);}
   finally{busy=false;render();}
  }
- const onMessage=event=>{
+ const onMessage=async event=>{
   if(preview)return;
   if(event.origin!==window.location.origin||event.source!==frame.contentWindow||
      event.data?.schema!=='gensrpg.exploration.npc.merchant.open.v1')return;
@@ -152,6 +152,20 @@ export function installAdventureMerchantPlayV1({
   // Explain a pending combat instead of silently ignoring an authenticated request.
   let combatBlocked=false;
   try{combatBlocked=hasPendingCombat(state.sessionId);}catch{combatBlocked=true;}
+  // This is a real player interaction, not a startup or silent migration.
+  // Only Capture may restore its own authored shop from the SAME universe
+  // draft under the Adventure Core lock; never manufacture a default shop.
+  if(!combatBlocked&&!state.rules.economy?.merchants.some(m=>m.id===event.data.merchantId)
+      &&typeof repairMissingMerchant==='function'){
+   try{
+    const repaired=await repairMissingMerchant({
+     sessionId:activeSession,merchantId:event.data.merchantId
+    });
+    if(repaired)state=repaired;
+   }catch(error){console.warn('Marchand : liaison de partie non réconciliée',error);}
+  }
+  if(sessionId()!==activeSession||document.body.dataset.adventurePlaying!=='true'||
+     frame.hidden||dialog.open||state.sessionId!==activeSession)return;
   openShop(state,event.data.merchantId,combatBlocked);
   frame.contentWindow?.postMessage({
    schema:'gensrpg.capture.v2.npc.merchant.open-ack.v1',

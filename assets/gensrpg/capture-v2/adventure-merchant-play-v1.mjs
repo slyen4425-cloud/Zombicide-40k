@@ -128,11 +128,26 @@ export function installAdventureMerchantPlayV1({
  const onMessage=event=>{
   if(event.origin!==window.location.origin||event.source!==frame.contentWindow||
      event.data?.schema!=='gensrpg.exploration.npc.merchant.open.v1')return;
-  const state=load();
-  if(!state||state.status!=='playing'||sessionId()!==state.sessionId||
-     event.data.sessionId!==state.sessionId||
+  const activeSession=sessionId();
+  if(!activeSession||event.data.sessionId!==activeSession||
      document.body.dataset.adventurePlaying!=='true'||frame.hidden||
      dialog.open)return;
+  // The authenticated, visible Explorer may outlive a selected/corrupt save.
+  // Surface the refusal in the same Capture-owned modal, with no transactions,
+  // rather than swallowing the player's action without any explanation.
+  let state;
+  try{state=load();}catch(error){console.error('Marchand : sauvegarde inaccessible',error);}
+  if(!state||state.status!=='playing'||state.sessionId!==activeSession){
+   openEpoch++;openedMerchant=null;openedSession=activeSession;
+   title.textContent='Commerce temporairement indisponible';
+   balance.textContent='';rows.replaceChildren();
+   say('La sauvegarde active ne correspond plus à cette aventure. Reprends cette partie depuis le menu. Aucune transaction effectuée.',true);
+   dialog.showModal();
+   frame.contentWindow?.postMessage({
+    schema:'gensrpg.capture.v2.npc.merchant.open-ack.v1',sessionId:openedSession
+   },window.location.origin);
+   return;
+  }
   // Explain a pending combat instead of silently ignoring an authenticated request.
   let combatBlocked=false;
   try{combatBlocked=hasPendingCombat(state.sessionId);}catch{combatBlocked=true;}

@@ -330,7 +330,7 @@ test('real smartphone merchant: proximity iframe opens only canonical shop and b
 });
 
 test('merchant edits inside the saved NPC; official Capture commits the inventory and only merchantId is linked', 
- {timeout:195000},async()=>{
+ {timeout:300000},async()=>{
  await new Promise(ok=>server.listen(0,'127.0.0.1',ok));
  let browser;
  try{
@@ -345,6 +345,23 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
    {waitUntil:'domcontentloaded',timeout:60000});
   await page.locator('button.gensRootModeCard.capture').tap();
   await page.locator('#gensCaptureV2Root [data-capture-universe-select="monster-invoc"]').tap();
+  // Authoring a world after already having a save used to write the shop
+  // only to that save, while the next Nouvelle partie ignored it.
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
+  const prior=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
+  await prior.locator('#adventure-start-new').tap();
+  await prior.locator('#adventure-create:not([disabled])').waitFor({timeout:25000});
+  await prior.locator('#adventure-official-hero-grid .adventure-official-hero-card').first().tap();
+  await page.waitForFunction(()=>/^hero\.user\.[a-f0-9-]{36}$/.test(
+   document.querySelector('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]')
+    ?.contentDocument?.querySelector('#adventure-hero-choice')?.value??''),null,{timeout:45000});
+  await prior.locator('#adventure-player-alias').fill('Partie précédente');
+  await prior.locator('#adventure-create').tap();
+  await prior.locator('#adventure-play:not([disabled])').waitFor({timeout:25000});
+  const oldSessionId=await page.evaluate(()=>JSON.parse(localStorage.getItem(
+   'gensrpg.capture.v2.adventure.portfolio.v1')).selectedSessionId);
+  assert.ok(oldSessionId);
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
   assert.equal(await page.locator('[data-capture-v2-view="merchant"]').count(),0,
    'standalone merchant navigation must be gone');
@@ -375,13 +392,16 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   await merchant.locator('#adventure-merchant-name').waitFor({state:'visible',timeout:60000});
   assert.equal(await merchant.locator('body').getAttribute('data-adventure-item-embed'),'npc');
   assert.equal(await merchant.locator('#adventure-loot-global-rewards').isVisible(),false);
-  await merchant.locator('#adventure-merchant-library input[type="checkbox"]').first().check();
-  const stockInput=merchant.locator('#adventure-merchant-library input[aria-label^="Stock du "]').first();
+  await merchant.locator('#adventure-merchant-category').selectOption('usable');
+  await merchant.getByRole('checkbox',{name:'Proposer Potion de soins',exact:true}).check();
+  await merchant.getByRole('checkbox',{name:'Proposer Potion de réanimation',exact:true}).check();
+  const stockInput=merchant.getByRole('spinbutton',{name:'Stock du Potion de soins (vide : illimité)',exact:true});
   const stockBox=await stockInput.boundingBox();
   assert.ok(stockBox&&stockBox.width>=90&&stockBox.height>=40,'stock control readable on mobile');
   assert.equal(await stockInput.getAttribute('placeholder'),'Illimité');
   assert.equal(await merchant.locator('#adventure-status').isVisible(),true,'inline validation remains visible before save');
-  await stockInput.fill('2');
+  await stockInput.fill('3');
+  await merchant.getByRole('spinbutton',{name:'Stock du Potion de réanimation (vide : illimité)',exact:true}).fill('3');
   await merchant.locator('#adventure-merchant-add').click({noWaitAfter:true});
   await npc.locator('#npc-status').filter({hasText:/Boutique enregistrée et liée|Articles et tarifs enregistrés/}).waitFor({timeout:60000});
   // The native NPC owner closes the child iframe on successful refresh.
@@ -395,12 +415,123 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   assert.equal(merchantId,'merchant-'+npcId,'new PNJ gets a stable automatic shop reference');
   await npc.locator('#npc-merchant-configure').tap();
   await merchant.locator('#adventure-merchant-name').waitFor({state:'visible',timeout:60000});
+  await merchant.locator('#adventure-merchant-category').selectOption('usable');
   await merchant.locator('#adventure-merchant-library input:checked').first().waitFor({timeout:40000});
   assert.equal(await storedMerchantId(),merchantId,
    'link survives reload, without creating a second shop');
-  assert.equal(await merchant.locator('#adventure-merchant-library input[aria-label^="Stock du "]').first().inputValue(),'2','stock restored in visible field');
-  // Place the exact authored definition (not copied NPC data) in a real
-  // WorldDocument; launch the native Adventure using its normal UI.
+  assert.equal(await merchant.getByRole('spinbutton',{name:'Stock du Potion de soins (vide : illimité)',exact:true}).inputValue(),'3');
+  assert.equal(await merchant.getByRole('spinbutton',{name:'Stock du Potion de réanimation (vide : illimité)',exact:true}).inputValue(),'3');
+  // Verify the exact Capture-owned modal used by the editor test bridge.
+  // Read existing authored rules, buy with test funds, close, and prove that
+  // neither the old save nor the future-game draft was mutated.
+  const snapshot=()=>page.evaluate(()=>Object.fromEntries(Object.keys(localStorage)
+   .filter(k=>k.includes('gensrpg.capture.v2.adventure')).sort()
+   .map(k=>[k,localStorage.getItem(k)])));
+  const beforeTest=await snapshot();
+  await page.evaluate(id=>{
+   const testFrame=document.createElement('iframe');
+   testFrame.id='merchant-test-fixture';
+   testFrame.style='position:fixed;inset:0;width:100vw;height:100dvh;z-index:99999;background:white';
+   const url=new URL('assets/gensrpg/capture-v2/adventure.html',document.baseURI);
+   url.searchParams.set('merchantTest',id);
+   url.searchParams.set('merchantTestNonce',crypto.randomUUID());
+   testFrame.src=url.href;document.body.append(testFrame);
+  },merchantId);
+  const preview=page.frameLocator('#merchant-test-fixture');
+  await preview.locator('#adventure-merchant-dialog[open]').waitFor({timeout:60000});
+  assert.match(await preview.locator('#adventure-merchant-balance').innerText(),/TEST.*fictif/);
+  assert.match(await preview.locator('#adventure-merchant-trades').innerText(),/Potion de soins.*stock 3/);
+  await preview.getByRole('button',{name:'Acheter',exact:true}).first().tap();
+  await preview.locator('#adventure-merchant-trades').filter({hasText:/Potion de soins.*stock 2/}).waitFor();
+  assert.deepEqual(await snapshot(),beforeTest,'simulation must not write any Adventure persistence');
+  await preview.locator('#adventure-merchant-close').tap();
+  await page.locator('#merchant-test-fixture').evaluate(frame=>frame.remove());
+  assert.deepEqual(await snapshot(),beforeTest);
+  // Seed only a blank map; placement/removal/replacement and saving must
+  // pass through the actual World Builder, not injected actor records.
+  await npc.locator('body').evaluate(async()=>{
+   const {createBlankWorldBuilderDraft}=await import('./src/builder/world-builder-draft.js');
+   const {saveWorldAssemblerDraft}=await import('./src/builder/world-assembler-handoff.js');
+   saveWorldAssemblerDraft(localStorage,createBlankWorldBuilderDraft({
+    id:'merchant-ci-world',width:36*28,height:24*21
+   }));
+  });
+  await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  await page.locator('#gensCaptureV2Root [data-capture-v2-view="world"]').tap();
+  const builder=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
+  await builder.locator('#world-workspace-map').tap();
+  await builder.locator('#sculpt-canvas').waitFor({state:'visible',timeout:45000});
+  const nativeFrame=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
+  await page.waitForFunction(id=>document.querySelector('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]')
+   ?.contentWindow?.__sculptActorsProbe?.()?.definitions?.includes(id),npcId,{timeout:45000});
+  await builder.locator('#mode-objects').tap();
+  await builder.locator('#actor-open').tap();
+  const chooseNpc=async()=>{
+   await builder.locator('#actor-npc-library-open').tap();
+   await builder.locator('#actor-npc-gallery button').filter({hasText:'Marchand intégré témoin'}).tap();
+  };
+  const canvas=builder.locator('#sculpt-canvas');
+  const place=async()=>{
+   await canvas.scrollIntoViewIfNeeded();
+   const position=await canvas.evaluate(el=>{
+    const p=window.__sculptLabProbe(),rect=el.getBoundingClientRect();
+    for(const [cx,cy] of [[18,12],[17,12],[18,11],[17,11]]){
+     const x=rect.left+p.cameraPan.x+(cx+.5)*28*p.zoom;
+     const y=rect.top+p.cameraPan.y+(cy+.5)*21*p.zoom;
+     if(document.elementFromPoint(x,y)===el)return {x:x-rect.left,y:y-rect.top};
+    }
+    throw Error('No reachable World Builder cell near the start');
+   });
+   await canvas.tap({position});
+  };
+  const count=()=>nativeFrame.evaluate(el=>el.contentWindow.__sculptActorsProbe().count);
+  await chooseNpc();
+  await place();
+  assert.equal(await count(),1);
+  await builder.locator('#actor-action').selectOption('remove');
+  await place();
+  assert.equal(await count(),0);
+  await chooseNpc();
+  await place();
+  assert.equal(await count(),1);
+  // Real Tester button in the actual World Builder. Both the host and
+  // Capture shop are native iframes; no synthetic merchant-open message.
+  await builder.locator('#navigation-toggle').tap();
+  await builder.locator('#npc-talk').waitFor({state:'visible',timeout:45000});
+  const testBefore=await snapshot();
+  const testShop=builder.frameLocator('#npc-merchant-test-frame');
+  const openTesterShop=async()=>{
+   await builder.locator('#npc-talk').tap();
+   await builder.locator('#npc-dialogue-next').filter({hasText:'Commercer'}).tap();
+   await builder.locator('#npc-merchant-test-dialog[open]').waitFor();
+   await testShop.locator('#adventure-merchant-dialog[open]').waitFor({timeout:60000});
+   assert.match(await testShop.locator('#adventure-merchant-balance').innerText(),/TEST.*fictif/);
+   assert.match(await testShop.locator('#adventure-merchant-trades').innerText(),/Potion de soins.*stock 3/);
+   assert.match(await testShop.locator('#adventure-merchant-trades').innerText(),/Potion de réanimation.*stock 3/);
+  };
+  await openTesterShop();
+  await testShop.getByRole('button',{name:'Acheter',exact:true}).first().tap();
+  await testShop.locator('#adventure-merchant-trades').filter({hasText:/Potion de soins.*stock 2/}).waitFor();
+  assert.deepEqual(await snapshot(),testBefore);
+  await testShop.locator('#adventure-merchant-close').tap();
+  await builder.locator('#npc-merchant-test-dialog').waitFor({state:'hidden'});
+  await builder.locator('#npc-talk').waitFor({state:'visible'});
+  await openTesterShop();
+  await builder.locator('#npc-merchant-test-close').tap();
+  await builder.locator('#npc-merchant-test-dialog').waitFor({state:'hidden'});
+  assert.deepEqual(await snapshot(),testBefore,'Tester must never write Adventure persistence');
+  await builder.locator('#navigation-toggle').tap();
+  await builder.locator('#world-workspace-world').tap();
+  await builder.locator('#world-workspace-map').waitFor({state:'visible',timeout:45000});
+  const placed=await builder.locator('body').evaluate(async()=>{
+   const {readWorldAssemblerDraft}=await import('./src/builder/world-assembler-handoff.js');
+   const world=readWorldAssemblerDraft(localStorage);
+   return world.areas.find(a=>a.id===world.initialAreaId).actors;
+  });
+  assert.equal(placed.length,1);
+  assert.equal(placed[0].actorDefinitionId,npcId);
+  assert.equal(placed[0].npc,undefined,'placed actor must not duplicate the canonical NPC definition');
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="adventure"]').tap();
   const adventure=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="capture"]');
@@ -413,37 +544,27 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   await adventure.locator('#adventure-player-alias').fill('Marchand témoin');
   await adventure.locator('#adventure-create').tap();
   const fixture=await adventure.locator('#adventure-play').evaluate(async(_,ids)=>{
-   const [{createBlankWorldBuilderDraft},{saveWorldAssemblerDraft},{normalizeWorldActorPlacement},
-    {createUserNpcStoreV1},{createAdventureStoreV1},{createAdventurePortfolioStoreV1},
+   const [{createAdventureStoreV1},{createAdventurePortfolioStoreV1},
     {adventureMerchantPriceV1}]=await Promise.all([
-     import('../../../vendor/exploration-lab/src/builder/world-builder-draft.js'),
-     import('../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js'),
-     import('../../../vendor/exploration-lab/src/actors/world-actor-placement-model.js'),
-     import('../../../vendor/exploration-lab/src/storage/user-npc-store-v1.js'),
      import('./adventure-contract-v1.mjs'),import('./adventure-portfolio-store-v1.mjs'),
      import('./adventure-economy-v1.mjs')
    ]);
-   const npc=await createUserNpcStoreV1().get(ids.npcId);
-   if(!npc)throw Error('PNJ enregistré introuvable');
-   const world=createBlankWorldBuilderDraft({id:'merchant-ci-world',width:36*28,height:24*21});
-   const area=world.areas.find(a=>a.id===world.initialAreaId);
-   const spawn=area.spawns.find(s=>s.id===world.initialSpawnId);
-   area.actors.push(normalizeWorldActorPlacement({id:'merchant-placement-'+crypto.randomUUID(),
-    actorDefinitionId:ids.npcId,x:spawn.x+20,y:spawn.y,facingX:1}));
-   saveWorldAssemblerDraft(localStorage,world);
    const options={storage:localStorage,coreStorage:window.GensStorageV1};
    const portfolio=createAdventurePortfolioStoreV1({...options,legacyStore:createAdventureStoreV1(options)});
    const session=portfolio.load();
    const shop=session.rules.economy.merchants.find(m=>m.id===ids.merchantId);
-   const item=session.rules.loot.items.find(i=>i.id===shop.itemIds[0]);
-   if(shop.itemStocks[item.id]!==2)throw Error('Stock créé non transporté');
+   if(!shop)throw Error('Marchand configuré après une ancienne partie absent de la nouvelle partie');
+   const item=session.rules.loot.items.find(i=>i.id==='item.potion.heal');
+   if(shop.itemStocks[item.id]!==3||shop.itemStocks['item.potion.revive']!==3)
+    throw Error('Stocks 3/3 non transportés vers la nouvelle partie');
    // Only fixture funding; all subsequent transactions are performed by UI.
-   const currency=1000+adventureMerchantPriceV1(item.saleValue,shop.sellPercent)*2;
+   const currency=1000+adventureMerchantPriceV1(item.saleValue,shop.sellPercent)*3;
    portfolio.save({...session,inventory:{...session.inventory,currency}});
    return {sessionId:session.sessionId,itemId:item.id,merchantId:shop.id,
     buy:adventureMerchantPriceV1(item.saleValue,shop.sellPercent),
     sell:adventureMerchantPriceV1(item.saleValue,shop.buyPercent),currency};
   },{npcId,merchantId});
+  assert.notEqual(fixture.sessionId,oldSessionId,'must be a genuinely new save');
   const readSave=()=>page.evaluate(id=>JSON.parse(localStorage.getItem(
    'gensrpg.capture.v2.adventure.slot.v1:'+id)),fixture.sessionId);
   const play=adventure.frameLocator('#adventure-play-frame');
@@ -454,9 +575,9 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   assert.equal(await play.locator('#npc-dialogue-trade').isVisible(),false,'one final commerce action');
   await play.locator('#npc-dialogue-next').tap();
   await adventure.locator('#adventure-merchant-dialog[open]').waitFor({timeout:15000});
-  await adventure.getByRole('button',{name:'Acheter',exact:true}).tap();
+  await adventure.getByRole('button',{name:'Acheter',exact:true}).first().tap();
   await page.waitForFunction(f=>JSON.parse(localStorage.getItem(
-   'gensrpg.capture.v2.adventure.slot.v1:'+f.sessionId))?.merchantStocks?.[f.merchantId]?.[f.itemId]===1,fixture);
+   'gensrpg.capture.v2.adventure.slot.v1:'+f.sessionId))?.merchantStocks?.[f.merchantId]?.[f.itemId]===2,fixture);
   let saved=await readSave();
   assert.equal(saved.inventory.currency,fixture.currency-fixture.buy);
   assert.equal(saved.inventory.items[fixture.itemId],1);
@@ -465,7 +586,7 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
    'gensrpg.capture.v2.adventure.slot.v1:'+f.sessionId))?.inventory.currency===f.currency-f.buy+f.sell,fixture);
   saved=await readSave();
   assert.equal(saved.inventory.items[fixture.itemId]??0,0);
-  assert.equal(saved.merchantStocks[fixture.merchantId][fixture.itemId],1);
+  assert.equal(saved.merchantStocks[fixture.merchantId][fixture.itemId],2);
   await adventure.locator('#adventure-merchant-close').tap();
   // Wait for the scoped closed acknowledgement before changing view.
   await play.locator('#npc-talk').waitFor({state:'visible',timeout:15000});
@@ -495,13 +616,16 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   assert.equal(await play.locator('#npc-dialogue-trade').isVisible(),false,'one final commerce action');
   await play.locator('#npc-dialogue-next').tap();
   await adventure.locator('#adventure-merchant-dialog[open]').waitFor({timeout:15000});
-  await adventure.getByRole('button',{name:'Acheter',exact:true}).tap();
+  assert.match(await adventure.locator('#adventure-merchant-trades').innerText(),/Potion de réanimation.*stock 3/);
+  await adventure.getByRole('spinbutton',{name:'Quantité pour Potion de soins',exact:true}).first().fill('2');
+  await adventure.getByRole('button',{name:'Acheter',exact:true}).first().tap();
   await page.waitForFunction(f=>JSON.parse(localStorage.getItem(
    'gensrpg.capture.v2.adventure.slot.v1:'+f.sessionId))?.merchantStocks?.[f.merchantId]?.[f.itemId]===0,fixture);
   saved=await readSave();
-  assert.equal(saved.inventory.currency,fixture.currency-2*fixture.buy+fixture.sell);
-  assert.equal(saved.inventory.items[fixture.itemId],1);
-  assert.equal(await adventure.getByRole('button',{name:'Acheter',exact:true}).isDisabled(),true);
+  assert.equal(saved.inventory.currency,fixture.currency-3*fixture.buy+fixture.sell);
+  assert.equal(saved.inventory.items[fixture.itemId],2);
+  assert.equal(await adventure.getByRole('button',{name:'Acheter',exact:true}).first().isDisabled(),true);
+  assert.equal(await adventure.getByRole('button',{name:'Acheter',exact:true}).nth(1).isDisabled(),false);
   await adventure.locator('#adventure-merchant-close').tap();
   assert.deepEqual(errors.filter(e=>/SyntaxError|Uncaught|Duplicate Capture/.test(e)),[]);
  }finally{

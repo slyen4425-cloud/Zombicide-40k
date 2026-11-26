@@ -480,11 +480,15 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
   await page.locator('#gensCaptureV2Root .gensCaptureV2CreatorPanel .gensCaptureV2MenuBack').tap();
   assert.equal(await page.locator('#gensCaptureV2Root').getAttribute('data-menu'),'main');
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  const worldGroup=page.locator('#gensCaptureV2Root [data-editor-group="world"]');
+  assert.equal(await page.locator('#gensCaptureV2Root .gensCaptureV2EditorGroup[open]').count(),0);
+  await worldGroup.locator('summary').tap();
   assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="world"] button:visible').count(),2,
    'World Assembler and 2.5D Sculpt belong to the same editor group');
   assert.equal(await page.locator('#gensCaptureV2Root [data-capture-v2-view="explore"]').count(),0,
    'duplicated 2.5D Tester is removed, not hidden');
   // PNJ is a first-class native editor on the SAME Capture release origin.
+  await page.locator('#gensCaptureV2Root [data-editor-group="npc"] > summary').tap();
   await page.locator('[data-capture-v2-view="npc"]').tap();
   const npcFrame=page.locator('#gensCaptureV2Root iframe');
   assert.ok((await npcFrame.getAttribute('src')).includes(
@@ -494,6 +498,7 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
   assert.ok(await npc.locator('#npc-role').count());
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  await page.locator('#gensCaptureV2Root [data-editor-group="combat"] > summary').tap();
   await page.locator('[data-capture-v2-view="creature"]').tap();
   const combat=page.locator('#gensCaptureV2Root iframe');
   await combat.waitFor({state:'visible'});
@@ -554,6 +559,7 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
   await combatFrame.locator('[data-capture-editor-human]:visible').waitFor();
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  await page.locator('#gensCaptureV2Root [data-editor-group="world"] > summary').tap();
   await page.locator('[data-capture-v2-view="builder"]').tap();
   const frame=page.locator('#gensCaptureV2Root iframe');
   assert.ok((await frame.getAttribute('src')).includes(scope+'vendor/exploration-lab/sculpt-lab.html'));
@@ -898,7 +904,7 @@ test('actual mobile Creator selects official UI sound, preserves its assetId and
  }
 });
 
-test('real Android portrait Capture home shows one wallpaper and separated GenSRPG return controls',
+test('real Android portrait Capture picker is neutral, selected universe has one wallpaper and one return',
  {timeout:90000},async()=>{
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  let browser,context;
@@ -915,29 +921,29 @@ test('real Android portrait Capture home shows one wallpaper and separated GenSR
   const home=page.locator('#gensCaptureV2Root');
   await home.waitFor({state:'visible',timeout:30000});
   const header=home.locator(':scope > header');
-  const title=header.locator('strong');
-  const quit=header.locator('button').first();
+  const quit=header.locator('[data-capture-v2-exit]');
   const back=header.locator('a.gensCaptureReturnToMain');
-  await back.waitFor({state:'visible',timeout:30000});
-  // A minimal transparent creator image exercises the actual published CSS
-  // without touching IndexedDB or relying on a private author's import.
-  const painted=await home.evaluate(el=>{
-   el.dataset.creatorWallpaper='true';
-   el.style.setProperty('--capture-home-art',
-    'url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22100%22%20height=%22100%22%3E%3Ccircle%20cx=%2250%22%20cy=%2250%22%20r=%2220%22%20fill=%22purple%22/%3E%3C/svg%3E")');
+  await back.waitFor({state:'attached',timeout:30000});
+  const picker=home.locator('[data-capture-universe-select="monster-invoc"]');
+  await picker.waitFor({state:'visible',timeout:35000});
+  const readPaint=()=>home.evaluate(el=>{
    const css=getComputedStyle(el);
    return {color:css.backgroundColor,images:(css.backgroundImage.match(/url\(/g)||[]).length,
     size:css.backgroundSize,orientation:matchMedia('(orientation:portrait)').matches};
   });
-  assert.deepEqual(painted,{color:'rgb(8, 18, 27)',images:1,
-   size:'cover, contain, cover',orientation:true},
-   'transparent art must be drawn ONCE over opaque Capture home in portrait');
-  const [t,q,b]=await Promise.all([title.boundingBox(),quit.boundingBox(),back.boundingBox()]);
-  assert.ok(t&&q&&b,'all native navigation controls must be visible');
-  assert.ok(t.y+t.height<=q.y+1&&t.y+t.height<=b.y+1,
-   'title must be on its own row above both actions');
-  assert.ok(q.x+q.width<=b.x+1,
-   'Quitter le mode must not overlap Retour a GenSRPG');
+  assert.equal((await readPaint()).images,0,'unselected universe must not paint any artwork');
+  assert.equal(await header.locator('strong').count(),0);
+  assert.equal(await back.isVisible(),false);
+  assert.equal(await quit.isVisible(),true);
+  await picker.tap();
+  await page.waitForFunction(()=>{const el=document.querySelector('#gensCaptureV2Root');return el?.dataset.menu==='main'&&getComputedStyle(el).backgroundImage.includes('url(')},null,{timeout:30000});
+  assert.deepEqual(await readPaint(),{color:'rgb(8, 18, 27)',images:1,size:'cover, contain, cover',orientation:true},
+   'selected universe must paint one actual official image');
+  await home.locator('[data-capture-v2-menu="universes"]').tap();
+  await picker.waitFor({state:'visible'});
+  assert.equal((await readPaint()).images,0,'return to picker must remove the selected wallpaper');
+  assert.equal(await quit.isVisible(),true);
+  assert.equal(await back.isVisible(),false);
  }finally{
   await context?.close();await browser?.close();
   server.closeAllConnections();await new Promise(resolve=>server.close(resolve));

@@ -22,8 +22,10 @@ test('showcase starts with three certified wallpapers and never overwrites a per
 test('menu/window navigation rotates only the default, never the chosen personal artwork',()=>{
  const shell=read('shell-entry-v1.js');
  assert.match(shell,/creatorOwner\?\.rotateDefaultWallpaper\?\.\(\)/);
- assert.match(shell,/function showShowcaseWallpaper\(\)/);
- assert.match(shell,/owner\.selectUniverse\('monster-invoc','Monster InvoC'\)/);
+ assert.doesNotMatch(shell,/function showShowcaseWallpaper\(\)/);
+ assert.match(shell,/function showUniverses\(\)\{\s*if\(!host\)return false;\s*selectedUniverse=null;\s*home\(\);/);
+ assert.match(shell,/function selectUniverse\(project\)\{[\s\S]*?selectedUniverse=project;[\s\S]*?await owner\.selectUniverse\(project\.id,project\.name\);/);
+ assert.match(shell,/if\(selectedUniverse\)\{[\s\S]*?creatorOwner\?\.enterHome\(\);\s*\}else creatorOwner\?\.leaveHome\(\);/);
  assert.match(shell,/if\(previousMenu==='creator'\|\|previousMenu==='editors'\)/);
 });
 

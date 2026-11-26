@@ -17,7 +17,7 @@ export function withSelectedAdventureWorldV1(session,worldId){
  return Object.freeze({...session,
   world:Object.freeze({...session.world,mapRef:worldId,position:null})});
 }
-export function resolveSelectedAdventureWorldV1({session,worldLibrary,selectedWorldId}={}){
+export async function resolveSelectedAdventureWorldV1({session,worldLibrary,selectedWorldId}={}){
  if(!session||!identifier(selectedWorldId))
   throw new TypeError('Choisis un WorldDocument enregistré');
  if(session.world?.mapRef!==null&&session.world?.mapRef!==selectedWorldId)
@@ -25,17 +25,17 @@ export function resolveSelectedAdventureWorldV1({session,worldLibrary,selectedWo
  if(!worldLibrary||typeof worldLibrary.list!=='function'||
    typeof worldLibrary.load!=='function'||typeof worldLibrary.activate!=='function')
   throw new Error('Bibliothèque de mondes Exploration officielle indisponible');
- const allowed=worldLibrary.list();
+ const allowed=await worldLibrary.list();
  if(!allowed.some(entry=>entry.id===selectedWorldId))
   throw new Error('Monde de partie introuvable dans la bibliothèque Exploration');
  // Read-only preflight: network host/guest WorldDocument matching MUST
  // succeed before any active Builder draft or AdventureSave is changed.
- const document=worldLibrary.load(selectedWorldId);
+ const document=await worldLibrary.load(selectedWorldId);
  if(!document||document.id!==selectedWorldId)
   throw new Error('WorldDocument officiel sélectionné introuvable ou corrompu');
  return document;
 }
-export function activateSelectedAdventureWorldV1({worldLibrary,selectedWorldId}={}){
+export async function activateSelectedAdventureWorldV1({worldLibrary,selectedWorldId}={}){
  if(!worldLibrary||typeof worldLibrary.activate!=='function'||
   !identifier(selectedWorldId))
   throw new TypeError('Exploration World Builder officiel requis');

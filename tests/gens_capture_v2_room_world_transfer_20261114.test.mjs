@@ -34,30 +34,30 @@ const ingest=(source,opts={})=>importCaptureSharedWorldV1({
  connection:guest,room,packet,library:source.library,importOfficial:source.parse,
  fingerprintOfficial:source.fingerprint,...opts
 });
-test('authenticated guest imports official world once, never overwrites archived map',()=>{
+test('authenticated guest imports official world once, never overwrites archived map',async()=>{
  const source=official();
- const first=ingest(source);
+ const first=await ingest(source);
  assert.deepEqual(first,{worldId:'forest-world',alreadyAvailable:false});
  assert.equal(source.logs.length,1);assert.equal(source.logs[0].replace,false);
  assert.equal(source.library.load('forest-world').signature,42);
- const repeated=ingest(source);
+ const repeated=await ingest(source);
  assert.equal(repeated.alreadyAvailable,true);
  assert.equal(source.logs.length,1,'second import is read-only');
 });
-test('host, outsiders, closed room, foreign or modified WorldDocument are all rejected before save',()=>{
+test('host, outsiders, closed room, foreign or modified WorldDocument are all rejected before save',async()=>{
  const source=official();
  for(const connection of [{userId:'u1',role:'host'},{userId:'intruder',role:'guest'}])
-  assert.throws(()=>ingest(source,{connection}),/invité|authentifié/);
- assert.throws(()=>ingest(source,{room:{...room,open:false}}),/invité|authentifié/);
- assert.throws(()=>ingest(source,{packet:{...packet,worldId:'foreign'}}),/ne correspond pas/i);
- assert.throws(()=>ingest(source,{packet:{...packet,serializedDocument:
+  await assert.rejects(()=>ingest(source,{connection}),/invité|authentifié/);
+ await assert.rejects(()=>ingest(source,{room:{...room,open:false}}),/invité|authentifié/);
+ await assert.rejects(()=>ingest(source,{packet:{...packet,worldId:'foreign'}}),/ne correspond pas/i);
+ await assert.rejects(()=>ingest(source,{packet:{...packet,serializedDocument:
   JSON.stringify({...original,signature:7})}}),/Empreinte/i);
  assert.equal(source.logs.length,0,'no write on invalid input');
 });
-test('existing official WorldDocument with same id but different content is kept intact',()=>{
+test('existing official WorldDocument with same id but different content is kept intact',async()=>{
  const source=official();
  source.rows.set('forest-world',{...original,signature:99});
- assert.throws(()=>ingest(source),/nom mais son contenu diffère/i);
+ await assert.rejects(()=>ingest(source),/nom mais son contenu diffère/i);
  assert.equal(source.rows.get('forest-world').signature,99);
  assert.equal(source.logs.length,0);
 });
@@ -113,21 +113,21 @@ test('UI and scoped transport call the REAL Exploration importer/library, not co
  assert.doesNotMatch(transport,/z40k_|\.from\(['"]gensrpg\.capture\.v2\.adventure/i);
 });
 
-test('guest local draft is archived additively, collision and unarchived edits never overwritten',()=>{
+test('guest local draft is archived additively, collision and unarchived edits never overwritten',async()=>{
  const source=official();
  const old={id:'my-local-draft',signature:99,areas:[{id:'local'}]};
- const result=preserveCaptureGuestDraftV1({activeDraft:old,room,
+ const result=await preserveCaptureGuestDraftV1({activeDraft:old,room,
   library:source.library,fingerprintOfficial:source.fingerprint});
  assert.equal(result.archived,true);
  assert.equal(source.library.load('my-local-draft'),old);
- assert.equal(preserveCaptureGuestDraftV1({activeDraft:old,room,
-  library:source.library,fingerprintOfficial:source.fingerprint}).archived,false);
+ assert.equal((await preserveCaptureGuestDraftV1({activeDraft:old,room,
+  library:source.library,fingerprintOfficial:source.fingerprint})).archived,false);
  const unexpected={...old,signature:98};
- assert.throws(()=>preserveCaptureGuestDraftV1({activeDraft:unexpected,room,
+ await assert.rejects(()=>preserveCaptureGuestDraftV1({activeDraft:unexpected,room,
   library:source.library,fingerprintOfficial:source.fingerprint}),/modifications/i);
  assert.equal(source.library.load('my-local-draft').signature,99);
  const sameId={...old,id:'forest-world'};
- assert.throws(()=>preserveCaptureGuestDraftV1({activeDraft:sameId,room,
+ await assert.rejects(()=>preserveCaptureGuestDraftV1({activeDraft:sameId,room,
   library:source.library,fingerprintOfficial:source.fingerprint}),/même nom/i);
  assert.ok(!source.rows.has('forest-world'));
 });
@@ -143,4 +143,19 @@ test('host can copy or native-share the actual server invitation code; no fabric
  assert.match(app,/activeCaptureRoom\.code/);
  assert.match(app,/adventure-room-share-actions'\)\.hidden=response\.role!=='host'/);
  assert.doesNotMatch(app,/inviteUrl=|joinUrl=|\/\?room=/);
+});
+
+test('guest import waits for durable commit, then verifies stored fingerprint; rejected commit never acknowledges',async()=>{
+ const source=official();let release;
+ const gate=new Promise(resolve=>{release=resolve;});
+ const owner={...source.library,list:async()=>source.library.list(),load:async id=>source.library.load(id),save:async(...args)=>{await gate;source.library.save(...args);}};
+ let done=false;
+ const pending=ingest(source,{library:owner}).then(result=>{done=true;return result;});
+ await Promise.resolve();await Promise.resolve();assert.equal(done,false);assert.equal(source.logs.length,0);
+ release();assert.equal((await pending).worldId,room.worldId);assert.equal(source.logs.length,1);
+ const rejected=official();const failed={...rejected.library,save:async()=>{throw Error('Quota exceeded');}};
+ await assert.rejects(()=>ingest(rejected,{library:failed}),/Quota exceeded/);assert.equal(rejected.rows.size,0);
+ const draft={id:'local-draft',signature:3};
+ await assert.rejects(()=>preserveCaptureGuestDraftV1({activeDraft:draft,room,library:failed,fingerprintOfficial:rejected.fingerprint}),/Quota exceeded/);
+ assert.equal(rejected.rows.size,0);
 });

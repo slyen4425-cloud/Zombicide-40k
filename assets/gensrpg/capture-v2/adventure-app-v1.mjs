@@ -2392,9 +2392,10 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
   }
  }
  if(worldLibrary&&selectedWorldId){
-  world=resolveSelectedAdventureWorldV1({
+  world=await resolveSelectedAdventureWorldV1({
    session:beforeWorldSession,worldLibrary,selectedWorldId
   });
+  if(launchEpoch!==journeyLaunchEpoch)return;
   const draft=readWorldAssemblerDraft(universeWorldStorage);
   if(checkAdventureWorldArchiveV1({
    activeWorld:draft,archivedWorld:world,selectedWorldId,
@@ -2420,9 +2421,10 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  });
  if(launchEpoch!==journeyLaunchEpoch)return;
  if(worldLibrary&&selectedWorldId){
-  const activated=activateSelectedAdventureWorldV1({
+  const activated=await activateSelectedAdventureWorldV1({
    worldLibrary,selectedWorldId
   });
+  if(launchEpoch!==journeyLaunchEpoch)return;
   if(playWorldFingerprint(activated)!==playWorldFingerprint(world))
    throw new Error('Le monde archivé a changé avant son activation : partie conservée.');
  }
@@ -2599,14 +2601,16 @@ $('adventure-room-enter').addEventListener('click',guardedAsync(async()=>{
    throw new Error('Le monde du créateur est encore en cours d’envoi. Réessaie après son entrée en jeu.');
   // Switching to the host WorldDocument must never erase an unfinished
   // local author draft; archive it via the ONLY official Exploration library.
-  preserveCaptureGuestDraftV1({
+  await preserveCaptureGuestDraftV1({
    activeDraft:readWorldAssemblerDraft(universeWorldStorage),
    room:server,library:worldLibrary,fingerprintOfficial:playWorldFingerprint
   });
-  const imported=importCaptureSharedWorldV1({
+  if(activeCaptureRoom!==connection)throw new Error('Salon changé pendant la sauvegarde du monde local.');
+  const imported=await importCaptureSharedWorldV1({
    connection,room:server,packet,library:worldLibrary,
    importOfficial:importWorldBuilderDocument,fingerprintOfficial:playWorldFingerprint
   });
+  if(activeCaptureRoom!==connection)throw new Error('Salon changé pendant la réception du monde.');
   const nickname=$('adventure-player-alias').value;
   const session=store?.load();
   const valid=captureGuestSessionMatchesHostSetupV1({

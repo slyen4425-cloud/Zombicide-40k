@@ -36,21 +36,21 @@ test('new AdventureSave stores only the official WorldDocument identity, not map
  assert.equal('areas' in selected.world,false);
  assert.deepEqual(original.inventory,selected.inventory);
 });
-test('selected world matches stored adventure identity and activates official Exploration library only',()=>{
+test('selected world matches stored adventure identity and activates official Exploration library only',async()=>{
  const s=withSelectedAdventureWorldV1(session(),'neige-1'),lib=library();
- const actual=resolveSelectedAdventureWorldV1({session:s,worldLibrary:lib,selectedWorldId:'neige-1'});
+ const actual=await resolveSelectedAdventureWorldV1({session:s,worldLibrary:lib,selectedWorldId:'neige-1'});
  assert.equal(actual.id,'neige-1');
  assert.deepEqual(lib.opened,[],'read-only world validation never changes editor storage');
- assert.equal(activateSelectedAdventureWorldV1({worldLibrary:lib,selectedWorldId:'neige-1'}).id,'neige-1');
+ assert.equal((await activateSelectedAdventureWorldV1({worldLibrary:lib,selectedWorldId:'neige-1'})).id,'neige-1');
  assert.deepEqual(lib.opened,['neige-1']);
- assert.throws(()=>resolveSelectedAdventureWorldV1({session:s,worldLibrary:lib,selectedWorldId:'foret-1'}),/monde|partie/i);
+ await assert.rejects(()=>resolveSelectedAdventureWorldV1({session:s,worldLibrary:lib,selectedWorldId:'foret-1'}),/monde|partie/i);
  assert.deepEqual(lib.opened,['neige-1'],'mismatched world cannot activate any document');
 });
-test('unregistered or unavailable official world never changes editor state or session save',()=>{
+test('unregistered or unavailable official world never changes editor state or session save',async()=>{
  const s=withSelectedAdventureWorldV1(session(),'foret-1'),lib=library();
- assert.throws(()=>resolveSelectedAdventureWorldV1({session:s,worldLibrary:lib,selectedWorldId:'unknown'}),/monde|introuvable/i);
+ await assert.rejects(()=>resolveSelectedAdventureWorldV1({session:s,worldLibrary:lib,selectedWorldId:'unknown'}),/monde|introuvable/i);
  assert.deepEqual(lib.opened,[]);
- assert.throws(()=>resolveSelectedAdventureWorldV1({session:s,worldLibrary:null,selectedWorldId:'foret-1'}),/Exploration|bibliothèque/i);
+ await assert.rejects(()=>resolveSelectedAdventureWorldV1({session:s,worldLibrary:null,selectedWorldId:'foret-1'}),/Exploration|bibliothèque/i);
 });
 test('real Adventure uses official lazy library, never a GenSrpg world serializer',()=>{
  const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
@@ -82,4 +82,19 @@ test('Jouer displays absent local WorldDocument without creating a hidden fallba
  assert.match(code,/Aucun monde local jouable/);
  assert.match(code,/Monde local actuel \(compatibilité\)/);
  assert.doesNotMatch(code,/localStorage\.setItem|createBlankWorldBuilderDraft|createNewExplorationPlay|worldLibrary\.activate/);
+});
+
+test('async native archive selection and activation wait for durable acknowledgement',async()=>{
+ const lib=library(),s=withSelectedAdventureWorldV1(session(),'foret-1');
+ let release;
+ const delayed=new Promise(resolve=>{release=resolve;});
+ const owner={...lib,list:async()=>lib.list(),load:async id=>lib.load(id),
+  activate:async id=>{await delayed;return lib.activate(id);}};
+ assert.equal((await resolveSelectedAdventureWorldV1({session:s,worldLibrary:owner,selectedWorldId:'foret-1'})).id,'foret-1');
+ assert.deepEqual(lib.opened,[]);
+ let complete=false;
+ const pending=activateSelectedAdventureWorldV1({worldLibrary:owner,selectedWorldId:'foret-1'}).then(result=>{complete=true;return result;});
+ await Promise.resolve();assert.equal(complete,false);assert.deepEqual(lib.opened,[]);
+ release();assert.equal((await pending).id,'foret-1');assert.deepEqual(lib.opened,['foret-1']);
+ await assert.rejects(()=>resolveSelectedAdventureWorldV1({session:s,worldLibrary:{...owner,load:async()=>{throw Error('IndexedDB failed');}},selectedWorldId:'foret-1'}),/IndexedDB failed/);
 });

@@ -92,6 +92,16 @@ test('real Capture Shell chooses a universe then shows one game and grouped edit
  const worldGroup=grouped.find(n=>n.dataset?.editorGroup==='world');
  const combatGroup=grouped.find(n=>n.dataset?.editorGroup==='combat');
  assert.ok(worldGroup&&combatGroup,'world/exploration and creatures/combat must each have ONE group');
+ for(const group of grouped.filter(n=>n.dataset?.editorGroup)){
+  assert.equal(group.tag,'details');assert.equal(group.attrs.name,'capture-editor-group');
+  assert.equal(group.children[0].tag,'summary');assert.notEqual(group.open,true);
+ }
+ const header=nodes.find(n=>n.tag==='header');
+ assert.equal(header.children.filter(n=>n.tag==='strong').length,0);
+ assert.equal(header.children.find(n=>n.dataset.captureV2MenuBack==='main').textContent,'← Retour');
+ header.children.find(n=>n.dataset.captureV2MenuBack==='main').click();
+ assert.equal(s.body.children[0].dataset.menu,'main');
+ s.click('captureV2Menu','editors');
  assert.equal(all(worldGroup).filter(n=>n.dataset.captureV2View==='builder').length,1);
  assert.equal(all(worldGroup).filter(n=>n.dataset.captureV2View==='world').length,1);
  assert.equal(all(combatGroup).filter(n=>n.dataset.captureV2View==='creature').length,1);

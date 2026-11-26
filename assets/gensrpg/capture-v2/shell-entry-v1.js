@@ -502,6 +502,7 @@
     if(!selectedUniverse||!home())return false;
     creatorOwner?.rotateDefaultWallpaper?.();
     host.dataset.menu="editors";
+    for(const group of host.querySelectorAll?.(".gensCaptureV2EditorGroup")??[])group.open=false;
     notice.textContent="";
     return true;
   }

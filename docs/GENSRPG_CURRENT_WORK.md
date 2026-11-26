@@ -1,3 +1,7 @@
+## 2026-11-26 — Ergonomie : alignement des sentinelles de publication Capture (NON GREEN)
+- Base d7c41107ac5856524518d8a3fb506723811cd88a, checkpoint `checkpoint/capture-before-ergonomie-wallpaper-gate-20261126`, branche `work/capture-ergonomie-wallpaper-gate-20261126`.
+- Publisher #681, run 45833055607, jobs build et capture-preview-review rouges à cause du test source `gens_capture_default_vitrine_combat_loading_20261123.test.mjs:22` qui exige l'ancien préchargement avant choix d'univers. Remplacement par les invariants sélection explicite, rotation par défaut et préservation du fond auteur. Aucune modification runtime ni image. CI exacte et repin #681 obligatoires.
+
 ## 2026-11-26 — Adoption ergonomie Exploration #563 / Capture #679 (NON GREEN)
 - START source Capture 07845f3b478ace6afe841c159d953fe818a20f24, checkpoint `checkpoint/capture-before-adopt-ergonomie-20261126`, branche `work/capture-adopt-exploration-ergonomie-20261126`.
 - Cible Exploration main 7dd03a1aa718e6e71ecfb95519db430a002e0bff; arbre identique à HEAD PR testé. CI main 45826547569 et Pages 45826547034 à confirmer avant fusion. Renderer et assets inchangés. Capture #679 déjà fusionnée, CI PR verte. Aucun changement de moteur, stockage, eau ou Combat.

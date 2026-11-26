@@ -1,3 +1,9 @@
+## 2026-11-26 — Publication ergonomie Capture / Exploration (NON GREEN)
+- START PWA main 0e85092612ffbe7c4cdc3efba0156d66cb49dd0a ; checkpoint `checkpoint/gensrpg-start-pwa-ergonomie-20261126`, branche `work/pwa-ergonomie-20261126`.
+- #563 Exploration fusionnée au main 7dd03a1aa718e6e71ecfb95519db430a002e0bff ; arbre de PR identique, CI PR 45825628153 et assemblage 45825628071 SUCCESS. CI main 45826547569 SUCCESS (jobs), publication main 45826547034 en cours à la rédaction. Renderer vérifié 82e230a2095bceecfdc7e566d3bddaf63f3c2dbc inchangé. #679 Capture fusionnée 07845f3b478ace6afe841c159d953fe818a20f24 avec arbre certifié. #680 adoption source en validation.
+- Le publisher conserve un seul chemin et les anciens liens ; vérifie l'unique action visible de retour, le fond neutre du sélecteur d'univers et la provenance renderer. Le pin publié reste inchangé tant que #680 n'est pas fusionnée et certifiée. Préserver toutes les fonctionnalités et les travaux #562 eau / #561 stockage. Autorisation de fusion/publication donnée le 26/11, seulement après tests.
+- Étapes restantes : confirmer Exploration HTTPS exact, CI #680, fusion source, actualiser pin publisher et assertions exactes du pin, CI publisher et budget, fusion, vérifier Pages HTTPS exact et communiquer lien. Aucun état GREEN de livraison avant la preuve.
+
 ## 2026-11-26 — Publication PWA correctif quota World Builder #560 (NON GREEN)
 - START PWA main 233ce44b2e06a81666416e2e643206ddec2c4e07, checkpoint `checkpoint/pwa-before-world-quota-20261126`, branche `work/pwa-world-quota-20261126`.
 - Capture #677 fusionnée b82c4fbafeeb72ab3f22b8add0623805b500c02b, arbre identique au HEAD a8225367831377b0f6a6df9ffa48884590c3f8b7 certifié par 4 workflows 45781412711/45781412701/45781412733/45781412645 SUCCESS et revue exacte sans finding.

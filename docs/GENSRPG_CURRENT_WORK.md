@@ -1,3 +1,8 @@
+## 2026-11-26 — Capture source : adoption eau/lave #562 (NON GREEN)
+- START 334762a734b598785985030a4d05c1b47d18850c ; checkpoint `checkpoint/capture-before-water-lava-20261126`, branche `work/capture-v2-water-lava-20261126`.
+- Autorisation auteur explicite 26/11. Exploration main a7b9d535880719cd50fd8935a5876e02219f2495 ; statut `pages/exploration-main-live` SUCCESS sur ce SHA. Comparaison Git avec HEAD PR 25ef41498fe7dab0278aac86d40bd5961d30c4ff : aucun fichier différent, CI 45827277068 et assemblage 45827277136 SUCCESS sur l'arbre identique. Le connecteur n'expose pas les IDs des runs post-fusion ; le pin certifie la CI de cet arbre, non un run main inventé. Renderer blob f9dc12bd8979625828347b51f0805853da44f3f4.
+- Pin Exploration seul ; conserver ergonomie, Combat, médias, sauvegardes et API. Le publisher existant doit produire les cinq atlas via le build canonique Exploration avant transport. Tests source exacts puis fusion dans la branche Capture canonique ; PWA séparée, budget 900 Mio et preuve HTTPS. #561 sauvegarde distinct.
+
 ## 2026-11-26 — Ergonomie : alignement des sentinelles de publication Capture (NON GREEN)
 - Base d7c41107ac5856524518d8a3fb506723811cd88a, checkpoint `checkpoint/capture-before-ergonomie-wallpaper-gate-20261126`, branche `work/capture-ergonomie-wallpaper-gate-20261126`.
 - Publisher #681, run 45833055607, jobs build et capture-preview-review rouges à cause du test source `gens_capture_default_vitrine_combat_loading_20261123.test.mjs:22` qui exige l'ancien préchargement avant choix d'univers. Remplacement par les invariants sélection explicite, rotation par défaut et préservation du fond auteur. Aucune modification runtime ni image. CI exacte et repin #681 obligatoires.

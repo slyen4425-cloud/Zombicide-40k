@@ -1,3 +1,9 @@
+## 2026-11-26 — Publication PWA correctif quota World Builder #560 (NON GREEN)
+- START PWA main 233ce44b2e06a81666416e2e643206ddec2c4e07, checkpoint `checkpoint/pwa-before-world-quota-20261126`, branche `work/pwa-world-quota-20261126`.
+- Capture #677 fusionnée b82c4fbafeeb72ab3f22b8add0623805b500c02b, arbre identique au HEAD a8225367831377b0f6a6df9ffa48884590c3f8b7 certifié par 4 workflows 45781412711/45781412701/45781412733/45781412645 SUCCESS et revue exacte sans finding.
+- Exploration #560 main c3dd13358b1f4f3c8a2e8b29e40a1b5134061901, CI 45759990513 et Pages 45759990509 HTTPS SUCCESS; même renderer 82e230a2095bceecfdc7e566d3bddaf63f3c2dbc. Seul publisher existant, pin et sentinelles physiques des trois fichiers du stockage. Combat et catalogue médias inchangés. Préserver les anciens mondes, parties, cache et URLs. Pas de suppression de données. Compression transitoire, IndexedDB #561 distinct.
+- CI exacte / 900 Mio / revue et déploiement HTTPS exact avant GREEN ; test de récupération utilisateur séparé.
+
 ## 2026-11-25 — Publication PWA PNJ marchand / dresseur / sauvage (C2, NON GREEN)
 - START PWA main `744b365eb228f25691ded61b237db357d8824e8e` après publication #671 (Dracendre 2 GIF idle, Veuve jaune, 85 décors). Checkpoint `checkpoint/pwa-before-npc-wild-merchant-promotion-20261125` ; branche publisher unique `work/pwa-npc-wild-merchant-promotion-20261125`.
 - Sources : Capture #674 intégrée au tronc source par `bf6174d34598fef12c89df314700f23b3ae3884a` ; Exploration #559 main `afb8d878f4c0b60c61aef4bf59306d518481efe6`. Capture adoption #675 fusionnée vers la source canonique au SHA `1c94473fbc6407b847af144f206960303e18e224` après tests Capture PR SUCCESS ; Exploration CI main 45703174726 et Pages 45703174709 SUCCESS exact.

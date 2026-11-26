@@ -18,7 +18,7 @@ const memoryStorage=()=>{
   setItem:(k,v)=>bytes.set(k,String(v)),removeItem:k=>bytes.delete(k),
   key:i=>[...bytes.keys()][i]??null,get length(){return bytes.size;}};
 };
-test('real native Exploration serializer/validator and library round-trip a remote room WorldDocument unchanged',()=>{
+test('real native Exploration serializer/validator and library round-trip a remote room WorldDocument unchanged',async()=>{
  const hostWorld=createBlankWorldBuilderDraft({id:'monde-a-deux',width:640,height:480});
  const serialized=serializeWorldBuilderDraft(hostWorld);
  const imported=importWorldBuilderDocument(serialized);
@@ -30,13 +30,13 @@ test('real native Exploration serializer/validator and library round-trip a remo
  const library=createExplorationWorldDocumentLibraryV1({storage:memoryStorage()});
  const args={connection:{role:'guest',userId:'guest'},room,packet,library,
   importOfficial:importWorldBuilderDocument,fingerprintOfficial:playWorldFingerprint};
- const result=importCaptureSharedWorldV1(args);
+ const result=await importCaptureSharedWorldV1(args);
  assert.equal(result.worldId,hostWorld.id);
  assert.equal(playWorldFingerprint(library.load(hostWorld.id)),fp);
- assert.equal(importCaptureSharedWorldV1(args).alreadyAvailable,true,'idempotent read-only import');
+ assert.equal((await importCaptureSharedWorldV1(args)).alreadyAvailable,true,'idempotent read-only import');
 });
 
-test('real Exploration library preserves old guest author draft before activating host world',()=>{
+test('real Exploration library preserves old guest author draft before activating host world',async()=>{
  const storage=memoryStorage();
  const oldWorld=createBlankWorldBuilderDraft({id:'mon-brouillon',width:720,height:480});
  saveWorldAssemblerDraft(storage,oldWorld);
@@ -45,14 +45,14 @@ test('real Exploration library preserves old guest author draft before activatin
  const fp=playWorldFingerprint(hostWorld);
  const room={open:true,worldId:hostWorld.id,worldFingerprint:fp,
   members:[{id:'h'},{id:'g'}]};
- const kept=preserveCaptureGuestDraftV1({
+ const kept=await preserveCaptureGuestDraftV1({
   activeDraft:readWorldAssemblerDraft(storage),room,library,
   fingerprintOfficial:playWorldFingerprint
  });
  assert.equal(kept.archived,true);
  assert.equal(playWorldFingerprint(library.load('mon-brouillon')),
   playWorldFingerprint(oldWorld));
- const imported=importCaptureSharedWorldV1({
+ const imported=await importCaptureSharedWorldV1({
   connection:{role:'guest',userId:'g'},room,library,
   packet:{worldId:hostWorld.id,worldFingerprint:fp,
    serializedDocument:serializeWorldBuilderDraft(hostWorld)},

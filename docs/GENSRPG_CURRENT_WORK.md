@@ -4,6 +4,8 @@
 
 - Étape 2 : choix de monde, activation et import de salon attendent les appels de bibliothèque asynchrones et la relecture après commit. Vérification de l'annulation du lancement après les attentes et changement de salon pendant le transfert. Tests de confirmation différée et refus de quota ; propriétaire legacy toujours seul actif en production, aucun pin changé. Reste la composition du pont, lectures de présentation, et bascule coordonnée.
 
+- CI f0b2a57 : trois workflows verts, clean ownership 45878207117 rouge uniquement sur deux tests round-trip natifs qui lisaient une Promise sans await. Correction des appels de test, mêmes assertions de fingerprint, archivage, idempotence et activation ; aucune modification des contrôles runtime.
+
 ## 2026-11-26 — Capture source : adoption eau/lave #562 (NON GREEN)
 - START 334762a734b598785985030a4d05c1b47d18850c ; checkpoint `checkpoint/capture-before-water-lava-20261126`, branche `work/capture-v2-water-lava-20261126`.
 - Autorisation auteur explicite 26/11. Exploration main a7b9d535880719cd50fd8935a5876e02219f2495 ; statut `pages/exploration-main-live` SUCCESS sur ce SHA. Comparaison Git avec HEAD PR 25ef41498fe7dab0278aac86d40bd5961d30c4ff : aucun fichier différent, CI 45827277068 et assemblage 45827277136 SUCCESS sur l'arbre identique. Le connecteur n'expose pas les IDs des runs post-fusion ; le pin certifie la CI de cet arbre, non un run main inventé. Renderer blob f9dc12bd8979625828347b51f0805853da44f3f4.

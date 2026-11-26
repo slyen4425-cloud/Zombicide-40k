@@ -779,9 +779,16 @@ test('PWA portrait Capture menu paints ONE opaque wallpaper without exposing Gen
   'Jouer setup menu must not recreate the duplicated image');
  const portrait=css.match(/@media \(orientation:portrait\) and \(max-width:650px\)\{([\s\S]*?)\n\}/)?.[1];
  assert.ok(portrait,'real portrait header layout is published');
- assert.match(portrait,/grid-template-columns:max-content minmax\(0,1fr\)/);
- assert.match(portrait,/grid-column:1\/-1/);
- assert.match(portrait,/\.gensCaptureReturnToMain\{/);
+ if(css.includes('[data-capture-v2-exit]')){
+  assert.match(portrait,/display:flex;justify-content:center/);
+  assert.match(css,/header > \.gensCaptureReturnToMain\{display:none!important\}/);
+  assert.match(css,/data-menu="editors"\] > header > \[data-capture-v2-exit\]\{display:none!important\}/);
+  assert.match(css,/data-menu="universes"\]\{\s*background:radial-gradient/);
+ }else{
+  assert.match(portrait,/grid-template-columns:max-content minmax\(0,1fr\)/);
+  assert.match(portrait,/grid-column:1\/-1/);
+  assert.match(portrait,/\.gensCaptureReturnToMain\{/);
+ }
 });
 
 test('merchant and monster drops use one shipped Capture item catalog and original fragment controls',()=>{

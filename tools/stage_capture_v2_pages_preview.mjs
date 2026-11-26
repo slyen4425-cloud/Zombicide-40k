@@ -119,6 +119,28 @@ const mainEntrySource=path.resolve(path.dirname(fileURLToPath(import.meta.url)),
 const mainEntryTarget=path.join(trial,'assets/gensrpg/shell/capture-v2-from-main-entry-v1.js');
 if(fs.existsSync(mainEntryTarget))throw Error('Duplicate main Capture V2 handoff owner');
 fs.copyFileSync(mainEntrySource,mainEntryTarget);
+// Approved authored water/lava sprites are built by their sole Exploration owner.
+// Do this before copying assets: the root ZIP is source-only and is never shipped.
+const certifiedLivingWaterSha='a7b9d535880719cd50fd8935a5876e02219f2495';
+const livingWaterAtlasFiles=Object.freeze({
+ eau_bleue_profonde:195611,eau_turquoise:257780,eau_riviere:171319,eau_marais:179173,lave:269455
+});
+const livingWaterAtlasDir='assets/exploration/materials/forest/water/animated';
+if(sourcePin.exploration.sha===certifiedLivingWaterSha){
+ const build=path.join(exploration,'scripts/build-living-water-atlases.mjs');
+ if(!fs.existsSync(build))throw Error('Certified Exploration author atlas builder missing');
+ execFileSync(process.execPath,[build,exploration],{stdio:'inherit',timeout:180000});
+ const dir=path.join(exploration,livingWaterAtlasDir);
+ const expected=Object.keys(livingWaterAtlasFiles).map(n=>n+'.png').sort();
+ if(JSON.stringify(fs.readdirSync(dir).sort())!==JSON.stringify(expected))
+  throw Error('Unexpected authored water/lava atlas inventory');
+ for(const [name,size] of Object.entries(livingWaterAtlasFiles)){
+  const b=bytes(dir,name+'.png');
+  if(b.length!==size||!b.subarray(0,8).equals(Buffer.from('89504e470d0a1a0a','hex'))||
+     b.readUInt32BE(16)!==504||b.readUInt32BE(20)!==378)
+   throw Error('Invalid certified author atlas: '+name);
+ }
+}
 const exploreDest=path.join(trial,'vendor/exploration-lab');
 fs.mkdirSync(exploreDest,{recursive:true});
 // Author archives stay in the Exploration repository. Browser Pages ships
@@ -141,6 +163,15 @@ for(const folder of ['src','assets']){
       return true;
     }
   });
+}
+if(sourcePin.exploration.sha===certifiedLivingWaterSha){
+ for(const name of Object.keys(livingWaterAtlasFiles)){
+  const rel=livingWaterAtlasDir+'/'+name+'.png';
+  if(!bytes(exploreDest,rel).equals(bytes(exploration,rel)))
+   throw Error('Authored water atlas transport drift: '+name);
+ }
+ if(fs.existsSync(path.join(exploreDest,'Genesis_textures_animees_eau_lave.zip')))
+  throw Error('Source ZIP must stay outside the PWA');
 }
 if(excludedSourceArchives.length!==6)
   throw Error('Unexpected official Exploration author ZIP count: '+excludedSourceArchives.length);
@@ -420,6 +451,15 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
     !pinnedSouthRenderer.includes('for(const {side,opacity} of info.contactShadows)'))
   throw Error('Exploration navigation-only renderer differs from reviewed official main');
  releasedSouthBlob=expectedSouthBlob;
+ southRendererOriginSha=sourcePin.exploration.sha;
+}else if(sourcePin.exploration.sha===certifiedLivingWaterSha){
+ const expected='f9dc12bd8979625828347b51f0805853da44f3f4';
+ if(gitBlobSha(pinnedSouthRenderer)!==expected||
+    !pinnedSouthRenderer.includes(officialSouthBacking)||
+    !pinnedSouthRenderer.includes('if(ramp.navigationOnly)continue;')||
+    !pinnedSouthRenderer.includes('drawSculptLivingWaterLayer'))
+  throw Error('Living water renderer differs from the certified native Exploration owner');
+ releasedSouthBlob=expected;
  southRendererOriginSha=sourcePin.exploration.sha;
 }else throw Error('Unreviewed Exploration renderer version; certification required');
 const provenance={

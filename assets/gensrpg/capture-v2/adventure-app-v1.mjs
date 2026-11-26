@@ -950,17 +950,19 @@ async function loadOfficialItemTemplates(){
  renderItemLibrary();renderItemRules();
 }
 
+// Labels only: a derived presentation projection, never a WorldDocument or gameplay authority.
+const worldDisplayLabels=new Map();
 function officialWorldLabel(worldId){
  if(!worldId)return 'Monde local';
  try{
-  const world=worldLibrary?.load(worldId);
-  const title=world?.name??world?.title??world?.label??world?.id;
-  const area=world?.areas?.find(a=>a.id===world.initialAreaId);
-  if(typeof title==='string'&&title.trim()&&!/^world[.:_-][a-f0-9-]{20,}$/i.test(title))
-   return title.trim();
-  if(typeof area?.label==='string'&&area.label.trim())return area.label.trim();
-  return worldId;
+  return worldDisplayLabels.get(worldId)??worldId;
  }catch{return worldId;}
+}
+function worldDisplayLabel(world,worldId){
+ const title=world?.name??world?.title??world?.label??world?.id;
+ const area=world?.areas?.find(a=>a.id===world.initialAreaId);
+ if(typeof title==='string'&&title.trim()&&!/^world[.:_-][a-f0-9-]{20,}$/i.test(title))return title.trim();
+ return typeof area?.label==='string'&&area.label.trim()?area.label.trim():worldId;
 }
 function portfolioTitle(entry){
  return adventureSaveDisplayNameV1({
@@ -1066,7 +1068,10 @@ if(!isItemEditor){
  }
 }else document.body.dataset.adventureStartView='new';
 
-function refreshWorldChoices(saved=null){
+let worldChoiceEpoch=0;
+async function refreshWorldChoices(saved=null){
+ const epoch=++worldChoiceEpoch;
+ const library=worldLibrary;
  const picker=$('adventure-world-select'),notice=$('adventure-world-status');
  // The native World Builder owns the document and recovery. Read its
  // existing draft for presentation only; never manufacture a fallback map.
@@ -1082,7 +1087,12 @@ function refreshWorldChoices(saved=null){
    :'Aucun monde local jouable : ouvre le World Builder officiel, crée ou importe une carte, puis enregistre-la.');
   return;
  }
- const worlds=worldLibrary.list();
+ let worlds;
+ try{worlds=await library.list();}catch(error){
+  if(epoch===worldChoiceEpoch){picker.disabled=true;text(notice,'Bibliothèque Exploration indisponible : '+error.message);}
+  return false;
+ }
+ if(epoch!==worldChoiceEpoch||library!==worldLibrary)return false;
  const previous=picker.value;
  picker.replaceChildren(option('',localPlayable
    ?'Monde local actuel (compatibilité)':'Aucun monde local disponible'),
@@ -1096,6 +1106,12 @@ function refreshWorldChoices(saved=null){
   :localPlayable
    ?'Aucun monde archivé : enregistre d’abord ton monde dans le World Builder officiel.'
    :'Aucun monde local jouable : ouvre le World Builder officiel, crée ou importe une carte, puis enregistre-la avant de jouer.');
+ const labels=await Promise.all(worlds.map(async w=>{
+  try{return [w.id,worldDisplayLabel(await library.load(w.id),w.id)];}catch{return [w.id,w.id];}
+ }));
+ if(epoch!==worldChoiceEpoch||library!==worldLibrary)return false;
+ worldDisplayLabels.clear();for(const [id,label] of labels)worldDisplayLabels.set(id,label);
+ renderPortfolioOptions();return true;
 }
 async function installOfficialWorldLibrary(){
  try{
@@ -1111,7 +1127,7 @@ async function installOfficialWorldLibrary(){
    const worlds=createExplorationUniverseWorldProjectsV1({
     storage:window.localStorage,makeId:()=>crypto.randomUUID()
    });
-   if(!worlds.list(selectedUniverseId).length)
+   if(!(await worlds.list(selectedUniverseId)).length)
     throw new Error('Cet univers ne possède aucun WorldDocument natif');
    worldLibrary=Object.freeze({
     list:()=>worlds.list(selectedUniverseId),
@@ -1123,7 +1139,7 @@ async function installOfficialWorldLibrary(){
   worldLibrary=null;
   console.info('Bibliothèque multi-mondes en attente de main Exploration',error.message);
  }
- refreshWorldChoices(store?.load()??null);
+ await refreshWorldChoices(store?.load()??null);
  renderPortfolioOptions();
 }
 function renderPartyActiveChoices(){
@@ -1276,14 +1292,18 @@ function captureRoomProvider(){
  captureRoomTransport=createCaptureRoomTransportV1({client});
  return captureRoomTransport;
 }
-function syncCaptureRoomEntry(){
+let roomEntryEpoch=0;
+async function syncCaptureRoomEntry(){
+ const epoch=++roomEntryEpoch;
+ const connection=activeCaptureRoom,room=lastCaptureRoomState,library=worldLibrary;
  const button=$('adventure-room-enter'),hint=$('adventure-room-entry-hint');
  let localWorldFingerprint=null;
- if(lastCaptureRoomState?.worldId&&worldLibrary){
-  try{localWorldFingerprint=playWorldFingerprint(
-   worldLibrary.load(lastCaptureRoomState.worldId));}
+ if(room?.worldId&&library){
+  button.disabled=true;
+  try{localWorldFingerprint=playWorldFingerprint(await library.load(room.worldId));}
   catch{ /* Absent or invalid local world: offer official room import. */ }
  }
+ if(epoch!==roomEntryEpoch||connection!==activeCaptureRoom||room!==lastCaptureRoomState||library!==worldLibrary)return null;
  const p=captureRoomEntryPresentationV1({
   connection:activeCaptureRoom,room:lastCaptureRoomState,
   session:store?.load()??null,selectedWorldId:$('adventure-world-select').value,
@@ -1317,7 +1337,7 @@ function applyCaptureGuestSetup(){
  $('adventure-creator-camera-zoom').value=String(setup.cameraPolicy.zoomPercent??175);
  $('adventure-creator-camera-zoom-value').textContent=$('adventure-creator-camera-zoom').value+' %';
  const worldId=lastCaptureRoomState?.worldId;
- if(worldId&&worldLibrary?.list().some(w=>w.id===worldId))
+ if(worldId&&[...$('adventure-world-select').options].some(w=>w.value===worldId))
   $('adventure-world-select').value=worldId;
 }
 function renderCaptureRoomMembers(state){
@@ -1436,7 +1456,7 @@ async function connectCaptureRoom(response){
    session:current,setup:captureSharedRoomSetup,room:state
   });
   setAdventureStartView(valid?'load':'new',{preserveChoices:true});
-  refreshWorldChoices(valid?current:null);
+  await refreshWorldChoices(valid?current:null);
   $('adventure-player-alias').value=alias;
   applyCaptureGuestSetup();showSave();
  }
@@ -2081,7 +2101,8 @@ $('adventure-starter-all-rarities').addEventListener('change',guarded(()=>{
 }));
 $('adventure-starter').addEventListener('change',updatePreview);
 $('adventure-starter-count').addEventListener('change',guarded(renderStarterReserveSelectors));
-$('adventure-create').addEventListener('click',guarded(()=>{
+let preparingGuestAdventure=false;
+$('adventure-create').addEventListener('click',guardedAsync(async()=>{
  // Refuse a new host session BEFORE overwriting local selection: the room
  // and its invited players still belong to exactly one saved session.
  if(activeCaptureRoom?.role==='host')
@@ -2091,8 +2112,14 @@ $('adventure-create').addEventListener('click',guarded(()=>{
  if(guest){
   if(!setup||!lastCaptureRoomState?.worldId||!lastCaptureRoomState?.worldFingerprint)
    throw new Error('Le créateur doit partager sa configuration et son monde avant la préparation.');
-  if(playWorldFingerprint(worldLibrary?.load(lastCaptureRoomState.worldId))!==
-     lastCaptureRoomState.worldFingerprint)
+  if(preparingGuestAdventure)return;
+  const connection=activeCaptureRoom,room=lastCaptureRoomState;
+  preparingGuestAdventure=true;
+  let world;
+  try{world=await worldLibrary?.load(room.worldId);}finally{preparingGuestAdventure=false;}
+  if(connection!==activeCaptureRoom||room!==lastCaptureRoomState||setup!==captureSharedRoomSetup)
+   throw new Error('Salon changé pendant la vérification du monde.');
+  if(playWorldFingerprint(world)!==room.worldFingerprint)
    throw new Error('Reçois la carte du créateur avant de préparer ton héros.');
   if(Number($('adventure-starter-count').value)!==setup.starterCount)
    throw new Error('Le nombre de créatures est fixé par le créateur.');
@@ -2348,8 +2375,7 @@ window.addEventListener('message',event=>{
     event.source!==frame.contentWindow||
     event.data?.sessionId!==activePlayingSheet?.sessionId)return;
  if(event.data.schema==='gensrpg.exploration.play.ready.v1'){
-  if(event.data.worldId!==store.load()?.world?.mapRef&&
-     event.data.worldId!==readWorldAssemblerDraft(universeWorldStorage)?.id)return;
+  if(event.data.worldId!==activePlayingSheet.worldId)return;
   adventurePerf('play iframe ready after launch',adventureLaunchStartedAt??performance.now());
   adventureLaunchStartedAt=null;
   dismissJourneyLoading();
@@ -2539,7 +2565,7 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
   }
  });
  // Keep the Aventure owner mounted while the native Exploration frame runs.
- activePlayingSheet={sessionId,refreshParty};
+ activePlayingSheet={sessionId,worldId:world.id,refreshParty};
  currentSheetCreatureId=result.session.party.active.instanceId;
  $('adventure-open-last-result').hidden=!result.session.lastAward;
  activeCaptureExplorationEvents?.dispose();
@@ -2591,7 +2617,8 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
  }
 }));
 $('adventure-room-enter').addEventListener('click',guardedAsync(async()=>{
- const p=syncCaptureRoomEntry();
+ const p=await syncCaptureRoomEntry();
+ if(!p)return;
  if(p.action==='import'){
   const connection=activeCaptureRoom;
   if(!connection)throw new Error('Rejoins d’abord un salon');
@@ -2617,7 +2644,7 @@ $('adventure-room-enter').addEventListener('click',guardedAsync(async()=>{
    session,setup:captureSharedRoomSetup,room:server
   });
   setAdventureStartView(valid?'load':'new',{preserveChoices:true});
-  refreshWorldChoices(valid?session:null);
+  await refreshWorldChoices(valid?session:null);
   $('adventure-world-select').value=imported.worldId;
   $('adventure-player-alias').value=nickname;
   applyCaptureGuestSetup();showSave();syncCaptureRoomEntry();
@@ -2629,8 +2656,8 @@ $('adventure-room-enter').addEventListener('click',guardedAsync(async()=>{
  if(p.action==='prepare'){
   const nickname=$('adventure-player-alias').value;
   const roomWorldId=lastCaptureRoomState?.worldId;
-  setAdventureStartView('new',{preserveChoices:true});refreshWorldChoices(null);
-  if(roomWorldId&&worldLibrary?.list().some(w=>w.id===roomWorldId))
+  setAdventureStartView('new',{preserveChoices:true});await refreshWorldChoices(null);
+  if(roomWorldId&&[...$('adventure-world-select').options].some(w=>w.value===roomWorldId))
    $('adventure-world-select').value=roomWorldId;
   $('adventure-player-alias').value=nickname;
   applyCaptureGuestSetup();syncCaptureRoomEntry();
@@ -2656,7 +2683,7 @@ $('adventure-save-load').addEventListener('click',guardedAsync(async()=>{
  rules=normalizeAdventureRulesV1(loaded.rules);
  setFields(rules);setSessionControlFields(loaded);
  renderItemRules();showSave();updatePreview();
- refreshWorldChoices(loaded);
+ await refreshWorldChoices(loaded);
  await fillHeroChoices(loaded.hero?.definitionId??null);
  stateMessage('Partie '+activeSaveTitle(loaded)+' chargée. Les autres sauvegardes restent intactes.');
 }));
@@ -2677,7 +2704,7 @@ $('adventure-save-delete').addEventListener('click',guardedAsync(async()=>{
   rules=normalizeAdventureRulesV1(remaining?.rules??draftStore.load()??SHOWCASE_ADVENTURE_RULES_V1);
   setFields(rules);setSessionControlFields(remaining);
   renderItemRules();showSave();updatePreview();
-  refreshWorldChoices(remaining);
+  await refreshWorldChoices(remaining);
   await fillHeroChoices(remaining?.hero?.definitionId??null);
   stateMessage(description+' supprimée. Les autres sauvegardes et mondes sont conservés.');
 }));

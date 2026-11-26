@@ -98,6 +98,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
   assert.equal(await page.locator('#gensCaptureV2Root [data-editor-group="heroes"] [data-capture-v2-view="heroes"]').count(),1,
    'hero editor appears once, in the Héros editor group');
+  await page.locator('#gensCaptureV2Root [data-editor-group="heroes"] > summary').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="heroes"]').tap();
   assert.equal(await page.evaluate(()=>window.GensCaptureV2.status().view),'heroes');
   const heroFrame=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
@@ -712,6 +713,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  await page.locator('#gensCaptureV2Root [data-editor-group="combat"] > summary').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="creature"]').tap();
   const iframe=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
   await iframe.waitFor({state:'visible'});
@@ -805,6 +807,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   for(const tab of ['skills','combat','music']){
     await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
     await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+    await page.locator('#gensCaptureV2Root [data-editor-group="combat"] > summary').tap();
     await page.locator('#gensCaptureV2Root [data-capture-v2-view="'+tab+'"]').tap();
     const native=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="combat"]');
     const expected='vendor/combat-lab/examples/dom-demo/capture-editor-v2.html?tab='+tab;
@@ -816,10 +819,12 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   }
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  await page.locator('#gensCaptureV2Root [data-editor-group="combat"] > summary').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="bestiary"]').tap();
   await page.frameLocator('#gensCaptureV2Root iframe').locator('[data-bestiary]').waitFor({timeout:25000});
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  await page.locator('#gensCaptureV2Root [data-editor-group="world"] > summary').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="world"]').tap();
   await page.frameLocator('#gensCaptureV2Root iframe').locator('#world-name').waitFor({timeout:25000});
   // Two DISTINCT editor owners grouped under one Monde menu.
@@ -828,6 +833,7 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   assert.equal(await page.locator('#gensCaptureV2Root iframe').count(),0);
   assert.equal(await page.locator('#gensCaptureV2Root > nav').isVisible(),true);
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  await page.locator('#gensCaptureV2Root [data-editor-group="world"] > summary').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="builder"]').tap();
   const builderFrame=page.locator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
   await builderFrame.waitFor({state:'visible'});

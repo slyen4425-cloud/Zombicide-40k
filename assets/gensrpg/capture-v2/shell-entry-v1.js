@@ -409,27 +409,16 @@
     delete host.dataset.adventureCombatActive;
     delete host.dataset.adventureLoadingActive;
     nativeTitle.textContent="";
+    delete notice.dataset.error;
     notice.textContent=selectedUniverse
       ?'Univers '+selectedUniverse.name+' · choisis Jouer, Éditeurs ou Créateur.'
-      :'Choisis un univers. Monster InvoC conserve toutes tes parties historiques.';
+      :'';
     return true;
-  }
-  // At first app launch and when leaving an universe, show the official
-  // showcase wallpaper with the SAME Creator owner, not an extra CSS authority.
-  function showShowcaseWallpaper(){
-    const expected=host;
-    void createShellCreator().then(async owner=>{
-      if(!owner||!host||host!==expected||selectedUniverse)return;
-      await owner.selectUniverse('monster-invoc','Monster InvoC');
-      if(host===expected&&!selectedUniverse&&host.dataset.view==='home')
-        owner.enterHome();
-    }).catch(error=>console.warn('Fond de vitrine temporairement indisponible',error));
   }
   function showUniverses(){
     if(!host)return false;
     selectedUniverse=null;
     home();
-    showShowcaseWallpaper();
     universeUi?.showList();
     return true;
   }
@@ -513,7 +502,8 @@
     if(!selectedUniverse||!home())return false;
     creatorOwner?.rotateDefaultWallpaper?.();
     host.dataset.menu="editors";
-    notice.textContent="Choisis un outil de création.";
+    for(const group of host.querySelectorAll?.(".gensCaptureV2EditorGroup")??[])group.open=false;
+    notice.textContent="";
     return true;
   }
   function start(){
@@ -526,11 +516,15 @@
     host.dataset.view="home";
     host.dataset.menu="universes";
     const header=doc.createElement("header");
-    const name=doc.createElement("strong");name.textContent="Monster Capture";
     const exit=doc.createElement("button");
     exit.type="button";exit.textContent="Quitter le mode";
-    exit.addEventListener("click",stop);
-    header.append(name,exit);
+    exit.dataset.captureV2Exit="true";
+    exit.addEventListener("click",()=>{
+      const returnLink=header.querySelector?.("a.gensCaptureReturnToMain");
+      if(returnLink){returnLink.click();return;}
+      stop();
+    });
+    header.append(exit);
     // Module home shows worlds before any session. Adventure itself remains
     // the only owner of new saves, the existing portfolio and selected WorldDocument.
     const nav=doc.createElement("nav");
@@ -565,14 +559,15 @@
     const menuBack=doc.createElement("button");menuBack.type="button";
     menuBack.className="gensCaptureV2MenuBack";
     menuBack.dataset.captureV2MenuBack="main";
-    menuBack.textContent="← Menu principal";
+    menuBack.textContent="← Retour";
     menuBack.addEventListener("click",()=>{creatorOwner?.play('back');home();});
-    editorPanel.append(menuBack);
+    header.append(menuBack);
     for(const group of EDITOR_GROUPS){
-      const section=doc.createElement("section");
+      const section=doc.createElement("details");
       section.className="gensCaptureV2EditorGroup";
       section.dataset.editorGroup=group.id;
-      const title=doc.createElement("h2");title.textContent=group.title;
+      section.setAttribute("name","capture-editor-group");
+      const title=doc.createElement("summary");title.textContent=group.title;
       const entries=doc.createElement("ul");
       for(const kind of group.items){
         const li=doc.createElement("li");
@@ -606,7 +601,6 @@
     root.gensHideHomeLevels?.();
     home();
     loadUniverseHub();
-    showShowcaseWallpaper();
     return true;
   }
   function stop(){

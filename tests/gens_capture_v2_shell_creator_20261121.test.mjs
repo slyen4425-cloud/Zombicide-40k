@@ -222,13 +222,10 @@ test('Creator wallpaper uses ONE complete image and opaque backgrounds in both o
  // Preserve the existing single authority; never export the local Creator image to gameplay.
  assert.doesNotMatch(game,/background-image:.*gensrpg\.capture\.shell\.creator\.settings/);
 });
-test('portrait Capture header wraps title above the button and back link',()=>{
+test('portrait Capture header retains one centered visible return and neutral universe picker',()=>{
  const shell=read('shell-style-v1.css');
- const portrait=shell.match(/@media \(orientation:portrait\) and \(max-width:650px\)\{([\s\S]*?)\n\}/)?.[1];
- assert.ok(portrait,'portrait-only layout defined');
- assert.match(portrait,/> header\{/);
- assert.match(portrait,/grid-template-columns:max-content minmax\(0,1fr\)/);
- assert.match(portrait,/> header strong\{\s*grid-column:1\/-1/);
- assert.match(portrait,/\.gensCaptureReturnToMain\{/);
- assert.match(portrait,/text-overflow:ellipsis/);
+ assert.match(shell,/header\{display:flex;justify-content:center;padding:8px 12px\}/);
+ assert.match(shell,/header > \.gensCaptureReturnToMain\{display:none!important\}/);
+ assert.match(shell,/data-menu="editors"\] > header > \[data-capture-v2-exit\]\{display:none!important\}/);
+ assert.match(shell,/data-menu="universes"\]\{\s*background:radial-gradient/);
 });

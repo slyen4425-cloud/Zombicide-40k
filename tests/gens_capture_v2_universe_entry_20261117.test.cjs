@@ -45,7 +45,7 @@ test('Capture opens an actual universe picker before any native game/editor, the
  root.GensCaptureV2.home();
  nav.children[1].click();assert.equal(host.dataset.menu,'editors');
  const panel=host.children.find(el=>el.className==='gensCaptureV2Editors');
- const world=panel.children.find(x=>x.tag==='section').children.find(x=>x.tag==='ul').children[0].children[0];
+ const world=panel.children.find(x=>x.tag==='details').children.find(x=>x.tag==='ul').children[0].children[0];
  world.click();
  assert.match(stage.children[0].src,/vendor\/exploration-lab\/world-assembler\.html$/);
  root.GensCaptureV2.showUniverses();

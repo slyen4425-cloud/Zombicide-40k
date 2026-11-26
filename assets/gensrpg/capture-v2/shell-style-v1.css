@@ -19,22 +19,14 @@
  padding:clamp(12px,2vw,22px) clamp(12px,3vw,30px)}
 #gensCaptureV2Root[data-view="home"] > header strong{
  font-size:clamp(22px,4.5vw,34px);letter-spacing:.04em}
-/* Portrait menu: the title, Quitter and GenSRPG return link never overlap. */
+/* One visible return, preserving the canonical publisher destination. */
+#gensCaptureV2Root[data-view="home"] > header{justify-content:center;min-height:44px}
+#gensCaptureV2Root > header > .gensCaptureReturnToMain{display:none!important}
+#gensCaptureV2Root:not([data-menu="editors"]) > header > .gensCaptureV2MenuBack,
+#gensCaptureV2Root[data-menu="editors"] > header > [data-capture-v2-exit]{display:none!important}
+#gensCaptureV2Root[data-view="home"] > p:empty{display:none}
 @media (orientation:portrait) and (max-width:650px){
- #gensCaptureV2Root[data-view="home"] > header{
-  display:grid;grid-template-columns:max-content minmax(0,1fr);
-  gap:7px 10px;align-items:center;
- }
- #gensCaptureV2Root[data-view="home"] > header strong{
-  grid-column:1/-1;min-width:0;font-size:clamp(20px,5vw,26px);
-  letter-spacing:.01em;white-space:normal;
- }
- #gensCaptureV2Root[data-view="home"] > header > button{justify-self:start}
- #gensCaptureV2Root[data-view="home"] > header .gensCaptureReturnToMain{
-  display:block;min-width:0;max-width:100%;
-  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
-  text-align:right;color:#afe7e1;font-size:12px;
- }
+ #gensCaptureV2Root[data-view="home"] > header{display:flex;justify-content:center;padding:8px 12px}
 }
 #gensCaptureV2Root[data-view="home"] > nav,
 #gensCaptureV2Root[data-view="home"] > .gensCaptureV2Editors{
@@ -53,16 +45,18 @@
 #gensCaptureV2Root button:focus-visible{outline:3px solid #9be2d3;outline-offset:3px}
 #gensCaptureV2Root[data-menu="main"] > .gensCaptureV2Editors{display:none}
 #gensCaptureV2Root[data-menu="editors"] > .gensCaptureV2MainMenu{display:none}
-#gensCaptureV2Root .gensCaptureV2Editors{display:flex;flex-direction:column;gap:14px;
- padding:10px 5px 24px}
+#gensCaptureV2Root .gensCaptureV2Editors{display:flex;flex-direction:column;gap:7px;
+ padding:6px 5px 12px}
 #gensCaptureV2Root .gensCaptureV2MenuBack{
  align-self:flex-start;min-height:36px;background:#193e4a}
 #gensCaptureV2Root .gensCaptureV2EditorGroup{border:1px solid #426c77;
- background:rgba(10,33,45,.88);border-radius:14px;padding:12px 14px}
-#gensCaptureV2Root .gensCaptureV2EditorGroup h2{
- margin:0 0 8px;color:#c2f3e4;font-size:clamp(16px,2.2vw,19px)}
+ background:rgba(10,33,45,.88);border-radius:14px;padding:6px 14px}
+#gensCaptureV2Root .gensCaptureV2EditorGroup summary{
+ cursor:pointer;min-height:32px;line-height:32px;color:#c2f3e4;font-weight:700;font-size:clamp(16px,2.2vw,19px)}
+#gensCaptureV2Root .gensCaptureV2EditorGroup[open] summary{margin-bottom:8px}
 #gensCaptureV2Root .gensCaptureV2EditorGroup ul{
  list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+#gensCaptureV2Root .gensCaptureV2EditorGroup:not([open]) ul{display:none}
 #gensCaptureV2Root .gensCaptureV2EditorGroup li{margin:0}
 #gensCaptureV2Root .gensCaptureV2EditorGroup li button{
  display:block;width:100%;min-height:44px;text-align:left;padding:10px 14px}
@@ -73,7 +67,7 @@
  #gensCaptureV2Root[data-view="home"] > nav,
  #gensCaptureV2Root[data-view="home"] > .gensCaptureV2Editors{max-height:calc(100dvh - 112px)}
  #gensCaptureV2Root .gensCaptureV2MainMenu button{min-height:56px;padding:9px 16px}
- #gensCaptureV2Root .gensCaptureV2EditorGroup{padding:8px 10px}
+ #gensCaptureV2Root .gensCaptureV2EditorGroup{padding:3px 10px}
  #gensCaptureV2Root .gensCaptureV2EditorGroup li button{min-height:40px}
 }
 
@@ -271,3 +265,8 @@
 #gensCaptureV2Root .captureCreatorOfficialArtChoice{display:flex;flex-direction:column;gap:6px;padding:6px;min-width:0;align-items:stretch;text-align:center}
 #gensCaptureV2Root .captureCreatorOfficialArtChoice img{width:100%;height:84px;object-fit:contain;background:#08121b;border-radius:6px}
 #gensCaptureV2Root .captureCreatorOfficialArtChoice[aria-pressed="true"]{border-color:#87e5c3;box-shadow:0 0 0 2px #87e5c355}
+
+/* Never display an unselected universe's art, even if a previous load resolves late. */
+#gensCaptureV2Root[data-view="home"][data-menu="universes"]{
+ background:radial-gradient(ellipse at 50% 10%,#204a4b 0%,#102c36 42%,#08121b 84%);
+}

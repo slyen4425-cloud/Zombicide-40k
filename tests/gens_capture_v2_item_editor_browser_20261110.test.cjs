@@ -46,7 +46,10 @@ test('real landscape UI: library, drops, fragments and NPC shop share one saved 
   async function editor(kind,first=false){
    if(!first)await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
    await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
-   await page.locator('#gensCaptureV2Root [data-capture-v2-view="'+kind+'"]').tap();
+   const choice=page.locator('#gensCaptureV2Root [data-capture-v2-view="'+kind+'"]');
+   const group=choice.locator('xpath=ancestor::details[1]');
+   if(await group.getAttribute('open')===null)await group.locator('summary').tap();
+   await choice.tap();
    await page.waitForFunction(value=>window.GensCaptureV2?.status().view===value,kind);
    await frame.locator('#adventure-drop-species:not([disabled])').waitFor({
     state:'attached',timeout:45000});
@@ -365,6 +368,7 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
   assert.equal(await page.locator('[data-capture-v2-view="merchant"]').count(),0,
    'standalone merchant navigation must be gone');
+  if(await page.locator('[data-editor-group="npc"]').getAttribute('open')===null)await page.locator('[data-editor-group="npc"] > summary').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="npc"]').tap();
   const npc=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
   // IndexedDB NPC catalog must finish its initial async refresh BEFORE form
@@ -458,6 +462,7 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   });
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
+  if(await page.locator('[data-editor-group="world"]').getAttribute('open')===null)await page.locator('[data-editor-group="world"] > summary').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-view="world"]').tap();
   const builder=page.frameLocator('#gensCaptureV2Root iframe[data-capture-v2-native="exploration"]');
   await builder.locator('#world-workspace-map').tap();

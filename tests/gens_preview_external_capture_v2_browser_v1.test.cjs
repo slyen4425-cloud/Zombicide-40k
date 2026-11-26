@@ -122,7 +122,10 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
         await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').click();
       }
       await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').click();
-      await page.locator('#gensCaptureV2Root [data-capture-v2-view="'+key+'"]').click();
+      const choice=page.locator('#gensCaptureV2Root [data-capture-v2-view="'+key+'"]');
+      const group=choice.locator('xpath=ancestor::details[1]');
+      if(await group.count()&&(await group.getAttribute('open'))===null)await group.locator('summary').click();
+      await choice.click();
       const frame=page.locator('#gensCaptureV2Root iframe');
       await frame.waitFor({state:'visible'});
       assert.equal(await frame.getAttribute('allow'),'fullscreen');
@@ -135,6 +138,8 @@ const target='https://html-preview.github.io/?url=https://github.com/'+repo+'/bl
     // historic 2D black-screen preview with scripts that never initialized.
     await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').click();
     await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').click();
+    const worldGroup=page.locator('#gensCaptureV2Root [data-editor-group="world"]');
+    if(await worldGroup.getAttribute('open')===null&&await worldGroup.locator('summary').count())await worldGroup.locator('summary').click();
     await page.locator('#gensCaptureV2Root [data-capture-v2-view="builder"]').click();
     const sculpt=page.frameLocator('#gensCaptureV2Root iframe').locator('#sculpt-canvas');
     await sculpt.waitFor({state:'visible',timeout:30000});

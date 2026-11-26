@@ -1,3 +1,8 @@
+## 2026-11-26 — Adoption ergonomie Exploration #563 / Capture #679 (NON GREEN)
+- START source Capture 07845f3b478ace6afe841c159d953fe818a20f24, checkpoint `checkpoint/capture-before-adopt-ergonomie-20261126`, branche `work/capture-adopt-exploration-ergonomie-20261126`.
+- Cible Exploration main 7dd03a1aa718e6e71ecfb95519db430a002e0bff; arbre identique à HEAD PR testé. CI main 45826547569 et Pages 45826547034 à confirmer avant fusion. Renderer et assets inchangés. Capture #679 déjà fusionnée, CI PR verte. Aucun changement de moteur, stockage, eau ou Combat.
+- Promotion interdite avant CI main + preuve HTTPS Exploration, CI source Capture, puis publisher PWA unique avec tests réels et budget. Autorisation utilisateur explicite 26/11.
+
 ## 2026-11-26 — Adoption Capture du correctif critique de quota World Builder #560 (NON GREEN)
 - START source Capture 1c94473fbc6407b847af144f206960303e18e224 ; checkpoint `checkpoint/capture-before-world-quota-560-20261126`, branche `work/capture-adopt-world-quota-560-20261126`.
 - Source unique Exploration main c3dd13358b1f4f3c8a2e8b29e40a1b5134061901 ; CI main 45759990513 et publication 45759990509 SUCCESS, étape de preuve HTTPS exacte SUCCESS. Renderer blob 82e230a2095bceecfdc7e566d3bddaf63f3c2dbc inchangé.

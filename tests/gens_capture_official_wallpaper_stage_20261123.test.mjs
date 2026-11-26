@@ -55,6 +55,11 @@ test('staged creator and launch screens use one official catalogue without repla
  assert.ok(game.includes('URL.createObjectURL(file)'));
  assert.ok(game.includes('[...officialBlobs.filter(Boolean),...sequence].slice(0,12)'));
  assert.ok(creator.includes('automaticWallpaper=true'));
- assert.ok(shell.includes('showShowcaseWallpaper()'));
+ // The official artwork belongs to a selected universe, never the picker.
+ assert.doesNotMatch(shell,/showShowcaseWallpaper\(/);
+ assert.match(shell,/if\(selectedUniverse\)\{[\s\S]*?creatorOwner\?\.enterHome\(\);\s*\}else creatorOwner\?\.leaveHome\(\);/);
+ assert.match(shell,/function showUniverses\(\)\{[\s\S]*?selectedUniverse=null;\s*home\(\);/);
+ const css=readFileSync(resolve(root,'shell-style-v1.css'),'utf8');
+ assert.match(css,/\[data-view="home"\]\[data-menu="universes"\]\{\s*background:radial-gradient/);
  // The original and all three new artworks are still byte-identical in the site.
 });

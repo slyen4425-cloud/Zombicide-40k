@@ -1,3 +1,9 @@
+## 2026-11-26 — Adoption Capture du correctif critique de quota World Builder #560 (NON GREEN)
+- START source Capture 1c94473fbc6407b847af144f206960303e18e224 ; checkpoint `checkpoint/capture-before-world-quota-560-20261126`, branche `work/capture-adopt-world-quota-560-20261126`.
+- Source unique Exploration main c3dd13358b1f4f3c8a2e8b29e40a1b5134061901 ; CI main 45759990513 et publication 45759990509 SUCCESS, étape de preuve HTTPS exacte SUCCESS. Renderer blob 82e230a2095bceecfdc7e566d3bddaf63f3c2dbc inchangé.
+- Modifier uniquement le pin source et les sentinelles de provenance ; la lecture officielle `readWorldAssemblerDraft` est déjà importée par `adventure-app-v1.mjs`. Conserver Combat, médias, anciens mondes, univers et Core. Aucun effacement du stockage.
+- Gates : CI source exacte, lecture ancien JSON et monde compact, parcours PWA création/sauvegarde/rechargement, preuve Pages après promotion séparée. Les anciens runs queued du 11/11 sont observés, non annulés sans audit propriétaire. Compression = mesure transitoire, pas suppression du plafond ; remplacement durable IndexedDB via propriétaire Exploration à cadrer séparément. Compatibilité de reprise après édition à traiter dans un lot futur, sans désactiver le contrôle d'intégrité.
+
 ## 2026-11-25 — Régression PNJ en Jouer (correctif source, NON GREEN)
 - Signalement utilisateur : boutique PNJ fonctionnelle dans Tester mais absente des règles d'une sauvegarde Jouer ; Gorille dresseur muet ; créature errante toujours visible et réengageable après victoire.
 - Base source officielle Capture `fc655014544ab8c9cc6d123b034bed53af352f24`, checkpoint `checkpoint/capture-npc-play-before-fixes-20261125`, travail `work/capture-npc-play-regressions-20261125`. Ne pas toucher au publisher #671 des animations idle, aux 85 décors ni aux médias.

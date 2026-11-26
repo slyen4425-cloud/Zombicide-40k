@@ -1,3 +1,6 @@
+## 2026-11-26 — promotion source eau/lave (NON GREEN)
+- Auteur a validé le rendu réel dans Exploration et autorisé publication PWA. #683 fusionnée db574eeb6ca0746531b70c4ec648eebda7cc9e77; comparaison Git avec HEAD ef7a528b95bd50bc1577d287f98fc26fb7d22556 : aucun fichier différent. Les quatre workflows 45843177636, 45843177631, 45843178377, 45843177638 SUCCESS après relance ciblée du job externe. Pin publisher mis à jour vers ce merge, atlas obligatoires dans gate physique. #684 CI exacte et HTTPS post-fusion restent requis. Préserver ergonomie, stockage et Combat.
+
 ## 2026-11-26 — PWA eau/lave #562 (NON GREEN)
 - START main 1783d35516532e7941980d3ed81a15cf4a080ca0 (ergonomie #681 fusionnée), checkpoint `checkpoint/pwa-before-water-lava-20261126`, branche `work/pwa-water-lava-20261126`.
 - Autorisation explicite utilisateur. Exploration main a7b9d535880719cd50fd8935a5876e02219f2495 ; statut Pages exact SUCCESS, arbre identique à PR testée 25ef41498fe7dab0278aac86d40bd5961d30c4ff, CI 45827277068 et assemblage 45827277136 verts. Renderer blob f9dc12bd8979625828347b51f0805853da44f3f4, 5 atlas total 1 073 338 octets. Source Capture #683 en validation, ne pas repinner avant fusion certifiée.

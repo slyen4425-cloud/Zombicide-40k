@@ -280,7 +280,7 @@ test('PWA carries exact cleaned bridge and stair binaries with stable native IDs
 
 test('native World Builder map exporter and in-game 200% dezoom are shipped once from certified Exploration',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(source.exploration.sha,'7dd03a1aa718e6e71ecfb95519db430a002e0bff',
+ assert.equal(source.exploration.sha,'a7b9d535880719cd50fd8935a5876e02219f2495',
    'ship certified Exploration main with the sculpt palette, cleaned bridges and stair profiles');
  const helper='vendor/exploration-lab/src/builder/world-assembler-map-preset-export-v1.js';
  required(trial,helper);
@@ -831,7 +831,7 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
   const base=html.match(/<select id="material">([\s\S]*?)<\/select>/)?.[1]??'';
   const rows=[["grass.forest.tall","texture.grass.forest.tall.01","terrain_haute_herbe_01.webp","forest","9a127bde4f600d1fbb77fc8cb1a03f7bc05d569576805e98ad461bb59627a49b"],["grass.forest.flowers","texture.grass.forest.flowers.01","terrain_herbe_fleurie_01.webp","forest","6cef9ed6c7e12b67f1e9d2cb1ab2ba7d3f13908ef6e111a32797462ae92bfff0"],["ground.snow.rocky","texture.ground.snow.rocky.01","terrain_neige_rocheuse_01.webp","snow","2e336b9446c335b0cf5f1913b45dbae5a137cb691ab77bd2ff7dbc57337cda35"],["ground.dirt.textured","texture.ground.dirt.textured.01","terrain_sol_terre_01.webp","plain","e3d1958b076497b6b56b29a582792ad583a42d94cff7d2206efae5af691f1440"],["ground.volcanic.rocky","texture.ground.volcanic.rocky.01","terrain_sol_volcanique_01.webp","volcano","d14a157801e96c4a0e7121cb044799c1bfe17ea15125aa9e63029f417faf2cbc"]];
   const provenance=json(trial,'release-provenance.v1.json');
-  assert.equal(provenance.exploration.sha,'7dd03a1aa718e6e71ecfb95519db430a002e0bff');
+  assert.equal(provenance.exploration.sha,'a7b9d535880719cd50fd8935a5876e02219f2495');
   for(const [materialId,assetId,filename,family,hash] of rows){
     const rel=owner+'assets/exploration/materials/forest/surfaces/'+filename;
     required(trial,rel);
@@ -860,7 +860,7 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
 test('the PWA physically ships the generic author description and zone/trail editor, not species-specific code',()=>{
  const pinned=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
  assert.equal(pinned.combat.sha,'dcb464e5bd0f24e1eeeafcc8995822f601e5fd10');
- assert.equal(pinned.exploration.sha,'7dd03a1aa718e6e71ecfb95519db430a002e0bff');
+ assert.equal(pinned.exploration.sha,'a7b9d535880719cd50fd8935a5876e02219f2495');
  const explanation=read(trial,'vendor/combat-lab/src/ui/capture-skill-explanation-v1.js').toString('utf8');
  const editor=read(trial,'vendor/combat-lab/src/ui/capture-editor-human-v2.js').toString('utf8');
  assert.match(explanation,/if\(d\.salvo\)/,'auto description must show configured salvo count');
@@ -958,7 +958,7 @@ test('published Capture carries the opt-in potion import and actual merchant sto
  assert.match(shop,/state\.merchantStocks/);
  const pins=json(trial,base+'source-pins-v1.json');
  assert.equal(pins.combat.sha,'dcb464e5bd0f24e1eeeafcc8995822f601e5fd10');
- assert.equal(pins.exploration.sha,'7dd03a1aa718e6e71ecfb95519db430a002e0bff');
+ assert.equal(pins.exploration.sha,'a7b9d535880719cd50fd8935a5876e02219f2495');
 });
 
 test('both owners explain missing merchant links in the assembled PWA',()=>{
@@ -1134,9 +1134,9 @@ test('World Builder quota fix ships exact native storage owners',()=>{
  }
 });
 
-// This gate is active only after the certified Capture source is promoted.
+// Mandatory physical gate for this certified release.
 test('approved water/lava atlases travel once through the canonical Exploration owner',()=>{
- if(explorationSha!=='a7b9d535880719cd50fd8935a5876e02219f2495')return;
+ assert.equal(explorationSha,'a7b9d535880719cd50fd8935a5876e02219f2495');
  const owner='vendor/exploration-lab/';
  const dir='assets/exploration/materials/forest/water/animated/';
  const sizes={eau_bleue_profonde:195611,eau_turquoise:257780,eau_riviere:171319,eau_marais:179173,lave:269455};

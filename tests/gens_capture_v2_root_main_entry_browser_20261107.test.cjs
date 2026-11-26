@@ -77,7 +77,15 @@ test('public main Capture click opens the ONE V2 owner, Jouer is native, return 
   const adventure=page.frameLocator('#gensCaptureV2Root iframe');
   await adventure.locator('#adventure-create').waitFor({state:'attached',timeout:45000});
   await page.locator('.gensCaptureV2NativeBack').tap();
-  await back.tap();
+  // New menu uses the one visible exit; its canonical link stays attached
+  // for routing, not as a second user action. Older certified releases still
+  // expose that link directly.
+  const exit=capture.locator('header [data-capture-v2-exit]');
+  if(await exit.count()){
+   assert.equal(await back.isVisible(),false,'redundant GenSRPG link is not visible');
+   assert.equal(await exit.isVisible(),true);
+   await exit.tap();
+  }else await back.tap();
   await page.waitForURL(base,{timeout:30000});
   await page.locator('button.gensRootModeCard.survival').waitFor({state:'attached'});
   assert.deepEqual(missing,[],'all main and V2 native resources must resolve from one publisher');

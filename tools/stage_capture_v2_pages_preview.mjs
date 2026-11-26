@@ -343,6 +343,7 @@ const certifiedDoorPromptSha='1333b74a5306bb07473f3c1f58be18804b9a5a75'; // #557
 const certifiedDecorAssetsSha='da445a85caa11d3d0503a3fc1227cad4e6b11471'; // #558 CI 45680415618 and Pages 45680415517 GREEN; same renderer blob.
 const certifiedWildVictorySha='afb8d878f4c0b60c61aef4bf59306d518481efe6'; // #559 wild defeat, trainer notice; same verified renderer Git blob; main CI/Pages must be GREEN.
 const certifiedWorldQuotaSha='c3dd13358b1f4f3c8a2e8b29e40a1b5134061901'; // #560 CI 45759990513, Pages 45759990509; same renderer.
+const certifiedErgonomieSha='7dd03a1aa718e6e71ecfb95519db430a002e0bff'; // #563 renderer byte-identical; CI 45826547569 / Pages 45826547034 certification required before promotion.
 const lightingSouthBlob='82e230a2095bceecfdc7e566d3bddaf63f3c2dbc';
 const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #554: CI 45624477145, Pages 45624477116 and 45640176867 SUCCESS, identical renderer blob.
 const waterPassageSouthBlob='19b0c9822048381793cd705f7cfcb2d4cdc207fa';
@@ -405,12 +406,12 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
    throw Error('Certified native elevated-ground renderer differs from Exploration main');
  releasedSouthBlob=recoveredWorldSouthBlob;
  southRendererOriginSha=sourcePin.exploration.sha;
-}else if([certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha].includes(sourcePin.exploration.sha)){
+}else if([certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha].includes(sourcePin.exploration.sha)){
  // The canonical owner intentionally hides navigationOnly ramps in play.
  // Certify its EXACT Git blob; preserve all physical passages in Collision
  // World, and NEVER modify/copy the original native renderer in the PWA.
- const waterPassage=[certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha].includes(sourcePin.exploration.sha);
- const worldLighting=[certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha].includes(sourcePin.exploration.sha);
+ const waterPassage=[certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha].includes(sourcePin.exploration.sha);
+ const worldLighting=[certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha].includes(sourcePin.exploration.sha);
  const expectedSouthBlob=worldLighting?lightingSouthBlob:waterPassage?waterPassageSouthBlob:navigationAllowSouthBlob;
  if(gitBlobSha(pinnedSouthRenderer)!==expectedSouthBlob||
     ((waterPassage||worldLighting)&&!pinnedSouthRenderer.includes('if(bridge.visibleInPlay)drawSculptWaterSupport(ctx,bridge,rise);'))||

@@ -344,15 +344,16 @@ const certifiedDoorPromptSha='1333b74a5306bb07473f3c1f58be18804b9a5a75'; // #557
 const certifiedDecorAssetsSha='da445a85caa11d3d0503a3fc1227cad4e6b11471'; // #558 CI 45680415618 + Pages 45680415517 GREEN.
  const certifiedWildVictorySha='afb8d878f4c0b60c61aef4bf59306d518481efe6'; // #559 main CI 45703174726 + Pages 45703174709 GREEN; same renderer blob.
 const certifiedWorldQuotaSha='c3dd13358b1f4f3c8a2e8b29e40a1b5134061901'; // #560 CI 45759990513, Pages 45759990509; same renderer.
+const certifiedLivingWaterSha='a7b9d535880719cd50fd8935a5876e02219f2495';
 const certifiedErgonomieSha='7dd03a1aa718e6e71ecfb95519db430a002e0bff'; // #563 renderer byte-identical; CI 45826547569 / Pages 45826547034 SUCCESS, exact HTTPS verified.
 const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #554: CI 45624477145, Pages 45624477116 and 45640176867 SUCCESS, identical renderer blob.
  // The stair fix changes navigation and sprite presentation only. Its
  // canonical south terrain renderer remains byte-identical to recoveredWorld.
- const expectedOfficialRendererBlob=[certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha].includes(explorationSha)?'82e230a2095bceecfdc7e566d3bddaf63f3c2dbc': [certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha].includes(explorationSha)
+ const expectedOfficialRendererBlob=explorationSha===certifiedLivingWaterSha?'f9dc12bd8979625828347b51f0805853da44f3f4':[certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha].includes(explorationSha)?'82e230a2095bceecfdc7e566d3bddaf63f3c2dbc': [certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha].includes(explorationSha)
    ?'19b0c9822048381793cd705f7cfcb2d4cdc207fa'
    :[certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha].includes(explorationSha)
    ?'98c70979a719b2bad48a35df972bb880b6a62f5e'
-   :[recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha].includes(explorationSha)
+   :[recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha].includes(explorationSha)
    ?'6c101756bdf9c58a9ae8cf3fe104e49575145748'
    :explorationSha===fringeRoadExplorationSha
     ?'1a0869afc5b258e8f403f43cd26b3f417a6c8786'
@@ -363,7 +364,7 @@ const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #55
  assert.equal(provenance.exploration.sha,explorationSha,
    'the complete native Exploration checkout must match the source pin');
  assert.ok(['13bbd8230d8dfcef612586974b2dcb54e18e16c4',
-   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha].includes(explorationSha),
+   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha].includes(explorationSha),
    'release must reject unreviewed Exploration main SHAs');
  const bytes=read(trial,official);
  const gitBlob=crypto.createHash('sha1')
@@ -378,7 +379,7 @@ const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #55
  const sculpt=read(trial,'vendor/exploration-lab/src/sculpt-lab-main.js').toString('utf8');
  assert.match(sculpt,/drawOuterSouthRim:false/);
  assert.match(sculpt,/drawDecorativeFringeTerrain\(\)/);
- if([fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha].includes(explorationSha)){
+ if([fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha].includes(explorationSha)){
   assert.match(sculpt,/drawDecorativeFringeObjects\('back'\)/);
   assert.match(sculpt,/drawDecorativeFringeObjects\('front'\)/);
   const north=sculpt.indexOf("drawDecorativeFringeObjects('back');");
@@ -386,7 +387,7 @@ const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #55
   const south=sculpt.indexOf("drawDecorativeFringeObjects('front');",hero);
   assert.ok(north>=0&&hero>north&&south>hero,
    'a southern tree must layer in front of the player but own no collision');
-  if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha].includes(explorationSha)){
+  if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha].includes(explorationSha)){
    assert.doesNotMatch(text,/ctx.fillRect\(rect.x,rect.y,rect.width,rect.height\)/,
     'no per-tile translucent altitude paint on a raised road or grass');
    assert.match(text,/for\(const \{side,opacity\} of info.contactShadows\)/,
@@ -1131,4 +1132,27 @@ test('World Builder quota fix ships exact native storage owners',()=>{
   const bytes=read(trial,owner+file);
   assert.equal(crypto.createHash('sha1').update('blob '+bytes.length+String.fromCharCode(0)).update(bytes).digest('hex'),expected,file);
  }
+});
+
+// This gate is active only after the certified Capture source is promoted.
+test('approved water/lava atlases travel once through the canonical Exploration owner',()=>{
+ if(explorationSha!=='a7b9d535880719cd50fd8935a5876e02219f2495')return;
+ const owner='vendor/exploration-lab/';
+ const dir='assets/exploration/materials/forest/water/animated/';
+ const sizes={eau_bleue_profonde:195611,eau_turquoise:257780,eau_riviere:171319,eau_marais:179173,lave:269455};
+ let sum=0;
+ assert.deepEqual(fs.readdirSync(path.join(trial,owner+dir)).sort(),Object.keys(sizes).map(x=>x+'.png').sort());
+ for(const [name,size] of Object.entries(sizes)){
+  const b=read(trial,owner+dir+name+'.png');
+  assert.equal(b.length,size);assert.equal(b.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+  assert.equal(b.readUInt32BE(16),504);assert.equal(b.readUInt32BE(20),378);sum+=b.length;
+  assert.equal(fs.existsSync(path.join(trial,dir,name+'.png')),false);
+ }
+ assert.equal(sum,1073338);
+ for(const base of [site,trial,path.join(trial,owner)])
+  assert.equal(fs.existsSync(path.join(base,'Genesis_textures_animees_eau_lave.zip')),false);
+ const html=read(trial,owner+'sculpt-lab.html').toString('utf8');
+ assert.match(html,/value="water\.lava"/);assert.match(html,/id="water-fps"/);assert.match(html,/id="water-foam"/);
+ const sprites=read(trial,owner+'src/render/animated-surface-sprites-v1.js').toString('utf8');
+ assert.match(sprites,/loadAnimatedSurfaceAtlas/);
 });

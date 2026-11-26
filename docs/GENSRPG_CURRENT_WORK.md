@@ -1,3 +1,9 @@
+## 2026-11-26 — PWA eau/lave #562 (NON GREEN)
+- START main 1783d35516532e7941980d3ed81a15cf4a080ca0 (ergonomie #681 fusionnée), checkpoint `checkpoint/pwa-before-water-lava-20261126`, branche `work/pwa-water-lava-20261126`.
+- Autorisation explicite utilisateur. Exploration main a7b9d535880719cd50fd8935a5876e02219f2495 ; statut Pages exact SUCCESS, arbre identique à PR testée 25ef41498fe7dab0278aac86d40bd5961d30c4ff, CI 45827277068 et assemblage 45827277136 verts. Renderer blob f9dc12bd8979625828347b51f0805853da44f3f4, 5 atlas total 1 073 338 octets. Source Capture #683 en validation, ne pas repinner avant fusion certifiée.
+- Publisher unique : exécuter le build canonique du propriétaire Exploration avant copie src/assets uniquement si révision eau/lave certifiée. Contrôler les cinq PNG, dimensions, poids, archive hors runtime, provenance byte-exacte. Garder le pin ergonomie actuel jusqu'à fusion Capture #683, puis adapter les assertions de publication à la nouvelle source. Préserver Combat, médias, UI, données et anciennes URL. #561 sauvegardes indépendant.
+- Gates : CI exacte, budget, publication HTTPS et contrôle Android/PC. Aucun GREEN anticipé.
+
 ## 2026-11-26 — Publication ergonomie Capture / Exploration (NON GREEN)
 - 14h56 : #682 fusionnée 334762a734b598785985030a4d05c1b47d18850c ; deux checks source réussis, arbre de fusion identique, correctif sentinelle uniquement. Repin #681 pour relancer build et capture-preview-review. Ancien run rouge 45833055607 conservé comme preuve, aucune désactivation de test.
 - 14h44 : Exploration main CI 45826547569 + Pages 45826547034 SUCCESS, preuve HTTPS exacte réussie. Capture adoption #680 fusionnée d7c41107ac5856524518d8a3fb506723811cd88a, arbre identique HEAD ff8bbc4cc926cdca81f4912ad1a69de619fcaa74 certifié par les six contrôles. Pin publisher mis à jour, tests et publication PWA restent bloquants.

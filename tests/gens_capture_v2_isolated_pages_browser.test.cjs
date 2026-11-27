@@ -167,6 +167,13 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   await openCombatArenaSettings();
   await editor.locator('#world-combat-arena').selectOption({label:'Neige'});
   await editor.locator('#area-combat-arena').selectOption({label:'Ville'});
+   await editor.waitForFunction(async()=>{
+    const {openWorldDocumentReleaseAccessV1}=await import('./src/storage/world-document-release-access-v1.js');
+    const access=await openWorldDocumentReleaseAccessV1({storage:localStorage,sessionStorage});
+    const world=await access.readDraft();
+    return access.durable&&world?.defaultCombatArenaId==='snow'&&world.areas.find(a=>a.id===world.initialAreaId)?.encounters?.combatArenaId==='city';
+   });
+   await editor.locator('#save-state').filter({hasText:'Monde sauvegardé localement'}).waitFor();
   await editor.reload();
   await openCombatArenaSettings();
   await editor.locator('#area-combat-arena:not([disabled])').waitFor();

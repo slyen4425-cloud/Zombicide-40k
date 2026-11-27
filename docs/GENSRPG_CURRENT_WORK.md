@@ -1,3 +1,8 @@
+## 2026-11-27 — Adoption du pont Combat durable, sans routes non validées (NON GREEN)
+- START 58313047cbe6f62536160336c576b85fc3853088 ; checkpoint `checkpoint/capture-before-indexeddb-combat-bridge-20261127`, branche `work/capture-adopt-indexeddb-combat-bridge-20261127`.
+- Exploration #567/#568 fusionnées, CI exacte 46045210248 et assemblage 46045210243 SUCCESS, Pages `pages/exploration-main-live` SUCCESS sur 10165c5a895e4714a180fab52325d30fc09e092c. Comparaison avec 5f684c4 : uniquement pont, fixture, test et journal. Aucune nouvelle route. PWA #693 reste le seul raccord publisher.
+- Pin Exploration et sentinelle uniquement, Combat inchangé. CI Capture exacte avant fusion, puis actualiser #693 et vérifier HTTPS.
+
 ## 2026-11-27 — Adoption finale bibliothèque graphique + IndexedDB (NON GREEN)
 - START c6586e4f3c69253edf5613fd881efd05304dc862 ; checkpoint `checkpoint/capture-before-graphic-library-20261127`, branche `work/capture-adopt-graphic-library-20261127`.
 - #685 fusionnée après 4/4 CI exactes SUCCESS, arbre identique. Exploration #564 main 5f684c4d1978522ac7dc1f315fdc5e2aab8048fc : CI 46036194126 et assemblage 46036194145 SUCCESS, statut HTTPS exact `pages/exploration-main-live` SUCCESS. Adopter uniquement pin Exploration et sentinelle. Combat inchangé, stockage durable maintenu. CI Capture puis promotion PWA unique obligatoires.

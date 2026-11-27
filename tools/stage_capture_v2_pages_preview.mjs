@@ -124,7 +124,8 @@ fs.copyFileSync(mainEntrySource,mainEntryTarget);
 const certifiedLivingWaterSha='a7b9d535880719cd50fd8935a5876e02219f2495';
 const certifiedPatrolSha='98f76585c6109e46558d364e6ac697ed4319963e';
 const certifiedGreenHeroSha='3ed0c06e0ffdc798a011ecfcafe9037712864d9c';
-const certifiedLivingWaterRelease=sha=>[certifiedLivingWaterSha,certifiedPatrolSha,certifiedGreenHeroSha].includes(sha);
+const certifiedGraphicIndexedDbSha='5f684c4d1978522ac7dc1f315fdc5e2aab8048fc';
+const certifiedLivingWaterRelease=sha=>[certifiedLivingWaterSha,certifiedPatrolSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(sha);
 const livingWaterAtlasFiles=Object.freeze({
  eau_bleue_profonde:195611,eau_turquoise:257780,eau_riviere:171319,eau_marais:179173,lave:269455
 });
@@ -456,7 +457,7 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
  releasedSouthBlob=expectedSouthBlob;
  southRendererOriginSha=sourcePin.exploration.sha;
 }else if(certifiedLivingWaterRelease(sourcePin.exploration.sha)){
- const expected='f9dc12bd8979625828347b51f0805853da44f3f4';
+ const expected=sourcePin.exploration.sha===certifiedGraphicIndexedDbSha?'29cd0e76c5eee0faec1acfeb3a0a9ea589f062db':'f9dc12bd8979625828347b51f0805853da44f3f4';
  if(gitBlobSha(pinnedSouthRenderer)!==expected||
     !pinnedSouthRenderer.includes(officialSouthBacking)||
     !pinnedSouthRenderer.includes('if(ramp.navigationOnly)continue;')||

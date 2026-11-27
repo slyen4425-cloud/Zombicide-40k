@@ -14,7 +14,7 @@ import {projectCaptureStatEffectsV1}
 import {projectCaptureEncounterMaxHpV1}
  from '../../../vendor/combat-lab/src/ui/capture-encounter-combat-source-v1.js';
 import {createAdventureHpProjectorV1} from './adventure-hp-projection-v1.mjs';
-import {readWorldAssemblerDraft} from '../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js';
+import {loadCaptureNativeWorldAccessV1,captureWorldLibraryForAccessV1} from './world-native-access-v1.mjs';
 import {serializeWorldBuilderDraft,importWorldBuilderDocument}
  from '../../../vendor/exploration-lab/src/builder/world-builder-draft.js';
 import {
@@ -262,7 +262,11 @@ let store,portfolio,draftStore,creatorDraftStore,worldLibrary=null;
 let selectedUniverseId=null,universeWorldStorage=window.localStorage;
 // One official active-draft reader; cutover must replace it at composition,
 // never fall back to historical storage after a durable read failure.
-const readOfficialActiveWorld=async()=>readWorldAssemblerDraft(universeWorldStorage);
+let worldAccess=null;
+const readOfficialActiveWorld=async()=>{
+ if(!worldAccess)throw Error('Accès WorldDocument officiel indisponible');
+ return worldAccess.readDraft();
+};
 const text=(node,value)=>{node.textContent=String(value);};
 const stateMessage=(message,error=false)=>{
  text(status,message);status.dataset.error=String(error);
@@ -1119,29 +1123,15 @@ async function refreshWorldChoices(saved=null){
 }
 async function installOfficialWorldLibrary(){
  try{
-  // The official Lab owns archive/WorldDocument import/export and activation.
-  // Before its API is on certified main, never create a second codec.
-  const owner=await import(
-   '../../../vendor/exploration-lab/src/builder/exploration-world-document-library-v1.js');
-  if(selectedUniverseId===null){
-   worldLibrary=owner.createExplorationWorldDocumentLibraryV1({storage:window.localStorage});
-  }else{
-   const {createExplorationUniverseWorldProjectsV1}=await import(
-    '../../../vendor/exploration-lab/src/builder/exploration-universe-world-projects-v1.js');
-   const worlds=createExplorationUniverseWorldProjectsV1({
-    storage:window.localStorage,makeId:()=>crypto.randomUUID()
-   });
-   if(!(await worlds.list(selectedUniverseId)).length)
-    throw new Error('Cet univers ne possède aucun WorldDocument natif');
-   worldLibrary=Object.freeze({
-    list:()=>worlds.list(selectedUniverseId),
-    load:id=>worlds.load(selectedUniverseId,id),
-    activate:id=>worlds.activate(selectedUniverseId,id)
-   });
-  }
+  // One native release access owns every read, activation and guest import.
+  const access=await loadCaptureNativeWorldAccessV1({universeId:selectedUniverseId});
+  if(selectedUniverseId!==null&&!(await access.list()).length)
+   throw Error('Cet univers ne possède aucun WorldDocument natif');
+  worldAccess=access;
+  worldLibrary=captureWorldLibraryForAccessV1(access);
  }catch(error){
-  worldLibrary=null;
-  console.info('Bibliothèque multi-mondes en attente de main Exploration',error.message);
+  worldAccess=null;worldLibrary=null;
+  console.info('Bibliothèque officielle Exploration indisponible',error.message);
  }
  await refreshWorldChoices(store?.load()??null);
  renderPortfolioOptions();

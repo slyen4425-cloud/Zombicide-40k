@@ -55,7 +55,8 @@ test('unregistered or unavailable official world never changes editor state or s
 test('real Adventure uses official lazy library, never a GenSrpg world serializer',()=>{
  const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
  const html=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure.html',import.meta.url),'utf8');
- assert.match(app,/createExplorationWorldDocumentLibraryV1/);
+ assert.match(app,/await loadCaptureNativeWorldAccessV1\(\{universeId:selectedUniverseId\}\)/);
+ assert.match(app,/captureWorldLibraryForAccessV1\(access\)/);
  assert.match(app,/withSelectedAdventureWorldV1/);
  assert.match(app,/resolveSelectedAdventureWorldV1/);
  assert.match(html,/id="adventure-world-select"/);
@@ -78,7 +79,7 @@ test('Jouer displays absent local WorldDocument without creating a hidden fallba
  assert.ok(start>=0&&end>start,'canonical world selector required');
  const code=app.slice(start,end);
  assert.match(code,/await readOfficialActiveWorld\(\)/);
- assert.match(app,/const readOfficialActiveWorld=async\(\)=>readWorldAssemblerDraft\(universeWorldStorage\)/);
+ assert.match(app,/const readOfficialActiveWorld=async\(\)=>\{[\s\S]*?return worldAccess\.readDraft\(\);/);
  assert.match(code,/Aucun monde local disponible/);
  assert.match(code,/Aucun monde local jouable/);
  assert.match(code,/Monde local actuel \(compatibilité\)/);
@@ -102,9 +103,26 @@ test('async native archive selection and activation wait for durable acknowledge
 
 test('all Adventure author draft consumers await the same native reader with no raw storage bypass',()=>{
  const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
- assert.equal([...app.matchAll(/readWorldAssemblerDraft\(universeWorldStorage\)/g)].length,1);
+ assert.doesNotMatch(app,/readWorldAssemblerDraft\(/);
+ assert.equal([...app.matchAll(/worldAccess\.readDraft\(\)/g)].length,1);
  assert.equal([...app.matchAll(/await readOfficialActiveWorld\(\)/g)].length,4);
  assert.match(app,/let world=await readOfficialActiveWorld\(\);\s*if\(launchEpoch!==journeyLaunchEpoch\)return/);
  assert.match(app,/const draft=await readOfficialActiveWorld\(\);\s*if\(launchEpoch!==journeyLaunchEpoch\)return/);
  assert.match(app,/const activeDraft=await readOfficialActiveWorld\(\);\s*if\(activeCaptureRoom!==connection\)throw/);
+});
+
+import {loadCaptureNativeWorldAccessV1,captureWorldLibraryForAccessV1} from '../assets/gensrpg/capture-v2/world-native-access-v1.mjs';
+test('release bridge delegates every command to one official owner and does not fall back after failure',async()=>{
+ const calls=[],storage={},sessionStorage={},root={localStorage:storage,sessionStorage,crypto:{randomUUID:()=> 'generated'}};
+ const native={durable:true,projects:{},readDraft:async()=>({id:'world-host1234'}),list:async()=>[],load:async id=>({id}),activate:async id=>({id}),importShared:async(doc,options)=>{calls.push([doc,options]);return doc;}};
+ const access=await loadCaptureNativeWorldAccessV1({root,contract:'release',universeId:'unv_guest1234',imports:async uri=>{
+  assert.match(uri,/world-document-release-access-v1\.js$/);
+  return {openWorldDocumentReleaseAccessV1:async options=>{assert.equal(options.storage,storage);assert.equal(options.sessionStorage,sessionStorage);assert.equal(options.universeId,'unv_guest1234');return native;}};
+ }});
+ assert.equal(access,native);assert.equal((await access.readDraft()).id,'world-host1234');
+ const library=captureWorldLibraryForAccessV1(access),doc={id:'world-host1234'};
+ assert.deepEqual(await library.save(doc,{replace:false}),doc);
+ assert.deepEqual(calls,[[doc,{confirmed:true}]]);
+ assert.throws(()=>library.save(doc,{replace:true}),/Écrasement/);
+ let imported=0;await assert.rejects(loadCaptureNativeWorldAccessV1({root,contract:'release',imports:async()=>{imported++;throw Error('Migration impossible');}}),/Migration impossible/);assert.equal(imported,1);
 });

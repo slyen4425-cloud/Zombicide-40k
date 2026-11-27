@@ -280,7 +280,7 @@ test('PWA carries exact cleaned bridge and stair binaries with stable native IDs
 
 test('native World Builder map exporter and in-game 200% dezoom are shipped once from certified Exploration',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(source.exploration.sha,'3ed0c06e0ffdc798a011ecfcafe9037712864d9c',
+ assert.equal(source.exploration.sha,'10165c5a895e4714a180fab52325d30fc09e092c',
    'ship certified Exploration main with the sculpt palette, cleaned bridges and stair profiles');
  const helper='vendor/exploration-lab/src/builder/world-assembler-map-preset-export-v1.js';
  required(trial,helper);
@@ -345,16 +345,17 @@ const certifiedDecorAssetsSha='da445a85caa11d3d0503a3fc1227cad4e6b11471'; // #55
  const certifiedWildVictorySha='afb8d878f4c0b60c61aef4bf59306d518481efe6'; // #559 main CI 45703174726 + Pages 45703174709 GREEN; same renderer blob.
 const certifiedWorldQuotaSha='c3dd13358b1f4f3c8a2e8b29e40a1b5134061901'; // #560 CI 45759990513, Pages 45759990509; same renderer.
 const certifiedLivingWaterSha='98f76585c6109e46558d364e6ac697ed4319963e';
-const certifiedGreenHeroSha='3ed0c06e0ffdc798a011ecfcafe9037712864d9c'; // #565 CI 45981920240 and Pages HTTPS 45981920216.
+const certifiedGreenHeroSha='3ed0c06e0ffdc798a011ecfcafe9037712864d9c';
+const certifiedGraphicIndexedDbSha='10165c5a895e4714a180fab52325d30fc09e092c'; // #568 CI 46045210248 + HTTPS GREEN, without unvalidated roads.
 const certifiedErgonomieSha='7dd03a1aa718e6e71ecfb95519db430a002e0bff'; // #563 renderer byte-identical; CI 45826547569 / Pages 45826547034 SUCCESS, exact HTTPS verified.
 const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #554: CI 45624477145, Pages 45624477116 and 45640176867 SUCCESS, identical renderer blob.
  // The stair fix changes navigation and sprite presentation only. Its
  // canonical south terrain renderer remains byte-identical to recoveredWorld.
- const expectedOfficialRendererBlob=[certifiedLivingWaterSha,certifiedGreenHeroSha].includes(explorationSha)?'f9dc12bd8979625828347b51f0805853da44f3f4':[certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha].includes(explorationSha)?'82e230a2095bceecfdc7e566d3bddaf63f3c2dbc': [certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha].includes(explorationSha)
+ const expectedOfficialRendererBlob=explorationSha===certifiedGraphicIndexedDbSha?'29cd0e76c5eee0faec1acfeb3a0a9ea589f062db':[certifiedLivingWaterSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(explorationSha)?'f9dc12bd8979625828347b51f0805853da44f3f4':[certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(explorationSha)?'82e230a2095bceecfdc7e566d3bddaf63f3c2dbc': [certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(explorationSha)
    ?'19b0c9822048381793cd705f7cfcb2d4cdc207fa'
    :[certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha].includes(explorationSha)
    ?'98c70979a719b2bad48a35df972bb880b6a62f5e'
-   :[recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha].includes(explorationSha)
+   :[recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(explorationSha)
    ?'6c101756bdf9c58a9ae8cf3fe104e49575145748'
    :explorationSha===fringeRoadExplorationSha
     ?'1a0869afc5b258e8f403f43cd26b3f417a6c8786'
@@ -365,7 +366,7 @@ const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #55
  assert.equal(provenance.exploration.sha,explorationSha,
    'the complete native Exploration checkout must match the source pin');
  assert.ok(['13bbd8230d8dfcef612586974b2dcb54e18e16c4',
-   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha].includes(explorationSha),
+   '4df91fdc4d5eedcf421e4767e175cba80e469bb1',pixelExplorationSha,warmupAudioExplorationSha,crossfadeExplorationSha,authorExportCameraExplorationSha,fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(explorationSha),
    'release must reject unreviewed Exploration main SHAs');
  const bytes=read(trial,official);
  const gitBlob=crypto.createHash('sha1')
@@ -380,7 +381,7 @@ const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #55
  const sculpt=read(trial,'vendor/exploration-lab/src/sculpt-lab-main.js').toString('utf8');
  assert.match(sculpt,/drawOuterSouthRim:false/);
  assert.match(sculpt,/drawDecorativeFringeTerrain\(\)/);
- if([fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha].includes(explorationSha)){
+ if([fringeRoadExplorationSha,recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(explorationSha)){
   assert.match(sculpt,/drawDecorativeFringeObjects\('back'\)/);
   assert.match(sculpt,/drawDecorativeFringeObjects\('front'\)/);
   const north=sculpt.indexOf("drawDecorativeFringeObjects('back');");
@@ -388,7 +389,7 @@ const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #55
   const south=sculpt.indexOf("drawDecorativeFringeObjects('front');",hero);
   assert.ok(north>=0&&hero>north&&south>hero,
    'a southern tree must layer in front of the player but own no collision');
-  if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha].includes(explorationSha)){
+  if([recoveredWorldExplorationSha,stairsExplorationSha,certifiedNov21ExplorationSha,certifiedNov22NpcExplorationSha,certifiedNov22CleanedAssetsSha,certifiedNov22NpcInlineSha,certifiedNov22MultiplayerOverlapSha,certifiedNov22SculptPaletteSha,certifiedNov22FiveTerrainTexturesSha,certifiedNov23AutoPortalsSha,certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha,certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(explorationSha)){
    assert.doesNotMatch(text,/ctx.fillRect\(rect.x,rect.y,rect.width,rect.height\)/,
     'no per-tile translucent altitude paint on a raised road or grass');
    assert.match(text,/for\(const \{side,opacity\} of info.contactShadows\)/,
@@ -832,7 +833,7 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
   const base=html.match(/<select id="material">([\s\S]*?)<\/select>/)?.[1]??'';
   const rows=[["grass.forest.tall","texture.grass.forest.tall.01","terrain_haute_herbe_01.webp","forest","9a127bde4f600d1fbb77fc8cb1a03f7bc05d569576805e98ad461bb59627a49b"],["grass.forest.flowers","texture.grass.forest.flowers.01","terrain_herbe_fleurie_01.webp","forest","6cef9ed6c7e12b67f1e9d2cb1ab2ba7d3f13908ef6e111a32797462ae92bfff0"],["ground.snow.rocky","texture.ground.snow.rocky.01","terrain_neige_rocheuse_01.webp","snow","2e336b9446c335b0cf5f1913b45dbae5a137cb691ab77bd2ff7dbc57337cda35"],["ground.dirt.textured","texture.ground.dirt.textured.01","terrain_sol_terre_01.webp","plain","e3d1958b076497b6b56b29a582792ad583a42d94cff7d2206efae5af691f1440"],["ground.volcanic.rocky","texture.ground.volcanic.rocky.01","terrain_sol_volcanique_01.webp","volcano","d14a157801e96c4a0e7121cb044799c1bfe17ea15125aa9e63029f417faf2cbc"]];
   const provenance=json(trial,'release-provenance.v1.json');
-  assert.equal(provenance.exploration.sha,'3ed0c06e0ffdc798a011ecfcafe9037712864d9c');
+  assert.equal(provenance.exploration.sha,'10165c5a895e4714a180fab52325d30fc09e092c');
   for(const [materialId,assetId,filename,family,hash] of rows){
     const rel=owner+'assets/exploration/materials/forest/surfaces/'+filename;
     required(trial,rel);
@@ -861,7 +862,7 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
 test('the PWA physically ships the generic author description and zone/trail editor, not species-specific code',()=>{
  const pinned=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
  assert.equal(pinned.combat.sha,'3e2082ebcc396414c1fbe0c54ac24e0382ddd3b5');
- assert.equal(pinned.exploration.sha,'3ed0c06e0ffdc798a011ecfcafe9037712864d9c');
+ assert.equal(pinned.exploration.sha,'10165c5a895e4714a180fab52325d30fc09e092c');
  const explanation=read(trial,'vendor/combat-lab/src/ui/capture-skill-explanation-v1.js').toString('utf8');
  const editor=read(trial,'vendor/combat-lab/src/ui/capture-editor-human-v2.js').toString('utf8');
  assert.match(explanation,/if\(d\.salvo\)/,'auto description must show configured salvo count');
@@ -959,7 +960,7 @@ test('published Capture carries the opt-in potion import and actual merchant sto
  assert.match(shop,/state\.merchantStocks/);
  const pins=json(trial,base+'source-pins-v1.json');
  assert.equal(pins.combat.sha,'3e2082ebcc396414c1fbe0c54ac24e0382ddd3b5');
- assert.equal(pins.exploration.sha,'3ed0c06e0ffdc798a011ecfcafe9037712864d9c');
+ assert.equal(pins.exploration.sha,'10165c5a895e4714a180fab52325d30fc09e092c');
 });
 
 test('both owners explain missing merchant links in the assembled PWA',()=>{
@@ -1130,7 +1131,7 @@ test('85 certified Genesis decor WebPs ship once with their exact native definit
 
 test('World Builder quota fix ships exact native storage owners',()=>{
  const owner='vendor/exploration-lab/';
- for(const [file,expected] of [["src/storage/world-document-web-storage-codec-v1.js","959dc6461a6d6d96ea38f009a2f4c810d413f2d2"],["src/builder/world-assembler-handoff.js","6964ad0d1c18c89b25f61485f66446335b0c605e"],["src/builder/exploration-world-document-library-v1.js","3b148fd169f758300ccc91163eea90ff5914e5ca"]]){
+ for(const [file,expected] of [["src/storage/world-document-web-storage-codec-v1.js","959dc6461a6d6d96ea38f009a2f4c810d413f2d2"],["src/builder/world-assembler-handoff.js","6964ad0d1c18c89b25f61485f66446335b0c605e"],["src/builder/exploration-world-document-library-v1.js","817c14a2072df06011b024dc18aefb5f02a908e2"],["src/storage/world-document-release-access-v1.js","702459a960960fc3474b7b1ba42796ca83bcc362"],["src/storage/world-document-indexeddb-store-v1.js","2d006661573225b5068ed3f00bd196de03bafded"],["src/storage/world-document-transactional-owner-v1.js","31d75b018cd04e56fdb070faa881aca4f873e11e"]]){
   const bytes=read(trial,owner+file);
   assert.equal(crypto.createHash('sha1').update('blob '+bytes.length+String.fromCharCode(0)).update(bytes).digest('hex'),expected,file);
  }
@@ -1138,7 +1139,7 @@ test('World Builder quota fix ships exact native storage owners',()=>{
 
 // Mandatory physical gate for this certified release.
 test('approved water/lava atlases travel once through the canonical Exploration owner',()=>{
- assert.equal(explorationSha,'3ed0c06e0ffdc798a011ecfcafe9037712864d9c');
+ assert.equal(explorationSha,'10165c5a895e4714a180fab52325d30fc09e092c');
  const owner='vendor/exploration-lab/';
  const dir='assets/exploration/materials/forest/water/animated/';
  const sizes={eau_bleue_profonde:195611,eau_turquoise:257780,eau_riviere:171319,eau_marais:179173,lave:269455};
@@ -1221,4 +1222,15 @@ test('green hero walk frames are the exact certified Exploration blobs, without 
   assert.equal(fs.existsSync(path.join(trial,rel)),false,rel);
  }
  for(const root of [site,trial,path.join(trial,owner)])assert.equal(fs.existsSync(path.join(root,'GenSRPG_heros_vert_complet_test_jeu.zip')),false);
+});
+
+test('PWA adopts the single durable WorldDocument owner and native graphical library',()=>{
+ const owner='vendor/exploration-lab/';
+ const access=read(trial,owner+'src/storage/world-document-release-access-v1.js').toString('utf8');
+ const capture=read(trial,'assets/gensrpg/capture-v2/world-native-access-v1.mjs').toString('utf8');
+ assert.match(access,/WORLD_DOCUMENT_RELEASE_OWNER_V1='indexeddb'/);
+ assert.match(capture,/access\?\.durable!==true/);
+ assert.doesNotMatch(capture,/readWorldAssemblerDraft|contract==='legacy'/);
+ for(const rel of ['src/assets/sculpt-graphic-catalog-v1.js','src/assets/graphic-library-import-v1.js','src/assets/graphic-library-backup-v1.js','src/objects/object-library-picker-v1.js'])required(trial,owner+rel);
+ for(const base of [site,trial,path.join(trial,owner)])assert.equal(fs.existsSync(path.join(base,'Genesis_Bordures_Routes_v1.zip')),false);
 });

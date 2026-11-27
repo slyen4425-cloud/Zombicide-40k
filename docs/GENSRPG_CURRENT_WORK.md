@@ -1,3 +1,12 @@
+## 2026-11-27 — Raccord final du pont Combat durable, sans routes non validées (NON GREEN)
+- Capture #694 fusionnée fdf74e558e61bfe658a26f1ab4cdac19cae34c69 : CI 4/4 SUCCESS 46058412929/46058412725/46058412752/46058412796, arbre identique au candidat testé. Exploration #568 10165c5a895e4714a180fab52325d30fc09e092c : CI 46045210248 + assemblage 46045210243 SUCCESS, HTTPS exact SUCCESS. Renderer officiel inchangé 29cd0e76c5eee0faec1acfeb3a0a9ea589f062db. Nouvelles routes exclues.
+- Actualisation du seul publisher #693 ; conserver les corrections de tests navigateur déjà déposées, vérifier les vrais combats, reprise, poids et HTTPS final.
+
+## 2026-11-27 — Publication finale IndexedDB + bibliothèque graphique (NON GREEN)
+- START ef7bfe16d6b7969ab96b884eccd8950f7f2a3ec9 ; checkpoint `checkpoint/pwa-before-world-indexeddb-graphic-library-20261127`, branche `work/pwa-world-indexeddb-graphic-library-20261127`.
+- Capture #685/#692 fusionnées, #692 CI 4/4 SUCCESS 46039788216/46039788174/46039788043/46039788041, arbre identique au SHA source 58313047cbe6f62536160336c576b85fc3853088. Exploration #561/#564 fusionnées et Pages exact SUCCESS sur 5f684c4d1978522ac7dc1f315fdc5e2aab8048fc.
+- Pin PWA unique ; renderer blob officiel 29cd0e76c5eee0faec1acfeb3a0a9ea589f062db, preuve physique propriétaire IndexedDB et bibliothèque, cinq atlas eau/lave et 48 frames héros maintenus. Pas de changement Combat ni suppression d'assets. CI publisher exacte puis HTTPS obligatoire.
+
 ## 2026-11-27 — PWA : publier les sprites de marche du héros vert #565 (NON GREEN)
 - START main 791ec0484cccc37dad7f66e6983a74804dcbad62, checkpoint `checkpoint/pwa-before-green-hero-20261127`, branche `work/pwa-green-hero-20261127`. Capture #690 fusionnée 02542294cc47291d9cf601be2b7a6ff84fea0497, arbre identique au HEAD a4aef439 certifié (45982731920, 45982732502, 45982731848, 45982732017). Exploration main 3ed0c06e0ffdc798a011ecfcafe9037712864d9c, CI 45981920240 et HTTPS 45981920216 SUCCESS. Renderer et cinq atlas eau/lave inchangés.
 - Publisher unique : pin source, allowlist certifiée et sentinelle des 48 PNG RGBA 128×160 byte-exacts. ZIP auteur hors site. Conservation des autres sources, données et médias. Aucune migration IndexedDB des héros déjà copiés. CI exacte puis fusion et preuve HTTPS réelle avant GREEN. Lots stockage/bibliothèque toujours séparés.

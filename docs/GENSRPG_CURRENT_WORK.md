@@ -9,6 +9,10 @@
 
 - Étape 4 : lectures du brouillon Aventure (sélecteur, préflight Jouer, comparaison archive, réception salon) attendues via un seul lecteur natif. Vérification des epochs de lancement/sélecteur et du salon après attente, aucun fallback en cas d'échec d'une lecture. Le lecteur de production reste historique jusqu'au raccord du propriétaire durable certifié. Synchronisation explicite avec #688 : pins et sentinelle certifiés intégralement conservés. NON GREEN jusqu'à CI et bascule coordonnée.
 
+## 2026-11-27 — Raccord Capture des 48 sprites de marche du héros vert #565 (NON GREEN)
+- START source 4c8f936a5ec85e38721927f533b2550401c1c321, checkpoint `checkpoint/capture-before-green-hero-20261127`, branche `work/capture-adopt-green-hero-20261127`. Autorisation auteur de terminer les publications. Exploration main 3ed0c06e0ffdc798a011ecfcafe9037712864d9c, CI 45981920240 SUCCESS, Pages 45981920216 SUCCESS et preuve HTTPS exacte SUCCESS. Arbre identique au HEAD #565 testé.
+- Pin Exploration et sentinelle de provenance uniquement. Conserver Combat, idles, patrouilles, eau/lave, médias, sauvegardes et autres héros. Les copies déjà importées IndexedDB ne sont pas modifiées. Lots #561/#685 et #564 distincts non activés. CI source exacte puis publisher PWA unique et preuve HTTPS avant livraison.
+
 ## 2026-11-27 — Adoption Capture des idles #404 et patrouilles #549 (NON GREEN)
 - START source db574eeb6ca0746531b70c4ec648eebda7cc9e77 ; checkpoint `checkpoint/capture-before-idle-patrol-20261127` ; branche `work/capture-adopt-idle-patrol-20261127`. Auteur autorise fusion, Ephemus explicitement exclu. Issues de veille #686 et #687 regroupées dans ce raccord unique ; création automatique de PR avait échoué.
 - Combat main 3e2082ebcc396414c1fbe0c54ac24e0382ddd3b5 CI 45897517488, Pages 45897515559 et import 45897517507 SUCCESS ; Exploration main 98f76585c6109e46558d364e6ac697ed4319963e CI 45898236494 et Pages/HTTPS exact 45898236547 SUCCESS. Les nouveaux pins ne touchent ni stockage, ni gameplay Capture, ni médias Ephemus ; les assets restent sur global-assets certifié existant. Les lots #561/#685 et #564 restent distincts, aucune activation incomplète.

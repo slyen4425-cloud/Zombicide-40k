@@ -183,3 +183,37 @@ test('interrupted explicit copy retains source intent and resumes without ever s
  assert.notEqual(worlds.list(pending.id)[0].id,worlds.list(template.id)[0].id);
  assert.equal(combat.load(template.id).projectId,template.id,'source untouched');
 });
+
+test('Capture awaits asynchronous native world creation and rechecks the committed project before ready',async()=>{
+ const storage=memory(),projects=createCaptureUniverseProjectStoreV1({
+  storage,coreStorage:core,makeId:()=> '1234abcd'
+ });
+ const combatData=new Map(),heroProjects=new Set(),rules=new Map(),worldData=new Map();
+ let release,entered,failRead=false;
+ const started=new Promise(resolve=>entered=resolve);
+ const gate=new Promise(resolve=>release=resolve);
+ let creates=0;
+ const worlds={
+  async list(id){if(failRead)throw Error('IndexedDB non confirmé');return worldData.get(id)??[];},
+  async createBlank(id){creates++;entered();await gate;worldData.set(id,[{id:'world-native1234'}]);},
+  async copy(){throw Error('unexpected copy');}
+ };
+ const orchestrator=createCaptureUniverseProjectOrchestratorV1({
+  projects,worlds,combat:{load:id=>combatData.get(id)??null,create:id=>combatData.set(id,{projectId:id})},
+  heroes:{requireReady:id=>{if(!heroProjects.has(id))throw Error('missing');return {id};},createEmpty:id=>heroProjects.add(id)},
+  rulesFor:id=>({load:()=>rules.get(id)??null,save:value=>rules.set(id,value)}),
+  blankCombat:async()=>({}),defaultRules:{schema:'rules'}
+ });
+ const result=orchestrator.create('Univers durable');
+ await started;
+ const pending=projects.list().find(p=>!p.legacy);
+ assert.equal(pending.status,'pending');
+ assert.throws(()=>projects.requireReady(pending.id),/non initialisé/);
+ failRead=true;release();
+ await assert.rejects(result,/IndexedDB non confirmé/);
+ assert.equal(projects.get(pending.id).status,'pending');
+ failRead=false;
+ assert.equal((await orchestrator.provision(pending.id)).status,'ready');
+ assert.equal(creates,1,'already committed native world is never replaced on retry');
+ assert.equal(worldData.get(pending.id)[0].id,'world-native1234');
+});

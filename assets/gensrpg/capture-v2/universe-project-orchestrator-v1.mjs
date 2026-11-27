@@ -15,12 +15,12 @@ export function createCaptureUniverseProjectOrchestratorV1({
  const ready=id=>({
   combatProjectId:id,heroProjectId:id,worldProjectId:id,rulesProjectId:id
  });
- const verify={
+ const verify=worldReady=>({
   combatProjectId:(id,project)=>id===project&&combat.load(id)?.projectId===id,
   heroProjectId:(id,project)=>id===project&&heroes.requireReady(id)?.id===id,
-  worldProjectId:(id,project)=>id===project&&worlds.list(id).length>0,
+  worldProjectId:(id,project)=>id===project&&id===worldReady,
   rulesProjectId:(id,project)=>id===project&&rulesFor(id).load()!==null
- };
+ });
  async function provision(id){
   const project=projects.get(id);
   if(project.legacy)throw new Error('Monster InvoC conserve ses contenus historiques : aucune migration');
@@ -37,13 +37,13 @@ export function createCaptureUniverseProjectOrchestratorV1({
     throw new Error('Copie du catalogue Monster InvoC : export officiel Combat non raccordé');
    else combat.copy({fromId:copyFrom,toId:id,confirmed:true});
   }
-  if(!worlds.list(id).length){
-   if(copyFrom===null)worlds.createBlank(id);
+  if(!(await worlds.list(id)).length){
+   if(copyFrom===null)await worlds.createBlank(id);
    else {
     const source=fromWorldId??(copyFrom===MONSTER_INVOC_UNIVERSE_ID_V1
-     ?null:worlds.list(copyFrom)[0]?.id);
+     ?null:(await worlds.list(copyFrom))[0]?.id);
     if(!source)throw new Error('Sélectionne un WorldDocument source archivé pour la copie');
-    worlds.copy({fromWorldId:source,toProjectId:id,confirmed:true});
+    await worlds.copy({fromWorldId:source,toProjectId:id,confirmed:true});
    }
   }
   let heroReady=false;
@@ -64,7 +64,13 @@ export function createCaptureUniverseProjectOrchestratorV1({
    const src=copyFrom===null?null:rulesFor(copyFrom).load();
    drafts.save(src??defaultRules);
   }
-  return projects.provision(id,ready(id),verify);
+  // The async Exploration owner must acknowledge the actual committed
+  // project before the synchronous Capture index can mark it ready.
+  // A rejected read/write never manufactures a successful verification.
+  const committedWorlds=await worlds.list(id);
+  if(!Array.isArray(committedWorlds)||!committedWorlds.length)
+   throw new Error('WorldDocument natif non confirmé : univers conservé en attente');
+  return projects.provision(id,ready(id),verify(id));
  }
  async function create(name,config={}){
   const sourceId=config.copyFrom??null;

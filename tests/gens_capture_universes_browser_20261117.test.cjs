@@ -72,26 +72,39 @@ test('two real independent universes survive reload, native Combat/World/Hero/Ru
   await lib.locator('.capture-universe-form input').fill('Héros');
   await lib.locator('.capture-universe-form button[type="submit"]').tap();
   await lib.locator('[data-capture-v2-menu="editors"]').waitFor({state:'visible',timeout:65000});
+  const readWorlds=async()=>page.evaluate(async()=>{
+   const p=JSON.parse(localStorage.getItem('gensrpg.capture.v2.universes.index.v1'));
+   const {openWorldDocumentReleaseAccessV1}=await import('/vendor/exploration-lab/src/storage/world-document-release-access-v1.js');
+   const access=await openWorldDocumentReleaseAccessV1({storage:localStorage,sessionStorage});
+   if(!access.durable||!access.projects)throw Error('Native durable world projects required');
+   return Promise.all(p.projects.map(async project=>{
+    const rows=await access.projects.list(project.id);
+    const documents=await Promise.all(rows.map(async row=>(await access.projects.load(project.id,row.id)).id));
+    return {id:project.id,worldIds:documents};
+   }));
+  });
+  const worlds=await readWorlds();
   const state=await page.evaluate(()=>{
    const p=JSON.parse(localStorage.getItem('gensrpg.capture.v2.universes.index.v1'));
    const combat=k=>JSON.parse(localStorage.getItem('gensrpg.combat.capture.universe.database.v1:'+k));
-   const worlds=JSON.parse(localStorage.getItem('gensrpg.exploration.universe-worlds.index.v1'));
    const heroes=JSON.parse(localStorage.getItem('gensrpg.exploration.universe-heroes.index.v1'));
    const rules=k=>localStorage.getItem('gensrpg.capture.v2.universe.scope.v1:'+k+
     ':gensrpg.capture.v2.adventure.rules-draft.v1');
-   return {p,combat: p.projects.map(x=>combat(x.id)),worlds,heroes,
+   return {p,combat: p.projects.map(x=>combat(x.id)),heroes,
     rules:p.projects.map(x=>rules(x.id)),legacySave:localStorage.getItem('gensrpg.capture.v2.adventure.save.v1')};
   });
   assert.deepEqual(state.p.projects.map(p=>p.name).sort(),['Héros','Manga']);
   assert.equal(state.p.projects.every(p=>p.status==='ready'),true);
   assert.equal(state.combat.every(x=>x.database.creatures.length===0),true,
    'blank worlds may have own hero/manga persons, never copied Monster InvoC monsters');
-  assert.equal(state.worlds.projects.length,2);
-  assert.notEqual(state.worlds.projects[0].worldIds[0],state.worlds.projects[1].worldIds[0]);
+  assert.equal(worlds.length,2);
+  assert.ok(worlds.every(project=>project.worldIds.length===1));
+  assert.notEqual(worlds[0].worldIds[0],worlds[1].worldIds[0]);
   assert.equal(state.heroes.projects.length,2);
   assert.equal(state.rules.every(Boolean),true);
   assert.equal(state.legacySave,rawBefore,'legacy session bytes preserved');
   await page.reload({waitUntil:'domcontentloaded'});
+  assert.deepEqual(await readWorlds(),worlds,'Both official IndexedDB project documents survive a real page reload');
   await page.locator('button.gensRootModeCard.capture').tap();
   await lib.locator('[data-capture-universe-select="'+first+'"]').waitFor({timeout:35000});
   await lib.locator('[data-capture-universe-select="'+first+'"]').tap();

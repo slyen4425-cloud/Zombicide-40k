@@ -5,6 +5,7 @@ import {createCaptureUniverseAdventureStorageV1} from './universe-adventure-stor
 import {createCaptureUniverseProjectOrchestratorV1} from './universe-project-orchestrator-v1.mjs';
 import {createAdventureRulesDraftStoreV1} from './adventure-rules-draft-v1.mjs';
 import {DEFAULT_ADVENTURE_RULES_V1} from './adventure-contract-v1.mjs';
+import {loadCaptureNativeWorldAccessV1} from './world-native-access-v1.mjs';
 
 const official=new URL('../../../vendor/',import.meta.url);
 export async function loadCaptureUniverseNativeBridgeV1({
@@ -14,16 +15,15 @@ export async function loadCaptureUniverseNativeBridgeV1({
  const storage=root.localStorage;
  if(!coreStorage||!storage||typeof root.crypto?.randomUUID!=='function')
   throw new Error('Stockage et identifiants natifs GenSRPG requis');
- const [combatModule,worldModule,heroModule,heroStoreModule]=await Promise.all([
+ const [combatModule,worldAccess,heroModule,heroStoreModule]=await Promise.all([
   imports(new URL('combat-lab/src/contracts/capture-universe-database-store-v1.js',official).href),
-  imports(new URL('exploration-lab/src/builder/exploration-universe-world-projects-v1.js',official).href),
+  loadCaptureNativeWorldAccessV1({root,imports}),
   imports(new URL('exploration-lab/src/storage/exploration-universe-hero-projects-v1.js',official).href),
   imports(new URL('exploration-lab/src/storage/user-hero-store-v1.js',official).href)
  ]);
  const combat=combatModule.createCaptureUniverseDatabaseStoreV1({storage});
- const worlds=worldModule.createExplorationUniverseWorldProjectsV1({
-  storage,makeId:()=>root.crypto.randomUUID()
- });
+ const worlds=worldAccess.projects;
+ if(!worlds)throw Error('Commandes de projets WorldDocument natives indisponibles');
  const heroes=heroModule.createExplorationUniverseHeroProjectsV1({
   storage,heroStore:heroStoreModule.createUserHeroStoreV1()
  });

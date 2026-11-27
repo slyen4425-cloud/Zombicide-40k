@@ -455,10 +455,15 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   // pass through the actual World Builder, not injected actor records.
   await npc.locator('body').evaluate(async()=>{
    const {createBlankWorldBuilderDraft}=await import('./src/builder/world-builder-draft.js');
-   const {saveWorldAssemblerDraft}=await import('./src/builder/world-assembler-handoff.js');
-   saveWorldAssemblerDraft(localStorage,createBlankWorldBuilderDraft({
-    id:'merchant-ci-world',width:36*28,height:24*21
-   }));
+   const {openWorldDocumentReleaseAccessV1}=await import('./src/storage/world-document-release-access-v1.js');
+   const access=await openWorldDocumentReleaseAccessV1({storage:localStorage,sessionStorage});
+   if(!access.durable)throw Error('Durable owner required');
+   const world=createBlankWorldBuilderDraft({id:'merchant-ci-world',width:36*28,height:24*21});
+   // This fixture originally seeded only a draft, not an archived blank.
+   // Archiving before NPC placement introduces a stale archive on resume.
+   await access.saveDraft(world,await access.readDraft());
+   if((await access.readDraft())?.id!==world.id)throw Error('World seed not committed');
+   if((await access.list()).some(entry=>entry.id===world.id))throw Error('Merchant draft fixture must not create a stale blank archive');
   });
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();
@@ -530,8 +535,11 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   await builder.locator('#world-workspace-world').tap();
   await builder.locator('#world-workspace-map').waitFor({state:'visible',timeout:45000});
   const placed=await builder.locator('body').evaluate(async()=>{
-   const {readWorldAssemblerDraft}=await import('./src/builder/world-assembler-handoff.js');
-   const world=readWorldAssemblerDraft(localStorage);
+   const {openWorldDocumentReleaseAccessV1}=await import('./src/storage/world-document-release-access-v1.js');
+   const access=await openWorldDocumentReleaseAccessV1({storage:localStorage,sessionStorage});
+   if(!access.durable)throw Error('Durable WorldDocument owner required for merchant verification');
+   const world=await access.readDraft();
+   if(!world)throw Error('Merchant map not durably saved after return to World Builder');
    return world.areas.find(a=>a.id===world.initialAreaId).actors;
   });
   assert.equal(placed.length,1);
@@ -614,7 +622,8 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
     dialogue:document.getElementById('npc-dialogue-overlay')?.hidden,
     status:document.getElementById('play-save-status')?.textContent
    })).catch(()=>null);
-   throw Error('Merchant unavailable after actual resume: '+JSON.stringify({beforeResume,afterResume}),{cause:error});
+   const resumeUi=await adventure.locator('body').evaluate(()=>({status:document.getElementById('adventure-status')?.textContent,worldStatus:document.getElementById('adventure-world-status')?.textContent,worldChoice:document.getElementById('adventure-world-select')?.value,frame:document.getElementById('adventure-play-frame')?.getAttribute('src')})).catch(()=>null);
+   throw Error('Merchant unavailable after actual resume: '+JSON.stringify({beforeResume,afterResume,resumeUi,errors}),{cause:error});
   }
   await play.locator('#npc-talk').tap();
   await play.locator('#npc-dialogue-next').filter({hasText:'Commercer'}).waitFor({state:'visible',timeout:15000});

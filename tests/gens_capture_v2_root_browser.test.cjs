@@ -418,13 +418,16 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   const authored=await resumed.locator('#adventure-play').evaluate(async()=>{
     // The genuine World Builder model/serializer owns the data. This is not
     // a parallel test terrain or a fabricated runtime world.
-    const [{createBlankWorldBuilderDraft},{saveWorldAssemblerDraft}]=await Promise.all([
+    const [{createBlankWorldBuilderDraft,serializeWorldBuilderDraft},{openWorldDocumentReleaseAccessV1}]=await Promise.all([
       import('../../../vendor/exploration-lab/src/builder/world-builder-draft.js'),
-      import('../../../vendor/exploration-lab/src/builder/world-assembler-handoff.js')
+      import('../../../vendor/exploration-lab/src/storage/world-document-release-access-v1.js')
     ]);
     const world=createBlankWorldBuilderDraft({id:'gen-ci-capture-world',width:36*28,height:24*21});
-    saveWorldAssemblerDraft(localStorage,world);
-    return localStorage.getItem('gensrpg.world-assembler.document.v1');
+    const access=await openWorldDocumentReleaseAccessV1({storage:localStorage,sessionStorage});
+    if(!access.durable)throw Error('Durable owner required');
+    await access.archive(world);
+    await access.activate(world.id);
+    return serializeWorldBuilderDraft(await access.readDraft());
   });
   assert.ok(authored&&authored.includes('gen-ci-capture-world'),'canonical WorldDocument was not saved');
   await resumed.locator('#adventure-play').tap();
@@ -647,7 +650,12 @@ test('real four-mode root enters the NEW Capture Shell and opens original pinned
   },stored.sessionId);
   assert.equal(scopedAfter.worldId,scopedBefore.worldId);
   assert.equal(scopedAfter.sessionId,stored.sessionId);
-  assert.equal(await page.evaluate(()=>localStorage.getItem('gensrpg.world-assembler.document.v1')),authored,
+  assert.equal(await page.evaluate(async()=>{
+    const {openWorldDocumentReleaseAccessV1}=await import('./vendor/exploration-lab/src/storage/world-document-release-access-v1.js');
+    const {serializeWorldBuilderDraft}=await import('./vendor/exploration-lab/src/builder/world-builder-draft.js');
+    const access=await openWorldDocumentReleaseAccessV1({storage:localStorage,sessionStorage});
+    return serializeWorldBuilderDraft(await access.readDraft());
+  }),authored,
     'native game cannot mutate the World Builder authored document');
   const playingSave=await page.evaluate(id=>{
     const raw=localStorage.getItem('gensrpg.capture.v2.adventure.slot.v1:'+id);

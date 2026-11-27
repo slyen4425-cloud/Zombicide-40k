@@ -44,7 +44,11 @@ test('Adventure does not pretend the Exploration editor Tester is a native Game 
  assert.match(ui,/shell\?\.open\?\.\('world'\)/);
  assert.match(ui,/vendor\/exploration-lab\/world-assembler\.html/);
  assert.match(ui,/startAdventureExplorationV1\(/);
- assert.match(ui,/readWorldAssemblerDraft\(universeWorldStorage\)/);
+ assert.match(ui,/import \{loadCaptureNativeWorldAccessV1,captureWorldLibraryForAccessV1\} from '\.\/world-native-access-v1\.mjs'/);
+ assert.match(ui,/const access=await loadCaptureNativeWorldAccessV1\(\{universeId:selectedUniverseId\}\)/);
+ assert.match(ui,/worldAccess=access;\s*worldLibrary=captureWorldLibraryForAccessV1\(access\)/);
+ assert.match(ui,/const readOfficialActiveWorld=async\(\)=>\{\s*if\(!worldAccess\)throw Error\([^)]*\);\s*return worldAccess\.readDraft\(\);/);
+ assert.doesNotMatch(ui,/readWorldAssemblerDraft\(|saveWorldAssemblerDraft\(/,'Aventure must not bypass the native access owner');
  assert.match(ui,/createExplorationUniverseWorkspaceStorageV1\(window\.localStorage,universeId\)/,
   'world drafts use native Exploration ownership with scoped keys');
  assert.match(ui,/createNewExplorationPlay,readExplorationPlay/);

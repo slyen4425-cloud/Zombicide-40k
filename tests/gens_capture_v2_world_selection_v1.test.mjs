@@ -77,7 +77,8 @@ test('Jouer displays absent local WorldDocument without creating a hidden fallba
  const end=app.indexOf('async function installOfficialWorldLibrary(',start);
  assert.ok(start>=0&&end>start,'canonical world selector required');
  const code=app.slice(start,end);
- assert.match(code,/readWorldAssemblerDraft\(universeWorldStorage\)/);
+ assert.match(code,/await readOfficialActiveWorld\(\)/);
+ assert.match(app,/const readOfficialActiveWorld=async\(\)=>readWorldAssemblerDraft\(universeWorldStorage\)/);
  assert.match(code,/Aucun monde local disponible/);
  assert.match(code,/Aucun monde local jouable/);
  assert.match(code,/Monde local actuel \(compatibilité\)/);
@@ -97,4 +98,13 @@ test('async native archive selection and activation wait for durable acknowledge
  await Promise.resolve();assert.equal(complete,false);assert.deepEqual(lib.opened,[]);
  release();assert.equal((await pending).id,'foret-1');assert.deepEqual(lib.opened,['foret-1']);
  await assert.rejects(()=>resolveSelectedAdventureWorldV1({session:s,worldLibrary:{...owner,load:async()=>{throw Error('IndexedDB failed');}},selectedWorldId:'foret-1'}),/IndexedDB failed/);
+});
+
+test('all Adventure author draft consumers await the same native reader with no raw storage bypass',()=>{
+ const app=readFileSync(new URL('../assets/gensrpg/capture-v2/adventure-app-v1.mjs',import.meta.url),'utf8');
+ assert.equal([...app.matchAll(/readWorldAssemblerDraft\(universeWorldStorage\)/g)].length,1);
+ assert.equal([...app.matchAll(/await readOfficialActiveWorld\(\)/g)].length,4);
+ assert.match(app,/let world=await readOfficialActiveWorld\(\);\s*if\(launchEpoch!==journeyLaunchEpoch\)return/);
+ assert.match(app,/const draft=await readOfficialActiveWorld\(\);\s*if\(launchEpoch!==journeyLaunchEpoch\)return/);
+ assert.match(app,/const activeDraft=await readOfficialActiveWorld\(\);\s*if\(activeCaptureRoom!==connection\)throw/);
 });

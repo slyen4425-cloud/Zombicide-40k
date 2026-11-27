@@ -260,6 +260,9 @@ let officialCombatSha=null,officialStatRegistry=null;
 let officialCombatVitalsProjector=null;
 let store,portfolio,draftStore,creatorDraftStore,worldLibrary=null;
 let selectedUniverseId=null,universeWorldStorage=window.localStorage;
+// One official active-draft reader; cutover must replace it at composition,
+// never fall back to historical storage after a durable read failure.
+const readOfficialActiveWorld=async()=>readWorldAssemblerDraft(universeWorldStorage);
 const text=(node,value)=>{node.textContent=String(value);};
 const stateMessage=(message,error=false)=>{
  text(status,message);status.dataset.error=String(error);
@@ -1076,8 +1079,9 @@ async function refreshWorldChoices(saved=null){
  // The native World Builder owns the document and recovery. Read its
  // existing draft for presentation only; never manufacture a fallback map.
  let localWorld=null;
- try{localWorld=readWorldAssemblerDraft(universeWorldStorage);}
- catch{/* No silent repair or deletion of a malformed author document. */}
+ try{localWorld=await readOfficialActiveWorld();}
+ catch(error){if(epoch===worldChoiceEpoch){picker.disabled=true;text(notice,'Lecture du monde actif impossible : '+error.message);}return false;}
+ if(epoch!==worldChoiceEpoch||library!==worldLibrary)return false;
  const localPlayable=typeof localWorld?.id==='string'&&!!localWorld.id&&
   Array.isArray(localWorld.areas)&&localWorld.areas.length>0;
  if(!worldLibrary){
@@ -2402,7 +2406,8 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
     !captureGuestSessionMatchesHostSetupV1({
      session:store?.load(),setup:captureSharedRoomSetup,room:lastCaptureRoomState
     }))throw new Error('Cette sauvegarde ne suit pas les règles de l’hôte. Prépare ton héros dans le salon avant d’entrer.');
- let world=readWorldAssemblerDraft(universeWorldStorage);
+ let world=await readOfficialActiveWorld();
+ if(launchEpoch!==journeyLaunchEpoch)return;
  let beforeWorldSession=store.load();
  // The preparation controls must apply to the next actual play entry even
  // when the player didn't reopen the creator's advanced settings.
@@ -2422,7 +2427,8 @@ $('adventure-play').addEventListener('click',guardedAsync(async()=>{
    session:beforeWorldSession,worldLibrary,selectedWorldId
   });
   if(launchEpoch!==journeyLaunchEpoch)return;
-  const draft=readWorldAssemblerDraft(universeWorldStorage);
+  const draft=await readOfficialActiveWorld();
+  if(launchEpoch!==journeyLaunchEpoch)return;
   if(checkAdventureWorldArchiveV1({
    activeWorld:draft,archivedWorld:world,selectedWorldId,
    fingerprint:playWorldFingerprint
@@ -2628,8 +2634,10 @@ $('adventure-room-enter').addEventListener('click',guardedAsync(async()=>{
    throw new Error('Le monde du créateur est encore en cours d’envoi. Réessaie après son entrée en jeu.');
   // Switching to the host WorldDocument must never erase an unfinished
   // local author draft; archive it via the ONLY official Exploration library.
+  const activeDraft=await readOfficialActiveWorld();
+  if(activeCaptureRoom!==connection)throw new Error('Salon changé pendant la lecture du monde local.');
   await preserveCaptureGuestDraftV1({
-   activeDraft:readWorldAssemblerDraft(universeWorldStorage),
+   activeDraft,
    room:server,library:worldLibrary,fingerprintOfficial:playWorldFingerprint
   });
   if(activeCaptureRoom!==connection)throw new Error('Salon changé pendant la sauvegarde du monde local.');

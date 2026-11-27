@@ -7,6 +7,13 @@
 
 - CI f0b2a57 : trois workflows verts, clean ownership 45878207117 rouge uniquement sur deux tests round-trip natifs qui lisaient une Promise sans await. Correction des appels de test, mêmes assertions de fingerprint, archivage, idempotence et activation ; aucune modification des contrôles runtime.
 
+- Étape 4 : lectures du brouillon Aventure (sélecteur, préflight Jouer, comparaison archive, réception salon) attendues via un seul lecteur natif. Vérification des epochs de lancement/sélecteur et du salon après attente, aucun fallback en cas d'échec d'une lecture. Le lecteur de production reste historique jusqu'au raccord du propriétaire durable certifié. Synchronisation explicite avec #688 : pins et sentinelle certifiés intégralement conservés. NON GREEN jusqu'à CI et bascule coordonnée.
+
+## 2026-11-27 — Adoption Capture des idles #404 et patrouilles #549 (NON GREEN)
+- START source db574eeb6ca0746531b70c4ec648eebda7cc9e77 ; checkpoint `checkpoint/capture-before-idle-patrol-20261127` ; branche `work/capture-adopt-idle-patrol-20261127`. Auteur autorise fusion, Ephemus explicitement exclu. Issues de veille #686 et #687 regroupées dans ce raccord unique ; création automatique de PR avait échoué.
+- Combat main 3e2082ebcc396414c1fbe0c54ac24e0382ddd3b5 CI 45897517488, Pages 45897515559 et import 45897517507 SUCCESS ; Exploration main 98f76585c6109e46558d364e6ac697ed4319963e CI 45898236494 et Pages/HTTPS exact 45898236547 SUCCESS. Les nouveaux pins ne touchent ni stockage, ni gameplay Capture, ni médias Ephemus ; les assets restent sur global-assets certifié existant. Les lots #561/#685 et #564 restent distincts, aucune activation incomplète.
+- Tests exacts de source, intégration native, sentinelles des pins puis publisher unique PWA avec inventaire et contrôle des atlas eau/lave conservés, preuve HTTPS. Pas de fusion/promotion avant CI du candidat.
+
 ## 2026-11-26 — Capture source : adoption eau/lave #562 (NON GREEN)
 - START 334762a734b598785985030a4d05c1b47d18850c ; checkpoint `checkpoint/capture-before-water-lava-20261126`, branche `work/capture-v2-water-lava-20261126`.
 - Autorisation auteur explicite 26/11. Exploration main a7b9d535880719cd50fd8935a5876e02219f2495 ; statut `pages/exploration-main-live` SUCCESS sur ce SHA. Comparaison Git avec HEAD PR 25ef41498fe7dab0278aac86d40bd5961d30c4ff : aucun fichier différent, CI 45827277068 et assemblage 45827277136 SUCCESS sur l'arbre identique. Le connecteur n'expose pas les IDs des runs post-fusion ; le pin certifie la CI de cet arbre, non un run main inventé. Renderer blob f9dc12bd8979625828347b51f0805853da44f3f4.

@@ -11,6 +11,8 @@
 
 - Étape 5 : composition native unique utilisée par le pont de provisionnement univers et Aventure. Lectures, liste, activation et import de salon passent par la même interface du propriétaire Exploration ; rejet de l’écrasement et aucun fallback après erreur du contrat durable. Le pin certifié courant impose encore explicitement le contrat legacy natif ; sa branche de compatibilité sera retirée au raccord du module de release #561. Test d’injection du propriétaire durable et échec sans fallback. NON GREEN avant pin et activation.
 
+- CI 46005868104 : seul test d’autorité UI Aventure obsolète, exigeant la lecture directe legacy. La sentinelle vérifie maintenant le chargement du propriétaire natif scoped, sa bibliothèque et son lecteur unique, et interdit le contournement direct read/save. Aucun contrôle runtime ni test supprimé ; nouvelle CI requise.
+
 ## 2026-11-27 — Raccord Capture des 48 sprites de marche du héros vert #565 (NON GREEN)
 - START source 4c8f936a5ec85e38721927f533b2550401c1c321, checkpoint `checkpoint/capture-before-green-hero-20261127`, branche `work/capture-adopt-green-hero-20261127`. Autorisation auteur de terminer les publications. Exploration main 3ed0c06e0ffdc798a011ecfcafe9037712864d9c, CI 45981920240 SUCCESS, Pages 45981920216 SUCCESS et preuve HTTPS exacte SUCCESS. Arbre identique au HEAD #565 testé.
 - Pin Exploration et sentinelle de provenance uniquement. Conserver Combat, idles, patrouilles, eau/lave, médias, sauvegardes et autres héros. Les copies déjà importées IndexedDB ne sont pas modifiées. Lots #561/#685 et #564 distincts non activés. CI source exacte puis publisher PWA unique et preuve HTTPS avant livraison.

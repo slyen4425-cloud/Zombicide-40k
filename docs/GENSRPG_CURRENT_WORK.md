@@ -1,3 +1,7 @@
+## 2026-11-27 — Raccord final du pont Combat durable, sans routes non validées (NON GREEN)
+- Capture #694 fusionnée fdf74e558e61bfe658a26f1ab4cdac19cae34c69 : CI 4/4 SUCCESS 46058412929/46058412725/46058412752/46058412796, arbre identique au candidat testé. Exploration #568 10165c5a895e4714a180fab52325d30fc09e092c : CI 46045210248 + assemblage 46045210243 SUCCESS, HTTPS exact SUCCESS. Renderer officiel inchangé 29cd0e76c5eee0faec1acfeb3a0a9ea589f062db. Nouvelles routes exclues.
+- Actualisation du seul publisher #693 ; conserver les corrections de tests navigateur déjà déposées, vérifier les vrais combats, reprise, poids et HTTPS final.
+
 ## 2026-11-27 — Publication finale IndexedDB + bibliothèque graphique (NON GREEN)
 - START ef7bfe16d6b7969ab96b884eccd8950f7f2a3ec9 ; checkpoint `checkpoint/pwa-before-world-indexeddb-graphic-library-20261127`, branche `work/pwa-world-indexeddb-graphic-library-20261127`.
 - Capture #685/#692 fusionnées, #692 CI 4/4 SUCCESS 46039788216/46039788174/46039788043/46039788041, arbre identique au SHA source 58313047cbe6f62536160336c576b85fc3853088. Exploration #561/#564 fusionnées et Pages exact SUCCESS sur 5f684c4d1978522ac7dc1f315fdc5e2aab8048fc.

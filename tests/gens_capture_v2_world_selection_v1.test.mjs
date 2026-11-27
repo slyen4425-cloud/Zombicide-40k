@@ -132,7 +132,7 @@ test('production bridge requires the certified durable owner and rejects a legac
  const root={localStorage:{},sessionStorage:{},crypto:{randomUUID:()=> 'generated'}};
  let calls=0;
  await assert.rejects(loadCaptureNativeWorldAccessV1({root,imports:async uri=>{
-  calls++;assert.match(uri,/world-document-release-access-v1\\.js$/);
+  calls++;assert.match(uri,/world-document-release-access-v1\.js$/);
   return {openWorldDocumentReleaseAccessV1:async()=>({durable:false})};
  }}),/durable requis/);
  assert.equal(calls,1);

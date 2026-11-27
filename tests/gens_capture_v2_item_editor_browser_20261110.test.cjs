@@ -455,10 +455,13 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   // pass through the actual World Builder, not injected actor records.
   await npc.locator('body').evaluate(async()=>{
    const {createBlankWorldBuilderDraft}=await import('./src/builder/world-builder-draft.js');
-   const {saveWorldAssemblerDraft}=await import('./src/builder/world-assembler-handoff.js');
-   saveWorldAssemblerDraft(localStorage,createBlankWorldBuilderDraft({
-    id:'merchant-ci-world',width:36*28,height:24*21
-   }));
+   const {openWorldDocumentReleaseAccessV1}=await import('./src/storage/world-document-release-access-v1.js');
+   const access=await openWorldDocumentReleaseAccessV1({storage:localStorage,sessionStorage});
+   if(!access.durable)throw Error('Durable owner required');
+   const world=createBlankWorldBuilderDraft({id:'merchant-ci-world',width:36*28,height:24*21});
+   await access.archive(world);
+   await access.activate(world.id);
+   if((await access.readDraft())?.id!==world.id)throw Error('World seed not committed');
   });
   await page.locator('#gensCaptureV2Root .gensCaptureV2NativeBack').tap();
   await page.locator('#gensCaptureV2Root [data-capture-v2-menu="editors"]').tap();

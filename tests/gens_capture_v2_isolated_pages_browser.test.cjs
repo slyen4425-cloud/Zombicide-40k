@@ -142,9 +142,9 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   // guaranteed Shadow encounter. The battle journal is written by Combat.
   await starter.evaluate(async(_,vendor)=>{
    const [{createBlankWorldBuilderDraft,updateTerrainFamilyEncounterProfile,
-    setTerrainFamilyExclusiveEncounterElement,setAreaEncounterRandomEnabled},{saveWorldAssemblerDraft}]=await Promise.all([
+    setTerrainFamilyExclusiveEncounterElement,setAreaEncounterRandomEnabled},{openWorldDocumentReleaseAccessV1}]=await Promise.all([
     import(vendor+'src/builder/world-builder-draft.js'),
-    import(vendor+'src/builder/world-assembler-handoff.js')
+    import(vendor+'src/storage/world-document-release-access-v1.js')
    ]);
    let world=createBlankWorldBuilderDraft({id:'adventure-pages-test',width:36*28,height:24*21});
    const area=world.areas.find(item=>item.id===world.initialAreaId);
@@ -152,11 +152,15 @@ test('Adventure applies the saved World Builder arena and commits a native encou
    world=updateTerrainFamilyEncounterProfile(world,family,{encounterChancePercent:100});
    world=setTerrainFamilyExclusiveEncounterElement(world,family,'shadow');
    world=setAreaEncounterRandomEnabled(world,area.id,true);
-   saveWorldAssemblerDraft(localStorage,world);
+   const access=await openWorldDocumentReleaseAccessV1({storage:localStorage,sessionStorage});
+   if(!access.durable)throw Error('Native durable WorldDocument owner required');
+   await access.saveDraft(world,await access.readDraft());
+   if((await access.readDraft())?.id!==world.id)throw Error('World fixture not durably committed');
   },scope+'vendor/exploration-lab/');
   const editor=await context.newPage();
   await editor.goto(base+scope+'vendor/exploration-lab/world-assembler.html');
   async function openCombatArenaSettings(){
+    await editor.locator('#open-selected-area:not([disabled])').waitFor({state:'visible'});
    await editor.locator('#open-selected-area').tap();
    await editor.locator('#area-combat-arenas > summary').tap();
   }
@@ -180,13 +184,13 @@ test('Adventure applies the saved World Builder arena and commits a native encou
   try{
    await map.locator('#sculpt-encounter-preview:visible').waitFor({timeout:18000});
   }catch(error){
-   const diagnostic=await canvas.evaluate(()=>({
+   const diagnostic=await canvas.evaluate(async()=>({
     play:window.__sculptPlayProbe?.(),encounter:window.__sculptEncounterProbe?.(),
     map:window.__sculptWorldProbe?.(),movement:document.getElementById('navigation-status')?.textContent,
     error:document.getElementById('play-start-error-message')?.textContent,
     playErrorVisible:document.body.classList.contains('sculpt-play-unavailable'),
     sessionGrants:Object.fromEntries(Object.keys(sessionStorage).filter(k=>k.startsWith('gensrpg.capture.v2.')).map(k=>[k,sessionStorage.getItem(k)?.slice(0,1500)])),
-    worldEncounters:(()=>{const raw=localStorage.getItem('gensrpg.world-assembler.document.v1');if(!raw)return null;const w=JSON.parse(raw);return {areas:w.areas.map(a=>({id:a.id,encounters:a.encounters})),plain:w.encounterConfig?.families?.find(a=>a.terrainFamilyId==='plain')}})()
+    worldEncounters:await (async()=>{const {openWorldDocumentReleaseAccessV1}=await import('./src/storage/world-document-release-access-v1.js');const access=await openWorldDocumentReleaseAccessV1({storage:localStorage,sessionStorage});const w=await access.readDraft();if(!w)return null;return {areas:w.areas.map(a=>({id:a.id,encounters:a.encounters})),plain:w.encounterConfig?.families?.find(a=>a.terrainFamilyId==='plain')}})()
    })).catch(e=>({exception:e.message}));
    throw new Error('Official native Adventure encounter failed: '+JSON.stringify(diagnostic),{cause:error});
   }finally{await page.keyboard.up('ArrowRight');}
@@ -309,9 +313,9 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
   });
   // Place the trainer on a blank world with wild encounters disabled.
   await starter.evaluate(async(_,vendor)=>{
-   const [{createBlankWorldBuilderDraft,setWorldCombatArena},{saveWorldAssemblerDraft}]=await Promise.all([
+   const [{createBlankWorldBuilderDraft,setWorldCombatArena},{openWorldDocumentReleaseAccessV1}]=await Promise.all([
     import(vendor+'src/builder/world-builder-draft.js'),
-    import(vendor+'src/builder/world-assembler-handoff.js')
+    import(vendor+'src/storage/world-document-release-access-v1.js')
    ]);
    let world=createBlankWorldBuilderDraft({id:'adventure-trainer-pages-test',width:36*28,height:24*21});
    const area=world.areas.find(item=>item.id===world.initialAreaId);
@@ -323,7 +327,10 @@ test('Adventure offers a duel, remembers the victory and starts aggressive train
     x:spawn.x+112,y:spawn.y,npc:{kind:'trainer',name:'Rami',dialogue:'Je garde le passage.',
      trainerEngagement:'aggressive',trainerRoster:[{creatureId:'crea_ombre_2',level:7}]}});
    world=setWorldCombatArena(world,{areaId:area.id,arenaId:'city'});
-   saveWorldAssemblerDraft(localStorage,world);
+   const access=await openWorldDocumentReleaseAccessV1({storage:localStorage,sessionStorage});
+   if(!access.durable)throw Error('Native durable WorldDocument owner required');
+   await access.saveDraft(world,await access.readDraft());
+   if((await access.readDraft())?.id!==world.id)throw Error('World fixture not durably committed');
   },scope+'vendor/exploration-lab/');
   await loadSavedAdventureThroughGallery(adventure);
   await adventure.locator('#adventure-play').tap();

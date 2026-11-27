@@ -111,11 +111,11 @@ test('all Adventure author draft consumers await the same native reader with no 
  assert.match(app,/const activeDraft=await readOfficialActiveWorld\(\);\s*if\(activeCaptureRoom!==connection\)throw/);
 });
 
-import {loadCaptureNativeWorldAccessV1,captureWorldLibraryForAccessV1} from '../assets/gensrpg/capture-v2/world-native-access-v1.mjs';
+import {CAPTURE_WORLD_ACCESS_CONTRACT_V1,loadCaptureNativeWorldAccessV1,captureWorldLibraryForAccessV1} from '../assets/gensrpg/capture-v2/world-native-access-v1.mjs';
 test('release bridge delegates every command to one official owner and does not fall back after failure',async()=>{
  const calls=[],storage={},sessionStorage={},root={localStorage:storage,sessionStorage,crypto:{randomUUID:()=> 'generated'}};
  const native={durable:true,projects:{},readDraft:async()=>({id:'world-host1234'}),list:async()=>[],load:async id=>({id}),activate:async id=>({id}),importShared:async(doc,options)=>{calls.push([doc,options]);return doc;}};
- const access=await loadCaptureNativeWorldAccessV1({root,contract:'release',universeId:'unv_guest1234',imports:async uri=>{
+ const access=await loadCaptureNativeWorldAccessV1({root,universeId:'unv_guest1234',imports:async uri=>{
   assert.match(uri,/world-document-release-access-v1\.js$/);
   return {openWorldDocumentReleaseAccessV1:async options=>{assert.equal(options.storage,storage);assert.equal(options.sessionStorage,sessionStorage);assert.equal(options.universeId,'unv_guest1234');return native;}};
  }});
@@ -124,5 +124,16 @@ test('release bridge delegates every command to one official owner and does not 
  assert.deepEqual(await library.save(doc,{replace:false}),doc);
  assert.deepEqual(calls,[[doc,{confirmed:true}]]);
  assert.throws(()=>library.save(doc,{replace:true}),/Écrasement/);
- let imported=0;await assert.rejects(loadCaptureNativeWorldAccessV1({root,contract:'release',imports:async()=>{imported++;throw Error('Migration impossible');}}),/Migration impossible/);assert.equal(imported,1);
+ let imported=0;await assert.rejects(loadCaptureNativeWorldAccessV1({root,imports:async()=>{imported++;throw Error('Migration impossible');}}),/Migration impossible/);assert.equal(imported,1);
+});
+
+test('production bridge requires the certified durable owner and rejects a legacy response',async()=>{
+ assert.equal(CAPTURE_WORLD_ACCESS_CONTRACT_V1,'release');
+ const root={localStorage:{},sessionStorage:{},crypto:{randomUUID:()=> 'generated'}};
+ let calls=0;
+ await assert.rejects(loadCaptureNativeWorldAccessV1({root,imports:async uri=>{
+  calls++;assert.match(uri,/world-document-release-access-v1\\.js$/);
+  return {openWorldDocumentReleaseAccessV1:async()=>({durable:false})};
+ }}),/durable requis/);
+ assert.equal(calls,1);
 });

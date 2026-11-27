@@ -533,8 +533,11 @@ test('merchant edits inside the saved NPC; official Capture commits the inventor
   await builder.locator('#world-workspace-world').tap();
   await builder.locator('#world-workspace-map').waitFor({state:'visible',timeout:45000});
   const placed=await builder.locator('body').evaluate(async()=>{
-   const {readWorldAssemblerDraft}=await import('./src/builder/world-assembler-handoff.js');
-   const world=readWorldAssemblerDraft(localStorage);
+   const {openWorldDocumentReleaseAccessV1}=await import('./src/storage/world-document-release-access-v1.js');
+   const access=await openWorldDocumentReleaseAccessV1({storage:localStorage,sessionStorage});
+   if(!access.durable)throw Error('Durable WorldDocument owner required for merchant verification');
+   const world=await access.readDraft();
+   if(!world)throw Error('Merchant map not durably saved after return to World Builder');
    return world.areas.find(a=>a.id===world.initialAreaId).actors;
   });
   assert.equal(placed.length,1);

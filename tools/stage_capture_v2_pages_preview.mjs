@@ -123,7 +123,8 @@ fs.copyFileSync(mainEntrySource,mainEntryTarget);
 // Do this before copying assets: the root ZIP is source-only and is never shipped.
 const certifiedLivingWaterSha='a7b9d535880719cd50fd8935a5876e02219f2495';
 const certifiedPatrolSha='98f76585c6109e46558d364e6ac697ed4319963e';
-const certifiedLivingWaterRelease=sha=>[certifiedLivingWaterSha,certifiedPatrolSha].includes(sha);
+const certifiedGreenHeroSha='3ed0c06e0ffdc798a011ecfcafe9037712864d9c';
+const certifiedLivingWaterRelease=sha=>[certifiedLivingWaterSha,certifiedPatrolSha,certifiedGreenHeroSha].includes(sha);
 const livingWaterAtlasFiles=Object.freeze({
  eau_bleue_profonde:195611,eau_turquoise:257780,eau_riviere:171319,eau_marais:179173,lave:269455
 });

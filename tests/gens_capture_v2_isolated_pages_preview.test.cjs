@@ -1064,7 +1064,8 @@ test('Dracendre 24 real idle frames are shipped by the one canonical visual libr
  assert.equal(dracendre.id,'crea_dracendre');
  assert.equal(dracendre.presentation.version,11);
  const idle=dracendre.presentation.visual.idle;
- assert.equal(idle.mode,'gif');
+ assert.equal(idle.mode,'both');
+ for(const view of ['front','back'])assert.equal(idle[view].displayScale,1.2);
  for(const [role,side,digest] of [
   ['opponent','face','f65b7bf068d04a7dda64748a3e12a8ae8c70f65432ccaa0ff46c31b9b8beaf46'],
   ['player','dos','164f839b07d537e84755eff03e54711694d4701a5aceaf5ff4c89b4cdf767275']

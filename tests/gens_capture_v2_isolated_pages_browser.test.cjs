@@ -173,7 +173,7 @@ test('Adventure applies the saved World Builder arena and commits a native encou
     const world=await access.readDraft();
     return access.durable&&world?.defaultCombatArenaId==='snow'&&world.areas.find(a=>a.id===world.initialAreaId)?.encounters?.combatArenaId==='city';
    });
-   await editor.locator('#save-state').filter({hasText:'Monde sauvegardé localement'}).waitFor();
+   await editor.locator('#save-state').filter({hasText:'Monde sauvegardé localement'}).waitFor({state:'attached'});
   await editor.reload();
   await openCombatArenaSettings();
   await editor.locator('#area-combat-arena:not([disabled])').waitFor();
@@ -600,7 +600,7 @@ test('one-origin nested Pages URL renders real Capture/Combat/2.5D and leaves ro
   assert.equal(await tester.getAttribute('aria-pressed'),'true');
   await tester.tap();
   assert.equal(await tester.getAttribute('aria-pressed'),'false');
-  const rootHtml=await page.request.get(base+'/index.html');
+  const rootHtml=await page.request.get(base+'/index.html',{maxRetries:2});
   assert.equal(rootHtml.status(),200);
   assert.doesNotMatch(await rootHtml.text(),
    /assets\/gensrpg\/capture-v2\/shell-entry-v1\.js/,

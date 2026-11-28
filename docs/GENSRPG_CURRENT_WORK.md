@@ -1,3 +1,7 @@
+## 2026-11-28 — Adoption fluidité eau/lave sans routes (NON GREEN)
+- START fdf74e558e61bfe658a26f1ab4cdac19cae34c69 ; checkpoint `checkpoint/capture-before-water-fluidity-20261128`, branche `work/capture-adopt-water-fluidity-20261128`.
+- Exploration #570/#571 fusionnées, main 954a7ddc55d938112a58c2451d51ab803caff37b, CI exacte 46074344553 (3 jobs SUCCESS) et statut pages/exploration-main-live SUCCESS. Comparaison au pin précédent : neuf fichiers exclusivement eau/lave. Auteur valide aperçu et publication, exclut routes. Pin et sentinelle seuls modifiés ; Combat et sauvegardes inchangés. CI Capture exacte avant promotion publisher distincte ; adapter contrat 5 atlas 1008×756 et 180 frames, vérifier preuve publique.
+
 ## 2026-11-27 — Adoption du pont Combat durable, sans routes non validées (NON GREEN)
 - START 58313047cbe6f62536160336c576b85fc3853088 ; checkpoint `checkpoint/capture-before-indexeddb-combat-bridge-20261127`, branche `work/capture-adopt-indexeddb-combat-bridge-20261127`.
 - Exploration #567/#568 fusionnées, CI exacte 46045210248 et assemblage 46045210243 SUCCESS, Pages `pages/exploration-main-live` SUCCESS sur 10165c5a895e4714a180fab52325d30fc09e092c. Comparaison avec 5f684c4 : uniquement pont, fixture, test et journal. Aucune nouvelle route. PWA #693 reste le seul raccord publisher.

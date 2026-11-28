@@ -125,8 +125,10 @@ const certifiedLivingWaterSha='a7b9d535880719cd50fd8935a5876e02219f2495';
 const certifiedPatrolSha='98f76585c6109e46558d364e6ac697ed4319963e';
 const certifiedGreenHeroSha='3ed0c06e0ffdc798a011ecfcafe9037712864d9c';
 const certifiedGraphicIndexedDbSha='10165c5a895e4714a180fab52325d30fc09e092c';
-const certifiedLivingWaterRelease=sha=>[certifiedLivingWaterSha,certifiedPatrolSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(sha);
-const livingWaterAtlasFiles=Object.freeze({
+const certifiedRoadWaterSha='26a0f15f97db0d39d91dca13999d537b8f8af7dc';
+const certifiedLivingWaterRelease=sha=>[certifiedLivingWaterSha,certifiedPatrolSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha,certifiedRoadWaterSha].includes(sha);
+const modernRoadWater=sourcePin.exploration.sha===certifiedRoadWaterSha;
+const livingWaterAtlasFiles=Object.freeze(modernRoadWater?{eau_bleue_profonde:740465,eau_turquoise:971091,eau_riviere:650338,eau_marais:649825,lave:1000934}:{
  eau_bleue_profonde:195611,eau_turquoise:257780,eau_riviere:171319,eau_marais:179173,lave:269455
 });
 const livingWaterAtlasDir='assets/exploration/materials/forest/water/animated';
@@ -141,9 +143,16 @@ if(certifiedLivingWaterRelease(sourcePin.exploration.sha)){
  for(const [name,size] of Object.entries(livingWaterAtlasFiles)){
   const b=bytes(dir,name+'.png');
   if(b.length!==size||!b.subarray(0,8).equals(Buffer.from('89504e470d0a1a0a','hex'))||
-     b.readUInt32BE(16)!==504||b.readUInt32BE(20)!==378)
+     b.readUInt32BE(16)!==(modernRoadWater?1008:504)||b.readUInt32BE(20)!==(modernRoadWater?756:378))
    throw Error('Invalid certified author atlas: '+name);
  }
+}
+const roadBorderDir='assets/exploration/materials/road-borders';
+const roadBorderFiles=[...['naturelle','cailloux','pierre_taillee','beton','bois','neige'].map(n=>'bandes/bordure_'+n+'.webp'),...Array.from({length:8},(_,i)=>'sprites_cailloux/caillou_'+String(i+1).padStart(2,'0')+'.webp')];
+if(modernRoadWater){
+ execFileSync('python3',[path.join(exploration,'scripts/import-road-borders-v1.py'),'--install'],{stdio:'inherit',timeout:180000});
+ let total=0;for(const rel of roadBorderFiles)total+=bytes(exploration,roadBorderDir+'/'+rel).length;
+ if(total!==415644)throw Error('Certified road borders byte budget mismatch');
 }
 const exploreDest=path.join(trial,'vendor/exploration-lab');
 fs.mkdirSync(exploreDest,{recursive:true});
@@ -176,6 +185,10 @@ if(certifiedLivingWaterRelease(sourcePin.exploration.sha)){
  }
  if(fs.existsSync(path.join(exploreDest,'Genesis_textures_animees_eau_lave.zip')))
   throw Error('Source ZIP must stay outside the PWA');
+}
+if(modernRoadWater){
+ for(const rel of roadBorderFiles){const file=roadBorderDir+'/'+rel;if(!bytes(exploreDest,file).equals(bytes(exploration,file)))throw Error('Road border transport drift: '+rel);}
+ if(fs.existsSync(path.join(exploreDest,'Genesis_Bordures_Routes_v1.zip')))throw Error('Road border source ZIP must remain outside PWA');
 }
 if(excludedSourceArchives.length!==6)
   throw Error('Unexpected official Exploration author ZIP count: '+excludedSourceArchives.length);
@@ -457,7 +470,7 @@ if(sourcePin.exploration.sha===legacyExplorationSha){
  releasedSouthBlob=expectedSouthBlob;
  southRendererOriginSha=sourcePin.exploration.sha;
 }else if(certifiedLivingWaterRelease(sourcePin.exploration.sha)){
- const expected=sourcePin.exploration.sha===certifiedGraphicIndexedDbSha?'29cd0e76c5eee0faec1acfeb3a0a9ea589f062db':'f9dc12bd8979625828347b51f0805853da44f3f4';
+ const expected=modernRoadWater?'0ad5f4d95840eed5204063eb76cff073c591ffee':sourcePin.exploration.sha===certifiedGraphicIndexedDbSha?'29cd0e76c5eee0faec1acfeb3a0a9ea589f062db':'f9dc12bd8979625828347b51f0805853da44f3f4';
  if(gitBlobSha(pinnedSouthRenderer)!==expected||
     !pinnedSouthRenderer.includes(officialSouthBacking)||
     !pinnedSouthRenderer.includes('if(ramp.navigationOnly)continue;')||

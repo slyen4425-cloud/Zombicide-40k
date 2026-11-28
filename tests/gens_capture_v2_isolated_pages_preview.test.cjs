@@ -280,7 +280,7 @@ test('PWA carries exact cleaned bridge and stair binaries with stable native IDs
 
 test('native World Builder map exporter and in-game 200% dezoom are shipped once from certified Exploration',()=>{
  const source=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
- assert.equal(source.exploration.sha,'10165c5a895e4714a180fab52325d30fc09e092c',
+ assert.equal(source.exploration.sha,'26a0f15f97db0d39d91dca13999d537b8f8af7dc',
    'ship certified Exploration main with the sculpt palette, cleaned bridges and stair profiles');
  const helper='vendor/exploration-lab/src/builder/world-assembler-map-preset-export-v1.js';
  required(trial,helper);
@@ -346,12 +346,12 @@ const certifiedDecorAssetsSha='da445a85caa11d3d0503a3fc1227cad4e6b11471'; // #55
 const certifiedWorldQuotaSha='c3dd13358b1f4f3c8a2e8b29e40a1b5134061901'; // #560 CI 45759990513, Pages 45759990509; same renderer.
 const certifiedLivingWaterSha='98f76585c6109e46558d364e6ac697ed4319963e';
 const certifiedGreenHeroSha='3ed0c06e0ffdc798a011ecfcafe9037712864d9c';
-const certifiedGraphicIndexedDbSha='10165c5a895e4714a180fab52325d30fc09e092c'; // #568 CI 46045210248 + HTTPS GREEN, without unvalidated roads.
+const certifiedGraphicIndexedDbSha='26a0f15f97db0d39d91dca13999d537b8f8af7dc'; // #568 CI 46045210248 + HTTPS GREEN, without unvalidated roads.
 const certifiedErgonomieSha='7dd03a1aa718e6e71ecfb95519db430a002e0bff'; // #563 renderer byte-identical; CI 45826547569 / Pages 45826547034 SUCCESS, exact HTTPS verified.
 const certifiedTesterDoorsSha='e17fc0f9cd17c67755024653691fe4653048d305'; // #554: CI 45624477145, Pages 45624477116 and 45640176867 SUCCESS, identical renderer blob.
  // The stair fix changes navigation and sprite presentation only. Its
  // canonical south terrain renderer remains byte-identical to recoveredWorld.
- const expectedOfficialRendererBlob=explorationSha===certifiedGraphicIndexedDbSha?'29cd0e76c5eee0faec1acfeb3a0a9ea589f062db':[certifiedLivingWaterSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(explorationSha)?'f9dc12bd8979625828347b51f0805853da44f3f4':[certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(explorationSha)?'82e230a2095bceecfdc7e566d3bddaf63f3c2dbc': [certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(explorationSha)
+ const expectedOfficialRendererBlob=explorationSha===certifiedGraphicIndexedDbSha?'0ad5f4d95840eed5204063eb76cff073c591ffee':[certifiedLivingWaterSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(explorationSha)?'f9dc12bd8979625828347b51f0805853da44f3f4':[certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(explorationSha)?'82e230a2095bceecfdc7e566d3bddaf63f3c2dbc': [certifiedUniversePlaySha,certifiedWildEncounterSha,certifiedWildBehaviorSha,certifiedHudSha,certifiedDirectMerchantSha,certifiedFinalMerchantSha,certifiedTesterDoorsSha,certifiedLightingSha,certifiedDoorPromptSha,certifiedDecorAssetsSha,certifiedWildVictorySha,certifiedWorldQuotaSha,certifiedErgonomieSha,certifiedLivingWaterSha,certifiedGreenHeroSha,certifiedGraphicIndexedDbSha].includes(explorationSha)
    ?'19b0c9822048381793cd705f7cfcb2d4cdc207fa'
    :[certifiedNov23NavigationAllowSha,certifiedNov23StairsAuthoringSha,certifiedMerchantDialogSha].includes(explorationSha)
    ?'98c70979a719b2bad48a35df972bb880b6a62f5e'
@@ -833,7 +833,7 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
   const base=html.match(/<select id="material">([\s\S]*?)<\/select>/)?.[1]??'';
   const rows=[["grass.forest.tall","texture.grass.forest.tall.01","terrain_haute_herbe_01.webp","forest","9a127bde4f600d1fbb77fc8cb1a03f7bc05d569576805e98ad461bb59627a49b"],["grass.forest.flowers","texture.grass.forest.flowers.01","terrain_herbe_fleurie_01.webp","forest","6cef9ed6c7e12b67f1e9d2cb1ab2ba7d3f13908ef6e111a32797462ae92bfff0"],["ground.snow.rocky","texture.ground.snow.rocky.01","terrain_neige_rocheuse_01.webp","snow","2e336b9446c335b0cf5f1913b45dbae5a137cb691ab77bd2ff7dbc57337cda35"],["ground.dirt.textured","texture.ground.dirt.textured.01","terrain_sol_terre_01.webp","plain","e3d1958b076497b6b56b29a582792ad583a42d94cff7d2206efae5af691f1440"],["ground.volcanic.rocky","texture.ground.volcanic.rocky.01","terrain_sol_volcanique_01.webp","volcano","d14a157801e96c4a0e7121cb044799c1bfe17ea15125aa9e63029f417faf2cbc"]];
   const provenance=json(trial,'release-provenance.v1.json');
-  assert.equal(provenance.exploration.sha,'10165c5a895e4714a180fab52325d30fc09e092c');
+  assert.equal(provenance.exploration.sha,'26a0f15f97db0d39d91dca13999d537b8f8af7dc');
   for(const [materialId,assetId,filename,family,hash] of rows){
     const rel=owner+'assets/exploration/materials/forest/surfaces/'+filename;
     required(trial,rel);
@@ -862,7 +862,7 @@ test('five new Exploration terrain WebPs are shipped ONCE with stable native mat
 test('the PWA physically ships the generic author description and zone/trail editor, not species-specific code',()=>{
  const pinned=json(trial,'assets/gensrpg/capture-v2/source-pins-v1.json');
  assert.equal(pinned.combat.sha,'3e2082ebcc396414c1fbe0c54ac24e0382ddd3b5');
- assert.equal(pinned.exploration.sha,'10165c5a895e4714a180fab52325d30fc09e092c');
+ assert.equal(pinned.exploration.sha,'26a0f15f97db0d39d91dca13999d537b8f8af7dc');
  const explanation=read(trial,'vendor/combat-lab/src/ui/capture-skill-explanation-v1.js').toString('utf8');
  const editor=read(trial,'vendor/combat-lab/src/ui/capture-editor-human-v2.js').toString('utf8');
  assert.match(explanation,/if\(d\.salvo\)/,'auto description must show configured salvo count');
@@ -960,7 +960,7 @@ test('published Capture carries the opt-in potion import and actual merchant sto
  assert.match(shop,/state\.merchantStocks/);
  const pins=json(trial,base+'source-pins-v1.json');
  assert.equal(pins.combat.sha,'3e2082ebcc396414c1fbe0c54ac24e0382ddd3b5');
- assert.equal(pins.exploration.sha,'10165c5a895e4714a180fab52325d30fc09e092c');
+ assert.equal(pins.exploration.sha,'26a0f15f97db0d39d91dca13999d537b8f8af7dc');
 });
 
 test('both owners explain missing merchant links in the assembled PWA',()=>{
@@ -1139,19 +1139,19 @@ test('World Builder quota fix ships exact native storage owners',()=>{
 
 // Mandatory physical gate for this certified release.
 test('approved water/lava atlases travel once through the canonical Exploration owner',()=>{
- assert.equal(explorationSha,'10165c5a895e4714a180fab52325d30fc09e092c');
+ assert.equal(explorationSha,'26a0f15f97db0d39d91dca13999d537b8f8af7dc');
  const owner='vendor/exploration-lab/';
  const dir='assets/exploration/materials/forest/water/animated/';
- const sizes={eau_bleue_profonde:195611,eau_turquoise:257780,eau_riviere:171319,eau_marais:179173,lave:269455};
+ const sizes={eau_bleue_profonde:740465,eau_turquoise:971091,eau_riviere:650338,eau_marais:649825,lave:1000934};
  let sum=0;
  assert.deepEqual(fs.readdirSync(path.join(trial,owner+dir)).sort(),Object.keys(sizes).map(x=>x+'.png').sort());
  for(const [name,size] of Object.entries(sizes)){
   const b=read(trial,owner+dir+name+'.png');
   assert.equal(b.length,size);assert.equal(b.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
-  assert.equal(b.readUInt32BE(16),504);assert.equal(b.readUInt32BE(20),378);sum+=b.length;
+  assert.equal(b.readUInt32BE(16),1008);assert.equal(b.readUInt32BE(20),756);sum+=b.length;
   assert.equal(fs.existsSync(path.join(trial,dir,name+'.png')),false);
  }
- assert.equal(sum,1073338);
+ assert.equal(sum,4012653);
  for(const base of [site,trial,path.join(trial,owner)])
   assert.equal(fs.existsSync(path.join(base,'Genesis_textures_animees_eau_lave.zip')),false);
  const html=read(trial,owner+'sculpt-lab.html').toString('utf8');
@@ -1233,4 +1233,14 @@ test('PWA adopts the single durable WorldDocument owner and native graphical lib
  assert.doesNotMatch(capture,/readWorldAssemblerDraft|contract==='legacy'/);
  for(const rel of ['src/assets/sculpt-graphic-catalog-v1.js','src/assets/graphic-library-import-v1.js','src/assets/graphic-library-backup-v1.js','src/objects/object-library-picker-v1.js'])required(trial,owner+rel);
  for(const base of [site,trial,path.join(trial,owner)])assert.equal(fs.existsSync(path.join(base,'Genesis_Bordures_Routes_v1.zip')),false);
+});
+
+
+test('all fourteen certified road border WebP files travel once through native Exploration',()=>{
+ const owner='vendor/exploration-lab/',dir='assets/exploration/materials/road-borders/';
+ const names=[...['naturelle','cailloux','pierre_taillee','beton','bois','neige'].map(n=>'bandes/bordure_'+n+'.webp'),...Array.from({length:8},(_,i)=>'sprites_cailloux/caillou_'+String(i+1).padStart(2,'0')+'.webp')];
+ let sum=0;for(const name of names){const b=read(trial,owner+dir+name);assert.equal(b.subarray(0,4).toString(),'RIFF');assert.equal(b.subarray(8,16).toString(),'WEBPVP8L');sum+=b.length;assert.equal(fs.existsSync(path.join(trial,dir,name)),false);}
+ assert.equal(sum,415644);
+ for(const base of [site,trial,path.join(trial,owner)])assert.equal(fs.existsSync(path.join(base,'Genesis_Bordures_Routes_v1.zip')),false);
+ for(const name of ['road-border-renderer-v1.js','road-border-contour-v3.js'])required(trial,owner+'src/render/'+name);
 });

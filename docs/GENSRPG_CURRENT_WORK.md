@@ -1840,3 +1840,7 @@ Lot 01: contrat inerte et tests; pas de chargement en production, pas de changem
 - **Prochaine action** : retirer tentative RED de délégation par le rendu ; implémenter contrat explicite de création Core200 → propriétaire Core051, puis repasser la sentinelle navigateur exigeante et CI au SHA exact. Conserver NON GREEN si écart. Créer un checkpoint final GREEN uniquement lorsque tous les contrôles obligatoires passent, sinon conserver NON GREEN et préciser le blocage.
 
 Références : `docs/GENSRPG_CHARTE.md` §§1–5 et 12–26, `docs/GENSRPG_CHECKPOINT_POLICY.md`, `docs/GENSRPG_PHASE12_DUNGEON_CHEST_LIFECYCLE_GREEN_2026-10-21.md`.
+
+
+## Capture — routes et eau/lave validées (28/11, NON GREEN)
+START b98addd4fce7bf8514ba1b5b9a02aaf9cac4550e, branche work/capture-adopt-validated-roads-water-20261128. Autorisation auteur 11:38 CET. Repin unique Exploration 26a0f15f97db0d39d91dca13999d537b8f8af7dc : #570/#574 eau/lave, #572/#577 routes et raccords, #578 perspective, CI 46134880714 et Pages 46135481473 success, recette auteur confirmée. Diff depuis 954a7dd inspecté : routes, renderer et tests associés. Combat inchangé, aucune modification du runtime Capture, des sauvegardes ou du publisher. CI source exacte avant fusion ; publication distincte avec build officiel des 14 WebP bordures et atlas eau/lave, budget et preuve HTTPS. Pas d'import personnalisé dans ce lot.

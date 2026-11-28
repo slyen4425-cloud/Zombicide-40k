@@ -119,6 +119,8 @@ const mainEntrySource=path.resolve(path.dirname(fileURLToPath(import.meta.url)),
 const mainEntryTarget=path.join(trial,'assets/gensrpg/shell/capture-v2-from-main-entry-v1.js');
 if(fs.existsSync(mainEntryTarget))throw Error('Duplicate main Capture V2 handoff owner');
 fs.copyFileSync(mainEntrySource,mainEntryTarget);
+// Independent emergency raw export; no alternate writer, no runtime or assets.
+fs.copyFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)),'world-recovery-readonly.html'),path.join(trial,'world-recovery.html'));
 // Approved authored water/lava sprites are built by their sole Exploration owner.
 // Do this before copying assets: the root ZIP is source-only and is never shipped.
 const certifiedLivingWaterSha='a7b9d535880719cd50fd8935a5876e02219f2495';

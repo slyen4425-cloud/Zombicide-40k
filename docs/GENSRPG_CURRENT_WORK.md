@@ -1441,3 +1441,7 @@ Références : `docs/GENSRPG_CHARTE.md` §§1–5 et 12–26, `docs/GENSRPG_CHEC
 
 ## PWA — routes et eau/lave validées (NON GREEN)
 START 0a9d8dc6a0a086d4316af4a5ea998f63c62952eb, branche work/pwa-publish-validated-roads-water-20261128. Autorisation auteur 28/11 11:38 CET. Source Capture #697 candidate 91fa228c00d050cd3b16f90523722947ff2da1aa, remplacer impérativement par le SHA de fusion certifié avant promotion. Exploration 26a0f15f97db0d39d91dca13999d537b8f8af7dc, 1570 tests, CI 46134880714 et HTTPS 46135481473. Publisher unique : atlas 180 frames 1008x756 (4012653 octets), 14 WebP bordures (415644 octets), génération officielle puis transport exact, ZIP exclus. Renderer 0ad5f4d95840eed5204063eb76cff073c591ffee. Préserver Combat, stockage, héros, bibliothèque et autres modules. DRAFT jusqu'à source fusionnée, contrôles exacts et budget, puis Pages HTTPS. Aucun import personnalisé dans ce lot.
+
+
+## Incident utilisateur Monde_alpha — récupération lecture seule 28/11
+PWA 9c1d9c4, capture DevTools : `WorldDocument IndexedDB illisible : conservation` dans checkedRow, base documents comporte 5 lignes dont Monde_alpha actif révision 135, archive rev1 et autre monde. Données présentes, intégrité à confirmer. Priorité export exact des lignes actuelles/précédentes et anciennes clés sans mutation. Page autonome même origine, sans runtime, sans réseau ni écriture ; test Chromium export et conservation. Aucun changement aux pins ni collines ni performance #579. NON GREEN avant CI et HTTPS. Ne pas restaurer automatiquement ni remplacer révision 135 par archive.

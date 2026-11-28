@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Genesis RPG — récupération des mondes</title><style>
+body{background:#102330;color:#e6f4f5;font:16px system-ui,sans-serif;margin:0}main{max-width:720px;margin:auto;padding:24px}h1{font-size:24px}button{font:inherit;padding:12px 16px;background:#87dacd;color:#102330;border:0;border-radius:8px;margin:8px 0;cursor:pointer}button:disabled{opacity:.5}li{padding:7px;overflow-wrap:anywhere}p{line-height:1.5}#status{white-space:pre-wrap}small{color:#b3cbd1}
+</style></head><body><main><h1>Récupération des mondes — lecture seule</h1>
+<p>Cette page indépendante n'ouvre pas le moteur de jeu. Elle ne répare, ne supprime et ne modifie aucune sauvegarde. Elle permet de télécharger les octets originaux des documents présents, y compris les révisions précédentes, et les anciennes clés de monde.</p>
+<p id="status" role="status">Prêt à lire les sauvegardes de ce navigateur.</p>
+<button id="scan">Rechercher mes mondes</button><br><button id="download" disabled>Télécharger la copie de secours complète</button><ul id="rows"></ul>
+<small>Utilise le même profil de navigateur et la même adresse GitHub Pages que la PWA. Aucun envoi réseau.</small></main>
+<script>
+'use strict';
+const database='gensrpg-exploration-world-documents-v1',store='documents';
+const q=id=>document.getElementById(id);
+const legacyKey=k=>k==='gensrpg.world-assembler.document.v1'||k==='gensrpg.exploration.world-library.index.v1'||k==='gensrpg.exploration.universe-worlds.index.v1'||k==='gensrpg.capture.v2.universes.index.v1'||k.startsWith('gensrpg.exploration.world-library.document.v1:')||/^gensrpg\.exploration\.universe\.workspace\.v1:unv_[a-z0-9-]+:gensrpg\.world-assembler\.document\.v1$/.test(k);
+let snapshot=null;
+async function readRows(){
+ if(typeof indexedDB.databases==='function'){
+  const dbs=await indexedDB.databases();
+  if(!dbs.some(d=>d.name===database))return [];
+ }
+ return new Promise((resolve,reject)=>{
+  const req=indexedDB.open(database);
+  req.onupgradeneeded=()=>req.transaction.abort(); // never create a DB
+  req.onerror=()=>reject(req.error||Error('Lecture IndexedDB impossible'));
+  req.onblocked=()=>reject(Error('Ouverture bloquée; aucune modification'));
+  req.onsuccess=()=>{
+   const db=req.result;
+   try{
+    const tx=db.transaction(store,'readonly'),read=tx.objectStore(store).getAll();
+    tx.oncomplete=()=>{db.close();resolve(read.result)};
+    tx.onabort=()=>{db.close();reject(tx.error||Error('Lecture annulée'))};
+   }catch(error){db.close();reject(error)}
+  };
+ });
+}
+q('scan').onclick=async()=>{
+ snapshot=null;q('scan').disabled=true;q('download').disabled=true;q('rows').replaceChildren();q('status').textContent='Lecture en cours…';
+ const errors=[],legacy=[];let rows=[];
+ try{rows=await readRows()}catch(e){errors.push('IndexedDB : '+e.message)}
+ try{for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&legacyKey(key))legacy.push({key,raw:localStorage.getItem(key)})}}catch(e){errors.push('Anciennes clés : '+e.message)}
+ snapshot={schema:'gensrpg-world-recovery-raw-v1',capturedAt:new Date().toISOString(),origin:location.origin,database,store,rows,legacy,errors};
+ for(const row of rows){
+  let id='';try{id=JSON.parse(row.serialized)?.id||''}catch{}
+  const li=document.createElement('li');li.textContent=(id?id+' — ':'')+row.key+' — révision '+row.revision+' — '+(row.serialized?.length||0)+' caractères'+(row.previous?' — ancienne version conservée':'');q('rows').append(li);
+ }
+ q('status').textContent=rows.length+' enregistrement(s) IndexedDB, '+legacy.length+' ancienne(s) clé(s).'+(errors.length?'\n'+errors.join('\n'):'')+'\nAucune donnée modifiée.';
+ q('download').disabled=!(rows.length||legacy.length);q('scan').disabled=false;
+};
+q('download').onclick=()=>{
+ if(!snapshot)return;
+ const url=URL.createObjectURL(new Blob([JSON.stringify(snapshot,null,2)],{type:'application/json'}));
+ const a=document.createElement('a');a.href=url;a.download='Genesis-SECOURS-mondes.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+</script></body></html>

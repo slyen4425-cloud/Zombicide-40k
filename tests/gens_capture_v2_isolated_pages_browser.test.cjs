@@ -965,11 +965,12 @@ test('real Android portrait Capture picker is neutral, selected universe has one
 });
 
 test('read-only emergency page exports exact raw IndexedDB revisions even if the runtime rejects them',{timeout:60000},async()=>{
- if(!server.listening)await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  const origin='http://127.0.0.1:'+server.address().port;
- const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ let browser,context;
  try{
-  const context=await browser.newContext({acceptDownloads:true});
+  browser=await chromium.launch({headless:true});
+  context=await browser.newContext({acceptDownloads:true,serviceWorkers:'block'});
   const page=await context.newPage();
   const response=await page.goto(origin+scope+'world-recovery.html');assert.equal(response.status(),200);
   const original={key:'gensrpg.world-assembler.document.v1',revision:135,serialized:'{"id":"Monde_alpha","raw":"test"}',previous:'{"id":"Monde_alpha","raw":"previous"}'};
@@ -990,6 +991,5 @@ test('read-only emergency page exports exact raw IndexedDB revisions even if the
   assert.deepEqual(backup.errors,[]);
   const after=await page.evaluate(()=>new Promise((resolve,reject)=>{const req=indexedDB.open('gensrpg-exploration-world-documents-v1');req.onerror=()=>reject(req.error);req.onsuccess=()=>{const db=req.result,tx=db.transaction('documents','readonly'),r=tx.objectStore('documents').getAll();tx.oncomplete=()=>{db.close();resolve(r.result)}}}));
   assert.deepEqual(after,[original]);
-  await context.close();
- }finally{await browser.close();}
+ }finally{await context?.close();await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 });
